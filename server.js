@@ -4,7 +4,6 @@ const app = express();
 
 const PORT = process.env.PORT || 3000;
 
-// Statikus fájlok kiszolgálása
 app.use(express.static(path.join(__dirname)));
 
 app.use(express.json());
@@ -14,5 +13,5 @@ app.get('/', (req, res) => {
 });
 
 app.listen(PORT, () => {
-    console.log(`Szerver fut a https://localhost:${PORT} porton.`);
+    console.log(`!!The Server is on!! [https://localhost:${PORT}]`);
 });
