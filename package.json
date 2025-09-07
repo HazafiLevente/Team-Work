@@ -12,6 +12,8 @@
   },
   "private": true,
   "dependencies": {
+    "@angular/core": "^20.2.4",
+    "@angular/forms": "^20.2.4",
     "express": "^5.1.0"
   }
 }
