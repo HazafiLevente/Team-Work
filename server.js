@@ -9,6 +9,7 @@ app.use(express.static(path.join(__dirname)));
 app.use(express.json());
 
 app.get('/', (req, res) => {
+    res.type('text/plain');
     res.sendFile(path.join(__dirname, 'Home.ts'));
 });
 
