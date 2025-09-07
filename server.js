@@ -10,7 +10,7 @@ app.use(express.static(path.join(__dirname)));
 app.use(express.json());
 
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'Home.html'));
+    res.sendFile(path.join(__dirname, ''));
 });
 
 app.listen(PORT, () => {
