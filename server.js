@@ -4,15 +4,15 @@ const app = express();
 
 const PORT = process.env.PORT || 3000;
 
-app.use(express.static(path.join(__dirname)));
+// Angular buildelt fájlok kiszolgálása
+app.use(express.static(path.join(__dirname, 'Work/dist/Work')));
 
-app.use(express.json());
 
+// Angular route-ok (minden más útvonal)
 app.get('/', (req, res) => {
-    res.type('text/plain');
-    res.sendFile(path.join(__dirname, 'Home.ts'));
+    res.sendFile(path.join(__dirname, 'Work/dist/Work/browser/index.html'));
 });
 
 app.listen(PORT, () => {
-    console.log(`!!The Server is on!! [https://localhost:${PORT}]`);
+    console.log(`✅ The Server is on! [http://localhost:${PORT}]`);
 });
