@@ -4,7 +4,7 @@ const app = express();
 const sql = require("msnodesqlv8");
 
 
-const PORT = process.env.PORT || 4000;
+const PORT = process.env.PORT || 5000;
 
 // Angular buildelt fájlok kiszolgálása
 app.use(express.static(path.join(__dirname, 'Work/dist/Work')));
