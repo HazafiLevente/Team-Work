@@ -16,7 +16,8 @@
     "@angular/core": "^20.2.4",
     "@angular/forms": "^20.2.4",
     "express": "^5.1.0",
-    "msnodesqlv8": "^5.1.1"
+    "msnodesqlv8": "^5.1.1",
+    "mysql2": "^3.15.1"
   },
   "keywords": [],
   "author": "",
