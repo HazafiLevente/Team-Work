@@ -4,16 +4,25 @@
   "description": "",
   "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/HazafiLevente/Team-Work.git"
+    "url": "git+https://github.com/HazafiLevente/Team-Work.git"
   },
   "private": true,
   "dependencies": {
     "@angular/core": "^20.2.4",
     "@angular/forms": "^20.2.4",
-    "express": "^5.1.0"
-  }
+    "express": "^5.1.0",
+    "msnodesqlv8": "^5.1.1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/HazafiLevente/Team-Work/issues"
+  },
+  "homepage": "https://github.com/HazafiLevente/Team-Work#readme"
 }
