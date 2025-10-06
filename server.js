@@ -28,8 +28,6 @@ app.get('/api/guitars', (req, res) => {
             console.error("❌ DB hiba:", err);
             return res.status(500).json({ error: "Adatbázis hiba!" });
         }
-
-        console.log("📦 Lekérdezett sorok:", rows);
         res.json(rows);
     });
 });
@@ -41,8 +39,6 @@ app.get('/api/cpu', (req, res) => {
             console.error("❌ DB hiba:", err);
             return res.status(500).json({ error: "Adatbázis hiba!" });
         }
-
-        console.log("📦 Lekérdezett sorok:", rows);
         res.json(rows);
     });
 });
