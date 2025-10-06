@@ -34,6 +34,19 @@ app.get('/api/guitars', (req, res) => {
     });
 });
 
+app.get('/api/cpu', (req, res) => {
+    console.log("🎸 /api/cpu hívás érkezett!");
+    connection.query('SELECT * FROM processors', (err, rows) => {
+        if (err) {
+            console.error("❌ DB hiba:", err);
+            return res.status(500).json({ error: "Adatbázis hiba!" });
+        }
+
+        console.log("📦 Lekérdezett sorok:", rows);
+        res.json(rows);
+    });
+});
+
 
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'webs/Home.html'));
