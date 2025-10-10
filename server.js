@@ -13,9 +13,15 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 
 app.use(express.static(path.join(__dirname, 'webs')));
 
-// --- Teszt endpoint (guitars) ---
-app.get('/api/guitars', async (req, res) => {
+// --- Főoldal ---
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'webs/Home.html'));
+});
 
+
+// --- Guitar endpoint ---
+app.get('/api/guitars', async (req, res) => {
+    console.log("🎸 /api/guitars hívás érkezett!");
     const { data, error } = await supabase
         .from('electric_guitars')
         .select('*');
@@ -43,12 +49,11 @@ app.get('/api/cpu', async (req, res) => {
         return res.status(500).json({ error: error.message });
     }
 
-    res.json(data);
-});
+    if (!data || data.length === 0) {
+        return res.status(404).json({ message: "Nincs adat a táblában" });
+    }
 
-// --- Főoldal ---
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'webs/Home.html'));
+    res.json(data);
 });
 
 // --- Indítás ---
