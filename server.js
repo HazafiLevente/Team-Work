@@ -1,53 +1,57 @@
 const express = require('express');
 const path = require('path');
-const mysql = require('mysql2');
-const app = express();
+const { createClient } = require('@supabase/supabase-js');
 
+const app = express();
 const PORT = process.env.PORT || 3000;
+
+// Supabase inicializálása
+const supabaseUrl = 'https://ecjufuhmmehhzusicghh.supabase.co';
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVjanVmdWhtbWVoaHp1c2ljZ2hoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk3NjIzNjksImV4cCI6MjA3NTMzODM2OX0.U3cIRqeSrWTyjvxwKTI2LoIwcB2sHiSlEccYHQd9Ow8';
+
+const supabase = createClient(supabaseUrl, supabaseKey);
 
 app.use(express.static(path.join(__dirname, 'webs')));
 
-const connection = mysql.createConnection({
-    host: 'localhost',
-    user: 'root',
-    password: '1234',
-    database: 'datas'
-});
-connection.connect((err) => {
-    if (err) {
-        console.error("❌ Nem sikerült kapcsolódni az adatbázishoz:", err);
-        return;
+// --- Teszt endpoint (guitars) ---
+app.get('/api/guitars', async (req, res) => {
+
+    const { data, error } = await supabase
+        .from('electric_guitars')
+        .select('*');
+    if (error) {
+        console.error("❌ Supabase hiba:", error);
+        return res.status(500).json({ error: error.message });
     }
-    console.log("✅ Kapcsolódva az adatbázishoz!");
+
+    if (!data || data.length === 0) {
+        return res.status(404).json({ message: "Nincs adat a táblában" });
+    }
+
+    res.json(data);
 });
 
-app.get('/api/guitars', (req, res) => {
-    console.log("🎸 /api/guitars hívás érkezett!");
-    connection.query('SELECT * FROM guitar', (err, rows) => {
-        if (err) {
-            console.error("❌ DB hiba:", err);
-            return res.status(500).json({ error: "Adatbázis hiba!" });
-        }
-        res.json(rows);
-    });
+// --- CPU endpoint ---
+app.get('/api/cpu', async (req, res) => {
+    console.log("🧠 /api/cpu hívás érkezett!");
+    const { data, error } = await supabase
+        .from('processors')
+        .select('*');
+
+    if (error) {
+        console.error("❌ Supabase hiba:", error);
+        return res.status(500).json({ error: error.message });
+    }
+
+    res.json(data);
 });
 
-app.get('/api/cpu', (req, res) => {
-    console.log("🎸 /api/cpu hívás érkezett!");
-    connection.query('SELECT * FROM processors', (err, rows) => {
-        if (err) {
-            console.error("❌ DB hiba:", err);
-            return res.status(500).json({ error: "Adatbázis hiba!" });
-        }
-        res.json(rows);
-    });
-});
-
-
+// --- Főoldal ---
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'webs/Home.html'));
 });
 
+// --- Indítás ---
 app.listen(PORT, () => {
     console.log(`✅ The Server is on! [http://localhost:${PORT}]`);
 });
