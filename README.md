@@ -11,7 +11,7 @@ Project:
 -Termék árak dinamikusan változó(Norbi)
 -Menu(Norbi)
 -típusok megírása (pl. autóknál)(Roli)
--About, Kapcsolat, Üzenet AI-al(kételyes)
+-About, Kapcsolat, Üzenet AI-al(egyre biztosabb hogy lesz!)
 -Logo(Levi)
 -Animációk gyüjtése, és megírása(Norbi,Levi)
 -Szerver(Api requests) (Levi) 
