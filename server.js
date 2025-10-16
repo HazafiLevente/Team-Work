@@ -59,6 +59,25 @@ app.get('/api/cpu', async (req, res) => {
 
 
 
+// --- Alt Saxophone endpoint ---
+app.get('/api/alt/saxophone', async (req, res) => {
+    console.log("🧠 /api/alt/saxophone hívás érkezett!");
+    const { data, error } = await supabase
+        .from('alt_saxophone')
+        .select('*');
+
+    if (error) {
+        console.error("❌ Supabase hiba:", error);
+        return res.status(500).json({ error: error.message });
+    }
+
+    if (!data || data.length === 0) {
+        return res.status(404).json({ message: "Nincs adat a táblában" });
+    }
+
+    res.json(data);
+});
+
 // --- Indítás ---
 app.listen(PORT, () => {
     console.log(`✅ The Server is on! [http://localhost:${PORT}]`);
