@@ -56,7 +56,12 @@ app.get('/api/cpu', async (req, res) => {
     res.json(data);
 });
 
+
+
+
 // --- Indítás ---
 app.listen(PORT, () => {
     console.log(`✅ The Server is on! [http://localhost:${PORT}]`);
 });
+
+
