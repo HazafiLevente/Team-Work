@@ -60,8 +60,8 @@ app.get('/api/cpu', async (req, res) => {
 
 
 // --- Alt Saxophone endpoint ---
-app.get('/api/alt/saxophone', async (req, res) => {
-    console.log("🧠 /api/alt/saxophone hívás érkezett!");
+app.get('/api/saxophone/alt', async (req, res) => {
+    console.log("🧠 /api/saxophone/alt hívás érkezett!");
     const { data, error } = await supabase
         .from('alt_saxophone')
         .select('*');
