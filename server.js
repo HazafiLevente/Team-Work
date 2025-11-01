@@ -15,9 +15,19 @@ app.use(express.static(path.join(__dirname, 'webs')));
 
 // --- Főoldal ---
 app.get('/', (req, res) => {
+    console.log(" / hívás érkezett!");
+    res.sendFile(path.join(__dirname, 'webs/Home.html'));
+});
+app.get('/home', (req, res) => {
+    console.log(" /home hívás érkezett!");
     res.sendFile(path.join(__dirname, 'webs/Home.html'));
 });
 
+// --- User Side ---
+app.get('/regist', async (req, res) => {
+    console.log("✏️ /regist hívás érkezett!");
+    res.sendFile(path.join(__dirname, 'webs/Regist.html'));
+});
 
 // --- Guitar endpoint ---
 app.get('/api/guitars', async (req, res) => {
@@ -78,9 +88,26 @@ app.get('/api/saxophone/alt', async (req, res) => {
     res.json(data);
 });
 
+// --- Alt Saxophone endpoint ---
+app.get('/api/bassers', async (req, res) => {
+    console.log("🧠 /api/bassers hívás érkezett!");
+    const { data, error } = await supabase
+        .from('bassers')
+        .select('*');
+
+    if (error) {
+        console.error("❌ Supabase hiba:", error);
+        return res.status(500).json({ error: error.message });
+    }
+
+    if (!data || data.length === 0) {
+        return res.status(404).json({ message: "Nincs adat a táblában" });
+    }
+
+    res.json(data);
+});
+
 // --- Indítás ---
 app.listen(PORT, () => {
     console.log(`✅ The Server is on! [http://localhost:${PORT}]`);
 });
-
-

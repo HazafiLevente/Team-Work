@@ -32,6 +32,16 @@ body{
     -moz-osx-font-smoothing:grayscale;
     padding-top:74px;
 }
+input[type="text"], input[type="password"], input[type="email"], textarea{
+    background: var(--glass-alpha);
+    border:1px solid var(--glass-border);
+    border-radius:var(--radius);
+    padding:12px 14px;
+    color:var(--text);
+    font-size:14px;
+    font-weight:500;
+    transition: all .16s;
+}
 
 /*  --------------------------------------------
     Szép neon scroll bár (Chromium alapú böngészők)
@@ -197,6 +207,7 @@ main.content{
     text-decoration:none; border:1px solid rgba(255,255,255,0.04);
     transition: transform .16s, box-shadow .16s;
     background: linear-gradient(90deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+    color: white;
 }
 .btn:hover{ transform: translateY(-3px); box-shadow:0 12px 40px rgba(0,0,0,0.6);}
 
