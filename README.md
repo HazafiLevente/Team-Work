@@ -15,3 +15,4 @@ Project:
 -Logo(Levi)
 -Animációk gyüjtése, és megírása(Norbi,Levi)
 -Szerver(Api requests) (Levi) 
+-Adabázis feltöltése(Supabase[https://supabase.com/dashboard/org/zffexebqsxmjsmcmllni])(közös)
