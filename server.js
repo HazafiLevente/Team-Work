@@ -107,6 +107,23 @@ app.get('/api/bassers', async (req, res) => {
     res.json(data);
 });
 
+// --- CoupeCar ---
+app.get('/api/coupe', async (req, res) => {
+    console.log(" /api/coupe hívás érkezett!");
+    const { data, error } = await supabase
+        .from('coupe_car')
+        .select('*');
+    if (error) {
+        console.error("❌ Supabase hiba:", error);
+        return res.status(500).json({ error: error.message });
+    }
+
+    if (!data || data.length === 0) {
+        return res.status(404).json({ message: "Nincs adat a táblában" });
+    }
+
+    res.json(data);
+});
 // --- Indítás ---
 app.listen(PORT, () => {
     console.log(`✅ The Server is on! [http://localhost:${PORT}]`);

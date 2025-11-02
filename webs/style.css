@@ -232,3 +232,8 @@ main.content{
 @media (prefers-reduced-motion: reduce){
     *{transition:none!important;animation:none!important}
 }
+
+.logorreg {
+    color: darkgray;
+    font-size: 15px;
+}
