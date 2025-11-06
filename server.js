@@ -1,9 +1,14 @@
 const express = require('express');
 const path = require('path');
 const { createClient } = require('@supabase/supabase-js');
+const bcrypt = require('bcryptjs');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
 
 // Supabase inicializálása
 const supabaseUrl = 'https://ecjufuhmmehhzusicghh.supabase.co';
@@ -124,6 +129,46 @@ app.get('/api/coupe', async (req, res) => {
 
     res.json(data);
 });
+
+// --- Register endpoint ---
+app.post('/api/register', async (req, res) => {
+    try {
+        const { fullname, username, email, password } = req.body;
+
+        if (!fullname || !username || !email || !password) {
+            return res.status(400).json({ error: "Hiányzó adatok!" });
+        }
+
+        // 🔒 Jelszó hash-elése
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        // 🧩 Beszúrás a Supabase táblába
+        const { data, error } = await supabase
+            .from('user')
+            .insert([
+                {
+                    Name: fullname,
+                    UserName: username,
+                    Email: email,
+                    password: hashedPassword,
+                    isAdmin: false
+                }
+            ]);
+
+        if (error) {
+            console.error("❌ Supabase hiba:", error);
+            return res.status(500).json({ error: error.message });
+        }
+
+        console.log("✅ Felhasználó létrehozva:", username);
+        res.status(201).json({ message: "Sikeres regisztráció!" });
+
+    } catch (err) {
+        console.error("❌ Szerver hiba:", err);
+        res.status(500).json({ error: "Belső szerverhiba." });
+    }
+});
+
 // --- Indítás ---
 app.listen(PORT, () => {
     console.log(`✅ The Server is on! [http://localhost:${PORT}]`);

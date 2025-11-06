@@ -237,3 +237,13 @@ main.content{
     color: darkgray;
     font-size: 15px;
 }
+a.logorreg
+{
+    color: darkgray;
+    text-decoration: none;
+}
+a.logorreg:hover
+{
+    color: #474747;
+    text-decoration: none;
+}

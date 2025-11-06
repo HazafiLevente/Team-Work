@@ -28,15 +28,19 @@
 <main class="content">
     <section class="panel">
         <div class="hero">
-            <h2>Login</h2>
+            <h2>Registration</h2>
+            <label for="username">Username:</label>
+            <input type="text" id="username" required/>
+            <label for="fullname">Fullname:</label>
+            <input type="text" id="fullname" required/>
             <label for="email">Email:</label>
             <input type="text" id="email" required/>
             <label for="password">Password:</label>
             <input type="password" id="password" required/>
             <br>
-            <button class="btn" onclick="connect()">Connect</button>
+            <button class="btn" onclick="connectreg()">Connect</button>
             <p class="logorreg">
-                van fiókom, <a onclick="regist()">bejelentkezek</a>
+                van fiókom, <a onclick="login()" class='logorreg'>bejelentkezek</a>
             </p>
         </div>
     </section>
