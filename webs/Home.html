@@ -17,11 +17,12 @@
     </div>
 
     <nav class="nav" aria-label="Főmenü">
-        <a href="/">Home</a>
+        <a href="/home">Home</a>
+        <a href="#" onclick="loadCPUs()">CPUs</a>
         <a href="/">Projects</a>
         <a href="/">Market</a>
         <a href="/">Settings</a>
-        <a class="cta" href="/regist">Connect</a>
+        <a class="cta" id="auth-btn" href="/regist">Connect</a>
     </nav>
 </header>
 
@@ -30,8 +31,9 @@
         <div class="hero">
             <h2>Üdv a Setup Configuratorban</h2>
             <div class="neon-line"></div>
+            <p class="muted">Ez a tesztverzió lehetővé teszi CPU-k, hangszerek és autók listázását a Supabase adatbázisból.</p>
             <div style="display:flex; gap:10px; margin-top:10px;">
-                <a class="btn" href="#">Felfedezés</a>
+                <a class="btn" href="#" onclick="loadCPUs()">Mutasd a CPU-kat</a>
                 <a class="btn" href="#">Dashboard</a>
                 <span class="tag">vTest</span>
             </div>
@@ -42,7 +44,7 @@
             <div style="display:flex; justify-content:space-between; align-items:center;">
                 <div>
                     <div style="font-weight:800">New Products</div>
-                    <div class="muted" style="margin-top:6px">últ. 24 óra</div>
+                    <div class="muted" style="margin-top:6px">utolsó 24 óra</div>
                 </div>
                 <div style="text-align:right">
                     <div style="font-size:18px; font-weight:800"></div>

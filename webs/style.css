@@ -247,3 +247,48 @@ a.logorreg:hover
     color: #474747;
     text-decoration: none;
 }
+
+.cpu-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+}
+.cpu-card {
+    background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 12px;
+    padding: 14px;
+    text-align: center;
+    transition: all 0.2s ease-in-out;
+}
+.cpu-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 0 20px rgba(138,43,226,0.25);
+}
+.cpu-card img {
+    width: 100%;
+    border-radius: 10px;
+    margin-bottom: 10px;
+}
+.cpu-card h3 {
+    font-size: 16px;
+    margin: 8px 0 4px;
+}
+.cpu-card p {
+    font-size: 13px;
+    color: var(--text);
+    opacity: 0.8;
+}
+/* --------------------------
+   Szélesebb tartalom CPU nézethez
+   -------------------------- */
+.wide-content {
+    max-width: 1600px !important;
+    grid-template-columns: 1fr !important;
+}
+
+.wide-panel {
+    grid-column: 1 / -1;
+}
+
