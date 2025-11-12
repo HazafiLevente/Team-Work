@@ -87,15 +87,25 @@ app.get("/api/cpu", verifyAdmin, async (req, res) => {
     res.json(data);
 });
 
-app.get("/api/motherboard", verifyAdmin, async (req, res) => {
-    console.log("🧠 /api/motherboard hívás érkezett!");
+// --- MOTHERBOARDS (nyilvános lekérés) ---
+app.get("/api/motherboard", async (req, res) => {
+    console.log("🧩 /api/motherboard hívás érkezett!");
     const { data, error } = await supabase.from("motherboard").select("*");
-    if (error)
+
+    if (error) {
+        console.error("❌ Supabase hiba:", error.message);
         return res.status(500).json({ error: "Supabase hiba: " + error.message });
-    if (!data || data.length === 0)
+    }
+
+    if (!data || data.length === 0) {
+        console.warn("⚠️ Nincs adat az alaplapok táblában!");
         return res.status(404).json({ message: "Nincs adat a táblában" });
+    }
+
+    console.log(`✅ ${data.length} alaplap betöltve.`);
     res.json(data);
 });
+
 
 app.get("/api/saxophone/alt", verifyAdmin, async (req, res) => {
     console.log("🎷 /api/saxophone/alt hívás érkezett!");
