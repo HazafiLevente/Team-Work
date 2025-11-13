@@ -8,6 +8,10 @@ document.addEventListener("DOMContentLoaded", async () => {
         await loadMotherboards();
 
     }
+    if (window.location.pathname === "/profile") {
+        await loadProfile();
+    }
+
 
     // a /regist oldalon ne töltsön semmit
     if (window.location.pathname !== "/regist") {
@@ -331,11 +335,11 @@ async function loadMotherboards() {
             } else if (manu.includes("asus") && mdl.includes("tuf")) {
                 imageURL = "https://mir-s3-cdn-cf.behance.net/project_modules/1400_webp/67e9d8113991421.6033266825dca.jpg";
             } else if (manu.includes("asus") && mdl.includes("prime")) {
-                imageURL = "https://w7.pngwing.com/pngs/110/633/png-transparent-laptop-asus-dell-logo-%E5%8D%8E%E7%A1%95-laptop-angle-electronics-text.png";
+                imageURL = "https://media.icdn.hu/brand/entity/1000028/5c9cc630da861asus.jpg";
             } else if (manu.includes("msi")) {
-                imageURL = "https://www.notebookcheck.net/fileadmin/Notebooks/News/_nc3/MSI_logo_for_share2.png";
+                imageURL = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTIKBiMNQDdQz7jVtSpJkR6SyTRaHnagUTE1A&s";
             } else if (manu.includes("gigabyte")) {
-                imageURL = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQlSeqHh9_HIDE0_XDw2LnC_-cWtwVzEgaBCA&s";
+                imageURL = "https://www.eteknix.com/wp-content/uploads/2019/09/1-90.jpg";
             } else if (manu.includes("asrock")) {
                 imageURL = "https://www.notebookcheck-hu.com/fileadmin/Notebooks/News/_nc4/1704541866_asrock.jpg";
             }
@@ -343,7 +347,18 @@ async function loadMotherboards() {
             const card = document.createElement("div");
             card.className = "cpu-card"; // ugyanaz a stílus, így egységes
             card.innerHTML = `
-                <div class="cpu-item" style="text-align:center; padding:12px; background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.05); border-radius:12px;">
+                <div class="cpu-item" style="
+                text-align:center;
+                padding:12px;
+                background:rgba(255,255,255,0.02);
+                border:1px solid rgba(255,255,255,0.05);
+                border-radius:12px;
+                height: 430px;              
+                width: 300px;             
+                display:flex;
+                flex-direction:column;
+                justify-content:flex-start;
+                overflow:hidden;">
                     <img src="${imageURL}" width="140" height="140" alt="${model}" style="border-radius:10px; object-fit:cover;">
                     <h3 style="margin-top:10px;">${model}</h3>
                     <p><strong>${manufacturer}</strong></p>
@@ -370,6 +385,43 @@ async function loadMotherboards() {
         const grid = document.getElementById("motherboard-grid");
         if (grid) grid.innerHTML = `<p class="muted">⚠️ Hiba az alaplapok betöltése közben.</p>`;
     }
+}
+// ----------------------------
+// PROFILE PAGE LOAD
+// ----------------------------
+async function loadProfile() {
+    const box = document.getElementById("profile-box");
+
+    const res = await fetch("/api/me", { credentials: "include" });
+
+    // ❌ Ha nincs bejelentkezve → töltsük be a /regist oldalt
+    if (!res.ok) {
+        regist();
+        return;
+    }
+
+    const data = await res.json();
+
+    if (!data.loggedIn) {
+        regist();
+        return;
+    }
+
+    const user = data.user;
+
+    // ✔ Profil megjelenítése
+    box.innerHTML = `
+        <h2>Profilod</h2>
+        <div class="neon-line"></div>
+
+        <p><strong>Név:</strong> ${user.name}</p>
+        <p><strong>Felhasználónév:</strong> ${user.username}</p>
+        <p><strong>Email:</strong> ${user.email}</p>
+        <p><strong>Admin:</strong> ${user.isAdmin ? "Igen" : "Nem"}</p>
+
+        <br><br>
+        <button class="btn" onclick="logout()">Kijelentkezés</button>
+    `;
 }
 
 

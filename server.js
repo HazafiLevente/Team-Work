@@ -36,6 +36,10 @@ app.get("/regist", (req, res) => {
     console.log("✏️ /regist hívás érkezett!");
     res.sendFile(path.join(__dirname, "webs/Regist.html"));
 });
+app.get("/profile", (req, res) => {
+    console.log("✏️ /profile hívás érkezett!");
+    res.sendFile(path.join(__dirname, "webs/Profile.html"));
+});
 
 // --- Token ellenőrzés ---
 function verifyToken(req, res, next) {
@@ -65,9 +69,24 @@ function verifyAdmin(req, res, next) {
         next();
     });
 }
+function apiSecretBrowser(req, res, next) {
+    const fetchMode = req.headers["sec-fetch-mode"];
+
+    // Böngésző URL-ből való megnyitás → navigate = NEM fetch
+    if (!fetchMode || fetchMode === "navigate") {
+        return res.status(404).sendFile(path.join(__dirname, "webs/404.html"));
+    }
+
+    // Fetch() hívás → engedjük
+    next();
+}
+
+
+
+
 
 // --- API endpointok ---
-app.get("/api/guitars", verifyAdmin, async (req, res) => {
+app.get("/api/guitars",apiSecretBrowser, async (req, res) => {
     console.log("🎸 /api/guitars hívás érkezett!");
     const { data, error } = await supabase.from("electric_guitars").select("*");
     if (error)
@@ -77,7 +96,7 @@ app.get("/api/guitars", verifyAdmin, async (req, res) => {
     res.json(data);
 });
 
-app.get("/api/cpu", verifyAdmin, async (req, res) => {
+app.get("/api/cpu",apiSecretBrowser, async (req, res) => {
     console.log("🧠 /api/cpu hívás érkezett!");
     const { data, error } = await supabase.from("processors").select("*");
     if (error)
@@ -88,7 +107,7 @@ app.get("/api/cpu", verifyAdmin, async (req, res) => {
 });
 
 // --- MOTHERBOARDS (nyilvános lekérés) ---
-app.get("/api/motherboard", async (req, res) => {
+app.get("/api/motherboard",apiSecretBrowser, async (req, res) => {
     console.log("🧩 /api/motherboard hívás érkezett!");
     const { data, error } = await supabase.from("motherboard").select("*");
 
@@ -107,7 +126,7 @@ app.get("/api/motherboard", async (req, res) => {
 });
 
 
-app.get("/api/saxophone/alt", verifyAdmin, async (req, res) => {
+app.get("/api/saxophone/alt",apiSecretBrowser, async (req, res) => {
     console.log("🎷 /api/saxophone/alt hívás érkezett!");
     const { data, error } = await supabase.from("alt_saxophone").select("*");
     if (error)
@@ -117,7 +136,7 @@ app.get("/api/saxophone/alt", verifyAdmin, async (req, res) => {
     res.json(data);
 });
 
-app.get("/api/bassers", verifyAdmin, async (req, res) => {
+app.get("/api/bassers",apiSecretBrowser, async (req, res) => {
     console.log("🎸 /api/bassers hívás érkezett!");
     const { data, error } = await supabase.from("bassers").select("*");
     if (error)
@@ -127,7 +146,7 @@ app.get("/api/bassers", verifyAdmin, async (req, res) => {
     res.json(data);
 });
 
-app.get("/api/coupe", verifyAdmin, async (req, res) => {
+app.get("/api/coupe", apiSecretBrowser, async (req, res) => {
     console.log("🚗 /api/coupe hívás érkezett!");
     const { data, error } = await supabase.from("coupe_car").select("*");
     if (error)
@@ -265,7 +284,7 @@ app.post("/api/logout", (req, res) => {
 });
 
 // --- Login státusz ellenőrzés ---
-app.get("/api/me", (req, res) => {
+app.get("/api/me",verifyAdmin, (req, res) => {
     const token = req.cookies.auth_token;
     if (!token) return res.status(401).json({ loggedIn: false });
 
