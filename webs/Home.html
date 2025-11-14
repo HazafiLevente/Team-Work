@@ -18,42 +18,40 @@
 
     <nav class="nav" aria-label="Főmenü">
         <a href="/home">Home</a>
-        <a href="#" onclick="loadCPUs()">CPUs</a>
         <a href="/">Projects</a>
-        <a href="/">Market</a>
         <a href="/profile">Profile</a>
         <a class="cta" id="auth-btn" href="/regist">Connect</a>
     </nav>
 </header>
 
-<main class="content">
-    <section class="panel">
-        <div class="hero">
-            <h2>Üdv a Setup Configuratorban</h2>
-            <div class="neon-line"></div>
-            <p class="muted">Ez a tesztverzió lehetővé teszi CPU-k, hangszerek és autók listázását a Supabase adatbázisból.</p>
-            <div style="display:flex; gap:10px; margin-top:10px;">
-                <a class="btn" href="#" onclick="loadCPUs()">Mutasd a CPU-kat</a>
-                <a class="btn" href="#">Dashboard</a>
-                <span class="tag">vTest</span>
-            </div>
+<main class="content"></main>
+
+<!-- JOBB OLDALI FIX OLDALSÁV – mindentől független -->
+<aside id="latest-box" class="latest-fixed">
+    <div class="panel small-card">
+        <h3 style="margin-bottom:10px;">Legutóbb feltöltve</h3>
+        <ul id="latest-list"
+            style="list-style:none; padding:0; margin:0; font-size:13px;"></ul>
+    </div>
+
+    <!-- ÚJ BLOKK: MY SETUP -->
+    <div class="panel small-card" style="margin-top:15px;">
+        <h3 style="margin-bottom:10px;">My Setup</h3>
+
+        <button id="mysetup-btn"
+                class="btn"
+                style="width:100%; text-align:center; margin-bottom:12px;">
+            My Setup
+        </button>
+
+        <div id="mysetup-box"
+             class="muted"
+             style="font-size:14px; padding-top:6px;">
+            Nincs elem kiválasztva.
         </div>
-    </section>
-    <aside class="sidebar">
-        <div class="panel small-card">
-            <div style="display:flex; justify-content:space-between; align-items:center;">
-                <div>
-                    <div style="font-weight:800">New Products</div>
-                    <div class="muted" style="margin-top:6px">utolsó 24 óra</div>
-                </div>
-                <div style="text-align:right">
-                    <div style="font-size:18px; font-weight:800"></div>
-                    <div class="muted">alerts</div>
-                </div>
-            </div>
-        </div>
-    </aside>
-</main>
+    </div>
+</aside>
+
 
 <script src="script.js"></script>
 </body>

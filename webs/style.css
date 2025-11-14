@@ -131,15 +131,26 @@ input[type="text"], input[type="password"], input[type="email"], textarea{
 /* -------------------------
    Content area
    ------------------------- */
-main.content{
-    max-width:1200px;
-    margin:28px auto;
-    padding:24px;
-    display:grid;
-    gap:22px;
-    grid-template-columns: 1fr 340px;
-    align-items:start;
+@media (max-width: 980px) {
+    main.content {
+        margin-right: 0 !important;
+    }
+
+    #latest-box {
+        display: none;
+    }
 }
+main.content {
+    max-width: 1200px;
+    margin: 28px 380px 28px 20px;  /* TOP | RIGHT | BOTTOM | LEFT */
+    padding: 24px;
+    display: grid;
+    gap: 22px;
+    grid-template-columns: 1fr 340px;
+    align-items: start;
+}
+
+
 
 /*  --------------
     fő kártya / panel
@@ -290,5 +301,13 @@ a.logorreg:hover
 
 .wide-panel {
     grid-column: 1 / -1;
+}
+
+.latest-fixed {
+    position: fixed;
+    right: 40px;
+    top: 120px;
+    width: 280px;
+    z-index: 25;
 }
 

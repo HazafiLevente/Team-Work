@@ -41,6 +41,19 @@ app.get("/profile", (req, res) => {
     res.sendFile(path.join(__dirname, "webs/Profile.html"));
 });
 
+function verifyUser(req, res, next) {
+    const token = req.cookies.auth_token;
+    if (!token) return res.status(401).json({ error: "Not logged in" });
+
+    try {
+        req.user = jwt.verify(token, JWT_SECRET);
+        next();
+    } catch (err) {
+        return res.status(403).json({ error: "Invalid token" });
+    }
+}
+
+
 // --- Token ellenőrzés ---
 function verifyToken(req, res, next) {
     const token =
@@ -155,39 +168,59 @@ app.get("/api/coupe", apiSecretBrowser, async (req, res) => {
         return res.status(404).json({ message: "Nincs adat a táblában" });
     res.json(data);
 });
-// --- ÖSSZES TERMÉK LEKÉRÉSE ---
-// Ez minden táblát lekér és egyetlen JSON-ban ad vissza
-app.get("/api/all", verifyAdmin, async (req, res) => {
-    console.log("🌍 /api/all hívás érkezett!");
+app.get("/api/all", apiSecretBrowser, async (req, res) => {
+    console.log("🌍 /api/all – összes tábla lekérése");
 
     try {
-        // Egyenként lekérjük az adatokat minden táblából
-        const tables = [
-            "processors",
-            "electric_guitars",
-            "alt_saxophone",
-            "bassers",
-            "coupe_car"
-        ];
+        const { data, error } = await supabase.rpc("get_all_tables");
 
-        const results = {};
-
-        for (const table of tables) {
-            const { data, error } = await supabase.from(table).select("*");
-            if (error) {
-                console.error(`❌ Hiba a ${table} táblánál:`, error.message);
-                results[table] = { error: error.message };
-            } else {
-                results[table] = data || [];
-            }
+        if (error) {
+            return res.status(500).json({ error: error.message });
         }
 
-        res.json(results);
+        const excluded = ["users", "user", "auth", "profiles"];
+
+        // RPC: [{table_name:"processors"}, ...]
+        const cleaned = data
+            .map(t => t.table_name)
+            .filter(name => !excluded.includes(name));
+
+        res.json({ tables: cleaned });
+
     } catch (err) {
-        console.error("❌ Összes adat lekérési hiba:", err);
-        res.status(500).json({ error: "Hiba az adatok lekérésekor." });
+        console.error("❌ /api/all hiba:", err);
+        res.status(500).json({ error: "Szerverhiba." });
     }
 });
+
+app.get("/api/latest", verifyUser, async (req, res) => {
+    const table = req.query.table;
+
+    if (!table) {
+        return res.status(400).json({ error: "Missing table" });
+    }
+
+    const { data, error } = await supabase
+        .from(table)
+        .select("*")
+        .order("id", { ascending: false })
+        .limit(5);
+
+    if (error) {
+        return res.status(400).json({ error: error.message });
+    }
+
+    const formatted = data.map(row => ({
+        name: row.Model || row.model || row.Name || row.name || row.title || "Unknown",
+        table: table
+    }));
+
+
+    res.json(formatted);
+});
+
+
+
 
 
 // --- Register ---
@@ -284,7 +317,7 @@ app.post("/api/logout", (req, res) => {
 });
 
 // --- Login státusz ellenőrzés ---
-app.get("/api/me",verifyAdmin, (req, res) => {
+app.get("/api/me",verifyUser, (req, res) => {
     const token = req.cookies.auth_token;
     if (!token) return res.status(401).json({ loggedIn: false });
 

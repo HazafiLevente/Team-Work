@@ -6,6 +6,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (window.location.pathname === "/home" || window.location.pathname === "/") {
         await loadCPUs();
         await loadMotherboards();
+        await loadLatestProducts();
 
     }
     if (window.location.pathname === "/profile") {
@@ -423,6 +424,70 @@ async function loadProfile() {
         <button class="btn" onclick="logout()">Kijelentkezés</button>
     `;
 }
+
+async function loadLatestProducts() {
+    try {
+        // 1️⃣ összes tábla lekérése
+        const tablesRes = await fetch("/api/all", { credentials: "include" });
+        const tableData = await tablesRes.json();
+
+        if (!tablesRes.ok || !tableData.tables) {
+            console.log("⚠️ Nem jött tábla lista");
+            return;
+        }
+
+        const tables = tableData.tables;
+
+        if (tables.length === 0) {
+            console.log("⚠️ Üres tábla lista");
+            return;
+        }
+
+        // 2️⃣ random tábla kiválasztása
+        const randomTable = tables[Math.floor(Math.random() * tables.length)];
+        console.log("🎲 Random tábla:", randomTable);
+
+        // 3️⃣ latest lekérése
+        const res = await fetch(`/api/latest?table=${randomTable}`, { credentials: "include" });
+        const data = await res.json();
+
+        const list = document.getElementById("latest-list");
+        if (!list) return;
+
+        list.innerHTML = "";
+
+        if (!res.ok || data.length === 0) {
+            list.innerHTML = `<li class="muted">Nincs adat</li>`;
+            return;
+        }
+
+        // 4️⃣ megjelenítés – Manufacturer + Model
+        data.forEach(row => {
+            const li = document.createElement("li");
+            li.style.marginBottom = "8px";
+
+            const manufacturer = row.manufacturer || row.Manufacturer || row.brand || "";
+            const model = row.model || row.Model || row.name || row.Name || "";
+
+            li.innerHTML = `
+                <span style="color:white; font-weight:bold;">
+                    ${manufacturer || "N/A"}
+                </span><br>
+                <span style="color:#ddd;">
+                    ${model || "Unknown Model"}
+                </span>
+            `;
+
+            list.appendChild(li);
+        });
+
+    } catch (err) {
+        console.error("❌ latest load error:", err);
+    }
+}
+
+
+
 
 
 
