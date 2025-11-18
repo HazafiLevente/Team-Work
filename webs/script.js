@@ -1,61 +1,90 @@
-// ----------------------------
-// PAGE INIT
-// ----------------------------
+/* ----------------------------------
+   SEARCH + PRODUCT GRID INJECTOR
+---------------------------------- */
+
+function injectSearchArea() {
+    const content = document.querySelector(".content");
+    if (!content) return;
+
+    const box = document.createElement("div");
+    box.id = "search-box-wrapper";
+    box.style.gridColumn = "1 / -1";
+    box.innerHTML = `
+        <div style="margin-bottom: 20px;">
+            <input id="search-input" 
+                   type="text" 
+                   placeholder="Keresés: manufacturer, model, kategória..."
+                   style="
+                        width:100%;
+                        padding:14px;
+                        border-radius:10px;
+                        background:rgba(255,255,255,0.05);
+                        border:1px solid rgba(255,255,255,0.12);
+                        color:white;
+                        font-size:16px;">
+        </div>
+
+        <div id="product-grid"></div>
+    `;
+
+    content.prepend(box);
+}
+
+/* ----------------------------------
+   PAGE INIT
+---------------------------------- */
+
 document.addEventListener("DOMContentLoaded", async () => {
-    // csak a home oldalon töltsön CPU-kat
-    if (window.location.pathname === "/home" || window.location.pathname === "/") {
+    const path = window.location.pathname;
+
+    if (path === "/home" || path === "/") {
+        injectSearchArea();
+        await loadProducts();   // egen kategóriák
         await loadCPUs();
         await loadMotherboards();
         await loadLatestProducts();
-
     }
-    if (window.location.pathname === "/profile") {
+
+    if (path === "/profile") {
         await loadProfile();
     }
 
-
-    // a /regist oldalon ne töltsön semmit
-    if (window.location.pathname !== "/regist") {
+    if (path !== "/regist") {
         await checkLoginStatus();
     }
 });
 
-// ----------------------------
-// REGISTRATION
-// ----------------------------
+
+/* ----------------------------------
+   AUTH
+---------------------------------- */
+
 async function connectreg() {
     const fullname = document.getElementById("fullname").value;
     const username = document.getElementById("username").value;
     const email = document.getElementById("email").value;
     const password = document.getElementById("password").value;
 
-    const userData = { fullname, username, email, password };
-    console.log("📤 Küldés:", userData);
-
     const res = await fetch("/api/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(userData),
+        body: JSON.stringify({ fullname, username, email, password }),
         credentials: "include"
     });
 
-    const result = await res.json();
+    const data = await res.json();
+
     if (res.ok) {
-        alert("✅ Sikeres regisztráció!");
+        alert("Sikeres regisztráció!");
         window.location.href = "/home";
     } else {
-        alert("❌ Hiba: " + result.error);
+        alert("Hiba: " + data.error);
     }
 }
 
-// ----------------------------
-// LOGIN
-// ----------------------------
 async function connectlog() {
     const email = document.getElementById("email").value;
     const password = document.getElementById("password").value;
-
-    console.log("📤 Bejelentkezés:", email);
 
     const res = await fetch("/api/login", {
         method: "POST",
@@ -64,40 +93,31 @@ async function connectlog() {
         credentials: "include"
     });
 
-    const result = await res.json();
+    const data = await res.json();
 
     if (res.ok) {
-        alert("✅ Sikeres bejelentkezés!");
+        alert("Sikeres bejelentkezés!");
         window.location.href = "/home";
     } else {
-        alert("❌ Hiba: " + result.error);
+        alert("Hiba: " + data.error);
     }
 }
 
-// ----------------------------
-// LOGOUT
-// ----------------------------
 async function logout() {
-    await fetch("/api/logout", {
-        method: "POST",
-        credentials: "include"
-    });
-    alert("👋 Kijelentkeztél!");
+    await fetch("/api/logout", { method: "POST", credentials: "include" });
     window.location.href = "/regist";
 }
 
-// ----------------------------
-// LOGIN STATUS CHECK
-// ----------------------------
+/* ----------------------------------
+   LOGIN BUTTON
+---------------------------------- */
+
 async function checkLoginStatus() {
     const authBtn = document.getElementById("auth-btn");
     if (!authBtn) return;
 
     try {
-        const res = await fetch("/api/me", {
-            method: "GET",
-            credentials: "include"
-        });
+        const res = await fetch("/api/me", { credentials: "include" });
 
         if (!res.ok) {
             setConnectButton(authBtn);
@@ -105,392 +125,365 @@ async function checkLoginStatus() {
         }
 
         const data = await res.json();
-        if (data && data.loggedIn) {
-            setLogoutButton(authBtn);
-        } else {
-            setConnectButton(authBtn);
-        }
-    } catch (err) {
-        console.error("⚠️ Hiba a bejelentkezés-ellenőrzésnél:", err);
+        data.loggedIn ? setLogoutButton(authBtn) : setConnectButton(authBtn);
+
+    } catch {
         setConnectButton(authBtn);
     }
 }
 
-function setConnectButton(authBtn) {
-    authBtn.textContent = "Connect";
-    authBtn.href = "/regist";
-    authBtn.style.color = "";
-    authBtn.style.border = "";
-    authBtn.onclick = null;
+function setConnectButton(btn) {
+    btn.textContent = "Connect";
+    btn.href = "/regist";
+    btn.onclick = null;
 }
 
-function setLogoutButton(authBtn) {
-    authBtn.textContent = "Logout";
-    authBtn.href = "#";
-    authBtn.style.color = "red";
-    authBtn.style.border = "1px solid red";
-    authBtn.style.padding = "5px 10px";
-    authBtn.style.borderRadius = "5px";
-    authBtn.style.cursor = "pointer";
-    authBtn.style.marginLeft = "10px";
-    authBtn.style.fontSize = "16px";
-    authBtn.style.fontWeight = "bold";
-    authBtn.style.textDecoration = "none";
-    authBtn.onclick = (e) => {
+function setLogoutButton(btn) {
+    btn.textContent = "Logout";
+    btn.href = "#";
+    btn.onclick = (e) => {
         e.preventDefault();
         logout();
     };
 }
 
-// ----------------------------
-// REGISTRATION / LOGIN PAGES
-// ----------------------------
-function regist() {
-    var content = document.querySelector(".content");
-    content.innerHTML = `
-        <section class="panel">
-            <div class="hero">
-                <h2>Registration</h2>
-                <label for="username">Username:</label>
-                <input type="text" id="username" required/>
-                <label for="fullname">Fullname:</label>
-                <input type="text" id="fullname" required/>
-                <label for="email">Email:</label>
-                <input type="text" id="email" required/>
-                <label for="password">Password:</label>
-                <input type="password" id="password" required/>
-                <br>
-                <button class="btn" onclick="connectreg()">Connect</button>
-                <p class="logorreg">
-                    van fiókom, <a class='logorreg' onclick="login()">bejelentkezek</a>
-                </p>
-            </div>
-        </section>`;
-}
+/* ----------------------------------
+   PROFILE PAGE
+---------------------------------- */
 
-function login() {
-    var content = document.querySelector(".content");
-    content.innerHTML = `
-        <section class="panel">
-            <div class="hero">
-                <h2>Login</h2>
-                <label for="email">Email:</label>
-                <input type="text" id="email" required/>
-                <label for="password">Password:</label>
-                <input type="password" id="password" required/>
-                <br>
-                <button class="btn" onclick="connectlog()">Connect</button>
-                <br>
-                <p>
-                    még nincs fiókom, <a onclick="regist()" class='logorreg'>regisztrálok</a>
-                </p>
-            </div>
-        </section>`;
-}
-
-// ----------------------------
-// CPU ITEMS (dynamic load)
-// ----------------------------
-async function loadCPUs() {
-    try {
-        const content = document.querySelector(".content");
-
-        content.classList.add("wide-content");
-
-        content.innerHTML = `
-            <section class="panel wide-panel">
-                <div class="hero">
-                    <h2>Available CPUs</h2>
-                    <div class="neon-line"></div>
-                    <div class="cpu-grid" id="cpu-grid">
-                        <p class="muted">🔄 Betöltés...</p>
-                    </div>
-                </div>
-            </section>
-        `;
-
-        const res = await fetch("/api/cpu", { credentials: "include" });
-        const data = await res.json();
-        const grid = document.getElementById("cpu-grid");
-        grid.innerHTML = "";
-
-        if (!res.ok || !data || data.length === 0) {
-            grid.innerHTML = `<p class="muted">❌ Nincs elérhető CPU adat.</p>`;
-            return;
-        }
-
-        // CPU-k kártyáinak megjelenítése (4 db / sor)
-        data.forEach(cpu => {
-            // 🔍 gyártó alapú kép kiválasztása
-            let imageURL = "";
-            if (cpu.Manufacturer && cpu.Manufacturer.toLowerCase().includes("amd")) {
-                imageURL = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQclXL3zcdtE9LYXthL1f2egJdYdxDKXLfmCg&s";
-            } else if (cpu.Manufacturer && cpu.Manufacturer.toLowerCase().includes("intel")) {
-                imageURL = "https://mir-s3-cdn-cf.behance.net/project_modules/1400_webp/8e4313112554403.60186ea0c7798.jpg";
-            } else {
-                imageURL = "https://via.placeholder.com/200x120?text=CPU";
-            }
-
-            const card = document.createElement("div");
-            card.className = "cpu-card";
-            card.innerHTML = `
-                <div class="cpu-item" style="text-align:center; padding:12px; background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.05); border-radius:12px;">
-                    <img src="${imageURL}" width="140" height="140" alt="${cpu.Model}" style="border-radius:10px; object-fit:cover;">
-                    <h3 style="margin-top:10px;">${cpu.Model}</h3>
-                    <p><strong>${cpu.Manufacturer}</strong></p>
-                    <p>${cpu.Threads} threads • ${cpu.Clock} GHz</p>
-                    <p>Socket: ${cpu.Socket}</p>
-                    <p>Cache: ${cpu.Cache} MB</p>
-                    <p><strong>Ár:</strong> ${cpu.Price.toLocaleString("hu-HU")} Ft</p>
-                </div>
-            `;
-            grid.appendChild(card);
-        });
-
-        // pontosan 4 oszlopos grid
-        grid.style.display = "grid";
-        grid.style.gridTemplateColumns = "repeat(4, 1fr)";
-        grid.style.gap = "24px";
-        grid.style.justifyItems = "center";
-
-    } catch (err) {
-        console.error("❌ CPU betöltési hiba:", err);
-        const grid = document.getElementById("cpu-grid");
-        if (grid) grid.innerHTML = `<p class="muted">⚠️ Hiba a CPU-k betöltése közben.</p>`;
-    }
-}
-// ----------------------------
-// MOTHERBOARD ITEMS (dynamic load, CPUs után)
-// ----------------------------
-async function loadMotherboards() {
-    try {
-        console.log("🔍 Alaplapok betöltése elindult...");
-        const gridParent = document.querySelector(".content");
-
-        // Új szekció az alaplapokhoz
-        const section = document.createElement("section");
-        section.className = "panel wide-panel";
-        section.innerHTML = `
-            <div class="hero">
-                <h2>Available Motherboards</h2>
-                <div class="neon-line"></div>
-                <div class="motherboard-grid" id="motherboard-grid">
-                    <p class="muted">🔄 Betöltés...</p>
-                </div>
-            </div>
-        `;
-        gridParent.appendChild(section);
-
-        const res = await fetch("/api/motherboard", { credentials: "include" });
-        const data = await res.json();
-        const grid = document.getElementById("motherboard-grid");
-        grid.innerHTML = "";
-
-        // --- Ha nincs adat ---
-        if (!res.ok || !data || data.length === 0) {
-            console.warn("⚠️ Nincs adat az alaplapokhoz:", data);
-            grid.innerHTML = `<p class="muted">❌ Nincs elérhető alaplap adat.</p>`;
-            return;
-        }
-
-        console.log(`✅ ${data.length} alaplap érkezett a szervertől.`);
-
-        // --- Render ---
-        data.forEach(board => {
-            // 🔧 normalizálás: kisbetűs kulcsok, hogy bárhogy jöjjön az adat, működjön
-            const b = {};
-            for (const key in board) {
-                b[key.toLowerCase()] = board[key];
-            }
-
-            // --- alapértékek, ha hiányozna valami ---
-            const model = b.model || "Ismeretlen modell";
-            const manufacturer = b.manufacturer || "Ismeretlen gyártó";
-            const socket = b.socket || "—";
-            const chipset = b.chipset || "—";
-            const ramtype = b.ramtype || "—";
-            const ramslots = b.ramslots || "—";
-            const rammaxmhz = b.rammaxmhz || "—";
-            const m2slots = b.m2slots || "—";
-            const sataports = b.sataports || "—";
-            const pcieversion = b.pcieversion || "—";
-            const lanspeed = b.lanspeed || "—";
-            const wifi = b.wifi || "—";
-            const bluetooth = b.bluetooth || "—";
-            const audiochip = b.audiochip || "—";
-            const usbportsrear = b.usbportsrear || "—";
-            const rgbsupport = b.rgbsupport || "—";
-            const price = b.price ? parseInt(b.price).toLocaleString("hu-HU") + " Ft" : "N/A";
-
-
-
-
-            // --- 🖼️ Kép kiválasztása gyártó és modell alapján ---
-            let imageURL = "https://cdn-icons-png.flaticon.com/512/1875/1875848.png"; // alapértelmezett
-
-            const manu = manufacturer.toLowerCase();
-            const mdl = model.toLowerCase();
-
-            if (manu.includes("asus") && mdl.includes("rog")) {
-                imageURL = "https://rog.asus.com/dist/img/rog-404.jpg";
-            } else if (manu.includes("asus") && mdl.includes("tuf")) {
-                imageURL = "https://mir-s3-cdn-cf.behance.net/project_modules/1400_webp/67e9d8113991421.6033266825dca.jpg";
-            } else if (manu.includes("asus") && mdl.includes("prime")) {
-                imageURL = "https://media.icdn.hu/brand/entity/1000028/5c9cc630da861asus.jpg";
-            } else if (manu.includes("msi")) {
-                imageURL = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTIKBiMNQDdQz7jVtSpJkR6SyTRaHnagUTE1A&s";
-            } else if (manu.includes("gigabyte")) {
-                imageURL = "https://www.eteknix.com/wp-content/uploads/2019/09/1-90.jpg";
-            } else if (manu.includes("asrock")) {
-                imageURL = "https://www.notebookcheck-hu.com/fileadmin/Notebooks/News/_nc4/1704541866_asrock.jpg";
-            }
-
-            const card = document.createElement("div");
-            card.className = "cpu-card"; // ugyanaz a stílus, így egységes
-            card.innerHTML = `
-                <div class="cpu-item" style="
-                text-align:center;
-                padding:12px;
-                background:rgba(255,255,255,0.02);
-                border:1px solid rgba(255,255,255,0.05);
-                border-radius:12px;
-                height: 430px;              
-                width: 300px;             
-                display:flex;
-                flex-direction:column;
-                justify-content:flex-start;
-                overflow:hidden;">
-                    <img src="${imageURL}" width="140" height="140" alt="${model}" style="border-radius:10px; object-fit:cover;">
-                    <h3 style="margin-top:10px;">${model}</h3>
-                    <p><strong>${manufacturer}</strong></p>
-                    <p>Socket: ${socket} • Chipset: ${chipset}</p>
-                    <p>${ramtype} RAM • ${ramslots} slot • ${rammaxmhz} MHz</p>
-                    <p>M.2: ${m2slots} • SATA: ${sataports} • PCIe ${pcieversion}</p>
-                    <p>LAN: ${lanspeed} • WiFi: ${wifi} • BT: ${bluetooth}</p>
-                    <p>Audio: ${audiochip} • USB Rear: ${usbportsrear}</p>
-                    <p>RGB: ${rgbsupport}</p>
-                    <p><strong>Ár:</strong> ${price}</p>
-                </div>
-            `;
-            grid.appendChild(card);
-        });
-
-        // --- Grid elrendezés ---
-        grid.style.display = "grid";
-        grid.style.gridTemplateColumns = "repeat(auto-fill, minmax(280px, 1fr))";
-        grid.style.gap = "24px";
-        grid.style.justifyItems = "center";
-
-    } catch (err) {
-        console.error("❌ Alaplap betöltési hiba:", err);
-        const grid = document.getElementById("motherboard-grid");
-        if (grid) grid.innerHTML = `<p class="muted">⚠️ Hiba az alaplapok betöltése közben.</p>`;
-    }
-}
-// ----------------------------
-// PROFILE PAGE LOAD
-// ----------------------------
 async function loadProfile() {
     const box = document.getElementById("profile-box");
+    if (!box) return;
 
     const res = await fetch("/api/me", { credentials: "include" });
-
-    // ❌ Ha nincs bejelentkezve → töltsük be a /regist oldalt
-    if (!res.ok) {
-        regist();
-        return;
-    }
+    if (!res.ok) return regist();
 
     const data = await res.json();
-
-    if (!data.loggedIn) {
-        regist();
-        return;
-    }
+    if (!data.loggedIn) return regist();
 
     const user = data.user;
 
-    // ✔ Profil megjelenítése
     box.innerHTML = `
         <h2>Profilod</h2>
         <div class="neon-line"></div>
-
         <p><strong>Név:</strong> ${user.name}</p>
         <p><strong>Felhasználónév:</strong> ${user.username}</p>
         <p><strong>Email:</strong> ${user.email}</p>
-        <p><strong>Admin:</strong> ${user.isAdmin ? "Igen" : "Nem"}</p>
-
-        <br><br>
         <button class="btn" onclick="logout()">Kijelentkezés</button>
     `;
 }
 
+/* ----------------------------------
+   CPU LIST
+---------------------------------- */
+
+async function loadCPUs() {
+    const content = document.querySelector(".content");
+
+    const section = document.createElement("section");
+    section.className = "panel wide-panel";
+    section.innerHTML = `
+        <div class="hero">
+            <h2>Available CPUs</h2>
+            <div class="neon-line"></div>
+            <div class="cpu-grid" id="cpu-grid">
+                <p class="muted">Betöltés...</p>
+            </div>
+        </div>
+    `;
+    content.appendChild(section);
+
+    const res = await fetch("/api/cpu", { credentials: "include" });
+    const data = await res.json();
+    const grid = document.getElementById("cpu-grid");
+
+    grid.innerHTML = "";
+
+    data.forEach(cpu => {
+        const card = document.createElement("div");
+        card.className = "cpu-card";
+
+        let imageURL = "https://via.placeholder.com/200x120?text=CPU";
+        if (cpu.Manufacturer?.toLowerCase().includes("amd"))
+            imageURL = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQclXL3zcdtE9LYXthL1f2egJdYdxDKXLfmCg&s";
+        if (cpu.Manufacturer?.toLowerCase().includes("intel"))
+            imageURL = "https://mir-s3-cdn-cf.behance.net/project_modules/1400_webp/8e4313112554403.60186ea0c7798.jpg";
+
+        card.innerHTML = `
+            <div class="cpu-item" style="padding:12px;">
+                <img src="${imageURL}" width="140">
+                <h3>${cpu.Model}</h3>
+                <p>${cpu.Manufacturer}</p>
+                <p>${cpu.Threads} threads</p>
+                <p>${cpu.Clock} GHz</p>
+                <p><strong>${cpu.Price.toLocaleString("hu-HU")} Ft</strong></p>
+            </div>
+        `;
+
+        grid.appendChild(card);
+    });
+}
+
+/* ----------------------------------
+   MOTHERBOARDS
+---------------------------------- */
+
+async function loadMotherboards() {
+    const content = document.querySelector(".content");
+
+    const section = document.createElement("section");
+    section.className = "panel wide-panel";
+    section.innerHTML = `
+        <div class="hero">
+            <h2>Available Motherboards</h2>
+            <div class="neon-line"></div>
+            <div id="motherboard-grid"></div>
+        </div>
+    `;
+    content.appendChild(section);
+
+    const res = await fetch("/api/motherboard");
+    const data = await res.json();
+    const grid = document.getElementById("motherboard-grid");
+
+    grid.innerHTML = "";
+    grid.style.display = "grid";
+    grid.style.gridTemplateColumns = "repeat(auto-fill,minmax(280px,1fr))";
+    grid.style.gap = "20px";
+
+    data.forEach(mb => {
+        const card = document.createElement("div");
+        card.className = "cpu-card";
+
+        card.innerHTML = `
+            <div class="cpu-item">
+                <h3>${mb.Model}</h3>
+                <p>${mb.Manufacturer}</p>
+                <p>Socket: ${mb.Socket}</p>
+                <p><strong>${mb.Price.toLocaleString("hu-HU")} Ft</strong></p>
+            </div>
+        `;
+
+        grid.appendChild(card);
+    });
+}
+
+/* ----------------------------------
+   LATEST PRODUCTS SIDEBAR
+---------------------------------- */
+
 async function loadLatestProducts() {
+    const res = await fetch("/api/all", { credentials: "include" });
+    const { tables } = await res.json();
+
+    const random = tables[Math.floor(Math.random() * tables.length)];
+
+    const r = await fetch(`/api/latest?table=${random}`, { credentials: "include" });
+    const rows = await r.json();
+
+    const list = document.getElementById("latest-list");
+    if (!list) return;
+
+    list.innerHTML = "";
+
+    rows.forEach(row => {
+        const li = document.createElement("li");
+        li.innerHTML = `<strong>${row.manufacturer}</strong><br>${row.model}`;
+        list.appendChild(li);
+    });
+}
+
+/* ----------------------------------
+   GLOBAL PRODUCT SEARCH
+---------------------------------- */
+
+let allProducts = [];
+let currentResults = [];
+
+async function loadProducts() {
     try {
-        // 1️⃣ összes tábla lekérése
-        const tablesRes = await fetch("/api/all", { credentials: "include" });
-        const tableData = await tablesRes.json();
+        const res = await fetch("/api/all");
+        const { tables } = await res.json();
 
-        if (!tablesRes.ok || !tableData.tables) {
-            console.log("⚠️ Nem jött tábla lista");
-            return;
+        const map = {
+            processors: "/api/cpu",
+            motherboard: "/api/motherboard",
+            electric_guitars: "/api/guitars",
+            alt_saxophone: "/api/saxophone/alt",
+            bassers: "/api/bassers",
+            coupe_car: "/api/coupe"
+        };
+
+        let merged = [];
+
+        for (let t of tables) {
+            if (!map[t]) continue;
+
+            const r = await fetch(map[t]);
+            const rows = await r.json();
+
+            rows.forEach(x => merged.push(normalizeProduct(x, t)));
         }
 
-        const tables = tableData.tables;
+        allProducts = merged;
+        currentResults = merged;
 
-        if (tables.length === 0) {
-            console.log("⚠️ Üres tábla lista");
-            return;
-        }
-
-        // 2️⃣ random tábla kiválasztása
-        const randomTable = tables[Math.floor(Math.random() * tables.length)];
-        console.log("🎲 Random tábla:", randomTable);
-
-        // 3️⃣ latest lekérése
-        const res = await fetch(`/api/latest?table=${randomTable}`, { credentials: "include" });
-        const data = await res.json();
-
-        const list = document.getElementById("latest-list");
-        if (!list) return;
-
-        list.innerHTML = "";
-
-        if (!res.ok || data.length === 0) {
-            list.innerHTML = `<li class="muted">Nincs adat</li>`;
-            return;
-        }
-
-        // 4️⃣ megjelenítés – Manufacturer + Model
-        data.forEach(row => {
-            const li = document.createElement("li");
-            li.style.marginBottom = "8px";
-
-            const manufacturer = row.manufacturer || row.Manufacturer || row.brand || "";
-            const model = row.model || row.Model || row.name || row.Name || "";
-
-            li.innerHTML = `
-                <span style="color:white; font-weight:bold;">
-                    ${manufacturer || "N/A"}
-                </span><br>
-                <span style="color:#ddd;">
-                    ${model || "Unknown Model"}
-                </span>
-            `;
-
-            list.appendChild(li);
-        });
+        renderProducts(merged);
 
     } catch (err) {
-        console.error("❌ latest load error:", err);
+        console.error("loadProducts error:", err);
     }
 }
 
+function normalizeProduct(row, table) {
+    const lower = {};
+    Object.keys(row).forEach(k => lower[k.toLowerCase()] = row[k]);
+
+    return {
+        table,
+        manufacturer: lower.manufacturer || lower.brand || "Unknown",
+        model: lower.model || lower.name || "Unknown",
+        price: lower.price ?? null,
+        raw: row
+    };
+}
+
+/* ----------------------------------
+   RENDER PRODUCT GRID
+---------------------------------- */
+
+function renderProducts(list) {
+    const grid = document.getElementById("product-grid");
+    if (!grid) return;
+
+    if (!list.length) {
+        grid.innerHTML = `<p class="muted">Nincs találat.</p>`;
+        return;
+    }
+
+    grid.innerHTML = "";
+    grid.style.display = "grid";
+    grid.style.gridTemplateColumns = "repeat(auto-fill, minmax(220px, 1fr))";
+    grid.style.gap = "20px";
+
+    list.forEach(p => {
+        const div = document.createElement("div");
+        div.className = "cpu-card";
+
+        let priceText = p.price ? p.price.toLocaleString("hu-HU") + " Ft" : "N/A";
+
+        const img = getProductImage(p.table, p);
+
+        div.innerHTML = `
+    <div class="cpu-item" style="padding:12px; text-align:center;">
+        <img src="${img}" 
+             alt="product image" 
+             style="width:120px; height:120px; object-fit:contain; margin-bottom:10px;">
+
+        <span class="tag">${p.table}</span>
+        <h3>${p.model}</h3>
+        <p>${p.manufacturer}</p>
+        <p><strong>${priceText}</strong></p>
+    </div>
+`;
+
+        div.onclick = () => {
+            window.location.href = `/product.html?table=${p.table}&model=${encodeURIComponent(p.model)}`;
+        };
+
+        grid.appendChild(div);
+    });
+}
+
+/* ----------------------------------
+   SEARCH INPUT
+---------------------------------- */
+
+document.addEventListener("input", e => {
+    if (e.target.id !== "search-input") return;
+
+    const term = e.target.value.toLowerCase().trim();
+
+    if (!term) {
+        renderProducts(allProducts);
+        return;
+    }
+
+    const filtered = allProducts.filter(p =>
+        p.manufacturer.toLowerCase().includes(term) ||
+        p.model.toLowerCase().includes(term) ||
+        p.table.toLowerCase().includes(term)
+    );
+
+    renderProducts(filtered);
+});
 
 
 
 
 
 
+function getProductImage(table, product) {
 
+    const m = (product.manufacturer || "").toLowerCase();
+    const model = (product.model || "").toLowerCase();
 
+    // CPU képek
+    if (table === "processors") {
+        if (m.includes("intel")) return "https://newsroom.intel.com/wp-content/uploads/2024/11/newsroom-Intel-ARL-Chip-4-768x432.jpg";
+        if (m.includes("amd")) return "https://i0.wp.com/play3r.net/wp-content/uploads/2017/03/AMD-Ryzen-Logo.png?fit=750%2C500&ssl=1";
+    }
+
+    // Motherboard képek
+    if (table === "motherboard") {
+        if (m.includes("asus") && model.includes("rog"))
+            return "https://www.svgrepo.com/show/303479/asus-rog-1-logo.svg";
+        if (m.includes("asus") && model.includes("tuf"))
+            return "https://images.seeklogo.com/logo-png/55/1/asus-tuf-gaming-logo-png_seeklogo-555052.png";
+        if (m.includes("msi"))
+            return "https://images.seeklogo.com/logo-png/30/1/msi-logo-png_seeklogo-304877.png";
+        if (m.includes("gigabyte"))
+            return "https://1000logos.net/wp-content/uploads/2020/05/Gigabyte-Logo.png";
+        if (m.includes("asrock"))
+            return "https://images.seeklogo.com/logo-png/49/1/asrock-logo-png_seeklogo-490350.png";
+        if (m.includes("asus") && model.includes("prime"))
+            return "https://1000logos.net/wp-content/uploads/2016/10/Asus-Logo.png";
+    }
+
+    // Electric Guitar
+    if (table === "electric_guitars") {
+        if (m.includes("ibanez"))
+            return "https://i.etsystatic.com/34531699/r/il/cce3ab/3800330793/il_1140xN.3800330793_2y7v.jpg";
+        if (m.includes("fender"))
+            return "https://i.etsystatic.com/34531699/r/il/5c4684/3935469309/il_1140xN.3935469309_a0j4.jpg";
+        if (m.includes("gibson"))
+            return "https://upload.wikimedia.org/wikipedia/commons/5/51/Gibson_Guitar_logo.svg";
+    }
+
+    // Bass Guitar
+    if (table === "bassers") {
+        if (m.includes("yamaha"))
+            return "https://1000logos.net/wp-content/uploads/2020/06/Yamaha-Logo.png";
+        if (m.includes("fender"))
+            return "https://i.etsystatic.com/34531699/r/il/5c4684/3935469309/il_1140xN.3935469309_a0j4.jpg";
+    }
+
+    // Alt Saxophone
+    if (table === "alt_saxophone") {
+        return "https://cdn-icons-png.flaticon.com/512/2965/2965647.png";
+    }
+
+    // Coupe Car
+    if (table === "coupe_car") {
+        if (model.includes("bmw"))
+            return "https://www.bmwusa.com/content/dam/bmwusa/4-series/coupe/2024/desktop/BMW-MY24-4SeriesCoupe-430i-xDrive-1.png";
+        if (model.includes("audi"))
+            return "https://www.audi.hu/media/Theme_Banner_Banner_Image_Component/8559-banner_image/dh-640-2bb7ad/1366x683-a5_3_4_front.jpg";
+        if (model.includes("mercedes"))
+            return "https://www.mbusa.com/content/dam/mb-nafta/us/myco/my24/c/class/sedan/all-vehicles/2024-C-SEDAN-AVP-DR.png";
+        return "https://cdn-icons-png.flaticon.com/512/7436/7436317.png";
+    }
+
+    // DEFAULT kép bármire
+    return "https://via.placeholder.com/200?text=No+Image";
+}
