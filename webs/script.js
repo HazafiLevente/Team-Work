@@ -458,6 +458,7 @@ function getProductImage(table, product) {
             return "https://i.etsystatic.com/34531699/r/il/5c4684/3935469309/il_1140xN.3935469309_a0j4.jpg";
         if (m.includes("gibson"))
             return "https://upload.wikimedia.org/wikipedia/commons/5/51/Gibson_Guitar_logo.svg";
+
     }
 
     // Bass Guitar

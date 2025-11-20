@@ -63,6 +63,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     <p><strong>Kategória:</strong> ${table}</p>
     <p><strong>Gyártó:</strong> ${lower.manufacturer || "N/A"}</p>
+    
 
         ${Object.entries(lower)
         .filter(([k, v]) => !["id","model","manufacturer"].includes(k))
