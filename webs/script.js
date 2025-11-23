@@ -40,8 +40,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (path === "/home" || path === "/") {
         injectSearchArea();
         await loadProducts();   // egen kategóriák
-        await loadCPUs();
-        await loadMotherboards();
         await loadLatestProducts();
     }
 
@@ -204,11 +202,11 @@ async function loadCPUs() {
         card.className = "cpu-card";
 
         let imageURL = "https://via.placeholder.com/200x120?text=CPU";
-        if (cpu.Manufacturer?.toLowerCase().includes("amd"))
+        if (cpu.Manufacturer && cpu.Manufacturer.toLowerCase().includes("amd")) {
             imageURL = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQclXL3zcdtE9LYXthL1f2egJdYdxDKXLfmCg&s";
-        if (cpu.Manufacturer?.toLowerCase().includes("intel"))
+        } else if (cpu.Manufacturer && cpu.Manufacturer.toLowerCase().includes("intel")) {
             imageURL = "https://mir-s3-cdn-cf.behance.net/project_modules/1400_webp/8e4313112554403.60186ea0c7798.jpg";
-
+        }
         card.innerHTML = `
             <div class="cpu-item" style="padding:12px;">
                 <img src="${imageURL}" width="140">
@@ -349,6 +347,29 @@ function normalizeProduct(row, table) {
 }
 
 /* ----------------------------------
+   SEARCH INPUT
+---------------------------------- */
+
+document.addEventListener("input", e => {
+    if (e.target.id !== "search-input") return;
+
+    const term = e.target.value.toLowerCase().trim();
+
+    if (!term) {
+        renderProducts(allProducts);
+        return;
+    }
+
+    const filtered = allProducts.filter(p =>
+        p.manufacturer.toLowerCase().includes(term) ||
+        p.model.toLowerCase().includes(term) ||
+        p.table.toLowerCase().includes(term)
+    );
+
+    renderProducts(filtered);
+});
+
+/* ----------------------------------
    RENDER PRODUCT GRID
 ---------------------------------- */
 
@@ -377,8 +398,11 @@ function renderProducts(list) {
         div.innerHTML = `
     <div class="cpu-item" style="padding:12px; text-align:center;">
         <img src="${img}" 
-             alt="product image" 
-             style="width:120px; height:120px; object-fit:contain; margin-bottom:10px;">
+         alt="product image"
+         style="display:block; margin:0 auto; 
+                width:120px; height:120px; 
+                object-fit:contain; margin-bottom:10px; border-radius: 6px;">
+
 
         <span class="tag">${p.table}</span>
         <h3>${p.model}</h3>
@@ -395,29 +419,6 @@ function renderProducts(list) {
     });
 }
 
-/* ----------------------------------
-   SEARCH INPUT
----------------------------------- */
-
-document.addEventListener("input", e => {
-    if (e.target.id !== "search-input") return;
-
-    const term = e.target.value.toLowerCase().trim();
-
-    if (!term) {
-        renderProducts(allProducts);
-        return;
-    }
-
-    const filtered = allProducts.filter(p =>
-        p.manufacturer.toLowerCase().includes(term) ||
-        p.model.toLowerCase().includes(term) ||
-        p.table.toLowerCase().includes(term)
-    );
-
-    renderProducts(filtered);
-});
-
 
 
 
@@ -430,8 +431,8 @@ function getProductImage(table, product) {
 
     // CPU képek
     if (table === "processors") {
-        if (m.includes("intel")) return "https://newsroom.intel.com/wp-content/uploads/2024/11/newsroom-Intel-ARL-Chip-4-768x432.jpg";
-        if (m.includes("amd")) return "https://i0.wp.com/play3r.net/wp-content/uploads/2017/03/AMD-Ryzen-Logo.png?fit=750%2C500&ssl=1";
+        if (m.includes("intel")) return "https://mir-s3-cdn-cf.behance.net/project_modules/1400_webp/8e4313112554403.60186ea0c7798.jpg";
+        if (m.includes("amd")) return "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQclXL3zcdtE9LYXthL1f2egJdYdxDKXLfmCg&s";
     }
 
     // Motherboard képek
