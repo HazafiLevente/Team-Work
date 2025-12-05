@@ -1,0 +1,5 @@
+ID,Manufacturer,Model,Price Range (Ft),Body Type,Horsepower,Acceleration (s),Seats,Fuel Type,Year,Transmission
+1,CITROEN,"Xsara Picasso 1.6 Exclusive","100000 - 499999",MPV,"100 - 149","14.9 - 10",5,Petrol,"2006-2007",Manual
+2,OPEL,"Zafira 1.9 DTI","500000 - 999999",MPV,"100 - 149","14.9 - 10",7,Diesel,"2005-2008",Manual
+3,FORD,"Galaxy 2.0 TDCi Ghia","1000000 - 3900000",MPV,"100 - 149","14.9 - 10",7,Diesel,"2006-2010",Manual
+4,FORD,"S-Max 2.0 TDCi Titanium Powershift","1000000 - 3900000",MPV,"150 - 199","14.9 - 10",7,Diesel,"2010–",Automatic
