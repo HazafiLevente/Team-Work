@@ -52,6 +52,49 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 });
 
+async function login() {
+    var main = document.querySelector(".content"); // <-- EZ A HELYES
+    main.innerHTML = `
+    <section class="panel">
+        <div class="hero">
+            <h2>Login</h2>
+            <label for="email">Email:</label>
+            <input type="text" id="email" required/>
+            <label for="password">Password:</label>
+            <input type="password" id="password" required/>
+            <br>
+            <button class="btn" onclick="connectlog()">Connect</button>
+            <p class="logorreg">
+                Még nincs fiókom, <a class='logorreg' onclick="regist()">regisztrálok</a>
+            </p>
+        </div>
+    </section>`;
+}
+
+
+async function regist() {
+    var main = document.querySelector(".content");
+    main.innerHTML = `
+    <section class="panel">
+        <div class="hero">
+            <h2>Registration</h2>
+            <label for="username">Username:</label>
+            <input type="text" id="username" required/>
+            <label for="fullname">Fullname:</label>
+            <input type="text" id="fullname" required/>
+            <label for="email">Email:</label>
+            <input type="text" id="email" required/>
+            <label for="password">Password:</label>
+            <input type="password" id="password" required/>
+            <br>
+            <button class="btn" onclick="connectreg()">Connect</button>
+            <p class="logorreg">
+                Van már fiókom, <a class='logorreg' onclick="login()">bejelentkezek</a>
+            </p>
+        </div>
+    </section>`;
+}
+
 
 /* ----------------------------------
    AUTH
@@ -167,6 +210,32 @@ async function loadProfile() {
         <p><strong>Név:</strong> ${user.name}</p>
         <p><strong>Felhasználónév:</strong> ${user.username}</p>
         <p><strong>Email:</strong> ${user.email}</p>
+        <button class="btn" onclick="mySetup()">My Setup</button>
+        <button class="btn" onclick="logout()">Kijelentkezés</button>
+    `;
+}
+async function mySetup() {
+    const box = document.getElementById("profile-box");
+    if (!box) return;
+
+    const res = await fetch("/api/me", { credentials: "include" });
+    if (!res.ok) return regist();
+
+    const data = await res.json();
+    if (!data.loggedIn) return regist();
+
+    const user = data.user;
+
+    box.innerHTML = `
+        <h2>Profilod</h2>
+        <div class="neon-line"></div>
+        <p><strong>Név:</strong> ${user.name}</p>
+        <p><strong>Felhasználónév:</strong> ${user.username}</p>
+        <p><strong>Email:</strong> ${user.email}</p>
+        <button class="btn" onclick="mySetup()">My Setup</button>
+        <div id="setupBox-content">
+            
+        </div>
         <button class="btn" onclick="logout()">Kijelentkezés</button>
     `;
 }

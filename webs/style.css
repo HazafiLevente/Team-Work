@@ -311,3 +311,12 @@ a.logorreg:hover
     z-index: 25;
 }
 
+
+
+
+#setupBox-content {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    width: 30%;
+}
