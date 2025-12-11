@@ -214,6 +214,8 @@ async function loadProfile() {
         <button class="btn" onclick="logout()">Kijelentkezés</button>
     `;
 }
+
+
 async function mySetup() {
     const box = document.getElementById("profile-box");
     if (!box) return;
@@ -225,6 +227,7 @@ async function mySetup() {
     if (!data.loggedIn) return regist();
 
     const user = data.user;
+
 
     box.innerHTML = `
         <h2>Profilod</h2>
