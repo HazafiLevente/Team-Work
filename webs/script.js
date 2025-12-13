@@ -3,6 +3,9 @@
 ---------------------------------- */
 
 function injectSearchArea() {
+    // ⛔ ha már van search input, NE injektáljuk újra
+    if (document.getElementById("search-input")) return;
+
     const content = document.querySelector(".content");
     if (!content) return;
 
@@ -29,6 +32,7 @@ function injectSearchArea() {
 
     content.prepend(box);
 }
+
 
 /* ----------------------------------
    PAGE INIT
@@ -191,6 +195,7 @@ function setLogoutButton(btn) {
 /* ----------------------------------
    PROFILE PAGE
 ---------------------------------- */
+let isSetup = false;
 
 async function loadProfile() {
     const box = document.getElementById("profile-box");
@@ -199,22 +204,11 @@ async function loadProfile() {
     const res = await fetch("/api/me", { credentials: "include" });
     if (!res.ok) return regist();
 
-    const data = await res.json();
-    if (!data.loggedIn) return regist();
+    const { loggedIn, user } = await res.json();
+    if (!loggedIn) return regist();
 
-    const user = data.user;
-
-    box.innerHTML = `
-        <h2>Profilod</h2>
-        <div class="neon-line"></div>
-        <p><strong>Név:</strong> ${user.name}</p>
-        <p><strong>Felhasználónév:</strong> ${user.username}</p>
-        <p><strong>Email:</strong> ${user.email}</p>
-        <button class="btn" onclick="mySetup()">My Setup</button>
-        <button class="btn" onclick="logout()">Kijelentkezés</button>
-    `;
+    renderProfile(box, user);
 }
-
 
 async function mySetup() {
     const box = document.getElementById("profile-box");
@@ -223,25 +217,50 @@ async function mySetup() {
     const res = await fetch("/api/me", { credentials: "include" });
     if (!res.ok) return regist();
 
-    const data = await res.json();
-    if (!data.loggedIn) return regist();
+    const { loggedIn, user } = await res.json();
+    if (!loggedIn) return regist();
 
-    const user = data.user;
+    // 🔁 TOGGLE
+    isSetup = !isSetup;
 
+    if (isSetup) {
+        renderSetup(box, user);
+    } else {
+        renderProfile(box, user);
+    }
+}
 
+function renderProfile(box, user) {
     box.innerHTML = `
         <h2>Profilod</h2>
         <div class="neon-line"></div>
         <p><strong>Név:</strong> ${user.name}</p>
         <p><strong>Felhasználónév:</strong> ${user.username}</p>
         <p><strong>Email:</strong> ${user.email}</p>
+
         <button class="btn" onclick="mySetup()">My Setup</button>
-        <div id="setupBox-content">
-            
-        </div>
         <button class="btn" onclick="logout()">Kijelentkezés</button>
     `;
 }
+
+function renderSetup(box, user) {
+    box.innerHTML = `
+        <h2>My Setup</h2>
+        <div class="neon-line"></div>
+
+        <p><strong>Név:</strong> ${user.name}</p>
+        <p><strong>Email:</strong> ${user.email}</p>
+
+        <div id="setupBox-content">
+            <!-- ide jön majd CPU / GPU / stb -->
+            <p class="muted">⚙️ Setup szerkesztése hamarosan…</p>
+        </div>
+
+        <button class="btn" onclick="mySetup()">⬅ Vissza a profilhoz</button>
+        <button class="btn" onclick="logout()">Kijelentkezés</button>
+    `;
+}
+
 
 /* ----------------------------------
    CPU LIST
@@ -506,6 +525,7 @@ function getProductImage(table, product) {
         if (m.includes("intel")) return "https://mir-s3-cdn-cf.behance.net/project_modules/1400_webp/8e4313112554403.60186ea0c7798.jpg";
         if (m.includes("amd")) return "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQclXL3zcdtE9LYXthL1f2egJdYdxDKXLfmCg&s";
     }
+
 
     // Motherboard képek
     if (table === "motherboard") {
