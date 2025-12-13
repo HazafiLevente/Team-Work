@@ -214,21 +214,106 @@ async function mySetup() {
     const box = document.getElementById("profile-box");
     if (!box) return;
 
-    const res = await fetch("/api/me", { credentials: "include" });
-    if (!res.ok) return regist();
-
-    const { loggedIn, user } = await res.json();
-    if (!loggedIn) return regist();
-
-    // 🔁 TOGGLE
     isSetup = !isSetup;
 
-    if (isSetup) {
-        renderSetup(box, user);
-    } else {
-        renderProfile(box, user);
+    if (!isSetup) {
+        const res = await fetch("/api/me", { credentials: "include" });
+        const { user } = await res.json();
+        return renderProfile(box, user);
     }
+
+    // ⏳ loading
+    box.innerHTML = `
+        <h2>My Setup</h2>
+        <p class="muted">⏳ Setup betöltése...</p>
+    `;
+
+    const res = await fetch("/api/my-first-setup", { credentials: "include" });
+    const data = await res.json();
+
+    if (!data.setup) {
+        box.innerHTML = `
+            <h2>My Setup</h2>
+            <p class="muted">❌ Még nincs egyetlen géped sem.</p>
+            <button class="btn" onclick="mySetup()">⬅ Vissza</button>
+        `;
+        return;
+    }
+
+    renderSetupWithData(box, data);
 }
+
+
+function renderSetupWithData(box, data) {
+    const { setup, details } = data;
+
+    box.innerHTML = `
+        <div class="setup-title">
+            <h2 id="setup-title-text">${setup.setup_name}</h2>
+            <button class="btn small" onclick="editSetupName(${setup.id})">✏️ Módosít</button>
+        </div>
+
+        <div class="neon-line"></div>
+
+        <ul class="setup-list">
+            <li><strong>CPU:</strong> ${details.processor?.Model || "—"}</li>
+            <li><strong>Alaplap:</strong> ${details.motherboard?.Model || "—"}</li>
+            <li><strong>RAM:</strong> ${details.ram?.model || "—"}</li>
+            <li><strong>VGA:</strong> ${details.videocard?.model || "—"}</li>
+            <li><strong>Tápegység:</strong> ${details.psu?.model || "—"}</li>
+        </ul>
+
+        <button class="btn" onclick="mySetup()">⬅ Vissza a profilhoz</button>
+        <button class="btn" onclick="logout()">Kijelentkezés</button>
+    `;
+}
+
+function editSetupName(setupId) {
+    const title = document.getElementById("setup-title-text");
+    const currentName = title.textContent;
+
+    title.outerHTML = `
+        <input 
+            id="setup-title-input"
+            value="${currentName}"
+            style="font-size:24px; padding:6px; width:100%; max-width:400px;"
+        />
+        <div style="margin-top:10px">
+            <button class="btn small" onclick="saveSetupName(${setupId})">💾 Mentés</button>
+            <button class="btn small" onclick="cancelEditSetupName('${currentName}')">❌ Mégse</button>
+        </div>
+    `;
+}
+
+async function saveSetupName(setupId) {
+    const input = document.getElementById("setup-title-input");
+    const newName = input.value.trim();
+
+    if (!newName) {
+        alert("A név nem lehet üres!");
+        return;
+    }
+
+    const res = await fetch("/api/update-setup-name", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ setupId, newName })
+    });
+
+    if (!res.ok) {
+        alert("❌ Nem sikerült menteni");
+        return;
+    }
+
+    // frissítjük a nézetet
+    mySetup();
+}
+
+function cancelEditSetupName(originalName) {
+    mySetup(); // egyszerűbb: újratöltjük a setup nézetet
+}
+
 
 function renderProfile(box, user) {
     box.innerHTML = `
