@@ -32,20 +32,51 @@
         <h3>📦 Tables</h3>
 
         <input
-        id="table-search"
-        type="text"
-        placeholder="Search table..."
-        class="admin-table-search"
+                id="table-search"
+                type="text"
+                placeholder="Search table..."
+                class="admin-table-search"
         />
 
         <ul id="table-list"></ul>
+
+        <!-- 🔽 QUERIES PANEL -->
+        <div class="admin-queries">
+            <div class="queries-header">
+                <span>🧾 Queries</span>
+                <button id="add-query-btn" class="query-add-btn">+</button>
+            </div>
+
+            <ul id="query-list"></ul>
+        </div>
     </aside>
+
 
     <!-- JOBB OLDALI TARTALOM -->
     <section class="admin-main">
+        <div id="sql-editor" class="sql-editor hidden">
+            <textarea id="sql-textarea" placeholder="Write SQL query here..."></textarea>
+
+            <div class="sql-actions">
+                <button class="btn small" onclick="runSQL()">▶ Run</button>
+                <button class="btn small" onclick="saveSQL()">💾 Save</button>
+                <button class="btn small danger" onclick="discardSQL()">❌ Discard</button>
+            </div>
+
+            <pre id="sql-result" class="sql-result"></pre>
+        </div>
+
         <div class="admin-header">
             <h2 id="active-table">Select a table</h2>
+
+            <input
+                    id="admin-row-search"
+                    type="text"
+                    placeholder="Search in table..."
+                    class="admin-row-search"
+            />
         </div>
+
 
         <div class="admin-table-wrapper">
             <table class="admin-table">

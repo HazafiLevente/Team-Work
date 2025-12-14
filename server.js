@@ -22,7 +22,7 @@ const JWT_SECRET = process.env.JWT_SECRET;
    LOAD ADMINS FROM JSON
 ====================================================== */
 const adminFilePath = path.join(__dirname, "admin.json");
-let ADMIN_IDS = [];
+let ADMIN_IDS = [1,2,5];
 
 try {
     const raw = fs.readFileSync(adminFilePath, "utf8");
@@ -104,6 +104,10 @@ app.get("/profile", (_, res) =>
 app.get("/admin", verifyAdmin, (_, res) => {
     res.sendFile(path.join(__dirname, "webs/Admin.html"));
 });
+app.get("/setup", (_, res) => {
+    res.sendFile(path.join(__dirname, "webs/Mysetup.html"));
+});
+
 
 
 /* ======================================================
@@ -288,6 +292,27 @@ app.get("/api/images", async (_, res) => {
         res.status(500).json({});
     }
 });
+app.get("/meta/filler", (_, res) => {
+    res.sendFile(path.join(__dirname, "filler.json"));
+});
+
+
+
+app.post("/api/admin/sql/run", verifyAdmin, async (req, res) => {
+    const { sql } = req.body;
+    if (!sql) {
+        return res.status(400).json({ error: "Missing SQL" });
+    }
+
+    const { data, error } = await supabase
+        .rpc("execute_sql", { sql });
+
+    if (error) {
+        return res.status(400).json({ error: error.message });
+    }
+
+    res.json(data);
+});
 
 
 /* ======================================================
@@ -296,31 +321,52 @@ app.get("/api/images", async (_, res) => {
 app.get("/api/my-first-setup", verifyUser, async (req, res) => {
     const userId = req.user.id;
 
-    const { data: setup } = await supabase
+    // 1️⃣ megkeressük a user setupjait (legkisebb ID elöl)
+    const { data: setups, error: setupErr } = await supabase
         .from("setup[Setup]")
-        .select("*")
+        .select("id, setup_name")
         .eq("user_id", userId)
-        .order("created_at", { ascending: true })
-        .limit(1)
-        .single();
+        .order("id", { ascending: true });
 
-    if (!setup) return res.json({ setup: null });
+    if (setupErr) {
+        return res.status(500).json({ error: setupErr.message });
+    }
 
-    const { data: details } = await supabase
+    if (!setups || setups.length === 0) {
+        return res.json({ setup: null });
+    }
+
+    const setupIds = setups.map(s => s.id);
+
+    // 2️⃣ megkeressük a legelső pc_details rekordot ezekhez a setupokhoz
+    const { data: pc, error: pcErr } = await supabase
         .from("pc_details[Setup]")
         .select(`
             *,
+            setup:setup_id(id, setup_name),
             processor:processors(*),
             motherboard:motherboard(*),
             ram:ram(*),
             videocard:video_cards(*),
             psu:psu(*)
         `)
-        .eq("setup_id", setup.id)
+        .in("setup_id", setupIds)
+        .order("id", { ascending: true })
+        .limit(1)
         .single();
 
-    res.json({ setup, details });
+    if (pcErr) {
+        return res.status(500).json({ error: pcErr.message });
+    }
+
+    // 3️⃣ visszaadjuk pontosan azt a formátumot,
+    // amit a frontend már MOST is vár
+    res.json({
+        setup: pc.setup,
+        details: pc
+    });
 });
+
 app.post("/api/update-setup-name", verifyUser, async (req, res) => {
     const { setupId, newName } = req.body;
 
@@ -340,10 +386,177 @@ app.post("/api/update-setup-name", verifyUser, async (req, res) => {
 
     res.json({ success: true });
 });
+app.get("/api/my-setups", verifyUser, async (req, res) => {
+    const userId = req.user.id;
 
-app.get("/meta/filler", (_, res) => {
-    res.sendFile(path.join(__dirname, "filler.json"));
+    const { data, error } = await supabase
+        .from("setup[Setup]")
+        .select("id, setup_name")
+        .eq("user_id", userId)
+        .order("id", { ascending: true });
+
+    if (error) {
+        return res.status(500).json({ error: error.message });
+    }
+
+    res.json({ setups: data || [] });
 });
+
+app.post("/api/my-setups", verifyUser, async (req, res) => {
+    const userId = req.user.id;
+    const { name } = req.body;
+
+    if (!name || !name.trim()) {
+        return res.status(400).json({ error: "Missing setup name" });
+    }
+
+    const { data, error } = await supabase
+        .from("setup[Setup]")
+        .insert([{
+            user_id: userId,
+            setup_name: name.trim()
+        }])
+        .select()
+        .single();
+
+    if (error) {
+        return res.status(500).json({ error: error.message });
+    }
+
+    res.json({ setup: data });
+});
+
+
+
+/* ======================================================
+   SETUP CHILDREN (PC + HOME THEATER)
+====================================================== */
+app.get("/api/setup/:id/children", verifyUser, async (req, res) => {
+    const setupId = Number(req.params.id);
+
+    console.log("🔍 [CHILDREN] setupId =", setupId);
+
+    const { data: pcs, error: pcErr } = await supabase
+        .from("pc_details[Setup]")
+        .select("id, setup_name, setup_id")
+        .eq("setup_id", setupId);
+
+    console.log("🖥 PCs:", pcs);
+    if (pcErr) console.error("❌ PC ERROR:", pcErr);
+
+    const { data: hts, error: htErr } = await supabase
+        .from("home_theater_setups[Setups]") // ✅ FIX
+        .select("id, setup_name, setup_id")
+        .eq("setup_id", setupId);
+
+    console.log("🎬 HOME THEATERS:", hts);
+    if (htErr) console.error("❌ HT ERROR:", htErr);
+
+    const children = [
+        ...(pcs || []).map(p => ({
+            id: p.id,
+            setup_name: p.setup_name ?? "Gaming PC",
+            type: "pc"
+        })),
+        ...(hts || []).map(h => ({
+            id: h.id,
+            setup_name: h.setup_name ?? "Házimozi",
+            type: "home_theater"
+        }))
+    ];
+
+    console.log("📦 FINAL CHILDREN:", children);
+
+    res.json({ children });
+});
+
+
+
+
+/* ======================================================
+   SETUP DETAILS (PC OR HOME THEATER)
+====================================================== */
+/* ======================================================
+   SETUP DETAILS (PC OR HOME THEATER)
+====================================================== */
+app.get("/api/setup/details", verifyUser, async (req, res) => {
+    const { type, id } = req.query;
+    const childId = Number(id);
+
+    console.log("🔍 [DETAILS] type =", type, "id =", childId);
+
+    if (!type || !childId) {
+        return res.status(400).json({ error: "Missing type or id" });
+    }
+
+    /* ===================== PC ===================== */
+    if (type === "pc") {
+        const { data: pc, error } = await supabase
+            .from("pc_details[Setup]")
+            .select(`
+                setup:setup_id(id, setup_name),
+                processor:processors(Model),
+                motherboard:motherboard(Model),
+                ram:ram(model),
+                videocard:video_cards(model),
+                psu:psu(model)
+            `)
+            .eq("id", childId)
+            .maybeSingle();
+
+        console.log("🖥 PC DETAILS:", pc);
+        if (error) console.error("❌ PC DETAILS ERROR:", error);
+
+        if (!pc) return res.status(404).json({ error: "PC not found" });
+
+        return res.json({
+            setup: pc.setup,
+            items: [
+                { label: "CPU", value: pc.processor?.Model },
+                { label: "Alaplap", value: pc.motherboard?.Model },
+                { label: "RAM", value: pc.ram?.model },
+                { label: "VGA", value: pc.videocard?.model },
+                { label: "Tápegység", value: pc.psu?.model }
+            ]
+        });
+    }
+
+    /* ================= HOME THEATER ================= */
+    if (type === "home_theater") {
+        const { data: ht, error } = await supabase
+            .from("home_theater_setups[Setups]") // ✅ FONTOS
+            .select(`
+                *,
+                setup:setup_id(id, setup_name)
+            `)
+            .eq("id", childId)
+            .maybeSingle();
+
+        console.log("🎬 HT DETAILS:", ht);
+        if (error) console.error("❌ HT DETAILS ERROR:", error);
+
+        if (!ht) return res.status(404).json({ error: "Home theater not found" });
+
+        const items = Object.entries(ht)
+            .filter(([k]) =>
+                !["id", "setup_id", "created_at", "setup"].includes(k)
+            )
+            .map(([k, v]) => ({
+                label: k.replaceAll("_", " "),
+                value: v ?? "—"
+            }));
+
+        return res.json({
+            setup: ht.setup,
+            items
+        });
+    }
+
+    res.status(400).json({ error: "Invalid type" });
+});
+
+
+
 
 
 /* ======================================================
