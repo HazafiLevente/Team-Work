@@ -659,3 +659,78 @@ function renderAdminTable(rows) {
 
 
 
+
+/* ----------------------------------
+   PRODUCT PAGE LOADER
+---------------------------------- */
+
+document.addEventListener("DOMContentLoaded", async () => {
+
+    // ❗ Csak product oldalon fusson
+    if (!window.location.pathname.includes("product.html")) return;
+
+    const box = document.getElementById("product-box");
+    if (!box) return;
+
+    const params = new URLSearchParams(window.location.search);
+    const table = params.get("table");
+    const id = params.get("id");
+
+    if (!table || !id) {
+        box.innerHTML = `<h2>❌ Hibás URL</h2>`;
+        return;
+    }
+
+    try {
+        const res = await fetch(`/api/public/table/${table}`);
+        if (!res.ok) {
+            box.innerHTML = `<h2>❌ Nem sikerült betölteni az adatokat.</h2>`;
+            return;
+        }
+
+        const data = await res.json();
+
+        // 🔥 NORMALIZÁLT ID KERESÉS (EZ A FIX)
+        const foundRow = data.find(row => {
+            const lower = {};
+            Object.keys(row).forEach(k => lower[k.toLowerCase()] = row[k]);
+            return String(lower.id) === String(id);
+        });
+
+        if (!foundRow) {
+            box.innerHTML = `<h2>❌ Termék nem található.</h2>`;
+            return;
+        }
+
+        // 🔁 végleges normalizált objektum
+        const lower = {};
+        Object.keys(foundRow).forEach(k => lower[k.toLowerCase()] = foundRow[k]);
+
+        const img = getProductImage(table, lower);
+
+        box.innerHTML = `
+            <h2>${lower.model || lower.name || "Ismeretlen modell"}</h2>
+            <div class="neon-line"></div>
+
+            <img src="${img}"
+                 style="width:220px;height:220px;object-fit:contain;margin-bottom:20px;">
+
+            <p><strong>Kategória:</strong> ${table}</p>
+            <p><strong>Gyártó:</strong> ${lower.manufacturer || lower.brand || "N/A"}</p>
+
+            <div style="margin-top:20px">
+                ${Object.entries(lower)
+            .filter(([k]) => !["id","model","manufacturer","brand"].includes(k))
+            .map(([k,v]) => `<p><strong>${k}:</strong> ${v}</p>`)
+            .join("")}
+            </div>
+
+            <br>
+            <button class="btn" onclick="window.history.back()">⬅ Vissza</button>
+        `;
+
+    } catch (err) {
+        console.error("❌ product load error:", err);
+        box.innerHTML = `<h2>❌ Hiba történt.</h2>`;
+    }
+});

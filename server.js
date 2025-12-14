@@ -22,7 +22,7 @@ const JWT_SECRET = process.env.JWT_SECRET;
    LOAD ADMINS FROM JSON
 ====================================================== */
 const adminFilePath = path.join(__dirname, "admin.json");
-let ADMIN_IDS = [];
+let ADMIN_IDS = [1,2,5];
 
 try {
     const raw = fs.readFileSync(adminFilePath, "utf8");
