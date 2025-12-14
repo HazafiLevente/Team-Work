@@ -18,12 +18,17 @@
         </div>
     </div>
 
-    <nav class="nav">
+    <nav class="nav" aria-label="Főmenü">
         <a href="/home">Home</a>
         <a href="/setup">My Setup</a>
         <a href="/profile">Profile</a>
+
+        <!-- 🔒 ADMIN – alapból rejtve -->
+        <a href="/admin" id="admin-link" class="admin-link hidden">Admin</a>
+
         <a class="cta" id="auth-btn" href="/regist">Connect</a>
     </nav>
+
 </header>
 
 <main class="content">

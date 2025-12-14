@@ -20,22 +20,44 @@
         <a href="/home">Home</a>
         <a href="/setup">My Setup</a>
         <a href="/profile">Profile</a>
-
-        <!-- 🔒 ADMIN – alapból rejtve -->
-        <a href="/admin" id="admin-link" class="admin-link hidden">Admin</a>
-
+        <a href="/admin">Admin</a>
         <a class="cta" id="auth-btn" href="/regist">Connect</a>
     </nav>
-
 </header>
 
-<main class="content" id="profile-content">
-    <section class="panel">
-        <div class="hero" id="profile-box">
-            <h2>Betöltés...</h2>
+<main class="admin-layout">
+
+    <!-- BAL OLDALI SÁV -->
+    <aside class="admin-sidebar">
+        <h3>📦 Tables</h3>
+
+        <input
+        id="table-search"
+        type="text"
+        placeholder="Search table..."
+        class="admin-table-search"
+        />
+
+        <ul id="table-list"></ul>
+    </aside>
+
+    <!-- JOBB OLDALI TARTALOM -->
+    <section class="admin-main">
+        <div class="admin-header">
+            <h2 id="active-table">Select a table</h2>
+        </div>
+
+        <div class="admin-table-wrapper">
+            <table class="admin-table">
+                <thead id="admin-thead"></thead>
+                <tbody id="admin-tbody"></tbody>
+            </table>
         </div>
     </section>
+
 </main>
+
+
 
 
 <script src="script.js"></script>

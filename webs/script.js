@@ -43,9 +43,10 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     if (path === "/home" || path === "/") {
         injectSearchArea();
-        await loadProducts();   // egen kategóriák
-        await loadLatestProducts();
+        await loadImageMap();
+        await loadProducts();
     }
+
 
     if (path === "/profile") {
         await loadProfile();
@@ -54,6 +55,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (path !== "/regist") {
         await checkLoginStatus();
     }
+    if (path === "/admin") {
+        await loadAdminTables();
+    }
+
+
 });
 
 async function login() {
@@ -159,6 +165,8 @@ async function logout() {
 
 async function checkLoginStatus() {
     const authBtn = document.getElementById("auth-btn");
+    const adminLink = document.getElementById("admin-link");
+
     if (!authBtn) return;
 
     try {
@@ -166,16 +174,33 @@ async function checkLoginStatus() {
 
         if (!res.ok) {
             setConnectButton(authBtn);
+            if (adminLink) adminLink.classList.add("hidden");
             return;
         }
 
         const data = await res.json();
-        data.loggedIn ? setLogoutButton(authBtn) : setConnectButton(authBtn);
+
+        if (data.loggedIn) {
+            setLogoutButton(authBtn);
+
+            // 👑 ADMIN CHECK
+            if (data.user.isAdmin && adminLink) {
+                adminLink.classList.remove("hidden");
+            } else if (adminLink) {
+                adminLink.classList.add("hidden");
+            }
+
+        } else {
+            setConnectButton(authBtn);
+            if (adminLink) adminLink.classList.add("hidden");
+        }
 
     } catch {
         setConnectButton(authBtn);
+        if (adminLink) adminLink.classList.add("hidden");
     }
 }
+
 
 function setConnectButton(btn) {
     btn.textContent = "Connect";
@@ -346,127 +371,6 @@ function renderSetup(box, user) {
     `;
 }
 
-
-/* ----------------------------------
-   CPU LIST
----------------------------------- */
-
-async function loadCPUs() {
-    const content = document.querySelector(".content");
-
-    const section = document.createElement("section");
-    section.className = "panel wide-panel";
-    section.innerHTML = `
-        <div class="hero">
-            <h2>Available CPUs</h2>
-            <div class="neon-line"></div>
-            <div class="cpu-grid" id="cpu-grid">
-                <p class="muted">Betöltés...</p>
-            </div>
-        </div>
-    `;
-    content.appendChild(section);
-
-    const res = await fetch("/api/cpu", { credentials: "include" });
-    const data = await res.json();
-    const grid = document.getElementById("cpu-grid");
-
-    grid.innerHTML = "";
-
-    data.forEach(cpu => {
-        const card = document.createElement("div");
-        card.className = "cpu-card";
-
-        let imageURL = "https://via.placeholder.com/200x120?text=CPU";
-        if (cpu.Manufacturer && cpu.Manufacturer.toLowerCase().includes("amd")) {
-            imageURL = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQclXL3zcdtE9LYXthL1f2egJdYdxDKXLfmCg&s";
-        } else if (cpu.Manufacturer && cpu.Manufacturer.toLowerCase().includes("intel")) {
-            imageURL = "https://mir-s3-cdn-cf.behance.net/project_modules/1400_webp/8e4313112554403.60186ea0c7798.jpg";
-        }
-        card.innerHTML = `
-            <div class="cpu-item" style="padding:12px;">
-                <img src="${imageURL}" width="140">
-                <h3>${cpu.Model}</h3>
-                <p>${cpu.Manufacturer}</p>
-                <p>${cpu.Threads} threads</p>
-                <p>${cpu.Clock} GHz</p>
-                <p><strong>${cpu.Price.toLocaleString("hu-HU")} Ft</strong></p>
-            </div>
-        `;
-
-        grid.appendChild(card);
-    });
-}
-
-/* ----------------------------------
-   MOTHERBOARDS
----------------------------------- */
-
-async function loadMotherboards() {
-    const content = document.querySelector(".content");
-
-    const section = document.createElement("section");
-    section.className = "panel wide-panel";
-    section.innerHTML = `
-        <div class="hero">
-            <h2>Available Motherboards</h2>
-            <div class="neon-line"></div>
-            <div id="motherboard-grid"></div>
-        </div>
-    `;
-    content.appendChild(section);
-
-    const res = await fetch("/api/motherboard");
-    const data = await res.json();
-    const grid = document.getElementById("motherboard-grid");
-
-    grid.innerHTML = "";
-    grid.style.display = "grid";
-    grid.style.gridTemplateColumns = "repeat(auto-fill,minmax(280px,1fr))";
-    grid.style.gap = "20px";
-
-    data.forEach(mb => {
-        const card = document.createElement("div");
-        card.className = "cpu-card";
-
-        card.innerHTML = `
-            <div class="cpu-item">
-                <h3>${mb.Model}</h3>
-                <p>${mb.Manufacturer}</p>
-                <p>Socket: ${mb.Socket}</p>
-                <p><strong>${mb.Price.toLocaleString("hu-HU")} Ft</strong></p>
-            </div>
-        `;
-
-        grid.appendChild(card);
-    });
-}
-
-/* ----------------------------------
-   LATEST PRODUCTS SIDEBAR
----------------------------------- */
-
-async function loadLatestProducts() {
-    const res = await fetch("/api/all", { credentials: "include" });
-    const { tables } = await res.json();
-
-    const random = tables[Math.floor(Math.random() * tables.length)];
-
-    const r = await fetch(`/api/latest?table=${random}`, { credentials: "include" });
-    const rows = await r.json();
-
-    const list = document.getElementById("latest-list");
-    if (!list) return;
-
-    list.innerHTML = "";
-
-    rows.forEach(row => {
-        const li = document.createElement("li");
-        li.innerHTML = `<strong>${row.manufacturer}</strong><br>${row.model}`;
-        list.appendChild(li);
-    });
-}
-
 /* ----------------------------------
    GLOBAL PRODUCT SEARCH
 ---------------------------------- */
@@ -475,39 +379,58 @@ let allProducts = [];
 let currentResults = [];
 
 async function loadProducts() {
+    const grid = document.getElementById("product-grid");
     try {
-        const res = await fetch("/api/all");
-        const { tables } = await res.json();
+        const res = await fetch("/api/products/tables");
 
-        const map = {
-            processors: "/api/cpu",
-            motherboard: "/api/motherboard",
-            electric_guitars: "/api/guitars",
-            alt_saxophone: "/api/saxophone/alt",
-            bassers: "/api/bassers",
-            coupe_car: "/api/coupe"
-        };
-
-        let merged = [];
-
-        for (let t of tables) {
-            if (!map[t]) continue;
-
-            const r = await fetch(map[t]);
-            const rows = await r.json();
-
-            rows.forEach(x => merged.push(normalizeProduct(x, t)));
+        if (!res.ok) {
+            const txt = await res.text();
+            console.error("❌ /api/products/tables failed:", res.status, txt);
+            if (grid) grid.innerHTML = `<p class="muted">❌ Hiba: /api/products/tables (${res.status})</p>`;
+            return;
         }
 
-        allProducts = merged;
-        currentResults = merged;
+        const { tables } = await res.json();
 
-        renderProducts(merged);
+        console.log("✅ PRODUCT TABLES:", tables);
+
+        if (!Array.isArray(tables) || tables.length === 0) {
+            if (grid) grid.innerHTML = `<p class="muted">Nincs egyetlen product tábla sem (nincs [ a névben).</p>`;
+            return;
+        }
+
+        const requests = tables.map(t =>
+            fetch(`/api/public/table/${t}`)
+                .then(async r => {
+                    if (!r.ok) {
+                        const txt = await r.text();
+                        console.error(`❌ table fetch failed: ${t}`, r.status, txt);
+                        return [];
+                    }
+                    return r.json();
+                })
+                .catch(err => {
+                    console.error(`❌ fetch crashed: ${t}`, err);
+                    return [];
+                })
+                .then(rows => rows.map(row => normalizeProduct(row, t)))
+        );
+
+        const results = await Promise.all(requests);
+        allProducts = results.flat();
+
+        console.log("✅ PRODUCTS:", allProducts.length);
+        renderProducts(allProducts);
 
     } catch (err) {
-        console.error("loadProducts error:", err);
+        console.error("❌ loadProducts error:", err);
+        if (grid) grid.innerHTML = `<p class="muted">❌ JS error: ${err.message}</p>`;
     }
 }
+
+
+
+
 
 function normalizeProduct(row, table) {
     const lower = {};
@@ -515,11 +438,13 @@ function normalizeProduct(row, table) {
 
     return {
         table,
+        id: lower.id,
         manufacturer: lower.manufacturer || lower.brand || "Unknown",
         model: lower.model || lower.name || "Unknown",
         price: lower.price ?? null,
         raw: row
     };
+
 }
 
 /* ----------------------------------
@@ -588,81 +513,149 @@ function renderProducts(list) {
 `;
 
         div.onclick = () => {
-            window.location.href = `/product.html?table=${p.table}&model=${encodeURIComponent(p.model)}`;
+            window.location.href = `/product.html?table=${p.table}&id=${p.id}`;
         };
+
+
+
 
         grid.appendChild(div);
     });
 }
 
 
+let IMAGE_MAP = {};
 
+async function loadImageMap() {
+    try {
+        const res = await fetch("/api/images");
+        if (!res.ok) {
+            console.warn("⚠️ No images map");
+            IMAGE_MAP = {};
+            return;
+        }
+        IMAGE_MAP = await res.json();
+        console.log("🖼 IMAGE MAP LOADED:", IMAGE_MAP);
+    } catch (err) {
+        console.error("❌ loadImageMap error:", err);
+        IMAGE_MAP = {};
+    }
+}
 
 
 
 function getProductImage(table, product) {
-
-    const m = (product.manufacturer || "").toLowerCase();
-    const model = (product.model || "").toLowerCase();
-
-    // CPU képek
-    if (table === "processors") {
-        if (m.includes("intel")) return "https://mir-s3-cdn-cf.behance.net/project_modules/1400_webp/8e4313112554403.60186ea0c7798.jpg";
-        if (m.includes("amd")) return "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQclXL3zcdtE9LYXthL1f2egJdYdxDKXLfmCg&s";
+    if (!IMAGE_MAP || !IMAGE_MAP[table]) {
+        return "https://via.placeholder.com/200?text=No+Image";
     }
 
+    const text = ((product.manufacturer || "") + " " + (product.model || "")).toLowerCase();
+    const rules = IMAGE_MAP[table];
 
-    // Motherboard képek
-    if (table === "motherboard") {
-        if (m.includes("asus") && model.includes("rog"))
-            return "https://www.svgrepo.com/show/303479/asus-rog-1-logo.svg";
-        if (m.includes("asus") && model.includes("tuf"))
-            return "https://images.seeklogo.com/logo-png/55/1/asus-tuf-gaming-logo-png_seeklogo-555052.png";
-        if (m.includes("msi"))
-            return "https://images.seeklogo.com/logo-png/30/1/msi-logo-png_seeklogo-304877.png";
-        if (m.includes("gigabyte"))
-            return "https://1000logos.net/wp-content/uploads/2020/05/Gigabyte-Logo.png";
-        if (m.includes("asrock"))
-            return "https://images.seeklogo.com/logo-png/49/1/asrock-logo-png_seeklogo-490350.png";
-        if (m.includes("asus") && model.includes("prime"))
-            return "https://1000logos.net/wp-content/uploads/2016/10/Asus-Logo.png";
+    for (const key in rules) {
+        if (text.includes(key)) {
+            return rules[key];
+        }
     }
 
-    // Electric Guitar
-    if (table === "electric_guitars") {
-        if (m.includes("ibanez"))
-            return "https://i.etsystatic.com/34531699/r/il/cce3ab/3800330793/il_1140xN.3800330793_2y7v.jpg";
-        if (m.includes("fender"))
-            return "https://i.etsystatic.com/34531699/r/il/5c4684/3935469309/il_1140xN.3935469309_a0j4.jpg";
-        if (m.includes("gibson"))
-            return "https://upload.wikimedia.org/wikipedia/commons/5/51/Gibson_Guitar_logo.svg";
-
-    }
-
-    // Bass Guitar
-    if (table === "bassers") {
-        if (m.includes("yamaha"))
-            return "https://1000logos.net/wp-content/uploads/2020/06/Yamaha-Logo.png";
-        if (m.includes("fender"))
-            return "https://i.etsystatic.com/34531699/r/il/5c4684/3935469309/il_1140xN.3935469309_a0j4.jpg";
-    }
-
-    // Alt Saxophone
-    if (table === "alt_saxophone") {
-        return "https://cdn-icons-png.flaticon.com/512/2965/2965647.png";
-    }
-
-    // Coupe Car
-    if (table === "coupe_car") {
-        if (model.includes("bmw"))
-            return "https://www.bmwusa.com/content/dam/bmwusa/4-series/coupe/2024/desktop/BMW-MY24-4SeriesCoupe-430i-xDrive-1.png";
-        if (model.includes("audi"))
-            return "https://www.audi.hu/media/Theme_Banner_Banner_Image_Component/8559-banner_image/dh-640-2bb7ad/1366x683-a5_3_4_front.jpg";
-        if (model.includes("mercedes"))
-            return "https://www.mbusa.com/content/dam/mb-nafta/us/myco/my24/c/class/sedan/all-vehicles/2024-C-SEDAN-AVP-DR.png";
-        return "https://cdn-icons-png.flaticon.com/512/7436/7436317.png";
-    }
-
-    // DEFAULT kép bármire
     return "https://via.placeholder.com/200?text=No+Image";
 }
+
+
+
+
+
+
+document.addEventListener("input", e => {
+    if (e.target.id !== "table-search") return;
+
+    const term = e.target.value.toLowerCase().trim();
+
+    if (!term) {
+        renderTableList(adminTables);
+        return;
+    }
+
+    const filtered = adminTables.filter(t =>
+        t.toLowerCase().includes(term)
+    );
+
+    renderTableList(filtered);
+});
+
+
+
+let adminTables = [];
+
+
+async function loadAdminTables() {
+    const list = document.getElementById("table-list");
+    if (!list) return;
+
+    const res = await fetch("/api/all", { credentials: "include" });
+    const { tables } = await res.json();
+
+    adminTables = tables;
+    renderTableList(tables);
+}
+
+function renderTableList(tables) {
+    const list = document.getElementById("table-list");
+    list.innerHTML = "";
+
+    tables.forEach(t => {
+        const li = document.createElement("li");
+        li.textContent = t;
+        li.onclick = () => selectTable(t, li);
+        list.appendChild(li);
+    });
+}
+
+
+async function selectTable(table, el) {
+    document.querySelectorAll(".admin-sidebar li")
+        .forEach(li => li.classList.remove("active"));
+
+    el.classList.add("active");
+    document.getElementById("active-table").textContent = table;
+
+    const res = await fetch(`/api/table/${table}`, { credentials: "include" });
+    const rows = await res.json();
+
+    renderAdminTable(rows);
+}
+
+function renderAdminTable(rows) {
+    const thead = document.getElementById("admin-thead");
+    const tbody = document.getElementById("admin-tbody");
+
+    thead.innerHTML = "";
+    tbody.innerHTML = "";
+
+    if (!rows.length) return;
+
+    // HEAD
+    const headRow = document.createElement("tr");
+    Object.keys(rows[0]).forEach(col => {
+        if (col === "password") return; // 🔒
+        const th = document.createElement("th");
+        th.textContent = col;
+        headRow.appendChild(th);
+    });
+    thead.appendChild(headRow);
+
+    // BODY
+    rows.forEach(r => {
+        const tr = document.createElement("tr");
+        Object.entries(r).forEach(([k, v]) => {
+            if (k === "password") return;
+            const td = document.createElement("td");
+            td.textContent = v ?? "—";
+            tr.appendChild(td);
+        });
+        tbody.appendChild(tr);
+    });
+}
+
+
+

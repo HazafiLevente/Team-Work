@@ -1,0 +1,18 @@
+{
+  "processors": {
+    "amd": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQclXL3zcdtE9LYXthL1f2egJdYdxDKXLfmCg&s",
+    "intel": "https://mir-s3-cdn-cf.behance.net/project_modules/1400_webp/8e4313112554403.60186ea0c7798.jpg"
+  },
+  "motherboard": {
+    "asus rog": "https://www.svgrepo.com/show/303479/asus-rog-1-logo.svg",
+    "asus tuf": "https://images.seeklogo.com/logo-png/55/1/asus-tuf-gaming-logo-png_seeklogo-555052.png",
+    "msi": "https://images.seeklogo.com/logo-png/30/1/msi-logo-png_seeklogo-304877.png",
+    "gigabyte": "https://1000logos.net/wp-content/uploads/2020/05/Gigabyte-Logo.png",
+    "asrock": "https://images.seeklogo.com/logo-png/49/1/asrock-logo-png_seeklogo-490350.png"
+  },
+  "electric_guitars": {
+    "ibanez": "https://i.etsystatic.com/34531699/r/il/cce3ab/3800330793/il_1140xN.3800330793_2y7v.jpg",
+    "fender": "https://i.etsystatic.com/34531699/r/il/5c4684/3935469309/il_1140xN.3935469309_a0j4.jpg",
+    "gibson": "https://upload.wikimedia.org/wikipedia/commons/5/51/Gibson_Guitar_logo.svg"
+  }
+}

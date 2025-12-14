@@ -58,7 +58,16 @@ function verifyUser(req, res, next) {
 
     try {
         req.user = jwt.verify(token, JWT_SECRET);
-        req.user.isAdmin = ADMIN_IDS.includes(req.user.id);
+        req.user.isAdmin = ADMIN_IDS.includes(Number(req.user.id));
+
+        /*console.log("ADMIN CHECK:", {
+            tokenId: req.user.id,
+            tokenIdType: typeof req.user.id,
+            ADMIN_IDS,
+            isAdmin: req.user.isAdmin
+        });
+        */
+
         next();
     } catch {
         return res.status(403).json({ error: "Invalid token" });
@@ -92,6 +101,10 @@ app.get("/regist", (_, res) =>
 app.get("/profile", (_, res) =>
     res.sendFile(path.join(__dirname, "webs/Profile.html"))
 );
+app.get("/admin", verifyAdmin, (_, res) => {
+    res.sendFile(path.join(__dirname, "webs/Admin.html"));
+});
+
 
 /* ======================================================
    PUBLIC DATA API
@@ -127,25 +140,128 @@ app.get("/api/bassers", async (_, res) => {
 });
 
 app.get("/api/coupe", async (_, res) => {
-    const { data, error } = await supabase.from("coupe_car").select("*");
+    const { data, error } = await supabase.from("coupe_cars").select("*");
     if (error) return res.status(500).json({ error: error.message });
     res.json(data);
 });
+
+app.get("/api/admin/users", verifyAdmin, async (req, res) => {
+    const { data, error } = await supabase
+        .from("user[Auth]")
+        .select("ID, Name, UserName, Email, created_at")
+        .order("created_at", { ascending: false });
+
+    if (error) {
+        return res.status(500).json({ error: error.message });
+    }
+
+    const usersWithAdminFlag = data.map(u => ({
+        Name: u.Name,
+        UserName: u.UserName,
+        Email: u.Email,
+        created_at: u.created_at,
+        isAdmin: ADMIN_IDS.includes(Number(u.ID))
+    }));
+
+    res.json(usersWithAdminFlag);
+});
+app.get("/api/table/:name", verifyAdmin, async (req, res) => {
+    const table = req.params.name;
+
+    const { data, error } = await supabase
+        .from(table)
+        .select("*")
+        .limit(100);
+
+    if (error) {
+        return res.status(400).json({ error: error.message });
+    }
+
+    res.json(data);
+});
+app.get("/api/public/table/:name", async (req, res) => {
+    const table = req.params.name;
+    const { data, error } = await supabase
+        .from(table)
+        .select("*");
+
+
+    if (error) {
+        return res.status(400).json({ error: error.message });
+    }
+
+    res.json(data);
+});
+app.get("/api/products/tables", async (_, res) => {
+    const { data, error } = await supabase.rpc("get_all_tables");
+
+    if (error) return res.status(500).json({ error: error.message });
+    if (!Array.isArray(data)) return res.json({ tables: [] });
+
+    // ✅ termék = nincs benne [
+    const productTables = data
+        .map(t => t.table_name)
+        .filter(name => name && !name.includes("["));
+
+    res.json({ tables: productTables });
+});
+
+app.get("/api/admin/tables", verifyAdmin, async (_, res) => {
+    const { data, error } = await supabase.rpc("get_all_tables");
+
+    if (error) return res.status(500).json({ error: error.message });
+    if (!Array.isArray(data)) return res.json({ tables: [] });
+
+    // ✅ admin-only = van benne [
+    const adminTables = data
+        .map(t => t.table_name)
+        .filter(name => name && name.includes("["));
+
+    res.json({ tables: adminTables });
+});
+
+app.get("/api/admin/users", verifyAdmin, async (req, res) => {
+    const { data, error } = await supabase
+        .from("user[Auth]") // ✅ EZ
+        .select("ID, Name, UserName, Email, created_at")
+        .order("created_at", { ascending: false });
+
+    if (error) return res.status(500).json({ error: error.message });
+
+    const usersWithAdminFlag = data.map(u => ({
+        Name: u.Name,
+        UserName: u.UserName,
+        Email: u.Email,
+        created_at: u.created_at,
+        isAdmin: ADMIN_IDS.includes(Number(u.ID))
+    }));
+
+    res.json(usersWithAdminFlag);
+});
+
+
+
+
 
 /* ======================================================
    META API
 ====================================================== */
 app.get("/api/all", async (_, res) => {
     const { data, error } = await supabase.rpc("get_all_tables");
-    if (error) return res.status(500).json({ error: error.message });
 
-    const excluded = ["users", "user", "auth", "profiles"];
+    if (error) {
+        return res.status(500).json({ error: error.message });
+    }
+
+    const excluded = ["auth", "profiles"];
+
     const cleaned = data
         .map(t => t.table_name)
         .filter(name => !excluded.includes(name));
 
     res.json({ tables: cleaned });
 });
+
 
 app.get("/api/latest", verifyUser, async (req, res) => {
     const table = req.query.table;
@@ -161,6 +277,19 @@ app.get("/api/latest", verifyUser, async (req, res) => {
     res.json(data);
 });
 
+app.get("/api/images", async (_, res) => {
+    try {
+        const filePath = path.join(__dirname, "images.json");
+        const raw = fs.readFileSync(filePath, "utf8");
+        const json = JSON.parse(raw);
+        res.json(json);
+    } catch (err) {
+        console.error("❌ images.json load error:", err);
+        res.status(500).json({});
+    }
+});
+
+
 /* ======================================================
    SETUP / PC API
 ====================================================== */
@@ -168,7 +297,7 @@ app.get("/api/my-first-setup", verifyUser, async (req, res) => {
     const userId = req.user.id;
 
     const { data: setup } = await supabase
-        .from("setup")
+        .from("setup[Setup]")
         .select("*")
         .eq("user_id", userId)
         .order("created_at", { ascending: true })
@@ -178,7 +307,7 @@ app.get("/api/my-first-setup", verifyUser, async (req, res) => {
     if (!setup) return res.json({ setup: null });
 
     const { data: details } = await supabase
-        .from("pc_details")
+        .from("pc_details[Setup]")
         .select(`
             *,
             processor:processors(*),
@@ -200,7 +329,7 @@ app.post("/api/update-setup-name", verifyUser, async (req, res) => {
     }
 
     const { error } = await supabase
-        .from("setup")
+        .from("setup[Setup]")
         .update({ setup_name: newName })
         .eq("id", setupId)
         .eq("user_id", req.user.id); // 🔒 csak a sajátját
@@ -210,6 +339,10 @@ app.post("/api/update-setup-name", verifyUser, async (req, res) => {
     }
 
     res.json({ success: true });
+});
+
+app.get("/meta/filler", (_, res) => {
+    res.sendFile(path.join(__dirname, "filler.json"));
 });
 
 
@@ -223,7 +356,7 @@ app.post("/api/register", async (req, res) => {
 
     const hashed = await bcrypt.hash(password, 10);
 
-    const { error } = await supabase.from("user").insert([{
+    const { error } = await supabase.from("user[Auth]").insert([{
         Name: fullname,
         UserName: username,
         Email: email,
@@ -239,7 +372,7 @@ app.post("/api/login", async (req, res) => {
     const { email, password } = req.body;
 
     const { data: users } = await supabase
-        .from("user")
+        .from("user[Auth]")
         .select("*")
         .eq("Email", email)
         .limit(1);
@@ -292,3 +425,5 @@ app.listen(PORT, () => {
 ╚══════════════════════════════════════════════╝
 `);
 });
+
+
