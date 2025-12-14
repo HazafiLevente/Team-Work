@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="hu">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Setup Configurator</title>
+    <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+<header class="top-menu">
+    <div class="brand">
+        <div class="logo">SC</div>
+        <div>
+            <h1>Setup Configurator</h1>
+            <div class="muted" style="font-size:12px;margin-top:2px">Test Version</div>
+        </div>
+    </div>
+
+    <nav class="nav" aria-label="Főmenü">
+        <a href="/home">Home</a>
+        <a href="/setup">My Setup</a>
+        <a href="/profile">Profile</a>
+
+        <!-- 🔒 ADMIN – alapból rejtve -->
+        <a href="/admin" id="admin-link" class="admin-link hidden">Admin</a>
+
+        <a class="cta" id="auth-btn" href="/regist">Connect</a>
+    </nav>
+
+</header>
+
+<main class="content" id="profile-content">
+    <section class="panel">
+        <div class="hero" id="profile-box">
+            <h2>Betöltés...</h2>
+        </div>
+    </section>
+</main>
+
+
+<script src="script.js"></script>
+</body>
+</html>

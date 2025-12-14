@@ -1,64 +1,3 @@
-
-// ============================
-//   TERMÉKLISTA FUNKCIÓK
-// ============================
-
-// Fake produktlista – később API-ból is mehetne
-const products = [
-    { name: "Ibanez RG421PB-CHF elektromos gitár", date: "2025-01-10" },
-    { name: "Focusrite Scarlett Solo 4th Gen", date: "2025-01-10" },
-    { name: "BOSS Katana-50 Gen 3", date: "2025-01-09" },
-    { name: "Arturia MiniLab 3", date: "2025-01-09" },
-    { name: "Nux DM-210 Drumkit", date: "2025-01-08" }
-];
-
-document.addEventListener("DOMContentLoaded", () => {
-    renderProductList();
-    updateNewProductsCount();
-});
-
-// Lista megjelenítése
-function renderProductList() {
-    const container = document.getElementById("productContainer");
-    if (!container) return; // login/reg oldalon nem létezik
-
-    container.innerHTML = "";
-
-    products.forEach(p => {
-        const card = document.createElement("div");
-        card.className = "product-card";
-        card.innerHTML = `
-            <div class="product-name">${p.name}</div>
-            <div class="product-date">Hozzáadva: ${p.date}</div>
-        `;
-        container.appendChild(card);
-    });
-}
-
-// Oldalsáv: új termékek száma
-function updateNewProductsCount() {
-    const box = document.getElementById("newProductCount");
-    if (!box) return;
-
-    const today = new Date().toISOString().split("T")[0];
-    let count = products.filter(p => p.date === today).length;
-
-    box.innerText = count;
-}
-
-// Felfedezés gomb smooth scroll
-const explore = document.getElementById("exploreBtn");
-if (explore) {
-    explore.addEventListener("click", () => {
-        const section = document.getElementById("productSection");
-        if (section) {
-            section.scrollIntoView({ behavior: "smooth" });
-        }
-    });
-}
-
-
-
 document.addEventListener("DOMContentLoaded", {
 
 });
@@ -136,5 +75,3 @@ function login()
             </div>
         </section>`
 }
-
-

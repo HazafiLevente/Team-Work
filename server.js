@@ -1,175 +1,429 @@
-const express = require('express');
-const path = require('path');
-const { createClient } = require('@supabase/supabase-js');
-const bcrypt = require('bcryptjs');
+require("dotenv").config();
+console.log("ENV CHECK:", {
+    SUPABASE_URL: process.env.SUPABASE_URL,
+    HAS_SERVICE_KEY: !!process.env.SUPABASE_SERVICE_ROLE_KEY
+});
+const express = require("express");
+const path = require("path");
+const fs = require("fs");
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+const cookieParser = require("cookie-parser");
+const { createClient } = require("@supabase/supabase-js");
 
+/* ======================================================
+   APP + CONFIG
+====================================================== */
 const app = express();
 const PORT = process.env.PORT || 3000;
+const JWT_SECRET = process.env.JWT_SECRET;
 
+/* ======================================================
+   LOAD ADMINS FROM JSON
+====================================================== */
+const adminFilePath = path.join(__dirname, "admin.json");
+let ADMIN_IDS = [];
+
+try {
+    const raw = fs.readFileSync(adminFilePath, "utf8");
+    const parsed = JSON.parse(raw);
+    ADMIN_IDS = Object.values(parsed).map(Number);
+    console.log("✅ Admin IDs loaded:", ADMIN_IDS);
+} catch (err) {
+    console.error("❌ admin.json betöltési hiba!", err);
+}
+
+/* ======================================================
+   SUPABASE (SERVICE ROLE – NO RLS)
+====================================================== */
+const supabase = createClient(
+    process.env.SUPABASE_URL,
+    process.env.SUPABASE_SERVICE_ROLE_KEY
+);
+
+/* ======================================================
+   MIDDLEWARE
+====================================================== */
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
+app.use(express.static(path.join(__dirname, "webs")));
 
+/* ======================================================
+   AUTH MIDDLEWARE
+====================================================== */
+function verifyUser(req, res, next) {
+    const token = req.cookies.auth_token;
+    if (!token) return res.status(401).json({ error: "Not logged in" });
 
-// Supabase inicializálása
-const supabaseUrl = 'https://ecjufuhmmehhzusicghh.supabase.co';
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVjanVmdWhtbWVoaHp1c2ljZ2hoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk3NjIzNjksImV4cCI6MjA3NTMzODM2OX0.U3cIRqeSrWTyjvxwKTI2LoIwcB2sHiSlEccYHQd9Ow8';
-
-const supabase = createClient(supabaseUrl, supabaseKey);
-
-app.use(express.static(path.join(__dirname, 'webs')));
-
-// --- Főoldal ---
-app.get('/', (req, res) => {
-    console.log(" / hívás érkezett!");
-    res.sendFile(path.join(__dirname, 'webs/Home.html'));
-});
-app.get('/home', (req, res) => {
-    console.log(" /home hívás érkezett!");
-    res.sendFile(path.join(__dirname, 'webs/Home.html'));
-});
-
-// --- User Side ---
-app.get('/regist', async (req, res) => {
-    console.log("✏️ /regist hívás érkezett!");
-    res.sendFile(path.join(__dirname, 'webs/Regist.html'));
-});
-
-// --- Guitar endpoint ---
-app.get('/api/guitars', async (req, res) => {
-    console.log("🎸 /api/guitars hívás érkezett!");
-    const { data, error } = await supabase
-        .from('electric_guitars')
-        .select('*');
-    if (error) {
-        console.error("❌ Supabase hiba:", error);
-        return res.status(500).json({ error: error.message });
-    }
-
-    if (!data || data.length === 0) {
-        return res.status(404).json({ message: "Nincs adat a táblában" });
-    }
-
-    res.json(data);
-});
-
-// --- CPU endpoint ---
-app.get('/api/cpu', async (req, res) => {
-    console.log("🧠 /api/cpu hívás érkezett!");
-    const { data, error } = await supabase
-        .from('processors')
-        .select('*');
-
-    if (error) {
-        console.error("❌ Supabase hiba:", error);
-        return res.status(500).json({ error: error.message });
-    }
-
-    if (!data || data.length === 0) {
-        return res.status(404).json({ message: "Nincs adat a táblában" });
-    }
-
-    res.json(data);
-});
-
-
-
-
-// --- Alt Saxophone endpoint ---
-app.get('/api/saxophone/alt', async (req, res) => {
-    console.log("🧠 /api/saxophone/alt hívás érkezett!");
-    const { data, error } = await supabase
-        .from('alt_saxophone')
-        .select('*');
-
-    if (error) {
-        console.error("❌ Supabase hiba:", error);
-        return res.status(500).json({ error: error.message });
-    }
-
-    if (!data || data.length === 0) {
-        return res.status(404).json({ message: "Nincs adat a táblában" });
-    }
-
-    res.json(data);
-});
-
-// --- Alt Saxophone endpoint ---
-app.get('/api/bassers', async (req, res) => {
-    console.log("🧠 /api/bassers hívás érkezett!");
-    const { data, error } = await supabase
-        .from('bassers')
-        .select('*');
-
-    if (error) {
-        console.error("❌ Supabase hiba:", error);
-        return res.status(500).json({ error: error.message });
-    }
-
-    if (!data || data.length === 0) {
-        return res.status(404).json({ message: "Nincs adat a táblában" });
-    }
-
-    res.json(data);
-});
-
-// --- CoupeCar ---
-app.get('/api/coupe', async (req, res) => {
-    console.log(" /api/coupe hívás érkezett!");
-    const { data, error } = await supabase
-        .from('coupe_car')
-        .select('*');
-    if (error) {
-        console.error("❌ Supabase hiba:", error);
-        return res.status(500).json({ error: error.message });
-    }
-
-    if (!data || data.length === 0) {
-        return res.status(404).json({ message: "Nincs adat a táblában" });
-    }
-
-    res.json(data);
-});
-
-// --- Register endpoint ---
-app.post('/api/register', async (req, res) => {
     try {
-        const { fullname, username, email, password } = req.body;
+        req.user = jwt.verify(token, JWT_SECRET);
+        req.user.isAdmin = ADMIN_IDS.includes(Number(req.user.id));
 
-        if (!fullname || !username || !email || !password) {
-            return res.status(400).json({ error: "Hiányzó adatok!" });
+        /*console.log("ADMIN CHECK:", {
+            tokenId: req.user.id,
+            tokenIdType: typeof req.user.id,
+            ADMIN_IDS,
+            isAdmin: req.user.isAdmin
+        });
+        */
+
+        next();
+    } catch {
+        return res.status(403).json({ error: "Invalid token" });
+    }
+}
+
+function verifyAdmin(req, res, next) {
+    verifyUser(req, res, () => {
+        if (!req.user.isAdmin) {
+            return res.status(403).json({ error: "Admin only" });
         }
+        next();
+    });
+}
 
-        // 🔒 Jelszó hash-elése
-        const hashedPassword = await bcrypt.hash(password, 10);
+/* ======================================================
+   PAGE ROUTES
+====================================================== */
+app.get("/", (_, res) =>
+    res.sendFile(path.join(__dirname, "webs/Home.html"))
+);
 
-        // 🧩 Beszúrás a Supabase táblába
-        const { data, error } = await supabase
-            .from('user')
-            .insert([
-                {
-                    Name: fullname,
-                    UserName: username,
-                    Email: email,
-                    password: hashedPassword,
-                    isAdmin: false
-                }
-            ]);
+app.get("/home", (_, res) =>
+    res.sendFile(path.join(__dirname, "webs/Home.html"))
+);
 
-        if (error) {
-            console.error("❌ Supabase hiba:", error);
-            return res.status(500).json({ error: error.message });
-        }
+app.get("/regist", (_, res) =>
+    res.sendFile(path.join(__dirname, "webs/Regist.html"))
+);
 
-        console.log("✅ Felhasználó létrehozva:", username);
-        res.status(201).json({ message: "Sikeres regisztráció!" });
+app.get("/profile", (_, res) =>
+    res.sendFile(path.join(__dirname, "webs/Profile.html"))
+);
+app.get("/admin", verifyAdmin, (_, res) => {
+    res.sendFile(path.join(__dirname, "webs/Admin.html"));
+});
 
+
+/* ======================================================
+   PUBLIC DATA API
+====================================================== */
+app.get("/api/guitars", async (_, res) => {
+    const { data, error } = await supabase.from("electric_guitars").select("*");
+    if (error) return res.status(500).json({ error: error.message });
+    res.json(data);
+});
+
+app.get("/api/cpu", async (_, res) => {
+    const { data, error } = await supabase.from("processors").select("*");
+    if (error) return res.status(500).json({ error: error.message });
+    res.json(data);
+});
+
+app.get("/api/motherboard", async (_, res) => {
+    const { data, error } = await supabase.from("motherboard").select("*");
+    if (error) return res.status(500).json({ error: error.message });
+    res.json(data);
+});
+
+app.get("/api/saxophone/alt", async (_, res) => {
+    const { data, error } = await supabase.from("alt_saxophone").select("*");
+    if (error) return res.status(500).json({ error: error.message });
+    res.json(data);
+});
+
+app.get("/api/bassers", async (_, res) => {
+    const { data, error } = await supabase.from("bassers").select("*");
+    if (error) return res.status(500).json({ error: error.message });
+    res.json(data);
+});
+
+app.get("/api/coupe", async (_, res) => {
+    const { data, error } = await supabase.from("coupe_cars").select("*");
+    if (error) return res.status(500).json({ error: error.message });
+    res.json(data);
+});
+
+app.get("/api/admin/users", verifyAdmin, async (req, res) => {
+    const { data, error } = await supabase
+        .from("user[Auth]")
+        .select("ID, Name, UserName, Email, created_at")
+        .order("created_at", { ascending: false });
+
+    if (error) {
+        return res.status(500).json({ error: error.message });
+    }
+
+    const usersWithAdminFlag = data.map(u => ({
+        Name: u.Name,
+        UserName: u.UserName,
+        Email: u.Email,
+        created_at: u.created_at,
+        isAdmin: ADMIN_IDS.includes(Number(u.ID))
+    }));
+
+    res.json(usersWithAdminFlag);
+});
+app.get("/api/table/:name", verifyAdmin, async (req, res) => {
+    const table = req.params.name;
+
+    const { data, error } = await supabase
+        .from(table)
+        .select("*")
+        .limit(100);
+
+    if (error) {
+        return res.status(400).json({ error: error.message });
+    }
+
+    res.json(data);
+});
+app.get("/api/public/table/:name", async (req, res) => {
+    const table = req.params.name;
+    const { data, error } = await supabase
+        .from(table)
+        .select("*");
+
+
+    if (error) {
+        return res.status(400).json({ error: error.message });
+    }
+
+    res.json(data);
+});
+app.get("/api/products/tables", async (_, res) => {
+    const { data, error } = await supabase.rpc("get_all_tables");
+
+    if (error) return res.status(500).json({ error: error.message });
+    if (!Array.isArray(data)) return res.json({ tables: [] });
+
+    // ✅ termék = nincs benne [
+    const productTables = data
+        .map(t => t.table_name)
+        .filter(name => name && !name.includes("["));
+
+    res.json({ tables: productTables });
+});
+
+app.get("/api/admin/tables", verifyAdmin, async (_, res) => {
+    const { data, error } = await supabase.rpc("get_all_tables");
+
+    if (error) return res.status(500).json({ error: error.message });
+    if (!Array.isArray(data)) return res.json({ tables: [] });
+
+    // ✅ admin-only = van benne [
+    const adminTables = data
+        .map(t => t.table_name)
+        .filter(name => name && name.includes("["));
+
+    res.json({ tables: adminTables });
+});
+
+app.get("/api/admin/users", verifyAdmin, async (req, res) => {
+    const { data, error } = await supabase
+        .from("user[Auth]") // ✅ EZ
+        .select("ID, Name, UserName, Email, created_at")
+        .order("created_at", { ascending: false });
+
+    if (error) return res.status(500).json({ error: error.message });
+
+    const usersWithAdminFlag = data.map(u => ({
+        Name: u.Name,
+        UserName: u.UserName,
+        Email: u.Email,
+        created_at: u.created_at,
+        isAdmin: ADMIN_IDS.includes(Number(u.ID))
+    }));
+
+    res.json(usersWithAdminFlag);
+});
+
+
+
+
+
+/* ======================================================
+   META API
+====================================================== */
+app.get("/api/all", async (_, res) => {
+    const { data, error } = await supabase.rpc("get_all_tables");
+
+    if (error) {
+        return res.status(500).json({ error: error.message });
+    }
+
+    const excluded = ["auth", "profiles"];
+
+    const cleaned = data
+        .map(t => t.table_name)
+        .filter(name => !excluded.includes(name));
+
+    res.json({ tables: cleaned });
+});
+
+
+app.get("/api/latest", verifyUser, async (req, res) => {
+    const table = req.query.table;
+    if (!table) return res.status(400).json({ error: "Missing table" });
+
+    const { data, error } = await supabase
+        .from(table)
+        .select("*")
+        .order("id", { ascending: false })
+        .limit(5);
+
+    if (error) return res.status(500).json({ error: error.message });
+    res.json(data);
+});
+
+app.get("/api/images", async (_, res) => {
+    try {
+        const filePath = path.join(__dirname, "images.json");
+        const raw = fs.readFileSync(filePath, "utf8");
+        const json = JSON.parse(raw);
+        res.json(json);
     } catch (err) {
-        console.error("❌ Szerver hiba:", err);
-        res.status(500).json({ error: "Belső szerverhiba." });
+        console.error("❌ images.json load error:", err);
+        res.status(500).json({});
     }
 });
 
-// --- Indítás ---
-app.listen(PORT, () => {
-    console.log(`✅ The Server is on! [http://localhost:${PORT}]`);
+
+/* ======================================================
+   SETUP / PC API
+====================================================== */
+app.get("/api/my-first-setup", verifyUser, async (req, res) => {
+    const userId = req.user.id;
+
+    const { data: setup } = await supabase
+        .from("setup[Setup]")
+        .select("*")
+        .eq("user_id", userId)
+        .order("created_at", { ascending: true })
+        .limit(1)
+        .single();
+
+    if (!setup) return res.json({ setup: null });
+
+    const { data: details } = await supabase
+        .from("pc_details[Setup]")
+        .select(`
+            *,
+            processor:processors(*),
+            motherboard:motherboard(*),
+            ram:ram(*),
+            videocard:video_cards(*),
+            psu:psu(*)
+        `)
+        .eq("setup_id", setup.id)
+        .single();
+
+    res.json({ setup, details });
 });
+app.post("/api/update-setup-name", verifyUser, async (req, res) => {
+    const { setupId, newName } = req.body;
+
+    if (!setupId || !newName) {
+        return res.status(400).json({ error: "Missing data" });
+    }
+
+    const { error } = await supabase
+        .from("setup[Setup]")
+        .update({ setup_name: newName })
+        .eq("id", setupId)
+        .eq("user_id", req.user.id); // 🔒 csak a sajátját
+
+    if (error) {
+        return res.status(500).json({ error: error.message });
+    }
+
+    res.json({ success: true });
+});
+
+app.get("/meta/filler", (_, res) => {
+    res.sendFile(path.join(__dirname, "filler.json"));
+});
+
+
+/* ======================================================
+   AUTH API
+====================================================== */
+app.post("/api/register", async (req, res) => {
+    const { fullname, username, email, password } = req.body;
+    if (!fullname || !username || !email || !password)
+        return res.status(400).json({ error: "Missing fields" });
+
+    const hashed = await bcrypt.hash(password, 10);
+
+    const { error } = await supabase.from("user[Auth]").insert([{
+        Name: fullname,
+        UserName: username,
+        Email: email,
+        password: hashed,
+        isAdmin: false
+    }]);
+
+    if (error) return res.status(500).json({ error: error.message });
+    res.json({ message: "Registration successful" });
+});
+
+app.post("/api/login", async (req, res) => {
+    const { email, password } = req.body;
+
+    const { data: users } = await supabase
+        .from("user[Auth]")
+        .select("*")
+        .eq("Email", email)
+        .limit(1);
+
+    if (!users || !users.length)
+        return res.status(401).json({ error: "Invalid credentials" });
+
+    const user = users[0];
+    const ok = await bcrypt.compare(password, user.password);
+    if (!ok) return res.status(401).json({ error: "Invalid credentials" });
+
+    const isAdmin = ADMIN_IDS.includes(user.ID);
+
+    const token = jwt.sign({
+        id: user.ID,
+        name: user.Name,
+        username: user.UserName,
+        email: user.Email,
+        isAdmin
+    }, JWT_SECRET, { expiresIn: "1h" });
+
+    res.cookie("auth_token", token, {
+        httpOnly: true,
+        sameSite: "lax",
+        maxAge: 60 * 60 * 1000
+    });
+
+    res.json({ message: "Login successful", isAdmin });
+});
+
+app.post("/api/logout", (_, res) => {
+    res.clearCookie("auth_token");
+    res.json({ message: "Logged out" });
+});
+
+app.get("/api/me", verifyUser, (req, res) => {
+    res.json({ loggedIn: true, user: req.user });
+});
+
+/* ======================================================
+   SERVER START
+====================================================== */
+app.listen(PORT, () => {
+    console.clear();
+    console.log(`
+╔══════════════════════════════════════════════╗
+║  💫 SETUP CONFIGURATOR – SERVER RUNNING 💫   ║
+║  🌐 http://localhost:${PORT}                     ║
+║  👑 Admin IDs: ${ADMIN_IDS.join(", ")}            ║
+╚══════════════════════════════════════════════╝
+`);
+});
+
+
