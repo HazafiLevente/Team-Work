@@ -527,12 +527,28 @@ a.logorreg:hover
 
 
 
+/* === ALAP GRID (setup lista) === */
 .setup-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
     gap: 20px;
     margin-top: 20px;
 }
+
+/* === SZÉLES GRID (children + details) === */
+.setup-grid-wide {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+
+    /* 🔥 EZ A LÉNYEG */
+    width: 100%;
+    max-width: 1200px;
+    margin-left: 0;      /* balra */
+    margin-right: auto; /* ne középre */
+}
+
 
 .setup-card {
     padding: 16px;
@@ -567,3 +583,28 @@ a.logorreg:hover
     line-height: 1;
 }
 
+
+.setup-card h3 {
+    font-size: 16px;
+}
+
+.setup-card .muted {
+    font-size: 14px;
+    opacity: 0.8;
+}
+
+/* 🔓 Setup oldalaknál engedjük ki a tartalmat balra */
+.setup-page-wide {
+    width: 100%;
+    max-width: none;        /* 🔥 nincs korlát */
+    padding-left: 40px;     /* ahol bekarikáztad */
+    padding-right: 40px;
+}
+
+/* maga a grid */
+.setup-grid-wide {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+}

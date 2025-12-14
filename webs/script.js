@@ -956,7 +956,12 @@ async function loadSetupChildren(setupId) {
         <button class="btn small" onclick="loadMySetupsPage()">⬅ Vissza</button>
         <h2>Setup konfigurációk</h2>
         <div class="neon-line"></div>
-        <div id="child-list" class="setup-grid"></div>
+        
+        <div class="setup-page-wide">
+            <div id="child-list" class="setup-grid-wide"></div>
+        </div>
+
+
     `;
 
     const list = document.getElementById("child-list");
@@ -1005,7 +1010,10 @@ async function loadSetupDetails(type, id) {
         <button class="btn small" onclick="loadMySetupsPage()">⬅ Vissza</button>
         <h2>${data.setup.setup_name}</h2>
         <div class="neon-line"></div>
-        <div id="device-list" class="setup-grid"></div>
+        <div class="setup-page-wide">
+            <div id="device-list" class="setup-grid-wide"></div>
+        </div>
+
     `;
 
     renderGenericItems(data.items);
