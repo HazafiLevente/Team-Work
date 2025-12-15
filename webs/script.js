@@ -470,6 +470,11 @@ function renderProfile(box, user) {
 let allProducts = [];
 let currentResults = [];
 
+let activeBrands = new Set();
+let filterPanelOpen = false;
+
+
+
 async function loadProducts() {
     const grid = document.getElementById("product-grid");
     try {
@@ -507,19 +512,19 @@ async function loadProducts() {
                 })
                 .then(rows => rows.map(row => normalizeProduct(row, t)))
         );
-
         const results = await Promise.all(requests);
         allProducts = results.flat();
 
         console.log("✅ PRODUCTS:", allProducts.length);
         renderProducts(allProducts);
+        buildBrandFilters(allProducts);
+
 
     } catch (err) {
         console.error("❌ loadProducts error:", err);
         if (grid) grid.innerHTML = `<p class="muted">❌ JS error: ${err.message}</p>`;
     }
 }
-
 
 
 
@@ -560,6 +565,87 @@ document.addEventListener("input", e => {
     );
 
     renderProducts(filtered);
+});
+
+function buildBrandFilters(products) {
+    const box = document.getElementById("brand-filters");
+    if (!box) return;
+
+    box.innerHTML = "";
+
+    const brands = [...new Set(
+        products.map(p => p.manufacturer).filter(Boolean)
+    )].sort();
+
+    brands.forEach(brand => {
+        const id = `brand-${brand.replace(/\s+/g, "-")}`;
+
+        const label = document.createElement("label");
+        label.style.display = "flex";
+        label.style.alignItems = "center";
+        label.style.gap = "8px";
+        label.style.cursor = "pointer";
+
+        label.innerHTML = `
+            <input type="checkbox" id="${id}" />
+            <span>${brand}</span>
+        `;
+
+        const checkbox = label.querySelector("input");
+
+        checkbox.addEventListener("change", () => {
+            if (checkbox.checked) {
+                activeBrands.add(brand);
+            } else {
+                activeBrands.delete(brand);
+            }
+            applyFilters();
+        });
+
+        box.appendChild(label);
+    });
+}
+
+function applyFilters() {
+    const term = document
+        .getElementById("search-input")
+        .value
+        .toLowerCase()
+        .trim();
+
+    let result = allProducts;
+
+    // 🔍 TEXT SEARCH
+    if (term) {
+        result = result.filter(p =>
+            p.manufacturer.toLowerCase().includes(term) ||
+            p.model.toLowerCase().includes(term) ||
+            p.table.toLowerCase().includes(term)
+        );
+    }
+
+    // 🧰 BRAND FILTER
+    if (activeBrands.size > 0) {
+        result = result.filter(p =>
+            activeBrands.has(p.manufacturer)
+        );
+    }
+
+    renderProducts(result);
+}
+
+
+/* ----------------------------------
+   SEARCH FILTER
+---------------------------------- */
+
+document.addEventListener("click", e => {
+    if (e.target.id !== "filter-toggle-btn") return;
+
+    const panel = document.getElementById("filter-panel");
+    filterPanelOpen = !filterPanelOpen;
+
+    panel.classList.toggle("hidden", !filterPanelOpen);
 });
 
 /* ----------------------------------
@@ -1042,3 +1128,11 @@ function renderGenericItems(items) {
         list.appendChild(div);
     });
 }
+
+//SZŰRŐ//
+
+
+
+
+
+
