@@ -6,6 +6,8 @@
   "motherboard": {
     "asus rog": "https://www.svgrepo.com/show/303479/asus-rog-1-logo.svg",
     "asus tuf": "https://images.seeklogo.com/logo-png/55/1/asus-tuf-gaming-logo-png_seeklogo-555052.png",
+    "asus prime": "https://images.seeklogo.com/logo-png/1/1/asus-logo-png_seeklogo-12597.png",
+
     "msi": "https://images.seeklogo.com/logo-png/30/1/msi-logo-png_seeklogo-304877.png",
     "gigabyte": "https://1000logos.net/wp-content/uploads/2020/05/Gigabyte-Logo.png",
     "asrock": "https://images.seeklogo.com/logo-png/49/1/asrock-logo-png_seeklogo-490350.png"
@@ -20,5 +22,33 @@
     "schecter": "https://www.westsidedistribution.com/wp-content/uploads/2016/12/schecter.png",
     "esp ltd": "https://www.adkguitar.com/cdn/shop/articles/ESP_2020_Cover_600x.jpg?v=1579038437",
     "ltd": "http://i.pinimg.com/736x/a1/a3/1a/a1a31a32c7a4cce6944b6f5ee7a67b44.jpg"
+  },
+
+  "cars":
+  {
+    "audi": "https://upload.wikimedia.org/wikipedia/commons/7/7f/Audi_logo_detail.svg",
+    "aston martin": "https://media.astonmartin.com/wp-content/uploads/2024/10/ce859c89496adc2e56207f62e0616485-m.jpg.webp",
+    "bmw": "https://upload.wikimedia.org/wikipedia/commons/4/44/BMW.svg",
+    "ferrari": "https://images.seeklogo.com/logo-png/5/1/ferrari-emblem-logo-png_seeklogo-53763.png",
+    "ford": "https://www.citypng.com/public/uploads/preview/ford-car-logo-transparent-background-701751694714017b9iu5lsgqm.png",
+    "chevrolet": "https://www.clipartmax.com/png/full/260-2601922_chevy-logo-chevrolet-car-symbol-meaning-and-history-chevrolet-logo.png",
+    "citroen": "https://toppng.com/uploads/preview/citroen-logo-vector-download-115742278128venvuwhbt.png",
+    "honda": "https://toppng.com/uploads/preview/honda-logo-11548788767xtwmuojhst.png",
+    "lexus": "https://upload.wikimedia.org/wikipedia/commons/4/42/Lexus-cars-logo-emblem.jpg",
+    "mercedes-amg": "https://www.citypng.com/public/uploads/preview/mercedes-benz-amg-white-logo-hd-png-701751694713916bzbqqvib0s.png",
+    "mercedes-benz": "https://upload.wikimedia.org/wikipedia/commons/9/90/Mercedes-Logo.svg",
+    "mini": "https://pngimg.com/uploads/mini/mini_PNG11789.png",
+    "mg": "https://www.nicepng.com/png/full/37-371086_car-logo-mg-new-mg.png",
+    "opel": "https://toppng.com/uploads/preview/opel-car-logo-115309618438kp3onw4ky.png",
+    "peugeot": "https://www.citypng.com/public/uploads/preview/hd-peugeot-emblem-logo-transparent-png-7358116970368933hz6ghcmhq.png",
+    "porsche": "https://toppng.com/uploads/preview/porsche-logo-transparent-11661076022cioy4mwdjo.png",
+    "subaru": "https://www.citypng.com/public/uploads/preview/hd-subaru-emblem-logo-sign-png-701751694713303jt5dglpl1l.png",
+    "suzuki": "https://toppng.com/uploads/preview/suzuki-logo-11548789364mryetbkflj.png",
+    "tesla": "https://upload.wikimedia.org/wikipedia/commons/e/e8/Tesla_logo.png",
+    "volkswagen": "https://upload.wikimedia.org/wikipedia/commons/2/23/Volkswagen_-_Logo.svg"
+
   }
 }
+
+
+
