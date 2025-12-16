@@ -2,6 +2,9 @@
    PAGE INIT
 ---------------------------------- */
 
+
+
+
 document.addEventListener("DOMContentLoaded", async () => {
     const path = window.location.pathname;
 
@@ -722,25 +725,78 @@ async function loadImageMap() {
 
 
 
+//PRODUCTIMAGE//
+
+const TABLE_IMAGE_CATEGORY_MAP = {
+    hatchback_cars: "cars",
+    coupe_cars: "cars",
+    cabrio_cars: "cars",
+    wagon_cars: "cars",
+    egyteru_cars: "cars",
+
+    electric_guitars: "electric_guitars",
+    processors: "processors",
+    motherboards: "motherboard"
+};
+
+
 function getProductImage(table, product) {
-    if (!IMAGE_MAP || !IMAGE_MAP[table]) {
+    if (!IMAGE_MAP) {
         return "https://via.placeholder.com/200?text=No+Image";
     }
 
-    const text = ((product.manufacturer || "") + " " + (product.model || "")).toLowerCase();
-    const rules = IMAGE_MAP[table];
+    const text = normalizeText(
+        (product.manufacturer || "") + " " + (product.model || "")
+    );
 
-    for (const key in rules) {
-        if (text.includes(key)) {
-            return rules[key];
+    // 1️⃣ kategória-alapú képek
+    const category = normalizeTableName(table);
+    const categoryRules = IMAGE_MAP[category];
+
+    if (categoryRules) {
+        const keys = Object.keys(categoryRules)
+            .map(k => normalizeText(k))
+            .sort((a, b) => b.length - a.length);
+
+        for (const key of keys) {
+            if (text.includes(key)) {
+                return categoryRules[key];
+            }
         }
     }
 
+    // 2️⃣ 🔥 BRAND LOGO FALLBACK
+    const brand = normalizeText(product.manufacturer);
+    if (IMAGE_MAP.brands && IMAGE_MAP.brands[brand]) {
+        return IMAGE_MAP.brands[brand];
+    }
+
+    // 3️⃣ végső fallback
     return "https://via.placeholder.com/200?text=No+Image";
 }
 
 
 
+function normalizeTableName(table) {
+    const clean = table
+        .toLowerCase()
+        .replace("public.", "")
+        .replace("_setup", "")
+        .replace("[setup]", "")
+        .trim();
+
+    return TABLE_IMAGE_CATEGORY_MAP[clean] || clean.replace(/s$/, "");
+}
+
+
+
+function normalizeText(str = "") {
+    return str
+        .toLowerCase()
+        .replace(/[-_]/g, " ")
+        .replace(/\s+/g, " ")
+        .trim();
+}
 
 
 
@@ -1128,11 +1184,6 @@ function renderGenericItems(items) {
         list.appendChild(div);
     });
 }
-
-//SZŰRŐ//
-
-
-
 
 
 

@@ -2,6 +2,7 @@
   "processors": {
     "amd": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQclXL3zcdtE9LYXthL1f2egJdYdxDKXLfmCg&s",
     "intel": "https://mir-s3-cdn-cf.behance.net/project_modules/1400_webp/8e4313112554403.60186ea0c7798.jpg"
+
   },
   "motherboard": {
     "asus rog": "https://www.svgrepo.com/show/303479/asus-rog-1-logo.svg",
@@ -47,8 +48,64 @@
     "tesla": "https://upload.wikimedia.org/wikipedia/commons/e/e8/Tesla_logo.png",
     "volkswagen": "https://upload.wikimedia.org/wikipedia/commons/2/23/Volkswagen_-_Logo.svg"
 
+  },
+
+  "bass":
+  {
+    "ibanez": "https://i.etsystatic.com/34531699/r/il/cce3ab/3800330793/il_1140xN.3800330793_2y7v.jpg",
+    "jackson": "https://ih1.redbubble.net/image.3441845157.6332/flat,750x,075,f-pad,750x1000,f8f8f8.jpg",
+    "ltd": "http://i.pinimg.com/736x/a1/a3/1a/a1a31a32c7a4cce6944b6f5ee7a67b44.jpg"
+  },
+
+  "drums(acoustic)":
+  {
+    "yamaha": "https://images.seeklogo.com/logo-png/15/1/yamaha-logo-png_seeklogo-154895.png",
+    "tama": "https://www.clipartmax.com/png/full/150-1501867_stock-vector-tama-logo-tama.png"
+  },
+
+  "drums(electronic)":
+  {
+    "roland": "https://images.seeklogo.com/logo-png/47/1/roland-logo-png_seeklogo-479587.png",
+    "alesis": "https://images.seeklogo.com/logo-png/40/1/alesis-corp-logo-png_seeklogo-404750.png",
+    "nux": "https://images.ctfassets.net/74ch1hskxran/3ugiBlCpbzz9VYivhlR5f/3dd55df017fc0ddd6d3490130e68b8e7/Nux.jpg"
+  },
+
+  "acoustic-guitars":
+  {
+    "ibanez":"https://i.etsystatic.com/34531699/r/il/cce3ab/3800330793/il_1140xN.3800330793_2y7v.jpg",
+    "fender": "https://i.etsystatic.com/34531699/r/il/5c4684/3935469309/il_1140xN.3935469309_a0j4.jpg",
+    "taylor": "https://upload.wikimedia.org/wikipedia/commons/3/32/Taylor_Guitars_circular_logo.svg",
+    "epiphone": "https://images.seeklogo.com/logo-png/4/1/epiphone-logo-png_seeklogo-48363.png"
+  },
+
+  "guitaramps-normal":
+  {
+    "line": "https://p7.hiclipart.com/preview/606/767/648/guitar-amplifier-line-6-pod-yamaha-corporation-yamaha-logo.jpg",
+    "fender": "https://i.etsystatic.com/34531699/r/il/5c4684/3935469309/il_1140xN.3935469309_a0j4.jpg",
+    "roland": "https://images.seeklogo.com/logo-png/47/1/roland-logo-png_seeklogo-479587.png",
+    "blackstar": "https://seekvectorlogo.net/wp-content/uploads/2019/11/blackstar-amplification-ltd-vector-logo.png",
+    "boss": "https://www.tonepedia.com/wp-content/uploads/2022/03/Boss_logo2-768x396.jpg"
+  },
+
+  "guitaramps-tubed":
+  {
+    "orange": "https://www.amplifiedparts.com/sites/default/files/styles/large/public/sets_by_amp/logos/logo_orange_1547655871.png",
+    "marshall": "https://upload.wikimedia.org/wikipedia/commons/6/69/Marshall_logo.svg",
+    "electro harmonix": "https://shop.ehx.com/library/userfiles/image/ehx-white.jpg",
+    "engl": "https://upload.wikimedia.org/wikipedia/commons/5/55/Engl_logo.svg",
+    "vox": "https://upload.wikimedia.org/wikipedia/commons/a/a2/Vox_logo.svg",
+    "victory": "https://images.ctfassets.net/74ch1hskxran/4bTB88eKNVcQzwYpG47CQs/1f7102d683a1743add7549c8b3d8e048/brand-victory.jpg",
+    "laney": "https://images.ctfassets.net/74ch1hskxran/7bhJVP9zP53oZhvwyNiqT0/c335a8470e825d08c035bd97d2d91507/Laney.jpg"
+  },
+
+  "daws":
+  {
+    "behringer": "https://toppng.com/uploads/preview/behringer-vector-logo-free-download-11574244626ajb7i9zuov.png"
+
   }
 }
+
+
 
 
 
