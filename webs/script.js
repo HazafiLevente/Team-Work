@@ -36,9 +36,14 @@ document.addEventListener("DOMContentLoaded", async () => {
             });
         }
     }
+
     if (path === "/setup") {
-        await loadMySetupsPage();
+        const ok = await requireLoginOrRedirect(); // Ha nincs belépve, ez átviszi a /regist-re
+        if (ok) {
+            await loadMySetupsPage();
+        }
     }
+
 
 
 
@@ -264,6 +269,23 @@ async function logout() {
     window.location.href = "/regist";
 }
 
+async function requireLoginOrRedirect() {
+    const res = await fetch("/api/me", { credentials: "include" });
+    if (!res.ok) {
+        window.location.href = "/regist";
+        return false;
+    }
+
+    const data = await res.json();
+    if (!data.loggedIn) {
+        window.location.href = "/regist";
+        return false;
+    }
+
+    return true;
+}
+
+
 /* ----------------------------------
    LOGIN BUTTON
 ---------------------------------- */
@@ -462,6 +484,75 @@ function renderProfile(box, user) {
         <button class="btn" onclick="logout()">Kijelentkezés</button>
     `;
 }
+
+async function loadMySetupsPage() {
+    const content = document.querySelector(".content");
+    if (!content) return;
+
+    // 1. Alapstruktúra felépítése
+    content.innerHTML = `
+        <h2>My Setups</h2>
+        <div class="neon-line"></div>
+        <div id="setup-list" class="setup-grid">
+            <p class="muted">⏳ Betöltés...</p>
+        </div>
+    `;
+
+    try {
+        const res = await fetch("/api/my-setups", { credentials: "include" });
+        const data = await res.json();
+
+        // 2. A renderelésnél nem ágazunk el!
+        // Mindig meghívjuk a renderelőt, az majd eldönti, van-e adat.
+        renderSetupCards(data.setups || []);
+
+    } catch (err) {
+        console.error("Hiba:", err);
+        const list = document.getElementById("setup-list");
+        if (list) list.innerHTML = `<p class="muted">❌ Hiba történt a betöltéskor.</p>`;
+    }
+}
+
+function renderSetupCards(setups) {
+    const list = document.getElementById("setup-list");
+    if (!list) return;
+
+    list.innerHTML = ""; // Betöltés jelző törlése
+
+    // 🧩 1. Meglévő setupok kirakása (ha vannak)
+    setups.forEach(setup => {
+        const div = document.createElement("div");
+        div.className = "setup-card";
+        div.innerHTML = `
+            <h3>${setup.setup_name}</h3>
+            <p class="muted">ID: ${setup.id}</p>
+        `;
+        div.onclick = () => loadSetupChildren(setup.id);
+        list.appendChild(div);
+    });
+
+    // ➕ 2. A PLUSZ JELLES KÁRTYA (Ez MINDIG bekerül a végére)
+    // Ez oldja meg a logikádat: ha üres a lista, ez lesz az első és egyetlen elem.
+    const addCard = document.createElement("div");
+    addCard.className = "setup-card setup-card-add";
+    addCard.style.display = "flex";
+    addCard.style.alignItems = "center";
+    addCard.style.justifyContent = "center";
+    addCard.style.border = "2px dashed rgba(255,255,255,0.2)";
+    addCard.style.cursor = "pointer";
+
+    addCard.innerHTML = `
+        <div style="text-align:center;">
+            <span style="font-size: 40px; display: block; margin-bottom: 5px;">+</span>
+            <span class="muted" style="font-size: 14px;">Új setup</span>
+        </div>
+    `;
+
+    addCard.onclick = createNewSetup;
+    list.appendChild(addCard);
+}
+
+
 
 /* ----------------------------------
    GLOBAL PRODUCT SEARCH
@@ -951,11 +1042,31 @@ async function loadMySetupsPage() {
         const res = await fetch("/api/my-setups", { credentials: "include" });
         const data = await res.json();
 
-        if (!data.setups || data.setups.length === 0) {
-            document.getElementById("setup-list").innerHTML =
-                `<p class="muted">❌ Nincs még setupod.</p>`;
+        if (data.setups.length === 0) {
+            container.innerHTML = `
+        <p class="no-setup">❌ Nincs még setupod.</p>
+
+        <button class="btn" id="create-setup-btn">
+            ➕ Új setup létrehozása
+        </button>
+    `;
+
+            document
+                .getElementById("create-setup-btn")
+                .addEventListener("click", createNewSetup);
+
             return;
         }
+        container.innerHTML += `
+    <button class="btn" style="margin-top:20px" id="create-setup-btn">
+        ➕ Új setup létrehozása
+    </button>
+`;
+
+        document
+            .getElementById("create-setup-btn")
+            .addEventListener("click", createNewSetup);
+
 
         renderSetupCards(data.setups);
 
@@ -1128,6 +1239,81 @@ function renderGenericItems(items) {
         list.appendChild(div);
     });
 }
+
+async function loadMySetups() {
+    const box = document.getElementById("setup-list");
+
+    try {
+        const res = await fetch("/api/my-setups", {
+            credentials: "include"
+        });
+
+        if (!res.ok) throw new Error("API error");
+
+        const setups = await res.json();
+
+        if (!Array.isArray(setups) || setups.length === 0) {
+            box.innerHTML = `
+                <p class="no-setup">❌ Nincs még setupod.</p>
+                <button class="btn" id="create-setup-btn">
+                    ➕ Új setup létrehozása
+                </button>
+            `;
+
+            document
+                .getElementById("create-setup-btn")
+                .addEventListener("click", createNewSetup);
+
+            return;
+        }
+
+        box.innerHTML = setups.map(s => `
+            <div class="setup-card">
+                <strong>${s.setup_name}</strong>
+                <button class="btn small" onclick="openSetup(${s.id})">
+                    Megnyit
+                </button>
+            </div>
+        `).join("");
+
+        box.innerHTML += `
+            <button class="btn" style="margin-top:20px" id="create-setup-btn">
+                ➕ Új setup létrehozása
+            </button>
+        `;
+
+        document
+            .getElementById("create-setup-btn")
+            .addEventListener("click", createNewSetup);
+
+    } catch (err) {
+        console.error(err);
+        box.innerHTML = "<p class='error'>❌ Hiba történt.</p>";
+    }
+}
+
+
+
+async function createNewSetup() {
+    const name = prompt("Add meg az új setup nevét:");
+    if (!name || !name.trim()) return;
+
+    const res = await fetch("/api/my-setups", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ name })
+    });
+
+    if (!res.ok) {
+        alert("❌ Nem sikerült létrehozni");
+        return;
+    }
+
+    await loadMySetups(); // frissítés
+}
+
+
 
 //SZŰRŐ//
 

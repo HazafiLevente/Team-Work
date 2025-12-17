@@ -574,7 +574,6 @@ app.post("/api/register", async (req, res) => {
         UserName: username,
         Email: email,
         password: hashed,
-        isAdmin: false
     }]);
 
     if (error) return res.status(500).json({ error: error.message });
