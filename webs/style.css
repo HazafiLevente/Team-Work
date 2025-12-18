@@ -608,3 +608,35 @@ a.logorreg:hover
     gap: 20px;
     margin-top: 20px;
 }
+
+
+.setup-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.dots-btn {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 20px;
+    cursor: pointer;
+}
+
+.setup-menu {
+    margin-top: 10px;
+}
+
+.hidden {
+    display: none;
+}
+
+.danger-btn {
+    background: #ff3b3b;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    color: white;
+}

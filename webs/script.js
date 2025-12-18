@@ -517,41 +517,77 @@ function renderSetupCards(setups) {
     const list = document.getElementById("setup-list");
     if (!list) return;
 
-    list.innerHTML = ""; // Betöltés jelző törlése
+    list.innerHTML = "";
 
-    // 🧩 1. Meglévő setupok kirakása (ha vannak)
     setups.forEach(setup => {
         const div = document.createElement("div");
         div.className = "setup-card";
+
         div.innerHTML = `
-            <h3>${setup.setup_name}</h3>
-            <p class="muted">ID: ${setup.id}</p>
+            <div class="setup-card-header">
+                <h3>${setup.setup_name}</h3>
+                <button class="dots-btn" onclick="toggleSetupMenu(event, ${setup.id})">⋮</button>
+            </div>
+
+            <div class="setup-menu hidden" id="menu-${setup.id}">
+                <button class="danger-btn" onclick="confirmDeleteSetup(${setup.id})">
+                    🗑 Setup törlése
+                </button>
+            </div>
         `;
-        div.onclick = () => loadSetupChildren(setup.id);
+
+        div.addEventListener("click", () => loadSetupChildren(setup.id));
         list.appendChild(div);
     });
 
-    // ➕ 2. A PLUSZ JELLES KÁRTYA (Ez MINDIG bekerül a végére)
-    // Ez oldja meg a logikádat: ha üres a lista, ez lesz az első és egyetlen elem.
+    // ➕ Új setup kártya
     const addCard = document.createElement("div");
     addCard.className = "setup-card setup-card-add";
-    addCard.style.display = "flex";
-    addCard.style.alignItems = "center";
-    addCard.style.justifyContent = "center";
-    addCard.style.border = "2px dashed rgba(255,255,255,0.2)";
-    addCard.style.cursor = "pointer";
-
     addCard.innerHTML = `
         <div style="text-align:center;">
-            <span style="font-size: 40px; display: block; margin-bottom: 5px;">+</span>
-            <span class="muted" style="font-size: 14px;">Új setup</span>
+            <span style="font-size:40px">+</span>
+            <div class="muted">Új setup</div>
         </div>
     `;
-
     addCard.onclick = createNewSetup;
     list.appendChild(addCard);
 }
 
+
+
+function toggleSetupMenu(event, setupId) {
+    event.stopPropagation();
+
+    document.querySelectorAll(".setup-menu").forEach(m => {
+        if (m.id !== `menu-${setupId}`) m.classList.add("hidden");
+    });
+
+    const menu = document.getElementById(`menu-${setupId}`);
+    if (menu) menu.classList.toggle("hidden");
+}
+
+async function confirmDeleteSetup(setupId) {
+    const ok = confirm("Biztosan törölni szeretnéd ezt a setupot?");
+    if (!ok) return;
+
+    try {
+        const res = await fetch(`/api/my-setups/${setupId}`, {
+            method: "DELETE",
+            credentials: "include"
+        });
+
+        if (!res.ok) {
+            alert("❌ Nem sikerült törölni");
+            return;
+        }
+
+        await loadMySetupsPage();
+
+    } catch (err) {
+        console.error(err);
+        alert("❌ Hiba történt");
+    }
+}
 
 
 /* ----------------------------------
@@ -1183,34 +1219,6 @@ async function loadMySetupsPage() {
     }
 }
 
-function renderSetupCards(setups) {
-    const list = document.getElementById("setup-list");
-    if (!list) return;
-
-    list.innerHTML = "";
-
-    setups.forEach(setup => {
-        const div = document.createElement("div");
-        div.className = "setup-card";
-        div.innerHTML = `
-            <h3>${setup.setup_name}</h3>
-            <p class="muted">ID: ${setup.id}</p>
-        `;
-        div.onclick = () => loadSetupChildren(setup.id);
-        list.appendChild(div);
-    });
-
-    const addCard = document.createElement("div");
-    addCard.className = "setup-card setup-card-add";
-    addCard.innerHTML = `
-        <div style="text-align:center;">
-            <span style="font-size:40px">+</span>
-            <div class="muted">Új setup</div>
-        </div>
-    `;
-    addCard.onclick = createNewSetup;
-    list.appendChild(addCard);
-}
 
 async function createNewSetup() {
     const name = prompt("Add meg az új setup nevét:");
@@ -1230,3 +1238,31 @@ async function createNewSetup() {
 
     loadMySetupsPage();
 }
+
+app.delete("/api/my-setups/:id", async (req, res) => {
+    try {
+        const userId = req.user?.id;
+        const setupId = req.params.id;
+
+        if (!userId) {
+            return res.status(401).json({ error: "Not logged in" });
+        }
+
+        const { error } = await supabase
+            .from("setups")
+            .delete()
+            .eq("id", setupId)
+            .eq("user_id", userId); // nagyon fontos!
+
+        if (error) {
+            console.error(error);
+            return res.status(400).json({ error: "Delete failed" });
+        }
+
+        res.json({ success: true });
+
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: "Server error" });
+    }
+});
