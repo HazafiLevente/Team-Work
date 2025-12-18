@@ -540,11 +540,17 @@ function normalizeProduct(row, table) {
         table,
         id: lower.id,
         manufacturer: lower.manufacturer || lower.brand || "Unknown",
-        model: lower.model || lower.name || "Unknown",
+
+        // 🔥 EZ A FONTOS RÉSZ
+        model:
+            lower.model ||
+            lower.product_name ||
+            lower.name ||
+            "Unknown",
+
         price: lower.price ?? null,
         raw: row
     };
-
 }
 
 /* ----------------------------------
@@ -732,11 +738,58 @@ const TABLE_IMAGE_CATEGORY_MAP = {
     coupe_cars: "cars",
     cabrio_cars: "cars",
     wagon_cars: "cars",
-    egyteru_cars: "cars",
+    mpv_cars: "cars",
 
     electric_guitars: "electric_guitars",
+    acoustic_guitars: "acoustic-guitars",
+    bassers: "bass",
+
+    drums_acoustic: "drums(acoustic)",
+    acoustic_drums: "drums(acoustic)",
+    drums_electric: "drums(electronic)",
+    electric_drums: "drums(electronic)",
+
+    guitaramps_normal: "guitaramps-normal",
+    guitaramps_tubed: "guitaramps-tubed",
+
+    daws: "daws",
+
+
+    multi_effects: "effect-multieffects",
+    effects_pedal:"effect-effectpedal",
+
+    mixer: "mixer",
+    soundcard: "soundcard",
+    soundcards: "soundcard",
+
+    midis: "midis",
+
+    guitarstrings: "guitarstring",
+
+    microphones: "microphones",
+
+    software_products: "softwares",
+
+    alt_saxophone:"alt_saxophones",
+    alt_saxophones:"alt_saxophones",
+
+    wind_instrument_oils: "wind_instruments_cremes_oils",
+
+    cleaning_brushes: "cleaning_brushes",
+
+    saxophone_cases: "saxophone_case",
+
+    c_trumpets: "c_trumpets",
+
+
     processors: "processors",
-    motherboards: "motherboard"
+    motherboards: "motherboard",
+
+    ram: "rams",
+    rams: "rams",
+    video_cards: "videocards",
+    psu:"psu"
+
 };
 
 
@@ -745,33 +798,31 @@ function getProductImage(table, product) {
         return "https://via.placeholder.com/200?text=No+Image";
     }
 
+    const category = normalizeTableName(table);
+    const categoryRules = IMAGE_MAP[category];
     const text = normalizeText(
         (product.manufacturer || "") + " " + (product.model || "")
     );
 
-    // 1️⃣ kategória-alapú képek
-    const category = normalizeTableName(table);
-    const categoryRules = IMAGE_MAP[category];
-
     if (categoryRules) {
-        const keys = Object.keys(categoryRules)
-            .map(k => normalizeText(k))
-            .sort((a, b) => b.length - a.length);
+        const entries = Object.entries(categoryRules)
+            .map(([key, url]) => ({
+                key: normalizeText(key),
+                url
+            }))
+            .sort((a, b) => b.key.length - a.key.length);
 
-        for (const key of keys) {
-            if (text.includes(key)) {
-                return categoryRules[key];
+        for (const entry of entries) {
+            if (text.includes(entry.key)) {
+                return entry.url;
             }
         }
+
+        // 🟡 fallback: első kategória kép
+        const fallback = Object.values(categoryRules)[0];
+        if (fallback) return fallback;
     }
 
-    // 2️⃣ 🔥 BRAND LOGO FALLBACK
-    const brand = normalizeText(product.manufacturer);
-    if (IMAGE_MAP.brands && IMAGE_MAP.brands[brand]) {
-        return IMAGE_MAP.brands[brand];
-    }
-
-    // 3️⃣ végső fallback
     return "https://via.placeholder.com/200?text=No+Image";
 }
 
@@ -783,20 +834,41 @@ function normalizeTableName(table) {
         .replace("public.", "")
         .replace("_setup", "")
         .replace("[setup]", "")
+        .replace(/-/g, "_")
+        .replace(/\s+/g, "_")
         .trim();
 
-    return TABLE_IMAGE_CATEGORY_MAP[clean] || clean.replace(/s$/, "");
+    return TABLE_IMAGE_CATEGORY_MAP[clean] || clean;
 }
+
 
 
 
 function normalizeText(str = "") {
-    return str
+    return String(str)
         .toLowerCase()
-        .replace(/[-_]/g, " ")
-        .replace(/\s+/g, " ")
+        .normalize("NFD")                 // ékezetek bontása
+        .replace(/[\u0300-\u036f]/g, "")  // ékezetek törlése
+        .replace(/['".]/g, "")            // ' " . eltávolítása
+        .replace(/[^a-z0-9]+/g, " ")      // MINDEN nem alfanumerikus → space
+        .replace(/\s+/g, " ")             // többszörös space
         .trim();
+
+    const entries = Object.entries(categoryRules)
+        .map(([key, url]) => ({
+            key: normalizeText(key),
+            url
+        }))
+        .sort((a, b) => b.key.length - a.key.length);
+
+    for (const entry of entries) {
+        if (text.includes(entry.key)) {
+            return entry.url;
+        }
+    }
+
 }
+
 
 
 
