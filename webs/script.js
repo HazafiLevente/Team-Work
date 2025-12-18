@@ -1026,88 +1026,6 @@ function discardSQL() {
 ---------------------------------- */
 
 
-async function loadMySetupsPage() {
-    const content = document.querySelector(".content");
-    if (!content) return;
-
-    content.innerHTML = `
-        <h2>My Setups</h2>
-        <div class="neon-line"></div>
-        <div id="setup-list" class="setup-grid">
-            <p class="muted">⏳ Betöltés...</p>
-        </div>
-    `;
-
-    try {
-        const res = await fetch("/api/my-setups", { credentials: "include" });
-        const data = await res.json();
-
-        if (data.setups.length === 0) {
-            container.innerHTML = `
-        <p class="no-setup">❌ Nincs még setupod.</p>
-
-        <button class="btn" id="create-setup-btn">
-            ➕ Új setup létrehozása
-        </button>
-    `;
-
-            document
-                .getElementById("create-setup-btn")
-                .addEventListener("click", createNewSetup);
-
-            return;
-        }
-        container.innerHTML += `
-    <button class="btn" style="margin-top:20px" id="create-setup-btn">
-        ➕ Új setup létrehozása
-    </button>
-`;
-
-        document
-            .getElementById("create-setup-btn")
-            .addEventListener("click", createNewSetup);
-
-
-        renderSetupCards(data.setups);
-
-    } catch (err) {
-        console.error(err);
-        document.getElementById("setup-list").innerHTML =
-            `<p class="muted">❌ Hiba történt.</p>`;
-    }
-}
-
-function renderSetupCards(setups) {
-    const list = document.getElementById("setup-list");
-    list.innerHTML = "";
-
-    // 🧩 EXISTING SETUPS – ELŐSZÖR
-    setups.forEach(setup => {
-        const div = document.createElement("div");
-        div.className = "setup-card";
-
-        div.innerHTML = `
-            <h3>${setup.setup_name}</h3>
-            <p class="muted">ID: ${setup.id}</p>
-        `;
-
-        div.onclick = () => {
-            loadSetupChildren(setup.id);
-        };
-
-        list.appendChild(div);
-    });
-
-    // ➕ CREATE NEW SETUP CARD – VÉGÉRE
-    const addCard = document.createElement("div");
-    addCard.className = "setup-card setup-card-add";
-    addCard.innerHTML = `<span class="setup-plus">+</span>`;
-
-    addCard.onclick = createNewSetup;
-    list.appendChild(addCard);
-}
-
-
 async function createNewSetup() {
     const name = prompt("Add meg az új setup nevét:");
     if (!name) return;
@@ -1240,63 +1158,63 @@ function renderGenericItems(items) {
     });
 }
 
-async function loadMySetups() {
-    const box = document.getElementById("setup-list");
+async function loadMySetupsPage() {
+    const content = document.querySelector(".content");
+    if (!content) return;
+
+    content.innerHTML = `
+        <h2>My Setups</h2>
+        <div class="neon-line"></div>
+        <div id="setup-list" class="setup-grid">
+            <p class="muted">⏳ Betöltés...</p>
+        </div>
+    `;
 
     try {
-        const res = await fetch("/api/my-setups", {
-            credentials: "include"
-        });
+        const res = await fetch("/api/my-setups", { credentials: "include" });
+        const data = await res.json();
 
-        if (!res.ok) throw new Error("API error");
-
-        const setups = await res.json();
-
-        if (!Array.isArray(setups) || setups.length === 0) {
-            box.innerHTML = `
-                <p class="no-setup">❌ Nincs még setupod.</p>
-                <button class="btn" id="create-setup-btn">
-                    ➕ Új setup létrehozása
-                </button>
-            `;
-
-            document
-                .getElementById("create-setup-btn")
-                .addEventListener("click", createNewSetup);
-
-            return;
-        }
-
-        box.innerHTML = setups.map(s => `
-            <div class="setup-card">
-                <strong>${s.setup_name}</strong>
-                <button class="btn small" onclick="openSetup(${s.id})">
-                    Megnyit
-                </button>
-            </div>
-        `).join("");
-
-        box.innerHTML += `
-            <button class="btn" style="margin-top:20px" id="create-setup-btn">
-                ➕ Új setup létrehozása
-            </button>
-        `;
-
-        document
-            .getElementById("create-setup-btn")
-            .addEventListener("click", createNewSetup);
+        renderSetupCards(data.setups || []);
 
     } catch (err) {
         console.error(err);
-        box.innerHTML = "<p class='error'>❌ Hiba történt.</p>";
+        document.getElementById("setup-list").innerHTML =
+            `<p class="muted">❌ Hiba történt.</p>`;
     }
 }
 
+function renderSetupCards(setups) {
+    const list = document.getElementById("setup-list");
+    if (!list) return;
 
+    list.innerHTML = "";
+
+    setups.forEach(setup => {
+        const div = document.createElement("div");
+        div.className = "setup-card";
+        div.innerHTML = `
+            <h3>${setup.setup_name}</h3>
+            <p class="muted">ID: ${setup.id}</p>
+        `;
+        div.onclick = () => loadSetupChildren(setup.id);
+        list.appendChild(div);
+    });
+
+    const addCard = document.createElement("div");
+    addCard.className = "setup-card setup-card-add";
+    addCard.innerHTML = `
+        <div style="text-align:center;">
+            <span style="font-size:40px">+</span>
+            <div class="muted">Új setup</div>
+        </div>
+    `;
+    addCard.onclick = createNewSetup;
+    list.appendChild(addCard);
+}
 
 async function createNewSetup() {
     const name = prompt("Add meg az új setup nevét:");
-    if (!name || !name.trim()) return;
+    if (!name) return;
 
     const res = await fetch("/api/my-setups", {
         method: "POST",
@@ -1310,15 +1228,5 @@ async function createNewSetup() {
         return;
     }
 
-    await loadMySetups(); // frissítés
+    loadMySetupsPage();
 }
-
-
-
-//SZŰRŐ//
-
-
-
-
-
-
