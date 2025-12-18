@@ -1272,6 +1272,15 @@ function renderRoleList(user) {
                 </div>
             `;
         }
+        if (user.role === "owner") {
+            return `
+                <div class="role-option disabled">
+                    👑 OWNER (env locked)
+                </div>
+            `;
+        }
+
+
 
         return `
             <div class="role-option"

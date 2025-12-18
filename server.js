@@ -3,7 +3,15 @@ console.log("ENV CHECK:", {
     SUPABASE_URL: process.env.SUPABASE_URL,
     HAS_SERVICE_KEY: !!process.env.SUPABASE_SERVICE_ROLE_KEY
 });
-const { startControl } = require("./control");
+const {
+    startControl,
+    resolveRole,
+    canAssignRole,
+    hasAdminAccess,
+    hasAdminPlusAccess,
+    ROLES
+} = require("./control");
+
 const express = require("express");
 const path = require("path");
 const fs = require("fs");
@@ -24,11 +32,6 @@ const JWT_SECRET = process.env.JWT_SECRET;
 ====================================================== */
 const adminFilePath = path.join(__dirname, "admin.json");
 
-let ROLES = {
-    owners: new Set(),
-    admins: new Set(),
-    adminsPlus: new Set()
-};
 const TABLES_FILE = path.join(__dirname, "tables.runtime.json");
 
 function getRuntimeTables() {
@@ -39,84 +42,6 @@ function getRuntimeTables() {
 
 
 
-function loadRolesFromEnv() {
-    if (!process.env.ADMIN_ROLES) {
-        throw new Error("❌ ADMIN_ROLES missing from .env");
-    }
-
-    let parsed;
-    try {
-        parsed = JSON.parse(process.env.ADMIN_ROLES);
-    } catch (e) {
-        throw new Error("❌ ADMIN_ROLES is not valid JSON");
-    }
-
-    if (!ROLES.owners.size) {
-        console.warn("⚠️ No owners defined! System lock risk.");
-    }
-
-
-    ROLES.owners = new Set(
-        Object.values(parsed.Owners || {}).map(Number)
-    );
-
-    ROLES.admins = new Set(
-        Object.values(parsed.Admin || {}).map(Number)
-    );
-
-    ROLES.adminsPlus = new Set(
-        Object.values(parsed["Admin+"] || {}).map(Number)
-    );
-
-    console.log("👑 Owners:", [...ROLES.owners]);
-    console.log("🛡 Admins:", [...ROLES.admins]);
-    console.log("🔥 Admin+:", [...ROLES.adminsPlus]);
-}
-
-function canAssignRole(granterRole, targetRole) {
-    const hierarchy = {
-        owner: 3,
-        "admin+": 2,
-        admin: 1,
-        user: 0
-    };
-
-    return hierarchy[granterRole] > hierarchy[targetRole];
-}
-
-function writeRolesToFile() {
-    const json = {
-        Owners: {},
-        Admin: {},
-        "Admin+": {}
-    };
-
-    ROLES.owners.forEach(id => json.Owners[`user_${id}`] = id);
-    ROLES.admins.forEach(id => json.Admin[`user_${id}`] = id);
-    ROLES.adminsPlus.forEach(id => json["Admin+"][`user_${id}`] = id);
-
-    fs.writeFileSync(adminFilePath, JSON.stringify(json, null, 2));
-}
-
-
-
-function resolveRole(userId) {
-    if (ROLES.owners.has(userId)) return "owner";
-    if (ROLES.adminsPlus.has(userId)) return "admin+";
-    if (ROLES.admins.has(userId)) return "admin";
-    return "user";
-}
-
-function hasAdminAccess(role) {
-    return ["admin", "admin+", "owner"].includes(role);
-}
-
-function hasAdminPlusAccess(role) {
-    return ["admin+", "owner"].includes(role);
-}
-
-
-loadRolesFromEnv();
 
 /* ======================================================
    SUPABASE (SERVICE ROLE – NO RLS)
@@ -416,47 +341,6 @@ app.post("/api/admin/sql/run", verifyAdmin, async (req, res) => {
     res.json(data);
 });
 
-app.post("/api/admin/set-role", verifyAdmin, async (req, res) => {
-    const { userId, role } = req.body;
-    const targetId = Number(userId);
-
-    if (!targetId || !["user", "admin", "admin+", "owner"].includes(role)) {
-        return res.status(400).json({ error: "Invalid data" });
-    }
-
-    // ❌ magát nem emelheti
-    if (targetId === req.user.id) {
-        return res.status(403).json({ error: "You cannot change your own role" });
-    }
-
-    // 🔥 ITT JÖN A JAVÍTÁS
-    const granterId = req.user.id;
-    const granterRole = resolveRole(granterId);
-    const targetCurrentRole = resolveRole(targetId);
-
-    if (!canAssignRole(granterRole, role)) {
-        return res.status(403).json({ error: "Nincs jogod ehhez a ranghoz" });
-    }
-
-    if (targetCurrentRole === "owner" && granterRole !== "owner") {
-        return res.status(403).json({ error: "Owner rang nem módosítható" });
-    }
-
-    // 🧹 törlés minden role-ból
-    ROLES.owners.delete(targetId);
-    ROLES.adminsPlus.delete(targetId);
-    ROLES.admins.delete(targetId);
-    // ➕ új role
-    if (role === "owner") ROLES.owners.add(targetId);
-    if (role === "admin+") ROLES.adminsPlus.add(targetId);
-    if (role === "admin") ROLES.admins.add(targetId);
-
-    writeRolesToFile();
-    loadRoles();
-
-    res.json({ success: true });
-});
-
 app.post("/api/admin/update-row", verifyAdmin, async (req, res) => {
     const { table, id, updates } = req.body;
 
@@ -549,6 +433,15 @@ app.post("/api/admin/delete-row", verifyAdmin, async (req, res) => {
     if (table === "user[Auth]" && Number(id) === req.user.id) {
         return res.status(403).json({ error: "Saját fiók nem törölhető" });
     }
+    if (
+        table === "user[Auth]" &&
+        ROLES.owners.has(Number(id))
+    ) {
+        return res.status(403).json({
+            error: "Owner felhasználó nem törölhető"
+        });
+    }
+
 
     const idColumn = table === "user[Auth]" ? "ID" : "id";
 

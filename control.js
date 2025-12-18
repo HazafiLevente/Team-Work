@@ -4,6 +4,9 @@ const { createClient } = require("@supabase/supabase-js");
 
 require("dotenv").config();
 
+
+
+
 const filler = require("./filler.json");
 
 const OUT_FILE = path.join(__dirname, "tables.runtime.json");
@@ -12,6 +15,10 @@ const supabase = createClient(
     process.env.SUPABASE_URL,
     process.env.SUPABASE_SERVICE_ROLE_KEY
 );
+
+/* ======================================================
+   TABLES
+====================================================== */
 
 function isExcluded(name) {
     return filler.exclude_table_patterns.some(p =>
@@ -197,6 +204,94 @@ async function updateProductsHomeFunction(tablesMeta) {
 }
 
 
+/* ======================================================
+   ADMIN
+====================================================== */
+
+
+
+/* ======================================================
+   ADMIN / ROLES
+====================================================== */
+
+const OWNER_IDS = new Set(
+    (process.env.OWNERS || "")
+        .split(",")
+        .map(Number)
+        .filter(Boolean)
+);
+
+const ADMIN_PLUS_IDS = new Set(
+    (process.env.ADMINS_PLUS || "")
+        .split(",")
+        .map(Number)
+        .filter(Boolean)
+);
+
+const ADMIN_IDS = new Set(
+    (process.env.ADMINS || "")
+        .split(",")
+        .map(Number)
+        .filter(Boolean)
+);
+
+const ROLES = {
+    owners: OWNER_IDS,          // 🔒 IMMUTABLE
+    adminsPlus: ADMIN_PLUS_IDS, // 🔒 ENV
+    admins: ADMIN_IDS           // 🔒 ENV
+};
+
+
+function loadRolesFromEnv() {
+    if (!process.env.ADMIN_ROLES) {
+        throw new Error("❌ ADMIN_ROLES missing from .env");
+    }
+
+    let parsed;
+    try {
+        parsed = JSON.parse(process.env.ADMIN_ROLES);
+    } catch {
+        throw new Error("❌ ADMIN_ROLES is not valid JSON");
+    }
+
+    ROLES.owners = new Set(
+        Object.values(parsed.Owners || {}).map(Number)
+    );
+
+    ROLES.admins = new Set(
+        Object.values(parsed.Admin || {}).map(Number)
+    );
+
+    ROLES.adminsPlus = new Set(
+        Object.values(parsed["Admin+"] || {}).map(Number)
+    );
+
+    console.log("👑 Owners:", [...ROLES.owners]);
+    console.log("🔥 Admin+:", [...ROLES.adminsPlus]);
+    console.log("🛡 Admin:", [...ROLES.admins]);
+}
+
+function resolveRole(userId) {
+    if (ROLES.owners.has(userId)) return "owner";
+    if (ROLES.adminsPlus.has(userId)) return "admin+";
+    if (ROLES.admins.has(userId)) return "admin";
+    return "user";
+}
+
+
+function canAssignRole(granterRole, targetRole) {
+    const rank = { owner: 3, "admin+": 2, admin: 1, user: 0 };
+    return rank[granterRole] > rank[targetRole];
+}
+
+function hasAdminAccess(role) {
+    return ["admin", "admin+", "owner"].includes(role);
+}
+
+function hasAdminPlusAccess(role) {
+    return ["admin+", "owner"].includes(role);
+}
+
 
 let interval = null;
 
@@ -212,4 +307,14 @@ function startControl() {
     );
 }
 
-module.exports = { startControl };
+module.exports = {
+    startControl,
+
+    // 🔐 admin API
+    resolveRole,
+    canAssignRole,
+    hasAdminAccess,
+    hasAdminPlusAccess,
+    ROLES
+};
+

@@ -4,6 +4,8 @@
     "user_2": 2,
     "user_5": 5
   },
-  "Admin": {},
+  "Admin": {
+    "user_8": 8
+  },
   "Admin+": {}
 }
