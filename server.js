@@ -3,6 +3,7 @@ console.log("ENV CHECK:", {
     SUPABASE_URL: process.env.SUPABASE_URL,
     HAS_SERVICE_KEY: !!process.env.SUPABASE_SERVICE_ROLE_KEY
 });
+const { startControl } = require("./control");
 const express = require("express");
 const path = require("path");
 const fs = require("fs");
@@ -28,6 +29,14 @@ let ROLES = {
     admins: new Set(),
     adminsPlus: new Set()
 };
+const TABLES_FILE = path.join(__dirname, "tables.runtime.json");
+
+function getRuntimeTables() {
+    if (!fs.existsSync(TABLES_FILE)) return [];
+    const json = JSON.parse(fs.readFileSync(TABLES_FILE, "utf8"));
+    return json.tables || [];
+}
+
 
 
 function loadRolesFromEnv() {
@@ -308,20 +317,6 @@ app.get("/api/products/tables", async (_, res) => {
     res.json({ tables: productTables });
 });
 
-app.get("/api/admin/tables", verifyAdmin, async (_, res) => {
-    const { data, error } = await supabase.rpc("get_all_tables");
-
-    if (error) return res.status(500).json({ error: error.message });
-    if (!Array.isArray(data)) return res.json({ tables: [] });
-
-    // ✅ admin-only = van benne [
-    const adminTables = data
-        .map(t => t.table_name)
-        .filter(name => name && name.includes("["));
-
-    res.json({ tables: adminTables });
-});
-
 
 
 
@@ -377,6 +372,33 @@ app.get("/meta/filler", (_, res) => {
 });
 
 
+
+app.get("/api/products/tables", async (_, res) => {
+    res.json({
+        tables: getRuntimeTables()
+    });
+});
+
+
+
+/* ======================================================
+   ADMIN API
+====================================================== */
+
+
+app.get("/api/admin/tables", verifyAdmin, async (_, res) => {
+    const { data, error } = await supabase.rpc("get_all_tables");
+
+    if (error) return res.status(500).json({ error: error.message });
+    if (!Array.isArray(data)) return res.json({ tables: [] });
+
+    // ✅ admin-only = van benne [
+    const adminTables = data
+        .map(t => t.table_name)
+        .filter(name => name && name.includes("["));
+
+    res.json({ tables: adminTables });
+});
 
 app.post("/api/admin/sql/run", verifyAdmin, async (req, res) => {
     const { sql } = req.body;
@@ -852,10 +874,29 @@ app.get("/api/me", verifyUser, (req, res) => {
 });
 
 
+/* ======================================================
+   RUNTIME API'S
+====================================================== */
+
+app.get("/api/runtime/tables", (_, res) => {
+    const json = JSON.parse(
+        fs.readFileSync(
+            path.join(__dirname, "tables.runtime.json"),
+            "utf8"
+        )
+    );
+    res.json(json);
+});
+
+
+
 
 /* ======================================================
    SERVER START
 ====================================================== */
+
+startControl();
+
 app.listen(PORT, () => {
     console.clear();
     console.log(`
