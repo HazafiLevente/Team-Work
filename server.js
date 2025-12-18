@@ -22,16 +22,92 @@ const JWT_SECRET = process.env.JWT_SECRET;
    LOAD ADMINS FROM JSON
 ====================================================== */
 const adminFilePath = path.join(__dirname, "admin.json");
-let ADMIN_IDS = [1,2,5];
 
-try {
-    const raw = fs.readFileSync(adminFilePath, "utf8");
-    const parsed = JSON.parse(raw);
-    ADMIN_IDS = Object.values(parsed).map(Number);
-    console.log("✅ Admin IDs loaded:", ADMIN_IDS);
-} catch (err) {
-    console.error("❌ admin.json betöltési hiba!", err);
+let ROLES = {
+    owners: new Set(),
+    admins: new Set(),
+    adminsPlus: new Set()
+};
+
+
+function loadRolesFromEnv() {
+    if (!process.env.ADMIN_ROLES) {
+        throw new Error("❌ ADMIN_ROLES missing from .env");
+    }
+
+    let parsed;
+    try {
+        parsed = JSON.parse(process.env.ADMIN_ROLES);
+    } catch (e) {
+        throw new Error("❌ ADMIN_ROLES is not valid JSON");
+    }
+
+    if (!ROLES.owners.size) {
+        console.warn("⚠️ No owners defined! System lock risk.");
+    }
+
+
+    ROLES.owners = new Set(
+        Object.values(parsed.Owners || {}).map(Number)
+    );
+
+    ROLES.admins = new Set(
+        Object.values(parsed.Admin || {}).map(Number)
+    );
+
+    ROLES.adminsPlus = new Set(
+        Object.values(parsed["Admin+"] || {}).map(Number)
+    );
+
+    console.log("👑 Owners:", [...ROLES.owners]);
+    console.log("🛡 Admins:", [...ROLES.admins]);
+    console.log("🔥 Admin+:", [...ROLES.adminsPlus]);
 }
+
+function canAssignRole(granterRole, targetRole) {
+    const hierarchy = {
+        owner: 3,
+        "admin+": 2,
+        admin: 1,
+        user: 0
+    };
+
+    return hierarchy[granterRole] > hierarchy[targetRole];
+}
+
+function writeRolesToFile() {
+    const json = {
+        Owners: {},
+        Admin: {},
+        "Admin+": {}
+    };
+
+    ROLES.owners.forEach(id => json.Owners[`user_${id}`] = id);
+    ROLES.admins.forEach(id => json.Admin[`user_${id}`] = id);
+    ROLES.adminsPlus.forEach(id => json["Admin+"][`user_${id}`] = id);
+
+    fs.writeFileSync(adminFilePath, JSON.stringify(json, null, 2));
+}
+
+
+
+function resolveRole(userId) {
+    if (ROLES.owners.has(userId)) return "owner";
+    if (ROLES.adminsPlus.has(userId)) return "admin+";
+    if (ROLES.admins.has(userId)) return "admin";
+    return "user";
+}
+
+function hasAdminAccess(role) {
+    return ["admin", "admin+", "owner"].includes(role);
+}
+
+function hasAdminPlusAccess(role) {
+    return ["admin+", "owner"].includes(role);
+}
+
+
+loadRolesFromEnv();
 
 /* ======================================================
    SUPABASE (SERVICE ROLE – NO RLS)
@@ -57,31 +133,50 @@ function verifyUser(req, res, next) {
     if (!token) return res.status(401).json({ error: "Not logged in" });
 
     try {
-        req.user = jwt.verify(token, JWT_SECRET);
-        req.user.isAdmin = ADMIN_IDS.includes(Number(req.user.id));
+        const decoded = jwt.verify(token, JWT_SECRET);
+        const id = Number(decoded.id);
 
-        /*console.log("ADMIN CHECK:", {
-            tokenId: req.user.id,
-            tokenIdType: typeof req.user.id,
-            ADMIN_IDS,
-            isAdmin: req.user.isAdmin
+        const role = resolveRole(id);
+
+        req.user = {
+            id,
+            name: decoded.name,
+            username: decoded.username,
+            email: decoded.email,
+            role
+        };
+
+        console.log("🔎 AUTH CHECK", {
+            decodedId: decoded.id,
+            numericId: Number(decoded.id),
+            owners: [...ROLES.owners]
         });
-        */
+
 
         next();
     } catch {
-        return res.status(403).json({ error: "Invalid token" });
+        res.status(403).json({ error: "Invalid token" });
     }
 }
 
 function verifyAdmin(req, res, next) {
     verifyUser(req, res, () => {
-        if (!req.user.isAdmin) {
+        if (!hasAdminAccess(req.user.role)) {
             return res.status(403).json({ error: "Admin only" });
         }
         next();
     });
 }
+
+function verifyAdminPlus(req, res, next) {
+    verifyUser(req, res, () => {
+        if (!hasAdminPlusAccess(req.user.role)) {
+            return res.status(403).json({ error: "Admin+ only" });
+        }
+        next();
+    });
+}
+
 
 /* ======================================================
    PAGE ROUTES
@@ -155,20 +250,23 @@ app.get("/api/admin/users", verifyAdmin, async (req, res) => {
         .select("ID, Name, UserName, Email, created_at")
         .order("created_at", { ascending: false });
 
-    if (error) {
-        return res.status(500).json({ error: error.message });
-    }
+    if (error) return res.status(500).json({ error: error.message });
 
-    const usersWithAdminFlag = data.map(u => ({
-        Name: u.Name,
-        UserName: u.UserName,
-        Email: u.Email,
-        created_at: u.created_at,
-        isAdmin: ADMIN_IDS.includes(Number(u.ID))
-    }));
+    const users = data.map(u => {
+        const id = Number(u.ID);
+        return {
+            id,
+            Name: u.Name,
+            UserName: u.UserName,
+            Email: u.Email,
+            created_at: u.created_at,
+            role: resolveRole(id)
+        };
+    });
 
-    res.json(usersWithAdminFlag);
+    res.json(users);
 });
+
 app.get("/api/table/:name", verifyAdmin, async (req, res) => {
     const table = req.params.name;
 
@@ -224,24 +322,6 @@ app.get("/api/admin/tables", verifyAdmin, async (_, res) => {
     res.json({ tables: adminTables });
 });
 
-app.get("/api/admin/users", verifyAdmin, async (req, res) => {
-    const { data, error } = await supabase
-        .from("user[Auth]") // ✅ EZ
-        .select("ID, Name, UserName, Email, created_at")
-        .order("created_at", { ascending: false });
-
-    if (error) return res.status(500).json({ error: error.message });
-
-    const usersWithAdminFlag = data.map(u => ({
-        Name: u.Name,
-        UserName: u.UserName,
-        Email: u.Email,
-        created_at: u.created_at,
-        isAdmin: ADMIN_IDS.includes(Number(u.ID))
-    }));
-
-    res.json(usersWithAdminFlag);
-});
 
 
 
@@ -313,6 +393,155 @@ app.post("/api/admin/sql/run", verifyAdmin, async (req, res) => {
 
     res.json(data);
 });
+
+app.post("/api/admin/set-role", verifyAdmin, async (req, res) => {
+    const { userId, role } = req.body;
+    const targetId = Number(userId);
+
+    if (!targetId || !["user", "admin", "admin+", "owner"].includes(role)) {
+        return res.status(400).json({ error: "Invalid data" });
+    }
+
+    // ❌ magát nem emelheti
+    if (targetId === req.user.id) {
+        return res.status(403).json({ error: "You cannot change your own role" });
+    }
+
+    // 🔥 ITT JÖN A JAVÍTÁS
+    const granterId = req.user.id;
+    const granterRole = resolveRole(granterId);
+    const targetCurrentRole = resolveRole(targetId);
+
+    if (!canAssignRole(granterRole, role)) {
+        return res.status(403).json({ error: "Nincs jogod ehhez a ranghoz" });
+    }
+
+    if (targetCurrentRole === "owner" && granterRole !== "owner") {
+        return res.status(403).json({ error: "Owner rang nem módosítható" });
+    }
+
+    // 🧹 törlés minden role-ból
+    ROLES.owners.delete(targetId);
+    ROLES.adminsPlus.delete(targetId);
+    ROLES.admins.delete(targetId);
+    // ➕ új role
+    if (role === "owner") ROLES.owners.add(targetId);
+    if (role === "admin+") ROLES.adminsPlus.add(targetId);
+    if (role === "admin") ROLES.admins.add(targetId);
+
+    writeRolesToFile();
+    loadRoles();
+
+    res.json({ success: true });
+});
+
+app.post("/api/admin/update-row", verifyAdmin, async (req, res) => {
+    const { table, id, updates } = req.body;
+
+    if (!table || !id || !updates) {
+        return res.status(400).json({ error: "Missing data" });
+    }
+
+    // ❌ SOHA ne engedjük ID módosítását
+    ["id", "ID", "created_at", "password"].forEach(k => delete updates[k]);
+
+    // ✅ IGAZI PK MEGHATÁROZÁSA
+    const idColumn = table === "user[Auth]" ? "ID" : "id";
+
+    const { error } = await supabase
+        .from(table)
+        .update(updates)
+        .eq(idColumn, id);
+
+    if (error) {
+        return res.status(500).json({ error: error.message });
+    }
+
+    res.json({ success: true });
+});
+
+
+
+app.post("/api/admin/update-user", verifyAdmin, async (req, res) => {
+    const { userId, Name, UserName, Email } = req.body;
+
+    if (!userId) {
+        return res.status(400).json({ error: "Missing userId" });
+    }
+
+    // ❌ jelszót direkt nem engedünk
+    const updateData = {};
+    if (Name) updateData.Name = Name;
+    if (UserName) updateData.UserName = UserName;
+    if (Email) updateData.Email = Email;
+
+    const { error } = await supabase
+        .from("user[Auth]")
+        .update(updateData)
+        .eq("ID", userId);
+
+    if (error) {
+        return res.status(500).json({ error: error.message });
+    }
+
+    res.json({ success: true });
+});
+
+
+app.post("/api/admin/insert-row", verifyAdmin, async (req, res) => {
+    const { table, payload } = req.body;
+
+    if (table === "user[Auth]") {
+        return res.status(403).json({
+            error: "Felhasználót csak regisztráción keresztül lehet létrehozni"
+        });
+    }
+
+    if (!table || !payload || typeof payload !== "object") {
+        return res.status(400).json({ error: "Invalid data" });
+    }
+
+    ["id", "ID", "created_at", "password"].forEach(k => delete payload[k]);
+
+    const { error } = await supabase
+        .from(table)
+        .insert([payload]);
+
+    if (error) {
+        return res.status(500).json({ error: error.message });
+    }
+
+    res.json({ success: true });
+});
+
+
+
+app.post("/api/admin/delete-row", verifyAdmin, async (req, res) => {
+    const { table, id } = req.body;
+
+    if (!table || !id) {
+        return res.status(400).json({ error: "Missing table or id" });
+    }
+
+    // ❌ saját user törlése tiltva
+    if (table === "user[Auth]" && Number(id) === req.user.id) {
+        return res.status(403).json({ error: "Saját fiók nem törölhető" });
+    }
+
+    const idColumn = table === "user[Auth]" ? "ID" : "id";
+
+    const { error } = await supabase
+        .from(table)
+        .delete()
+        .eq(idColumn, id);
+
+    if (error) {
+        return res.status(500).json({ error: error.message });
+    }
+
+    res.json({ success: true });
+});
+
 
 
 /* ======================================================
@@ -470,12 +699,6 @@ app.get("/api/setup/:id/children", verifyUser, async (req, res) => {
     res.json({ children });
 });
 
-
-
-
-/* ======================================================
-   SETUP DETAILS (PC OR HOME THEATER)
-====================================================== */
 /* ======================================================
    SETUP DETAILS (PC OR HOME THEATER)
 ====================================================== */
@@ -574,7 +797,6 @@ app.post("/api/register", async (req, res) => {
         UserName: username,
         Email: email,
         password: hashed,
-        isAdmin: false
     }]);
 
     if (error) return res.status(500).json({ error: error.message });
@@ -597,24 +819,25 @@ app.post("/api/login", async (req, res) => {
     const ok = await bcrypt.compare(password, user.password);
     if (!ok) return res.status(401).json({ error: "Invalid credentials" });
 
-    const isAdmin = ADMIN_IDS.includes(user.ID);
+    const role = resolveRole(Number(user.ID));
 
     const token = jwt.sign({
-        id: user.ID,
+        id: Number(user.ID), // 🔥 EZ A FIX
         name: user.Name,
         username: user.UserName,
-        email: user.Email,
-        isAdmin
-    }, JWT_SECRET, { expiresIn: "1h" });
+        email: user.Email
+    }, JWT_SECRET, { expiresIn: "24h" });
+
 
     res.cookie("auth_token", token, {
         httpOnly: true,
         sameSite: "lax",
-        maxAge: 60 * 60 * 1000
+        maxAge: 24 * 60 * 60 * 1000
     });
 
-    res.json({ message: "Login successful", isAdmin });
+    res.json({ message: "Login successful", role });
 });
+
 
 app.post("/api/logout", (_, res) => {
     res.clearCookie("auth_token");
@@ -622,8 +845,13 @@ app.post("/api/logout", (_, res) => {
 });
 
 app.get("/api/me", verifyUser, (req, res) => {
-    res.json({ loggedIn: true, user: req.user });
+    res.json({
+        loggedIn: true,
+        user: req.user
+    });
 });
+
+
 
 /* ======================================================
    SERVER START
@@ -632,11 +860,11 @@ app.listen(PORT, () => {
     console.clear();
     console.log(`
 ╔══════════════════════════════════════════════╗
-║  💫 SETUP CONFIGURATOR – SERVER RUNNING 💫   ║
-║  🌐 http://localhost:${PORT}                     ║
-║  👑 Admin IDs: ${ADMIN_IDS.join(", ")}            ║
+║  💫 SETUP CONFIGURATOR – SERVER RUNNING 💫   
+║  🌐 http://localhost:${PORT}             
+║  👑 Owners: ${[...ROLES.owners].join(", ")} 
+║  🔥 Admin+: ${[...ROLES.adminsPlus].join(", ")} 
+║  🛡 Admin: ${[...ROLES.admins].join(", ")}   
 ╚══════════════════════════════════════════════╝
 `);
 });
-
-

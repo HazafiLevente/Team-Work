@@ -2,9 +2,6 @@
    PAGE INIT
 ---------------------------------- */
 
-
-
-
 document.addEventListener("DOMContentLoaded", async () => {
     const path = window.location.pathname;
 
@@ -24,6 +21,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
     if (path === "/admin") {
         await loadAdminTables();
+        await checkLoginStatus();
 
         const addBtn = document.getElementById("add-query-btn");
         if (addBtn) {
@@ -45,6 +43,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 
 
+
     /* ----------------------------------
        PRODUCT PAGE LOADER
     ---------------------------------- */
@@ -53,10 +52,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     // ❗ Csak product oldalon fusson
     // ✅ HELYES – csak product logika
     if (window.location.pathname.includes("product.html")) {
-
-        // 🔥 FONTOS: image map betöltése
-        await loadImageMap();
-
         const box = document.getElementById("product-box");
         if (!box) return;
 
@@ -78,6 +73,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
             const data = await res.json();
 
+            // 🔥 NORMALIZÁLT ID KERESÉS (EZ A FIX)
             const foundRow = data.find(row => {
                 const lower = {};
                 Object.keys(row).forEach(k => lower[k.toLowerCase()] = row[k]);
@@ -89,31 +85,25 @@ document.addEventListener("DOMContentLoaded", async () => {
                 return;
             }
 
+            // 🔁 végleges normalizált objektum
             const lower = {};
             Object.keys(foundRow).forEach(k => lower[k.toLowerCase()] = foundRow[k]);
 
-            // ✅ UGYANAZ A KÉPLOGIKA, MINT A GRIDNÉL
             const img = getProductImage(table, lower);
 
             box.innerHTML = `
-            <h2>${lower.model || lower.name || "Ismeretlen termék"}</h2>
+            <h2>${lower.model || lower.name || "Ismeretlen modell"}</h2>
             <div class="neon-line"></div>
 
             <img src="${img}"
-                 style="
-                    width:260px;
-                    height:260px;
-                    object-fit:contain;
-                    margin:20px 0;
-                    border-radius:10px;
-                 ">
+                 style="width:220px;height:220px;object-fit:contain;margin-bottom:20px;">
 
             <p><strong>Kategória:</strong> ${table}</p>
             <p><strong>Gyártó:</strong> ${lower.manufacturer || lower.brand || "N/A"}</p>
 
             <div style="margin-top:20px">
                 ${Object.entries(lower)
-                .filter(([k]) => !["id","model","manufacturer","brand","created_at"].includes(k))
+                .filter(([k]) => !["id","model","manufacturer","brand"].includes(k))
                 .map(([k,v]) => `<p><strong>${k}:</strong> ${v}</p>`)
                 .join("")}
             </div>
@@ -127,6 +117,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             box.innerHTML = `<h2>❌ Hiba történt.</h2>`;
         }
     }
+
 
 
 
@@ -283,7 +274,11 @@ async function checkLoginStatus() {
     const authBtn = document.getElementById("auth-btn");
     const adminLink = document.getElementById("admin-link");
 
-    if (!authBtn) return;
+    if (!authBtn) {
+        setTimeout(checkLoginStatus, 50);
+        return;
+    }
+
 
     try {
         const res = await fetch("/api/me", { credentials: "include" });
@@ -300,7 +295,7 @@ async function checkLoginStatus() {
             setLogoutButton(authBtn);
 
             // 👑 ADMIN CHECK
-            if (data.user.isAdmin && adminLink) {
+            if (["admin","admin+","owner"].includes(data.user.role)) {
                 adminLink.classList.remove("hidden");
             } else if (adminLink) {
                 adminLink.classList.add("hidden");
@@ -310,28 +305,30 @@ async function checkLoginStatus() {
             setConnectButton(authBtn);
             if (adminLink) adminLink.classList.add("hidden");
         }
+        window.CURRENT_USER_ROLE = data.user.role;
+        console.log("CURRENT_USER_ROLE:", window.CURRENT_USER_ROLE);
 
     } catch {
         setConnectButton(authBtn);
         if (adminLink) adminLink.classList.add("hidden");
     }
-}
 
+}
 
 function setConnectButton(btn) {
     btn.textContent = "Connect";
-    btn.href = "/regist";
-    btn.onclick = null;
+    btn.onclick = () => {
+        window.location.href = "/regist";
+    };
 }
-
 function setLogoutButton(btn) {
     btn.textContent = "Logout";
-    btn.href = "#";
     btn.onclick = (e) => {
         e.preventDefault();
         logout();
     };
 }
+
 
 /* ----------------------------------
    PROFILE PAGE
@@ -350,6 +347,7 @@ async function loadProfile() {
 
     renderProfile(box, user);
 }
+
 
 /* ----------------------------------
    MYSETUP PAGE
@@ -484,8 +482,6 @@ let currentResults = [];
 let activeBrands = new Set();
 let filterPanelOpen = false;
 
-
-
 async function loadProducts() {
     const grid = document.getElementById("product-grid");
     try {
@@ -540,6 +536,7 @@ async function loadProducts() {
 
 
 
+
 function normalizeProduct(row, table) {
     const lower = {};
     Object.keys(row).forEach(k => lower[k.toLowerCase()] = row[k]);
@@ -560,6 +557,7 @@ function normalizeProduct(row, table) {
         raw: row
     };
 }
+
 
 /* ----------------------------------
    SEARCH INPUT
@@ -583,6 +581,10 @@ document.addEventListener("input", e => {
 
     renderProducts(filtered);
 });
+
+/* ----------------------------------
+   RENDER PRODUCT GRID
+---------------------------------- */
 
 function buildBrandFilters(products) {
     const box = document.getElementById("brand-filters");
@@ -887,18 +889,40 @@ function getCategoryRules(category) {
 
 
 
-
 /* ----------------------------------
    ADMIN PAGE
 ---------------------------------- */
 
+let adminAllRows = [];
+let currentTableRows = [];
+let adminTables = [];
+
 document.addEventListener("input", e => {
-    if (e.target.id !== "table-search") return;
+    if (e.target.id !== "admin-row-search") return;
 
     const term = e.target.value.toLowerCase().trim();
 
     if (!term) {
-        renderTableList(adminTables);
+        renderAdminTable(adminAllRows);
+        return;
+    }
+
+    const filtered = adminAllRows.filter(row =>
+        Object.values(row).some(v =>
+            String(v).toLowerCase().includes(term)
+        )
+    );
+
+    renderAdminTable(filtered);
+});
+
+document.addEventListener("input", e => {
+    if (e.target.id !== "admin-table-search") return;
+
+    const term = e.target.value.toLowerCase().trim();
+
+    if (!term) {
+        renderTableList(adminTables); // vissza az összes
         return;
     }
 
@@ -909,44 +933,21 @@ document.addEventListener("input", e => {
     renderTableList(filtered);
 });
 
-document.addEventListener("input", e => {
-    if (e.target.id !== "admin-row-search") return;
 
-    const term = e.target.value.toLowerCase().trim();
-
-    if (!term) {
-        renderAdminTable(currentTableRows);
-        return;
-    }
-
-    const filtered = currentTableRows.filter(row =>
-        Object.values(row).some(v =>
-            String(v).toLowerCase().includes(term)
-        )
-    );
-
-    renderAdminTable(filtered);
-});
-
-
-let adminTables = [];
 
 
 async function loadAdminTables() {
-    const list = document.getElementById("table-list");
-    if (!list) return;
-
     const res = await fetch("/api/all", { credentials: "include" });
     const { tables } = await res.json();
-
     adminTables = tables;
     renderTableList(tables);
 }
 
 function renderTableList(tables) {
     const list = document.getElementById("table-list");
-    list.innerHTML = "";
+    if (!list) return;
 
+    list.innerHTML = "";
     tables.forEach(t => {
         const li = document.createElement("li");
         li.textContent = t;
@@ -955,7 +956,6 @@ function renderTableList(tables) {
     });
 }
 
-
 async function selectTable(table, el) {
     document.querySelectorAll(".admin-sidebar li")
         .forEach(li => li.classList.remove("active"));
@@ -963,114 +963,581 @@ async function selectTable(table, el) {
     el.classList.add("active");
     document.getElementById("active-table").textContent = table;
 
-    const res = await fetch(`/api/table/${table}`, { credentials: "include" });
-    const rows = await res.json();
+    let rows;
 
-    currentTableRows = rows;   // ⬅️ CACHE
+    if (table === "user[Auth]") {
+        const res = await fetch("/api/admin/users", { credentials: "include" });
+        rows = await res.json();
+    } else {
+        const res = await fetch(`/api/table/${table}`, { credentials: "include" });
+        rows = await res.json();
+    }
+
+
+    adminAllRows = rows;
+    currentTableRows = rows;
     renderAdminTable(rows);
+
 }
 
-
+/* ==================================================
+   ADMIN – TABLE RENDER (⋮ MENÜ!)
+================================================== */
 function renderAdminTable(rows) {
     const thead = document.getElementById("admin-thead");
     const tbody = document.getElementById("admin-tbody");
 
+
     thead.innerHTML = "";
     tbody.innerHTML = "";
 
-    if (!rows.length) return;
+    if (!rows || rows.length === 0) return;
 
-    // HEAD
+    const isUserTable =
+        "Email" in rows[0] &&
+        "UserName" in rows[0];
+
+    /* ---------- HEAD ---------- */
     const headRow = document.createElement("tr");
+
     Object.keys(rows[0]).forEach(col => {
-        if (col === "password") return; // 🔒
+        if (col === "password") return;
         const th = document.createElement("th");
         th.textContent = col;
         headRow.appendChild(th);
     });
-    thead.appendChild(headRow);
 
-    // BODY
-    rows.forEach(r => {
-        const tr = document.createElement("tr");
-        Object.entries(r).forEach(([k, v]) => {
-            if (k === "password") return;
-            const td = document.createElement("td");
-            td.textContent = v ?? "—";
-            tr.appendChild(td);
-        });
-        tbody.appendChild(tr);
-    });
-}
-
-/* ----------------------------------
-   ADMIN SQL QUERY STATE
----------------------------------- */
-
-let currentSQL = "";
-
-document.addEventListener("DOMContentLoaded", () => {
-    const addBtn = document.getElementById("add-query-btn");
-    if (!addBtn) return;
-
-    addBtn.addEventListener("click", () => {
-        const editor = document.getElementById("sql-editor");
-        const textarea = document.getElementById("sql-textarea");
-        const result = document.getElementById("sql-result");
-
-        editor.classList.remove("hidden");
-        textarea.value = "";
-        result.textContent = "";
-
-        // segéd minta
-        textarea.placeholder = "SELECT * FROM table_name LIMIT 10;";
-    });
-});
-
-async function runSQL() {
-    const textarea = document.getElementById("sql-textarea");
-    const resultBox = document.getElementById("sql-result");
-
-    const sql = textarea.value.trim();
-    if (!sql) {
-        resultBox.textContent = "❌ Üres SQL";
-        return;
+    if (isUserTable) {
+        const roleTh = document.createElement("th");
+        roleTh.textContent = "Role";
+        headRow.appendChild(roleTh);
     }
 
-    resultBox.textContent = "⏳ Running query...";
+    const actionTh = document.createElement("th");
+    actionTh.textContent = "⋮";
+    headRow.appendChild(actionTh);
 
-    try {
-        const res = await fetch("/api/admin/sql/run", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            credentials: "include",
-            body: JSON.stringify({ sql })
+    thead.appendChild(headRow);
+
+    /* ---------- BODY ---------- */
+    rows.forEach(r => {
+        const tr = document.createElement("tr");
+
+        // 🔥 EZ KELL
+        tr.dataset.pk = r.id ?? r.ID ?? r.Id;
+        tr.dataset.pkColumn = r.id !== undefined
+            ? "id"
+            : r.ID !== undefined
+                ? "ID"
+                : r.Id !== undefined
+                    ? "Id"
+                    : null;
+
+
+        Object.entries(r).forEach(([k, v]) => {
+            if (k === "password") return;
+            if (isUserTable && k === "role") return; // 🔥 EZ IS
+
+            const td = document.createElement("td");
+            td.textContent = v ?? "—";
+            td.dataset.column = k;
+            tr.appendChild(td);
         });
 
-        const data = await res.json();
 
-        if (!res.ok) {
-            resultBox.textContent = "❌ ERROR:\n" + (data.error || "Unknown error");
+        if (isUserTable) {
+            const roleTd = document.createElement("td");
+            roleTd.textContent = r.role?.toUpperCase() || "USER";
+            roleTd.style.fontWeight = "600";
+            roleTd.style.opacity = "0.8";
+            tr.appendChild(roleTd);
+        }
+
+        const actionTd = document.createElement("td");
+        const menuBtn = document.createElement("div");
+        menuBtn.className = "menu-dots";
+        menuBtn.innerHTML = "&#8942;";
+
+
+        menuBtn.onclick = e => {
+            e.stopPropagation();
+            if (isUserTable) {
+                openUserMenu(r, menuBtn);
+            } else {
+                openGenericMenu(r, menuBtn);
+            }
+        };
+
+
+
+        actionTd.appendChild(menuBtn);
+        tr.appendChild(actionTd);
+        tbody.appendChild(tr);
+
+        tr.ondblclick = () => {
+            enableRowEdit(tr, r);
+        };
+
+
+    });
+    // ➕ ADD ROW BAR – VÉGÉN (NEM user[Auth]-nál)
+    if (!isUserTable) {
+        const addRowTr = document.createElement("tr");
+        addRowTr.className = "add-row-tr";
+
+        const addTd = document.createElement("td");
+        addTd.colSpan = thead.querySelectorAll("th").length;
+        addTd.innerHTML = `<div class="add-row-btn">➕ Új sor hozzáadása</div>`;
+
+        addTd.onclick = () => createEmptyRow(rows[0]);
+
+        addRowTr.appendChild(addTd);
+        tbody.appendChild(addRowTr);
+    }
+
+
+
+}
+
+function openGenericMenu(row, anchor) {
+    closeAnyMenu();
+
+    const rect = anchor.getBoundingClientRect();
+    const menu = document.createElement("div");
+    menu.id = "context-menu";
+    menu.className = "user-menu neon";
+
+    menu.style.top = rect.bottom + "px";
+    menu.style.left = (rect.left - 200) + "px";
+
+    const table = document.getElementById("active-table").textContent;
+
+    menu.innerHTML = `
+        <div class="menu-title">Műveletek</div>
+
+        <div class="menu-item danger"
+             onclick="deleteGenericRow('${table}', '${row.id ?? row.ID ?? row.Id}')">
+            <span style="color:#ff4d4d; font-weight:700; margin-right:6px;">❌</span>
+            Törlés
+        </div>
+    `;
+
+    document.body.appendChild(menu);
+    setTimeout(() =>
+            document.addEventListener("click", closeAnyMenu, { once: true }),
+        0
+    );
+}
+
+
+function enableRowEdit(tr, row) {
+    if (tr.classList.contains("editing")) return;
+
+    tr.classList.add("editing");
+
+    const table = document.getElementById("active-table").textContent;
+    const tds = Array.from(tr.children);
+
+    const original = {};
+
+    tds.forEach((td, index) => {
+        const col = td.dataset?.column;
+        if (!col) return;
+
+        original[col] = row[col];
+
+        // tiltott mezők
+        if (["id", "password", "created_at"].includes(col)) return;
+
+        const input = document.createElement("input");
+        input.className = "row-input";
+        input.value = row[col] ?? "";
+
+        td.textContent = "";
+        td.appendChild(input);
+    });
+
+    const cancel = () => {
+        tr.classList.remove("editing");
+        selectTable(table, document.querySelector(".admin-sidebar li.active"));
+    };
+
+    const save = async () => {
+        const updates = {};
+
+        tds.forEach(td => {
+            const col = td.dataset?.column;
+            const input = td.querySelector("input");
+            if (!input) return;
+
+            const val = input.value.trim();
+            if (val !== String(row[col] ?? "")) {
+                updates[col] = val;
+            }
+        });
+
+        if (Object.keys(updates).length === 0) {
+            cancel();
             return;
         }
 
-        resultBox.textContent = JSON.stringify(data, null, 2);
+        const res = await fetch("/api/admin/update-row", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+            body: JSON.stringify({
+                table,
+                id: tr.dataset.pk,
+                updates
+            })
 
-    } catch (err) {
-        console.error(err);
-        resultBox.textContent = "❌ JS error: " + err.message;
+
+        });
+
+        if (!res.ok) {
+            const err = await res.json();
+            alert("❌ Beszúrás sikertelen:\n" + err.error);
+            return;
+        }
+
+
+        cancel();
+    };
+
+    tr.addEventListener("keydown", e => {
+        if (e.key === "Enter") save();
+        if (e.key === "Escape") cancel();
+    });
+
+    tr.addEventListener("focusout", save, { once: true });
+}
+
+
+/* ==================================================
+   ⋮ MENÜK
+================================================== */
+
+function closeAnyMenu() {
+    const m = document.getElementById("context-menu");
+    if (m) m.remove();
+}
+
+function openUserMenu(user, anchor) {
+    closeAnyMenu();
+
+    const rect = anchor.getBoundingClientRect();
+    const menu = document.createElement("div");
+    menu.id = "context-menu";
+    menu.className = "user-menu neon";
+
+    menu.style.top = rect.bottom + "px";
+    menu.style.left = (rect.left - 200) + "px";
+
+    menu.innerHTML = `
+        <div class="menu-title">Felhasználó</div>
+        <div class="muted">${user.Name} • ${user.role.toUpperCase()}</div>
+
+        <hr>
+
+        <div class="menu-title">👑 Rang adás</div>
+        ${renderRoleList(user)}
+        
+        <hr>
+        
+        <hr>
+
+        <div class="menu-item danger"
+             onclick="deleteRow(${user.id})">
+            <span style="color:#ff4d4d; font-weight:700; margin-right:6px;">❌</span>
+            Törlés
+        </div>
+
+    `;
+
+    document.body.appendChild(menu);
+    setTimeout(() =>
+            document.addEventListener("click", closeAnyMenu, { once: true }),
+        0
+    );
+}
+
+function renderRoleList(user) {
+    const roles = ["owner", "admin+", "admin", "user"];
+
+    return roles.map(role => {
+        if (role === user.role) {
+            return `
+                <div class="role-option disabled">
+                    ✔ ${role.toUpperCase()}
+                </div>
+            `;
+        }
+
+        return `
+            <div class="role-option"
+                 onclick="setUserRole(${user.id}, '${role}')">
+                ${role.toUpperCase()}
+            </div>
+        `;
+    }).join("");
+}
+
+async function deleteRow(id) {
+    const table = document.getElementById("active-table").textContent;
+
+    if (!confirm("⚠️ Biztosan törlöd ezt a sort? Ez nem visszavonható!")) {
+        return;
     }
+
+    const res = await fetch("/api/admin/delete-row", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+            table,
+            id
+        })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+        alert("❌ Törlés sikertelen: " + data.error);
+        return;
+    }
+
+    closeAnyMenu();
+
+    // 🔄 frissítjük a táblát
+    selectTable(table, document.querySelector(".admin-sidebar li.active"));
 }
 
-function saveSQL() {
-    alert("💾 Save később jön (Supabase table)");
+
+function openRoleMenu(userId) {
+    closeAnyMenu();
+
+    const row = currentTableRows.find(u => u.id === userId);
+    if (!row) return;
+
+    openUserMenu(row, document.querySelector(".menu-dots"));
 }
 
-function discardSQL() {
-    document.getElementById("sql-editor").classList.add("hidden");
-    document.getElementById("sql-textarea").value = "";
-    document.getElementById("sql-result").textContent = "";
+
+
+
+
+function closeModal() {
+    const m = document.querySelector(".user-edit-modal");
+    if (m) m.remove();
 }
+
+
+function canAssignFrontend(granter, target) {
+    const rank = { owner: 3, "admin+": 2, admin: 1, user: 0 };
+    return (rank[granter] || 0) > (rank[target] || 0); // ✅ Null-safe check
+}
+
+
+
+
+function openDisabledMenu(anchor) {
+    closeAnyMenu();
+
+    const rect = anchor.getBoundingClientRect();
+    const menu = document.createElement("div");
+    menu.id = "context-menu";
+    menu.className = "user-menu muted";
+    menu.style.top = rect.bottom + "px";
+    menu.style.left = rect.left + "px";
+
+    menu.innerHTML = `
+        <div class="menu-item">⏳ Később elérhető</div>
+    `;
+
+    document.body.appendChild(menu);
+    setTimeout(() =>
+            document.addEventListener("click", closeAnyMenu, { once: true })
+        , 0);
+}
+async function setUserRole(userId, role) {
+    if (!confirm(`Biztosan ${role.toUpperCase()} rangot adsz?`)) return;
+
+    const res = await fetch("/api/admin/set-role", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ userId, role })
+    });
+
+    const data = await res.json();
+    if (!res.ok) {
+        alert("❌ " + data.error);
+        return;
+    }
+
+    closeAnyMenu();
+
+    const table = document.getElementById("active-table").textContent;
+    selectTable(table, document.querySelector(".admin-sidebar li.active"));
+}
+
+
+function createEmptyRow(exampleRow) {
+    const tbody = document.getElementById("admin-tbody");
+    const table = document.getElementById("active-table").textContent;
+
+    const tr = document.createElement("tr");
+    tr.className = "editing new-row";
+
+    const inputs = {};
+
+    Object.keys(exampleRow).forEach(col => {
+        if (["id", "ID", "created_at", "password"].includes(col)) return;
+
+        const td = document.createElement("td");
+        const input = document.createElement("input");
+
+        input.className = "row-input";
+        input.placeholder = col;
+
+        inputs[col] = input;
+        td.appendChild(input);
+        tr.appendChild(td);
+    });
+
+    // role / action oszlopok üresen
+    const filler = document.createElement("td");
+    tr.appendChild(filler);
+    tr.appendChild(document.createElement("td"));
+
+    tbody.insertBefore(tr, tbody.lastChild);
+
+    const cancel = () => tr.remove();
+
+    const save = async () => {
+        const payload = {};
+        Object.entries(inputs).forEach(([k, input]) => {
+            const val = input.value.trim();
+            if (val !== "") payload[k] = val;
+        });
+
+        if (Object.keys(payload).length === 0) {
+            cancel();
+            return;
+        }
+
+        const res = await fetch("/api/admin/insert-row", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+            body: JSON.stringify({ table, payload })
+        });
+
+        if (!res.ok) {
+            alert("❌ Beszúrás sikertelen");
+            return;
+        }
+
+        selectTable(table, document.querySelector(".admin-sidebar li.active"));
+    };
+
+    tr.addEventListener("keydown", e => {
+        if (e.key === "Enter") save();
+        if (e.key === "Escape") cancel();
+    });
+
+    tr.querySelector("input")?.focus();
+
+    // createEmptyRow végén
+    tr.addEventListener("focusout", save, { once: true });
+
+}
+
+
+/* ==================================================
+   ADMIN – TOGGLE ROLE
+================================================== */
+
+async function toggleAdmin(userId) {
+    if (!confirm("Biztos módosítod az admin jogot?")) return;
+
+    const res = await fetch("/api/admin/toggle-admin", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ userId })
+    });
+
+    const data = await res.json();
+    if (!res.ok) {
+        alert("❌ " + data.error);
+        return;
+    }
+
+    const table = document.getElementById("active-table").textContent;
+    selectTable(table, document.querySelector(".admin-sidebar li.active"));
+}
+
+/* ==================================================
+   ADMIN – SQL
+================================================== */
+
+function bindSQLButton() {
+    const addBtn = document.getElementById("add-query-btn");
+    if (!addBtn) return;
+
+    addBtn.onclick = () => {
+        document.getElementById("sql-editor").classList.remove("hidden");
+        document.getElementById("sql-textarea").value = "";
+        document.getElementById("sql-result").textContent = "";
+    };
+}
+
+async function runSQL() {
+    const sql = document.getElementById("sql-textarea").value.trim();
+    const result = document.getElementById("sql-result");
+
+    if (!sql) {
+        result.textContent = "❌ Üres SQL";
+        return;
+    }
+
+    result.textContent = "⏳ Running...";
+
+    const res = await fetch("/api/admin/sql/run", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ sql })
+    });
+
+    const data = await res.json();
+    result.textContent = res.ok
+        ? JSON.stringify(data, null, 2)
+        : "❌ " + data.error;
+}
+
+async function deleteGenericRow(table, id) {
+    if (!confirm("⚠️ Biztosan törlöd ezt a sort?")) return;
+
+    const res = await fetch("/api/admin/delete-row", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ table, id })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+        alert("❌ Törlés sikertelen: " + data.error);
+        return;
+    }
+
+    closeAnyMenu();
+    selectTable(table, document.querySelector(".admin-sidebar li.active"));
+}
+
 
 
 /* ----------------------------------
@@ -1271,6 +1738,3 @@ function renderGenericItems(items) {
         list.appendChild(div);
     });
 }
-
-
-
