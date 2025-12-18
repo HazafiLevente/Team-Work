@@ -128,6 +128,13 @@
     "nektar": "https://thumbs.static-thomann.de/thumb/thumb182x108/pics/herstlogos/nektar.webp",
     "presonus": "https://images.seeklogo.com/logo-png/24/1/presonus-logo-png_seeklogo-243008.png"
   },
+
+  "audio_processor":
+  {
+    "trinnov": "https://www.trinnov.com/site/assets/files/1016/trinnov-schema-logo.jpg",
+    "stormaudio": "https://logovtor.com/wp-content/uploads/2022/03/stormaudio-logo-vector-2022.png"
+  },
+
   "effect-multieffects": {
     "boss": "https://www.tonepedia.com/wp-content/uploads/2022/03/Boss_logo2-768x396.jpg",
     "line": "https://p7.hiclipart.com/preview/606/767/648/guitar-amplifier-line-6-pod-yamaha-corporation-yamaha-logo.jpg",
@@ -149,12 +156,12 @@
   "soundcard": {
     "focusrite": "https://upload.wikimedia.org/wikipedia/commons/f/fc/Focusrite_logo.png",
     "presonus": "https://images.seeklogo.com/logo-png/24/1/presonus-logo-png_seeklogo-243008.png",
-    "m-audio": "https://cdn.freebiesupply.com/logos/large/2x/m-audio-logo-png-transparent.png",
+    "m-audio": "https://pult.cy/image/cache/catalog/clear/brands/M-Audio/0-500x500.png",
     "behringer": "https://toppng.com/uploads/preview/behringer-vector-logo-free-download-11574244626ajb7i9zuov.png"
   },
   "midis": {
     "akai": "https://upload.wikimedia.org/wikipedia/commons/4/46/Akai_brand_logo.svg",
-    "M-Audio": "https://cdn.freebiesupply.com/logos/large/2x/m-audio-logo-png-transparent.png",
+    "m-audio": "https://pult.cy/image/cache/catalog/clear/brands/M-Audio/0-500x500.png",
     "arturia": "https://images.seeklogo.com/logo-png/48/1/arturia-logo-png_seeklogo-481051.png",
     "nektar": "https://www.arc.si/lyphp-latest/plugins/lythumb.php?src=/documents/arc/brands/Nektar.png&w=500&h=250&f=1",
     "native instruments": "https://images.seeklogo.com/logo-png/9/1/native-instruments-logo-png_seeklogo-97446.png",
@@ -216,6 +223,39 @@
   {
     "yamaha": "https://images.seeklogo.com/logo-png/15/1/yamaha-logo-png_seeklogo-154895.png",
     "Roy Benson": "https://www.musik-mueller.it/wp-content/uploads/2019/10/Marken-Roy-Benson.png"
+  },
+
+  "home_theater":
+  {
+    "marantz": "https://upload.wikimedia.org/wikipedia/commons/c/c1/Marantz-Logo.svg",
+    "denon": "https://upload.wikimedia.org/wikipedia/commons/b/b3/Denon_Logo.svg",
+    "yamaha": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/de/Yamaha_Motor_logo.svg/1200px-Yamaha_Motor_logo.svg.png",
+    "onkyo": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQDBD_yVPyHLkTjFXJ3R_5tGxnW3n7XHsvqSQ&s",
+    "sony": "https://images.seeklogo.com/logo-png/12/1/sony-logo-png_seeklogo-129420.png",
+    "pioneer": "https://1000logos.net/wp-content/uploads/2017/12/Pioneer-logo.png",
+    "cambridge audio": "https://images.seeklogo.com/logo-png/2/1/cambridge-audio-logo-png_seeklogo-25170.png",
+    "jbl": "https://logos-world.net/wp-content/uploads/2020/03/JBL-Logo.jpg",
+    "wiim": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ0XgezA-QWNEo9VMcH4nJHcNQE_vkRgZiUJw&s",
+    "harman/kardon": "https://1000logos.net/wp-content/uploads/2021/05/Harman-Kardon-logo.png",
+    "tangent": "https://images.squarespace-cdn.com/content/v1/60650b96a32d3740f6ae11c7/66a0462d-953a-4877-a3a9-30cb9f4d59d7/Artboard+15TANGENT_LOGO_V3.png",
+    "blitzwolf": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQrurhELJ5i6t61ysv2hd6zdD6zjsBsF2Ot4g&s",
+    "aiwa": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRA9TWHmQ1T-44apMNE2O6JgZdrW8sebPF1BQ&s",
+    "musical fidelity": "https://www.musicalfidelity.com/uploads/images/musical-fidelity-logo-og.jpg",
+    "audiolab": "https://images.seeklogo.com/logo-png/1/1/audiolab-logo-png_seeklogo-13510.png",
+    "technics": "https://images.seeklogo.com/logo-png/50/1/technics-logo-png_seeklogo-509967.png"
+  },
+
+  "studio_monitor_speakers":
+  {
+    "yamaha": "https://images.seeklogo.com/logo-png/15/1/yamaha-logo-png_seeklogo-154895.png",
+    "adam audio": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRz0Zv1rbyngK6x5auoYmZVVS0b6eSMhd7KwQ&s",
+    "krk": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQFkCcqRsb0boYXn09gxG1srD_xu0Y6zaacWw&s",
+    "jbl": "https://logos-world.net/wp-content/uploads/2020/03/JBL-Logo.jpg",
+    "presonus": "https://images.seeklogo.com/logo-png/24/1/presonus-logo-png_seeklogo-243008.png",
+    "mackie": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTbnB0wiUMsClPeehHUlgb4Q-Zbn9ijCr6tCg&s",
+    "focal": "https://images.seeklogo.com/logo-png/33/1/focal-logo-png_seeklogo-334994.png",
+    "ik multimedia": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQg6jHKOyPx4hFzrJQnV8RjS1PjnySfZ7lOBg&s",
+    "behringer": "https://toppng.com/uploads/preview/behringer-vector-logo-free-download-11574244626ajb7i9zuov.png"
   }
 
 }

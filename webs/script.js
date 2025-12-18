@@ -53,6 +53,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     // ❗ Csak product oldalon fusson
     // ✅ HELYES – csak product logika
     if (window.location.pathname.includes("product.html")) {
+
+        // 🔥 FONTOS: image map betöltése
+        await loadImageMap();
+
         const box = document.getElementById("product-box");
         if (!box) return;
 
@@ -74,7 +78,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
             const data = await res.json();
 
-            // 🔥 NORMALIZÁLT ID KERESÉS (EZ A FIX)
             const foundRow = data.find(row => {
                 const lower = {};
                 Object.keys(row).forEach(k => lower[k.toLowerCase()] = row[k]);
@@ -86,25 +89,31 @@ document.addEventListener("DOMContentLoaded", async () => {
                 return;
             }
 
-            // 🔁 végleges normalizált objektum
             const lower = {};
             Object.keys(foundRow).forEach(k => lower[k.toLowerCase()] = foundRow[k]);
 
+            // ✅ UGYANAZ A KÉPLOGIKA, MINT A GRIDNÉL
             const img = getProductImage(table, lower);
 
             box.innerHTML = `
-            <h2>${lower.model || lower.name || "Ismeretlen modell"}</h2>
+            <h2>${lower.model || lower.name || "Ismeretlen termék"}</h2>
             <div class="neon-line"></div>
 
             <img src="${img}"
-                 style="width:220px;height:220px;object-fit:contain;margin-bottom:20px;">
+                 style="
+                    width:260px;
+                    height:260px;
+                    object-fit:contain;
+                    margin:20px 0;
+                    border-radius:10px;
+                 ">
 
             <p><strong>Kategória:</strong> ${table}</p>
             <p><strong>Gyártó:</strong> ${lower.manufacturer || lower.brand || "N/A"}</p>
 
             <div style="margin-top:20px">
                 ${Object.entries(lower)
-                .filter(([k]) => !["id","model","manufacturer","brand"].includes(k))
+                .filter(([k]) => !["id","model","manufacturer","brand","created_at"].includes(k))
                 .map(([k,v]) => `<p><strong>${k}:</strong> ${v}</p>`)
                 .join("")}
             </div>
@@ -118,7 +127,6 @@ document.addEventListener("DOMContentLoaded", async () => {
             box.innerHTML = `<h2>❌ Hiba történt.</h2>`;
         }
     }
-
 
 
 
@@ -711,6 +719,8 @@ function renderProducts(list) {
 }
 
 
+//PRODUCTIMAGE//
+
 let IMAGE_MAP = {};
 
 async function loadImageMap() {
@@ -731,7 +741,7 @@ async function loadImageMap() {
 
 
 
-//PRODUCTIMAGE//
+
 
 const TABLE_IMAGE_CATEGORY_MAP = {
     hatchback_cars: "cars",
@@ -773,6 +783,8 @@ const TABLE_IMAGE_CATEGORY_MAP = {
     alt_saxophone:"alt_saxophones",
     alt_saxophones:"alt_saxophones",
 
+    audio_processors: "audio_processor",
+
     wind_instrument_oils: "wind_instruments_cremes_oils",
 
     cleaning_brushes: "cleaning_brushes",
@@ -781,6 +793,10 @@ const TABLE_IMAGE_CATEGORY_MAP = {
 
     c_trumpets: "c_trumpets",
 
+    home_theater: "home_theater",
+    home_theatre: "home_theatre",
+
+    studio_audio_speakers: "studio_audio_speakers",
 
     processors: "processors",
     motherboards: "motherboard",
@@ -794,12 +810,13 @@ const TABLE_IMAGE_CATEGORY_MAP = {
 
 
 function getProductImage(table, product) {
-    if (!IMAGE_MAP) {
+    if (!IMAGE_MAP || Object.keys(IMAGE_MAP).length === 0) {
         return "https://via.placeholder.com/200?text=No+Image";
     }
 
     const category = normalizeTableName(table);
-    const categoryRules = IMAGE_MAP[category];
+    const categoryRules = getCategoryRules(category);
+
     const text = normalizeText(
         (product.manufacturer || "") + " " + (product.model || "")
     );
@@ -818,14 +835,13 @@ function getProductImage(table, product) {
             }
         }
 
-        // 🟡 fallback: első kategória kép
+        // 🟡 fallback: első kép a kategóriából
         const fallback = Object.values(categoryRules)[0];
         if (fallback) return fallback;
     }
 
     return "https://via.placeholder.com/200?text=No+Image";
 }
-
 
 
 function normalizeTableName(table) {
@@ -847,27 +863,26 @@ function normalizeTableName(table) {
 function normalizeText(str = "") {
     return String(str)
         .toLowerCase()
-        .normalize("NFD")                 // ékezetek bontása
-        .replace(/[\u0300-\u036f]/g, "")  // ékezetek törlése
-        .replace(/['".]/g, "")            // ' " . eltávolítása
-        .replace(/[^a-z0-9]+/g, " ")      // MINDEN nem alfanumerikus → space
-        .replace(/\s+/g, " ")             // többszörös space
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/['".]/g, "")
+        .replace(/[^a-z0-9]+/g, " ")
+        .replace(/\s+/g, " ")
         .trim();
+}
 
-    const entries = Object.entries(categoryRules)
-        .map(([key, url]) => ({
-            key: normalizeText(key),
-            url
-        }))
-        .sort((a, b) => b.key.length - a.key.length);
 
-    for (const entry of entries) {
-        if (text.includes(entry.key)) {
-            return entry.url;
+function getCategoryRules(category) {
+    const normalizedCategory = normalizeText(category);
+
+    for (const [key, value] of Object.entries(IMAGE_MAP)) {
+        if (normalizeText(key) === normalizedCategory) {
+            return value;
         }
     }
-
+    return null;
 }
+
 
 
 
