@@ -99,26 +99,39 @@ async function getAllTableColumns() {
 }
 
 function detectColumns(columns) {
+    const lower = columns.map(c => c.toLowerCase());
+
     const id =
-        columns.find(c => c.toLowerCase() === "id");
+        columns.find(c =>
+            ["id", "ID"].includes(c)
+        ) || "'0'";
 
     const manufacturer =
         columns.find(c =>
-            ["manufacturer", "brand"].includes(c.toLowerCase())
+            ["manufacturer", "brand", "maker"].includes(c.toLowerCase())
         );
 
     const model =
         columns.find(c =>
-            ["model", "name", "product_name"].includes(c.toLowerCase())
+            ["model", "name", "product_name", "series"].includes(c.toLowerCase())
         );
 
     const price =
-        columns.find(c => c.toLowerCase() === "price");
+        columns.find(c =>
+            ["price", "cost", "price_huf"].includes(c.toLowerCase())
+        );
 
-    if (!id || !manufacturer || !model) return null;
+    // 🔥 CSAK A MANUFACTURER + MODEL KÖTELEZŐ
+    if (!manufacturer || !model) return null;
 
-    return { id, manufacturer, model, price };
+    return {
+        id,
+        manufacturer,
+        model,
+        price: price || null
+    };
 }
+
 
 
 
@@ -132,14 +145,15 @@ function buildUnionSQL(tablesMeta) {
         blocks.push(`
             select
                 '${table}'::text as table_name,
-                ${q(cols.id)}::text as id,
+                ${cols.id === "'0'" ? "'0'" : q(cols.id)}::text as id,
                 ${q(cols.manufacturer)}::text as manufacturer,
                 ${q(cols.model)}::text as model,
                 ${cols.price
-            ? q(cols.price) + "::numeric"
-            : "null::numeric"} as price
+                    ? q(cols.price) + "::numeric"
+                    : "null::numeric"} as price
             from "${table}"
         `.trim());
+
     }
 
     return blocks.join("\nunion all\n");
@@ -156,9 +170,7 @@ function q(col) {
 function buildProductsHomeSQL(unionSQL) {
     return `
 create or replace function products_home(
-    q text,
-    lim int,
-    off int
+    q text
 )
 returns table (
     table_name text,
@@ -167,7 +179,6 @@ returns table (
     model text,
     price numeric
 )
-
 language sql
 security definer
 as $$
@@ -177,8 +188,7 @@ as $$
     where
         q is null
         or lower(manufacturer) like '%' || q || '%'
-        or lower(model) like '%' || q || '%'
-    limit lim offset off;
+        or lower(model) like '%' || q || '%';
 $$;
 `;
 }
@@ -317,4 +327,3 @@ module.exports = {
     hasAdminPlusAccess,
     ROLES
 };
-

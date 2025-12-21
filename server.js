@@ -35,12 +35,10 @@ const adminFilePath = path.join(__dirname, "admin.json");
 const TABLES_FILE = path.join(__dirname, "tables.runtime.json");
 
 function getRuntimeTables() {
-    if (!fs.existsSync(TABLES_FILE)) return [];
+    if (!fs.existsSync(TABLES_FILE)) return {};
     const json = JSON.parse(fs.readFileSync(TABLES_FILE, "utf8"));
-    return json.tables || [];
+    return json.tables || {};
 }
-
-
 
 
 /* ======================================================
@@ -228,19 +226,6 @@ app.get("/api/public/table/:name", async (req, res) => {
 
     res.json(data);
 });
-app.get("/api/products/tables", async (_, res) => {
-    const { data, error } = await supabase.rpc("get_all_tables");
-
-    if (error) return res.status(500).json({ error: error.message });
-    if (!Array.isArray(data)) return res.json({ tables: [] });
-
-    // ✅ termék = nincs benne [
-    const productTables = data
-        .map(t => t.table_name)
-        .filter(name => name && !name.includes("["));
-
-    res.json({ tables: productTables });
-});
 
 
 
@@ -298,10 +283,41 @@ app.get("/meta/filler", (_, res) => {
 
 
 
-app.get("/api/products/tables", async (_, res) => {
-    res.json({
-        tables: getRuntimeTables()
-    });
+
+
+app.get("/api/products/tables", (_, res) => {
+    const runtime = getRuntimeTables();
+
+    // object → array
+    const tables = Object.keys(runtime);
+
+    res.json({ tables });
+});
+
+app.get("/api/products", async (req, res) => {
+    const page = Number(req.query.page || 1);
+    const q = req.query.q || null;
+
+    const limit = 200;
+    const offset = (page - 1) * limit;
+
+    const { data, error } = await supabase
+        .rpc("products_home", {
+            q,
+        });
+
+    if (error) {
+        console.error("❌ products_home error:", error);
+        return res.status(500).json({ error: error.message });
+    }
+
+    res.json({ items: data || [] });
+});
+
+app.get("/api/products/brands", async (_, res) => {
+    const { data, error } = await supabase.rpc("products_brands");
+    if (error) return res.status(500).json({ error: error.message });
+    res.json({ brands: data.map(b => b.brand) });
 });
 
 

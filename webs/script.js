@@ -9,6 +9,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         injectSearchArea();
         await loadImageMap();
         await loadProducts();
+        await loadBrandFilters();
+
     }
 
 
@@ -139,21 +141,20 @@ function injectSearchArea() {
     box.style.gridColumn = "1 / -1";
     box.innerHTML = `
         <div style="margin-bottom: 20px;">
-            <input id="search-input" 
-                   type="text" 
+            <input id="search-input" type="text"
                    placeholder="Keresés: manufacturer, model, kategória..."
-                   style="
-                        width:100%;
-                        padding:14px;
-                        border-radius:10px;
-                        background:rgba(255,255,255,0.05);
-                        border:1px solid rgba(255,255,255,0.12);
-                        color:white;
-                        font-size:16px;">
+                   style="width:100%; padding:14px; border-radius:10px;">
         </div>
-
+    
+        <button id="filter-toggle-btn" class="btn small">🔍 Szűrő</button>
+    
+        <div id="filter-panel" class="hidden">
+            <div id="brand-filters"></div>
+        </div>
+    
         <div id="product-grid"></div>
     `;
+
 
     content.prepend(box);
 }
@@ -482,7 +483,7 @@ let currentResults = [];
 let activeBrands = new Set();
 let filterPanelOpen = false;
 
-async function loadProducts() {
+/*async function loadProducts() {
     const grid = document.getElementById("product-grid");
     try {
         const res = await fetch("/api/products/tables");
@@ -531,6 +532,31 @@ async function loadProducts() {
         console.error("❌ loadProducts error:", err);
         if (grid) grid.innerHTML = `<p class="muted">❌ JS error: ${err.message}</p>`;
     }
+}*/
+
+
+async function loadProducts(q = null) {
+    const res = await fetch(
+        `/api/products?q=${encodeURIComponent(q || "")}`
+    );
+
+    if (!res.ok) {
+        console.error("❌ products load failed");
+        return;
+    }
+
+    const { items } = await res.json();
+
+    allProducts = items.map(p => ({
+        table: p.table_name,
+        id: p.id,
+        manufacturer: p.manufacturer,
+        model: p.model,
+        price: p.price
+    }));
+
+    renderProducts(allProducts);
+    buildBrandFilters(allProducts);
 }
 
 
@@ -588,13 +614,19 @@ document.addEventListener("input", e => {
 
 function buildBrandFilters(products) {
     const box = document.getElementById("brand-filters");
-    if (!box) return;
+    if (!box) {
+        console.warn("❌ #brand-filters element not found");
+        return;
+    }
 
     box.innerHTML = "";
+    activeBrands.clear();
 
     const brands = [...new Set(
-        products.map(p => p.manufacturer).filter(Boolean)
-    )].sort();
+        products
+            .map(p => p.manufacturer)
+            .filter(b => typeof b === "string" && b.trim())
+    )].sort((a, b) => a.localeCompare(b));
 
     brands.forEach(brand => {
         const id = `brand-${brand.replace(/\s+/g, "-")}`;
@@ -606,24 +638,51 @@ function buildBrandFilters(products) {
         label.style.cursor = "pointer";
 
         label.innerHTML = `
-            <input type="checkbox" id="${id}" />
+            <input type="checkbox" id="${id}">
             <span>${brand}</span>
         `;
 
         const checkbox = label.querySelector("input");
 
         checkbox.addEventListener("change", () => {
-            if (checkbox.checked) {
-                activeBrands.add(brand);
-            } else {
-                activeBrands.delete(brand);
-            }
+            checkbox.checked
+                ? activeBrands.add(brand)
+                : activeBrands.delete(brand);
             applyFilters();
         });
 
         box.appendChild(label);
     });
+
+    console.log("✅ Brand filters built:", brands);
 }
+
+
+
+async function loadBrandFilters() {
+    try {
+        const res = await fetch("/api/products/brands");
+
+        if (!res.ok) {
+            console.error("❌ /api/products/brands failed:", res.status);
+            return;
+        }
+
+        const data = await res.json();
+
+        if (!Array.isArray(data.brands)) {
+            console.warn("⚠️ brands is not array:", data);
+            return;
+        }
+
+        buildBrandFilters(
+            data.brands.map(b => ({ manufacturer: b }))
+        );
+    } catch (err) {
+        console.error("❌ loadBrandFilters crashed:", err);
+    }
+}
+
 
 function applyFilters() {
     const term = document
