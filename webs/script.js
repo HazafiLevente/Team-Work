@@ -485,33 +485,6 @@ function renderProfile(box, user) {
     `;
 }
 
-async function loadMySetupsPage() {
-    const content = document.querySelector(".content");
-    if (!content) return;
-
-    // 1. Alapstruktúra felépítése
-    content.innerHTML = `
-        <h2>My Setups</h2>
-        <div class="neon-line"></div>
-        <div id="setup-list" class="setup-grid">
-            <p class="muted">⏳ Betöltés...</p>
-        </div>
-    `;
-
-    try {
-        const res = await fetch("/api/my-setups", { credentials: "include" });
-        const data = await res.json();
-
-        // 2. A renderelésnél nem ágazunk el!
-        // Mindig meghívjuk a renderelőt, az majd eldönti, van-e adat.
-        renderSetupCards(data.setups || []);
-
-    } catch (err) {
-        console.error("Hiba:", err);
-        const list = document.getElementById("setup-list");
-        if (list) list.innerHTML = `<p class="muted">❌ Hiba történt a betöltéskor.</p>`;
-    }
-}
 
 function renderSetupCards(setups) {
     const list = document.getElementById("setup-list");
@@ -1062,33 +1035,7 @@ function discardSQL() {
 ---------------------------------- */
 
 
-async function createNewSetup() {
-    const name = prompt("Add meg az új setup nevét:");
-    if (!name) return;
 
-    try {
-        const res = await fetch("/api/my-setups", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            credentials: "include",
-            body: JSON.stringify({ name })
-        });
-
-        const data = await res.json();
-
-        if (!res.ok) {
-            alert("❌ Nem sikerült létrehozni: " + data.error);
-            return;
-        }
-
-        // 🔄 frissítjük a listát
-        await loadMySetupsPage();
-
-    } catch (err) {
-        console.error(err);
-        alert("❌ Hiba történt");
-    }
-}
 async function loadSetupChildren(setupId) {
     const content = document.querySelector(".content");
 
@@ -1239,30 +1186,49 @@ async function createNewSetup() {
     loadMySetupsPage();
 }
 
-app.delete("/api/my-setups/:id", async (req, res) => {
+async function deleteSetup(setupId, event) {
+
+    if (event) event.stopPropagation();
+
+    if (!confirm("Biztosan törölni szeretnéd ezt a setupot?")) return;
+
     try {
-        const userId = req.user?.id;
-        const setupId = req.params.id;
+        const res = await fetch(`/api/my-setups/${setupId}`, {
+            method: "DELETE",
+            credentials: "include"
+        });
 
-        if (!userId) {
-            return res.status(401).json({ error: "Not logged in" });
+        const data = await res.json();
+
+        if (res.ok && data.success) {
+            alert("Setup sikeresen törölve!");
+            await loadMySetupsPage(); // Lista frissítése
+        } else {
+            alert("Hiba a törlés során: " + (data.error || "Ismeretlen hiba"));
         }
+    } catch (err) {
+        console.error("Delete fetch error:", err);
+        alert("Hálózati hiba történt a törléskor.");
+    }
+}
 
-        const { error } = await supabase
-            .from("setups")
-            .delete()
-            .eq("id", setupId)
-            .eq("user_id", userId); // nagyon fontos!
 
-        if (error) {
-            console.error(error);
-            return res.status(400).json({ error: "Delete failed" });
-        }
+async function loadMySetups() {
+    const box = document.getElementById("setup-list");
+    if (!box) return;
 
-        res.json({ success: true });
+    try {
+        const res = await fetch("/api/my-setups", {
+            credentials: "include"
+        });
+
+        if (!res.ok) throw new Error("API error");
+
+        const setups = await res.json();
+        renderSetupCards(setups);
 
     } catch (err) {
         console.error(err);
-        res.status(500).json({ error: "Server error" });
+        box.innerHTML = "<p class='error'>❌ Hiba történt.</p>";
     }
-});
+}

@@ -427,6 +427,30 @@ app.post("/api/my-setups", verifyUser, async (req, res) => {
 });
 
 
+app.delete("/api/my-setups/:id", verifyUser, async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const setupId = req.params.id;
+
+        const { error } = await supabase
+            .from("setup[Setup]") // ✅ Javítva a tábla neve!
+            .delete()
+            .eq("id", setupId)
+            .eq("user_id", userId);
+
+        if (error) {
+            console.error("❌ Delete error:", error);
+            return res.status(400).json({ error: "Delete failed" });
+        }
+
+        res.json({ success: true });
+
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: "Server error" });
+    }
+});
+
 
 /* ======================================================
    SETUP CHILDREN (PC + HOME THEATER)
