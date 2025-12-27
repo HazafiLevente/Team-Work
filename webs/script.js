@@ -42,6 +42,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (path === "/setup") {
         await loadMySetupsPage();
     }
+    if (path === "/favorite") {
+        await loadFavorite();
+    }
 
 
 
@@ -1805,4 +1808,14 @@ function renderGenericItems(items) {
 
         list.appendChild(div);
     });
+}
+
+/* ==================================================
+   FAVORITE SITE
+================================================== */
+
+async function loadFavorite()
+{
+    var content = document.getElementById("favorite-box");
+
 }

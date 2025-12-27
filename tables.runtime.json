@@ -1,5 +1,5 @@
 {
-  "lastUpdated": 1766330564518,
+  "lastUpdated": 1766871654095,
   "tables": {
     "c_trumpets": {
       "columns": [
@@ -40,6 +40,8 @@
     },
     "effects_pedal": {
       "columns": [
+        "release_year",
+        "ID",
         "analog",
         "digital",
         "true_bypass",
@@ -47,8 +49,6 @@
         "stereo",
         "midi",
         "presets",
-        "release_year",
-        "ID",
         "Manufacturer",
         "Model",
         "pedal_type",
@@ -61,11 +61,24 @@
         "category"
       ]
     },
+    "favorite_pc_components[Lists]": {
+      "columns": [
+        "id",
+        "favorite_list_id",
+        "processor_id",
+        "videocard_id",
+        "motherboard_id",
+        "ram_id",
+        "psu_id",
+        "created_at",
+        "label"
+      ]
+    },
     "acoustic_drums": {
       "columns": [
+        "hardware_included",
         "cymbals_included",
         "ID",
-        "hardware_included",
         "Manufacturer",
         "Model",
         "series",
@@ -126,6 +139,20 @@
         "category"
       ]
     },
+    "favorite_home_theater_components": {
+      "columns": [
+        "id",
+        "favorite_list_id",
+        "receiver_id",
+        "processor_id",
+        "speaker_id",
+        "subwoofer_id",
+        "cable_id",
+        "created_at",
+        "label",
+        "role"
+      ]
+    },
     "processors": {
       "columns": [
         "ID",
@@ -157,11 +184,11 @@
     },
     "alt_saxophone": {
       "columns": [
-        "release_year",
         "ID",
         "engraving",
         "high_f_sharp",
         "adjustable_thumb_rest",
+        "release_year",
         "Manufacturer",
         "Model",
         "Type",
@@ -215,7 +242,7 @@
     },
     "psu": {
       "columns": [
-        "id",
+        "ID",
         "wattage",
         "manufacturer",
         "model",
@@ -228,7 +255,7 @@
     },
     "ram": {
       "columns": [
-        "id",
+        "ID",
         "capacity_gb",
         "sticks",
         "speed_mhz",
@@ -242,9 +269,9 @@
     },
     "video_cards": {
       "columns": [
+        "ID",
         "vram_gb",
         "bus_bit",
-        "id",
         "brand",
         "series",
         "model",
@@ -451,6 +478,8 @@
         "buttons",
         "touch_sensitive",
         "release_year",
+        "Manufacturer",
+        "Model",
         "controller_type",
         "connection",
         "display",
@@ -460,9 +489,7 @@
         "skill_level",
         "country_of_origin",
         "notes",
-        "category",
-        "Manufacturer",
-        "Model"
+        "category"
       ]
     },
     "electric_guitars": {
@@ -505,17 +532,17 @@
         "weight_kg",
         "release_year",
         "created_at",
-        "manufacturer",
-        "model",
-        "generation",
-        "series",
-        "interface",
         "adat_inputs",
         "adat_outputs",
         "dimensions",
         "compatible_os",
         "notes",
-        "category"
+        "category",
+        "manufacturer",
+        "model",
+        "generation",
+        "series",
+        "interface"
       ]
     },
     "guitarstrings": {
@@ -565,6 +592,7 @@
       "columns": [
         "ID",
         "Seats",
+        "Manufacturer",
         "Model",
         "Price Range (Ft)",
         "Body Type",
@@ -573,8 +601,7 @@
         "Fuel Type",
         "Year",
         "Transmission",
-        "category",
-        "Manufacturer"
+        "category"
       ]
     },
     "microphones": {
@@ -646,6 +673,39 @@
         "material",
         "notes",
         "category"
+      ]
+    },
+    "favorite_lists[Lists]": {
+      "columns": [
+        "id",
+        "user_id",
+        "created_at",
+        "name"
+      ]
+    },
+    "utp_cables": {
+      "columns": [
+        "id",
+        "created_at",
+        "Category"
+      ]
+    },
+    "cables_info[Cables]": {
+      "columns": [
+        "id",
+        "max_length_m",
+        "max_data_rate_gbps",
+        "max_power_w",
+        "active",
+        "bidirectional",
+        "cable_category",
+        "cable_type",
+        "standard",
+        "cable_structure",
+        "connector_a",
+        "connector_b",
+        "max_resolution",
+        "notes"
       ]
     }
   }
