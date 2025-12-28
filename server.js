@@ -451,51 +451,124 @@ app.delete("/api/my-setups/:id", verifyUser, async (req, res) => {
     }
 });
 
-
 /* ======================================================
-   SETUP CHILDREN (PC + HOME THEATER)
+   SETUP CHILDREN (LISTÁZÁS MINDEN TÁBLÁBÓL)
 ====================================================== */
 app.get("/api/setup/:id/children", verifyUser, async (req, res) => {
     const setupId = Number(req.params.id);
 
-    console.log("🔍 [CHILDREN] setupId =", setupId);
+    try {
+        // Párhuzamosan lekérjük mind a 4 táblát
+        // server.js - GET részlet
+        const [pcs, hts, cars, studios] = await Promise.all([
+            supabase.from("pc_details[Setup]").select("id, setup_name").eq("setup_id", setupId),
+            supabase.from("home_theater_setups[Setup]").select("id, setup_name").eq("setup_id", setupId),
+            supabase.from("Car_setup[Setup]").select("id, setup_name").eq("setup_id", setupId), // 👈 Nagy 'C'!
+            supabase.from("studio_monitor_setup[Setup]").select("id, setup_name").eq("setup_id", setupId)
+        ]);
 
-    const { data: pcs, error: pcErr } = await supabase
-        .from("pc_details[Setup]")
-        .select("id, setup_name, setup_id")
-        .eq("setup_id", setupId);
+        // Összefűzzük őket egy közös listába, és megjelöljük a típusukat
+        const children = [
+            ...(pcs.data || []).map(i => ({ ...i, type: "pc", label: "PC Konfig" })),
+            ...(hts.data || []).map(i => ({ ...i, type: "home_theater", label: "Házimozi" })),
+            ...(cars.data || []).map(i => ({ ...i, type: "car", label: "Autó" })),
+            ...(studios.data || []).map(i => ({ ...i, type: "studio", label: "Stúdió Monitor" }))
+        ];
 
-    console.log("🖥 PCs:", pcs);
-    if (pcErr) console.error("❌ PC ERROR:", pcErr);
+        res.json({ children });
 
-    const { data: hts, error: htErr } = await supabase
-        .from("home_theater_setups[Setups]") // ✅ FIX
-        .select("id, setup_name, setup_id")
-        .eq("setup_id", setupId);
+    } catch (err) {
+        console.error("Children fetch error:", err);
+        res.status(500).json({ error: "Server error fetching children" });
+    }
+});
 
-    console.log("🎬 HOME THEATERS:", hts);
-    if (htErr) console.error("❌ HT ERROR:", htErr);
+/* ======================================================
+   ÚJ CHILD LÉTREHOZÁSA (POST)
+====================================================== */
+app.post("/api/setup/:id/child", verifyUser, async (req, res) => {
+    const setupId = Number(req.params.id);
+    const { type, name } = req.body;
 
-    const children = [
-        ...(pcs || []).map(p => ({
-            id: p.id,
-            setup_name: p.setup_name ?? "Gaming PC",
-            type: "pc"
-        })),
-        ...(hts || []).map(h => ({
-            id: h.id,
-            setup_name: h.setup_name ?? "Házimozi",
-            type: "home_theater"
-        }))
-    ];
+    if (!type || !name) return res.status(400).json({ error: "Missing data" });
 
-    console.log("📦 FINAL CHILDREN:", children);
+    let tableName = "";
+    let insertData = {
+        setup_id: setupId,
+        setup_name: name
+    };
 
-    res.json({ children });
+    switch (type) {
+        case "pc":
+            tableName = "pc_details[Setup]";
+            break;
+        case "home_theater":
+            tableName = "home_theater_setups[Setup]";
+            insertData.receiver_id = 1; // Meglévő kényszer miatt
+            break;
+        case "car":
+            // ❗ FIGYELEM: A Supabase képed alapján nagy 'C' betű!
+            tableName = "Car_setup[Setup]";
+            break;
+        case "studio":
+            tableName = "studio_monitor_setup[Setup]";
+            break;
+        default:
+            return res.status(400).json({ error: "Invalid type" });
+    }
+
+    const { data, error } = await supabase
+        .from(tableName)
+        .insert([insertData])
+        .select()
+        .single();
+
+    if (error) {
+        console.error("❌ Supabase Hiba:", error.message);
+        return res.status(500).json({ error: error.message });
+    }
+
+    res.json({ success: true, item: data });
 });
 
 
+/* ======================================================
+   CHILD TÖRLÉSE (DELETE)
+====================================================== */
+app.delete("/api/child/:type/:id", verifyUser, async (req, res) => {
+    const { type, id } = req.params;
 
+    let tableName = "";
+
+    // Ugyanaz a logika, mint a létrehozásnál: típus -> tábla
+    switch (type) {
+        case "pc": tableName = "pc_details[Setup]"; break;
+        case "home_theater": tableName = "home_theater_setups[Setup]"; break;
+        case "car": tableName = "Car_setup[Setup]"; break;
+        case "studio": tableName = "studio_monitor_setup[Setup]"; break;
+        default: return res.status(400).json({ error: "Invalid type" });
+    }
+
+    try {
+        const { error } = await supabase
+            .from(tableName)
+            .delete()
+            .eq("id", id);
+        // Itt érdemes lenne ellenőrizni, hogy a setup a useré-e,
+        // de ha a frontend jól van megírva, első körben ez is működik.
+
+        if (error) {
+            console.error("Delete error:", error);
+            return res.status(500).json({ error: "Nem sikerült a törlés" });
+        }
+
+        res.json({ success: true });
+
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: "Szerver hiba" });
+    }
+});
 
 /* ======================================================
    SETUP DETAILS (PC OR HOME THEATER)

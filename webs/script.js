@@ -562,6 +562,175 @@ async function confirmDeleteSetup(setupId) {
     }
 }
 
+/* ----------------------------------
+   CHILD SETUP KEZELÉS
+---------------------------------- */
+
+// Ez a függvény rajzolja ki a kártyákat + a "Hozzáadás" gombot
+function renderChildCards(children, setupId) {
+    const list = document.getElementById("child-list");
+    if (!list) return;
+    list.innerHTML = "";
+
+    // 1. MEGLÉVŐ ELEMEK LISTÁZÁSA
+    children.forEach(child => {
+        const div = document.createElement("div");
+        div.className = "setup-card";
+
+        // Ikon kiválasztása
+        let icon = "❓";
+        if (child.type === "pc") icon = "🖥️";
+        if (child.type === "car") icon = "🚗";
+        if (child.type === "home_theater") icon = "🎬";
+        if (child.type === "studio") icon = "🎵";
+
+        div.innerHTML = `
+            <h3>${icon} ${child.setup_name}</h3>
+            <p class="muted" style="font-size:12px">${child.label}</p>
+
+            <div class="setup-menu" onclick="toggleChildMenu(event, 'menu-${child.id}-${child.type}')">⋮</div>
+            
+            <div id="menu-${child.id}-${child.type}" class="setup-dropdown hidden">
+                <div onclick="deleteChild('${child.type}', '${child.id}', '${setupId}', event)">🗑️ Törlés</div>
+            </div>
+        `;
+
+        // Kattintás a kártyára (részletek)
+        div.onclick = () => alert(`Részletek megnyitása: ${child.setup_name}`);
+
+        list.appendChild(div);
+    });
+
+    // 2. A "HOZZÁADÁS" KÁRTYA (VÁLTOZATLAN)
+    const addCard = document.createElement("div");
+    addCard.className = "setup-card setup-card-add";
+    addCard.style.display = "flex";
+    addCard.style.flexDirection = "column";
+    addCard.style.justifyContent = "center";
+    addCard.style.alignItems = "center";
+    addCard.style.cursor = "pointer";
+    addCard.style.border = "2px dashed rgba(255,255,255,0.2)";
+
+    addCard.innerHTML = `
+        <span style="font-size:32px; margin-bottom:5px;">+</span>
+        <span style="font-size:14px;" class="muted">Elem hozzáadása</span>
+    `;
+    addCard.onclick = () => showAddChildModal(setupId);
+    list.appendChild(addCard);
+}
+
+// 🛠️ FELUGRÓ ABLAK (MODAL) LÉTREHOZÁSA DYNAMIC HTML-LEL
+function showAddChildModal(setupId) {
+    // Ha már van nyitva modal, töröljük
+    const existing = document.getElementById("custom-modal");
+    if (existing) existing.remove();
+
+    const modal = document.createElement("div");
+    modal.id = "custom-modal";
+    modal.style.position = "fixed";
+    modal.style.top = "0"; modal.style.left = "0";
+    modal.style.width = "100%"; modal.style.height = "100%";
+    modal.style.background = "rgba(0,0,0,0.85)";
+    modal.style.display = "flex";
+    modal.style.alignItems = "center";
+    modal.style.justifyContent = "center";
+    modal.style.zIndex = "1000";
+
+    modal.innerHTML = `
+        <div style="background:#1a1a1a; padding:30px; border-radius:12px; width:90%; max-width:400px; border:1px solid #333; text-align:center;">
+            <h2 style="margin-bottom:20px;">Mit szeretnél hozzáadni?</h2>
+            
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:20px;">
+                <button class="btn" onclick="createChild('${setupId}', 'pc', 'Gaming PC')">🖥️ PC</button>
+                <button class="btn" onclick="createChild('${setupId}', 'car', 'Új Autó')">🚗 Autó</button>
+                <button class="btn" onclick="createChild('${setupId}', 'home_theater', 'Házimozi')">🎬 Mozi</button>
+                <button class="btn" onclick="createChild('${setupId}', 'studio', 'Stúdió')">🎵 Stúdió</button>
+            </div>
+
+            <button class="btn small" style="background:transparent; border:1px solid #555;" onclick="document.getElementById('custom-modal').remove()">❌ Mégse</button>
+        </div>
+    `;
+
+    document.body.appendChild(modal);
+}
+
+// 📡 API HÍVÁS A LÉTREHOZÁSHOZ
+async function createChild(setupId, type, defaultName) {
+    // Bezárjuk a modalt
+    document.getElementById("custom-modal").remove();
+
+    // Név bekérése
+    const name = prompt(`Nevezd el az új ${type} elemet:`, defaultName);
+    if (!name) return;
+
+    try {
+        const res = await fetch(`/api/setup/${setupId}/child`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ type, name }),
+            credentials: "include"
+        });
+
+        const data = await res.json();
+
+        if (res.ok) {
+            // Siker! Újratöltjük a listát, hogy megjelenjen az új elem
+            loadSetupChildren(setupId);
+        } else {
+            alert("Hiba: " + data.error);
+        }
+
+    } catch (err) {
+        console.error(err);
+        alert("Szerver hiba történt.");
+    }
+}
+
+
+// 🛠️ MENÜ MEGJELENÍTÉSE / ELREJTÉSE
+function toggleChildMenu(event, menuId) {
+    event.stopPropagation(); // Ne nyissa meg a kártyát
+
+    // Először becsukjuk az összes többit
+    document.querySelectorAll(".setup-dropdown").forEach(el => el.classList.add("hidden"));
+
+    const menu = document.getElementById(menuId);
+    if (menu) {
+        menu.classList.toggle("hidden");
+    }
+}
+
+// Ha bárhova máshova kattintunk, záródjanak be a menük
+document.addEventListener("click", () => {
+    document.querySelectorAll(".setup-dropdown").forEach(el => el.classList.add("hidden"));
+});
+
+
+// 🗑️ TÖRLÉS FUNKCIÓ
+async function deleteChild(type, id, setupId, event) {
+    if (event) event.stopPropagation(); // Ne klikkeljen a kártyára
+
+    if (!confirm("Biztosan törölni szeretnéd ezt az elemet?")) return;
+
+    try {
+        const res = await fetch(`/api/child/${type}/${id}`, {
+            method: "DELETE",
+            credentials: "include"
+        });
+
+        const data = await res.json();
+
+        if (res.ok) {
+            // Siker esetén frissítjük a nézetet
+            loadSetupChildren(setupId);
+        } else {
+            alert("Hiba: " + (data.error || "Ismeretlen hiba"));
+        }
+    } catch (err) {
+        console.error(err);
+        alert("Hálózati hiba.");
+    }
+}
 
 /* ----------------------------------
    GLOBAL PRODUCT SEARCH
@@ -1039,55 +1208,41 @@ function discardSQL() {
 async function loadSetupChildren(setupId) {
     const content = document.querySelector(".content");
 
+    // 1. Alap szerkezet felépítése (Címsor + Üres konténer a listának)
     content.innerHTML = `
-        <button class="btn small" onclick="loadMySetupsPage()">⬅ Vissza</button>
-        <p class="muted">⏳ Betöltés...</p>
-    `;
-
-    const res = await fetch(`/api/setup/${setupId}/children`, {
-        credentials: "include"
-    });
-
-    const data = await res.json();
-
-    content.innerHTML = `
-        <button class="btn small" onclick="loadMySetupsPage()">⬅ Vissza</button>
+        <button class="btn small" onclick="loadMySetupsPage()">⬅ Vissza a setupokhoz</button>
         <h2>Setup konfigurációk</h2>
         <div class="neon-line"></div>
         
         <div class="setup-page-wide">
-            <div id="child-list" class="setup-grid-wide"></div>
+            <div id="child-list" class="setup-grid-wide">
+                <p class="muted">⏳ Betöltés...</p>
+            </div>
         </div>
-
-
     `;
 
-    const list = document.getElementById("child-list");
+    try {
+        // 2. Adatok lekérése a szervertől (az új, bővített API-ról)
+        const res = await fetch(`/api/setup/${setupId}/children`, {
+            credentials: "include"
+        });
 
-    if (!data.children.length) {
-        list.innerHTML = `<p class="muted">❌ Nincs konfiguráció</p>`;
-        return;
+        if (!res.ok) {
+            document.getElementById("child-list").innerHTML = `<p class="muted">❌ Hiba az adatok betöltésekor.</p>`;
+            return;
+        }
+
+        const data = await res.json();
+
+        // 3. 🔥 ITT A LÉNYEG: Meghívjuk a renderelő függvényt! 🔥
+        // Ez fogja kirakni a kártyákat és a "+" gombot is.
+        renderChildCards(data.children || [], setupId);
+
+    } catch (err) {
+        console.error(err);
+        document.getElementById("child-list").innerHTML = `<p class="muted">❌ Szerver hiba.</p>`;
     }
-
-    data.children.forEach(child => {
-        const div = document.createElement("div");
-        div.className = "setup-card";
-
-        div.innerHTML = `
-        <h3>${child.setup_name}</h3>
-        <p class="muted">${child.child_type === "home_theater" ? "🎬 Házimozi" : "🖥 PC"}</p>
-    `;
-
-        div.onclick = () => {
-            loadSetupDetails(child.type, child.id);
-        };
-
-
-        list.appendChild(div);
-    });
-
 }
-
 
 async function loadSetupDetails(type, id) {
     const content = document.querySelector(".content");
