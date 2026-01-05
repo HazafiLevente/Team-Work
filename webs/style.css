@@ -834,3 +834,126 @@ tr.editing {
 .menu-item.danger:hover {
     background: rgba(255,77,77,0.15);
 }
+
+
+.search-row{
+    display:flex;
+    gap:12px;
+    align-items:center;
+    margin-bottom: 20px;
+    grid-column: 1 / -1;
+}
+
+.search-input{
+    flex:1;
+    padding:14px;
+    border-radius:10px;
+    background:rgba(255,255,255,0.05);
+    border:1px solid rgba(255,255,255,0.12);
+    color:white;
+    font-size:16px;
+}
+
+.dd{ position:relative; min-width:220px; }
+
+.dd-btn{
+    width:100%;
+    padding:14px;
+    border-radius:10px;
+    background:rgba(255,255,255,0.05);
+    border:1px solid rgba(255,255,255,0.12);
+    color:white;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    cursor:pointer;
+}
+
+.dd-caret{ opacity:0.8; }
+
+.dd-menu{
+    position:absolute;
+    z-index:9999;
+    top: calc(100% + 8px);
+    left:0;
+    right:0;
+    border-radius:12px;
+    padding:10px;
+    background:rgba(255,255,255,0.04); /* ✅ ugyanaz mint a div-ek */
+    border:1px solid rgba(255,255,255,0.10);
+    backdrop-filter: blur(10px);
+}
+
+.dd-search{
+    width:100%;
+    padding:10px;
+    border-radius:10px;
+    background:rgba(255,255,255,0.06);
+    border:1px solid rgba(255,255,255,0.12);
+    color:white;
+    margin-bottom:10px;
+}
+
+.dd-options{
+    max-height:260px;
+    overflow:auto;
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+}
+
+.dd-option{
+    text-align:left;
+    width:100%;
+    padding:10px;
+    border-radius:10px;
+    border:1px solid rgba(255,255,255,0.10);
+    background:rgba(255,255,255,0.03);
+    color:white;
+    cursor:pointer;
+}
+
+.dd-option:hover{
+    background:rgba(255,255,255,0.08);
+}
+
+.dd-option.active{
+    border-color: rgba(255,255,255,0.35);
+    background: rgba(255,255,255,0.10);
+}
+
+.hidden{ display:none; }
+
+
+
+
+
+/* a "sáv" (maga a select) */
+#manufacturer-select{
+    background: #121212;
+    color: #eaeaea;
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 10px;
+    padding: 10px 12px;
+    outline: none;
+    appearance: none;           /* Chrome/Edge */
+    -webkit-appearance: none;   /* Safari */
+    -moz-appearance: none;      /* Firefox */
+}
+
+/* hover/focus */
+#manufacturer-select:focus{
+    border-color: rgba(180, 120, 255, 0.6);
+    box-shadow: 0 0 0 3px rgba(180, 120, 255, 0.15);
+}
+
+/* próbáljuk az option listát is */
+#manufacturer-select option{
+    background: #121212;
+    color: #eaeaea;
+}
+
+/* Ha Windows/Chrome baszik rá és fehér marad: legalább a szöveg legyen sötét */
+#manufacturer-select option{
+    color: #111;
+}

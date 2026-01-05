@@ -9,9 +9,10 @@ document.addEventListener("DOMContentLoaded", async () => {
         injectSearchArea();
         await loadImageMap();
         await loadProducts();
-        await loadBrandFilters();
-
+        await loadManufacturersDropdown(); // ✅ EZ KELL A DROPDOWNHOZ
+        // await loadBrandFilters(); // ezt csak ha checkbox panel is kell
     }
+
 
 
     if (path === "/profile") {
@@ -133,7 +134,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 ---------------------------------- */
 
 function injectSearchArea() {
-    // ⛔ ha már van search input, NE injektáljuk újra
     if (document.getElementById("search-input")) return;
 
     const content = document.querySelector(".content");
@@ -142,25 +142,27 @@ function injectSearchArea() {
     const box = document.createElement("div");
     box.id = "search-box-wrapper";
     box.style.gridColumn = "1 / -1";
-    box.innerHTML = `
-        <div style="margin-bottom: 20px;">
-            <input id="search-input" type="text"
-                   placeholder="Keresés: manufacturer, model, kategória..."
-                   style="width:100%; padding:14px; border-radius:10px;">
-        </div>
-    
-        <button id="filter-toggle-btn" class="btn small">🔍 Szűrő</button>
-    
-        <div id="filter-panel" class="hidden">
-            <div id="brand-filters"></div>
-        </div>
-    
-        <div id="product-grid"></div>
-    `;
 
+    box.innerHTML = `
+      <div class="search-row">
+        <select id="manufacturer-select" class="search-input" style="max-width:260px;">
+          <option value="">⏳ Gyártók betöltése...</option>
+        </select>
+
+        <input id="search-input" type="text"
+               placeholder="Keresés: model, kategória..."
+               class="search-input" />
+
+        <button id="brand-search-btn" class="btn">🔎 Keresés</button>
+      </div>
+
+      <div id="product-grid"></div>
+    `;
 
     content.prepend(box);
 }
+
+
 
 
 
@@ -559,7 +561,210 @@ async function loadProducts(q = null) {
     }));
 
     renderProducts(allProducts);
-    buildBrandFilters(allProducts);
+
+    populateManufacturerSelect(allProducts);  // ✅ EZ TÖLTI A <select>-et
+    bindManufacturerSearch();
+    bindEnterSearch();
+    bindSelectChange(); // ✅ opcionális: azonnal szűr
+
+
+}
+
+function bindSelectChange() {
+    const sel = document.getElementById("manufacturer-select");
+    if (!sel) return;
+    if (sel.dataset.bound === "1") return;
+    sel.dataset.bound = "1";
+
+    sel.addEventListener("change", () => {
+        SELECTED_MANUFACTURER = sel.value || "";
+        runSearchFilter();
+    });
+}
+
+
+
+
+let SELECTED_MANUFACTURER = ""; // "" = összes
+
+function populateManufacturerDropdown(products) {
+    const optionsBox = document.getElementById("brand-dd-options");
+    if (!optionsBox) return;
+
+    optionsBox.innerHTML = "";           // ✅ fontos: ne duplázzon
+    SELECTED_MANUFACTURER = "";          // ✅ reset ha újratöltöd
+
+    const manufacturers = [...new Set(
+        products.map(p => (p.manufacturer || "").trim()).filter(Boolean)
+    )].sort((a, b) => a.localeCompare(b, "hu"));
+
+    // ... a többi maradhat ugyanaz
+
+
+    // első opció: összes
+    const allBtn = document.createElement("button");
+    allBtn.type = "button";
+    allBtn.className = "dd-option active";
+    allBtn.textContent = "(Összes gyártó)";
+    allBtn.onclick = () => selectManufacturer("");
+    optionsBox.appendChild(allBtn);
+
+    manufacturers.forEach(m => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "dd-option";
+        btn.textContent = m;
+        btn.onclick = () => selectManufacturer(m);
+        optionsBox.appendChild(btn);
+    });
+
+    bindDropdownUI();
+}
+
+function selectManufacturer(name) {
+    SELECTED_MANUFACTURER = (name || "").trim();
+
+    const label = document.getElementById("brand-dd-label");
+    if (label) label.textContent = SELECTED_MANUFACTURER || "(Összes gyártó)";
+
+    // active class frissítés
+    document.querySelectorAll("#brand-dd-options .dd-option").forEach(btn => {
+        const isAll = btn.textContent.includes("Összes");
+        const isMatch = btn.textContent === SELECTED_MANUFACTURER;
+        btn.classList.toggle("active", (!SELECTED_MANUFACTURER && isAll) || isMatch);
+    });
+
+    closeDropdown();
+}
+
+
+function bindDropdownUI() {
+    const btn = document.getElementById("brand-dd-btn");
+    const menu = document.getElementById("brand-dd-menu");
+    const search = document.getElementById("brand-dd-search");
+
+    if (!btn || !menu) return;
+
+    if (btn.dataset.bound === "1") return;
+    btn.dataset.bound = "1";
+
+    btn.addEventListener("click", (e) => {
+        e.preventDefault();
+        menu.classList.toggle("hidden");
+        if (!menu.classList.contains("hidden")) {
+            setTimeout(() => search?.focus(), 0);
+        }
+    });
+
+    // click outside => close
+    document.addEventListener("click", (e) => {
+        const wrap = document.getElementById("brand-dd");
+        if (!wrap) return;
+        if (!wrap.contains(e.target)) closeDropdown();
+    });
+
+    // dropdown search (szűrők a listában)
+    search?.addEventListener("input", () => {
+        const term = (search.value || "").toLowerCase().trim();
+        document.querySelectorAll("#brand-dd-options .dd-option").forEach(btn => {
+            const txt = btn.textContent.toLowerCase();
+            // az "Összes" mindig látszódjon
+            if (btn.textContent.includes("Összes")) {
+                btn.style.display = "";
+                return;
+            }
+            btn.style.display = txt.includes(term) ? "" : "none";
+        });
+    });
+}
+
+function closeDropdown() {
+    document.getElementById("brand-dd-menu")?.classList.add("hidden");
+}
+
+function bindManufacturerSearch() {
+    const btn = document.getElementById("brand-search-btn");
+    if (!btn) return;
+
+    if (btn.dataset.bound === "1") return;
+    btn.dataset.bound = "1";
+
+    btn.addEventListener("click", () => runSearchFilter());
+}
+
+function bindEnterSearch() {
+    // Enter a search inputban => keresés
+    document.addEventListener("keydown", (e) => {
+        if (e.key !== "Enter") return;
+
+        const activeId = document.activeElement?.id;
+
+        // ha dropdown keresőben nyomsz entert: zárja be + fusson a keresés
+        if (activeId === "brand-dd-search") {
+            e.preventDefault();
+            closeDropdown();
+            runSearchFilter();
+            return;
+        }
+
+        // ha sima search input: keresés
+        if (activeId === "search-input") {
+            e.preventDefault();
+            runSearchFilter();
+        }
+    });
+}
+
+function runSearchFilter() {
+    const input = document.getElementById("search-input");
+    const term = (input?.value || "").toLowerCase().trim();
+
+    let result = allProducts;
+
+    // gyártó
+    if (SELECTED_MANUFACTURER) {
+        const selectedLower = SELECTED_MANUFACTURER.toLowerCase();
+        result = result.filter(p => (p.manufacturer || "").toLowerCase() === selectedLower);
+    }
+
+    // model + kategória keresés
+    if (term) {
+        result = result.filter(p =>
+            (p.model || "").toLowerCase().includes(term) ||
+            (p.table || "").toLowerCase().includes(term)
+        );
+    }
+
+    renderProducts(result);
+}
+
+
+
+function populateManufacturerSelect(products) {
+    const select = document.getElementById("manufacturer-select");
+    if (!select) return;
+
+    const manufacturers = [...new Set(
+        products.map(p => (p.manufacturer || "").trim()).filter(Boolean)
+    )].sort((a, b) => a.localeCompare(b, "hu"));
+
+    select.innerHTML = `
+        <option value="">(Összes gyártó)</option>
+        ${manufacturers.map(m => `<option value="${escapeHtml(m)}">${escapeHtml(m)}</option>`).join("")}
+    `;
+}
+
+
+
+
+// biztonságos option szöveghez
+function escapeHtml(str = "") {
+    return String(str)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
 }
 
 
@@ -611,6 +816,13 @@ document.addEventListener("input", e => {
     renderProducts(filtered);
 });
 
+
+document.addEventListener("keydown", (e) => {
+    if (e.key !== "Enter") return;
+    if (document.activeElement?.id !== "search-input") return;
+
+    document.getElementById("brand-search-btn")?.click();
+});
 /* ----------------------------------
    RENDER PRODUCT GRID
 ---------------------------------- */
@@ -685,6 +897,38 @@ async function loadBrandFilters() {
         console.error("❌ loadBrandFilters crashed:", err);
     }
 }
+
+async function loadManufacturersDropdown() {
+    try {
+        const res = await fetch("/api/products/brands");
+        if (!res.ok) {
+            console.error("❌ /api/products/brands failed:", res.status);
+            return;
+        }
+
+        const data = await res.json();
+
+        // ✅ engedjük: {brands:[...]} vagy sima [...]
+        const raw = Array.isArray(data) ? data : (data.brands || []);
+
+        // ✅ engedjük: ["Asus"] vagy [{manufacturer:"Asus"}] vagy [{brand:"Asus"}]
+        const manufacturers = raw
+            .map(x => typeof x === "string" ? x : (x.manufacturer || x.brand || x.name || ""))
+            .map(s => String(s).trim())
+            .filter(Boolean);
+
+        populateManufacturerDropdown(
+            manufacturers.map(m => ({ manufacturer: m }))
+        );
+
+        console.log("✅ Manufacturers loaded:", manufacturers.length);
+
+    } catch (err) {
+        console.error("❌ loadManufacturersDropdown error:", err);
+    }
+}
+
+
 
 
 function applyFilters() {

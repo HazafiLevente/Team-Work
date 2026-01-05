@@ -33,43 +33,41 @@
 <main class="content">
 
 
-    <!-- 🔍 SEARCH + FILTER BAR -->
-    <div style="margin-bottom: 20px; grid-column: 1 / -1; display:flex; gap:12px;">
+    <!-- 🔍 SEARCH BAR + BRAND SELECT -->
+    <div style="margin-bottom: 20px; grid-column: 1 / -1; display:flex; gap:12px; flex-wrap:wrap;">
+
+        <select id="manufacturer-select" style="
+        min-width:240px;
+        padding:14px;
+        border-radius:10px;
+        background:rgba(255,255,255,0.05);
+        border:1px solid rgba(255,255,255,0.12);
+        color:white;
+        font-size:16px;
+    ">
+            <option value="">⏳ Gyártók betöltése...</option>
+        </select>
+
         <input
                 id="search-input"
                 type="text"
-                placeholder="Keresés: manufacturer, model, kategória..."
+                placeholder="Keresés: model, kategória..."
                 style="
             flex:1;
+            min-width:220px;
             padding:14px;
             border-radius:10px;
             background:rgba(255,255,255,0.05);
             border:1px solid rgba(255,255,255,0.12);
             color:white;
             font-size:16px;
-        ">
+        "
+        >
 
-        <button id="filter-toggle-btn" class="btn">
-            🧰 Szűrő
+        <button id="brand-search-btn" class="btn">
+            🔎 Keresés
         </button>
-    </div>
 
-    <!-- 🧰 FILTER PANEL (alapból rejtve) -->
-    <div id="filter-panel" class="hidden" style="
-    grid-column:1 / -1;
-    background:rgba(255,255,255,0.04);
-    border:1px solid rgba(255,255,255,0.1);
-    border-radius:12px;
-    padding:16px;
-    margin-bottom:20px;
-">
-        <strong>Gyártók</strong>
-        <div id="brand-filters" style="
-        margin-top:10px;
-        display:grid;
-        grid-template-columns:repeat(auto-fill,minmax(180px,1fr));
-        gap:8px;
-    "></div>
     </div>
 
     <!-- 🟣 PRODUCT GRID -->

@@ -1,5 +1,5 @@
 {
-  "lastUpdated": 1766871654095,
+  "lastUpdated": 1767617334264,
   "tables": {
     "c_trumpets": {
       "columns": [
@@ -40,15 +40,15 @@
     },
     "effects_pedal": {
       "columns": [
-        "release_year",
-        "ID",
-        "analog",
-        "digital",
         "true_bypass",
         "buffered",
         "stereo",
         "midi",
         "presets",
+        "release_year",
+        "ID",
+        "analog",
+        "digital",
         "Manufacturer",
         "Model",
         "pedal_type",
@@ -63,7 +63,6 @@
     },
     "favorite_pc_components[Lists]": {
       "columns": [
-        "id",
         "favorite_list_id",
         "processor_id",
         "videocard_id",
@@ -71,14 +70,15 @@
         "ram_id",
         "psu_id",
         "created_at",
+        "id",
         "label"
       ]
     },
     "acoustic_drums": {
       "columns": [
-        "hardware_included",
         "cymbals_included",
         "ID",
+        "hardware_included",
         "Manufacturer",
         "Model",
         "series",
@@ -116,14 +116,14 @@
     },
     "motherboard": {
       "columns": [
+        "SATAPorts",
+        "USBPortsRear",
+        "Price",
         "ID",
         "RamSlots",
         "RamMaxMHZ",
         "RamMaxSizeGB",
         "M2Slots",
-        "SATAPorts",
-        "USBPortsRear",
-        "Price",
         "Manufacturer",
         "Model",
         "Socket",
@@ -137,20 +137,6 @@
         "AudioChip",
         "RGBSupport",
         "category"
-      ]
-    },
-    "favorite_home_theater_components": {
-      "columns": [
-        "id",
-        "favorite_list_id",
-        "receiver_id",
-        "processor_id",
-        "speaker_id",
-        "subwoofer_id",
-        "cable_id",
-        "created_at",
-        "label",
-        "role"
       ]
     },
     "processors": {
@@ -184,11 +170,11 @@
     },
     "alt_saxophone": {
       "columns": [
-        "ID",
         "engraving",
         "high_f_sharp",
         "adjustable_thumb_rest",
         "release_year",
+        "ID",
         "Manufacturer",
         "Model",
         "Type",
@@ -269,9 +255,9 @@
     },
     "video_cards": {
       "columns": [
-        "ID",
         "vram_gb",
         "bus_bit",
+        "ID",
         "brand",
         "series",
         "model",
@@ -419,7 +405,6 @@
     },
     "midis": {
       "columns": [
-        "id",
         "keys_count",
         "pads",
         "knobs",
@@ -433,6 +418,7 @@
         "weight_kg",
         "release_year",
         "created_at",
+        "id",
         "manufacturer",
         "model",
         "series",
@@ -478,8 +464,6 @@
         "buttons",
         "touch_sensitive",
         "release_year",
-        "Manufacturer",
-        "Model",
         "controller_type",
         "connection",
         "display",
@@ -489,7 +473,9 @@
         "skill_level",
         "country_of_origin",
         "notes",
-        "category"
+        "category",
+        "Manufacturer",
+        "Model"
       ]
     },
     "electric_guitars": {
@@ -532,17 +518,17 @@
         "weight_kg",
         "release_year",
         "created_at",
+        "manufacturer",
+        "model",
+        "generation",
+        "series",
+        "interface",
         "adat_inputs",
         "adat_outputs",
         "dimensions",
         "compatible_os",
         "notes",
-        "category",
-        "manufacturer",
-        "model",
-        "generation",
-        "series",
-        "interface"
+        "category"
       ]
     },
     "guitarstrings": {
