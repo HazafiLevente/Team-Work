@@ -25,7 +25,8 @@
     "msi": "https://images.seeklogo.com/logo-png/30/1/msi-logo-png_seeklogo-304877.png",
     "fractal": "https://www.clearesult.com/80plus/sites/80plus/files/manufacturer/Fractal_Logo_Black.jpg",
     "asus": "https://www.clearesult.com/80plus/sites/80plus/files/manufacturer/Fractal_Logo_Black.jpg",
-    "adata": "https://1000logos.net/wp-content/uploads/2020/04/ADATA-Logo.png"
+    "adata": "https://1000logos.net/wp-content/uploads/2020/04/ADATA-Logo.png",
+    "ASUS": "https://www.clearesult.com/80plus/sites/80plus/files/manufacturer/Fractal_Logo_Black.jpg"
 
   },
   "rams":
@@ -81,7 +82,10 @@
     "subaru": "https://www.citypng.com/public/uploads/preview/hd-subaru-emblem-logo-sign-png-701751694713303jt5dglpl1l.png",
     "suzuki": "https://toppng.com/uploads/preview/suzuki-logo-11548789364mryetbkflj.png",
     "tesla": "https://upload.wikimedia.org/wikipedia/commons/e/e8/Tesla_logo.png",
-    "volkswagen": "https://upload.wikimedia.org/wikipedia/commons/2/23/Volkswagen_-_Logo.svg"
+    "volkswagen": "https://upload.wikimedia.org/wikipedia/commons/2/23/Volkswagen_-_Logo.svg",
+    "cupra": "https://images.seeklogo.com/logo-png/53/2/cupra-logo-png_seeklogo-538267.png",
+    "toyota": "https://global.toyota/pages/global_toyota/mobility/toyota-brand/emblem_001.jpg",
+    "skoda": "https://cdn.freebiesupply.com/logos/large/2x/skoda-6-logo-png-transparent.png"
   },
   "bass": {
     "ibanez": "https://i.etsystatic.com/34531699/r/il/cce3ab/3800330793/il_1140xN.3800330793_2y7v.jpg",
@@ -129,10 +133,10 @@
     "presonus": "https://images.seeklogo.com/logo-png/24/1/presonus-logo-png_seeklogo-243008.png"
   },
 
-  "audio_processor":
+  "audio_processorss":
   {
-    "trinnov": "https://www.trinnov.com/site/assets/files/1016/trinnov-schema-logo.jpg",
-    "stormaudio": "https://logovtor.com/wp-content/uploads/2022/03/stormaudio-logo-vector-2022.png"
+    "Trinnov": "https://casaplex.com/wp-content/uploads/2023/05/trinnov_logo-removebg-preview.png",
+    "StormAudio": "https://essentialinstall.com/wp-content/uploads/2019/01/StormAudio-Logo.jpg"
   },
 
   "effect-multieffects": {
@@ -178,15 +182,19 @@
     "shure": "https://images.seeklogo.com/logo-png/47/1/shure-logo-png_seeklogo-476685.png",
     "neumann": "https://upload.wikimedia.org/wikipedia/commons/0/09/Neumann_GmbH_Audio_Logo.svg"
   },
-  "softwares": {
+  "softwaress": {
     "spectatronic": "https://support.spectrasonics.net/manual/Omnisphere/support/images/prismlogoweb.jpg",
     "steinberg": "https://images.seeklogo.com/logo-png/20/1/steinberg-logo-png_seeklogo-208709.png",
     "arturia": "https://images.seeklogo.com/logo-png/48/1/arturia-logo-png_seeklogo-481051.png",
     "ableton": "https://images.seeklogo.com/logo-png/32/1/ableton-logo-png_seeklogo-328629.png",
-    "image line": "https://static.wikia.nocookie.net/logopedia/images/8/80/Image-Line_2007.png/revision/latest?cb=20220330002537",
+    "Image Line": "https://en.wikipedia.org/wiki/Image-Line#/media/File:ImageLineLogo.png",
     "native instruments": "https://images.seeklogo.com/logo-png/9/1/native-instruments-logo-png_seeklogo-97446.png",
     "avid": "https://upload.wikimedia.org/wikipedia/commons/e/ec/Avid_logo_purple_2017.svg",
     "presonus": "https://images.seeklogo.com/logo-png/24/1/presonus-logo-png_seeklogo-243008.png"
+  },
+
+  "IMAGELINE": {
+    "Image Line": "https://en.wikipedia.org/wiki/Image-Line#/media/File:ImageLineLogo.png"
   },
 
   "alt_saxophones": {
@@ -246,7 +254,7 @@
     "technics": "https://images.seeklogo.com/logo-png/50/1/technics-logo-png_seeklogo-509967.png"
   },
 
-  "studio_monitor_speakers":
+  "studio_monitor_speakerss":
   {
     "yamaha": "https://images.seeklogo.com/logo-png/15/1/yamaha-logo-png_seeklogo-154895.png",
     "adam audio": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRz0Zv1rbyngK6x5auoYmZVVS0b6eSMhd7KwQ&s",

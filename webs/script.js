@@ -1086,12 +1086,15 @@ const TABLE_IMAGE_CATEGORY_MAP = {
 
     microphones: "microphones",
 
-    software_products: "softwares",
+
+    softwaress: "software_products",
+    software_products: "IMAGELINE",
+
 
     alt_saxophone:"alt_saxophones",
     alt_saxophones:"alt_saxophones",
 
-    audio_processors: "audio_processor",
+    audio_processors: "audio_processorss",
 
     wind_instrument_oils: "wind_instruments_cremes_oils",
 
@@ -1105,6 +1108,8 @@ const TABLE_IMAGE_CATEGORY_MAP = {
     home_theatre: "home_theatre",
 
     studio_audio_speakers: "studio_audio_speakers",
+    studio_monitor_speakers:"studio_monitor_speakerss",
+    studio_monitor_speakerss:"studio_monitor_speakers",
 
     processors: "processors",
     motherboards: "motherboard",
