@@ -1087,8 +1087,7 @@ const TABLE_IMAGE_CATEGORY_MAP = {
     microphones: "microphones",
 
 
-    softwaress: "software_products",
-    software_products: "IMAGELINE",
+    software_products: "softwaress",
 
 
     alt_saxophone:"alt_saxophones",

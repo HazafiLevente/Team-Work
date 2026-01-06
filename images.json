@@ -62,6 +62,7 @@
     "esp ltd": "https://www.adkguitar.com/cdn/shop/articles/ESP_2020_Cover_600x.jpg?v=1579038437",
     "ltd": "http://i.pinimg.com/736x/a1/a3/1a/a1a31a32c7a4cce6944b6f5ee7a67b44.jpg"
   },
+
   "cars": {
     "audi": "https://upload.wikimedia.org/wikipedia/commons/7/7f/Audi_logo_detail.svg",
     "aston martin": "https://media.astonmartin.com/wp-content/uploads/2024/10/ce859c89496adc2e56207f62e0616485-m.jpg.webp",
@@ -85,7 +86,7 @@
     "volkswagen": "https://upload.wikimedia.org/wikipedia/commons/2/23/Volkswagen_-_Logo.svg",
     "cupra": "https://images.seeklogo.com/logo-png/53/2/cupra-logo-png_seeklogo-538267.png",
     "toyota": "https://global.toyota/pages/global_toyota/mobility/toyota-brand/emblem_001.jpg",
-    "skoda": "https://cdn.freebiesupply.com/logos/large/2x/skoda-6-logo-png-transparent.png"
+    "SKODA": "https://www.citypng.com/public/uploads/preview/skoda-emblem-logo-png-7017516947725940bgq3rrgsp.png"
   },
   "bass": {
     "ibanez": "https://i.etsystatic.com/34531699/r/il/cce3ab/3800330793/il_1140xN.3800330793_2y7v.jpg",
@@ -183,19 +184,17 @@
     "neumann": "https://upload.wikimedia.org/wikipedia/commons/0/09/Neumann_GmbH_Audio_Logo.svg"
   },
   "softwaress": {
-    "spectatronic": "https://support.spectrasonics.net/manual/Omnisphere/support/images/prismlogoweb.jpg",
+    "Spectrasonics": "https://dirigent.jp/wp-content/uploads/2024/04/Spectrasonics_Logo_White_Web_Transparent-504x279.png",
     "steinberg": "https://images.seeklogo.com/logo-png/20/1/steinberg-logo-png_seeklogo-208709.png",
     "arturia": "https://images.seeklogo.com/logo-png/48/1/arturia-logo-png_seeklogo-481051.png",
     "ableton": "https://images.seeklogo.com/logo-png/32/1/ableton-logo-png_seeklogo-328629.png",
-    "Image Line": "https://en.wikipedia.org/wiki/Image-Line#/media/File:ImageLineLogo.png",
+    "Image Line": "https://besthard.ru/wa-data/public/shop/products/48/60/266048/images/75888/75888.200@2x.png",
     "native instruments": "https://images.seeklogo.com/logo-png/9/1/native-instruments-logo-png_seeklogo-97446.png",
     "avid": "https://upload.wikimedia.org/wikipedia/commons/e/ec/Avid_logo_purple_2017.svg",
     "presonus": "https://images.seeklogo.com/logo-png/24/1/presonus-logo-png_seeklogo-243008.png"
   },
 
-  "IMAGELINE": {
-    "Image Line": "https://en.wikipedia.org/wiki/Image-Line#/media/File:ImageLineLogo.png"
-  },
+
 
   "alt_saxophones": {
     "yamaha": "https://images.seeklogo.com/logo-png/15/1/yamaha-logo-png_seeklogo-154895.png"
