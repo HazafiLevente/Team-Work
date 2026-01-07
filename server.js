@@ -450,36 +450,143 @@ app.delete("/api/my-setups/:id", verifyUser, async (req, res) => {
         res.status(500).json({ error: "Server error" });
     }
 });
+/* ======================================================
+   ITEM KERESŐ (TÖBB TÁBLA + Manufacturer/Model KEZELÉS)
+====================================================== */
+app.get("/api/items/search", verifyUser, async (req, res) => {
+    const { type, query } = req.query;
+
+    // Ha nincs keresőszó, üres listát adunk vissza
+    if (!query || query.length < 2) return res.json({ results: [] });
+
+    let searchResults = [];
+
+    try {
+        // -------------------------------------------------
+        // 🚗 AUTÓK KERESÉSE (4 külön táblából)
+        // -------------------------------------------------
+        if (type === "car") {
+            // Segédfüggvény a kereséshez (hogy ne kelljen 4x leírni ugyanazt)
+            const searchTable = (tableName) => {
+                return supabase
+                    .from(tableName)
+                    .select("id, Manufacturer, Model, category")
+                    // Keresés: Gyártó VAGY Model tartalmazza a szöveget (kis/nagybetű nem számít)
+                    .or(`Manufacturer.ilike.%${query}%,Model.ilike.%${query}%`)
+                    .limit(5);
+            };
+
+            // Párhuzamosan keressük a 4 táblában, amiket a képeden láttam
+            const [cabrio, coupe, hatchback, wagon] = await Promise.all([
+                searchTable("cabrio_cars"),
+                searchTable("coupe_cars"),
+                searchTable("hatchback_cars"),
+                searchTable("wagon_cars")
+            ]);
+
+            // Összefűzzük a találatokat egy nagy listába
+            const allCars = [
+                ...(cabrio.data || []),
+                ...(coupe.data || []),
+                ...(hatchback.data || []),
+                ...(wagon.data || [])
+            ];
+
+            // Formázás a Frontendnek (hogy legyen 'name' mező)
+            searchResults = allCars.map(item => ({
+                id: item.id,
+                name: `${item.Manufacturer} ${item.Model}`, // pl. "FERRARI California"
+                category: item.category || "Autó",
+                type: "car" // Fontos a mentéshez
+            }));
+        }
+
+            // -------------------------------------------------
+            // 🎵 STÚDIÓ / HANGSZER (Példa a sidebar alapján)
+        // -------------------------------------------------
+        else if (type === "studio") {
+            // Itt is felsorolhatod a tábláidat (acoustic_guitars, microphones, stb.)
+            const [guitars, drums] = await Promise.all([
+                supabase.from("acoustic_guitars")
+                    .select("id, Manufacturer, Model, category")
+                    .or(`Manufacturer.ilike.%${query}%,Model.ilike.%${query}%`)
+                    .limit(5),
+                // Ide írhatsz további táblákat (pl. electric_guitars, microphones)
+                supabase.from("microphones") // Ha van ilyen táblád
+                    .select("id, Manufacturer, Model, category")
+                    .or(`Manufacturer.ilike.%${query}%,Model.ilike.%${query}%`)
+                    .limit(5)
+            ]);
+
+            const allStudio = [
+                ...(guitars.data || []),
+                ...(drums.data || []) // Ha nincs microphones tábla, ez undefined lesz, kezeld óvatosan!
+            ];
+
+            searchResults = allStudio.map(item => ({
+                id: item.id,
+                name: `${item.Manufacturer} ${item.Model}`,
+                category: item.category || "Stúdió",
+                type: "studio"
+            }));
+        }
+
+            // -------------------------------------------------
+            // 🖥️ PC ALKATRÉSZ (Ha vannak tábláid)
+        // -------------------------------------------------
+        else if (type === "pc") {
+            // Példa: processzorok
+            const { data } = await supabase
+                .from("processors") // Ellenőrizd a tábla nevét!
+                .select("*")
+                .or(`Manufacturer.ilike.%${query}%,Model.ilike.%${query}%`)
+                .limit(5);
+
+            searchResults = (data || []).map(item => ({
+                id: item.id,
+                name: `${item.Manufacturer} ${item.Model}`,
+                category: "PC",
+                type: "pc"
+            }));
+        }
+
+        res.json({ results: searchResults });
+
+    } catch (err) {
+        console.error("KERESÉSI HIBA:", err);
+        res.status(500).json({ error: "Hiba történt a keresés közben." });
+    }
+});
 
 /* ======================================================
-   SETUP CHILDREN (LISTÁZÁS MINDEN TÁBLÁBÓL)
+   3. AL-ELEMEK LISTÁZÁSA (EZ HIÁNYZIK NÁLAD!)
 ====================================================== */
 app.get("/api/setup/:id/children", verifyUser, async (req, res) => {
     const setupId = Number(req.params.id);
 
     try {
-        // Párhuzamosan lekérjük mind a 4 táblát
-        // server.js - GET részlet
+        // Párhuzamosan lekérjük mind a 4 kategóriát
         const [pcs, hts, cars, studios] = await Promise.all([
             supabase.from("pc_details[Setup]").select("id, setup_name").eq("setup_id", setupId),
             supabase.from("home_theater_setups[Setup]").select("id, setup_name").eq("setup_id", setupId),
-            supabase.from("Car_setup[Setup]").select("id, setup_name").eq("setup_id", setupId), // 👈 Nagy 'C'!
+            // Itt a kritikus pont: Nagy 'C'-vel, ahogy a képeden volt!
+            supabase.from("Car_setup[Setup]").select("id, setup_name").eq("setup_id", setupId),
             supabase.from("studio_monitor_setup[Setup]").select("id, setup_name").eq("setup_id", setupId)
         ]);
 
-        // Összefűzzük őket egy közös listába, és megjelöljük a típusukat
+        // Összefűzzük a találatokat egy listába a Frontendnek
         const children = [
             ...(pcs.data || []).map(i => ({ ...i, type: "pc", label: "PC Konfig" })),
             ...(hts.data || []).map(i => ({ ...i, type: "home_theater", label: "Házimozi" })),
             ...(cars.data || []).map(i => ({ ...i, type: "car", label: "Autó" })),
-            ...(studios.data || []).map(i => ({ ...i, type: "studio", label: "Stúdió Monitor" }))
+            ...(studios.data || []).map(i => ({ ...i, type: "studio", label: "Stúdió" }))
         ];
 
-        res.json({ children });
+        res.json(children);
 
     } catch (err) {
-        console.error("Children fetch error:", err);
-        res.status(500).json({ error: "Server error fetching children" });
+        console.error("Hiba a listázáskor:", err);
+        res.status(500).json({ error: "Szerver hiba a betöltésnél" });
     }
 });
 
@@ -529,6 +636,75 @@ app.post("/api/setup/:id/child", verifyUser, async (req, res) => {
     }
 
     res.json({ success: true, item: data });
+});
+
+app.get("/api/items/search", verifyUser, async (req, res) => {
+    const { type, query } = req.query;
+    if (!query || query.length < 2) return res.json({ results: [] });
+
+    let results = [];
+    try {
+        if (type === "car") {
+            // Végigmegyünk a 4 autós táblán, amit a képeden láttam
+            const tables = ["cabrio_cars", "coupe_cars", "hatchback_cars", "wagon_cars"];
+            for (const table of tables) {
+                const { data } = await supabase
+                    .from(table)
+                    .select("id, Manufacturer, Model, category")
+                    .or(`Manufacturer.ilike.%${query}%,Model.ilike.%${query}%`)
+                    .limit(5);
+                if (data) {
+                    data.forEach(d => results.push({
+                        name: `${d.Manufacturer} ${d.Model}`,
+                        category: d.category
+                    }));
+                }
+            }
+        } else if (type === "studio") {
+            // Itt a hangszerekben keresünk
+            const { data } = await supabase
+                .from("acoustic_guitars")
+                .select("id, Manufacturer, Model, category")
+                .or(`Manufacturer.ilike.%${query}%,Model.ilike.%${query}%`)
+                .limit(10);
+            if (data) {
+                data.forEach(d => results.push({
+                    name: `${d.Manufacturer} ${d.Model}`,
+                    category: d.category
+                }));
+            }
+        }
+        res.json({ results });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.post("/api/setup/:id/child", verifyUser, async (req, res) => {
+    const setupId = req.params.id;
+    const { type, name } = req.body;
+
+    // Megkeressük a megfelelő cél-táblát a típus alapján
+    let tableName = "";
+    if (type === "car") tableName = "Car_setup[Setup]";
+    else if (type === "pc") tableName = "pc_details[Setup]";
+    else if (type === "studio") tableName = "studio_monitor_setup[Setup]";
+    else if (type === "home_theater") tableName = "home_theater_setups[Setup]";
+
+    try {
+        const { error } = await supabase
+            .from(tableName)
+            .insert([{
+                setup_id: setupId,
+                setup_name: name, // Ez a kiválasztott Item neve (pl. Ferrari)
+                setup_type: type
+            }]);
+
+        if (error) throw error;
+        res.json({ success: true });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
 });
 
 

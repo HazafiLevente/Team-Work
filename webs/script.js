@@ -619,40 +619,31 @@ function renderChildCards(children, setupId) {
     list.appendChild(addCard);
 }
 
-// 🛠️ FELUGRÓ ABLAK (MODAL) LÉTREHOZÁSA DYNAMIC HTML-LEL
 function showAddChildModal(setupId) {
-    // Ha már van nyitva modal, töröljük
     const existing = document.getElementById("custom-modal");
     if (existing) existing.remove();
 
     const modal = document.createElement("div");
     modal.id = "custom-modal";
-    modal.style.position = "fixed";
-    modal.style.top = "0"; modal.style.left = "0";
-    modal.style.width = "100%"; modal.style.height = "100%";
-    modal.style.background = "rgba(0,0,0,0.85)";
-    modal.style.display = "flex";
-    modal.style.alignItems = "center";
-    modal.style.justifyContent = "center";
-    modal.style.zIndex = "1000";
+    // Stílus, hogy jól nézzen ki
+    modal.style.cssText = "position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); display:flex; align-items:center; justify-content:center; z-index:1000;";
 
     modal.innerHTML = `
-        <div style="background:#1a1a1a; padding:30px; border-radius:12px; width:90%; max-width:400px; border:1px solid #333; text-align:center;">
+        <div style="background:#1a1a1a; padding:30px; border-radius:12px; width:90%; max-width:450px; border:1px solid #333; text-align:center; color: white;">
             <h2 style="margin-bottom:20px;">Mit szeretnél hozzáadni?</h2>
             
             <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:20px;">
-                <button class="btn" onclick="createChild('${setupId}', 'pc', 'Gaming PC')">🖥️ PC</button>
-                <button class="btn" onclick="createChild('${setupId}', 'car', 'Új Autó')">🚗 Autó</button>
-                <button class="btn" onclick="createChild('${setupId}', 'home_theater', 'Házimozi')">🎬 Mozi</button>
-                <button class="btn" onclick="createChild('${setupId}', 'studio', 'Stúdió')">🎵 Stúdió</button>
+                <button class="btn" onclick="openSearchModal('${setupId}', 'pc')">🖥️ PC Alkatrész</button>
+                <button class="btn" onclick="openSearchModal('${setupId}', 'car')">🚗 Autó</button>
+                <button class="btn" onclick="openSearchModal('${setupId}', 'home_theater')">🎬 Mozi eszköz</button>
+                <button class="btn" onclick="openSearchModal('${setupId}', 'studio')">🎵 Stúdió cucc</button>
             </div>
-
-            <button class="btn small" style="background:transparent; border:1px solid #555;" onclick="document.getElementById('custom-modal').remove()">❌ Mégse</button>
+            <button class="btn small" style="background:transparent; border:1px solid #555; color: white;" onclick="document.getElementById('custom-modal').remove()">Mégse</button>
         </div>
     `;
-
     document.body.appendChild(modal);
 }
+
 
 // 📡 API HÍVÁS A LÉTREHOZÁSHOZ
 async function createChild(setupId, type, defaultName) {
@@ -1385,5 +1376,82 @@ async function loadMySetups() {
     } catch (err) {
         console.error(err);
         box.innerHTML = "<p class='error'>❌ Hiba történt.</p>";
+    }
+}
+
+function openSearchModal(setupId, type) {
+    // Eltávolítjuk a választó modalt
+    const prev = document.getElementById("custom-modal");
+    if(prev) prev.remove();
+
+    const modal = document.createElement("div");
+    modal.id = "search-modal";
+    // Sötét háttér a keresőnek
+    modal.style.cssText = "position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); display:flex; flex-direction:column; align-items:center; padding-top:100px; z-index:1100; color:white;";
+
+    modal.innerHTML = `
+        <div style="width:90%; max-width:600px; text-align:center;">
+            <h2 style="margin-bottom:20px;">Keresés az adatbázisban</h2>
+            <input type="text" id="item-search-input" placeholder="Kezdj el gépelni (pl. Ferrari)..." 
+                   style="width:100%; padding:15px; font-size:18px; border-radius:8px; border:1px solid #444; background:#222; color:white; margin-bottom:20px;">
+            <div id="search-results" style="max-height:50vh; overflow-y:auto; text-align:left; background:#1a1a1a; border-radius:8px;">
+                <p style="padding:20px; color:#888; text-align:center;">Gépelj legalább 2 karaktert...</p>
+            </div>
+            <button class="btn" style="margin-top:20px; background:#444;" onclick="document.getElementById('search-modal').remove()">Mégse</button>
+        </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    const input = document.getElementById("item-search-input");
+    input.focus();
+
+    // Figyeljük a gépelést
+    input.onkeyup = async (e) => {
+        const query = e.target.value;
+        const resultsDiv = document.getElementById("search-results");
+
+        if (query.length < 2) return;
+
+        try {
+            const res = await fetch(`/api/items/search?type=${type}&query=${query}`, { credentials: "include" });
+            const data = await res.json();
+
+            resultsDiv.innerHTML = "";
+            if (data.results.length === 0) {
+                resultsDiv.innerHTML = '<p style="padding:20px;">Nincs találat.</p>';
+                return;
+            }
+
+            data.results.forEach(item => {
+                const itemDiv = document.createElement("div");
+                itemDiv.style.cssText = "padding:15px; border-bottom:1px solid #333; cursor:pointer; hover:background:#333;";
+                itemDiv.innerHTML = `<strong>${item.name}</strong> <br> <small style="color:#888;">${item.category}</small>`;
+
+                // KIVÁLASZTÁS
+                itemDiv.onclick = () => saveSelection(setupId, type, item.name);
+                resultsDiv.appendChild(itemDiv);
+            });
+        } catch (err) {
+            console.error("Keresési hiba:", err);
+        }
+    };
+}
+
+// Mentés funkció
+async function saveSelection(setupId, type, itemName) {
+    document.getElementById("search-modal").remove();
+    try {
+        const res = await fetch(`/api/setup/${setupId}/child`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ type, name: itemName }),
+            credentials: "include"
+        });
+        if (res.ok) {
+            loadSetupChildren(setupId); // Frissítjük a kártyákat
+        }
+    } catch (err) {
+        console.error(err);
     }
 }
