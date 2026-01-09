@@ -5,15 +5,15 @@
 document.addEventListener("DOMContentLoaded", async () => {
     const path = window.location.pathname;
 
+    // ✅ KELL minden oldalra, mert product.html-en is kell a kép
+    await loadImageMap();
+
     if (path === "/home" || path === "/") {
         injectSearchArea();
-        await loadImageMap();
         await loadProducts();
-        await loadManufacturersDropdown(); // ✅ EZ KELL A DROPDOWNHOZ
-        // await loadBrandFilters(); // ezt csak ha checkbox panel is kell
+        await loadManufacturersDropdown(); // ✅ dropdown
+        // await loadBrandFilters();
     }
-
-
 
     if (path === "/profile") {
         await loadProfile();
@@ -22,6 +22,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (path !== "/regist") {
         await checkLoginStatus();
     }
+
     if (path === "/admin") {
         await loadAdminTables();
         await checkLoginStatus();
@@ -40,12 +41,17 @@ document.addEventListener("DOMContentLoaded", async () => {
             });
         }
     }
+
     if (path === "/setup") {
         await loadMySetupsPage();
     }
+
     if (path === "/favorite") {
         await loadFavorite();
     }
+
+    // ✅ és utána jöhet a product page loader rész (ami nálad lentebb van)
+
 
 
 
