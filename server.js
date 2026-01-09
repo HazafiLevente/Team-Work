@@ -450,6 +450,91 @@ app.delete("/api/my-setups/:id", verifyUser, async (req, res) => {
         res.status(500).json({ error: "Server error" });
     }
 });
+
+
+/* ======================================================
+   SETUP DETAILS (PC OR HOME THEATER)
+====================================================== */
+/* ======================================================
+   SETUP DETAILS (PC OR HOME THEATER)
+====================================================== */
+app.get("/api/setup/details", verifyUser, async (req, res) => {
+    const { type, id } = req.query;
+    const childId = Number(id);
+
+    console.log("🔍 [DETAILS] type =", type, "id =", childId);
+
+    if (!type || !childId) {
+        return res.status(400).json({ error: "Missing type or id" });
+    }
+
+    /* ===================== PC ===================== */
+    if (type === "pc") {
+        const { data: pc, error } = await supabase
+            .from("pc_details[Setup]")
+            .select(`
+                setup:setup_id(id, setup_name),
+                processor:processors(Model),
+                motherboard:motherboard(Model),
+                ram:ram(model),
+                videocard:video_cards(model),
+                psu:psu(model)
+            `)
+            .eq("id", childId)
+            .maybeSingle();
+
+        console.log("🖥 PC DETAILS:", pc);
+        if (error) console.error("❌ PC DETAILS ERROR:", error);
+
+        if (!pc) return res.status(404).json({ error: "PC not found" });
+
+        return res.json({
+            setup: pc.setup,
+            items: [
+                { label: "CPU", value: pc.processor?.Model },
+                { label: "Alaplap", value: pc.motherboard?.Model },
+                { label: "RAM", value: pc.ram?.model },
+                { label: "VGA", value: pc.videocard?.model },
+                { label: "Tápegység", value: pc.psu?.model }
+            ]
+        });
+    }
+
+    /* ================= HOME THEATER ================= */
+    if (type === "home_theater") {
+        const { data: ht, error } = await supabase
+            .from("home_theater_setups[Setups]") // ✅ FONTOS
+            .select(`
+                *,
+                setup:setup_id(id, setup_name)
+            `)
+            .eq("id", childId)
+            .maybeSingle();
+
+        console.log("🎬 HT DETAILS:", ht);
+        if (error) console.error("❌ HT DETAILS ERROR:", error);
+
+        if (!ht) return res.status(404).json({ error: "Home theater not found" });
+
+        const items = Object.entries(ht)
+            .filter(([k]) =>
+                !["id", "setup_id", "created_at", "setup"].includes(k)
+            )
+            .map(([k, v]) => ({
+                label: k.replaceAll("_", " "),
+                value: v ?? "—"
+            }));
+
+        return res.json({
+            setup: ht.setup,
+            items
+        });
+    }
+
+    res.status(400).json({ error: "Invalid type" });
+});
+
+
 /* ======================================================
    ITEM KERESŐ (TÖBB TÁBLA + Manufacturer/Model KEZELÉS)
 ====================================================== */
@@ -745,89 +830,6 @@ app.delete("/api/child/:type/:id", verifyUser, async (req, res) => {
         res.status(500).json({ error: "Szerver hiba" });
     }
 });
-
-/* ======================================================
-   SETUP DETAILS (PC OR HOME THEATER)
-====================================================== */
-/* ======================================================
-   SETUP DETAILS (PC OR HOME THEATER)
-====================================================== */
-app.get("/api/setup/details", verifyUser, async (req, res) => {
-    const { type, id } = req.query;
-    const childId = Number(id);
-
-    console.log("🔍 [DETAILS] type =", type, "id =", childId);
-
-    if (!type || !childId) {
-        return res.status(400).json({ error: "Missing type or id" });
-    }
-
-    /* ===================== PC ===================== */
-    if (type === "pc") {
-        const { data: pc, error } = await supabase
-            .from("pc_details[Setup]")
-            .select(`
-                setup:setup_id(id, setup_name),
-                processor:processors(Model),
-                motherboard:motherboard(Model),
-                ram:ram(model),
-                videocard:video_cards(model),
-                psu:psu(model)
-            `)
-            .eq("id", childId)
-            .maybeSingle();
-
-        console.log("🖥 PC DETAILS:", pc);
-        if (error) console.error("❌ PC DETAILS ERROR:", error);
-
-        if (!pc) return res.status(404).json({ error: "PC not found" });
-
-        return res.json({
-            setup: pc.setup,
-            items: [
-                { label: "CPU", value: pc.processor?.Model },
-                { label: "Alaplap", value: pc.motherboard?.Model },
-                { label: "RAM", value: pc.ram?.model },
-                { label: "VGA", value: pc.videocard?.model },
-                { label: "Tápegység", value: pc.psu?.model }
-            ]
-        });
-    }
-
-    /* ================= HOME THEATER ================= */
-    if (type === "home_theater") {
-        const { data: ht, error } = await supabase
-            .from("home_theater_setups[Setups]") // ✅ FONTOS
-            .select(`
-                *,
-                setup:setup_id(id, setup_name)
-            `)
-            .eq("id", childId)
-            .maybeSingle();
-
-        console.log("🎬 HT DETAILS:", ht);
-        if (error) console.error("❌ HT DETAILS ERROR:", error);
-
-        if (!ht) return res.status(404).json({ error: "Home theater not found" });
-
-        const items = Object.entries(ht)
-            .filter(([k]) =>
-                !["id", "setup_id", "created_at", "setup"].includes(k)
-            )
-            .map(([k, v]) => ({
-                label: k.replaceAll("_", " "),
-                value: v ?? "—"
-            }));
-
-        return res.json({
-            setup: ht.setup,
-            items
-        });
-    }
-
-    res.status(400).json({ error: "Invalid type" });
-});
-
 
 
 
