@@ -1,4 +1,127 @@
 /* ----------------------------------
+   PAGE INIT
+---------------------------------- */
+
+document.addEventListener("DOMContentLoaded", async () => {
+    const path = window.location.pathname;
+
+    if (path === "/home" || path === "/") {
+        injectSearchArea();
+        await loadImageMap();
+        await loadProducts();
+    }
+
+
+    if (path === "/profile") {
+        await loadProfile();
+    }
+
+    if (path !== "/regist") {
+        await checkLoginStatus();
+    }
+    if (path === "/admin") {
+        await loadAdminTables();
+
+        const addBtn = document.getElementById("add-query-btn");
+        if (addBtn) {
+            addBtn.addEventListener("click", () => {
+                const editor = document.getElementById("sql-editor");
+                const textarea = document.getElementById("sql-textarea");
+                const result = document.getElementById("sql-result");
+
+                editor.classList.remove("hidden");
+                textarea.value = "";
+                result.textContent = "";
+                textarea.placeholder = "SELECT * FROM table_name LIMIT 10;";
+            });
+        }
+    }
+    if (path === "/setup") {
+        await loadMySetupsPage();
+    }
+
+
+
+    /* ----------------------------------
+       PRODUCT PAGE LOADER
+    ---------------------------------- */
+
+
+    // ❗ Csak product oldalon fusson
+    // ✅ HELYES – csak product logika
+    if (window.location.pathname.includes("product.html")) {
+        const box = document.getElementById("product-box");
+        if (!box) return;
+
+        const params = new URLSearchParams(window.location.search);
+        const table = params.get("table");
+        const id = params.get("id");
+
+        if (!table || !id) {
+            box.innerHTML = `<h2>❌ Hibás URL</h2>`;
+            return;
+        }
+
+        try {
+            const res = await fetch(`/api/public/table/${table}`);
+            if (!res.ok) {
+                box.innerHTML = `<h2>❌ Nem sikerült betölteni az adatokat.</h2>`;
+                return;
+            }
+
+            const data = await res.json();
+
+            // 🔥 NORMALIZÁLT ID KERESÉS (EZ A FIX)
+            const foundRow = data.find(row => {
+                const lower = {};
+                Object.keys(row).forEach(k => lower[k.toLowerCase()] = row[k]);
+                return String(lower.id) === String(id);
+            });
+
+            if (!foundRow) {
+                box.innerHTML = `<h2>❌ Termék nem található.</h2>`;
+                return;
+            }
+
+            // 🔁 végleges normalizált objektum
+            const lower = {};
+            Object.keys(foundRow).forEach(k => lower[k.toLowerCase()] = foundRow[k]);
+
+            const img = getProductImage(table, lower);
+
+            box.innerHTML = `
+            <h2>${lower.model || lower.name || "Ismeretlen modell"}</h2>
+            <div class="neon-line"></div>
+
+            <img src="${img}"
+                 style="width:220px;height:220px;object-fit:contain;margin-bottom:20px;">
+
+            <p><strong>Kategória:</strong> ${table}</p>
+            <p><strong>Gyártó:</strong> ${lower.manufacturer || lower.brand || "N/A"}</p>
+
+            <div style="margin-top:20px">
+                ${Object.entries(lower)
+                .filter(([k]) => !["id","model","manufacturer","brand"].includes(k))
+                .map(([k,v]) => `<p><strong>${k}:</strong> ${v}</p>`)
+                .join("")}
+            </div>
+
+            <br>
+            <button class="btn" onclick="window.history.back()">⬅ Vissza</button>
+        `;
+
+        } catch (err) {
+            console.error("❌ product load error:", err);
+            box.innerHTML = `<h2>❌ Hiba történt.</h2>`;
+        }
+    }
+
+
+
+
+});
+
+/* ----------------------------------
    SEARCH + PRODUCT GRID INJECTOR
 ---------------------------------- */
 
@@ -34,33 +157,11 @@ function injectSearchArea() {
 }
 
 
+
 /* ----------------------------------
-   PAGE INIT
+   LOGIN PAGE
 ---------------------------------- */
 
-document.addEventListener("DOMContentLoaded", async () => {
-    const path = window.location.pathname;
-
-    if (path === "/home" || path === "/") {
-        injectSearchArea();
-        await loadImageMap();
-        await loadProducts();
-    }
-
-
-    if (path === "/profile") {
-        await loadProfile();
-    }
-
-    if (path !== "/regist") {
-        await checkLoginStatus();
-    }
-    if (path === "/admin") {
-        await loadAdminTables();
-    }
-
-
-});
 
 async function login() {
     var main = document.querySelector(".content"); // <-- EZ A HELYES
@@ -80,6 +181,10 @@ async function login() {
         </div>
     </section>`;
 }
+
+/* ----------------------------------
+   REGISTRATION PAGE
+---------------------------------- */
 
 
 async function regist() {
@@ -235,6 +340,11 @@ async function loadProfile() {
     renderProfile(box, user);
 }
 
+/* ----------------------------------
+   MYSETUP PAGE
+---------------------------------- */
+
+
 async function mySetup() {
     const box = document.getElementById("profile-box");
     if (!box) return;
@@ -349,24 +459,6 @@ function renderProfile(box, user) {
         <p><strong>Email:</strong> ${user.email}</p>
 
         <button class="btn" onclick="mySetup()">My Setup</button>
-        <button class="btn" onclick="logout()">Kijelentkezés</button>
-    `;
-}
-
-function renderSetup(box, user) {
-    box.innerHTML = `
-        <h2>My Setup</h2>
-        <div class="neon-line"></div>
-
-        <p><strong>Név:</strong> ${user.name}</p>
-        <p><strong>Email:</strong> ${user.email}</p>
-
-        <div id="setupBox-content">
-            <!-- ide jön majd CPU / GPU / stb -->
-            <p class="muted">⚙️ Setup szerkesztése hamarosan…</p>
-        </div>
-
-        <button class="btn" onclick="mySetup()">⬅ Vissza a profilhoz</button>
         <button class="btn" onclick="logout()">Kijelentkezés</button>
     `;
 }
@@ -566,6 +658,11 @@ function getProductImage(table, product) {
 
 
 
+
+/* ----------------------------------
+   ADMIN PAGE
+---------------------------------- */
+
 document.addEventListener("input", e => {
     if (e.target.id !== "table-search") return;
 
@@ -583,6 +680,24 @@ document.addEventListener("input", e => {
     renderTableList(filtered);
 });
 
+document.addEventListener("input", e => {
+    if (e.target.id !== "admin-row-search") return;
+
+    const term = e.target.value.toLowerCase().trim();
+
+    if (!term) {
+        renderAdminTable(currentTableRows);
+        return;
+    }
+
+    const filtered = currentTableRows.filter(row =>
+        Object.values(row).some(v =>
+            String(v).toLowerCase().includes(term)
+        )
+    );
+
+    renderAdminTable(filtered);
+});
 
 
 let adminTables = [];
@@ -622,8 +737,10 @@ async function selectTable(table, el) {
     const res = await fetch(`/api/table/${table}`, { credentials: "include" });
     const rows = await res.json();
 
+    currentTableRows = rows;   // ⬅️ CACHE
     renderAdminTable(rows);
 }
+
 
 function renderAdminTable(rows) {
     const thead = document.getElementById("admin-thead");
@@ -657,5 +774,263 @@ function renderAdminTable(rows) {
     });
 }
 
+/* ----------------------------------
+   ADMIN SQL QUERY STATE
+---------------------------------- */
+
+let currentSQL = "";
+
+document.addEventListener("DOMContentLoaded", () => {
+    const addBtn = document.getElementById("add-query-btn");
+    if (!addBtn) return;
+
+    addBtn.addEventListener("click", () => {
+        const editor = document.getElementById("sql-editor");
+        const textarea = document.getElementById("sql-textarea");
+        const result = document.getElementById("sql-result");
+
+        editor.classList.remove("hidden");
+        textarea.value = "";
+        result.textContent = "";
+
+        // segéd minta
+        textarea.placeholder = "SELECT * FROM table_name LIMIT 10;";
+    });
+});
+
+async function runSQL() {
+    const textarea = document.getElementById("sql-textarea");
+    const resultBox = document.getElementById("sql-result");
+
+    const sql = textarea.value.trim();
+    if (!sql) {
+        resultBox.textContent = "❌ Üres SQL";
+        return;
+    }
+
+    resultBox.textContent = "⏳ Running query...";
+
+    try {
+        const res = await fetch("/api/admin/sql/run", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+            body: JSON.stringify({ sql })
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+            resultBox.textContent = "❌ ERROR:\n" + (data.error || "Unknown error");
+            return;
+        }
+
+        resultBox.textContent = JSON.stringify(data, null, 2);
+
+    } catch (err) {
+        console.error(err);
+        resultBox.textContent = "❌ JS error: " + err.message;
+    }
+}
+
+function saveSQL() {
+    alert("💾 Save később jön (Supabase table)");
+}
+
+function discardSQL() {
+    document.getElementById("sql-editor").classList.add("hidden");
+    document.getElementById("sql-textarea").value = "";
+    document.getElementById("sql-result").textContent = "";
+}
 
 
+/* ----------------------------------
+   SETUP PAGE
+---------------------------------- */
+
+
+async function loadMySetupsPage() {
+    const content = document.querySelector(".content");
+    if (!content) return;
+
+    content.innerHTML = `
+        <h2>My Setups</h2>
+        <div class="neon-line"></div>
+        <div id="setup-list" class="setup-grid">
+            <p class="muted">⏳ Betöltés...</p>
+        </div>
+    `;
+
+    try {
+        const res = await fetch("/api/my-setups", { credentials: "include" });
+        const data = await res.json();
+
+        if (!data.setups || data.setups.length === 0) {
+            document.getElementById("setup-list").innerHTML =
+                `<p class="muted">❌ Nincs még setupod.</p>`;
+            return;
+        }
+
+        renderSetupCards(data.setups);
+
+    } catch (err) {
+        console.error(err);
+        document.getElementById("setup-list").innerHTML =
+            `<p class="muted">❌ Hiba történt.</p>`;
+    }
+}
+
+function renderSetupCards(setups) {
+    const list = document.getElementById("setup-list");
+    list.innerHTML = "";
+
+    // 🧩 EXISTING SETUPS – ELŐSZÖR
+    setups.forEach(setup => {
+        const div = document.createElement("div");
+        div.className = "setup-card";
+
+        div.innerHTML = `
+            <h3>${setup.setup_name}</h3>
+            <p class="muted">ID: ${setup.id}</p>
+        `;
+
+        div.onclick = () => {
+            loadSetupChildren(setup.id);
+        };
+
+        list.appendChild(div);
+    });
+
+    // ➕ CREATE NEW SETUP CARD – VÉGÉRE
+    const addCard = document.createElement("div");
+    addCard.className = "setup-card setup-card-add";
+    addCard.innerHTML = `<span class="setup-plus">+</span>`;
+
+    addCard.onclick = createNewSetup;
+    list.appendChild(addCard);
+}
+
+
+async function createNewSetup() {
+    const name = prompt("Add meg az új setup nevét:");
+    if (!name) return;
+
+    try {
+        const res = await fetch("/api/my-setups", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+            body: JSON.stringify({ name })
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+            alert("❌ Nem sikerült létrehozni: " + data.error);
+            return;
+        }
+
+        // 🔄 frissítjük a listát
+        await loadMySetupsPage();
+
+    } catch (err) {
+        console.error(err);
+        alert("❌ Hiba történt");
+    }
+}
+async function loadSetupChildren(setupId) {
+    const content = document.querySelector(".content");
+
+    content.innerHTML = `
+        <button class="btn small" onclick="loadMySetupsPage()">⬅ Vissza</button>
+        <p class="muted">⏳ Betöltés...</p>
+    `;
+
+    const res = await fetch(`/api/setup/${setupId}/children`, {
+        credentials: "include"
+    });
+
+    const data = await res.json();
+
+    content.innerHTML = `
+        <button class="btn small" onclick="loadMySetupsPage()">⬅ Vissza</button>
+        <h2>Setup konfigurációk</h2>
+        <div class="neon-line"></div>
+        <div id="child-list" class="setup-grid"></div>
+    `;
+
+    const list = document.getElementById("child-list");
+
+    if (!data.children.length) {
+        list.innerHTML = `<p class="muted">❌ Nincs konfiguráció</p>`;
+        return;
+    }
+
+    data.children.forEach(child => {
+        const div = document.createElement("div");
+        div.className = "setup-card";
+
+        div.innerHTML = `
+        <h3>${child.setup_name}</h3>
+        <p class="muted">${child.child_type === "home_theater" ? "🎬 Házimozi" : "🖥 PC"}</p>
+    `;
+
+        div.onclick = () => {
+            loadSetupDetails(child.type, child.id);
+        };
+
+
+        list.appendChild(div);
+    });
+
+}
+
+
+async function loadSetupDetails(type, id) {
+    const content = document.querySelector(".content");
+
+    content.innerHTML = `
+        <button class="btn small" onclick="loadMySetupsPage()">⬅ Vissza</button>
+        <p class="muted">⏳ Betöltés...</p>
+    `;
+
+    const res = await fetch(
+        `/api/setup/details?type=${type}&id=${id}`,
+        { credentials: "include" }
+    );
+
+    const data = await res.json();
+
+    content.innerHTML = `
+        <button class="btn small" onclick="loadMySetupsPage()">⬅ Vissza</button>
+        <h2>${data.setup.setup_name}</h2>
+        <div class="neon-line"></div>
+        <div id="device-list" class="setup-grid"></div>
+    `;
+
+    renderGenericItems(data.items);
+}
+
+
+
+function renderGenericItems(items) {
+    const list = document.getElementById("device-list");
+    list.innerHTML = "";
+
+    if (!items || items.length === 0) {
+        list.innerHTML = `<p class="muted">❌ Nincs adat</p>`;
+        return;
+    }
+
+    items.forEach(item => {
+        const div = document.createElement("div");
+        div.className = "setup-card";
+
+        div.innerHTML = `
+            <h3>${item.label}</h3>
+            <p class="muted">${item.value || "—"}</p>
+        `;
+
+        list.appendChild(div);
+    });
+}

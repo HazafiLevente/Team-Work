@@ -3,6 +3,15 @@ console.log("ENV CHECK:", {
     SUPABASE_URL: process.env.SUPABASE_URL,
     HAS_SERVICE_KEY: !!process.env.SUPABASE_SERVICE_ROLE_KEY
 });
+const {
+    startControl,
+    resolveRole,
+    canAssignRole,
+    hasAdminAccess,
+    hasAdminPlusAccess,
+    ROLES
+} = require("./control");
+
 const express = require("express");
 const path = require("path");
 const fs = require("fs");
@@ -22,16 +31,15 @@ const JWT_SECRET = process.env.JWT_SECRET;
    LOAD ADMINS FROM JSON
 ====================================================== */
 const adminFilePath = path.join(__dirname, "admin.json");
-let ADMIN_IDS = [1,2,5];
 
-try {
-    const raw = fs.readFileSync(adminFilePath, "utf8");
-    const parsed = JSON.parse(raw);
-    ADMIN_IDS = Object.values(parsed).map(Number);
-    console.log("✅ Admin IDs loaded:", ADMIN_IDS);
-} catch (err) {
-    console.error("❌ admin.json betöltési hiba!", err);
+const TABLES_FILE = path.join(__dirname, "tables.runtime.json");
+
+function getRuntimeTables() {
+    if (!fs.existsSync(TABLES_FILE)) return {};
+    const json = JSON.parse(fs.readFileSync(TABLES_FILE, "utf8"));
+    return json.tables || {};
 }
+
 
 /* ======================================================
    SUPABASE (SERVICE ROLE – NO RLS)
@@ -57,31 +65,50 @@ function verifyUser(req, res, next) {
     if (!token) return res.status(401).json({ error: "Not logged in" });
 
     try {
-        req.user = jwt.verify(token, JWT_SECRET);
-        req.user.isAdmin = ADMIN_IDS.includes(Number(req.user.id));
+        const decoded = jwt.verify(token, JWT_SECRET);
+        const id = Number(decoded.id);
 
-        /*console.log("ADMIN CHECK:", {
-            tokenId: req.user.id,
-            tokenIdType: typeof req.user.id,
-            ADMIN_IDS,
-            isAdmin: req.user.isAdmin
+        const role = resolveRole(id);
+
+        req.user = {
+            id,
+            name: decoded.name,
+            username: decoded.username,
+            email: decoded.email,
+            role
+        };
+
+        console.log("🔎 AUTH CHECK", {
+            decodedId: decoded.id,
+            numericId: Number(decoded.id),
+            owners: [...ROLES.owners]
         });
-        */
+
 
         next();
     } catch {
-        return res.status(403).json({ error: "Invalid token" });
+        res.status(403).json({ error: "Invalid token" });
     }
 }
 
 function verifyAdmin(req, res, next) {
     verifyUser(req, res, () => {
-        if (!req.user.isAdmin) {
+        if (!hasAdminAccess(req.user.role)) {
             return res.status(403).json({ error: "Admin only" });
         }
         next();
     });
 }
+
+function verifyAdminPlus(req, res, next) {
+    verifyUser(req, res, () => {
+        if (!hasAdminPlusAccess(req.user.role)) {
+            return res.status(403).json({ error: "Admin+ only" });
+        }
+        next();
+    });
+}
+
 
 /* ======================================================
    PAGE ROUTES
@@ -155,20 +182,23 @@ app.get("/api/admin/users", verifyAdmin, async (req, res) => {
         .select("ID, Name, UserName, Email, created_at")
         .order("created_at", { ascending: false });
 
-    if (error) {
-        return res.status(500).json({ error: error.message });
-    }
+    if (error) return res.status(500).json({ error: error.message });
 
-    const usersWithAdminFlag = data.map(u => ({
-        Name: u.Name,
-        UserName: u.UserName,
-        Email: u.Email,
-        created_at: u.created_at,
-        isAdmin: ADMIN_IDS.includes(Number(u.ID))
-    }));
+    const users = data.map(u => {
+        const id = Number(u.ID);
+        return {
+            id,
+            Name: u.Name,
+            UserName: u.UserName,
+            Email: u.Email,
+            created_at: u.created_at,
+            role: resolveRole(id)
+        };
+    });
 
-    res.json(usersWithAdminFlag);
+    res.json(users);
 });
+
 app.get("/api/table/:name", verifyAdmin, async (req, res) => {
     const table = req.params.name;
 
@@ -196,52 +226,7 @@ app.get("/api/public/table/:name", async (req, res) => {
 
     res.json(data);
 });
-app.get("/api/products/tables", async (_, res) => {
-    const { data, error } = await supabase.rpc("get_all_tables");
 
-    if (error) return res.status(500).json({ error: error.message });
-    if (!Array.isArray(data)) return res.json({ tables: [] });
-
-    // ✅ termék = nincs benne [
-    const productTables = data
-        .map(t => t.table_name)
-        .filter(name => name && !name.includes("["));
-
-    res.json({ tables: productTables });
-});
-
-app.get("/api/admin/tables", verifyAdmin, async (_, res) => {
-    const { data, error } = await supabase.rpc("get_all_tables");
-
-    if (error) return res.status(500).json({ error: error.message });
-    if (!Array.isArray(data)) return res.json({ tables: [] });
-
-    // ✅ admin-only = van benne [
-    const adminTables = data
-        .map(t => t.table_name)
-        .filter(name => name && name.includes("["));
-
-    res.json({ tables: adminTables });
-});
-
-app.get("/api/admin/users", verifyAdmin, async (req, res) => {
-    const { data, error } = await supabase
-        .from("user[Auth]") // ✅ EZ
-        .select("ID, Name, UserName, Email, created_at")
-        .order("created_at", { ascending: false });
-
-    if (error) return res.status(500).json({ error: error.message });
-
-    const usersWithAdminFlag = data.map(u => ({
-        Name: u.Name,
-        UserName: u.UserName,
-        Email: u.Email,
-        created_at: u.created_at,
-        isAdmin: ADMIN_IDS.includes(Number(u.ID))
-    }));
-
-    res.json(usersWithAdminFlag);
-});
 
 
 
@@ -298,6 +283,64 @@ app.get("/meta/filler", (_, res) => {
 
 
 
+
+
+app.get("/api/products/tables", (_, res) => {
+    const runtime = getRuntimeTables();
+
+    // object → array
+    const tables = Object.keys(runtime);
+
+    res.json({ tables });
+});
+
+app.get("/api/products", async (req, res) => {
+    const page = Number(req.query.page || 1);
+    const q = req.query.q || null;
+
+    const limit = 200;
+    const offset = (page - 1) * limit;
+
+    const { data, error } = await supabase
+        .rpc("products_home", {
+            q,
+        });
+
+    if (error) {
+        console.error("❌ products_home error:", error);
+        return res.status(500).json({ error: error.message });
+    }
+
+    res.json({ items: data || [] });
+});
+
+app.get("/api/products/brands", async (_, res) => {
+    const { data, error } = await supabase.rpc("products_brands");
+    if (error) return res.status(500).json({ error: error.message });
+    res.json({ brands: data.map(b => b.brand) });
+});
+
+
+
+/* ======================================================
+   ADMIN API
+====================================================== */
+
+
+app.get("/api/admin/tables", verifyAdmin, async (_, res) => {
+    const { data, error } = await supabase.rpc("get_all_tables");
+
+    if (error) return res.status(500).json({ error: error.message });
+    if (!Array.isArray(data)) return res.json({ tables: [] });
+
+    // ✅ admin-only = van benne [
+    const adminTables = data
+        .map(t => t.table_name)
+        .filter(name => name && name.includes("["));
+
+    res.json({ tables: adminTables });
+});
+
 app.post("/api/admin/sql/run", verifyAdmin, async (req, res) => {
     const { sql } = req.body;
     if (!sql) {
@@ -313,6 +356,123 @@ app.post("/api/admin/sql/run", verifyAdmin, async (req, res) => {
 
     res.json(data);
 });
+
+app.post("/api/admin/update-row", verifyAdmin, async (req, res) => {
+    const { table, id, updates } = req.body;
+
+    if (!table || !id || !updates) {
+        return res.status(400).json({ error: "Missing data" });
+    }
+
+    // ❌ SOHA ne engedjük ID módosítását
+    ["id", "ID", "created_at", "password"].forEach(k => delete updates[k]);
+
+    // ✅ IGAZI PK MEGHATÁROZÁSA
+    const idColumn = table === "user[Auth]" ? "ID" : "id";
+
+    const { error } = await supabase
+        .from(table)
+        .update(updates)
+        .eq(idColumn, id);
+
+    if (error) {
+        return res.status(500).json({ error: error.message });
+    }
+
+    res.json({ success: true });
+});
+
+
+
+app.post("/api/admin/update-user", verifyAdmin, async (req, res) => {
+    const { userId, Name, UserName, Email } = req.body;
+
+    if (!userId) {
+        return res.status(400).json({ error: "Missing userId" });
+    }
+
+    // ❌ jelszót direkt nem engedünk
+    const updateData = {};
+    if (Name) updateData.Name = Name;
+    if (UserName) updateData.UserName = UserName;
+    if (Email) updateData.Email = Email;
+
+    const { error } = await supabase
+        .from("user[Auth]")
+        .update(updateData)
+        .eq("ID", userId);
+
+    if (error) {
+        return res.status(500).json({ error: error.message });
+    }
+
+    res.json({ success: true });
+});
+
+
+app.post("/api/admin/insert-row", verifyAdmin, async (req, res) => {
+    const { table, payload } = req.body;
+
+    if (table === "user[Auth]") {
+        return res.status(403).json({
+            error: "Felhasználót csak regisztráción keresztül lehet létrehozni"
+        });
+    }
+
+    if (!table || !payload || typeof payload !== "object") {
+        return res.status(400).json({ error: "Invalid data" });
+    }
+
+    ["id", "ID", "created_at", "password"].forEach(k => delete payload[k]);
+
+    const { error } = await supabase
+        .from(table)
+        .insert([payload]);
+
+    if (error) {
+        return res.status(500).json({ error: error.message });
+    }
+
+    res.json({ success: true });
+});
+
+
+
+app.post("/api/admin/delete-row", verifyAdmin, async (req, res) => {
+    const { table, id } = req.body;
+
+    if (!table || !id) {
+        return res.status(400).json({ error: "Missing table or id" });
+    }
+
+    // ❌ saját user törlése tiltva
+    if (table === "user[Auth]" && Number(id) === req.user.id) {
+        return res.status(403).json({ error: "Saját fiók nem törölhető" });
+    }
+    if (
+        table === "user[Auth]" &&
+        ROLES.owners.has(Number(id))
+    ) {
+        return res.status(403).json({
+            error: "Owner felhasználó nem törölhető"
+        });
+    }
+
+
+    const idColumn = table === "user[Auth]" ? "ID" : "id";
+
+    const { error } = await supabase
+        .from(table)
+        .delete()
+        .eq(idColumn, id);
+
+    if (error) {
+        return res.status(500).json({ error: error.message });
+    }
+
+    res.json({ success: true });
+});
+
 
 
 /* ======================================================
@@ -470,12 +630,6 @@ app.get("/api/setup/:id/children", verifyUser, async (req, res) => {
     res.json({ children });
 });
 
-
-
-
-/* ======================================================
-   SETUP DETAILS (PC OR HOME THEATER)
-====================================================== */
 /* ======================================================
    SETUP DETAILS (PC OR HOME THEATER)
 ====================================================== */
@@ -574,7 +728,6 @@ app.post("/api/register", async (req, res) => {
         UserName: username,
         Email: email,
         password: hashed,
-        isAdmin: false
     }]);
 
     if (error) return res.status(500).json({ error: error.message });
@@ -597,24 +750,25 @@ app.post("/api/login", async (req, res) => {
     const ok = await bcrypt.compare(password, user.password);
     if (!ok) return res.status(401).json({ error: "Invalid credentials" });
 
-    const isAdmin = ADMIN_IDS.includes(user.ID);
+    const role = resolveRole(Number(user.ID));
 
     const token = jwt.sign({
-        id: user.ID,
+        id: Number(user.ID), // 🔥 EZ A FIX
         name: user.Name,
         username: user.UserName,
-        email: user.Email,
-        isAdmin
-    }, JWT_SECRET, { expiresIn: "1h" });
+        email: user.Email
+    }, JWT_SECRET, { expiresIn: "24h" });
+
 
     res.cookie("auth_token", token, {
         httpOnly: true,
         sameSite: "lax",
-        maxAge: 60 * 60 * 1000
+        maxAge: 24 * 60 * 60 * 1000
     });
 
-    res.json({ message: "Login successful", isAdmin });
+    res.json({ message: "Login successful", role });
 });
+
 
 app.post("/api/logout", (_, res) => {
     res.clearCookie("auth_token");
@@ -622,21 +776,45 @@ app.post("/api/logout", (_, res) => {
 });
 
 app.get("/api/me", verifyUser, (req, res) => {
-    res.json({ loggedIn: true, user: req.user });
+    res.json({
+        loggedIn: true,
+        user: req.user
+    });
 });
+
+
+/* ======================================================
+   RUNTIME API'S
+====================================================== */
+
+app.get("/api/runtime/tables", (_, res) => {
+    const json = JSON.parse(
+        fs.readFileSync(
+            path.join(__dirname, "tables.runtime.json"),
+            "utf8"
+        )
+    );
+    res.json(json);
+});
+
+
+
 
 /* ======================================================
    SERVER START
 ====================================================== */
+
+startControl();
+
 app.listen(PORT, () => {
     console.clear();
     console.log(`
 ╔══════════════════════════════════════════════╗
-║  💫 SETUP CONFIGURATOR – SERVER RUNNING 💫   ║
-║  🌐 http://localhost:${PORT}                     ║
-║  👑 Admin IDs: ${ADMIN_IDS.join(", ")}            ║
+║  💫 SETUP CONFIGURATOR – SERVER RUNNING 💫   
+║  🌐 http://localhost:${PORT}             
+║  👑 Owners: ${[...ROLES.owners].join(", ")} 
+║  🔥 Admin+: ${[...ROLES.adminsPlus].join(", ")} 
+║  🛡 Admin: ${[...ROLES.admins].join(", ")}   
 ╚══════════════════════════════════════════════╝
 `);
 });
-
-

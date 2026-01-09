@@ -1,7 +1,7 @@
 {
-  "Data":
-  {
-      "[Auth]": true,
-      "[Setup]": true
-  }
+  "exclude_table_patterns": [
+    "[Setup]",
+    "[Auth]",
+    "[Setups]"
+  ]
 }
