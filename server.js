@@ -647,33 +647,46 @@ app.get("/api/items/search", verifyUser, async (req, res) => {
    3. AL-ELEMEK LISTÁZÁSA (EZ HIÁNYZIK NÁLAD!)
 ====================================================== */
 app.get("/api/setup/:id/children", verifyUser, async (req, res) => {
-    const setupId = Number(req.params.id);
+    // Kicsit biztosabbá tesszük az ID kezelést
+    const setupId = req.params.id;
+    console.log(`--- SETUP ELEMEK LEKÉRÉSE: ID ${setupId} ---`);
 
     try {
-        // Párhuzamosan lekérjük mind a 4 kategóriát
+        // Párhuzamosan lekérjük mind a 4 kategória táblájából az adatokat
+        // Figyelem: A táblaneveknek és oszlopoknak pontosan egyezniük kell!
         const [pcs, hts, cars, studios] = await Promise.all([
-            supabase.from("pc_details[Setup]").select("id, setup_name").eq("setup_id", setupId),
-            supabase.from("home_theater_setups[Setup]").select("id, setup_name").eq("setup_id", setupId),
-            // Itt a kritikus pont: Nagy 'C'-vel, ahogy a képeden volt!
-            supabase.from("Car_setup[Setup]").select("id, setup_name").eq("setup_id", setupId),
-            supabase.from("studio_monitor_setup[Setup]").select("id, setup_name").eq("setup_id", setupId)
+            supabase.from("pc_details[Setup]").select("*").eq("setup_id", setupId),
+            supabase.from("home_theater_setups[Setup]").select("*").eq("setup_id", setupId),
+            supabase.from("Car_setup[Setup]").select("*").eq("setup_id", setupId),
+            supabase.from("studio_monitor_setup[Setup]").select("*").eq("setup_id", setupId)
         ]);
 
-        // Összefűzzük a találatokat egy listába a Frontendnek
-        const children = [
-            ...(pcs.data || []).map(i => ({ ...i, type: "pc", label: "PC Konfig" })),
-            ...(hts.data || []).map(i => ({ ...i, type: "home_theater", label: "Házimozi" })),
-            ...(cars.data || []).map(i => ({ ...i, type: "car", label: "Autó" })),
-            ...(studios.data || []).map(i => ({ ...i, type: "studio", label: "Stúdió" }))
+        // Ellenőrizzük, jött-e hiba valamelyiknél (kiírjuk a terminálba, ha igen)
+        if (pcs.error) console.error("PC hiba:", pcs.error.message);
+        if (hts.error) console.error("Home Theater hiba:", hts.error.message);
+        if (cars.error) console.error("Car hiba:", cars.error.message);
+        if (studios.error) console.error("Studio hiba:", studios.error.message);
+
+        // Összefűzzük az eredményeket egy közös listába
+        // A frontendnek a 'setup_name' oszlopot küldjük display_name-ként
+        const allItems = [
+            ...(pcs.data || []).map(i => ({ ...i, type: 'pc', label: 'PC Alkatrész' })),
+            ...(hts.data || []).map(i => ({ ...i, type: 'home_theater', label: 'Mozi eszköz' })),
+            ...(cars.data || []).map(i => ({ ...i, type: 'car', label: 'Autó' })),
+            ...(studios.data || []).map(i => ({ ...i, type: 'studio', label: 'Stúdió cucc' }))
         ];
 
-        res.json(children);
+        console.log(`Setup ${setupId}: ${allItems.length} elem megtalálva.`);
+
+        // Ez a sor küldi vissza a JSON választ a frontendnek
+        res.json(allItems);
 
     } catch (err) {
-        console.error("Hiba a listázáskor:", err);
-        res.status(500).json({ error: "Szerver hiba a betöltésnél" });
+        console.error("Váratlan szerver hiba a betöltéskor:", err);
+        res.status(500).json({ error: "Szerver hiba az elemek betöltésekor" });
     }
 });
+
 
 /* ======================================================
    ÚJ CHILD LÉTREHOZÁSA (POST)
@@ -723,45 +736,41 @@ app.post("/api/setup/:id/child", verifyUser, async (req, res) => {
     res.json({ success: true, item: data });
 });
 
-app.get("/api/items/search", verifyUser, async (req, res) => {
-    const { type, query } = req.query;
-    if (!query || query.length < 2) return res.json({ results: [] });
+app.get("/api/items/list", verifyUser, async (req, res) => {
+    const { type } = req.query;
+    let allResults = [];
 
-    let results = [];
     try {
         if (type === "car") {
-            // Végigmegyünk a 4 autós táblán, amit a képeden láttam
             const tables = ["cabrio_cars", "coupe_cars", "hatchback_cars", "wagon_cars"];
+
             for (const table of tables) {
-                const { data } = await supabase
+                // A csillag (*) mindent lekér, így nem fog hibát dobni a hiányzó 'id' miatt
+                const { data, error } = await supabase
                     .from(table)
-                    .select("id, Manufacturer, Model, category")
-                    .or(`Manufacturer.ilike.%${query}%,Model.ilike.%${query}%`)
-                    .limit(5);
+                    .select("*");
+
+                if (error) {
+                    console.error(`Hiba a(z) ${table} táblánál:`, error.message);
+                    continue;
+                }
+
                 if (data) {
-                    data.forEach(d => results.push({
-                        name: `${d.Manufacturer} ${d.Model}`,
-                        category: d.category
-                    }));
+                    data.forEach(item => {
+                        allResults.push({
+                            // Itt fontos, hogy a tábládban nagy M-mel van a Manufacturer és a Model!
+                            name: `${item.Manufacturer} ${item.Model}`,
+                            category: "Autó"
+                        });
+                    });
                 }
             }
-        } else if (type === "studio") {
-            // Itt a hangszerekben keresünk
-            const { data } = await supabase
-                .from("acoustic_guitars")
-                .select("id, Manufacturer, Model, category")
-                .or(`Manufacturer.ilike.%${query}%,Model.ilike.%${query}%`)
-                .limit(10);
-            if (data) {
-                data.forEach(d => results.push({
-                    name: `${d.Manufacturer} ${d.Model}`,
-                    category: d.category
-                }));
-            }
+            return res.json({ results: allResults });
         }
-        res.json({ results });
+        res.json({ results: [] });
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        console.error("Szerver hiba:", err);
+        res.status(500).json({ error: "Szerver hiba történt" });
     }
 });
 

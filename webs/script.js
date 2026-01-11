@@ -943,7 +943,7 @@ function discardSQL() {
 async function loadSetupChildren(setupId) {
     const content = document.querySelector(".content");
 
-    // 1. Alap szerkezet felépítése (Címsor + Üres konténer a listának)
+    // 1. Alap szerkezet felépítése
     content.innerHTML = `
         <button class="btn small" onclick="loadMySetupsPage()">⬅ Vissza a setupokhoz</button>
         <h2>Setup konfigurációk</h2>
@@ -957,7 +957,7 @@ async function loadSetupChildren(setupId) {
     `;
 
     try {
-        // 2. Adatok lekérése a szervertől (az új, bővített API-ról)
+        // 2. Adatok lekérése
         const res = await fetch(`/api/setup/${setupId}/children`, {
             credentials: "include"
         });
@@ -967,46 +967,24 @@ async function loadSetupChildren(setupId) {
             return;
         }
 
+        // 3. Adat feldolgozása
         const data = await res.json();
 
-        // 3. 🔥 ITT A LÉNYEG: Meghívjuk a renderelő függvényt! 🔥
-        // Ez fogja kirakni a kártyákat és a "+" gombot is.
-        renderChildCards(data.children || [], setupId);
+        // Mivel a szervered közvetlenül a tömböt küldi,
+        // ellenőrizzük, hogy tömb-e, ha nem, akkor keressük a .children kulcsot.
+        const itemsToRender = Array.isArray(data) ? data : (data.children || []);
+
+        console.log("Megjelenítendő elemek:", itemsToRender);
+
+        // 4. Renderelés meghívása
+        // A renderChildCards fogja kirakni a kártyákat és a "+" gombot
+        renderChildCards(itemsToRender, setupId);
 
     } catch (err) {
-        console.error(err);
+        console.error("Hiba a frontend oldalon:", err);
         document.getElementById("child-list").innerHTML = `<p class="muted">❌ Szerver hiba.</p>`;
     }
 }
-
-async function loadSetupDetails(type, id) {
-    const content = document.querySelector(".content");
-
-    content.innerHTML = `
-        <button class="btn small" onclick="loadMySetupsPage()">⬅ Vissza</button>
-        <p class="muted">⏳ Betöltés...</p>
-    `;
-
-    const res = await fetch(
-        `/api/setup/details?type=${type}&id=${id}`,
-        { credentials: "include" }
-    );
-
-    const data = await res.json();
-
-    content.innerHTML = `
-        <button class="btn small" onclick="loadMySetupsPage()">⬅ Vissza</button>
-        <h2>${data.setup.setup_name}</h2>
-        <div class="neon-line"></div>
-        <div class="setup-page-wide">
-            <div id="device-list" class="setup-grid-wide"></div>
-        </div>
-
-    `;
-
-    renderGenericItems(data.items);
-}
-
 
 
 function renderGenericItems(items) {
@@ -1123,63 +1101,55 @@ async function loadMySetups() {
     }
 }
 
-function openSearchModal(setupId, type) {
-    // Eltávolítjuk a választó modalt
-    const prev = document.getElementById("custom-modal");
+async function openListModal(setupId, type) {
+    const prev = document.getElementById("search-modal");
     if(prev) prev.remove();
 
     const modal = document.createElement("div");
     modal.id = "search-modal";
-    // Sötét háttér a keresőnek
-    modal.style.cssText = "position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); display:flex; flex-direction:column; align-items:center; padding-top:100px; z-index:1100; color:white;";
+    modal.style.cssText = "position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); display:flex; align-items:center; justify-content:center; z-index:1100; color:white;";
 
     modal.innerHTML = `
-        <div style="width:90%; max-width:600px; text-align:center;">
-            <h2 style="margin-bottom:20px;">Keresés az adatbázisban</h2>
-            <input type="text" id="item-search-input" placeholder="Kezdj el gépelni (pl. Ferrari)..." 
-                   style="width:100%; padding:15px; font-size:18px; border-radius:8px; border:1px solid #444; background:#222; color:white; margin-bottom:20px;">
-            <div id="search-results" style="max-height:50vh; overflow-y:auto; text-align:left; background:#1a1a1a; border-radius:8px;">
-                <p style="padding:20px; color:#888; text-align:center;">Gépelj legalább 2 karaktert...</p>
+        <div style="background:#1a1a1a; padding:30px; border-radius:15px; width:90%; max-width:500px; border:1px solid #333; max-height:80vh; display:flex; flex-direction:column;">
+            <h2 style="margin-bottom:15px; text-align:center;">Válassz egy elemet</h2>
+            <div id="items-container" style="overflow-y:auto; flex-grow:1; border:1px solid #222; border-radius:8px; padding:10px; background:#111;">
+                <p style="text-align:center;">Betöltés...</p>
             </div>
-            <button class="btn" style="margin-top:20px; background:#444;" onclick="document.getElementById('search-modal').remove()">Mégse</button>
+            <button class="btn" style="margin-top:20px; width:100%;" onclick="document.getElementById('search-modal').remove()">Mégse</button>
         </div>
     `;
 
     document.body.appendChild(modal);
 
-    const input = document.getElementById("item-search-input");
-    input.focus();
+    try {
+        // Itt hívjuk meg az új listázó API-t
+        const res = await fetch(`/api/items/list?type=${type}`, { credentials: "include" });
+        const data = await res.json();
+        const container = document.getElementById("items-container");
 
-    // Figyeljük a gépelést
-    input.onkeyup = async (e) => {
-        const query = e.target.value;
-        const resultsDiv = document.getElementById("search-results");
+        container.innerHTML = ""; // Töröljük a "Betöltés..." szöveget
 
-        if (query.length < 2) return;
-
-        try {
-            const res = await fetch(`/api/items/search?type=${type}&query=${query}`, { credentials: "include" });
-            const data = await res.json();
-
-            resultsDiv.innerHTML = "";
-            if (data.results.length === 0) {
-                resultsDiv.innerHTML = '<p style="padding:20px;">Nincs találat.</p>';
-                return;
-            }
-
-            data.results.forEach(item => {
-                const itemDiv = document.createElement("div");
-                itemDiv.style.cssText = "padding:15px; border-bottom:1px solid #333; cursor:pointer; hover:background:#333;";
-                itemDiv.innerHTML = `<strong>${item.name}</strong> <br> <small style="color:#888;">${item.category}</small>`;
-
-                // KIVÁLASZTÁS
-                itemDiv.onclick = () => saveSelection(setupId, type, item.name);
-                resultsDiv.appendChild(itemDiv);
-            });
-        } catch (err) {
-            console.error("Keresési hiba:", err);
+        if (!data.results || data.results.length === 0) {
+            container.innerHTML = "<p style='text-align:center; padding:20px;'>Nincs elérhető elem.</p>";
+            return;
         }
-    };
+
+        data.results.forEach(item => {
+            const div = document.createElement("div");
+            div.style.cssText = "padding:12px; border-bottom:1px solid #222; cursor:pointer; transition: 0.2s;";
+            div.innerHTML = `<strong>${item.name}</strong> <span style="font-size:12px; color:#666; float:right;">${item.category}</span>`;
+
+            // Hover effekt
+            div.onmouseover = () => div.style.background = "#222";
+            div.onmouseout = () => div.style.background = "transparent";
+
+            // Kattintáskor mentünk
+            div.onclick = () => saveSelection(setupId, type, item.name);
+            container.appendChild(div);
+        });
+    } catch (err) {
+        console.error("Hiba:", err);
+    }
 }
 
 // Mentés funkció
@@ -1271,10 +1241,10 @@ function showAddChildModal(setupId) {
             <h2 style="margin-bottom:20px;">Mit szeretnél hozzáadni?</h2>
             
             <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:20px;">
-                <button class="btn" onclick="openSearchModal('${setupId}', 'pc')">🖥️ PC Alkatrész</button>
-                <button class="btn" onclick="openSearchModal('${setupId}', 'car')">🚗 Autó</button>
-                <button class="btn" onclick="openSearchModal('${setupId}', 'home_theater')">🎬 Mozi eszköz</button>
-                <button class="btn" onclick="openSearchModal('${setupId}', 'studio')">🎵 Stúdió cucc</button>
+                <button class="btn" onclick="openListModal('${setupId}', 'pc')">🖥️ PC Alkatrész</button>
+                <button class="btn" onclick="openListModal('${setupId}', 'car')">🚗 Autó</button>
+                <button class="btn" onclick="openListModal('${setupId}', 'home_theater')">🎬 Mozi eszköz</button>
+                <button class="btn" onclick="openListModal('${setupId}', 'studio')">🎵 Stúdió cucc</button>
             </div>
             <button class="btn small" style="background:transparent; border:1px solid #555; color: white;" onclick="document.getElementById('custom-modal').remove()">Mégse</button>
         </div>
