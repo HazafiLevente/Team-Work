@@ -12,6 +12,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         injectSearchArea();
         await loadProducts();
         await loadManufacturersDropdown(); // ✅ dropdown
+        bindExtraFiltersAutoRun();
         // await loadBrandFilters();
     }
 
@@ -699,41 +700,55 @@ function bindManufacturerSearch() {
 }
 
 function bindEnterSearch() {
-    // Enter a search inputban => keresés
     document.addEventListener("keydown", (e) => {
         if (e.key !== "Enter") return;
 
-        const activeId = document.activeElement?.id;
-
-        // ha dropdown keresőben nyomsz entert: zárja be + fusson a keresés
-        if (activeId === "brand-dd-search") {
-            e.preventDefault();
-            closeDropdown();
-            runSearchFilter();
-            return;
-        }
-
-        // ha sima search input: keresés
-        if (activeId === "search-input") {
+        const id = document.activeElement?.id;
+        if (["search-input", "min-price", "max-price"].includes(id)) {
             e.preventDefault();
             runSearchFilter();
         }
     });
 }
 
+
+function bindExtraFiltersAutoRun() {
+    const ids = ["min-price", "max-price", "sort-select"];
+    ids.forEach(id => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        if (el.dataset.bound === "1") return;
+        el.dataset.bound = "1";
+        el.addEventListener("change", runSearchFilter);
+    });
+}
+
+
+
+
+
+
+
 function runSearchFilter() {
     const input = document.getElementById("search-input");
     const term = (input?.value || "").toLowerCase().trim();
 
+    const minEl = document.getElementById("min-price");
+    const maxEl = document.getElementById("max-price");
+    const sortEl = document.getElementById("sort-select");
+
+    const minPrice = parseNumberSafe(minEl?.value);
+    const maxPrice = parseNumberSafe(maxEl?.value);
+
     let result = allProducts;
 
-    // gyártó
+    // 1) gyártó
     if (SELECTED_MANUFACTURER) {
         const selectedLower = SELECTED_MANUFACTURER.toLowerCase();
         result = result.filter(p => (p.manufacturer || "").toLowerCase() === selectedLower);
     }
 
-    // model + kategória keresés
+    // 2) model + kategória keresés
     if (term) {
         result = result.filter(p =>
             (p.model || "").toLowerCase().includes(term) ||
@@ -741,8 +756,54 @@ function runSearchFilter() {
         );
     }
 
+    // 3) ár szűrés (csak ha van price)
+    // ha egy terméknek nincs ára => dobjuk ki, ha min/max meg van adva
+    if (minPrice !== null) {
+        result = result.filter(p => typeof p.price === "number" && p.price >= minPrice);
+    }
+    if (maxPrice !== null) {
+        result = result.filter(p => typeof p.price === "number" && p.price <= maxPrice);
+    }
+
+    // 4) rendezés
+    const sort = sortEl?.value || "relevance";
+    result = sortProducts(result, sort);
+
     renderProducts(result);
 }
+
+function parseNumberSafe(val) {
+    if (val === undefined || val === null) return null;
+    const s = String(val).trim();
+    if (!s) return null;
+
+    // engedjük: "250000", "250 000", "250.000"
+    const cleaned = s.replace(/[^\d]/g, "");
+    if (!cleaned) return null;
+
+    const n = Number(cleaned);
+    return Number.isFinite(n) ? n : null;
+}
+
+
+function sortProducts(list, sort) {
+    const arr = [...list];
+
+    if (sort === "price_asc") {
+        arr.sort((a, b) => (a.price ?? Infinity) - (b.price ?? Infinity));
+    } else if (sort === "price_desc") {
+        arr.sort((a, b) => (b.price ?? -Infinity) - (a.price ?? -Infinity));
+    } else if (sort === "name_asc") {
+        arr.sort((a, b) => String(a.model || "").localeCompare(String(b.model || ""), "hu"));
+    } else if (sort === "name_desc") {
+        arr.sort((a, b) => String(b.model || "").localeCompare(String(a.model || ""), "hu"));
+    }
+
+    return arr;
+}
+
+
+
 
 
 
