@@ -11,10 +11,12 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (path === "/home" || path === "/") {
         injectSearchArea();
         await loadProducts();
-        await loadManufacturersDropdown(); // ✅ dropdown
+        await loadManufacturersDropdown();
         bindExtraFiltersAutoRun();
+        bindCarClearButton();
         // await loadBrandFilters();
     }
+
 
     if (path === "/profile") {
         await loadProfile();
@@ -50,6 +52,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (path === "/favorite") {
         await loadFavorite();
     }
+
 
     // ✅ és utána jöhet a product page loader rész (ami nálad lentebb van)
 
@@ -155,7 +158,7 @@ function injectSearchArea() {
         <select id="manufacturer-select" class="search-input" style="max-width:260px;">
           <option value="">⏳ Gyártók betöltése...</option>
         </select>
-
+        
         <input id="search-input" type="text"
                placeholder="Keresés: model, kategória..."
                class="search-input" />
@@ -548,9 +551,7 @@ let filterPanelOpen = false;
 
 
 async function loadProducts(q = null) {
-    const res = await fetch(
-        `/api/products?q=${encodeURIComponent(q || "")}`
-    );
+    const res = await fetch(`/api/products?q=${encodeURIComponent(q || "")}`);
 
     if (!res.ok) {
         console.error("❌ products load failed");
@@ -564,17 +565,17 @@ async function loadProducts(q = null) {
         id: p.id,
         manufacturer: p.manufacturer,
         model: p.model,
-        price: p.price
+        price: p.price,
+        raw: p   // 🔥 EZ A LÉNYEG
     }));
+
 
     renderProducts(allProducts);
 
-    populateManufacturerSelect(allProducts);  // ✅ EZ TÖLTI A <select>-et
+    populateManufacturerSelect(allProducts);
     bindManufacturerSearch();
     bindEnterSearch();
-    bindSelectChange(); // ✅ opcionális: azonnal szűr
-
-
+    bindSelectChange();
 }
 
 function bindSelectChange() {
@@ -724,7 +725,26 @@ function bindExtraFiltersAutoRun() {
 }
 
 
+function bindCarClearButton() {
+    const btn = document.getElementById("car-clear-btn");
+    if (!btn) return;
+    if (btn.dataset.bound === "1") return;
+    btn.dataset.bound = "1";
 
+    btn.addEventListener("click", () => {
+        [
+            "car-manufacturer","car-model","car-price-min","car-price-max",
+            "car-bodytype","car-hp-min","car-hp-max","car-accel-min","car-accel-max",
+            "car-seats-min","car-seats-max","car-fuel","car-year-min","car-year-max",
+            "car-transmission"
+        ].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.value = "";
+        });
+
+        runSearchFilter();
+    });
+}
 
 
 
@@ -733,22 +753,15 @@ function runSearchFilter() {
     const input = document.getElementById("search-input");
     const term = (input?.value || "").toLowerCase().trim();
 
-    const minEl = document.getElementById("min-price");
-    const maxEl = document.getElementById("max-price");
-    const sortEl = document.getElementById("sort-select");
-
-    const minPrice = parseNumberSafe(minEl?.value);
-    const maxPrice = parseNumberSafe(maxEl?.value);
-
     let result = allProducts;
 
-    // 1) gyártó
+    // ✅ alap manufacturer dropdown (a sima top select)
     if (SELECTED_MANUFACTURER) {
         const selectedLower = SELECTED_MANUFACTURER.toLowerCase();
         result = result.filter(p => (p.manufacturer || "").toLowerCase() === selectedLower);
     }
 
-    // 2) model + kategória keresés
+    // ✅ alap szöveges keresés (model + kategória)
     if (term) {
         result = result.filter(p =>
             (p.model || "").toLowerCase().includes(term) ||
@@ -756,21 +769,226 @@ function runSearchFilter() {
         );
     }
 
-    // 3) ár szűrés (csak ha van price)
-    // ha egy terméknek nincs ára => dobjuk ki, ha min/max meg van adva
-    if (minPrice !== null) {
-        result = result.filter(p => typeof p.price === "number" && p.price >= minPrice);
-    }
-    if (maxPrice !== null) {
-        result = result.filter(p => typeof p.price === "number" && p.price <= maxPrice);
-    }
+    // ✅ AUTÓ RÉSZLETES SZŰRŐ
+    const carFilters = getCarFilters();
+    if (isCarFilterActive(carFilters)) {
+        // ha bármelyik autós mező aktív, akkor kifejezetten autókra szűrünk
+        result = applyCarFilters(allProducts, carFilters);
 
-    // 4) rendezés
-    const sort = sortEl?.value || "relevance";
-    result = sortProducts(result, sort);
+        // és még ráengedjük a basic keresést is (ha írtál valamit felülre)
+        if (SELECTED_MANUFACTURER) {
+            const selectedLower = SELECTED_MANUFACTURER.toLowerCase();
+            result = result.filter(p => (p.manufacturer || "").toLowerCase() === selectedLower);
+        }
+        if (term) {
+            result = result.filter(p =>
+                (p.model || "").toLowerCase().includes(term) ||
+                (p.table || "").toLowerCase().includes(term)
+            );
+        }
+    }
 
     renderProducts(result);
 }
+
+
+
+function getCarFilters() {
+    const v = (id) => (document.getElementById(id)?.value ?? "").trim();
+
+    return {
+        manufacturer: v("car-manufacturer"),
+        model: v("car-model"),
+        priceMin: v("car-price-min"),
+        priceMax: v("car-price-max"),
+        bodyType: v("car-bodytype"),
+        hpMin: v("car-hp-min"),
+        hpMax: v("car-hp-max"),
+        accelMin: v("car-accel-min"),
+        accelMax: v("car-accel-max"),
+        seatsMin: v("car-seats-min"),
+        seatsMax: v("car-seats-max"),
+        fuel: v("car-fuel"),
+        yearMin: v("car-year-min"),
+        yearMax: v("car-year-max"),
+        transmission: v("car-transmission"),
+    };
+}
+
+function isCarFilterActive(cf) {
+    // ha bármelyik mező ki van töltve, akkor aktívnak vesszük
+    return Object.values(cf).some(x => String(x || "").length > 0);
+}
+
+function isCarTable(tableName = "") {
+    // ide sorold be a te autós tábláidat / prefixeket
+    const t = tableName.toLowerCase();
+    return (
+        t.includes("cars") ||
+        t.includes("hatchback_cars") ||
+        t.includes("coupe_cars") ||
+        t.includes("cabrio_cars") ||
+        t.includes("wagon_cars") ||
+        t.includes("mpv_cars")
+    );
+}
+
+function pickNumber(obj, keys) {
+    for (const k of keys) {
+        const val = obj?.[k];
+        const n = Number(val);
+        if (Number.isFinite(n)) return n;
+    }
+    return null;
+}
+function pickText(obj, keys) {
+    for (const k of keys) {
+        const val = obj?.[k];
+        if (val !== undefined && val !== null && String(val).trim() !== "") {
+            return String(val).trim();
+        }
+    }
+    return "";
+}
+
+function applyCarFilters(list, cf) {
+    // csak autós táblák
+    let cars = list.filter(p => p.raw && isCarTable(p.table));
+
+    // Gyártó (manufacturer)
+    if (cf.manufacturer) {
+        const m = cf.manufacturer.toLowerCase();
+        cars = cars.filter(p =>
+            String(p.manufacturer || "").toLowerCase().includes(m)
+        );
+    }
+
+    // Modell
+    if (cf.model) {
+        const m = cf.model.toLowerCase();
+        cars = cars.filter(p =>
+            String(p.model || "").toLowerCase().includes(m)
+        );
+    }
+
+    // Kivitel (Body Type)
+    if (cf.bodyType) {
+        const b = cf.bodyType.toLowerCase();
+        cars = cars.filter(p => {
+            const bt = pickText(p.raw, ["body_type", "Body Type", "bodytype", "bodyType", "boddy type"]);
+            return bt.toLowerCase().includes(b);
+        });
+    }
+
+    // Lóerő (Horsepower)
+    const hpMin = cf.hpMin ? Number(cf.hpMin) : null;
+    const hpMax = cf.hpMax ? Number(cf.hpMax) : null;
+
+    if (hpMin !== null || hpMax !== null) {
+        cars = cars.filter(p => {
+            const hp = pickNumber(p.raw, ["horsepower", "Horsepower", "hp", "HP"]);
+            if (hp === null) return false;
+            if (hpMin !== null && hp < hpMin) return false;
+            if (hpMax !== null && hp > hpMax) return false;
+            return true;
+        });
+    }
+
+    // Gyorsulás (Acceleration / Acceleration (s))
+    const aMin = cf.accelMin ? Number(cf.accelMin) : null;
+    const aMax = cf.accelMax ? Number(cf.accelMax) : null;
+
+    if (aMin !== null || aMax !== null) {
+        cars = cars.filter(p => {
+            const acc = pickNumber(p.raw, ["acceleration", "Acceleration", "Acceleration (s)", "0-100", "0_100", "acceleration (s)"]);
+            if (acc === null) return false;
+            if (aMin !== null && acc < aMin) return false;
+            if (aMax !== null && acc > aMax) return false;
+            return true;
+        });
+    }
+
+    // Ülések (Seats)
+    const sMin = cf.seatsMin ? Number(cf.seatsMin) : null;
+    const sMax = cf.seatsMax ? Number(cf.seatsMax) : null;
+
+    if (sMin !== null || sMax !== null) {
+        cars = cars.filter(p => {
+            const s = pickNumber(p.raw, ["seats", "Seats"]);
+            if (s === null) return false;
+            if (sMin !== null && s < sMin) return false;
+            if (sMax !== null && s > sMax) return false;
+            return true;
+        });
+    }
+
+    // Üzemanyag (Fuel Type)
+    if (cf.fuel) {
+        const f = cf.fuel.toLowerCase();
+        cars = cars.filter(p => {
+            const ft = pickText(p.raw, ["fuel_type", "Fuel Type", "fuel", "Fuel", "fuel type"]);
+            return ft.toLowerCase().includes(f);
+        });
+    }
+
+    // Évjárat (Year)
+    const yMin = cf.yearMin ? Number(cf.yearMin) : null;
+    const yMax = cf.yearMax ? Number(cf.yearMax) : null;
+
+    if (yMin !== null || yMax !== null) {
+        cars = cars.filter(p => {
+            const y = pickNumber(p.raw, ["year", "Year"]);
+            if (y === null) return false;
+            if (yMin !== null && y < yMin) return false;
+            if (yMax !== null && y > yMax) return false;
+            return true;
+        });
+    }
+
+    // Váltó (Transmission)
+    if (cf.transmission) {
+        const t = cf.transmission.toLowerCase();
+        cars = cars.filter(p => {
+            const tr = pickText(p.raw, ["transmission", "Transmission", "Transmission Type"]);
+            return tr.toLowerCase().includes(t);
+        });
+    }
+
+    return cars;
+}
+
+
+
+
+function normalizeRawKeys(obj) {
+    const out = {};
+    for (const [k, v] of Object.entries(obj || {})) {
+        const nk = String(k)
+            .trim()
+            .toLowerCase()
+            .replace(/\s+/g, "_"); // "Body Type" -> "body_type"
+        out[nk] = v;
+    }
+    return out;
+}
+
+
+
+function toNumber(val) {
+    if (val === null || val === undefined) return null;
+    const n = Number(
+        String(val)
+            .replace(",", ".")
+            .replace(/[^0-9.]/g, "")
+    );
+    return Number.isFinite(n) ? n : null;
+}
+
+
+
+
+
+
 
 function parseNumberSafe(val) {
     if (val === undefined || val === null) return null;
