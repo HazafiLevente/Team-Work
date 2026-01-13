@@ -947,13 +947,31 @@ tr.editing {
     box-shadow: 0 0 0 3px rgba(180, 120, 255, 0.15);
 }
 
-/* próbáljuk az option listát is */
-#manufacturer-select option{
-    background: #121212;
-    color: #eaeaea;
+
+
+
+
+
+/* SELECT + OPTION FIX */
+select {
+    color: white;
+    background-color: #1a1a1a;
 }
 
-/* Ha Windows/Chrome baszik rá és fehér marad: legalább a szöveg legyen sötét */
-#manufacturer-select option{
-    color: #111;
+select option {
+    background-color: #1a1a1a; /* lenyíló lista háttere */
+    color: #ffffff;            /* SZÖVEG SZÍNE */
+}
+
+/* hover / kiválasztott */
+select option:hover,
+select option:checked {
+    background-color: #6a4cff; /* lila */
+    color: #ffffff;
+}
+
+select {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
 }

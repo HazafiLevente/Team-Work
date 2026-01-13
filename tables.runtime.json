@@ -1,10 +1,10 @@
 {
-  "lastUpdated": 1768157213790,
+  "lastUpdated": 1768324093113,
   "tables": {
     "c_trumpets": {
       "columns": [
-        "release_year",
         "ID",
+        "release_year",
         "Manufacturer",
         "Model",
         "series",
@@ -76,9 +76,9 @@
     },
     "acoustic_drums": {
       "columns": [
-        "cymbals_included",
         "ID",
         "hardware_included",
+        "cymbals_included",
         "Manufacturer",
         "Model",
         "series",
@@ -116,7 +116,6 @@
     },
     "motherboard": {
       "columns": [
-        "SATAPorts",
         "USBPortsRear",
         "Price",
         "ID",
@@ -124,6 +123,7 @@
         "RamMaxMHZ",
         "RamMaxSizeGB",
         "M2Slots",
+        "SATAPorts",
         "Manufacturer",
         "Model",
         "Socket",
@@ -255,9 +255,9 @@
     },
     "video_cards": {
       "columns": [
-        "vram_gb",
         "bus_bit",
         "ID",
+        "vram_gb",
         "brand",
         "series",
         "model",
@@ -405,13 +405,6 @@
     },
     "midis": {
       "columns": [
-        "keys_count",
-        "pads",
-        "knobs",
-        "faders",
-        "aftertouch",
-        "velocity_sensitive",
-        "midi_in",
         "midi_out",
         "midi_thru",
         "usb_midi",
@@ -419,6 +412,13 @@
         "release_year",
         "created_at",
         "id",
+        "keys_count",
+        "pads",
+        "knobs",
+        "faders",
+        "aftertouch",
+        "velocity_sensitive",
+        "midi_in",
         "manufacturer",
         "model",
         "series",
@@ -436,9 +436,9 @@
         "strings",
         "frets",
         "release_year",
+        "series",
         "Manufacturer",
         "Model",
-        "series",
         "bass_type",
         "scale_length",
         "body_material",
@@ -464,9 +464,6 @@
         "buttons",
         "touch_sensitive",
         "release_year",
-        "controller_type",
-        "connection",
-        "display",
         "daw_compatibility",
         "platform_support",
         "power_supply",
@@ -475,7 +472,10 @@
         "notes",
         "category",
         "Manufacturer",
-        "Model"
+        "Model",
+        "controller_type",
+        "connection",
+        "display"
       ]
     },
     "electric_guitars": {
@@ -667,6 +667,22 @@
         "user_id",
         "created_at",
         "name"
+      ]
+    },
+    "pickup_cars": {
+      "columns": [
+        "ID",
+        "Seats",
+        "Manufacturer",
+        "Model",
+        "Price Range (Ft)",
+        "Body Type",
+        "Horsepower",
+        "Acceleration (s)",
+        "Fuel Type",
+        "Year",
+        "Transmission",
+        "category"
       ]
     },
     "utp_cables": {

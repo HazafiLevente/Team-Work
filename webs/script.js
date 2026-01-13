@@ -585,7 +585,7 @@ function bindSelectChange() {
     sel.dataset.bound = "1";
 
     sel.addEventListener("change", () => {
-        SELECTED_MANUFACTURER = sel.value || "";
+        SELECTED_MANUFACTURER = sel.value;
         runSearchFilter();
     });
 }
@@ -593,14 +593,13 @@ function bindSelectChange() {
 
 
 
-let SELECTED_MANUFACTURER = ""; // "" = összes
+let SELECTED_MANUFACTURER = "__all__";
 
 function populateManufacturerDropdown(products) {
     const optionsBox = document.getElementById("brand-dd-options");
     if (!optionsBox) return;
 
     optionsBox.innerHTML = "";           // ✅ fontos: ne duplázzon
-    SELECTED_MANUFACTURER = "";          // ✅ reset ha újratöltöd
 
     const manufacturers = [...new Set(
         products.map(p => (p.manufacturer || "").trim()).filter(Boolean)
@@ -756,10 +755,13 @@ function runSearchFilter() {
     let result = allProducts;
 
     // ✅ alap manufacturer dropdown (a sima top select)
-    if (SELECTED_MANUFACTURER) {
+    if (SELECTED_MANUFACTURER !== "__all__") {
         const selectedLower = SELECTED_MANUFACTURER.toLowerCase();
-        result = result.filter(p => (p.manufacturer || "").toLowerCase() === selectedLower);
+        result = result.filter(p =>
+            (p.manufacturer || "").toLowerCase() === selectedLower
+        );
     }
+
 
     // ✅ alap szöveges keresés (model + kategória)
     if (term) {
@@ -1034,9 +1036,10 @@ function populateManufacturerSelect(products) {
     )].sort((a, b) => a.localeCompare(b, "hu"));
 
     select.innerHTML = `
-        <option value="">(Összes gyártó)</option>
+        <option value="__all__">(Összes gyártó)</option>
         ${manufacturers.map(m => `<option value="${escapeHtml(m)}">${escapeHtml(m)}</option>`).join("")}
     `;
+
 }
 
 
