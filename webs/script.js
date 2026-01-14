@@ -17,11 +17,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         // await loadBrandFilters();
     }
 
-
-    if (path === "/profile") {
-        await loadProfile();
-    }
-
     if (path !== "/regist") {
         await checkLoginStatus();
     }
@@ -45,13 +40,21 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
     }
 
+    if (path === "/profile") {
+        if (!(await requireLoginOrRedirect())) return;
+        await loadProfile();
+    }
+
     if (path === "/setup") {
+        if (!(await requireLoginOrRedirect())) return;
         await loadMySetupsPage();
     }
 
     if (path === "/favorite") {
+        if (!(await requireLoginOrRedirect())) return;
         await loadFavorite();
     }
+
 
 
     // ✅ és utána jöhet a product page loader rész (ami nálad lentebb van)
@@ -282,67 +285,105 @@ async function logout() {
     window.location.href = "/regist";
 }
 
+async function requireLoginOrRedirect() {
+    const res = await fetch("/api/me", { credentials: "include" });
+    if (!res.ok) {
+        window.location.href = "/regist";
+        return false;
+    }
+    return true;
+}
+
+
 /* ----------------------------------
    LOGIN BUTTON
 ---------------------------------- */
 
 async function checkLoginStatus() {
-    const authBtn = document.getElementById("auth-btn");
+    const userWrap = document.getElementById("user-menu-wrap");
+    const avatarBtn = document.getElementById("user-avatar-btn");
     const adminLink = document.getElementById("admin-link");
-
-    if (!authBtn) {
-        setTimeout(checkLoginStatus, 50);
-        return;
-    }
-
+    const connectBtn = document.getElementById("connect-btn");
 
     try {
         const res = await fetch("/api/me", { credentials: "include" });
 
         if (!res.ok) {
-            setConnectButton(authBtn);
-            if (adminLink) adminLink.classList.add("hidden");
+            userWrap?.classList.add("hidden");
+            adminLink?.classList.add("hidden");
+            connectBtn?.classList.remove("hidden");
             return;
         }
 
         const data = await res.json();
 
         if (data.loggedIn) {
-            setLogoutButton(authBtn);
+            userWrap.classList.remove("hidden");
+            connectBtn?.classList.add("hidden");
 
-            // 👑 ADMIN CHECK
+            avatarBtn.onclick = (e) => {
+                e.stopPropagation();
+                openUserDropdown(data.user, avatarBtn);
+            };
+
             if (["admin","admin+","owner"].includes(data.user.role)) {
-                adminLink.classList.remove("hidden");
-            } else if (adminLink) {
-                adminLink.classList.add("hidden");
+                adminLink?.classList.remove("hidden");
+            } else {
+                adminLink?.classList.add("hidden");
             }
-
         } else {
-            setConnectButton(authBtn);
-            if (adminLink) adminLink.classList.add("hidden");
+            userWrap.classList.add("hidden");
+            connectBtn?.classList.remove("hidden");
         }
+
         window.CURRENT_USER_ROLE = data.user.role;
         console.log("CURRENT_USER_ROLE:", window.CURRENT_USER_ROLE);
 
-    } catch {
-        setConnectButton(authBtn);
-        if (adminLink) adminLink.classList.add("hidden");
+    } catch (err) {
+        console.error("auth check error:", err);
+        userWrap?.classList.add("hidden");
+        adminLink?.classList.add("hidden");
+        connectBtn?.classList.remove("hidden");
     }
-
 }
 
-function setConnectButton(btn) {
-    btn.textContent = "Connect";
-    btn.onclick = () => {
-        window.location.href = "/regist";
-    };
-}
-function setLogoutButton(btn) {
-    btn.textContent = "Logout";
-    btn.onclick = (e) => {
-        e.preventDefault();
-        logout();
-    };
+
+function openUserDropdown(user, anchor) {
+    closeAnyMenu();
+
+    const rect = anchor.getBoundingClientRect();
+    const menu = document.createElement("div");
+    menu.id = "context-menu";
+    menu.className = "user-menu neon";
+
+    menu.style.top = rect.bottom + 8 + "px";
+    menu.style.right = "20px";
+
+    menu.innerHTML = `
+        <div class="menu-title">${user.username}</div>
+        <div class="muted">${user.email}</div>
+
+        <hr>
+        
+        <div class="menu-item" onclick="location.href='/profile'">👤 Profile</div>
+        <div class="menu-item" onclick="location.href='/favorite'">⭐ Favorite</div>
+        <div class="menu-item" onclick="location.href='/setup'">🧰 My Setup</div>
+
+        ${["admin","admin+","owner"].includes(user.role)
+        ? `<div class="menu-item" onclick="location.href='/admin'">🛡 Admin</div>`
+        : ``}
+
+        <hr>
+
+        <div class="menu-item danger" onclick="logout()">🚪 Logout</div>
+    `;
+
+    document.body.appendChild(menu);
+
+    setTimeout(() =>
+            document.addEventListener("click", closeAnyMenu, { once: true }),
+        0
+    );
 }
 
 
@@ -369,112 +410,6 @@ async function loadProfile() {
    MYSETUP PAGE
 ---------------------------------- */
 
-
-async function mySetup() {
-    const box = document.getElementById("profile-box");
-    if (!box) return;
-
-    isSetup = !isSetup;
-
-    if (!isSetup) {
-        const res = await fetch("/api/me", { credentials: "include" });
-        const { user } = await res.json();
-        return renderProfile(box, user);
-    }
-
-    // ⏳ loading
-    box.innerHTML = `
-        <h2>My Setup</h2>
-        <p class="muted">⏳ Setup betöltése...</p>
-    `;
-
-    const res = await fetch("/api/my-first-setup", { credentials: "include" });
-    const data = await res.json();
-
-    if (!data.setup) {
-        box.innerHTML = `
-            <h2>My Setup</h2>
-            <p class="muted">❌ Még nincs egyetlen géped sem.</p>
-            <button class="btn" onclick="mySetup()">⬅ Vissza</button>
-        `;
-        return;
-    }
-
-    renderSetupWithData(box, data);
-}
-
-
-function renderSetupWithData(box, data) {
-    const { setup, details } = data;
-
-    box.innerHTML = `
-        <div class="setup-title">
-            <h2 id="setup-title-text">${setup.setup_name}</h2>
-            <button class="btn small" onclick="editSetupName(${setup.id})">✏️ Módosít</button>
-        </div>
-
-        <div class="neon-line"></div>
-
-        <ul class="setup-list">
-            <li><strong>CPU:</strong> ${details.processor?.Model || "—"}</li>
-            <li><strong>Alaplap:</strong> ${details.motherboard?.Model || "—"}</li>
-            <li><strong>RAM:</strong> ${details.ram?.model || "—"}</li>
-            <li><strong>VGA:</strong> ${details.videocard?.model || "—"}</li>
-            <li><strong>Tápegység:</strong> ${details.psu?.model || "—"}</li>
-        </ul>
-
-        <button class="btn" onclick="mySetup()">⬅ Vissza a profilhoz</button>
-        <button class="btn" onclick="logout()">Kijelentkezés</button>
-    `;
-}
-
-function editSetupName(setupId) {
-    const title = document.getElementById("setup-title-text");
-    const currentName = title.textContent;
-
-    title.outerHTML = `
-        <input 
-            id="setup-title-input"
-            value="${currentName}"
-            style="font-size:24px; padding:6px; width:100%; max-width:400px;"
-        />
-        <div style="margin-top:10px">
-            <button class="btn small" onclick="saveSetupName(${setupId})">💾 Mentés</button>
-            <button class="btn small" onclick="cancelEditSetupName('${currentName}')">❌ Mégse</button>
-        </div>
-    `;
-}
-
-async function saveSetupName(setupId) {
-    const input = document.getElementById("setup-title-input");
-    const newName = input.value.trim();
-
-    if (!newName) {
-        alert("A név nem lehet üres!");
-        return;
-    }
-
-    const res = await fetch("/api/update-setup-name", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ setupId, newName })
-    });
-
-    if (!res.ok) {
-        alert("❌ Nem sikerült menteni");
-        return;
-    }
-
-    // frissítjük a nézetet
-    mySetup();
-}
-
-function cancelEditSetupName(originalName) {
-    mySetup(); // egyszerűbb: újratöltjük a setup nézetet
-}
-
-
 function renderProfile(box, user) {
     box.innerHTML = `
         <h2>Profilod</h2>
@@ -483,7 +418,7 @@ function renderProfile(box, user) {
         <p><strong>Felhasználónév:</strong> ${user.username}</p>
         <p><strong>Email:</strong> ${user.email}</p>
 
-        <button class="btn" onclick="mySetup()">My Setup</button>
+        <button class="btn" onclick="location.href='/setup'">My Setup</button>
         <button class="btn" onclick="logout()">Kijelentkezés</button>
     `;
 }
@@ -2350,8 +2285,11 @@ function renderGenericItems(items) {
    FAVORITE SITE
 ================================================== */
 
-async function loadFavorite()
-{
-    var content = document.getElementById("favorite-box");
+async function loadFavorite() {
+    const box = document.getElementById("favorite-box");
+    if (!box) return;
 
+    box.innerHTML = `
+        <p class="muted">⭐ Kedvenc termékeid hamarosan itt lesznek.</p>
+    `;
 }

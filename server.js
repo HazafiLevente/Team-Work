@@ -131,10 +131,13 @@ app.get("/profile", (_, res) =>
 app.get("/admin", verifyAdmin, (_, res) => {
     res.sendFile(path.join(__dirname, "webs/Admin.html"));
 });
-app.get("/setup", (_, res) => {
+app.get("/setup", verifyUser, (_, res) => {
     res.sendFile(path.join(__dirname, "webs/Mysetup.html"));
 });
 
+app.get("/favorite", verifyUser, (_, res) => {
+    res.sendFile(path.join(__dirname, "webs/Favorite.html"));
+});
 
 
 /* ======================================================

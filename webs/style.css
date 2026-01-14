@@ -42,16 +42,33 @@ input[type="text"], input[type="password"], input[type="email"], textarea{
     font-weight:500;
     transition: all .16s;
 }
+/* =========================
+   CYBERPUNK SCROLLBAR (NO RAINBOW)
+========================= */
 
-/*  --------------------------------------------
-    Szép neon scroll bár (Chromium alapú böngészők)
-    ---------------------------------------------- */
-::-webkit-scrollbar{width:12px;height:12px}
-::-webkit-scrollbar-track{background:transparent}
-::-webkit-scrollbar-thumb{
-    background: linear-gradient(180deg, var(--accent-cyan), var(--accent-magenta));
-    border-radius:10px;
-    border:3px solid rgba(0,0,0,0.2);
+::-webkit-scrollbar {
+    width: 12px;
+    height: 12px;
+}
+
+::-webkit-scrollbar-track {
+    background: rgba(255,255,255,0.02);
+}
+
+::-webkit-scrollbar-thumb {
+    background: linear-gradient(
+            180deg,
+            rgba(138,43,226,0.55),   /* purple */
+            rgba(0,255,255,0.45)     /* cyan */
+    );
+    border-radius: 10px;
+    border: 3px solid rgba(10,10,10,0.9);
+}
+
+/* 🔥 finom hover glow */
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(0,255,255,0.65);
+    box-shadow: 0 0 10px rgba(0,255,255,0.35);
 }
 
 /* -------------------------
@@ -974,4 +991,65 @@ select {
     appearance: none;
     -webkit-appearance: none;
     -moz-appearance: none;
+}
+
+
+
+
+
+
+
+
+
+
+
+/* === USER DROPDOWN === */
+
+.user-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent-purple), var(--accent-cyan));
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+    box-shadow: 0 0 18px rgba(138,43,226,0.45);
+}
+
+.avatar-placeholder {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: rgba(0,0,0,0.35);
+}
+.btn.ghost {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.15);
+    box-shadow: none;
+}
+
+.user-menu .menu-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* alap szöveg */
+.user-menu .menu-item {
+    color: rgba(255,255,255,0.9);
+    transition: color 0.15s ease, opacity 0.15s ease;
+}
+
+/* 🔥 HOVER: csak a szöveg halványul */
+.user-menu .menu-item:hover {
+    color: rgba(255,255,255,0.55);
+}
+
+/* danger marad piros, de halványodik */
+.user-menu .menu-item.danger {
+    color: #ff4d4d;
+}
+
+.user-menu .menu-item.danger:hover {
+    color: rgba(255,77,77,0.6);
 }
