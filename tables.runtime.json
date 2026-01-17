@@ -1,5 +1,5 @@
 {
-  "lastUpdated": 1767963807075,
+  "lastUpdated": 1768650755261,
   "tables": {
     "c_trumpets": {
       "columns": [
@@ -63,22 +63,22 @@
     },
     "favorite_pc_components[Lists]": {
       "columns": [
+        "psu_id",
+        "created_at",
+        "id",
         "favorite_list_id",
         "processor_id",
         "videocard_id",
         "motherboard_id",
         "ram_id",
-        "psu_id",
-        "created_at",
-        "id",
         "label"
       ]
     },
     "acoustic_drums": {
       "columns": [
-        "cymbals_included",
         "ID",
         "hardware_included",
+        "cymbals_included",
         "Manufacturer",
         "Model",
         "series",
@@ -100,8 +100,8 @@
     },
     "coupe_cars": {
       "columns": [
-        "ID",
         "Seats",
+        "ID",
         "Manufacturer",
         "Model",
         "Price Range (Ft)",
@@ -116,14 +116,14 @@
     },
     "motherboard": {
       "columns": [
-        "SATAPorts",
-        "USBPortsRear",
-        "Price",
         "ID",
         "RamSlots",
         "RamMaxMHZ",
         "RamMaxSizeGB",
         "M2Slots",
+        "SATAPorts",
+        "USBPortsRear",
+        "Price",
         "Manufacturer",
         "Model",
         "Socket",
@@ -153,6 +153,22 @@
       ]
     },
     "mpv_cars": {
+      "columns": [
+        "ID",
+        "Manufacturer",
+        "Model",
+        "Price Range (Ft)",
+        "Body Type",
+        "Horsepower",
+        "Acceleration (s)",
+        "Seats",
+        "Fuel Type",
+        "Year",
+        "Transmission",
+        "category"
+      ]
+    },
+    "crossover_cars": {
       "columns": [
         "ID",
         "Manufacturer",
@@ -405,12 +421,6 @@
     },
     "midis": {
       "columns": [
-        "keys_count",
-        "pads",
-        "knobs",
-        "faders",
-        "aftertouch",
-        "velocity_sensitive",
         "midi_in",
         "midi_out",
         "midi_thru",
@@ -419,6 +429,12 @@
         "release_year",
         "created_at",
         "id",
+        "keys_count",
+        "pads",
+        "knobs",
+        "faders",
+        "aftertouch",
+        "velocity_sensitive",
         "manufacturer",
         "model",
         "series",
@@ -436,6 +452,12 @@
         "strings",
         "frets",
         "release_year",
+        "finish",
+        "skill_level",
+        "genre_recommended",
+        "country_of_origin",
+        "notes",
+        "category",
         "Manufacturer",
         "Model",
         "series",
@@ -446,13 +468,7 @@
         "fretboard_material",
         "pickups",
         "electronics",
-        "bridge",
-        "finish",
-        "skill_level",
-        "genre_recommended",
-        "country_of_origin",
-        "notes",
-        "category"
+        "bridge"
       ]
     },
     "daws": {
@@ -464,6 +480,8 @@
         "buttons",
         "touch_sensitive",
         "release_year",
+        "Manufacturer",
+        "Model",
         "controller_type",
         "connection",
         "display",
@@ -473,9 +491,7 @@
         "skill_level",
         "country_of_origin",
         "notes",
-        "category",
-        "Manufacturer",
-        "Model"
+        "category"
       ]
     },
     "electric_guitars": {
@@ -667,6 +683,22 @@
         "user_id",
         "created_at",
         "name"
+      ]
+    },
+    "pickup_cars": {
+      "columns": [
+        "ID",
+        "Seats",
+        "Manufacturer",
+        "Model",
+        "Price Range (Ft)",
+        "Body Type",
+        "Horsepower",
+        "Acceleration (s)",
+        "Fuel Type",
+        "Year",
+        "Transmission",
+        "category"
       ]
     },
     "utp_cables": {

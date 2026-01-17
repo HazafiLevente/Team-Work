@@ -149,8 +149,8 @@ function buildUnionSQL(tablesMeta) {
                 ${q(cols.manufacturer)}::text as manufacturer,
                 ${q(cols.model)}::text as model,
                 ${cols.price
-                    ? q(cols.price) + "::numeric"
-                    : "null::numeric"} as price
+            ? q(cols.price) + "::numeric"
+            : "null::numeric"} as price
             from "${table}"
         `.trim());
 
