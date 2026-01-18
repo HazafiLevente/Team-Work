@@ -1,10 +1,10 @@
 {
-  "lastUpdated": 1768389555363,
+  "lastUpdated": 1768745066337,
   "tables": {
     "c_trumpets": {
       "columns": [
-        "ID",
         "release_year",
+        "ID",
         "Manufacturer",
         "Model",
         "series",
@@ -63,14 +63,14 @@
     },
     "favorite_pc_components[Lists]": {
       "columns": [
+        "psu_id",
+        "created_at",
+        "id",
         "favorite_list_id",
         "processor_id",
         "videocard_id",
         "motherboard_id",
         "ram_id",
-        "psu_id",
-        "created_at",
-        "id",
         "label"
       ]
     },
@@ -100,8 +100,8 @@
     },
     "coupe_cars": {
       "columns": [
-        "ID",
         "Seats",
+        "ID",
         "Manufacturer",
         "Model",
         "Price Range (Ft)",
@@ -116,14 +116,14 @@
     },
     "motherboard": {
       "columns": [
-        "USBPortsRear",
-        "Price",
         "ID",
         "RamSlots",
         "RamMaxMHZ",
         "RamMaxSizeGB",
         "M2Slots",
         "SATAPorts",
+        "USBPortsRear",
+        "Price",
         "Manufacturer",
         "Model",
         "Socket",
@@ -153,6 +153,22 @@
       ]
     },
     "mpv_cars": {
+      "columns": [
+        "ID",
+        "Manufacturer",
+        "Model",
+        "Price Range (Ft)",
+        "Body Type",
+        "Horsepower",
+        "Acceleration (s)",
+        "Seats",
+        "Fuel Type",
+        "Year",
+        "Transmission",
+        "category"
+      ]
+    },
+    "crossover_cars": {
       "columns": [
         "ID",
         "Manufacturer",
@@ -255,9 +271,9 @@
     },
     "video_cards": {
       "columns": [
+        "vram_gb",
         "bus_bit",
         "ID",
-        "vram_gb",
         "brand",
         "series",
         "model",
@@ -405,6 +421,7 @@
     },
     "midis": {
       "columns": [
+        "midi_in",
         "midi_out",
         "midi_thru",
         "usb_midi",
@@ -418,7 +435,6 @@
         "faders",
         "aftertouch",
         "velocity_sensitive",
-        "midi_in",
         "manufacturer",
         "model",
         "series",
@@ -436,9 +452,15 @@
         "strings",
         "frets",
         "release_year",
-        "series",
+        "finish",
+        "skill_level",
+        "genre_recommended",
+        "country_of_origin",
+        "notes",
+        "category",
         "Manufacturer",
         "Model",
+        "series",
         "bass_type",
         "scale_length",
         "body_material",
@@ -446,13 +468,7 @@
         "fretboard_material",
         "pickups",
         "electronics",
-        "bridge",
-        "finish",
-        "skill_level",
-        "genre_recommended",
-        "country_of_origin",
-        "notes",
-        "category"
+        "bridge"
       ]
     },
     "daws": {
@@ -464,18 +480,18 @@
         "buttons",
         "touch_sensitive",
         "release_year",
+        "Manufacturer",
+        "Model",
+        "controller_type",
+        "connection",
+        "display",
         "daw_compatibility",
         "platform_support",
         "power_supply",
         "skill_level",
         "country_of_origin",
         "notes",
-        "category",
-        "Manufacturer",
-        "Model",
-        "controller_type",
-        "connection",
-        "display"
+        "category"
       ]
     },
     "electric_guitars": {

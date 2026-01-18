@@ -719,23 +719,10 @@ app.get("/api/setup/details", verifyUser, async (req, res) => {
 /* ======================================================
    AUTH API
 ====================================================== */
-app.post("/api/register", async (req, res) => {
-    const { fullname, username, email, password } = req.body;
-    if (!fullname || !username || !email || !password)
-        return res.status(400).json({ error: "Missing fields" });
+const { registerUser } = require("./registration");
 
-    const hashed = await bcrypt.hash(password, 10);
+app.post("/api/register", registerUser);
 
-    const { error } = await supabase.from("user[Auth]").insert([{
-        Name: fullname,
-        UserName: username,
-        Email: email,
-        password: hashed,
-    }]);
-
-    if (error) return res.status(500).json({ error: error.message });
-    res.json({ message: "Registration successful" });
-});
 
 app.post("/api/login", async (req, res) => {
     const { email, password } = req.body;
