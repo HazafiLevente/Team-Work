@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>Setup Configurator</title>
     <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
 </head>
 <body>
 <header class="top-menu">
@@ -18,14 +20,16 @@
 
     <nav class="nav">
         <a href="/home">Home</a>
-
+        <div id="bell">
+            <i class="fas fa-bell"></i><!-- Teljes csengő -->
+            <!--<i class="fas fa-bell-slash"></i> < -- Kikapcsolt csengő -->
+        </div>
         <!-- 👤 USER AVATAR (login után) -->
         <div id="user-menu-wrap" class="hidden">
             <div id="user-avatar-btn" class="user-avatar">
                 <span class="avatar-placeholder"></span>
             </div>
         </div>
-
         <!-- 🔐 GUEST CONNECT -->
         <a href="/regist" id="connect-btn" class="btn ghost">Connect</a>
     </nav>

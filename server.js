@@ -776,6 +776,10 @@ app.get("/api/me", verifyUser, (req, res) => {
 /* ======================================================
    RUNTIME API'S
 ====================================================== */
+const registerBellRoutes = require("./bell");
+registerBellRoutes(app, supabase, verifyUser);
+
+
 
 app.get("/api/runtime/tables", (_, res) => {
     const json = JSON.parse(

@@ -1053,3 +1053,55 @@ select {
 .user-menu .menu-item.danger:hover {
     color: rgba(255,77,77,0.6);
 }
+
+
+
+
+
+/* === BELL PART === */
+
+.bell-dropdown {
+    position: absolute;
+    top: 60px;
+    right: 20px;
+    width: 320px;
+    max-height: 420px;
+    overflow-y: auto;
+    background: #0f0f17;
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 12px;
+    box-shadow: 0 0 25px rgba(138,43,226,0.25);
+    z-index: 999;
+}
+
+.bell-item {
+    padding: 12px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+.bell-title {
+    font-weight: 700;
+    font-size: 14px;
+}
+
+.bell-message {
+    margin: 6px 0;
+    font-size: 13px;
+    opacity: 0.9;
+    text-align: center;
+}
+
+.bell-date {
+    font-size: 11px;
+    opacity: 0.6;
+    text-align: right;
+}
+
+.bell-item.unread {
+    background: rgba(255,255,255,0.05);
+    border-left: 3px solid #00ffff;
+}
+
+.bell-item.read {
+    opacity: 0.6;
+}

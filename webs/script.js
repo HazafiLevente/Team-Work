@@ -385,6 +385,91 @@ function openUserDropdown(user, anchor) {
         0
     );
 }
+/* ----------------------------------
+        BELL AUTH
+ ---------------------------------- */
+
+document.addEventListener("DOMContentLoaded", () => {
+    const bell = document.getElementById("bell");
+    if (bell) {
+        bell.addEventListener("click", AuthBell);
+    }
+});
+
+let bellOpen = false;
+
+async function AuthBell() {
+    closeAnyMenu();
+
+    if (bellOpen) {
+        document.getElementById("bell-dropdown")?.remove();
+        bellOpen = false;
+        return;
+    }
+
+    const res = await fetch("/api/bell", { credentials: "include" });
+    if (!res.ok) return;
+
+    const data = await res.json();
+
+    const box = document.createElement("div");
+    box.id = "bell-dropdown";
+    box.className = "bell-dropdown";
+
+    if (!data.length) {
+        box.innerHTML = `
+            <div class="bell-item muted">Nincs értesítés</div>
+        `;
+    } else {
+        box.innerHTML = data.map(n => `
+            <div class="bell-item ${n.read ? "read" : "unread"}"
+                 onclick="markBellRead(${n.id}, this)">
+                <div class="bell-title">${escapeHtml(n.title)}</div>
+                <div class="bell-message">${escapeHtml(n.message)}</div>
+                <div class="bell-date">${formatBellDate(n.created_at)}</div>
+            </div>
+        `).join("");
+    }
+
+    document.body.appendChild(box);
+
+    setTimeout(() => {
+        document.addEventListener("click", () => {
+            box.remove();
+            bellOpen = false;
+        }, { once: true });
+    }, 0);
+
+    bellOpen = true;
+}
+
+function formatBellDate(dateStr) {
+    const d = new Date(dateStr);
+    const now = new Date();
+    const diff = (now - d) / 1000 / 60 / 60;// órában
+    if (diff < 24) {
+        return d.toLocaleTimeString("hu-HU", {
+            hour: "2-digit",
+            minute: "2-digit"
+        });
+    }
+    return d.toLocaleDateString("hu-HU") .replace(/\./g, "-") .replace(/\s/g, "");
+}
+
+
+async function markBellRead(messageId, el) {
+    if (el.classList.contains("read")) return;
+
+    el.classList.add("read");
+    el.classList.remove("unread");
+
+    await fetch("/api/bell/read", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ messageId })
+    });
+}
 
 
 /* ----------------------------------
