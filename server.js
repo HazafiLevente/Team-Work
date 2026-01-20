@@ -3,6 +3,7 @@ console.log("ENV CHECK:", {
     SUPABASE_URL: process.env.SUPABASE_URL,
     HAS_SERVICE_KEY: !!process.env.SUPABASE_SERVICE_ROLE_KEY
 });
+
 const {
     startControl,
     resolveRole,

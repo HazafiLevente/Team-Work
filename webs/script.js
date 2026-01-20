@@ -798,10 +798,11 @@ function runSearchFilter() {
         result = applyCarFilters(allProducts, carFilters);
 
         // és még ráengedjük a basic keresést is (ha írtál valamit felülre)
-        if (SELECTED_MANUFACTURER) {
+        if (SELECTED_MANUFACTURER !== "__all__") {
             const selectedLower = SELECTED_MANUFACTURER.toLowerCase();
             result = result.filter(p => (p.manufacturer || "").toLowerCase() === selectedLower);
         }
+
         if (term) {
             result = result.filter(p =>
                 (p.model || "").toLowerCase().includes(term) ||
@@ -877,6 +878,22 @@ function applyCarFilters(list, cf) {
     // csak autós táblák
     let cars = list.filter(p => p.raw && isCarTable(p.table));
 
+    // Ár (Price) - MIN/MAX
+    const pMin = cf.priceMin ? Number(cf.priceMin) : null;
+    const pMax = cf.priceMax ? Number(cf.priceMax) : null;
+
+    if (pMin !== null || pMax !== null) {
+        cars = cars.filter(p => {
+            const price = Number(p.price);
+            if (!Number.isFinite(price)) return false;
+            if (pMin !== null && price < pMin) return false;
+            if (pMax !== null && price > pMax) return false;
+            return true;
+        });
+    }
+
+
+
     // Gyártó (manufacturer)
     if (cf.manufacturer) {
         const m = cf.manufacturer.toLowerCase();
@@ -897,10 +914,12 @@ function applyCarFilters(list, cf) {
     if (cf.bodyType) {
         const b = cf.bodyType.toLowerCase();
         cars = cars.filter(p => {
-            const bt = pickText(p.raw, ["body_type", "Body Type", "bodytype", "bodyType", "boddy type"]);
+            const raw = normalizeRawKeys(p.raw); // ✅ EZ A LÉNYEG
+            const bt = pickText(raw, ["body_type", "bodytype", "body"]);
             return bt.toLowerCase().includes(b);
         });
     }
+
 
     // Lóerő (Horsepower)
     const hpMin = cf.hpMin ? Number(cf.hpMin) : null;
@@ -948,10 +967,12 @@ function applyCarFilters(list, cf) {
     if (cf.fuel) {
         const f = cf.fuel.toLowerCase();
         cars = cars.filter(p => {
-            const ft = pickText(p.raw, ["fuel_type", "Fuel Type", "fuel", "Fuel", "fuel type"]);
+            const raw = normalizeRawKeys(p.raw);
+            const ft = pickText(raw, ["fuel_type", "fuel", "fueltype"]);
             return ft.toLowerCase().includes(f);
         });
     }
+
 
     // Évjárat (Year)
     const yMin = cf.yearMin ? Number(cf.yearMin) : null;
@@ -971,10 +992,12 @@ function applyCarFilters(list, cf) {
     if (cf.transmission) {
         const t = cf.transmission.toLowerCase();
         cars = cars.filter(p => {
-            const tr = pickText(p.raw, ["transmission", "Transmission", "Transmission Type"]);
+            const raw = normalizeRawKeys(p.raw);
+            const tr = pickText(raw, ["transmission", "transmission_type", "gearbox"]);
             return tr.toLowerCase().includes(t);
         });
     }
+
 
     return cars;
 }
