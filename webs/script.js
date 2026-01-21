@@ -1388,6 +1388,8 @@ const TABLE_IMAGE_CATEGORY_MAP = {
     cabrio_cars: "cars",
     wagon_cars: "cars",
     mpv_cars: "cars",
+    crossover_cars: "cars",
+
 
     electric_guitars: "electric_guitars",
     acoustic_guitars: "acoustic-guitars",
