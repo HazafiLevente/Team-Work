@@ -60,10 +60,13 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "webs")));
 
 app.use(cors({
-    origin: "http://localhost:4200/",
+    origin: "http://localhost:4200",
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type","Authorization"]
+    allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: true
 }));
+
+
 /* ======================================================
    AUTH MIDDLEWARE
 ====================================================== */

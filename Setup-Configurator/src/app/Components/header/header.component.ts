@@ -9,6 +9,7 @@ import {HttpClient} from '@angular/common/http';
 export class HeaderComponent {
   constructor(private http:HttpClient) {}
   public test() {
-    this.http.get('http://localhost:3000/test').subscribe(res => console.log(res));
+    this.http.get('http://localhost:3000/test', { withCredentials: true }).subscribe(res => console.log(res));
+
   }
 }
