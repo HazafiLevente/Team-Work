@@ -3,6 +3,7 @@ console.log("ENV CHECK:", {
     SUPABASE_URL: process.env.SUPABASE_URL,
     HAS_SERVICE_KEY: !!process.env.SUPABASE_SERVICE_ROLE_KEY
 });
+
 const {
     startControl,
     resolveRole,
@@ -727,6 +728,19 @@ app.get("/api/setup/details", verifyUser, async (req, res) => {
 });
 
 
+app.post("/api/search/cars", async (req, res) => {
+    const filters = req.body;
+
+    const { data, error } = await supabase
+        .rpc("search_cars", filters);
+
+    if (error) {
+        console.error("❌ search_cars error:", error);
+        return res.status(500).json({ error: error.message });
+    }
+
+    res.json({ items: data || [] });
+});
 
 
 
@@ -790,6 +804,10 @@ app.get("/api/me", verifyUser, (req, res) => {
 /* ======================================================
    RUNTIME API'S
 ====================================================== */
+const registerBellRoutes = require("./bell");
+registerBellRoutes(app, supabase, verifyUser);
+
+
 
 app.get("/api/runtime/tables", (_, res) => {
     const json = JSON.parse(

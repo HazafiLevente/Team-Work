@@ -86,7 +86,10 @@
     "volkswagen": "https://upload.wikimedia.org/wikipedia/commons/2/23/Volkswagen_-_Logo.svg",
     "cupra": "https://images.seeklogo.com/logo-png/53/2/cupra-logo-png_seeklogo-538267.png",
     "toyota": "https://global.toyota/pages/global_toyota/mobility/toyota-brand/emblem_001.jpg",
-    "SKODA": "https://www.citypng.com/public/uploads/preview/skoda-emblem-logo-png-7017516947725940bgq3rrgsp.png"
+    "SKODA": "https://www.citypng.com/public/uploads/preview/skoda-emblem-logo-png-7017516947725940bgq3rrgsp.png",
+    "mazda": "https://di-uploads-pod2.s3.amazonaws.com/biggersmazda/uploads/2013/06/Mazda-logo-big.jpg",
+    "nissan": "https://cdn.freebiesupply.com/logos/large/2x/nissan-6-logo-png-transparent.png",
+    "MITSUBISHI": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5a/Mitsubishi_logo.svg/960px-Mitsubishi_logo.svg.png"
   },
   "bass": {
     "ibanez": "https://i.etsystatic.com/34531699/r/il/cce3ab/3800330793/il_1140xN.3800330793_2y7v.jpg",
@@ -137,7 +140,23 @@
   "audio_processorss":
   {
     "Trinnov": "https://casaplex.com/wp-content/uploads/2023/05/trinnov_logo-removebg-preview.png",
-    "StormAudio": "https://essentialinstall.com/wp-content/uploads/2019/01/StormAudio-Logo.jpg"
+    "StormAudio": "https://essentialinstall.com/wp-content/uploads/2019/01/StormAudio-Logo.jpg",
+    "Integra": "https://en.wikipedia.org/wiki/Integra_LifeSciences#/media/File:Integra_LifeSciences_logo.jpg",
+    "denon": "https://upload.wikimedia.org/wikipedia/commons/b/b3/Denon_Logo.svg",
+    "lyngdorf" : "https://lyngdorf.steinwaylyngdorf.com/wp-content/uploads/2020/07/logoer200x200.jpg",
+    "anthem": "https://www.audiovideosystems.com/wp-content/uploads/2021/03/logo-anthem.png",
+    "marantz" : "https://upload.wikimedia.org/wikipedia/commons/c/c1/Marantz-Logo.svg",
+    "arcam": "https://cdn.freebiesupply.com/logos/large/2x/arcam-logo-svg-vector.svg",
+    "emotiva": "https://www.emotiva.net/wp-content/uploads/2023/10/Nueva-imagen-corporativa.jpg",
+    "jbl": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/JBL-Logo.svg/960px-JBL-Logo.svg.png",
+    "yamaha": "https://images.seeklogo.com/logo-png/15/1/yamaha-logo-png_seeklogo-154895.png",
+    "datasat": "https://logodix.com/logo/965563.png",
+    "acurus": "https://www.jayvee.com.au/images/logo-acurus.png",
+    "minidsp": "https://devicedb.roonlabs.net/1/images/1cac37853686c44a462a90adcf808736f86d4b68.png",
+    "tonewinner": "https://speedy.uenicdn.com/14b19bb6-ccb3-4667-843d-a19af98f4332/n290_160a/image/upload/v1694358219/business/63aa3402-4b41-4682-b413-75ffad6b56f6.png",
+    "monoprice": "https://tpucdn.com/review/monoprice-monolith-m-twe-wireless-earbuds-soundid/images/logo.jpg",
+    "onkyo": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQDBD_yVPyHLkTjFXJ3R_5tGxnW3n7XHsvqSQ&s"
+
   },
 
   "effect-multieffects": {
