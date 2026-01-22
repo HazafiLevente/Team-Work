@@ -1,10 +1,10 @@
 {
-  "lastUpdated": 1768745066337,
+  "lastUpdated": 1769097777898,
   "tables": {
     "c_trumpets": {
       "columns": [
-        "release_year",
         "ID",
+        "release_year",
         "Manufacturer",
         "Model",
         "series",
@@ -40,15 +40,15 @@
     },
     "effects_pedal": {
       "columns": [
+        "ID",
+        "analog",
+        "digital",
         "true_bypass",
         "buffered",
         "stereo",
         "midi",
         "presets",
         "release_year",
-        "ID",
-        "analog",
-        "digital",
         "Manufacturer",
         "Model",
         "pedal_type",
@@ -63,14 +63,14 @@
     },
     "favorite_pc_components[Lists]": {
       "columns": [
-        "psu_id",
-        "created_at",
         "id",
         "favorite_list_id",
         "processor_id",
         "videocard_id",
         "motherboard_id",
         "ram_id",
+        "psu_id",
+        "created_at",
         "label"
       ]
     },
@@ -100,8 +100,8 @@
     },
     "coupe_cars": {
       "columns": [
-        "Seats",
         "ID",
+        "Seats",
         "Manufacturer",
         "Model",
         "Price Range (Ft)",
@@ -186,11 +186,11 @@
     },
     "alt_saxophone": {
       "columns": [
+        "ID",
         "engraving",
         "high_f_sharp",
         "adjustable_thumb_rest",
         "release_year",
-        "ID",
         "Manufacturer",
         "Model",
         "Type",
@@ -242,6 +242,14 @@
         "category"
       ]
     },
+    "system_reads[System]": {
+      "columns": [
+        "id",
+        "system_id",
+        "user_id",
+        "created_at"
+      ]
+    },
     "psu": {
       "columns": [
         "ID",
@@ -271,9 +279,9 @@
     },
     "video_cards": {
       "columns": [
+        "ID",
         "vram_gb",
         "bus_bit",
-        "ID",
         "brand",
         "series",
         "model",
@@ -421,13 +429,6 @@
     },
     "midis": {
       "columns": [
-        "midi_in",
-        "midi_out",
-        "midi_thru",
-        "usb_midi",
-        "weight_kg",
-        "release_year",
-        "created_at",
         "id",
         "keys_count",
         "pads",
@@ -435,6 +436,13 @@
         "faders",
         "aftertouch",
         "velocity_sensitive",
+        "midi_in",
+        "midi_out",
+        "midi_thru",
+        "usb_midi",
+        "weight_kg",
+        "release_year",
+        "created_at",
         "manufacturer",
         "model",
         "series",
@@ -452,12 +460,6 @@
         "strings",
         "frets",
         "release_year",
-        "finish",
-        "skill_level",
-        "genre_recommended",
-        "country_of_origin",
-        "notes",
-        "category",
         "Manufacturer",
         "Model",
         "series",
@@ -468,7 +470,13 @@
         "fretboard_material",
         "pickups",
         "electronics",
-        "bridge"
+        "bridge",
+        "finish",
+        "skill_level",
+        "genre_recommended",
+        "country_of_origin",
+        "notes",
+        "category"
       ]
     },
     "daws": {
@@ -534,17 +542,17 @@
         "weight_kg",
         "release_year",
         "created_at",
-        "manufacturer",
-        "model",
-        "generation",
-        "series",
-        "interface",
         "adat_inputs",
         "adat_outputs",
         "dimensions",
         "compatible_os",
         "notes",
-        "category"
+        "category",
+        "manufacturer",
+        "model",
+        "generation",
+        "series",
+        "interface"
       ]
     },
     "guitarstrings": {
@@ -606,6 +614,15 @@
         "category"
       ]
     },
+    "system_message[System]": {
+      "columns": [
+        "id",
+        "created_at",
+        "title",
+        "message",
+        "target"
+      ]
+    },
     "microphones": {
       "columns": [
         "id",
@@ -615,6 +632,9 @@
         "usb_interface",
         "matched_pair",
         "created_at",
+        "included_accessories",
+        "notes",
+        "category",
         "manufacturer",
         "model",
         "microphone_type",
@@ -623,10 +643,7 @@
         "connection",
         "frequency_response",
         "application",
-        "color",
-        "included_accessories",
-        "notes",
-        "category"
+        "color"
       ]
     },
     "software_products": {
@@ -689,16 +706,16 @@
       "columns": [
         "ID",
         "Seats",
-        "Manufacturer",
-        "Model",
-        "Price Range (Ft)",
         "Body Type",
         "Horsepower",
         "Acceleration (s)",
         "Fuel Type",
         "Year",
         "Transmission",
-        "category"
+        "category",
+        "Manufacturer",
+        "Model",
+        "Price Range (Ft)"
       ]
     },
     "utp_cables": {
@@ -716,14 +733,14 @@
         "max_power_w",
         "active",
         "bidirectional",
-        "cable_category",
-        "cable_type",
-        "standard",
         "cable_structure",
         "connector_a",
         "connector_b",
+        "notes",
         "max_resolution",
-        "notes"
+        "cable_category",
+        "cable_type",
+        "standard"
       ]
     }
   }

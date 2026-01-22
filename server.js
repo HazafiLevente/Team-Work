@@ -19,12 +19,13 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const cookieParser = require("cookie-parser");
 const { createClient } = require("@supabase/supabase-js");
+const cors = require("cors");
 
 /* ======================================================
    APP + CONFIG
 ====================================================== */
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 4200;
 const JWT_SECRET = process.env.JWT_SECRET;
 
 /* ======================================================
@@ -57,6 +58,11 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "webs")));
 
+app.use(cors({
+    origin: "http://localhost:4200/",
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type","Authorization"]
+}));
 /* ======================================================
    AUTH MIDDLEWARE
 ====================================================== */
@@ -113,6 +119,10 @@ function verifyAdminPlus(req, res, next) {
 /* ======================================================
    PAGE ROUTES
 ====================================================== */
+
+
+
+/*
 app.get("/", (_, res) =>
     res.sendFile(path.join(__dirname, "webs/Home.html"))
 );
@@ -122,7 +132,7 @@ app.get("/home", (_, res) =>
 );
 
 app.get("/regist", (_, res) =>
-    res.sendFile(path.join(__dirname, "webs/Regist.html"))
+    res.sendFile(path.join(__dirname, "webs/Regist.html"))ööö
 );
 
 app.get("/profile", (_, res) =>
@@ -138,6 +148,10 @@ app.get("/setup", verifyUser, (_, res) => {
 app.get("/favorite", verifyUser, (_, res) => {
     res.sendFile(path.join(__dirname, "webs/Favorite.html"));
 });
+*/
+app.get("/test",  async (req, res) => {
+    res.json({"test":"siker!"});
+})
 
 
 /* ======================================================
