@@ -716,7 +716,15 @@ function bindManufacturerSearch() {
     if (btn.dataset.bound === "1") return;
     btn.dataset.bound = "1";
 
-    btn.addEventListener("click", () => runSearchFilter());
+    btn.addEventListener("click", () => {
+        const carFilters = getCarFilters();
+        if (isCarFilterActive(carFilters)) {
+            runCarSearch();   // 🔥 SQL
+        } else {
+            runSearchFilter(); // 🔍 sima termék
+        }
+    });
+
 }
 
 function bindEnterSearch() {
@@ -2377,4 +2385,50 @@ async function loadFavorite() {
     box.innerHTML = `
         <p class="muted">⭐ Kedvenc termékeid hamarosan itt lesznek.</p>
     `;
+}
+
+/* ==================================================
+   SEARCH FILTERS
+================================================== */
+
+
+async function runCarSearch() {
+    const filters = {
+        manufacturer: getVal("filter-manufacturer"),
+        model: getVal("filter-model"),
+        price_min: getVal("filter-price-min"),
+        price_max: getVal("filter-price-max"),
+        hp_min: getVal("filter-hp-min"),
+        hp_max: getVal("filter-hp-max"),
+        fuel: getVal("filter-fuel"),
+        year_min: getVal("filter-year-min"),
+        year_max: getVal("filter-year-max"),
+        transmission: getVal("filter-transmission")
+    };
+
+    const { data, error } = await supabase
+        .rpc("search_cars_all", filters);
+
+    if (error) {
+        console.error("Car search error:", error);
+        return;
+    }
+
+    // egységes formára hozás
+    allProducts = data.map(row => ({
+        table: row.table_name,
+        id: row.id,
+        manufacturer: row.manufacturer,
+        model: row.model,
+        price: row.price,
+        type: "car"
+    }));
+
+    renderProducts(allProducts);
+}
+
+function getVal(id) {
+    const el = document.getElementById(id);
+    if (!el) return null;
+    return el.value === "" ? null : el.value;
 }

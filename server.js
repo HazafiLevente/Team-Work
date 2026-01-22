@@ -713,6 +713,19 @@ app.get("/api/setup/details", verifyUser, async (req, res) => {
 });
 
 
+app.post("/api/search/cars", async (req, res) => {
+    const filters = req.body;
+
+    const { data, error } = await supabase
+        .rpc("search_cars", filters);
+
+    if (error) {
+        console.error("❌ search_cars error:", error);
+        return res.status(500).json({ error: error.message });
+    }
+
+    res.json({ items: data || [] });
+});
 
 
 
