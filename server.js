@@ -588,7 +588,39 @@ app.get("/api/items/list", verifyUser, async (req, res) => {
 
 
 
+app.get("/api/items/pc-list", verifyUser, async (req, res) => {
+    let allResults = [];
+    // A te pontos táblaneveid:
+    const pcTables = ["ram", "psu", "processors", "motherboard", "video_cards"];
 
+    try {
+        const results = await Promise.all(
+            pcTables.map(table => supabase.from(table).select("*"))
+        );
+
+        results.forEach((res, index) => {
+            const currentTable = pcTables[index];
+            if (res.error) {
+                console.error(`Hiba a(z) ${currentTable} táblánál:`, res.error.message);
+            } else if (res.data) {
+                res.data.forEach(item => {
+                    allResults.push({
+                        id: item.id,
+                        name: `${item.Manufacturer} ${item.Model}`, // Nagybetűs mezők!
+                        category: currentTable, // Ezt küldjük a mentéshez
+                        type: "pc"
+                    });
+                });
+            }
+        });
+
+        console.log(`PC lista kész: ${allResults.length} alkatrész.`);
+        res.json({ results: allResults });
+    } catch (err) {
+        console.error("PC listázási hiba:", err);
+        res.status(500).json({ error: "Szerver hiba" });
+    }
+});
 
 
 /* ======================================================
