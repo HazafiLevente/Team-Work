@@ -534,6 +534,62 @@ app.get("/api/setup/details", verifyUser, async (req, res) => {
     res.status(400).json({ error: "Invalid type" });
 });
 
+/* ======================================================
+   AUTÓK LISTÁZÁSA (ÖSSZES TÁBLÁBÓL)
+====================================================== */
+app.get("/api/items/list", verifyUser, async (req, res) => {
+    const { type } = req.query;
+
+    if (type !== "car") return res.json({ results: [] });
+
+    let allResults = [];
+
+    // Itt soroljuk fel az összes táblát, amiből autókat akarunk látni
+    const carTables = [
+        "cabrio_cars",
+        "coupe_cars",
+        "hatchback_cars",
+        "wagon_cars",
+        "mpv_cars",        // Ezt hiányoltad
+        "pickup_cars",     // Ezt is
+        "crossover_cars"   // És ezt is
+    ];
+
+    try {
+        // Minden táblát lekérdezünk
+        const results = await Promise.all(
+            carTables.map(table => supabase.from(table).select("*"))
+        );
+
+        results.forEach((res, index) => {
+            if (res.error) {
+                console.error(`Hiba a(z) ${carTables[index]} táblánál:`, res.error.message);
+            } else if (res.data) {
+                res.data.forEach(item => {
+                    allResults.push({
+                        id: item.id,
+                        // Figyelem: A Supabase-ben nagybetűs Manufacturer és Model van!
+                        name: `${item.Manufacturer} ${item.Model}`,
+                        category: carTables[index].replace("_cars", ""), // Pl: 'mpv'
+                        type: "car"
+                    });
+                });
+            }
+        });
+
+        console.log(`Összesen ${allResults.length} autót találtam a listához.`);
+        res.json({ results: allResults });
+
+    } catch (err) {
+        console.error("Szerver hiba a listázáskor:", err);
+        res.status(500).json({ error: "Szerver hiba" });
+    }
+});
+
+
+
+
+
 
 /* ======================================================
    ITEM KERESŐ (TÖBB TÁBLA + Manufacturer/Model KEZELÉS)
@@ -548,41 +604,46 @@ app.get("/api/items/search", verifyUser, async (req, res) => {
 
     try {
         // -------------------------------------------------
-        // 🚗 AUTÓK KERESÉSE (4 külön táblából)
+        // 🚗 AUTÓK KERESÉSE (Most már 7 táblából)
         // -------------------------------------------------
         if (type === "car") {
-            // Segédfüggvény a kereséshez (hogy ne kelljen 4x leírni ugyanazt)
+            // Segédfüggvény a kereséshez
             const searchTable = (tableName) => {
                 return supabase
                     .from(tableName)
                     .select("id, Manufacturer, Model, category")
-                    // Keresés: Gyártó VAGY Model tartalmazza a szöveget (kis/nagybetű nem számít)
                     .or(`Manufacturer.ilike.%${query}%,Model.ilike.%${query}%`)
-                    .limit(5);
+                    .limit(5); // Ha többet akarsz látni, ezt írd át 50-re vagy 100-ra
             };
 
-            // Párhuzamosan keressük a 4 táblában, amiket a képeden láttam
-            const [cabrio, coupe, hatchback, wagon] = await Promise.all([
+            // Itt adtam hozzá a 3 új táblát a listához:
+            const [cabrio, coupe, hatchback, wagon, mpv, pickup, crossover] = await Promise.all([
                 searchTable("cabrio_cars"),
                 searchTable("coupe_cars"),
                 searchTable("hatchback_cars"),
-                searchTable("wagon_cars")
+                searchTable("wagon_cars"),
+                searchTable("mpv_cars"),       // ÚJ
+                searchTable("pickup_cars"),    // ÚJ
+                searchTable("crossover_cars")  // ÚJ
             ]);
 
-            // Összefűzzük a találatokat egy nagy listába
+            // Itt fűzzük hozzá az eredményeiket a listához:
             const allCars = [
                 ...(cabrio.data || []),
                 ...(coupe.data || []),
                 ...(hatchback.data || []),
-                ...(wagon.data || [])
+                ...(wagon.data || []),
+                ...(mpv.data || []),       // ÚJ
+                ...(pickup.data || []),    // ÚJ
+                ...(crossover.data || [])  // ÚJ
             ];
 
-            // Formázás a Frontendnek (hogy legyen 'name' mező)
+            // Formázás a Frontendnek
             searchResults = allCars.map(item => ({
                 id: item.id,
-                name: `${item.Manufacturer} ${item.Model}`, // pl. "FERRARI California"
+                name: `${item.Manufacturer} ${item.Model}`,
                 category: item.category || "Autó",
-                type: "car" // Fontos a mentéshez
+                type: "car"
             }));
         }
 
