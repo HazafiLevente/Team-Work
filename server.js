@@ -1192,7 +1192,89 @@ app.delete("/api/child/:type/:id", verifyUser, async (req, res) => {
     }
 });
 
+/* ======================================================
+   AUTH API
+====================================================== */
+app.post("/api/register", async (req, res) => {
+    const { fullname, username, email, password } = req.body;
+    if (!fullname || !username || !email || !password)
+        return res.status(400).json({ error: "Missing fields" });
 
+    const hashed = await bcrypt.hash(password, 10);
+
+    const { error } = await supabase.from("user[Auth]").insert([{
+        Name: fullname,
+        UserName: username,
+        Email: email,
+        password: hashed,
+    }]);
+
+    if (error) return res.status(500).json({ error: error.message });
+    res.json({ message: "Registration successful" });
+});
+
+app.post("/api/login", async (req, res) => {
+    const { email, password } = req.body;
+
+    const { data: users } = await supabase
+        .from("user[Auth]")
+        .select("*")
+        .eq("Email", email)
+        .limit(1);
+
+    if (!users || !users.length)
+        return res.status(401).json({ error: "Invalid credentials" });
+
+    const user = users[0];
+    const ok = await bcrypt.compare(password, user.password);
+    if (!ok) return res.status(401).json({ error: "Invalid credentials" });
+
+    const role = resolveRole(Number(user.ID));
+
+    const token = jwt.sign({
+        id: Number(user.ID), // 🔥 EZ A FIX
+        name: user.Name,
+        username: user.UserName,
+        email: user.Email
+    }, JWT_SECRET, { expiresIn: "24h" });
+
+
+    res.cookie("auth_token", token, {
+        httpOnly: true,
+        sameSite: "lax",
+        maxAge: 24 * 60 * 60 * 1000
+    });
+
+    res.json({ message: "Login successful", role });
+});
+
+
+app.post("/api/logout", (_, res) => {
+    res.clearCookie("auth_token");
+    res.json({ message: "Logged out" });
+});
+
+app.get("/api/me", verifyUser, (req, res) => {
+    res.json({
+        loggedIn: true,
+        user: req.user
+    });
+});
+
+
+/* ======================================================
+   RUNTIME API'S
+====================================================== */
+
+app.get("/api/runtime/tables", (_, res) => {
+    const json = JSON.parse(
+        fs.readFileSync(
+            path.join(__dirname, "tables.runtime.json"),
+            "utf8"
+        )
+    );
+    res.json(json);
+});
 
 /* ======================================================
    SERVER START
