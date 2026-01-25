@@ -539,49 +539,69 @@ app.get("/api/setup/details", verifyUser, async (req, res) => {
 ====================================================== */
 app.get("/api/items/list", verifyUser, async (req, res) => {
     const { type } = req.query;
-
-    if (type !== "car") return res.json({ results: [] });
-
     let allResults = [];
 
-    // Itt soroljuk fel az összes táblát, amiből autókat akarunk látni
-    const carTables = [
-        "cabrio_cars",
-        "coupe_cars",
-        "hatchback_cars",
-        "wagon_cars",
-        "mpv_cars",        // Ezt hiányoltad
-        "pickup_cars",     // Ezt is
-        "crossover_cars"   // És ezt is
-    ];
-
     try {
-        // Minden táblát lekérdezünk
-        const results = await Promise.all(
-            carTables.map(table => supabase.from(table).select("*"))
-        );
+        // --- 1. AUTÓK (A te jól működő logikád alapján) ---
+        if (type === "car") {
+            const carTables = ["cabrio_cars", "coupe_cars", "hatchback_cars", "wagon_cars", "mpv_cars", "pickup_cars", "crossover_cars"];
+            const results = await Promise.all(carTables.map(table => supabase.from(table).select("*")));
 
-        results.forEach((res, index) => {
-            if (res.error) {
-                console.error(`Hiba a(z) ${carTables[index]} táblánál:`, res.error.message);
-            } else if (res.data) {
-                res.data.forEach(item => {
-                    allResults.push({
-                        id: item.id,
-                        // Figyelem: A Supabase-ben nagybetűs Manufacturer és Model van!
-                        name: `${item.Manufacturer} ${item.Model}`,
-                        category: carTables[index].replace("_cars", ""), // Pl: 'mpv'
-                        type: "car"
+            results.forEach((res, index) => {
+                if (res.data) {
+                    res.data.forEach(item => {
+                        allResults.push({
+                            id: item.id,
+                            name: `${item.Manufacturer} ${item.Model}`,
+                            category: carTables[index].replace("_cars", ""),
+                            type: "car"
+                        });
                     });
-                });
-            }
-        });
+                }
+            });
+            console.log(`Autók: ${allResults.length} db betöltve.`);
+            return res.json({ results: allResults });
+        }
 
-        console.log(`Összesen ${allResults.length} autót találtam a listához.`);
-        res.json({ results: allResults });
+        // --- 2. PC ALKATRÉSZEK (Az új "PC" kategória logika) ---
+        if (type === "pc") {
+            const pcTables = ["video_cards", "ram", "psu", "processors", "motherboard"];
+
+            // Itt is használjuk a gyorsabb Promise.all-t
+            const results = await Promise.all(pcTables.map(table => supabase.from(table).select("*")));
+
+            results.forEach((res, index) => {
+                const currentTable = pcTables[index];
+                if (res.data) {
+                    // Itt szűrünk a "PC" nagybetűs kategóriára
+                    const pcOnly = res.data.filter(item => {
+                        const cat = item.category || item.Category || "";
+                        return cat.toString().trim().toUpperCase() === "PC";
+                    });
+
+                    pcOnly.forEach(item => {
+                        // Rugalmas névkezelés (Manufacturer/Brand, Model/model)
+                        const brand = item.Manufacturer || item.manufacturer || item.Brand || item.brand || "Márka";
+                        const model = item.Model || item.model || "Modell";
+
+                        allResults.push({
+                            id: item.id,
+                            name: `${brand} ${model}`.trim(),
+                            category: currentTable,
+                            type: "pc"
+                        });
+                    });
+                }
+            });
+            console.log(`PC alkatrészek: ${allResults.length} db betöltve.`);
+            return res.json({ results: allResults });
+        }
+
+        // Ha sem autó, sem pc
+        res.json({ results: [] });
 
     } catch (err) {
-        console.error("Szerver hiba a listázáskor:", err);
+        console.error("Szerver hiba:", err);
         res.status(500).json({ error: "Szerver hiba" });
     }
 });
@@ -784,9 +804,13 @@ app.get("/api/setup/:id/children", verifyUser, async (req, res) => {
 /* ======================================================
    ÚJ CHILD LÉTREHOZÁSA (POST)
 ====================================================== */
+/* ======================================================
+   ÚJ CHILD LÉTREHOZÁSA (POST) - JAVÍTOTT PC LOGIKA
+====================================================== */
 app.post("/api/setup/:id/child", verifyUser, async (req, res) => {
     const setupId = Number(req.params.id);
-    const { type, name } = req.body;
+    // Fontos: a frontendnek küldenie kell az 'itemId'-t és a 'category'-t is!
+    const { type, name, itemId, category } = req.body;
 
     if (!type || !name) return res.status(400).json({ error: "Missing data" });
 
@@ -797,20 +821,44 @@ app.post("/api/setup/:id/child", verifyUser, async (req, res) => {
     };
 
     switch (type) {
+        // --- ITT A MÓDOSÍTÁS A PC RÉSZNÉL ---
         case "pc":
             tableName = "pc_details[Setup]";
+
+            // Ez a térkép köti össze a táblaneveket (amiket a listázó küld)
+            // a setup tábla oszlopneveivel.
+            const pcColumnMap = {
+                "video_cards": "videocard_id", // Figyelj: tábla='video_cards', oszlop='videocard_id'
+                "ram": "ram_id",
+                "psu": "psu_id",
+                "processors": "processor_id",
+                "motherboard": "motherboard_id"
+            };
+
+            // Megkeressük, melyik oszlopba kell írni
+            const targetColumn = pcColumnMap[category];
+
+            // Ha van érvényes oszlop és kaptunk ID-t, beleírjuk az adatcsomagba
+            if (targetColumn && itemId) {
+                insertData[targetColumn] = itemId;
+            }
             break;
+        // -------------------------------------
+
         case "home_theater":
             tableName = "home_theater_setups[Setup]";
             insertData.receiver_id = 1; // Meglévő kényszer miatt
             break;
+
         case "car":
             // ❗ FIGYELEM: A Supabase képed alapján nagy 'C' betű!
             tableName = "Car_setup[Setup]";
             break;
+
         case "studio":
             tableName = "studio_monitor_setup[Setup]";
             break;
+
         default:
             return res.status(400).json({ error: "Invalid type" });
     }
@@ -829,71 +877,38 @@ app.post("/api/setup/:id/child", verifyUser, async (req, res) => {
     res.json({ success: true, item: data });
 });
 
-app.get("/api/items/list", verifyUser, async (req, res) => {
-    const { type } = req.query;
-    let allResults = [];
 
-    try {
-        if (type === "car") {
-            const tables = ["cabrio_cars", "coupe_cars", "hatchback_cars", "wagon_cars"];
 
-            for (const table of tables) {
-                // A csillag (*) mindent lekér, így nem fog hibát dobni a hiányzó 'id' miatt
-                const { data, error } = await supabase
-                    .from(table)
-                    .select("*");
 
-                if (error) {
-                    console.error(`Hiba a(z) ${table} táblánál:`, error.message);
-                    continue;
-                }
 
-                if (data) {
-                    data.forEach(item => {
-                        allResults.push({
-                            // Itt fontos, hogy a tábládban nagy M-mel van a Manufacturer és a Model!
-                            name: `${item.Manufacturer} ${item.Model}`,
-                            category: "Autó"
-                        });
-                    });
-                }
-            }
-            return res.json({ results: allResults });
-        }
-        res.json({ results: [] });
-    } catch (err) {
-        console.error("Szerver hiba:", err);
-        res.status(500).json({ error: "Szerver hiba történt" });
-    }
-});
 
+// ==========================================
+// 2. MENTÉS (POST) - PC ID KEZELÉSSEL
+// ==========================================
 app.post("/api/setup/:id/child", verifyUser, async (req, res) => {
     const setupId = req.params.id;
-    const { type, name } = req.body;
+    const { type, name, itemId, category } = req.body;
 
-    // Megkeressük a megfelelő cél-táblát a típus alapján
     let tableName = "";
+    let insertData = { setup_id: setupId, setup_name: name, setup_type: type };
+
     if (type === "car") tableName = "Car_setup[Setup]";
-    else if (type === "pc") tableName = "pc_details[Setup]";
+    else if (type === "pc") {
+        tableName = "pc_details[Setup]";
+        const pcMap = { "processors": "processor_id", "motherboard": "motherboard_id", "ram": "ram_id", "psu": "psu_id", "video_cards": "videocard_id" };
+        if (pcMap[category]) insertData[pcMap[category]] = itemId; // Beírjuk a konkrét ID-t
+    }
     else if (type === "studio") tableName = "studio_monitor_setup[Setup]";
     else if (type === "home_theater") tableName = "home_theater_setups[Setup]";
 
     try {
-        const { error } = await supabase
-            .from(tableName)
-            .insert([{
-                setup_id: setupId,
-                setup_name: name, // Ez a kiválasztott Item neve (pl. Ferrari)
-                setup_type: type
-            }]);
-
+        const { data, error } = await supabase.from(tableName).insert([insertData]).select();
         if (error) throw error;
-        res.json({ success: true });
+        res.json({ success: true, item: data });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
 });
-
 
 /* ======================================================
    CHILD TÖRLÉSE (DELETE)
