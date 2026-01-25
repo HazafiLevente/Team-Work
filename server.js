@@ -802,9 +802,6 @@ app.get("/api/setup/:id/children", verifyUser, async (req, res) => {
 
 
 /* ======================================================
-   ÚJ CHILD LÉTREHOZÁSA (POST)
-====================================================== */
-/* ======================================================
    ÚJ CHILD LÉTREHOZÁSA (POST) - JAVÍTOTT PC LOGIKA
 ====================================================== */
 app.post("/api/setup/:id/child", verifyUser, async (req, res) => {
