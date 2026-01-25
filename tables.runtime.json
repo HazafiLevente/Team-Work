@@ -1,0 +1,926 @@
+{
+  "lastUpdated": 1769347013077,
+  "tables": {
+    "c_trumpets": {
+      "columns": [
+        "release_year",
+        "ID",
+        "Manufacturer",
+        "Model",
+        "series",
+        "key",
+        "bore_size",
+        "bell_material",
+        "bell_size",
+        "finish",
+        "valves",
+        "leadpipe",
+        "skill_level",
+        "recommended_genres",
+        "country_of_origin",
+        "notes",
+        "category"
+      ]
+    },
+    "hatchback_cars": {
+      "columns": [
+        "ID",
+        "Seats",
+        "Manufacturer",
+        "Model",
+        "Price Range (Ft)",
+        "Body Type",
+        "Horsepower",
+        "Acceleration (s)",
+        "Fuel Type",
+        "Year",
+        "Transmission",
+        "category"
+      ]
+    },
+    "effects_pedal": {
+      "columns": [
+        "release_year",
+        "ID",
+        "analog",
+        "digital",
+        "true_bypass",
+        "buffered",
+        "stereo",
+        "midi",
+        "presets",
+        "Manufacturer",
+        "Model",
+        "pedal_type",
+        "effect_category",
+        "power_supply",
+        "enclosure",
+        "country_of_origin",
+        "skill_level",
+        "notes",
+        "category"
+      ]
+    },
+    "favorite_pc_components[Lists]": {
+      "columns": [
+        "id",
+        "favorite_list_id",
+        "processor_id",
+        "videocard_id",
+        "motherboard_id",
+        "ram_id",
+        "psu_id",
+        "created_at",
+        "label"
+      ]
+    },
+    "acoustic_drums": {
+      "columns": [
+        "hardware_included",
+        "cymbals_included",
+        "ID",
+        "Manufacturer",
+        "Model",
+        "series",
+        "configuration",
+        "shell_material",
+        "finish",
+        "bass_drum_size",
+        "tom_sizes",
+        "floor_tom_sizes",
+        "snare_size",
+        "mounting_system",
+        "hoops",
+        "skill_level",
+        "genre_recommended",
+        "country_of_origin",
+        "notes",
+        "category"
+      ]
+    },
+    "coupe_cars": {
+      "columns": [
+        "ID",
+        "Seats",
+        "Manufacturer",
+        "Model",
+        "Price Range (Ft)",
+        "Body Type",
+        "Horsepower",
+        "Acceleration (s)",
+        "Fuel Type",
+        "Year",
+        "Transmission",
+        "category"
+      ]
+    },
+    "motherboard": {
+      "columns": [
+        "ID",
+        "RamSlots",
+        "RamMaxMHZ",
+        "RamMaxSizeGB",
+        "M2Slots",
+        "SATAPorts",
+        "USBPortsRear",
+        "Price",
+        "Manufacturer",
+        "Model",
+        "Socket",
+        "Chipset",
+        "FormFactor",
+        "RamType",
+        "PCIeVersion",
+        "LanSpeed",
+        "WiFi",
+        "Bluetooth",
+        "AudioChip",
+        "RGBSupport",
+        "category"
+      ]
+    },
+    "processors": {
+      "columns": [
+        "ID",
+        "Threads",
+        "Clock",
+        "Cache",
+        "Price",
+        "Manufacturer",
+        "Model",
+        "Socket",
+        "category"
+      ]
+    },
+    "mpv_cars": {
+      "columns": [
+        "ID",
+        "Manufacturer",
+        "Model",
+        "Price Range (Ft)",
+        "Body Type",
+        "Horsepower",
+        "Acceleration (s)",
+        "Seats",
+        "Fuel Type",
+        "Year",
+        "Transmission",
+        "category"
+      ]
+    },
+    "crossover_cars": {
+      "columns": [
+        "ID",
+        "Manufacturer",
+        "Model",
+        "Price Range (Ft)",
+        "Body Type",
+        "Horsepower",
+        "Acceleration (s)",
+        "Seats",
+        "Fuel Type",
+        "Year",
+        "Transmission",
+        "category"
+      ]
+    },
+    "alt_saxophone": {
+      "columns": [
+        "ID",
+        "engraving",
+        "high_f_sharp",
+        "adjustable_thumb_rest",
+        "release_year",
+        "Manufacturer",
+        "Model",
+        "Type",
+        "series",
+        "key",
+        "body_material",
+        "finish",
+        "pads",
+        "skill_level",
+        "recommended_genres",
+        "accessories_included",
+        "country_of_origin",
+        "notes",
+        "category"
+      ]
+    },
+    "multi_effects": {
+      "columns": [
+        "ID",
+        "footswitches",
+        "expression_pedal",
+        "amp_modeling",
+        "usb_audio",
+        "Manufacturer",
+        "Model",
+        "effect_type",
+        "instrument",
+        "format",
+        "target_level",
+        "target_genre",
+        "notes",
+        "category"
+      ]
+    },
+    "wind_instrument_oils": {
+      "columns": [
+        "ID",
+        "Manufacturer",
+        "Model",
+        "Type",
+        "HMany",
+        "oil_category",
+        "instrument_type",
+        "viscosity",
+        "application_area",
+        "suitable_for",
+        "target_level",
+        "notes",
+        "category"
+      ]
+    },
+    "system_reads[System]": {
+      "columns": [
+        "id",
+        "system_id",
+        "user_id",
+        "created_at"
+      ]
+    },
+    "psu": {
+      "columns": [
+        "ID",
+        "wattage",
+        "manufacturer",
+        "model",
+        "efficiency",
+        "atx_version",
+        "color",
+        "notes",
+        "category"
+      ]
+    },
+    "ram": {
+      "columns": [
+        "ID",
+        "capacity_gb",
+        "sticks",
+        "speed_mhz",
+        "cas_latency",
+        "price",
+        "manufacturer",
+        "model",
+        "memory_type",
+        "category"
+      ]
+    },
+    "video_cards": {
+      "columns": [
+        "ID",
+        "vram_gb",
+        "bus_bit",
+        "brand",
+        "series",
+        "model",
+        "chipset",
+        "variant",
+        "memory_type",
+        "product_code",
+        "notes",
+        "category"
+      ]
+    },
+    "cabrio_cars": {
+      "columns": [
+        "ID",
+        "Seats",
+        "Manufacturer",
+        "Model",
+        "Price Range (Ft)",
+        "Body Type",
+        "Horsepower",
+        "Acceleration (s)",
+        "Fuel Type",
+        "Year",
+        "Transmission",
+        "category"
+      ]
+    },
+    "electric_drums": {
+      "columns": [
+        "ID",
+        "shell_design",
+        "kit_pieces",
+        "cymbals",
+        "usb_midi",
+        "bluetooth",
+        "recording",
+        "release_year",
+        "Manufacturer",
+        "Model",
+        "drum_type",
+        "pad_type",
+        "module_model",
+        "hi_hat_type",
+        "kick_type",
+        "target_level",
+        "genre_recommendation",
+        "notes",
+        "category"
+      ]
+    },
+    "audio_processors": {
+      "columns": [
+        "hdmi_earc",
+        "network",
+        "id",
+        "max_channels",
+        "dolby_atmos",
+        "dts_x",
+        "auro_3d",
+        "hdmi_in",
+        "hdmi_out",
+        "brand",
+        "model",
+        "notes",
+        "category"
+      ]
+    },
+    "bariton_saxophone": {
+      "columns": [
+        "ID",
+        "engraving",
+        "low_a",
+        "high_f_sharp",
+        "adjustable_thumb_rest",
+        "release_year",
+        "Manufacturer",
+        "Model",
+        "Type",
+        "series",
+        "key",
+        "body_material",
+        "finish",
+        "pads",
+        "skill_level",
+        "recommended_genres",
+        "accessories_included",
+        "country_of_origin",
+        "notes",
+        "category"
+      ]
+    },
+    "home_theater": {
+      "columns": [
+        "id",
+        "channels",
+        "dolby_atmos",
+        "dts_x",
+        "surround",
+        "hdmi_in",
+        "hdmi_out",
+        "hdmi_earc",
+        "console_ready",
+        "network",
+        "bluetooth",
+        "airplay",
+        "spotify_connect",
+        "phono_input",
+        "sub_out",
+        "manufacturer",
+        "model",
+        "device_type",
+        "notes",
+        "category"
+      ]
+    },
+    "studio_monitor_speakers": {
+      "columns": [
+        "id",
+        "package_quantity",
+        "woofer_size_inch",
+        "tweeter_size_inch",
+        "power_watts_rms",
+        "peak_power_watts",
+        "sensitivity_db",
+        "max_spl_db",
+        "db_per_watt",
+        "benchmark_score",
+        "bluetooth",
+        "dsp",
+        "brand",
+        "model",
+        "speaker_type",
+        "notes",
+        "category"
+      ]
+    },
+    "mixer": {
+      "columns": [
+        "id",
+        "price",
+        "manufacturer",
+        "model",
+        "type"
+      ]
+    },
+    "midis": {
+      "columns": [
+        "id",
+        "keys_count",
+        "pads",
+        "knobs",
+        "faders",
+        "aftertouch",
+        "velocity_sensitive",
+        "midi_in",
+        "midi_out",
+        "midi_thru",
+        "usb_midi",
+        "weight_kg",
+        "release_year",
+        "created_at",
+        "manufacturer",
+        "model",
+        "series",
+        "daw_integration",
+        "power_type",
+        "dimensions",
+        "compatible_os",
+        "notes",
+        "category"
+      ]
+    },
+    "bassers": {
+      "columns": [
+        "ID",
+        "strings",
+        "frets",
+        "release_year",
+        "Manufacturer",
+        "Model",
+        "series",
+        "bass_type",
+        "scale_length",
+        "body_material",
+        "neck_material",
+        "fretboard_material",
+        "pickups",
+        "electronics",
+        "bridge",
+        "finish",
+        "skill_level",
+        "genre_recommended",
+        "country_of_origin",
+        "notes",
+        "category"
+      ]
+    },
+    "daws": {
+      "columns": [
+        "ID",
+        "motorized_faders",
+        "fader_count",
+        "rotary_encoders",
+        "buttons",
+        "touch_sensitive",
+        "release_year",
+        "Manufacturer",
+        "Model",
+        "controller_type",
+        "connection",
+        "display",
+        "daw_compatibility",
+        "platform_support",
+        "power_supply",
+        "skill_level",
+        "country_of_origin",
+        "notes",
+        "category"
+      ]
+    },
+    "electric_guitars": {
+      "columns": [
+        "ID",
+        "Price",
+        "strings",
+        "baritone",
+        "Manufacturer",
+        "Model",
+        "Guitar",
+        "Color",
+        "guitar_type",
+        "body_type",
+        "target_genre",
+        "target_level",
+        "notes",
+        "category"
+      ]
+    },
+    "soundcards": {
+      "columns": [
+        "air_mode",
+        "dsp",
+        "latency_ms",
+        "midi_in",
+        "midi_out",
+        "rack_mountable",
+        "bus_powered",
+        "weight_kg",
+        "release_year",
+        "created_at",
+        "id",
+        "inputs_total",
+        "outputs_total",
+        "mic_inputs",
+        "line_inputs",
+        "instrument_inputs",
+        "headphone_outputs",
+        "max_sample_rate",
+        "bit_depth",
+        "phantom_power",
+        "manufacturer",
+        "model",
+        "generation",
+        "series",
+        "interface",
+        "adat_inputs",
+        "adat_outputs",
+        "dimensions",
+        "compatible_os",
+        "notes",
+        "category"
+      ]
+    },
+    "guitarstrings": {
+      "columns": [
+        "id",
+        "string_count",
+        "coated",
+        "price",
+        "created_at",
+        "manufacturer",
+        "model",
+        "gauge",
+        "material",
+        "winding",
+        "suitable_for",
+        "tension",
+        "notes",
+        "category"
+      ]
+    },
+    "acoustic_guitars": {
+      "columns": [
+        "id",
+        "scale_length_mm",
+        "nut_width_mm",
+        "frets",
+        "electronics",
+        "includes_case",
+        "includes_accessories",
+        "created_at",
+        "manufacturer",
+        "model",
+        "body_shape",
+        "size",
+        "top_wood",
+        "back_sides_wood",
+        "neck_wood",
+        "fretboard_wood",
+        "finish",
+        "color",
+        "suitable_for",
+        "notes",
+        "category"
+      ]
+    },
+    "wagon_cars": {
+      "columns": [
+        "ID",
+        "Seats",
+        "Acceleration (s)",
+        "Manufacturer",
+        "Model",
+        "Price Range (Ft)",
+        "Body Type",
+        "Horsepower",
+        "Fuel Type",
+        "Year",
+        "Transmission",
+        "category"
+      ]
+    },
+    "system_message[System]": {
+      "columns": [
+        "id",
+        "created_at",
+        "title",
+        "message",
+        "target"
+      ]
+    },
+    "microphones": {
+      "columns": [
+        "id",
+        "max_spl_db",
+        "sensitivity_db",
+        "phantom_power",
+        "usb_interface",
+        "matched_pair",
+        "created_at",
+        "manufacturer",
+        "model",
+        "microphone_type",
+        "diaphragm",
+        "polar_pattern",
+        "connection",
+        "frequency_response",
+        "application",
+        "color",
+        "included_accessories",
+        "notes",
+        "category"
+      ]
+    },
+    "software_products": {
+      "columns": [
+        "id",
+        "edu_version",
+        "upgrade_version",
+        "download_only",
+        "created_at",
+        "manufacturer",
+        "product_name",
+        "software_type",
+        "category",
+        "edition",
+        "license_type",
+        "supported_os",
+        "plugin_formats",
+        "copy_protection",
+        "release_version",
+        "notes"
+      ]
+    },
+    "cleaning_brushes": {
+      "columns": [
+        "id",
+        "created_at",
+        "manufacturer",
+        "model",
+        "accessory_type",
+        "instrument_compatibility",
+        "material",
+        "notes",
+        "category"
+      ]
+    },
+    "saxophone_cases": {
+      "columns": [
+        "id",
+        "backpack_straps",
+        "created_at",
+        "manufacturer",
+        "model",
+        "sax_type",
+        "case_type",
+        "color",
+        "material",
+        "notes",
+        "category"
+      ]
+    },
+    "front_speaker": {
+      "columns": [
+        "id",
+        "passive",
+        "outputs",
+        "impedance_ohm",
+        "sensitivity_db",
+        "crossover_hz",
+        "power_rms_w",
+        "power_max_w",
+        "woofer_size_inch",
+        "bi_wire",
+        "height_mm",
+        "width_mm",
+        "depth_mm",
+        "weight_kg",
+        "created_at",
+        "brand",
+        "model",
+        "speaker_type",
+        "frequency_response",
+        "tweeter_type",
+        "cabinet_type",
+        "recommended_room_size",
+        "notes",
+        "category"
+      ]
+    },
+    "center_speakers": {
+      "columns": [
+        "id",
+        "sensitivity_db",
+        "impedance_ohm",
+        "max_power_watt",
+        "width_mm",
+        "height_mm",
+        "depth_mm",
+        "weight_kg",
+        "magnetic_shielding",
+        "release_year",
+        "created_at",
+        "enclosure_type",
+        "drivers",
+        "frequency_response_hz",
+        "recommended_amp_watt",
+        "crossover_hz",
+        "terminals",
+        "notes",
+        "category",
+        "manufacturer",
+        "model",
+        "speaker_type"
+      ]
+    },
+    "favorite_lists[Lists]": {
+      "columns": [
+        "id",
+        "user_id",
+        "created_at",
+        "name"
+      ]
+    },
+    "pickup_cars": {
+      "columns": [
+        "ID",
+        "Seats",
+        "Manufacturer",
+        "Model",
+        "Price Range (Ft)",
+        "Body Type",
+        "Horsepower",
+        "Acceleration (s)",
+        "Fuel Type",
+        "Year",
+        "Transmission",
+        "category"
+      ]
+    },
+    "back_speaker": {
+      "columns": [
+        "id",
+        "impedance_ohm",
+        "sensitivity_db",
+        "power_rms_w",
+        "power_max_w",
+        "weight_kg",
+        "created_at",
+        "brand",
+        "model",
+        "speaker_type",
+        "frequency_response",
+        "drivers",
+        "dimensions_mm",
+        "mounting",
+        "color",
+        "recommended_room_size",
+        "notes",
+        "category"
+      ]
+    },
+    "side_speaker": {
+      "columns": [
+        "id",
+        "impedance_ohm",
+        "sensitivity_db",
+        "power_rms_w",
+        "power_max_w",
+        "weight_kg",
+        "created_at",
+        "brand",
+        "model",
+        "speaker_type",
+        "frequency_response",
+        "drivers",
+        "dispersion",
+        "dimensions_mm",
+        "mounting",
+        "color",
+        "recommended_room_size",
+        "notes",
+        "category"
+      ]
+    },
+    "utp_cables": {
+      "columns": [
+        "id",
+        "created_at",
+        "Category"
+      ]
+    },
+    "cables_info[Cables]": {
+      "columns": [
+        "id",
+        "max_length_m",
+        "max_data_rate_gbps",
+        "max_power_w",
+        "active",
+        "bidirectional",
+        "cable_category",
+        "cable_type",
+        "standard",
+        "cable_structure",
+        "connector_a",
+        "connector_b",
+        "max_resolution",
+        "notes"
+      ]
+    },
+    "subwoofer": {
+      "columns": [
+        "id",
+        "driver_size_inch",
+        "amp_power_rms_w",
+        "amp_power_peak_w",
+        "phase_control",
+        "auto_on",
+        "height_mm",
+        "width_mm",
+        "depth_mm",
+        "weight_kg",
+        "created_at",
+        "brand",
+        "model",
+        "sub_type",
+        "driver_type",
+        "enclosure_type",
+        "frequency_response",
+        "amp_class",
+        "crossover_hz",
+        "inputs",
+        "outputs",
+        "recommended_room_size",
+        "notes",
+        "category"
+      ]
+    },
+    "bass_amplifier": {
+      "columns": [
+        "id",
+        "channels",
+        "power_rms_w",
+        "power_peak_w",
+        "low_pass_filter",
+        "high_pass_filter",
+        "dsp",
+        "limiter",
+        "rack_mountable",
+        "height_mm",
+        "width_mm",
+        "depth_mm",
+        "weight_kg",
+        "created_at",
+        "brand",
+        "model",
+        "amplifier_type",
+        "load_impedance_ohm",
+        "amp_class",
+        "frequency_response",
+        "crossover_hz",
+        "inputs",
+        "outputs",
+        "cooling",
+        "recommended_use",
+        "notes",
+        "category"
+      ]
+    },
+    "bass_shaker": {
+      "columns": [
+        "id",
+        "impedance_ohm",
+        "power_rms_w",
+        "power_peak_w",
+        "weight_kg",
+        "created_at",
+        "brand",
+        "model",
+        "shaker_type",
+        "frequency_response",
+        "sensitivity",
+        "mounting",
+        "recommended_amp_power",
+        "dimensions_mm",
+        "use_case",
+        "notes",
+        "category"
+      ]
+    }
+  }
+}
