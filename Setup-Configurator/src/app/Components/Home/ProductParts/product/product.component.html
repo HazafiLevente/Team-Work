@@ -1,0 +1,10 @@
+<div class="cpu-card" (click)="open()">
+  <h3>{{ product.model }}</h3>
+  <p>{{ product.manufacturer }}</p>
+
+  <p>
+    <strong>
+      {{ product.price ? (product.price | number:'1.0-0') + ' Ft' : 'N/A' }}
+    </strong>
+  </p>
+</div>

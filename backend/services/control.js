@@ -7,7 +7,7 @@ require("dotenv").config();
 
 
 
-const filler = require("./filler.json");
+const filler = require("../../datas/Jsons/filler.json");
 
 const OUT_FILE = path.join(__dirname, "tables.runtime.json");
 

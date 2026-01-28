@@ -1,0 +1,10 @@
+<div *ngIf="loading" class="muted">⏳ Betöltés...</div>
+
+<div class="product-grid" *ngIf="!loading">
+
+  <app-product
+    *ngFor="let p of products"
+    [product]="p">
+  </app-product>
+
+</div>
