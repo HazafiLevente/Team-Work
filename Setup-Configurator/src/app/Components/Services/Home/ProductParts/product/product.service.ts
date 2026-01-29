@@ -1,19 +1,20 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { Product } from '../../../../../Models/Product/product.model';
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable({ providedIn: 'root' })
 export class ProductService {
-
-  private baseUrl = '/api/products'; // server.js
+  private readonly API = 'http://localhost:3000/api';
 
   constructor(private http: HttpClient) {}
 
-  getProducts(limit: number): Observable<{ items: Product[] }> {
-    const params = new HttpParams().set('limit', limit);
-    return this.http.get<{ items: Product[] }>(this.baseUrl, { params });
+  getProducts(limit = 20): Observable<{ items: any[] }> {
+    // ha a backend nem kezel limitet, akkor vedd ki
+    const params = new HttpParams().set('limit', String(limit));
+
+    return this.http.get<{ items: any[] }>(
+      `${this.API}/products`,
+      { params, withCredentials: true }
+    );
   }
 }
