@@ -1,10 +1,10 @@
-<div *ngIf="loading" class="muted">⏳ Betöltés...</div>
-
-<div class="product-grid" *ngIf="!loading">
-
+<div class="product-grid" *ngIf="filteredProducts.length > 0">
   <app-product
-    *ngFor="let p of products"
+    *ngFor="let p of filteredProducts"
     [product]="p">
   </app-product>
-
 </div>
+
+<p class="muted" *ngIf="filteredProducts.length === 0">
+  Nincs találat.
+</p>

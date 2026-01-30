@@ -862,7 +862,7 @@ app.get("/api/items/search", verifyUser, async (req, res) => {
     app.get("/api/runtime/tables", (_, res) => {
         const json = JSON.parse(
             fs.readFileSync(
-                path.join(__dirname, "tables.runtime.json"),
+                path.join(__dirname, "tables.runtime1.json"),
                 "utf8"
             )
         );
@@ -1242,7 +1242,7 @@ app.get("/api/me", verifyUser, (req, res) => {
 app.get("/api/runtime/tables", (_, res) => {
     const json = JSON.parse(
         fs.readFileSync(
-            path.join(__dirname, "tables.runtime.json"),
+            path.join(__dirname, "tables.runtime1.json"),
             "utf8"
         )
     );

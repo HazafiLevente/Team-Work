@@ -1,15 +1,24 @@
-import { Component, signal } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { Component } from '@angular/core';
+import { AuthService } from './Components/Services/Auth/auth.service';
 import {HeaderComponent} from './Components/header/header.component';
-import {SearchbarComponent} from './Components/Home/searchbar/searchbar.component';
-import {ProductlistComponent} from './Components/Home/ProductParts/productlist/productlist.component';
+import {RouterOutlet} from '@angular/router';
+
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, HeaderComponent, SearchbarComponent, ProductlistComponent,],
-  templateUrl: './app.html',
-  styleUrl: './app.css'
+  standalone: true,
+  imports: [
+    HeaderComponent,
+    RouterOutlet
+
+  ],
+  templateUrl: './app.html'
 })
 export class App {
-  protected readonly title = signal('Setup-Configurator');
+  constructor(private auth: AuthService) {}
+
+  ngOnInit() {
+    this.auth.check(); // ⬅️ EZ NÉLKÜL SEMMI NEM MŰKÖDIK
+  }
 }
+

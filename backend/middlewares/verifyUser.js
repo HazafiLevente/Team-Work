@@ -1,26 +1,29 @@
 const jwt = require("jsonwebtoken");
-const { resolveRole, ROLES } = require("../services/control");
-
+const { resolveRole } = require("../services/control");
 const JWT_SECRET = process.env.JWT_SECRET;
 
 module.exports = function verifyUser(req, res, next) {
+    console.log("🍪 COOKIES:", req.cookies);
+
     const token = req.cookies.auth_token;
-    if (!token) return res.status(401).json({ error: "Not logged in" });
+    if (!token) {
+        console.log("❌ NINCS auth_token");
+        return res.status(401).json({ error: "Not logged in" });
+    }
 
     try {
         const decoded = jwt.verify(token, JWT_SECRET);
-        const id = Number(decoded.id);
 
         req.user = {
-            id,
-            name: decoded.name,
+            id: Number(decoded.id),
             username: decoded.username,
             email: decoded.email,
-            role: resolveRole(id)
+            role: resolveRole(Number(decoded.id))
         };
 
         next();
-    } catch {
-        res.status(403).json({ error: "Invalid token" });
+    } catch (e) {
+        console.log("❌ TOKEN HIBA", e.message);
+        return res.status(403).json({ error: "Invalid token" });
     }
 };

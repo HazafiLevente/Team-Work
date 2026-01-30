@@ -25,7 +25,7 @@ exports.register = async (req, res) => {
 };
 
 exports.login = async (req, res) => {
-    const { email, password } = req.body;
+    const { email, password, rememberMe } = req.body;
 
     const { data: users } = await supabase
         .from("user[Auth]")
@@ -33,24 +33,39 @@ exports.login = async (req, res) => {
         .eq("Email", email)
         .limit(1);
 
-    if (!users?.length) return res.status(401).json({ error: "Invalid login" });
+    if (!users?.length) {
+        return res.status(401).json({ error: "Invalid login" });
+    }
 
     const user = users[0];
     const ok = await bcrypt.compare(password, user.password);
-    if (!ok) return res.status(401).json({ error: "Invalid login" });
+    if (!ok) {
+        return res.status(401).json({ error: "Invalid login" });
+    }
 
-    const role = resolveRole(Number(user.ID));
+    const expiresIn = rememberMe ? "25d" : "12h";
 
     const token = jwt.sign({
         id: Number(user.ID),
         name: user.Name,
         username: user.UserName,
         email: user.Email
-    }, JWT_SECRET, { expiresIn: "24h" });
+    }, JWT_SECRET, { expiresIn });
 
-    res.cookie("auth_token", token, { httpOnly: true });
-    res.json({ role });
+    res.cookie("auth_token", token, {
+        httpOnly: true,
+        sameSite: "lax",   // ⬅️ EZ A FONTOS
+        secure: false,     // localhoston ok
+        maxAge: rememberMe
+            ? 25 * 24 * 60 * 60 * 1000
+            : 12 * 60 * 60 * 1000
+    });
+
+
+
+    res.json({ success: true });
 };
+
 
 exports.logout = (_, res) => {
     res.clearCookie("auth_token");
@@ -58,5 +73,19 @@ exports.logout = (_, res) => {
 };
 
 exports.me = (req, res) => {
-    res.json({ loggedIn: true, user: req.user });
+    if (!req.user) {
+        return res.status(401).json({ loggedIn: false });
+    }
+
+    res.json({
+        loggedIn: true,
+        user: {
+            id: req.user.id,
+            username: req.user.username,
+            email: req.user.email
+        }
+    });
 };
+
+
+

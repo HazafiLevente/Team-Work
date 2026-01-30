@@ -1,0 +1,46 @@
+.switch-auth {
+  margin-top: 14px;
+  font-size: 13px;
+}
+
+.switch-auth a {
+  color: #00ffff;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.switch-auth a:hover {
+  text-decoration: underline;
+}
+.top-menu {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+}
+
+.nav {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* 👤 USER WRAP */
+.user-wrap {
+  position: relative;        /* ⬅️ kell a dropdownhoz */
+  display: flex;
+  align-items: center;
+}
+
+
+/* 🔽 DROPDOWN */
+.user-menu {
+  position: absolute;
+  top: 100%;
+  right: 0;                  /* ⬅️ ez okozza a kilógást */
+  margin-top: 10px;
+  min-width: 220px;
+}
+
+
+

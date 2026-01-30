@@ -1,0 +1,13 @@
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 220px);
+  gap: 20px;
+
+  justify-content: start;
+  align-items: stretch;
+
+  width: 100%;
+
+  padding-left: 40px;
+  margin-top: 30px;
+}

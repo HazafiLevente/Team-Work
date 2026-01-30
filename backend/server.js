@@ -8,7 +8,7 @@ require("dotenv").config({
 const app = require("./app");
 const { startControl, ROLES } = require("./services/control");
 
-const PORT = process.env.PORT || 4200;
+const PORT = process.env.PORT || 3000;
 
 console.log("ENV CHECK:", {
     SUPABASE_URL: process.env.SUPABASE_URL,

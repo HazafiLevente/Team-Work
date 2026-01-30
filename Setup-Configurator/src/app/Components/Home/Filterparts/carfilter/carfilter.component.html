@@ -1,88 +1,145 @@
-<!-- 🔽 MORE / ADVANCED -->
-<details id="more-filters" style="grid-column: 1 / -1; margin-bottom:16px;">
-  <summary style="cursor:pointer; user-select:none; font-weight:700;">
-    Több:
-    <span class="muted" style="font-weight:400;">(részletes keresés)</span>
-  </summary>
+<div class="carfilter" [formGroup]="form">
 
-  <div style="
-      margin-top:12px;
-      padding:14px;
-      border-radius:12px;
-      background:rgba(255,255,255,0.04);
-      border:1px solid rgba(255,255,255,0.10);
-  ">
-    <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-bottom:12px;">
-      <span class="tag">🚗 Autók</span>
-      <span class="muted">Csak autó táblákra szűr</span>
-    </div>
-
-    <!-- AUTÓK SZŰRŐK GRID -->
-    <div style="
-      display:grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap:12px;
-    ">
-
-      <!-- Gyártó -->
-      <input id="car-manufacturer" class="search-input" placeholder="Gyártó (pl. BMW)" />
-
-      <!-- Modell -->
-      <input id="car-model" class="search-input" placeholder="Modell (pl. 320d)" />
-
-      <!-- Árkategória (min-max) -->
-      <input id="car-price-min" class="search-input" type="number" min="0" placeholder="Ár min (Ft)" />
-      <input id="car-price-max" class="search-input" type="number" min="0" placeholder="Ár max (Ft)" />
-
-      <!-- Kivitel -->
-      <select id="car-bodytype" class="search-input">
-        <option value="">Kivitel (összes)</option>
-        <option value="hatchback">Hatchback</option>
-        <option value="coupe">Coupé</option>
-        <option value="cabrio">Cabrio</option>
-        <option value="wagon">Kombi</option>
-        <option value="mpv">Egyterű</option>
-        <option value="sedan">Sedan</option>
-        <option value="suv">SUV</option>
-      </select>
-
-      <!-- Lóerő -->
-      <input id="car-hp-min" class="search-input" type="number" min="0" placeholder="Lóerő min" />
-      <input id="car-hp-max" class="search-input" type="number" min="0" placeholder="Lóerő max" />
-
-      <!-- Gyorsulás (0-100) másodperc -->
-      <input id="car-accel-min" class="search-input" type="number" min="0" step="0.1" placeholder="Gyorsulás min (s)" />
-      <input id="car-accel-max" class="search-input" type="number" min="0" step="0.1" placeholder="Gyorsulás max (s)" />
-
-      <!-- Ülések -->
-      <input id="car-seats-min" class="search-input" type="number" min="1" placeholder="Ülések min" />
-      <input id="car-seats-max" class="search-input" type="number" min="1" placeholder="Ülések max" />
-
-      <!-- Üzemanyag -->
-      <select id="car-fuel" class="search-input">
-        <option value="">Üzemanyag (összes)</option>
-        <option value="hybrid">Hibrid</option>
-        <option value="petrol">Benzin</option>
-        <option value="diesel">Dízel</option>
-        <option value="electric">Elektromos</option>
-      </select>
-
-      <!-- Évjárat -->
-      <input id="car-year-min" class="search-input" type="number" min="1950" placeholder="Évjárat min" />
-      <input id="car-year-max" class="search-input" type="number" min="1950" placeholder="Évjárat max" />
-
-      <!-- Váltó -->
-      <select id="car-transmission" class="search-input">
-        <option value="">Váltó (összes)</option>
-        <option value="manual">Manuális</option>
-        <option value="automatic">Automata</option>
-      </select>
-
-    </div>
-
-    <div style="display:flex; gap:10px; margin-top:12px; flex-wrap:wrap;">
-      <button class="btn small" id="car-clear-btn" type="button">🧹 Autó szűrők törlése</button>
-      <span class="muted" style="align-self:center;">A 🔎 Keresés gomb ezeket is figyelembe veszi.</span>
-    </div>
+  <div class="carfilter-header">
+    <span class="tag">🚗 Autók</span>
+    <span class="muted">Csak autó táblákra szűr</span>
   </div>
-</details>
+
+  <div class="filter-grid">
+
+    <input
+      class="search-input"
+      placeholder="Gyártó (pl. BMW)"
+      formControlName="manufacturer"
+    />
+
+    <input
+      class="search-input"
+      placeholder="Modell (pl. 320d)"
+      formControlName="model"
+    />
+
+    <input
+      class="search-input"
+      type="number"
+      min="0"
+      placeholder="Ár min (Ft)"
+      formControlName="priceMin"
+    />
+
+    <input
+      class="search-input"
+      type="number"
+      min="0"
+      placeholder="Ár max (Ft)"
+      formControlName="priceMax"
+    />
+
+    <select class="search-input" formControlName="bodyType">
+      <option value="">Kivitel (összes)</option>
+      <option value="hatchback">Hatchback</option>
+      <option value="coupe">Coupé</option>
+      <option value="cabrio">Cabrio</option>
+      <option value="wagon">Kombi</option>
+      <option value="mpv">Egyterű</option>
+      <option value="sedan">Sedan</option>
+      <option value="suv">SUV</option>
+    </select>
+
+    <input
+      class="search-input"
+      type="number"
+      min="0"
+      placeholder="Lóerő min"
+      formControlName="hpMin"
+    />
+
+    <input
+      class="search-input"
+      type="number"
+      min="0"
+      placeholder="Lóerő max"
+      formControlName="hpMax"
+    />
+
+    <input
+      class="search-input"
+      type="number"
+      min="0"
+      step="0.1"
+      placeholder="0–100 min (s)"
+      formControlName="accelMin"
+    />
+
+    <input
+      class="search-input"
+      type="number"
+      min="0"
+      step="0.1"
+      placeholder="0–100 max (s)"
+      formControlName="accelMax"
+    />
+
+    <input
+      class="search-input"
+      type="number"
+      min="1"
+      placeholder="Ülések min"
+      formControlName="seatsMin"
+    />
+
+    <input
+      class="search-input"
+      type="number"
+      min="1"
+      placeholder="Ülések max"
+      formControlName="seatsMax"
+    />
+
+    <select class="search-input" formControlName="fuel">
+      <option value="">Üzemanyag (összes)</option>
+      <option value="hybrid">Hibrid</option>
+      <option value="petrol">Benzin</option>
+      <option value="diesel">Dízel</option>
+      <option value="electric">Elektromos</option>
+    </select>
+
+    <input
+      class="search-input"
+      type="number"
+      min="1950"
+      placeholder="Évjárat min"
+      formControlName="yearMin"
+    />
+
+    <input
+      class="search-input"
+      type="number"
+      min="1950"
+      placeholder="Évjárat max"
+      formControlName="yearMax"
+    />
+
+    <select class="search-input" formControlName="transmission">
+      <option value="">Váltó (összes)</option>
+      <option value="manual">Manuális</option>
+      <option value="automatic">Automata</option>
+    </select>
+
+  </div>
+
+  <div class="carfilter-footer">
+    <button
+      type="button"
+      class="btn small"
+      (click)="clear()"
+    >
+      🧹 Autó szűrők törlése
+    </button>
+
+    <span class="muted">
+      A 🔎 Keresés gomb ezeket is figyelembe veszi.
+    </span>
+  </div>
+
+</div>

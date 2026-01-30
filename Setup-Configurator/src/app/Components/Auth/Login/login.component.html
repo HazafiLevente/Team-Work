@@ -1,0 +1,16 @@
+<form (ngSubmit)="submit()">
+  <input [(ngModel)]="email" name="email" required />
+  <input type="password" [(ngModel)]="password" name="password" required />
+
+  <label class="remember">
+    <input type="checkbox" [(ngModel)]="rememberMe" name="rememberMe">
+    Emlékezz rám
+  </label>
+  <p>
+    Nincs még fiókod?
+    <a routerLink="/auth/register">Regisztráció</a>
+  </p>
+
+
+  <button class="btn">Login</button>
+</form>

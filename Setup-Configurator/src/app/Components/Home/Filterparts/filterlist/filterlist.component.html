@@ -1,0 +1,61 @@
+<details class="advanced">
+  <summary>
+    Több:
+    <span class="muted">(részletes keresés)</span>
+  </summary>
+
+  <!-- CATEGORY SELECT -->
+  <div class="category-row">
+    <button
+      type="button"
+      class="tag"
+      [class.active]="active.car"
+      (click)="toggle('car'); $event.stopPropagation()"
+    >
+      🚗 Autók
+    </button>
+
+    <button
+      type="button"
+      class="tag"
+      [class.active]="active.computer"
+      (click)="toggle('computer'); $event.stopPropagation()"
+    >
+      🖥 Computer
+    </button>
+
+    <button
+      type="button"
+      class="tag"
+      [class.active]="active.ht"
+      (click)="toggle('ht'); $event.stopPropagation()"
+    >
+      🎬 HT
+    </button>
+
+    <button
+      type="button"
+      class="tag"
+      [class.active]="active.instrument"
+      (click)="toggle('instrument'); $event.stopPropagation()"
+    >
+      🎸 Instr
+    </button>
+
+  </div>
+
+  <!-- FILTER PANELS -->
+  <app-carfilter
+    *ngIf="active.car"
+    (filtersChange)="onCarChange($event)"
+  ></app-carfilter>
+
+  <app-computerfilter
+    *ngIf="active.computer"
+    (filtersChange)="onComputerChange($event)"
+  ></app-computerfilter>
+
+  <!-- később -->
+  <!-- app-hometheaterfilter -->
+  <!-- app-instrumentfilter -->
+</details>
