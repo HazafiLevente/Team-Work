@@ -93,32 +93,54 @@ export class CarfilterComponent implements OnInit, OnDestroy {
     this.sub?.unsubscribe();
   }
 
+  private s(v: any): string {
+    // stringes mezők tisztítása
+    return String(v ?? '').trim();
+  }
+
+  private n(v: any): string {
+    // number inputokból jöhet number vagy '' vagy null
+    // mi stringet tárolunk a filterben, hogy a parseRange/toNum tudja kezelni
+    if (v === '' || v == null) return '';
+    return String(v).trim();
+  }
+
+
+
   emitFilters(): void {
-    const raw = this.form.getRawValue() as CarFilters;
+    const raw = this.form.getRawValue() as any;
 
     const cleaned: CarFilters = {
-      ...raw,
-      manufacturer: (raw.manufacturer || '').trim(),
-      model: (raw.model || '').trim(),
+      category: 'car',
 
-      priceMin: (raw.priceMin || '').trim(),
-      priceMax: (raw.priceMax || '').trim(),
+      manufacturer: this.s(raw.manufacturer),
+      model: this.s(raw.model),
 
-      hpMin: (raw.hpMin || '').trim(),
-      hpMax: (raw.hpMax || '').trim(),
+      priceMin: this.n(raw.priceMin),
+      priceMax: this.n(raw.priceMax),
 
-      accelMin: (raw.accelMin || '').trim(),
-      accelMax: (raw.accelMax || '').trim(),
+      bodyType: raw.bodyType || '',
 
-      seatsMin: (raw.seatsMin || '').trim(),
-      seatsMax: (raw.seatsMax || '').trim(),
+      hpMin: this.n(raw.hpMin),
+      hpMax: this.n(raw.hpMax),
 
-      yearMin: (raw.yearMin || '').trim(),
-      yearMax: (raw.yearMax || '').trim(),
+      accelMin: this.n(raw.accelMin),
+      accelMax: this.n(raw.accelMax),
+
+      seatsMin: this.n(raw.seatsMin),
+      seatsMax: this.n(raw.seatsMax),
+
+      fuel: raw.fuel || '',
+
+      yearMin: this.n(raw.yearMin),
+      yearMax: this.n(raw.yearMax),
+
+      transmission: raw.transmission || '',
     };
 
     this.filtersChange.emit(cleaned);
   }
+
 
   isActive(): boolean {
     const v = this.form.getRawValue() as CarFilters;

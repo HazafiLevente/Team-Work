@@ -43,13 +43,17 @@ export class SearchbarComponent implements OnInit {
       error: (err) => console.error('Manufacturer load error:', err),
     });
 
+
     // aktuális filter visszatöltése
-    const cur = this.filtersService.current;
-    this.term = cur.term ?? '';
-    this.manufacturer = cur.manufacturer ?? '';
-    this.priceMin = cur.priceMin ?? null;
-    this.priceMax = cur.priceMax ?? null;
-    this.sort = cur.sort ?? '';
+    const cur = this.filtersService.current;      // CombinedFilters
+    const s = cur.search;                         // SearchFilters
+
+    this.term = s.term ?? '';
+    this.manufacturer = s.manufacturer ?? '';
+    this.priceMin = s.priceMin ?? null;
+    this.priceMax = s.priceMax ?? null;
+    this.sort = s.sort ?? '';
+
   }
 
   sanitizePrice(which: 'min' | 'max'): void {
@@ -75,7 +79,9 @@ export class SearchbarComponent implements OnInit {
 
     console.log('SEARCHBAR -> setFilters()', filters);
 
-    this.filtersService.setFilters(filters);
+    this.filtersService.setSearch(filters as SearchFilters);
+
+
   }
 
 

@@ -6,8 +6,7 @@ import { ProductService } from '../../../Services/Home/ProductParts/product/prod
 import { Product } from '../../../../Models/Product/product.model';
 import { ProductComponent } from '../product/product.component';
 
-import { ProductFiltersService } from '../../../Services/Home/Shared/product-filters.service';
-import { SearchFilters } from '../../../../Models/Filters/searchfilters.model';
+import { ProductFiltersService, CombinedFilters } from '../../../Services/Home/Shared/product-filters.service';
 
 @Component({
   selector: 'app-productlist',
@@ -17,26 +16,76 @@ import { SearchFilters } from '../../../../Models/Filters/searchfilters.model';
   styleUrls: ['./productlist.component.css']
 })
 export class ProductlistComponent implements OnInit, OnDestroy {
-  products: Product[] = [];
+
+  allProducts: Product[] = [];
+  carProducts: any[] = []; // autók részletes mezőkkel
+  products: Product[] = []; // (ha használod máshol, maradhat)
+
   filteredProducts: Product[] = [];
 
   loading = true;
-  readonly PRODUCT_LIMIT = 20;
+
+  // ha minden kategória kell induláskor, legyen nagyobb
+  readonly PRODUCT_LIMIT = 2000;
 
   private sub?: Subscription;
-  private lastFilters: SearchFilters;
 
   constructor(
     private productService: ProductService,
     private filtersService: ProductFiltersService
-  ) {
-    this.lastFilters = this.filtersService.current;
+  ) {}
+
+  ngOnInit(): void {
+    this.sub = this.filtersService.filters$.subscribe(f => {
+      this.applyFilters(f);
+    });
+
+    // 1) all products
+    this.productService.getProducts(this.PRODUCT_LIMIT).subscribe({
+      next: res => {
+        this.allProducts = res.items || [];
+        this.loading = false;
+        this.applyFilters(this.filtersService.current);
+      },
+      error: err => {
+        console.error('API ERROR (products)', err);
+        this.loading = false;
+      }
+    });
+
+    this.productService.getCars(this.PRODUCT_LIMIT).subscribe({
+      next: res => {
+        this.carProducts = res.items || [];
+        this.applyFilters(this.filtersService.current);
+      },
+      error: err => console.error('API ERROR (cars)', err)
+    });
+
+
+  }
+
+  ngOnDestroy(): void {
+    this.sub?.unsubscribe();
+  }
+
+  // -----------------------------
+  // Helpers
+  // -----------------------------
+
+  private norm(v: any): string {
+    return String(v ?? '').trim();
+  }
+
+  private normText(v: any): string {
+    return String(v ?? '')
+      .trim()
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '');
   }
 
   private getManufacturer(p: any): string {
     const norm = (v: any) => String(v ?? '').trim();
-
-    // ✅ mindent lefedünk: manufacturer / Manufacturer / brands / brand
     return (
       norm(p.manufacturer) ||
       norm(p.Manufacturer) ||
@@ -48,70 +97,213 @@ export class ProductlistComponent implements OnInit, OnDestroy {
     );
   }
 
-
-  ngOnInit(): void {
-    this.sub = this.filtersService.filters$.subscribe(f => {
-      console.log('PRODUCTLIST <- filters$', f);
-      this.applyFilters(f);
-    });
-
-
-    this.productService.getProducts(this.PRODUCT_LIMIT).subscribe({
-      next: res => {
-        this.products = res.items || [];
-        this.loading = false;
-
-        // induláskor is szűrünk
-        this.applyFilters(this.filtersService.current);
-      },
-      error: err => {
-        console.error('API ERROR', err);
-        this.loading = false;
-      }
-    });
+  // ✅ nálatok autóknál table_name van: pl cabrio_cars
+  private isCarItem(p: any): boolean {
+    const t = String(p?.table_name ?? p?.table ?? '').toLowerCase();
+    return t.endsWith('_cars') || t.includes('car');
   }
-
-
-  ngOnDestroy(): void {
-    this.sub?.unsubscribe();
-  }
-
-  private norm(v: any): string {
-    return String(v ?? '').trim();
-  }
-
-
 
   private getPriceNumber(p: any): number | null {
     const n = Number(p?.price);
     return Number.isFinite(n) ? n : null;
   }
 
-  private applyFilters(f: SearchFilters) {
-    const term = (f.term || '').toLowerCase().trim();
-    const selectedManu = (f.manufacturer || '').toLowerCase().trim();
+  private toNum(v: any): number | null {
+    if (v === '' || v == null) return null;
+    const n = Number(v);
+    return Number.isFinite(n) ? n : null;
+  }
 
-    let result = this.products.filter((p: any) => {
-      const searchable = this.getText(p);
+  private getText(p: any): string {
+    const model = String(p.model ?? p.Model ?? p.name ?? p.title ?? '').trim();
+    const manufacturer = String(p.manufacturer ?? p.Manufacturer ?? '').trim();
+    const category = String(p.category ?? p.Category ?? '').trim();
+    const desc = String(p.description ?? p.Description ?? '').trim();
+    return `${model} ${manufacturer} ${category} ${desc}`.toLowerCase();
+  }
+
+  private parseRange(value: any): { min: number | null; max: number | null } {
+    if (value == null) return { min: null, max: null };
+
+    const s = String(value).trim();
+    if (!s) return { min: null, max: null };
+
+    if (s.endsWith('+')) {
+      const n = Number(s.replace('+', '').trim());
+      return Number.isFinite(n) ? { min: n, max: null } : { min: null, max: null };
+    }
+
+    if (s.toLowerCase().includes('under')) {
+      const n = Number(s.replace(/[^0-9.]/g, ''));
+      return Number.isFinite(n) ? { min: null, max: n } : { min: null, max: null };
+    }
+
+    if (s.includes('-')) {
+      const [aRaw, bRaw] = s.split('-').map(x => x.trim());
+      const a = aRaw ? Number(aRaw) : null;
+      const b = bRaw ? Number(bRaw) : null;
+
+      const amin = a != null && Number.isFinite(a) ? a : null;
+      const bmax = b != null && Number.isFinite(b) ? b : null;
+
+      if (amin != null && bmax != null) {
+        return { min: Math.min(amin, bmax), max: Math.max(amin, bmax) };
+      }
+      return { min: amin, max: bmax };
+    }
+
+    const n = Number(s);
+    return Number.isFinite(n) ? { min: n, max: n } : { min: null, max: null };
+  }
+
+  private getField(p: any, ...keys: string[]): string {
+    for (const k of keys) {
+      const v = p?.[k];
+      if (v !== undefined && v !== null && String(v).trim() !== '') return String(v).trim();
+    }
+    return '';
+  }
+
+  private getBodyType(p: any): string {
+    return this.getField(p, 'Body Type', 'body_type', 'bodyType');
+  }
+
+  private getFuelType(p: any): string {
+    return this.getField(p, 'Fuel Type', 'fuel_type', 'fuel');
+  }
+
+  private getTransmission(p: any): string {
+    return this.getField(p, 'Transmission', 'transmission', 'gearbox');
+  }
+
+  private getHorsepowerRange(p: any): string {
+    return this.getField(p, 'Horsepower', 'horsepower', 'hp');
+  }
+
+  private getAccelerationRange(p: any): string {
+    return this.getField(p, 'Acceleration (s)', 'acceleration', 'accel');
+  }
+
+  private getYearRange(p: any): string {
+    return this.getField(p, 'Year', 'year');
+  }
+
+  private getPriceRange(p: any): string {
+    return this.getField(p, 'Price Range (Ft)', 'price_range', 'price_range_ft');
+  }
+
+  private mapBodyTypeFromDb(dbValue: any): string {
+    const x = this.normText(dbValue);
+
+    if (x === 'kombi') return 'wagon';
+    if (x === 'egyeru' || x === 'egyteru') return 'mpv';
+    if (x === 'coupe') return 'coupe';
+    if (x === 'cabrio') return 'cabrio';
+    if (x === 'hatchback') return 'hatchback';
+    if (x === 'sedan') return 'sedan';
+    if (x === 'suv') return 'suv';
+
+    return x;
+  }
+
+  // -----------------------------
+  // MAIN FILTER LOGIC
+  // -----------------------------
+
+  private applyFilters(state: CombinedFilters) {
+    const s = state.search;
+
+    const term = (s.term || '').toLowerCase().trim();
+    const selectedManu = (s.manufacturer || '').toLowerCase().trim();
+
+    // ✅ forráslista kategória szerint
+    const source: any[] =
+      state.activeCategory === 'car'
+        ? (this.carProducts || [])
+        : (this.allProducts || []);
+
+    // és innentől NEM this.products, hanem source
+    let result = source.filter((p: any) => {
       const manu = this.getManufacturer(p).toLowerCase();
+      const hay = this.getText(p);
 
-      // ✅ SZAVAS KERESŐ: több mezőben keres
-      const matchText = !term || searchable.includes(term);
-
-      // ✅ manufacturer szűrés
+      const matchText = !term || hay.includes(term);
       const matchManufacturer = !selectedManu || manu === selectedManu;
 
       const price = this.getPriceNumber(p);
       const hasPrice = price !== null;
 
-      const matchMin = f.priceMin == null || (hasPrice && price! >= f.priceMin);
-      const matchMax = f.priceMax == null || (hasPrice && price! <= f.priceMax);
+      const matchMin = s.priceMin == null || (hasPrice && price! >= s.priceMin);
+      const matchMax = s.priceMax == null || (hasPrice && price! <= s.priceMax);
 
       return matchText && matchManufacturer && matchMin && matchMax;
     });
 
-    // rendezés: no price mindig a végére
-    if (f.sort === 'price_asc') {
+    // 2) carfilter csak car módban
+    if (state.activeCategory === 'car' && state.car) {
+      const cf = state.car;
+
+      const cfManu = (cf.manufacturer || '').toLowerCase().trim();
+      const cfModel = (cf.model || '').toLowerCase().trim();
+
+      const cfPriceMin = this.toNum(cf.priceMin);
+      const cfPriceMax = this.toNum(cf.priceMax);
+
+      const hpMin = this.toNum(cf.hpMin);
+      const hpMax = this.toNum(cf.hpMax);
+
+      const accelMin = this.toNum(cf.accelMin);
+      const accelMax = this.toNum(cf.accelMax);
+
+      const seatsMin = this.toNum(cf.seatsMin);
+      const seatsMax = this.toNum(cf.seatsMax);
+
+      const yearMin = this.toNum(cf.yearMin);
+      const yearMax = this.toNum(cf.yearMax);
+
+      result = result.filter((p: any) => {
+        const manu = this.getManufacturer(p).toLowerCase();
+        const model = String(p.model ?? p.Model ?? '').toLowerCase();
+
+        if (cfManu && !manu.includes(cfManu)) return false;
+        if (cfModel && !model.includes(cfModel)) return false;
+
+        const priceR = this.parseRange(this.getPriceRange(p));
+        if (cfPriceMin != null && (priceR.max == null || priceR.max < cfPriceMin)) return false;
+        if (cfPriceMax != null && (priceR.min == null || priceR.min > cfPriceMax)) return false;
+
+        const hpR = this.parseRange(this.getHorsepowerRange(p));
+        if (hpMin != null && (hpR.max == null || hpR.max < hpMin)) return false;
+        if (hpMax != null && (hpR.min == null || hpR.min > hpMax)) return false;
+
+        const accR = this.parseRange(this.getAccelerationRange(p));
+        if (accelMin != null && (accR.max == null || accR.max < accelMin)) return false;
+        if (accelMax != null && (accR.min == null || accR.min > accelMax)) return false;
+
+        const seats = this.toNum(this.getField(p, 'seats', 'Seats'));
+        if (seatsMin != null && (seats == null || seats < seatsMin)) return false;
+        if (seatsMax != null && (seats == null || seats > seatsMax)) return false;
+
+        const yearR = this.parseRange(this.getYearRange(p));
+        if (yearMin != null && (yearR.max == null || yearR.max < yearMin)) return false;
+        if (yearMax != null && (yearR.min == null || yearR.min > yearMax)) return false;
+
+        const bodyDb = this.getBodyType(p);
+        const body = this.mapBodyTypeFromDb(bodyDb);
+        if (cf.bodyType && body !== cf.bodyType) return false;
+
+        const fuel = this.normText(this.getFuelType(p));
+        if (cf.fuel && fuel !== this.normText(cf.fuel)) return false;
+
+        const tr = this.normText(this.getTransmission(p));
+        if (cf.transmission && tr !== this.normText(cf.transmission)) return false;
+
+        return true;
+      });
+    }
+
+    // 3) rendezés
+    if (s.sort === 'price_asc') {
       result = [...result].sort((a: any, b: any) => {
         const ap = this.getPriceNumber(a);
         const bp = this.getPriceNumber(b);
@@ -120,7 +312,7 @@ export class ProductlistComponent implements OnInit, OnDestroy {
         if (bp == null) return -1;
         return ap - bp;
       });
-    } else if (f.sort === 'price_desc') {
+    } else if (s.sort === 'price_desc') {
       result = [...result].sort((a: any, b: any) => {
         const ap = this.getPriceNumber(a);
         const bp = this.getPriceNumber(b);
@@ -129,26 +321,16 @@ export class ProductlistComponent implements OnInit, OnDestroy {
         if (bp == null) return -1;
         return bp - ap;
       });
-    } else if (f.sort === 'name_asc') {
+    } else if (s.sort === 'name_asc') {
       result = [...result].sort((a: any, b: any) =>
-        String(a.model ?? a.name ?? '').localeCompare(String(b.model ?? b.name ?? ''), 'hu')
+        String(a.model ?? '').localeCompare(String(b.model ?? ''), 'hu')
       );
-    } else if (f.sort === 'name_desc') {
+    } else if (s.sort === 'name_desc') {
       result = [...result].sort((a: any, b: any) =>
-        String(b.model ?? b.name ?? '').localeCompare(String(a.model ?? a.name ?? ''), 'hu')
+        String(b.model ?? '').localeCompare(String(a.model ?? ''), 'hu')
       );
     }
 
     this.filteredProducts = result;
-  }
-
-  private getText(p: any): string {
-    // amit biztosan szeretnél, hogy a szavas kereső figyeljen
-    const model = String(p.model ?? p.Model ?? p.name ?? p.title ?? '').trim();
-    const manufacturer = String(p.manufacturer ?? p.Manufacturer ?? '').trim();
-    const category = String(p.category ?? p.Category ?? '').trim();
-    const desc = String(p.description ?? p.Description ?? '').trim();
-
-    return `${model} ${manufacturer} ${category} ${desc}`.toLowerCase();
   }
 }

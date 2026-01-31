@@ -1,5 +1,5 @@
 {
-  "lastUpdated": 1769849696895,
+  "lastUpdated": 1769888188213,
   "tables": {
     "c_trumpets": {
       "columns": [
@@ -40,6 +40,7 @@
     },
     "effects_pedal": {
       "columns": [
+        "presets",
         "release_year",
         "ID",
         "analog",
@@ -48,7 +49,6 @@
         "buffered",
         "stereo",
         "midi",
-        "presets",
         "Manufacturer",
         "Model",
         "pedal_type",
@@ -207,6 +207,32 @@
         "category"
       ]
     },
+    "floor_speakers": {
+      "columns": [
+        "created_at",
+        "id",
+        "way",
+        "impedance_ohm",
+        "sensitivity_db",
+        "rms_power_w",
+        "peak_power_w",
+        "woofer_count",
+        "woofer_size_inch",
+        "midrange_size_inch",
+        "height_mm",
+        "weight_kg",
+        "bass_reflex",
+        "bi_wire",
+        "manufacturer",
+        "model",
+        "speaker_type",
+        "frequency_response",
+        "tweeter_type",
+        "recommended_use",
+        "category",
+        "notes"
+      ]
+    },
     "multi_effects": {
       "columns": [
         "ID",
@@ -238,6 +264,23 @@
         "application_area",
         "suitable_for",
         "target_level",
+        "notes",
+        "category"
+      ]
+    },
+    "portable_speakers": {
+      "columns": [
+        "id",
+        "battery_hours",
+        "created_at",
+        "manufacturer",
+        "model",
+        "series",
+        "speaker_type",
+        "power_mode",
+        "wired_inputs",
+        "wireless",
+        "water_resistance",
         "notes",
         "category"
       ]
@@ -311,7 +354,6 @@
     },
     "electric_drums": {
       "columns": [
-        "ID",
         "shell_design",
         "kit_pieces",
         "cymbals",
@@ -319,6 +361,7 @@
         "bluetooth",
         "recording",
         "release_year",
+        "ID",
         "Manufacturer",
         "Model",
         "drum_type",
@@ -334,8 +377,6 @@
     },
     "audio_processors": {
       "columns": [
-        "hdmi_earc",
-        "network",
         "id",
         "max_channels",
         "dolby_atmos",
@@ -343,6 +384,8 @@
         "auro_3d",
         "hdmi_in",
         "hdmi_out",
+        "hdmi_earc",
+        "network",
         "manufacturer",
         "model",
         "notes",
@@ -416,6 +459,30 @@
         "speaker_type",
         "notes",
         "category"
+      ]
+    },
+    "ceiling_speakers": {
+      "columns": [
+        "id",
+        "way",
+        "impedance_ohm",
+        "sensitivity_db",
+        "rms_power_w",
+        "peak_power_w",
+        "woofer_size_inch",
+        "cutout_diameter_mm",
+        "mounting_depth_mm",
+        "paintable",
+        "moisture_resistant",
+        "created_at",
+        "manufacturer",
+        "model",
+        "speaker_type",
+        "frequency_response",
+        "tweeter_type",
+        "recommended_use",
+        "category",
+        "notes"
       ]
     },
     "mixer": {
@@ -522,16 +589,6 @@
     },
     "soundcards": {
       "columns": [
-        "air_mode",
-        "dsp",
-        "latency_ms",
-        "midi_in",
-        "midi_out",
-        "rack_mountable",
-        "bus_powered",
-        "weight_kg",
-        "release_year",
-        "created_at",
         "id",
         "inputs_total",
         "outputs_total",
@@ -542,6 +599,16 @@
         "max_sample_rate",
         "bit_depth",
         "phantom_power",
+        "air_mode",
+        "dsp",
+        "latency_ms",
+        "midi_in",
+        "midi_out",
+        "rack_mountable",
+        "bus_powered",
+        "weight_kg",
+        "release_year",
+        "created_at",
         "manufacturer",
         "model",
         "generation",
@@ -583,6 +650,7 @@
         "includes_case",
         "includes_accessories",
         "created_at",
+        "notes",
         "manufacturer",
         "model",
         "body_shape",
@@ -594,7 +662,6 @@
         "finish",
         "color",
         "suitable_for",
-        "notes",
         "category"
       ]
     },
@@ -602,12 +669,12 @@
       "columns": [
         "ID",
         "Seats",
-        "Acceleration (s)",
         "Manufacturer",
         "Model",
         "Price Range (Ft)",
         "Body Type",
         "Horsepower",
+        "Acceleration (s)",
         "Fuel Type",
         "Year",
         "Transmission",
@@ -735,6 +802,9 @@
         "magnetic_shielding",
         "release_year",
         "created_at",
+        "manufacturer",
+        "model",
+        "speaker_type",
         "enclosure_type",
         "drivers",
         "frequency_response_hz",
@@ -742,10 +812,7 @@
         "crossover_hz",
         "terminals",
         "notes",
-        "category",
-        "manufacturer",
-        "model",
-        "speaker_type"
+        "category"
       ]
     },
     "favorite_lists[Lists]": {
@@ -760,16 +827,16 @@
       "columns": [
         "ID",
         "Seats",
+        "Fuel Type",
+        "Year",
+        "Transmission",
+        "category",
         "Manufacturer",
         "Model",
         "Price Range (Ft)",
         "Body Type",
         "Horsepower",
-        "Acceleration (s)",
-        "Fuel Type",
-        "Year",
-        "Transmission",
-        "category"
+        "Acceleration (s)"
       ]
     },
     "back_speaker": {

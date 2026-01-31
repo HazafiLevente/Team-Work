@@ -1,8 +1,10 @@
-import { CarfilterComponent } from '../carfilter/carfilter.component';
-import { ComputerfilterComponent } from '../computerfilter/computerfilter.component';
-import {Component} from '@angular/core';
-import {ReactiveFormsModule} from '@angular/forms';
+import { Component } from '@angular/core';
+import { ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+
+import { CarfilterComponent, CarFilters } from '../carfilter/carfilter.component';
+import { ComputerfilterComponent } from '../computerfilter/computerfilter.component';
+import { ProductFiltersService, CategoryKey } from '../../../Services/Home/Shared/product-filters.service';
 
 @Component({
   selector: 'app-filterlist',
@@ -19,32 +21,38 @@ import { CommonModule } from '@angular/common';
 export class FilterlistComponent {
 
   active = {
-    car: true,
+    car: false,         // ✅ induláskor NE
     computer: false,
     ht: false,
     instrument: false
   };
 
-  filters: any = {};
 
-  toggle(key: keyof typeof this.active) {
-    Object.keys(this.active).forEach(k =>
-      this.active[k as keyof typeof this.active] = false
-    );
-    this.active[key] = true;
+  constructor(private filtersService: ProductFiltersService) {}
+
+  toggle(key: CategoryKey) {
+    // ha ugyanarra kattintasz, vissza ALL-ra
+    const cur = this.filtersService.current.activeCategory;
+    const next = (cur === key) ? 'all' : key;
+
+    // UI state (gomb highlight)
+    Object.keys(this.active).forEach(k => {
+      this.active[k as keyof typeof this.active] = false;
+    });
+    if (next !== 'all') {
+      this.active[next as keyof typeof this.active] = true;
+    }
+
+    this.filtersService.setActiveCategory(next);
   }
 
-  onCarChange(data: any) {
-    this.filters.car = data;
-    this.emit();
+
+  onCarChange(data: CarFilters) {
+    this.filtersService.setCar(data);
   }
 
   onComputerChange(data: any) {
-    this.filters.computer = data;
-    this.emit();
-  }
-
-  emit() {
-    console.log('🔎 FILTER PAYLOAD:', this.filters);
+    // majd később: this.filtersService.setComputer(data);
+    console.log('computer filters:', data);
   }
 }

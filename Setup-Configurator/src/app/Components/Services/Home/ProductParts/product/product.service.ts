@@ -18,6 +18,19 @@ export class ProductService {
       { params, withCredentials: true }
     );
   }
+
+  getCars(limit = 50) {
+    return this.http.get<{ items: any[] }>(
+      `/api/cars`,
+      {
+        params: { limit },
+        withCredentials: true
+      }
+    );
+  }
+
+
+
 }
 
 
