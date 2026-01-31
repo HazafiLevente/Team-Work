@@ -20,6 +20,8 @@ app.use("/api/cars", require("./routes/cars.routes"));
 app.use("/api/setup", require("./routes/setup.routes"));
 app.use("/api/bell", require("./routes/bell.routes"));
 app.use("/api/admin", require("./routes/admin.routes"));
+app.use("/api/profile", require("./routes/profile.routes"));
+
 
 
 app.use("/api/public", require("./routes/public.routes"));

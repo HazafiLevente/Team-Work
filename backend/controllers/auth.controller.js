@@ -7,22 +7,41 @@ const JWT_SECRET = process.env.JWT_SECRET;
 
 exports.register = async (req, res) => {
     const { fullname, username, email, password } = req.body;
+
     if (!fullname || !username || !email || !password) {
         return res.status(400).json({ error: "Missing fields" });
     }
 
     const hashed = await bcrypt.hash(password, 10);
 
-    const { error } = await supabase.from("user[Auth]").insert([{
-        Name: fullname,
-        UserName: username,
-        Email: email,
-        password: hashed
-    }]);
+    const { data: users, error } = await supabase
+        .from("user[Auth]")
+        .insert([{
+            Name: fullname,
+            UserName: username,
+            Email: email,
+            password: hashed
+        }])
+        .select()
+        .single();
 
-    if (error) return res.status(500).json({ error: error.message });
+    if (error) {
+        return res.status(500).json({ error: error.message });
+    }
+
+    // ⬅️ AUTOMATIKUS user_more
+    await supabase
+        .from("user_more[Auth]")
+        .insert({
+            user_id: users.ID,
+            age: null,
+            phone_number: null,
+            city: null
+        });
+
     res.json({ success: true });
 };
+
 
 exports.login = async (req, res) => {
     const { email, password, rememberMe } = req.body;
@@ -72,9 +91,25 @@ exports.logout = (_, res) => {
     res.json({ success: true });
 };
 
-exports.me = (req, res) => {
-    if (!req.user) {
-        return res.status(401).json({ loggedIn: false });
+exports.me = async (req, res) => {
+    const userId = req.user.id;
+
+    // biztosítjuk, hogy user_more létezzen
+    const { data, error } = await supabase
+        .from("user_more[Auth]")
+        .select("id")
+        .eq("user_id", userId)
+        .single();
+
+    if (error && error.code === 'PGRST116') {
+        await supabase
+            .from("user_more[Auth]")
+            .insert({
+                user_id: userId,
+                age: null,
+                phone_number: null,
+                city: null
+            });
     }
 
     res.json({
@@ -86,6 +121,7 @@ exports.me = (req, res) => {
         }
     });
 };
+
 
 
 

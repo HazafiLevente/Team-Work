@@ -1,5 +1,5 @@
-
 <header class="top-menu">
+
   <div class="brand">
     <div class="logo">SC</div>
     <div>
@@ -8,46 +8,55 @@
     </div>
   </div>
 
-  <!-- 👤 LOGGED IN USER -->
-  <div *ngIf="user$ | async as user" class="user-wrap" (click)="toggleMenu()">
+  <nav class="nav">
 
-  <span class="username">
-    {{ user.username }}
-  </span>
+    <!-- 🔐 GUEST -->
+    <button
+      *ngIf="!(user$ | async)"
+      class="btn ghost"
+      routerLink="/auth/login">
+      Connect
+    </button>
 
-    <div class="user-avatar">
-      <span class="avatar-placeholder"></span>
-    </div>
+    <!-- 👤 LOGGED IN USER -->
+    <div
+      *ngIf="user$ | async as user"
+      class="user-wrap"
+      (click)="toggleMenu()">
 
-    <!-- 🔽 DROPDOWN -->
-    <div *ngIf="dropdownOpen" class="user-menu neon">
-      <div class="menu-title">{{ user.username }}</div>
-      <div class="muted">{{ user.email }}</div>
+      <span class="username">
+        {{ user.username }}
+      </span>
 
-      <hr>
-
-      <div class="menu-item" routerLink="/profile">👤 Profile</div>
-      <div class="menu-item" routerLink="/favorite">⭐ Favorite</div>
-      <div class="menu-item" routerLink="/setup">🧰 My Setup</div>
-
-      <div
-        *ngIf="['admin','admin+','owner'].includes(user.role)"
-        class="menu-item"
-        routerLink="/admin">
-        🛡 Admin
+      <div class="user-avatar">
+        <span class="avatar-placeholder"></span>
       </div>
 
-      <hr>
+      <!-- 🔽 DROPDOWN -->
+      <div *ngIf="dropdownOpen" class="user-menu neon">
+        <div class="menu-title">{{ user.username }}</div>
+        <div class="muted">{{ user.email }}</div>
 
-      <div class="menu-item danger" (click)="logout()">
-        🚪 Logout
+        <hr>
+
+        <div class="menu-item" routerLink="/profile">👤 Profile</div>
+        <div class="menu-item" routerLink="/favorite">⭐ Favorite</div>
+        <div class="menu-item" routerLink="/setup">🧰 My Setup</div>
+
+        <div
+          *ngIf="['admin','admin+','owner'].includes(user.role)"
+          class="menu-item"
+          routerLink="/admin">
+          🛡 Admin
+        </div>
+
+        <hr>
+
+        <div class="menu-item danger" (click)="logout()">
+          🚪 Logout
+        </div>
       </div>
+
     </div>
-
-  </div>
-
-
-
-
-
+  </nav>
 </header>
