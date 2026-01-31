@@ -19,6 +19,11 @@ export class ProductService {
     );
   }
 
+  getProductDetails(table: string, id: string) {
+    return this.http.get<{ item: any }>(`http://localhost:3000/api/items/${encodeURIComponent(table)}/${encodeURIComponent(id)}`);
+  }
+
+
   getCars(limit = 50) {
     return this.http.get<{ items: any[] }>(
       `/api/cars`,

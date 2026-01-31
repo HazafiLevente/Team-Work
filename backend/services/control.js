@@ -11,6 +11,7 @@ const filler = require("../../datas/Jsons/filler.json");
 
 const OUT_FILE = path.join(__dirname, "../../datas","Jsons","tables.runtime.json");
 
+
 const supabase = createClient(
     process.env.SUPABASE_URL,
     process.env.SUPABASE_SERVICE_ROLE_KEY

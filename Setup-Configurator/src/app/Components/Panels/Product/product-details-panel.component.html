@@ -1,0 +1,38 @@
+<div class="overlay" (click)="close()"></div>
+
+<div class="panel">
+  <div class="panel-header">
+    <div class="title">
+      <div class="model">{{ product?.model }}</div>
+      <div class="sub">{{ product?.manufacturer }}</div>
+    </div>
+
+    <button class="close-btn" (click)="close()">✕</button>
+  </div>
+
+  <div class="panel-body">
+    <div *ngIf="loading">Betöltés...</div>
+
+    <div *ngIf="!loading && error" class="error">
+      {{ error }}
+    </div>
+
+    <div *ngIf="!loading && details">
+      <div class="price">
+        Ár:
+        <strong>
+          {{ details.price ? (details.price | number:'1.0-0') + ' Ft' : 'N/A' }}
+        </strong>
+      </div>
+
+      <div class="kv">
+        <div class="row" *ngFor="let k of keysOf(details)">
+          <ng-container *ngIf="!isHiddenKey(k)">
+            <div class="k">{{ k }}</div>
+            <div class="v">{{ details[k] }}</div>
+          </ng-container>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

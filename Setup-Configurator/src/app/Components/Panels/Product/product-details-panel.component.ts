@@ -1,0 +1,65 @@
+import { CommonModule } from '@angular/common';
+import { Component, EventEmitter, Input, OnChanges, Output } from '@angular/core';
+import { Product } from '../../../Models/Product/product.model';
+import { ProductService } from '../../Services/Home/ProductParts/product/product.service';
+
+@Component({
+  selector: 'app-product-details-panel',
+  standalone: true,
+  imports: [CommonModule],
+  templateUrl: './product-details-panel.component.html',
+  styleUrls: ['./product-details-panel.component.css']
+})
+export class ProductDetailsPanelComponent implements OnChanges {
+
+  @Input({ required: true }) product!: Product;
+  @Output() closed = new EventEmitter<void>();
+
+  loading = true;
+  error: string | null = null;
+
+  details: any = null;
+
+  constructor(private productService: ProductService) {}
+
+  ngOnChanges(): void {
+    this.fetchDetails();
+  }
+
+  close() {
+    this.closed.emit();
+  }
+
+  private fetchDetails() {
+    this.loading = true;
+    this.error = null;
+    this.details = null;
+
+    // ⚠️ nálad Product-ban lehet table vagy table_name – itt kezeld le:
+    const table = (this.product as any).table_name ?? (this.product as any).table;
+    const id = (this.product as any).id;
+
+    this.productService.getProductDetails(table, id).subscribe({
+      next: (res) => {
+        this.details = res?.item ?? res; // attól függ mit ad vissza a backend
+        this.loading = false;
+      },
+      error: (err) => {
+        console.error(err);
+        this.error = 'Nem sikerült betölteni a termék részleteit.';
+        this.loading = false;
+      }
+    });
+  }
+
+  // UI-hoz: key-value lista
+  keysOf(obj: any): string[] {
+    if (!obj) return [];
+    return Object.keys(obj);
+  }
+
+  isHiddenKey(k: string): boolean {
+    const x = k.toLowerCase();
+    return x === 'id' || x === 'created_at' || x === 'updated_at';
+  }
+}

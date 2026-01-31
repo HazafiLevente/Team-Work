@@ -1,0 +1,69 @@
+.profile-layout {
+  max-width: 1100px;
+  margin: 40px auto;
+  display: flex;
+  gap: 28px;
+}
+
+/* BAL OLDAL – TABOK */
+.profile-tabs {
+  width: 160px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.profile-tabs .tab {
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.12);
+  color: var(--text);
+  cursor: pointer;
+  text-align: left;
+  font-size: 15px;
+}
+
+.profile-tabs .tab.active {
+  background: linear-gradient(
+    135deg,
+    var(--accent-purple),
+    var(--accent-cyan)
+  );
+  color: #000;
+  font-weight: 700;
+}
+
+/* JOBB OLDAL – KÁRTYA */
+.profile-content {
+  flex: 1;
+  background: var(--surface);
+  border-radius: 26px;
+  padding: 28px 32px;
+  min-height: 420px;
+}
+
+/* FORM */
+.form {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+}
+
+.form input {
+  padding: 14px;
+  border-radius: 12px;
+  background: var(--glass-alpha);
+  border: 1px solid var(--glass-border);
+  color: var(--text);
+}
+
+.form button {
+  grid-column: span 2;
+  margin-top: 8px;
+}
+
+.sep {
+  margin: 28px 0;
+  opacity: 0.25;
+}

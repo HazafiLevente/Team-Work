@@ -7,15 +7,28 @@ import { Product } from '../../../../Models/Product/product.model';
 import { ProductComponent } from '../product/product.component';
 
 import { ProductFiltersService, CombinedFilters } from '../../../Services/Home/Shared/product-filters.service';
+import { ProductDetailsPanelComponent } from '../../../Panels/Product/product-details-panel.component';
+
 
 @Component({
   selector: 'app-productlist',
   standalone: true,
-  imports: [CommonModule, ProductComponent],
+  imports: [CommonModule, ProductComponent, ProductDetailsPanelComponent],
   templateUrl: './productlist.component.html',
   styleUrls: ['./productlist.component.css']
 })
+
 export class ProductlistComponent implements OnInit, OnDestroy {
+
+  selectedProduct: Product | null = null;
+
+  onOpenProduct(p: Product) {
+    this.selectedProduct = p;
+  }
+
+  onClosePanel() {
+    this.selectedProduct = null;
+  }
 
   allProducts: Product[] = [];
   carProducts: any[] = []; // autók részletes mezőkkel
@@ -333,4 +346,7 @@ export class ProductlistComponent implements OnInit, OnDestroy {
 
     this.filteredProducts = result;
   }
+
+
+
 }

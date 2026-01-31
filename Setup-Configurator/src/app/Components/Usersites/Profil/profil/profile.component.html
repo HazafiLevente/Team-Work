@@ -1,0 +1,66 @@
+<div class="profile-layout">
+
+  <!-- BAL OLDAL: TABOK -->
+  <aside class="profile-tabs">
+    <button class="tab" [class.active]="activeTab==='profile'" (click)="setTab('profile')">
+      👤 Profile
+    </button>
+
+    <button class="tab" [class.active]="activeTab==='favorite'" (click)="setTab('favorite')">
+      ⭐ Favorite
+    </button>
+
+    <button class="tab" [class.active]="activeTab==='setup'" (click)="setTab('setup')">
+      🧰 Setups
+    </button>
+  </aside>
+
+  <!-- JOBB OLDAL: TARTALOM -->
+  <section class="profile-content">
+
+    <!-- 👤 PROFILE TAB -->
+    <ng-container *ngIf="activeTab === 'profile'">
+      <h2>👤 Profil</h2>
+
+      <form class="form" [formGroup]="form">
+        <input formControlName="username" placeholder="Username">
+        <input formControlName="fullname" placeholder="Teljes név">
+        <input formControlName="phone" placeholder="Telefonszám">
+        <input formControlName="age" type="number" placeholder="Életkor">
+        <input formControlName="city" placeholder="Város">
+
+        <button type="button" class="btn" (click)="saveProfile()">
+          💾 Mentés
+        </button>
+      </form>
+
+      <hr class="sep">
+
+      <h3>🔐 Jelszó módosítás</h3>
+
+      <form class="form" [formGroup]="passwordForm">
+        <input type="password" formControlName="oldPassword" placeholder="Régi jelszó">
+        <input type="password" formControlName="newPassword" placeholder="Új jelszó">
+        <input type="password" formControlName="confirm" placeholder="Új jelszó újra">
+
+        <button type="button" class="btn danger" (click)="changePassword()">
+          🔒 Jelszó csere
+        </button>
+      </form>
+    </ng-container>
+
+    <!-- ⭐ FAVORITE TAB -->
+    <ng-container *ngIf="activeTab === 'favorite'">
+      <h2>⭐ Favorite</h2>
+      <p class="muted">Ide jön majd a kedvencek logikája (külön komponensbe később kiszedjük).</p>
+    </ng-container>
+
+    <!-- 🧰 SETUP TAB -->
+    <ng-container *ngIf="activeTab === 'setup'">
+      <h2>🧰 Setups</h2>
+      <p class="muted">Ide jön majd a setupok logikája (külön komponensbe később kiszedjük).</p>
+    </ng-container>
+
+  </section>
+
+</div>

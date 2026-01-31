@@ -1,26 +1,28 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
-import {CommonModule} from '@angular/common';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-profile',
   standalone: true,
   imports: [ReactiveFormsModule, CommonModule],
-  templateUrl: './profile.component.html'
+  templateUrl: './profile.component.html',
+  styleUrl: './profile.component.css'
 })
 export class ProfileComponent implements OnInit {
 
-  form!: any;
-  passwordForm!: any;
+  activeTab: 'profile' | 'favorite' | 'setup' = 'profile';
+
+  form!: FormGroup;
+  passwordForm!: FormGroup;
 
   constructor(
     private fb: FormBuilder,
     private http: HttpClient
   ) {}
 
-  ngOnInit() {
-
+  ngOnInit(): void {
     this.form = this.fb.group({
       username: [''],
       fullname: [''],
@@ -35,35 +37,23 @@ export class ProfileComponent implements OnInit {
       confirm: ['']
     });
 
-    this.http.get<any>('/api/profile', { withCredentials: true })
+    this.http
+      .get<any>('/api/profile', { withCredentials: true })
       .subscribe(data => this.form.patchValue(data));
   }
 
-  saveProfile() {
-    if (this.form.invalid) return;
+  setTab(tab: 'profile' | 'favorite' | 'setup') {
+    this.activeTab = tab;
+  }
 
-    this.http.put(
-      '/api/profile',
-      this.form.value,
-      { withCredentials: true }
-    ).subscribe({
-      next: () => {
-        alert('✅ Profil mentve');
-      },
-      error: err => {
-        console.error(err);
-        alert('❌ Hiba a profil mentésekor');
-      }
-    });
+  saveProfile() {
+    this.http.put('/api/profile', this.form.value, {
+      withCredentials: true
+    }).subscribe(() => alert('✅ Profil mentve'));
   }
 
   changePassword() {
     const { oldPassword, newPassword, confirm } = this.passwordForm.value;
-
-    if (!oldPassword || !newPassword) {
-      alert('❗ Tölts ki minden mezőt');
-      return;
-    }
 
     if (newPassword !== confirm) {
       alert('❌ A jelszavak nem egyeznek');
@@ -74,17 +64,9 @@ export class ProfileComponent implements OnInit {
       '/api/profile/password',
       { oldPassword, newPassword },
       { withCredentials: true }
-    ).subscribe({
-      next: () => {
-        alert('🔒 Jelszó megváltoztatva');
-        this.passwordForm.reset();
-      },
-      error: err => {
-        console.error(err);
-        alert('❌ Hibás régi jelszó');
-      }
+    ).subscribe(() => {
+      alert('🔒 Jelszó megváltoztatva');
+      this.passwordForm.reset();
     });
   }
-
 }
-
