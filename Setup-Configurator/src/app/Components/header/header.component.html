@@ -8,28 +8,44 @@
     </div>
   </div>
 
-  <nav class="nav">
-    <!-- 🔐 GUEST -->
-    <button *ngIf="!(user$ | async)" class="btn ghost" routerLink="/auth/register"> Connect </button>
-    <!-- 👤 LOGGED IN USER -->
-    <div *ngIf="user$ | async as user" class="user-wrap">
-      <div class="user-avatar" (click)="toggleMenu()">
-        <span class="avatar-placeholder"></span>
+  <!-- 👤 LOGGED IN USER -->
+  <div *ngIf="user$ | async as user" class="user-wrap" (click)="toggleMenu()">
+
+  <span class="username">
+    {{ user.username }}
+  </span>
+
+    <div class="user-avatar">
+      <span class="avatar-placeholder"></span>
+    </div>
+
+    <!-- 🔽 DROPDOWN -->
+    <div *ngIf="dropdownOpen" class="user-menu neon">
+      <div class="menu-title">{{ user.username }}</div>
+      <div class="muted">{{ user.email }}</div>
+
+      <hr>
+
+      <div class="menu-item" routerLink="/profile">👤 Profile</div>
+      <div class="menu-item" routerLink="/favorite">⭐ Favorite</div>
+      <div class="menu-item" routerLink="/setup">🧰 My Setup</div>
+
+      <div
+        *ngIf="['admin','admin+','owner'].includes(user.role)"
+        class="menu-item"
+        routerLink="/admin">
+        🛡 Admin
       </div>
-      <!-- 🔽 DROPDOWN -->
-      <div *ngIf="dropdownOpen" class="user-menu neon">
-        <div class="menu-title">{{ user.username }}</div>
-        <div class="muted">{{ user.email }}</div>
-        <hr>
-        <div class="menu-item" routerLink="/profile">👤 Profile</div>
-        <div class="menu-item" routerLink="/favorite">⭐ Favorite</div>
-        <div class="menu-item" routerLink="/setup">🧰 My Setup</div>
-        <div *ngIf="['admin','admin+','owner'].includes(user.role)" class="menu-item" routerLink="/admin"> 🛡 Admin </div>
-        <hr>
-        <div class="menu-item danger" (click)="logout()"> 🚪 Logout </div>
+
+      <hr>
+
+      <div class="menu-item danger" (click)="logout()">
+        🚪 Logout
       </div>
     </div>
-  </nav>
+
+  </div>
+
 
 
 

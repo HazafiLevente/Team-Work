@@ -3,7 +3,10 @@
   border-radius: var(--radius);
   background: var(--surface);
   border: 1px solid var(--glass-border);
+
+
 }
+
 
 .carfilter-header {
   display: flex;
@@ -14,9 +17,20 @@
 
 .filter-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  grid-template-columns: repeat(4, 220px);
   gap: 10px;
 }
+@media (max-width: 1024px) {
+  .filter-grid {
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  }
+
+  .carfilter {
+    max-width: 100%;
+    margin-left: 20px;
+  }
+}
+
 
 .search-input {
   background: var(--glass-alpha);
@@ -56,3 +70,5 @@
   font-weight: 600;
   font-size: 0.85rem;
 }
+
+

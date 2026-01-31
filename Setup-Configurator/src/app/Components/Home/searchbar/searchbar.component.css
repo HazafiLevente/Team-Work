@@ -1,9 +1,18 @@
 #_1 {
-  margin-bottom: 20px;
-  grid-column: 1 / -1;
-  display:flex;
-  gap:12px;
-  flex-wrap:wrap;
-  text-align: left;
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: center;
+
+  padding-left: 40px;
+  max-width: calc(4 * 220px + 3 * 20px); /* 4 card + gap */
   margin-top: 30px;
+  margin-bottom: 20px;
+}
+
+@media (max-width: 1024px) {
+  #_1 {
+    max-width: 100%;
+    padding-left: 20px;
+  }
 }

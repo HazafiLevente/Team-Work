@@ -1,10 +1,12 @@
 {
   "name": "team-work",
   "version": "1.0.0",
-  "description": "",
+  "description": "Project:\r -kereső sáv(Norbi)\r -profile(+admin)(Roli)\r -termékek, dinamikusan feltöltve(Roli)\r -Setup configurator(Levi)\r -AI(Kételyes, mivel kicsit nagy projekt de jó lenne)(Közös)\r -Profile: favorite, legutóbbi amit néztél, téma kedvencek, milyen cuccaid vannak, profile kép stb.(Roli) \r -Termék árak dinamikusan változó(Norbi)\r -Menu(Norbi)\r -típusok megírása (pl. autóknál)(Roli)\r -About, Kapcsolat, Üzenet AI-al(egyre biztosabb hogy lesz!)\r -Logo(Levi)\r -Animációk gyüjtése, és megírása(Norbi,Levi)\r -Szerver(Api requests) (Levi) \r -Adabázis feltöltése(Supabase[https://supabase.com/dashboard/org/zffexebqsxmjsmcmllni])(közös)",
   "main": "backend/server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "concurrently \"npm run backend\" \"npm run frontend\"",
+    "backend": "node backend/server.js",
+    "frontend": "cd Setup-Configurator && ng serve --proxy-config proxy.conf.json",
     "start": "node backend/server.js"
   },
   "repository": {
@@ -33,5 +35,8 @@
   "bugs": {
     "url": "https://github.com/HazafiLevente/Team-Work/issues"
   },
-  "homepage": "https://github.com/HazafiLevente/Team-Work#readme"
+  "homepage": "https://github.com/HazafiLevente/Team-Work#readme",
+  "devDependencies": {
+    "concurrently": "^9.2.1"
+  }
 }
