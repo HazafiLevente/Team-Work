@@ -4,5 +4,8 @@ const verifyUser = require("../middlewares/verifyUser");
 
 router.get("/", verifyUser, ctrl.list);
 router.post("/read", verifyUser, ctrl.read);
+router.get("/:id", verifyUser, ctrl.getOne);
+
+
 
 module.exports = router;

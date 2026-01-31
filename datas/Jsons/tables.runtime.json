@@ -1,5 +1,5 @@
 {
-  "lastUpdated": 1769897779816,
+  "lastUpdated": 1769900863905,
   "tables": {
     "c_trumpets": {
       "columns": [
@@ -24,8 +24,8 @@
     },
     "hatchback_cars": {
       "columns": [
-        "ID",
         "Seats",
+        "ID",
         "Manufacturer",
         "Model",
         "Price Range (Ft)",
@@ -40,7 +40,6 @@
     },
     "effects_pedal": {
       "columns": [
-        "presets",
         "release_year",
         "ID",
         "analog",
@@ -49,6 +48,7 @@
         "buffered",
         "stereo",
         "midi",
+        "presets",
         "Manufacturer",
         "Model",
         "pedal_type",
@@ -354,14 +354,14 @@
     },
     "electric_drums": {
       "columns": [
-        "shell_design",
-        "kit_pieces",
-        "cymbals",
         "usb_midi",
         "bluetooth",
         "recording",
         "release_year",
         "ID",
+        "shell_design",
+        "kit_pieces",
+        "cymbals",
         "Manufacturer",
         "Model",
         "drum_type",
@@ -650,7 +650,6 @@
         "includes_case",
         "includes_accessories",
         "created_at",
-        "notes",
         "manufacturer",
         "model",
         "body_shape",
@@ -662,6 +661,7 @@
         "finish",
         "color",
         "suitable_for",
+        "notes",
         "category"
       ]
     },
@@ -669,11 +669,11 @@
       "columns": [
         "ID",
         "Seats",
+        "Horsepower",
         "Manufacturer",
         "Model",
         "Price Range (Ft)",
         "Body Type",
-        "Horsepower",
         "Acceleration (s)",
         "Fuel Type",
         "Year",
@@ -685,6 +685,7 @@
       "columns": [
         "id",
         "created_at",
+        "sender",
         "title",
         "message",
         "target"
@@ -827,16 +828,16 @@
       "columns": [
         "ID",
         "Seats",
-        "Fuel Type",
-        "Year",
-        "Transmission",
-        "category",
         "Manufacturer",
         "Model",
         "Price Range (Ft)",
         "Body Type",
         "Horsepower",
-        "Acceleration (s)"
+        "Acceleration (s)",
+        "Fuel Type",
+        "Year",
+        "Transmission",
+        "category"
       ]
     },
     "back_speaker": {
@@ -848,8 +849,6 @@
         "power_max_w",
         "weight_kg",
         "created_at",
-        "manufacturer",
-        "model",
         "speaker_type",
         "frequency_response",
         "drivers",
@@ -858,7 +857,9 @@
         "color",
         "recommended_room_size",
         "notes",
-        "category"
+        "category",
+        "manufacturer",
+        "model"
       ]
     },
     "side_speaker": {
@@ -987,6 +988,24 @@
         "use_case",
         "notes",
         "category"
+      ]
+    },
+    "news_message[System]": {
+      "columns": [
+        "id",
+        "created_at",
+        "title",
+        "message",
+        "target"
+      ]
+    },
+    "register_message[System]": {
+      "columns": [
+        "id",
+        "target",
+        "created_at",
+        "title",
+        "message"
       ]
     }
   }

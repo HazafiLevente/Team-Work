@@ -22,7 +22,7 @@ const cookieParser = require("cookie-parser");
 const { createClient } = require("@supabase/supabase-js");
 const cors = require("cors");
 const {registerUser} = require("./backend/registration");
-const registerBellRoutes = require("./backend/bell");
+const registerBellRoutes = require("./backend/bell-message");
 
 /* ======================================================
    APP + CONFIG
@@ -854,7 +854,7 @@ app.get("/api/items/search", verifyUser, async (req, res) => {
     /* ======================================================
        RUNTIME API'S
     ====================================================== */
-    const registerBellRoutes = require("./bell");
+    const registerBellRoutes = require("./bell-message");
     registerBellRoutes(app, supabase, verifyUser);
 
 

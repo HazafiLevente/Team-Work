@@ -47,26 +47,46 @@ export class ProfileComponent implements OnInit {
   }
 
   saveProfile() {
-    this.http.put('/api/profile', this.form.value, {
-      withCredentials: true
-    }).subscribe(() => alert('✅ Profil mentve'));
+    console.log('SAVE CLICK', this.form.value);
+
+    this.http.put('/api/profile', this.form.value, { withCredentials: true })
+      .subscribe({
+        next: (res) => {
+          console.log('SAVE OK', res);
+          alert('✅ Profil mentve');
+        },
+        error: (err) => {
+          console.error('SAVE ERROR', err);
+          alert(`❌ Mentés hiba: ${err.status} (nézd a console-t)`);
+        }
+      });
   }
 
   changePassword() {
     const { oldPassword, newPassword, confirm } = this.passwordForm.value;
+    console.log('PWD CLICK', { oldPassword, newPassword, confirm });
+
+    if (!oldPassword || !newPassword || !confirm) {
+      alert('❌ Tölts ki minden mezőt');
+      return;
+    }
 
     if (newPassword !== confirm) {
       alert('❌ A jelszavak nem egyeznek');
       return;
     }
 
-    this.http.put(
-      '/api/profile/password',
-      { oldPassword, newPassword },
-      { withCredentials: true }
-    ).subscribe(() => {
-      alert('🔒 Jelszó megváltoztatva');
-      this.passwordForm.reset();
-    });
+    this.http.put('/api/profile/password', { oldPassword, newPassword }, { withCredentials: true })
+      .subscribe({
+        next: (res) => {
+          console.log('PWD OK', res);
+          alert('🔒 Jelszó megváltoztatva');
+          this.passwordForm.reset();
+        },
+        error: (err) => {
+          console.error('PWD ERROR', err);
+          alert(`❌ Jelszó csere hiba: ${err.status} (nézd a console-t)`);
+        }
+      });
   }
 }

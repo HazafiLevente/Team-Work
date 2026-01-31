@@ -391,7 +391,7 @@ function openUserDropdown(user, anchor) {
  ---------------------------------- */
 
 document.addEventListener("DOMContentLoaded", () => {
-    const bell = document.getElementById("bell");
+    const bell = document.getElementById("bell-message");
     if (bell) {
         bell.addEventListener("click", AuthBell);
     }
@@ -403,7 +403,7 @@ async function AuthBell() {
     closeAnyMenu();
 
     if (bellOpen) {
-        document.getElementById("bell-dropdown")?.remove();
+        document.getElementById("bell-message-dropdown")?.remove();
         bellOpen = false;
         return;
     }
@@ -414,8 +414,8 @@ async function AuthBell() {
     const data = await res.json();
 
     const box = document.createElement("div");
-    box.id = "bell-dropdown";
-    box.className = "bell-dropdown";
+    box.id = "bell-message-dropdown";
+    box.className = "bell-message-dropdown";
 
     if (!data.length) {
         box.innerHTML = `

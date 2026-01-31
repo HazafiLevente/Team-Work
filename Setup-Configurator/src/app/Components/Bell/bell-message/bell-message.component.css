@@ -1,0 +1,26 @@
+.message-page {
+  max-width: 720px;
+  margin: 60px auto;
+  background: var(--surface);
+  border-radius: 18px;
+  padding: 32px;
+}
+
+.title {
+  font-size: 22px;
+  margin-bottom: 20px;
+}
+
+.content {
+  font-size: 15px;
+  line-height: 1.6;
+  opacity: 0.9;
+}
+
+.meta {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 32px;
+  font-size: 13px;
+  opacity: 0.7;
+}

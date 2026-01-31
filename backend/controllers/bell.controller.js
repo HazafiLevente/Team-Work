@@ -70,3 +70,35 @@ exports.read = async (req, res) => {
 
     res.json({ success: true });
 };
+exports.getOne = async (req, res) => {
+    const userId = req.user.id;
+    const messageId = Number(req.params.id);
+
+    const { data: msg, error } = await supabase
+        .from("system_message[System]")
+        .select("id, title, message, created_at, sender_id")
+        .eq("id", messageId)
+        .single();
+
+    if (error || !msg) {
+        return res.status(404).json({ error: "Message not found" });
+    }
+
+    // sender lookup
+    let sender = null;
+    if (msg.sender_id) {
+        const { data } = await supabase
+            .from("user[Auth]")
+            .select("UserName")
+            .eq("ID", msg.sender_id)
+            .single();
+
+        sender = data?.UserName ?? "System";
+    }
+
+    res.json({
+        ...msg,
+        sender
+    });
+};
+

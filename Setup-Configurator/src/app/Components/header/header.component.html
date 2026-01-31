@@ -10,6 +10,8 @@
 
   <nav class="nav">
 
+
+
     <!-- 🔐 GUEST -->
     <button
       *ngIf="!(user$ | async)"
@@ -18,11 +20,48 @@
       Connect
     </button>
 
+
+    <!-- 🔔 BELL -->
+    <div
+      *ngIf="user$ | async"
+      class="bell-wrap"
+      (click)="toggleBell($event)">
+
+      <i class="fas fa-bell"></i>
+
+      <!-- 🔽 DROPDOWN -->
+      <div
+        *ngIf="bellOpen$ | async"
+        class="bell-dropdown"
+        (click)="$event.stopPropagation()">
+
+        <div *ngIf="(bellItems$ | async)?.length === 0"
+             class="bell-item muted">
+          Nincs értesítés
+        </div>
+
+        <div
+          *ngFor="let n of (bellItems$ | async)"
+          class="bell-item"
+          [class.unread]="!n.read"
+          (click)="openMessage(n.id, $event)">
+
+          <div class="bell-title">{{ n.title }}</div>
+          <div class="bell-message">{{ n.message }}</div>
+          <div class="bell-date">{{ n.created_at | date:'HH:mm' }}</div>
+        </div>
+
+      </div>
+    </div>
+
+
+
     <!-- 👤 LOGGED IN USER -->
     <div
       *ngIf="user$ | async as user"
       class="user-wrap"
-      (click)="toggleMenu()">
+      (click)="toggleMenu(); $event.stopPropagation()">
+
 
       <span class="username">
         {{ user.username }}
@@ -39,9 +78,9 @@
 
         <hr>
 
-        <div class="menu-item" routerLink="/usersite/profile">👤 Profile</div>
-        <div class="menu-item" routerLink="/favorite">⭐ Favorite</div>
-        <div class="menu-item" routerLink="/setup">🧰 My Setup</div>
+        <div class="menu-item" routerLink="/user/profile">👤 Profile</div>
+        <div class="menu-item" routerLink="/user/favorite">⭐ Favorite</div>
+        <div class="menu-item" routerLink="/user/setup">🧰 My Setup</div>
 
         <div
           *ngIf="['admin','admin+','owner'].includes(user.role)"

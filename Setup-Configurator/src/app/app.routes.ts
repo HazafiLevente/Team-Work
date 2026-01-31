@@ -8,13 +8,17 @@ import {authGuard} from './Components/Auth/authguard/auth.guard';
 import {UsersiteComponent} from './Components/Usersites/usersite/usersite.component';
 import {FavoriteComponent} from './Components/Usersites/Favorite/favorite/favorite.component';
 import {SetupComponent} from './Components/Usersites/Setup/setup/setup.component';
+import {BellMessageComponent} from './Components/Bell/bell-message/bell-message.component';
+
+
+
 
 export const routes: Routes = [
   { path: '', component: HomeComponent },
   { path: 'home', component: HomeComponent },
 
   {
-    path: 'usersite',
+    path: 'user',
     component: UsersiteComponent,
     canActivate: [authGuard],
     children: [
@@ -25,6 +29,11 @@ export const routes: Routes = [
     ]
   },
 
+  {
+    path: 'user/message/:id',
+    component: BellMessageComponent,
+    canActivate: [authGuard]
+  },
 
   {
     path: 'auth',
