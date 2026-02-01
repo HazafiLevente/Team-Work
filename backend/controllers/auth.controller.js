@@ -39,7 +39,17 @@ exports.register = async (req, res) => {
             city: null
         });
 
+    await supabase
+        .from("register_message[System]")
+        .insert([{
+            title: "Sikeres regisztráció 🎉",
+            message: `Üdv ${username}! A fiókod sikeresen létrejött.`,
+            target: String(users.ID),
+            created_at: new Date().toISOString()
+        }]);
+
     res.json({ success: true });
+
 };
 
 
@@ -68,8 +78,10 @@ exports.login = async (req, res) => {
         id: Number(user.ID),
         name: user.Name,
         username: user.UserName,
-        email: user.Email
+        email: user.Email,
+        role: user.role            // 🔥 EZ HIÁNYZOTT
     }, JWT_SECRET, { expiresIn });
+
 
     res.cookie("auth_token", token, {
         httpOnly: true,
@@ -121,6 +133,8 @@ exports.me = async (req, res) => {
         }
     });
 };
+
+
 
 
 

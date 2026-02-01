@@ -44,10 +44,19 @@
           *ngFor="let n of (bellItems$ | async)"
           class="bell-item"
           [class.unread]="!n.read"
-          (click)="openMessage(n.id, $event)">
+          (click)="openMessage(n, $event)">
 
-          <div class="bell-title">{{ n.title }}</div>
-          <div class="bell-message">{{ n.message }}</div>
+          <div class="bell-title">
+            {{ n.type === 'system' ? 'System'
+            : n.type === 'news' ? 'News'
+              : 'Register' }}
+          </div>
+
+
+          <div class="bell-message">
+            {{ n.title }}
+          </div>
+
           <div class="bell-date">{{ n.created_at | date:'HH:mm' }}</div>
         </div>
 

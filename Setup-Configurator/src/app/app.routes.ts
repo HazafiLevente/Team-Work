@@ -1,4 +1,3 @@
-import { Routes } from '@angular/router';
 import { AuthComponent } from './Components/Auth/auth/auth.component';
 import { LoginComponent } from './Components/Auth/Login/login.component';
 import { RegisterComponent } from './Components/Auth/Register/register.component';
@@ -9,13 +8,14 @@ import {UsersiteComponent} from './Components/Usersites/usersite/usersite.compon
 import {FavoriteComponent} from './Components/Usersites/Favorite/favorite/favorite.component';
 import {SetupComponent} from './Components/Usersites/Setup/setup/setup.component';
 import {BellMessageComponent} from './Components/Bell/bell-message/bell-message.component';
-
-
+import { Routes } from '@angular/router';
+import { ProductPageComponent } from './Components/Product/product/product.component';
 
 
 export const routes: Routes = [
   { path: '', component: HomeComponent },
   { path: 'home', component: HomeComponent },
+  { path: 'product/:table/:id', component: ProductPageComponent },
 
   {
     path: 'user',
@@ -30,10 +30,11 @@ export const routes: Routes = [
   },
 
   {
-    path: 'user/message/:id',
+    path: 'user/message/:type/:id',
     component: BellMessageComponent,
     canActivate: [authGuard]
   },
+
 
   {
     path: 'auth',

@@ -21,10 +21,13 @@ export class BellMessageComponent implements OnInit {
 
   ngOnInit() {
     const id = this.route.snapshot.paramMap.get('id');
+    const type = this.route.snapshot.paramMap.get('type');
 
-    this.http.get(`/api/bell/${id}`, { withCredentials: true })
+    this.http
+      .get(`/api/bell/${type}/${id}`, { withCredentials: true })
       .subscribe(data => this.message = data);
   }
+
 
   timeAgo(date: string): string {
     const diff = Math.floor((Date.now() - new Date(date).getTime()) / 1000);

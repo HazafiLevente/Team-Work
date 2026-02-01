@@ -1,5 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, OnChanges, Output } from '@angular/core';
+import { Router } from '@angular/router';
+
 import { Product } from '../../../Models/Product/product.model';
 import { ProductService } from '../../Services/Home/ProductParts/product/product.service';
 
@@ -20,7 +22,10 @@ export class ProductDetailsPanelComponent implements OnChanges {
 
   details: any = null;
 
-  constructor(private productService: ProductService) {}
+  constructor(
+    private productService: ProductService,
+    private router: Router
+  ) {}
 
   ngOnChanges(): void {
     this.fetchDetails();
@@ -30,18 +35,33 @@ export class ProductDetailsPanelComponent implements OnChanges {
     this.closed.emit();
   }
 
+  // ✅ "Több" gomb: átvisz a részletes product oldalra
+  onMore() {
+    const table = (this.product as any).table_name ?? (this.product as any).table;
+    const id = (this.product as any).id;
+
+    // ha nincs routingotok még, ez a rész nem fog működni
+    // (de a kód jó – csak kell route)
+    this.closed.emit();
+    this.router.navigate(['/product', table, id]);
+  }
+
+  // ✅ "+" gomb: egyelőre semmi
+  onPlus() {
+    console.log('➕ plus clicked (TODO)');
+  }
+
   private fetchDetails() {
     this.loading = true;
     this.error = null;
     this.details = null;
 
-    // ⚠️ nálad Product-ban lehet table vagy table_name – itt kezeld le:
     const table = (this.product as any).table_name ?? (this.product as any).table;
     const id = (this.product as any).id;
 
     this.productService.getProductDetails(table, id).subscribe({
       next: (res) => {
-        this.details = res?.item ?? res; // attól függ mit ad vissza a backend
+        this.details = res?.item ?? res;
         this.loading = false;
       },
       error: (err) => {
@@ -52,7 +72,6 @@ export class ProductDetailsPanelComponent implements OnChanges {
     });
   }
 
-  // UI-hoz: key-value lista
   keysOf(obj: any): string[] {
     if (!obj) return [];
     return Object.keys(obj);

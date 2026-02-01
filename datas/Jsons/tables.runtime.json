@@ -1,5 +1,5 @@
 {
-  "lastUpdated": 1769900863905,
+  "lastUpdated": 1769951876296,
   "tables": {
     "c_trumpets": {
       "columns": [
@@ -849,7 +849,6 @@
         "power_max_w",
         "weight_kg",
         "created_at",
-        "speaker_type",
         "frequency_response",
         "drivers",
         "dimensions_mm",
@@ -859,7 +858,8 @@
         "notes",
         "category",
         "manufacturer",
-        "model"
+        "model",
+        "speaker_type"
       ]
     },
     "side_speaker": {
@@ -994,6 +994,7 @@
       "columns": [
         "id",
         "created_at",
+        "sender",
         "title",
         "message",
         "target"

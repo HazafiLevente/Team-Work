@@ -8,7 +8,9 @@ export interface BellItem {
   message: string;
   created_at: string;
   read: boolean;
+  type: 'system' | 'news' | 'register'; // 🔥
 }
+
 
 @Injectable({ providedIn: 'root' })
 export class BellService {
@@ -40,7 +42,9 @@ export class BellService {
       .subscribe(data => this._items.next(data));
   }
 
-  markRead(id: number) {
+  markRead(id: number | undefined) {
+    if (!id) return;
+
     this.http.post(
       '/api/bell/read',
       { messageId: id },
@@ -53,4 +57,5 @@ export class BellService {
       );
     });
   }
+
 }

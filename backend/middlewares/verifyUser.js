@@ -2,6 +2,7 @@ const jwt = require("jsonwebtoken");
 const { resolveRole } = require("../services/control");
 const JWT_SECRET = process.env.JWT_SECRET;
 
+
 module.exports = function verifyUser(req, res, next) {
     console.log("🍪 COOKIES:", req.cookies);
 

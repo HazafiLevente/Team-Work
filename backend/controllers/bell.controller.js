@@ -2,24 +2,55 @@ const { supabase } = require("../services/supabase");
 
 exports.list = async (req, res) => {
     const role = req.user.role.toLowerCase();
-    const userId = req.user.id;
+    const userId = String(req.user.id);
 
-    const { data, error } = await supabase
-        .from("system_message[System]")
-        .select("id, title, message, created_at, target")
-        .order("created_at", { ascending: false })
-        .limit(10);
+    const tables = [
+        { table: "system_message[System]", type: "system" },
+        { table: "news_message[System]", type: "news" },
+        { table: "register_message[System]", type: "register" }
+    ];
 
-    if (error) {
-        return res.status(500).json({ error: error.message });
+    let all = [];
+
+    for (const t of tables) {
+        const { data } = await supabase
+            .from(t.table)
+            .select("id, title, message, created_at, target")
+            .order("created_at", { ascending: false })
+            .limit(20);
+
+        const filtered = (data || []).filter(m => {
+            // 1️⃣ ha VAN target → csak annak
+            if (m.target !== null && m.target !== undefined) {
+                const trg = String(m.target).toLowerCase();
+                return (
+                    trg === "all" ||
+                    trg === role ||
+                    trg === userId
+                );
+            }
+
+            // 2️⃣ ha NINCS target → típus alapú fallback
+            if (t.type === "register") {
+                // register mindig user-specifikus
+                return false;
+            }
+
+            // system / news target nélkül → mindenkinek
+            return true;
+        });
+
+        all.push(
+            ...filtered.map(m => ({
+                ...m,
+                type: t.type
+            }))
+        );
     }
 
-    const filtered = (data || []).filter(m => {
-        const t = m.target?.toLowerCase();
-        return t === "all" || t === role;
-    });
+    all.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 
-    const ids = filtered.map(m => m.id);
+    const ids = all.map(m => m.id);
 
     const { data: reads } = await supabase
         .from("system_reads[System]")
@@ -29,13 +60,15 @@ exports.list = async (req, res) => {
 
     const readSet = new Set((reads || []).map(r => r.message_id));
 
-    const result = filtered.map(m => ({
-        ...m,
-        read: readSet.has(m.id)
-    }));
-
-    res.json(result);
+    res.json(
+        all.map(m => ({
+            ...m,
+            read: readSet.has(m.id)
+        }))
+    );
 };
+
+
 
 exports.read = async (req, res) => {
     const userId = req.user.id;
@@ -71,34 +104,38 @@ exports.read = async (req, res) => {
     res.json({ success: true });
 };
 exports.getOne = async (req, res) => {
-    const userId = req.user.id;
-    const messageId = Number(req.params.id);
+    const id = Number(req.params.id);
+    const type = req.params.type;
 
-    const { data: msg, error } = await supabase
-        .from("system_message[System]")
-        .select("id, title, message, created_at, sender_id")
-        .eq("id", messageId)
+    const tableMap = {
+        system: "system_message[System]",
+        news: "news_message[System]",
+        register: "register_message[System]"
+    };
+
+    const table = tableMap[type];
+
+    if (!table) {
+        return res.status(400).json({ error: "Invalid message type" });
+    }
+
+    const { data, error } = await supabase
+        .from(table)
+        .select("*")
+        .eq("id", id)
         .single();
 
-    if (error || !msg) {
+    if (error || !data) {
         return res.status(404).json({ error: "Message not found" });
     }
 
-    // sender lookup
-    let sender = null;
-    if (msg.sender_id) {
-        const { data } = await supabase
-            .from("user[Auth]")
-            .select("UserName")
-            .eq("ID", msg.sender_id)
-            .single();
-
-        sender = data?.UserName ?? "System";
-    }
-
     res.json({
-        ...msg,
-        sender
+        ...data,
+        type
     });
 };
+
+
+
+
 
