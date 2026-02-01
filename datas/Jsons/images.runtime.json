@@ -1,5 +1,5 @@
 {
-  "lastUpdated": 1769973425201,
+  "lastUpdated": 1769973741215,
   "images": {
     "Electric Guitars": {
       "esp": {
@@ -131,8 +131,7 @@
           "/images/Processors/AMD/Ryzen%207/9800X3D/2.jpg",
           "/images/Processors/AMD/Ryzen%207/9800X3D/3.jpg"
         ]
-      },
-      "Intel": {}
+      }
     }
   }
 }
