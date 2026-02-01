@@ -135,7 +135,92 @@ exports.getOne = async (req, res) => {
     });
 };
 
+exports.conversations = async (req, res) => {
+    const userId = String(req.user.id);
+    const role = req.user.role.toLowerCase();
 
+    const tables = [
+        { table: "system_message[System]", type: "system" },
+        { table: "news_message[System]", type: "news" },
+        { table: "register_message[System]", type: "register" }
+    ];
+
+    let conversations = new Map();
+
+    for (const t of tables) {
+        const { data } = await supabase
+            .from(t.table)
+            .select("id, title, created_at, target, sender_name")
+            .order("created_at", { ascending: false });
+
+        for (const m of data || []) {
+
+            // 🔐 target szűrés
+            if (m.target && !["all", role, userId].includes(String(m.target).toLowerCase())) {
+                continue;
+            }
+
+            let key;
+            let label;
+
+            if (t.type === "system") {
+                key = "system";
+                label = "System";
+            } else if (t.type === "news") {
+                key = "news";
+                label = "News";
+            } else if (t.type === "register") {
+                key = `register:${userId}`;
+                label = "Regisztráció";
+            }
+
+            if (!conversations.has(key)) {
+                conversations.set(key, {
+                    key,
+                    type: t.type,
+                    title: label,
+                    lastMessage: m.title,
+                    lastAt: m.created_at
+                });
+            }
+        }
+    }
+
+    res.json(Array.from(conversations.values()));
+};
+
+
+exports.conversation = async (req, res) => {
+    const { key } = req.params;
+    const userId = String(req.user.id);
+
+    if (key === "system") {
+        const { data } = await supabase
+            .from("system_message[System]")
+            .select("*")
+            .order("created_at");
+        return res.json(data);
+    }
+
+    if (key === "news") {
+        const { data } = await supabase
+            .from("news_message[System]")
+            .select("*")
+            .order("created_at");
+        return res.json(data);
+    }
+
+    if (key.startsWith("register")) {
+        const { data } = await supabase
+            .from("register_message[System]")
+            .select("*")
+            .eq("target", userId)
+            .order("created_at");
+        return res.json(data);
+    }
+
+    res.status(400).json({ error: "Invalid conversation key" });
+};
 
 
 

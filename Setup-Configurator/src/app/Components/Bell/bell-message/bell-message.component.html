@@ -1,19 +1,24 @@
-<div class="message-page" *ngIf="message">
+<div class="chat-layout">
 
-  <h2 class="title">{{ message.title }}</h2>
-
-  <div class="content">
-    {{ message.message }}
+  <!-- BAL OLDAL -->
+  <div class="chat-list">
+    <div
+      *ngFor="let c of conversations"
+      class="chat-item"
+      [class.active]="c.key === activeKey"
+      (click)="openConversation(c.key)">
+      <div class="title">{{ c.title }}</div>
+      <div class="last">{{ c.lastMessage }}</div>
+    </div>
   </div>
 
-  <div class="meta">
-    <span class="sender">
-      👤 {{ message.sender_name }}
-    </span>
-
-    <span class="time">
-      ⏱ {{ timeAgo(message.created_at) }}
-    </span>
+  <!-- JOBB OLDAL -->
+  <div class="chat-window">
+    <div *ngFor="let m of messages" class="chat-message">
+      <div class="sender">👤 {{ m.sender_name }}</div>
+      <div class="text">{{ m.message }}</div>
+      <div class="time">{{ timeAgo(m.created_at) }}</div>
+    </div>
   </div>
 
 </div>

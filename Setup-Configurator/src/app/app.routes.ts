@@ -9,7 +9,7 @@ import {FavoriteComponent} from './Components/Usersites/Favorite/favorite/favori
 import {SetupComponent} from './Components/Usersites/Setup/setup/setup.component';
 import {BellMessageComponent} from './Components/Bell/bell-message/bell-message.component';
 import { Routes } from '@angular/router';
-import { ProductPageComponent } from './Components/Product/product/product.component';
+import { ProductPageComponent } from './Components/Product/product/product-page.component';
 
 
 export const routes: Routes = [

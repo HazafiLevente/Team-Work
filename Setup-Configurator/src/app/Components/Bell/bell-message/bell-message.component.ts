@@ -19,14 +19,24 @@ export class BellMessageComponent implements OnInit {
     private http: HttpClient
   ) {}
 
-  ngOnInit() {
-    const id = this.route.snapshot.paramMap.get('id');
-    const type = this.route.snapshot.paramMap.get('type');
+  conversations: any[] = [];
+  messages: any[] = [];
+  activeKey!: string;
 
-    this.http
-      .get(`/api/bell/${type}/${id}`, { withCredentials: true })
-      .subscribe(data => this.message = data);
+  ngOnInit() {
+    this.http.get<any[]>('/api/bell/conversations', { withCredentials: true })
+      .subscribe(c => {
+        this.conversations = c;
+        this.openConversation(c[0]?.key);
+      });
   }
+
+  openConversation(key: string) {
+    this.activeKey = key;
+    this.http.get<any[]>(`/api/bell/conversation/${key}`, { withCredentials: true })
+      .subscribe(m => this.messages = m);
+  }
+
 
 
   timeAgo(date: string): string {

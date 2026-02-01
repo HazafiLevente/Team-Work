@@ -1,0 +1,50 @@
+<div class="gallery-card">
+  <div class="stack" *ngIf="hasImages; else noImages">
+    <button class="stack-main" (click)="openViewer()">
+      <img [src]="currentSrc" [alt]="title" />
+    </button>
+
+    <div class="stack-behind" *ngFor="let img of images; let i = index" [style.--i]="i">
+      <img [src]="img" alt="" />
+    </div>
+
+    <div class="thumbs" *ngIf="images.length > 1">
+      <button
+        class="thumb"
+        *ngFor="let img of images; let i = index"
+        [class.active]="i === active"
+        (click)="setActive(i)"
+        title="Kép váltás">
+        <img [src]="img" alt="" />
+      </button>
+    </div>
+  </div>
+
+  <ng-template #noImages>
+    <div class="noimg">
+      <div class="noimg-box">Nincs kép</div>
+      <div class="noimg-hint">Később ide jönnek a termék képei.</div>
+    </div>
+  </ng-template>
+</div>
+
+<!-- Fullscreen viewer -->
+<div class="viewer" *ngIf="viewerOpen">
+  <div class="viewer-overlay" (click)="closeViewer()"></div>
+
+  <div class="viewer-inner">
+    <button class="nav left" (click)="prev()" aria-label="Előző">‹</button>
+
+    <div class="viewer-frame" [attr.data-dir]="direction">
+      <img [src]="currentSrc" [alt]="title" class="viewer-img" />
+    </div>
+
+    <button class="nav right" (click)="next()" aria-label="Következő">›</button>
+
+    <button class="close" (click)="closeViewer()" aria-label="Bezárás">✕</button>
+
+    <div class="counter" *ngIf="hasImages">
+      {{ active + 1 }} / {{ images.length }}
+    </div>
+  </div>
+</div>

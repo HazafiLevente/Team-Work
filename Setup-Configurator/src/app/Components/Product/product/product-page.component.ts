@@ -2,11 +2,15 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ProductService } from '../../Services/Home/ProductParts/product/product.service';
+import { ProductGalleryComponent } from '../productgallery/product-gallery.component';
+import { HttpClient } from '@angular/common/http';
+
+type ImageMap = Record<string, Record<string, Record<string, string[]>>>;
 
 @Component({
   selector: 'app-product-page',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, ProductGalleryComponent],
   template: `
     <div class="wrap">
       <div class="topbar">
@@ -41,6 +45,12 @@ import { ProductService } from '../../Services/Home/ProductParts/product/product
       <div class="card error" *ngIf="!loading && error">
         {{ error }}
       </div>
+
+      <app-product-gallery
+        *ngIf="!loading && item"
+        [images]="imageUrls"
+        [title]="displayTitle">
+      </app-product-gallery>
 
       <div class="grid" *ngIf="!loading && item">
         <div class="card">
@@ -266,11 +276,16 @@ export class ProductPageComponent implements OnInit {
   };
 
   fields: Array<{ label: string; value: string }> = [];
+  imageUrls: string[] = [];
+
+  // egyszer töltsük le a map-et (memóriában cache)
+  private static imageMapCache: ImageMap | null = null;
 
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private productService: ProductService
+    private productService: ProductService,
+    private http: HttpClient
   ) {}
 
   get displayTitle(): string {
@@ -305,6 +320,7 @@ export class ProductPageComponent implements OnInit {
       this.loading = true;
       this.error = null;
       this.item = null;
+      this.imageUrls = [];
 
       this.productService.getProductDetails(table, id).subscribe({
         next: res => {
@@ -318,6 +334,10 @@ export class ProductPageComponent implements OnInit {
           };
 
           this.fields = this.buildFields(this.item);
+
+          // képek: images.runtime.json map alapján
+          this.loadImagesFromMap();
+
           this.loading = false;
         },
         error: () => {
@@ -328,8 +348,37 @@ export class ProductPageComponent implements OnInit {
     });
   }
 
+  private loadImagesFromMap() {
+    const manu = this.primary.manufacturer;
+    const model = this.primary.model;
+
+    if (!this.table || !manu || !model) {
+      this.imageUrls = [];
+      return;
+    }
+
+    // ha már van cache, abból dolgozunk
+    if (ProductPageComponent.imageMapCache) {
+      this.imageUrls =
+        ProductPageComponent.imageMapCache?.[this.table]?.[manu]?.[model] ?? [];
+      return;
+    }
+
+    // különben letöltjük egyszer
+    this.http.get<any>('/api/images/map').subscribe({
+      next: (mapRes) => {
+        ProductPageComponent.imageMapCache = (mapRes?.images ?? {}) as ImageMap;
+        this.imageUrls =
+          ProductPageComponent.imageMapCache?.[this.table]?.[manu]?.[model] ?? [];
+      },
+      error: () => {
+        // ha nincs map, csak ne legyen kép
+        this.imageUrls = [];
+      }
+    });
+  }
+
   goBack() {
-    // ha van history, menjen vissza, különben /home
     if (window.history.length > 1) window.history.back();
     else this.router.navigate(['/home']);
   }
@@ -353,7 +402,6 @@ export class ProductPageComponent implements OnInit {
 
     const hidden = new Set(['id', 'ID', 'created_at', 'updated_at']);
 
-    // áttekintésben már megjelenő kulcsok, ezeket kihagyjuk
     const skip = new Set([
       'manufacturer','Manufacturer','brand','Brand',
       'model','Model','name','Name','product_name','Product Name',

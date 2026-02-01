@@ -1,9 +1,18 @@
 const express = require("express");
 const cookieParser = require("cookie-parser");
 const cors = require("cors");
-const path = require("path");
+
 
 const app = express();
+
+const path = require("path");
+
+// Team-Work/datas/Images
+const IMAGES_DIR = path.join(__dirname, "..", "datas", "Images");
+
+// URL: http://localhost:3000/images/...
+app.use("/images", express.static(IMAGES_DIR));
+
 
 app.use(express.json());
 app.use(cookieParser());
@@ -29,5 +38,6 @@ app.use("/api/profile", require("./routes/profile.routes"));
 app.use("/api/public", require("./routes/public.routes"));
 app.use("/api/images", require("./routes/images.routes"));
 app.use("/api", require("./routes/meta.routes"));
+app.use("/api/images", require("./routes/imagesMap.routes"));
 
 module.exports = app;

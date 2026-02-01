@@ -10,6 +10,7 @@ import { ProductFiltersService, CombinedFilters } from '../../../Services/Home/S
 import { ProductDetailsPanelComponent } from '../../../Panels/Product/product-details-panel.component';
 
 
+
 @Component({
   selector: 'app-productlist',
   standalone: true,
