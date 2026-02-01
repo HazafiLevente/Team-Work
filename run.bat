@@ -17,6 +17,12 @@ if not exist node_modules (
 
 REM ===== BACKEND =====
 echo.
+echo [X] Building images.runtime.json...
+call node backend\services\build-image-map.js
+
+
+
+echo.
 echo [2/4] Backend dependencies check...
 if not exist backend\node_modules (
   echo   Installing backend dependencies...

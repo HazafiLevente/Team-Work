@@ -1,3 +1,23 @@
-<div class="usersite-wrapper">
-  <router-outlet></router-outlet>
+<div class="usersite-layout">
+
+  <!-- BAL OLDAL: NAV -->
+  <aside class="usersite-sidebar">
+    <button routerLink="profile" routerLinkActive="active">
+      👤 Profile
+    </button>
+
+    <button routerLink="favorite" routerLinkActive="active">
+      ⭐ Favorite
+    </button>
+
+    <button routerLink="setup" routerLinkActive="active">
+      🧰 Setups
+    </button>
+  </aside>
+
+  <!-- JOBB OLDAL: TARTALOM -->
+  <main class="usersite-content">
+    <router-outlet></router-outlet>
+  </main>
+
 </div>

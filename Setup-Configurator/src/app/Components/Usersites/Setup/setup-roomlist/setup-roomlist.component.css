@@ -1,0 +1,43 @@
+.roomlist-wrapper {
+  padding: 15px;
+  background-color: #f4f7f6;
+  border-radius: 12px;
+}
+
+.counter-card {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 20px;
+  border-radius: 10px;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.count-badge {
+  font-size: 1.5rem;
+  font-weight: bold;
+  background: rgba(255, 255, 255, 0.2);
+  padding: 2px 12px;
+  border-radius: 20px;
+  margin-left: 10px;
+}
+
+.room-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px;
+  background: white;
+  margin-bottom: 8px;
+  border-radius: 6px;
+  border-left: 4px solid #764ba2;
+  transition: transform 0.2s;
+}
+
+.room-item:hover {
+  transform: translateX(5px);
+}
+
+.item-tag {
+  font-size: 0.8rem;
+  color: #888;
+}

@@ -1,5 +1,5 @@
 {
-  "lastUpdated": 1769962244969,
+  "lastUpdated": 1769973507783,
   "tables": {
     "c_trumpets": {
       "columns": [
@@ -669,14 +669,14 @@
       "columns": [
         "ID",
         "Seats",
-        "Horsepower",
+        "Year",
         "Manufacturer",
         "Model",
         "Price Range (Ft)",
         "Body Type",
+        "Horsepower",
         "Acceleration (s)",
         "Fuel Type",
-        "Year",
         "Transmission",
         "category"
       ]
@@ -849,17 +849,17 @@
         "power_max_w",
         "weight_kg",
         "created_at",
+        "notes",
+        "category",
+        "manufacturer",
+        "model",
+        "speaker_type",
         "frequency_response",
         "drivers",
         "dimensions_mm",
         "mounting",
         "color",
-        "recommended_room_size",
-        "notes",
-        "category",
-        "manufacturer",
-        "model",
-        "speaker_type"
+        "recommended_room_size"
       ]
     },
     "side_speaker": {

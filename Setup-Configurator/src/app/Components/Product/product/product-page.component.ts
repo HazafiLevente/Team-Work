@@ -5,6 +5,7 @@ import { ProductService } from '../../Services/Home/ProductParts/product/product
 import { ProductGalleryComponent } from '../productgallery/product-gallery.component';
 import { HttpClient } from '@angular/common/http';
 
+
 type ImageMap = Record<string, Record<string, Record<string, string[]>>>;
 
 @Component({
@@ -288,6 +289,7 @@ export class ProductPageComponent implements OnInit {
     private http: HttpClient
   ) {}
 
+
   get displayTitle(): string {
     return this.primary.model || 'Ismeretlen termék';
   }
@@ -352,15 +354,16 @@ export class ProductPageComponent implements OnInit {
     const manu = this.primary.manufacturer;
     const model = this.primary.model;
 
-    if (!this.table || !manu || !model) {
+    if (!manu || !model) {
       this.imageUrls = [];
       return;
     }
 
+    const wantTop = this.table;
+
     // ha már van cache, abból dolgozunk
     if (ProductPageComponent.imageMapCache) {
-      this.imageUrls =
-        ProductPageComponent.imageMapCache?.[this.table]?.[manu]?.[model] ?? [];
+      this.imageUrls = this.pickImages(ProductPageComponent.imageMapCache, wantTop, manu, model);
       return;
     }
 
@@ -368,15 +371,58 @@ export class ProductPageComponent implements OnInit {
     this.http.get<any>('/api/images/map').subscribe({
       next: (mapRes) => {
         ProductPageComponent.imageMapCache = (mapRes?.images ?? {}) as ImageMap;
-        this.imageUrls =
-          ProductPageComponent.imageMapCache?.[this.table]?.[manu]?.[model] ?? [];
+        this.imageUrls = this.pickImages(ProductPageComponent.imageMapCache!, wantTop, manu, model);
       },
       error: () => {
-        // ha nincs map, csak ne legyen kép
         this.imageUrls = [];
       }
     });
   }
+
+
+  private pickImages(map: ImageMap, topFolderWanted: string, manuWanted: string, modelWanted: string): string[] {
+    // 1) Top folder (pl "Electric Guitars") – nem kell egyezzen pontosan, normalizálva keresünk
+    const topKey = this.findKey(map, topFolderWanted);
+    if (!topKey) return [];
+
+    const manuMap = map[topKey] || {};
+    const manuKey = this.findKey(manuMap, manuWanted);
+    if (!manuKey) return [];
+
+    const modelMap = manuMap[manuKey] || {};
+    const modelKey = this.findKey(modelMap, modelWanted);
+    if (!modelKey) return [];
+
+    return modelMap[modelKey] || [];
+  }
+
+  private findKey(obj: Record<string, any>, wanted: string): string | null {
+    const want = this.normKey(wanted);
+
+    // 1) exact normalized match
+    for (const k of Object.keys(obj)) {
+      if (this.normKey(k) === want) return k;
+    }
+
+    // 2) contains match (ha pl table param "electric_guitars", mappa "Electric Guitars")
+    for (const k of Object.keys(obj)) {
+      const nk = this.normKey(k);
+      if (nk.includes(want) || want.includes(nk)) return k;
+    }
+
+    return null;
+  }
+
+
+  private normKey(s: string): string {
+    return String(s ?? '')
+      .trim()
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[_\s-]+/g, ''); // space/_/- mindegy
+  }
+
 
   goBack() {
     if (window.history.length > 1) window.history.back();

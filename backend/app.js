@@ -1,43 +1,51 @@
-const express = require("express");
 const cookieParser = require("cookie-parser");
 const cors = require("cors");
-
+const express = require("express");
+const path = require("path");
 
 const app = express();
 
-const path = require("path");
-
-// Team-Work/datas/Images
-const IMAGES_DIR = path.join(__dirname, "..", "datas", "Images");
-
-// URL: http://localhost:3000/images/...
-app.use("/images", express.static(IMAGES_DIR));
-
-
 app.use(express.json());
 app.use(cookieParser());
-app.use(cors({
-    origin: "http://localhost:4200",
-    credentials: true
-}));
+app.use(
+    cors({
+        origin: "http://localhost:4200",
+        credentials: true,
+    })
+);
 
-const bellRoutes = require("./routes/bell.routes");
+/* ----------------------------------
+   STATIC IMAGES
+   Team-Work/datas/images  ->  /images
+---------------------------------- */
+const ROOT = path.resolve(__dirname, ".."); // Team-Work (repo root)
+const IMAGES_DIR = path.join(ROOT, "datas", "images"); // FONTOS: datas/images (kisbetű)
 
-app.use("/api/bell", bellRoutes);
+console.log("🖼 Serving images from:", IMAGES_DIR);
+app.use("/images", express.static(IMAGES_DIR));
+
+/* ----------------------------------
+   API ROUTES
+---------------------------------- */
 app.use("/api/auth", require("./routes/auth.routes"));
 app.use("/api/products", require("./routes/products.routes"));
 app.use("/api/items", require("./routes/items.routes"));
 app.use("/api/cars", require("./routes/cars.routes"));
 app.use("/api/setup", require("./routes/setup.routes"));
-app.use("/api/bell-message", require("./routes/bell.routes"));
+app.use("/api/bell", require("./routes/bell.routes"));
 app.use("/api/admin", require("./routes/admin.routes"));
 app.use("/api/profile", require("./routes/profile.routes"));
-
-
-
 app.use("/api/public", require("./routes/public.routes"));
-app.use("/api/images", require("./routes/images.routes"));
-app.use("/api", require("./routes/meta.routes"));
+
+/* ----------------------------------
+   IMAGES MAP API
+   GET /api/images/map -> datas/Jsons/images.runtime.json
+---------------------------------- */
 app.use("/api/images", require("./routes/imagesMap.routes"));
+
+/* ----------------------------------
+   META
+---------------------------------- */
+app.use("/api", require("./routes/meta.routes"));
 
 module.exports = app;

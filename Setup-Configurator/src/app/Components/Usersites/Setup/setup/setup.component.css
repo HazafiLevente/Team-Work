@@ -1,0 +1,47 @@
+.container {
+  padding: 20px;
+}
+
+.boundary-box {
+  width: 100%;
+  height: 500px;
+  border: 2px dashed #ccc;
+  position: relative;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.drag-box {
+  width: 300px;
+  height: 150px;
+  border: 1px solid #3f51b5;
+  background-color: #fff;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+
+  /* Ez teszi lehetővé, hogy az egész dobozon látszódjon a "megfogható" kurzor */
+  cursor: grab;
+  user-select: none; /* Megakadályozza, hogy véletlenül kijelöld a szöveget húzás közben */
+}
+
+/* Amikor éppen nyomva tartod a bal klikket */
+.drag-box:active {
+  cursor: grabbing;
+}
+
+/* Húzás közbeni stílus (opcionális, de jól néz ki) */
+.cdk-drag-active {
+  box-shadow: 0 12px 20px rgba(0,0,0,0.2);
+  opacity: 0.9;
+}
+
+.content {
+  padding: 15px;
+  text-align: center;
+  font-weight: 500;
+  color: #333;
+}

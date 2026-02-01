@@ -1,12 +1,15 @@
 import { Component } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-usersite',
   standalone: true,
-  imports: [CommonModule, RouterOutlet],
+  imports: [
+    CommonModule,
+    RouterModule   // ⬅️ EZ HIÁNYZOTT
+  ],
   templateUrl: './usersite.component.html',
-  styleUrl: './usersite.component.css'
+  styleUrls: ['./usersite.component.css']
 })
 export class UsersiteComponent {}

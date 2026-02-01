@@ -1,6 +1,6 @@
 const router = require("express").Router();
-const ctrl = require("../controllers/imagesMap.controller");
+const imagesController = require("../controllers/imagesMap.controller");
 
-router.get("/map", ctrl.getMap);
+router.get("/map", imagesController.getMap);
 
 module.exports = router;

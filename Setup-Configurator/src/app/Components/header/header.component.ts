@@ -53,19 +53,13 @@ constructor(
     this.bell.close();
   }
 
-  openMessage(n: BellItem, event: MouseEvent) {
+  openMessage(n: any, event: MouseEvent) {
     event.stopPropagation();
-
-    if (!n?.type || !n?.id) {
-      console.error('❌ Invalid bell item', n);
-      return;
-    }
-
     this.bell.markRead(n.id);
     this.bell.close();
-
     this.router.navigate(['/user/message', n.type, n.id]);
   }
+
 
 
 

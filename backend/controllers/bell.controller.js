@@ -104,8 +104,7 @@ exports.read = async (req, res) => {
     res.json({ success: true });
 };
 exports.getOne = async (req, res) => {
-    const id = Number(req.params.id);
-    const type = req.params.type;
+    const { type, id } = req.params;
 
     const tableMap = {
         system: "system_message[System]",
@@ -114,26 +113,41 @@ exports.getOne = async (req, res) => {
     };
 
     const table = tableMap[type];
-
     if (!table) {
         return res.status(400).json({ error: "Invalid message type" });
     }
 
-    const { data, error } = await supabase
+    const { data } = await supabase
         .from(table)
         .select("*")
         .eq("id", id)
         .single();
 
-    if (error || !data) {
+    if (!data) {
         return res.status(404).json({ error: "Message not found" });
+    }
+
+    let senderName = "System";
+
+    if (data.sender) {
+        const { data: user } = await supabase
+            .from("user[Auth]")
+            .select("UserName")
+            .eq("ID", data.sender)
+            .single();
+
+        if (user?.UserName) {
+            senderName = user.UserName;
+        }
     }
 
     res.json({
         ...data,
-        type
+        type,
+        sender_name: senderName
     });
 };
+
 
 exports.conversations = async (req, res) => {
     const userId = String(req.user.id);
