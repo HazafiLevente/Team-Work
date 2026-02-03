@@ -37,7 +37,7 @@
 
         <div *ngIf="(bellItems$ | async)?.length === 0"
              class="bell-item muted">
-          Nincs értesítés
+        {{text.headerComponentZeroNotification}}
         </div>
 
         <div

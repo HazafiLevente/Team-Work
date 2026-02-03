@@ -5,6 +5,7 @@ import { AuthService } from '../Services/Auth/auth.service';
 import { Observable } from 'rxjs';
 import {BellService} from '../Services/Bell/bell.service';
 import { BellItem } from '../Services/Bell/bell.service';
+import { text } from '../../Constants/constants';
 
 @Component({
   selector: 'app-header',
@@ -16,6 +17,8 @@ import { BellItem } from '../Services/Bell/bell.service';
 export class HeaderComponent implements OnInit {
   user$!: Observable<any | null>;
   dropdownOpen = false;
+
+  text = text;
 
   bellOpen$!: Observable<boolean>;
   bellItems$!: Observable<BellItem[]>;

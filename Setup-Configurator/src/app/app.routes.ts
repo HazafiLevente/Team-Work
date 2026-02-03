@@ -13,9 +13,11 @@ import { ProfileComponent } from './Components/Usersites/Profil/profil/profile.c
 
 
 
+
+
 export const routes: Routes = [
-  { path: '', component: HomeComponent },
-  { path: 'home', component: HomeComponent },
+  { path: '', redirectTo: 'home', pathMatch: 'full'},
+  { path: 'home', component: HomeComponent }, //{, canActivate: [authGuard] },
   { path: 'product/:table/:id', component: ProductPageComponent },
   { path: 'user/message/:type/:id', component: BellMessageComponent },
 

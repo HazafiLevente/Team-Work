@@ -1,10 +1,10 @@
 {
-  "lastUpdated": 1769973918044,
+  "lastUpdated": 1770105621313,
   "tables": {
     "c_trumpets": {
       "columns": [
-        "release_year",
         "ID",
+        "release_year",
         "Manufacturer",
         "Model",
         "series",
@@ -24,8 +24,8 @@
     },
     "hatchback_cars": {
       "columns": [
-        "Seats",
         "ID",
+        "Seats",
         "Manufacturer",
         "Model",
         "Price Range (Ft)",
@@ -40,8 +40,6 @@
     },
     "effects_pedal": {
       "columns": [
-        "release_year",
-        "ID",
         "analog",
         "digital",
         "true_bypass",
@@ -49,6 +47,8 @@
         "stereo",
         "midi",
         "presets",
+        "release_year",
+        "ID",
         "Manufacturer",
         "Model",
         "pedal_type",
@@ -116,7 +116,6 @@
     },
     "motherboard": {
       "columns": [
-        "ID",
         "RamSlots",
         "RamMaxMHZ",
         "RamMaxSizeGB",
@@ -124,6 +123,7 @@
         "SATAPorts",
         "USBPortsRear",
         "Price",
+        "ID",
         "Manufacturer",
         "Model",
         "Socket",
@@ -209,7 +209,6 @@
     },
     "floor_speakers": {
       "columns": [
-        "created_at",
         "id",
         "way",
         "impedance_ohm",
@@ -223,6 +222,7 @@
         "weight_kg",
         "bass_reflex",
         "bi_wire",
+        "created_at",
         "manufacturer",
         "model",
         "speaker_type",
@@ -235,11 +235,11 @@
     },
     "multi_effects": {
       "columns": [
+        "amp_modeling",
+        "usb_audio",
         "ID",
         "footswitches",
         "expression_pedal",
-        "amp_modeling",
-        "usb_audio",
         "Manufacturer",
         "Model",
         "effect_type",
@@ -354,14 +354,14 @@
     },
     "electric_drums": {
       "columns": [
-        "usb_midi",
-        "bluetooth",
-        "recording",
-        "release_year",
         "ID",
         "shell_design",
         "kit_pieces",
         "cymbals",
+        "usb_midi",
+        "bluetooth",
+        "recording",
+        "release_year",
         "Manufacturer",
         "Model",
         "drum_type",
@@ -642,7 +642,6 @@
     },
     "acoustic_guitars": {
       "columns": [
-        "id",
         "scale_length_mm",
         "nut_width_mm",
         "frets",
@@ -650,6 +649,7 @@
         "includes_case",
         "includes_accessories",
         "created_at",
+        "id",
         "manufacturer",
         "model",
         "body_shape",
@@ -669,7 +669,6 @@
       "columns": [
         "ID",
         "Seats",
-        "Year",
         "Manufacturer",
         "Model",
         "Price Range (Ft)",
@@ -677,6 +676,7 @@
         "Horsepower",
         "Acceleration (s)",
         "Fuel Type",
+        "Year",
         "Transmission",
         "category"
       ]
@@ -779,10 +779,10 @@
         "depth_mm",
         "weight_kg",
         "created_at",
+        "frequency_response",
         "manufacturer",
         "model",
         "speaker_type",
-        "frequency_response",
         "tweeter_type",
         "cabinet_type",
         "recommended_room_size",
@@ -849,8 +849,6 @@
         "power_max_w",
         "weight_kg",
         "created_at",
-        "notes",
-        "category",
         "manufacturer",
         "model",
         "speaker_type",
@@ -859,7 +857,9 @@
         "dimensions_mm",
         "mounting",
         "color",
-        "recommended_room_size"
+        "recommended_room_size",
+        "notes",
+        "category"
       ]
     },
     "side_speaker": {
@@ -926,16 +926,7 @@
         "manufacturer",
         "model",
         "sub_type",
-        "driver_type",
-        "enclosure_type",
-        "frequency_response",
-        "amp_class",
-        "crossover_hz",
-        "inputs",
-        "outputs",
-        "recommended_room_size",
-        "notes",
-        "category"
+        "driver_type"
       ]
     },
     "bass_amplifier": {
@@ -953,20 +944,7 @@
         "width_mm",
         "depth_mm",
         "weight_kg",
-        "created_at",
-        "manufacturer",
-        "model",
-        "amplifier_type",
-        "load_impedance_ohm",
-        "amp_class",
-        "frequency_response",
-        "crossover_hz",
-        "inputs",
-        "outputs",
-        "cooling",
-        "recommended_use",
-        "notes",
-        "category"
+        "created_at"
       ]
     },
     "bass_shaker": {
@@ -976,37 +954,21 @@
         "power_rms_w",
         "power_peak_w",
         "weight_kg",
-        "created_at",
-        "manufacturer",
-        "model",
-        "shaker_type",
-        "frequency_response",
-        "sensitivity",
-        "mounting",
-        "recommended_amp_power",
-        "dimensions_mm",
-        "use_case",
-        "notes",
-        "category"
+        "created_at"
       ]
     },
     "news_message[System]": {
       "columns": [
         "id",
         "created_at",
-        "sender",
-        "title",
-        "message",
-        "target"
+        "sender"
       ]
     },
     "register_message[System]": {
       "columns": [
         "id",
         "target",
-        "created_at",
-        "title",
-        "message"
+        "created_at"
       ]
     }
   }

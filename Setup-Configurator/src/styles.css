@@ -71,27 +71,7 @@ input[type="text"], input[type="password"], input[type="email"], textarea{
   box-shadow: 0 0 10px rgba(0,255,255,0.35);
 }
 
-/* -------------------------
-   Top menu (fixed, glass + neon)
-   ------------------------- */
-.top-menu{
-  position:fixed;
-  left:0; right:0; top:0;
-  height:64px;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  padding:10px 20px;
-  gap:12px;
-  z-index:50;
 
-  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
-  border-bottom: 1px solid var(--glass-border);
-  backdrop-filter: blur(8px) saturate(120%);
-  -webkit-backdrop-filter: blur(8px) saturate(120%);
-
-  box-shadow: 0 10px 30px rgba(0,0,0,0.6);
-}
 
 .brand{
   display:flex;
