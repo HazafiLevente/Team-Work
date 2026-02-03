@@ -1,23 +1,46 @@
 <div class="chat-layout">
 
-  <!-- BAL OLDAL -->
+  <!-- LEFT SIDE: CONVERSATIONS -->
   <div class="chat-list">
     <div
       *ngFor="let c of conversations"
       class="chat-item"
       [class.active]="c.key === activeKey"
       (click)="openConversation(c.key)">
-      <div class="title">{{ c.title }}</div>
-      <div class="last">{{ c.lastMessage }}</div>
+      <div class="chat-avatar">
+        {{ c.title.charAt(0) }}
+      </div>
+      <div class="chat-info">
+        <div class="chat-headers">
+          <span class="chat-title">{{ c.title }}</span>
+          <span class="chat-time">{{ timeAgo(c.lastAt) }}</span>
+        </div>
+        <div class="chat-preview">{{ c.lastMessage }}</div>
+      </div>
     </div>
   </div>
 
-  <div class="message-page" *ngIf="message">
-    <h2 class="title">{{ message.title }}</h2>
-    <div class="content"> {{ message.message }} </div>
-    <div class="meta">
-      <span class="sender"> 👤 {{ message.sender_name }} </span>
-      <span class="time"> ⏱ {{ timeAgo(message.created_at) }} </span>
+  <!-- RIGHT SIDE: MESSAGES -->
+  <div class="chat-area">
+    <div class="messages-container" #scrollMe>
+      <div *ngFor="let m of messages" class="message-row" [class.system]="activeKey === 'system'">
+        
+        <!-- SENDER INFO (Only for Register or if needed) -->
+        <div class="sender-name" *ngIf="activeKey.startsWith('register')">
+          {{ m.sender_name || 'System' }}
+        </div>
+
+        <div class="message-bubble">
+          <div class="msg-title" *ngIf="m.title">{{ m.title }}</div>
+          <div class="msg-text">{{ m.message }}</div>
+          <div class="msg-time">{{ timeAgo(m.created_at) }}</div>
+        </div>
+
+      </div>
+      
+      <div *ngIf="messages.length === 0" class="empty-state">
+        Nincs üzenet ebben a beszélgetésben.
+      </div>
     </div>
   </div>
 

@@ -24,6 +24,17 @@ export class ProductService {
   }
 
 
+  getComputers(limit = 50) {
+    return this.http.get<{ items: any[] }>(
+      `/api/computers`,
+      {
+        params: { limit },
+        withCredentials: true
+      }
+    );
+  }
+
+
   getCars(limit = 50) {
     return this.http.get<{ items: any[] }>(
       `/api/cars`,

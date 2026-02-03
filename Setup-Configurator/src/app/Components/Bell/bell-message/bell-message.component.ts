@@ -17,26 +17,33 @@ export class BellMessageComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private http: HttpClient
-  ) {}
+  ) { }
 
   conversations: any[] = [];
   messages: any[] = [];
   activeKey!: string;
 
   ngOnInit() {
-    const id = this.route.snapshot.paramMap.get('id');
-    const type = this.route.snapshot.paramMap.get('type');
-
-    this.http
-      .get(`/api/bell/${type}/${id}`, { withCredentials: true })
-      .subscribe(data => this.message = data);
+    this.loadConversations();
   }
 
+  loadConversations() {
+    this.http.get<any[]>('/api/bell/conversations', { withCredentials: true })
+      .subscribe(res => {
+        this.conversations = res || [];
+        if (this.conversations.length) {
+          this.openConversation(this.conversations[0].key);
+        }
+      });
+  }
 
   openConversation(key: string) {
     this.activeKey = key;
     this.http.get<any[]>(`/api/bell/conversation/${key}`, { withCredentials: true })
-      .subscribe(m => this.messages = m);
+      .subscribe(m => {
+        this.messages = m || [];
+        // Scroll to bottom logic could go here
+      });
   }
 
 

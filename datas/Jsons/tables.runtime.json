@@ -1,5 +1,5 @@
 {
-  "lastUpdated": 1770105621313,
+  "lastUpdated": 1770152379660,
   "tables": {
     "c_trumpets": {
       "columns": [
@@ -40,6 +40,7 @@
     },
     "effects_pedal": {
       "columns": [
+        "ID",
         "analog",
         "digital",
         "true_bypass",
@@ -48,7 +49,6 @@
         "midi",
         "presets",
         "release_year",
-        "ID",
         "Manufacturer",
         "Model",
         "pedal_type",
@@ -76,9 +76,9 @@
     },
     "acoustic_drums": {
       "columns": [
+        "ID",
         "hardware_included",
         "cymbals_included",
-        "ID",
         "Manufacturer",
         "Model",
         "series",
@@ -116,6 +116,7 @@
     },
     "motherboard": {
       "columns": [
+        "ID",
         "RamSlots",
         "RamMaxMHZ",
         "RamMaxSizeGB",
@@ -123,8 +124,7 @@
         "SATAPorts",
         "USBPortsRear",
         "Price",
-        "ID",
-        "Manufacturer",
+        "manufacturer",
         "Model",
         "Socket",
         "Chipset",
@@ -146,7 +146,7 @@
         "Clock",
         "Cache",
         "Price",
-        "Manufacturer",
+        "manufacturer",
         "Model",
         "Socket",
         "category"
@@ -186,11 +186,11 @@
     },
     "alt_saxophone": {
       "columns": [
+        "adjustable_thumb_rest",
+        "release_year",
         "ID",
         "engraving",
         "high_f_sharp",
-        "adjustable_thumb_rest",
-        "release_year",
         "manufacturer",
         "Model",
         "Type",
@@ -235,11 +235,11 @@
     },
     "multi_effects": {
       "columns": [
-        "amp_modeling",
-        "usb_audio",
         "ID",
         "footswitches",
         "expression_pedal",
+        "amp_modeling",
+        "usb_audio",
         "Manufacturer",
         "Model",
         "effect_type",
@@ -317,22 +317,6 @@
         "manufacturer",
         "model",
         "memory_type",
-        "category"
-      ]
-    },
-    "video_cards": {
-      "columns": [
-        "ID",
-        "vram_gb",
-        "bus_bit",
-        "manufacturer",
-        "series",
-        "model",
-        "chipset",
-        "variant",
-        "memory_type",
-        "product_code",
-        "notes",
         "category"
       ]
     },
@@ -535,15 +519,7 @@
         "body_material",
         "neck_material",
         "fretboard_material",
-        "pickups",
-        "electronics",
-        "bridge",
-        "finish",
-        "skill_level",
-        "genre_recommended",
-        "country_of_origin",
-        "notes",
-        "category"
+        "pickups"
       ]
     },
     "daws": {
@@ -554,19 +530,7 @@
         "rotary_encoders",
         "buttons",
         "touch_sensitive",
-        "release_year",
-        "Manufacturer",
-        "Model",
-        "controller_type",
-        "connection",
-        "display",
-        "daw_compatibility",
-        "platform_support",
-        "power_supply",
-        "skill_level",
-        "country_of_origin",
-        "notes",
-        "category"
+        "release_year"
       ]
     },
     "electric_guitars": {
@@ -574,17 +538,7 @@
         "ID",
         "Price",
         "strings",
-        "baritone",
-        "Manufacturer",
-        "Model",
-        "Guitar",
-        "Color",
-        "guitar_type",
-        "body_type",
-        "target_genre",
-        "target_level",
-        "notes",
-        "category"
+        "baritone"
       ]
     },
     "soundcards": {
@@ -609,11 +563,6 @@
         "weight_kg",
         "release_year",
         "created_at",
-        "manufacturer",
-        "model",
-        "generation",
-        "series",
-        "interface",
         "adat_inputs",
         "adat_outputs",
         "dimensions",
@@ -642,6 +591,7 @@
     },
     "acoustic_guitars": {
       "columns": [
+        "id",
         "scale_length_mm",
         "nut_width_mm",
         "frets",
@@ -649,7 +599,6 @@
         "includes_case",
         "includes_accessories",
         "created_at",
-        "id",
         "manufacturer",
         "model",
         "body_shape",
@@ -779,10 +728,10 @@
         "depth_mm",
         "weight_kg",
         "created_at",
-        "frequency_response",
         "manufacturer",
         "model",
         "speaker_type",
+        "frequency_response",
         "tweeter_type",
         "cabinet_type",
         "recommended_room_size",
@@ -833,11 +782,7 @@
         "Price Range (Ft)",
         "Body Type",
         "Horsepower",
-        "Acceleration (s)",
-        "Fuel Type",
-        "Year",
-        "Transmission",
-        "category"
+        "Acceleration (s)"
       ]
     },
     "back_speaker": {
@@ -848,18 +793,7 @@
         "power_rms_w",
         "power_max_w",
         "weight_kg",
-        "created_at",
-        "manufacturer",
-        "model",
-        "speaker_type",
-        "frequency_response",
-        "drivers",
-        "dimensions_mm",
-        "mounting",
-        "color",
-        "recommended_room_size",
-        "notes",
-        "category"
+        "created_at"
       ]
     },
     "side_speaker": {
@@ -871,8 +805,6 @@
         "power_max_w",
         "weight_kg",
         "created_at",
-        "manufacturer",
-        "model",
         "speaker_type",
         "frequency_response",
         "drivers",
@@ -926,7 +858,16 @@
         "manufacturer",
         "model",
         "sub_type",
-        "driver_type"
+        "driver_type",
+        "enclosure_type",
+        "frequency_response",
+        "amp_class",
+        "crossover_hz",
+        "inputs",
+        "outputs",
+        "recommended_room_size",
+        "notes",
+        "category"
       ]
     },
     "bass_amplifier": {
@@ -944,7 +885,17 @@
         "width_mm",
         "depth_mm",
         "weight_kg",
-        "created_at"
+        "created_at",
+        "manufacturer",
+        "model",
+        "amplifier_type",
+        "load_impedance_ohm",
+        "amp_class",
+        "frequency_response",
+        "crossover_hz",
+        "inputs",
+        "outputs",
+        "cooling"
       ]
     },
     "bass_shaker": {
@@ -954,21 +905,50 @@
         "power_rms_w",
         "power_peak_w",
         "weight_kg",
-        "created_at"
+        "created_at",
+        "manufacturer",
+        "model",
+        "shaker_type",
+        "frequency_response",
+        "sensitivity",
+        "mounting",
+        "recommended_amp_power",
+        "dimensions_mm",
+        "use_case",
+        "notes",
+        "category"
       ]
     },
     "news_message[System]": {
       "columns": [
         "id",
         "created_at",
-        "sender"
+        "sender",
+        "title",
+        "message",
+        "target"
       ]
     },
     "register_message[System]": {
       "columns": [
         "id",
         "target",
-        "created_at"
+        "created_at",
+        "title",
+        "message"
+      ]
+    },
+    "video_cards": {
+      "columns": [
+        "ID",
+        "vram_gb",
+        "bus_bit",
+        "model",
+        "chipset",
+        "variant",
+        "memory_type",
+        "product_code",
+        "notes"
       ]
     }
   }

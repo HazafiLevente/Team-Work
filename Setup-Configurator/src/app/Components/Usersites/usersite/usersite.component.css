@@ -105,3 +105,18 @@
     min-width: 140px;
   }
 }
+
+
+.usersite-sidebar .admin-btn {
+  margin-top: 18px;
+  border: 1px solid rgba(255, 120, 120, 0.35);
+}
+
+.usersite-sidebar .admin-btn.active {
+  background: linear-gradient(
+    135deg,
+    #ff4d4d,
+    #ff9800
+  );
+  color: #000;
+}

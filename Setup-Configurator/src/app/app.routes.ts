@@ -1,3 +1,5 @@
+import { AdminComponent } from './Components/Usersites/Admin/admin/admin.component';
+import { adminGuard } from './Components/Auth/authguard/admin.guard';
 import { AuthComponent } from './Components/Auth/auth/auth.component';
 import { LoginComponent } from './Components/Auth/Login/login.component';
 import { RegisterComponent } from './Components/Auth/Register/register.component';
@@ -10,6 +12,7 @@ import {BellMessageComponent} from './Components/Bell/bell-message/bell-message.
 import { Routes } from '@angular/router';
 import { ProductPageComponent } from './Components/Product/product/product-page.component';
 import { ProfileComponent } from './Components/Usersites/Profil/profil/profile.component';
+
 
 
 
@@ -28,10 +31,16 @@ export const routes: Routes = [
       { path: 'profile', component: ProfileComponent },
       { path: 'favorite', component: FavoriteComponent },
       { path: 'setup', component: SetupComponent },
+
+      {
+        path: 'admin',
+        component: AdminComponent,
+        canActivate: [adminGuard]
+      },
+
       { path: '', redirectTo: 'profile', pathMatch: 'full' }
     ]
   },
-
 
 
 

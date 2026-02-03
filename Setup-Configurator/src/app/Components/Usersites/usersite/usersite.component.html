@@ -2,6 +2,7 @@
 
   <!-- BAL OLDAL: NAV -->
   <aside class="usersite-sidebar">
+
     <button routerLink="profile" routerLinkActive="active">
       👤 Profile
     </button>
@@ -13,7 +14,20 @@
     <button routerLink="setup" routerLinkActive="active">
       🧰 Setups
     </button>
+
+    <!-- 🛡 ADMIN – CSAK JOGOSULTAKNAK -->
+    <button
+      *ngIf="(user$ | async)?.role && ['admin','admin+','owner'].includes((user$ | async)!.role)"
+      routerLink="admin"
+      routerLinkActive="active"
+      class="admin-btn">
+
+      🛡 Admin
+    </button>
+
   </aside>
+
+
 
   <!-- JOBB OLDAL: TARTALOM -->
   <main class="usersite-content">

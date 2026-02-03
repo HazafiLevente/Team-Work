@@ -3,7 +3,8 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 
 import { CarfilterComponent, CarFilters } from '../carfilter/carfilter.component';
-import { ComputerfilterComponent } from '../computerfilter/computerfilter.component';
+import { ComputerfilterComponent, ComputerFilters } from '../computerfilter/computerfilter.component';
+
 import { ProductFiltersService, CategoryKey } from '../../../Services/Home/Shared/product-filters.service';
 
 @Component({
@@ -21,21 +22,19 @@ import { ProductFiltersService, CategoryKey } from '../../../Services/Home/Share
 export class FilterlistComponent {
 
   active = {
-    car: false,         // ✅ induláskor NE
+    car: false,
     computer: false,
     ht: false,
     instrument: false
   };
 
-
   constructor(private filtersService: ProductFiltersService) {}
 
   toggle(key: CategoryKey) {
-    // ha ugyanarra kattintasz, vissza ALL-ra
     const cur = this.filtersService.current.activeCategory;
-    const next = (cur === key) ? 'all' : key;
+    const next: CategoryKey = (cur === key) ? 'all' : key;
 
-    // UI state (gomb highlight)
+    // UI state
     Object.keys(this.active).forEach(k => {
       this.active[k as keyof typeof this.active] = false;
     });
@@ -46,13 +45,11 @@ export class FilterlistComponent {
     this.filtersService.setActiveCategory(next);
   }
 
-
   onCarChange(data: CarFilters) {
     this.filtersService.setCar(data);
   }
 
-  onComputerChange(data: any) {
-    // majd később: this.filtersService.setComputer(data);
-    console.log('computer filters:', data);
+  onComputerChange(data: ComputerFilters) {
+    this.filtersService.setComputer(data);
   }
 }

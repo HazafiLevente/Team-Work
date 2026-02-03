@@ -1,15 +1,17 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
+
 import { SearchFilters } from '../../../../Models/Filters/searchfilters.model';
 import { CarFilters } from '../../../Home/Filterparts/carfilter/carfilter.component';
+import { ComputerFilters } from '../../../Home/Filterparts/computerfilter/computerfilter.component';
 
 export type CategoryKey = 'all' | 'car' | 'computer' | 'ht' | 'instrument';
 
 export interface CombinedFilters {
   search: SearchFilters;
-  activeCategory: CategoryKey;     // melyik panel aktív
-  car?: CarFilters;               // részletes autó filterek
-  computer?: any;                 // majd később
+  activeCategory: CategoryKey;   // melyik panel aktív
+  car?: CarFilters;              // részletes autó filterek
+  computer?: ComputerFilters;    // részletes PC filterek
 }
 
 const DEFAULT_SEARCH: SearchFilters = {
@@ -22,7 +24,8 @@ const DEFAULT_SEARCH: SearchFilters = {
 
 const DEFAULT_FILTERS: CombinedFilters = {
   search: DEFAULT_SEARCH,
-  activeCategory: 'all',   // ✅ EZ A LÉNYEG
+  activeCategory: 'all',
+
   car: {
     category: 'car',
     manufacturer: '',
@@ -40,6 +43,26 @@ const DEFAULT_FILTERS: CombinedFilters = {
     yearMin: '',
     yearMax: '',
     transmission: '',
+  },
+
+  computer: {
+    category: 'computer',
+
+    cpuBrand: '',
+    cpuModel: '',
+
+    gpuBrand: '',
+    gpuModel: '',
+
+    ramMin: '',
+    ramMax: '',
+
+    storageType: '',
+    storageMin: '',
+    storageMax: '',
+
+    psuMin: '',
+    psuMax: '',
   }
 };
 
@@ -71,6 +94,14 @@ export class ProductFiltersService {
     const cur = this._filters$.value;
     const next: CombinedFilters = { ...cur, car };
     this.debug('setCar', next);
+    this._filters$.next(next);
+  }
+
+  /** Computerfilter hívja */
+  setComputer(computer: ComputerFilters) {
+    const cur = this._filters$.value;
+    const next: CombinedFilters = { ...cur, computer };
+    this.debug('setComputer', next);
     this._filters$.next(next);
   }
 

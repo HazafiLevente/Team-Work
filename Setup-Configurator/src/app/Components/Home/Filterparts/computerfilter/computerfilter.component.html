@@ -1,12 +1,63 @@
-<div class="filter-grid" [formGroup]="form">
+<div class="carfilter" [formGroup]="form">
 
-  <span class="tag">🖥 Computer</span>
+  <div class="carfilter-header">
+    <span class="tag">🖥️ PC</span>
+    <span class="muted">Csak PC táblákra szűr</span>
+  </div>
 
-  <input class="search-input" placeholder="Brand" formControlName="brand">
-  <input class="search-input" placeholder="CPU" formControlName="cpu">
-  <input class="search-input" placeholder="GPU" formControlName="gpu">
-  <input class="search-input" type="number" placeholder="RAM min" formControlName="ramMin">
-  <input class="search-input" type="number" placeholder="Ár min" formControlName="priceMin">
-  <input class="search-input" type="number" placeholder="Ár max" formControlName="priceMax">
+  <div class="filter-grid">
+
+    <input class="search-input" placeholder="CPU gyártó (pl. AMD / Intel)"
+           formControlName="cpuBrand" />
+
+    <input class="search-input" placeholder="CPU modell (pl. Ryzen 7 7800X3D)"
+           formControlName="cpuModel" />
+
+    <select class="search-input" formControlName="gpuBrand">
+      <option value="">GPU gyártó (összes)</option>
+      <option value="nvidia">NVIDIA</option>
+      <option value="amd">AMD</option>
+      <option value="intel">Intel</option>
+    </select>
+
+    <input class="search-input" placeholder="GPU modell (pl. RTX 4070)"
+           formControlName="gpuModel" />
+
+    <input class="search-input" type="number" min="0"
+           placeholder="RAM min (GB)" formControlName="ramMin" />
+
+    <input class="search-input" type="number" min="0"
+           placeholder="RAM max (GB)" formControlName="ramMax" />
+
+    <select class="search-input" formControlName="storageType">
+      <option value="">Tárhely típus (összes)</option>
+      <option value="hdd">HDD</option>
+      <option value="ssd">SSD</option>
+      <option value="nvme">NVMe</option>
+    </select>
+
+    <input class="search-input" type="number" min="0"
+           placeholder="Tárhely min (GB)" formControlName="storageMin" />
+
+    <input class="search-input" type="number" min="0"
+           placeholder="Tárhely max (GB)" formControlName="storageMax" />
+
+    <input class="search-input" type="number" min="0"
+           placeholder="PSU min (W)" formControlName="psuMin" />
+
+    <input class="search-input" type="number" min="0"
+           placeholder="PSU max (W)" formControlName="psuMax" />
+
+  </div>
+
+  <div class="carfilter-footer">
+    <button type="button" class="btn small" (click)="clear()">
+      🧹 PC szűrők törlése
+    </button>
+
+    <span class="muted">
+      A 🔎 Keresés gomb ezeket is figyelembe veszi.
+    </span>
+  </div>
 
 </div>

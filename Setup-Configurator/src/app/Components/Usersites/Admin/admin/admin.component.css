@@ -1,0 +1,45 @@
+.admin-page {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.admin-header h1 {
+  font-size: 26px;
+}
+
+.admin-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+}
+
+.stat-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 18px;
+  border-radius: 16px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.06);
+  transition: all 0.2s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 20px rgba(0,255,255,0.15);
+}
+
+.stat-card .icon {
+  font-size: 22px;
+}
+
+.stat-card .value {
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.stat-card .label {
+  font-size: 12px;
+  opacity: 0.6;
+}

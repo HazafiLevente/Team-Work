@@ -1,0 +1,33 @@
+<div class="admin-page">
+
+  <div class="admin-header">
+    <h1>🛡 Admin Panel</h1>
+    <p class="muted">Valós rendszer statisztikák</p>
+  </div>
+
+  <div class="admin-stats">
+
+    <div class="stat-card">
+      👤 {{ loading ? '…' : users }}
+      <span>Felhasználók</span>
+    </div>
+
+    <div class="stat-card">
+      🗂 {{ loading ? '…' : tables }}
+      <span>Összes tábla</span>
+    </div>
+
+    <div class="stat-card">
+      📦 {{ loading ? '…' : productTables }}
+      <span>Product táblák</span>
+    </div>
+
+    <div class="stat-card">
+      🧰 {{ loading ? '…' : products }}
+      <span>Összes termék</span>
+    </div>
+
+  </div>
+
+
+</div>

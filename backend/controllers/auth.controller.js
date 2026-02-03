@@ -129,9 +129,11 @@ exports.me = async (req, res) => {
         user: {
             id: req.user.id,
             username: req.user.username,
-            email: req.user.email
+            email: req.user.email,
+            role: req.user.role   // 🔥 EZ KELL
         }
     });
+
 };
 
 
