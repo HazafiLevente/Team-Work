@@ -1,5 +1,5 @@
 {
-  "lastUpdated": 1770234721197,
+  "lastUpdated": 1769973918044,
   "tables": {
     "c_trumpets": {
       "columns": [
@@ -24,8 +24,8 @@
     },
     "hatchback_cars": {
       "columns": [
-        "ID",
         "Seats",
+        "ID",
         "Manufacturer",
         "Model",
         "Price Range (Ft)",
@@ -40,7 +40,6 @@
     },
     "effects_pedal": {
       "columns": [
-        "presets",
         "release_year",
         "ID",
         "analog",
@@ -49,6 +48,7 @@
         "buffered",
         "stereo",
         "midi",
+        "presets",
         "Manufacturer",
         "Model",
         "pedal_type",
@@ -98,17 +98,33 @@
         "category"
       ]
     },
+    "coupe_cars": {
+      "columns": [
+        "ID",
+        "Seats",
+        "Manufacturer",
+        "Model",
+        "Price Range (Ft)",
+        "Body Type",
+        "Horsepower",
+        "Acceleration (s)",
+        "Fuel Type",
+        "Year",
+        "Transmission",
+        "category"
+      ]
+    },
     "motherboard": {
       "columns": [
-        "SATAPorts",
-        "USBPortsRear",
-        "Price",
         "ID",
         "RamSlots",
         "RamMaxMHZ",
         "RamMaxSizeGB",
         "M2Slots",
-        "manufacturer",
+        "SATAPorts",
+        "USBPortsRear",
+        "Price",
+        "Manufacturer",
         "Model",
         "Socket",
         "Chipset",
@@ -123,7 +139,20 @@
         "category"
       ]
     },
-    "crossover_cars": {
+    "processors": {
+      "columns": [
+        "ID",
+        "Threads",
+        "Clock",
+        "Cache",
+        "Price",
+        "Manufacturer",
+        "Model",
+        "Socket",
+        "category"
+      ]
+    },
+    "mpv_cars": {
       "columns": [
         "ID",
         "Manufacturer",
@@ -136,24 +165,10 @@
         "Fuel Type",
         "Year",
         "Transmission",
-        "category",
-        "Avgprice"
-      ]
-    },
-    "processors": {
-      "columns": [
-        "ID",
-        "Threads",
-        "Clock",
-        "Cache",
-        "Price",
-        "manufacturer",
-        "Model",
-        "Socket",
         "category"
       ]
     },
-    "mpv_cars": {
+    "crossover_cars": {
       "columns": [
         "ID",
         "Manufacturer",
@@ -194,6 +209,7 @@
     },
     "floor_speakers": {
       "columns": [
+        "created_at",
         "id",
         "way",
         "impedance_ohm",
@@ -207,7 +223,6 @@
         "weight_kg",
         "bass_reflex",
         "bi_wire",
-        "created_at",
         "manufacturer",
         "model",
         "speaker_type",
@@ -305,6 +320,22 @@
         "category"
       ]
     },
+    "video_cards": {
+      "columns": [
+        "ID",
+        "vram_gb",
+        "bus_bit",
+        "manufacturer",
+        "series",
+        "model",
+        "chipset",
+        "variant",
+        "memory_type",
+        "product_code",
+        "notes",
+        "category"
+      ]
+    },
     "cabrio_cars": {
       "columns": [
         "ID",
@@ -318,20 +349,19 @@
         "Fuel Type",
         "Year",
         "Transmission",
-        "category",
-        "Avgprice"
+        "category"
       ]
     },
     "electric_drums": {
       "columns": [
-        "ID",
-        "shell_design",
-        "kit_pieces",
-        "cymbals",
         "usb_midi",
         "bluetooth",
         "recording",
         "release_year",
+        "ID",
+        "shell_design",
+        "kit_pieces",
+        "cymbals",
         "Manufacturer",
         "Model",
         "drum_type",
@@ -639,6 +669,7 @@
       "columns": [
         "ID",
         "Seats",
+        "Year",
         "Manufacturer",
         "Model",
         "Price Range (Ft)",
@@ -646,7 +677,6 @@
         "Horsepower",
         "Acceleration (s)",
         "Fuel Type",
-        "Year",
         "Transmission",
         "category"
       ]
@@ -819,6 +849,8 @@
         "power_max_w",
         "weight_kg",
         "created_at",
+        "notes",
+        "category",
         "manufacturer",
         "model",
         "speaker_type",
@@ -827,9 +859,7 @@
         "dimensions_mm",
         "mounting",
         "color",
-        "recommended_room_size",
-        "notes",
-        "category"
+        "recommended_room_size"
       ]
     },
     "side_speaker": {
@@ -928,7 +958,15 @@
         "model",
         "amplifier_type",
         "load_impedance_ohm",
-        "amp_class"
+        "amp_class",
+        "frequency_response",
+        "crossover_hz",
+        "inputs",
+        "outputs",
+        "cooling",
+        "recommended_use",
+        "notes",
+        "category"
       ]
     },
     "bass_shaker": {
@@ -938,35 +976,37 @@
         "power_rms_w",
         "power_peak_w",
         "weight_kg",
-        "created_at"
+        "created_at",
+        "manufacturer",
+        "model",
+        "shaker_type",
+        "frequency_response",
+        "sensitivity",
+        "mounting",
+        "recommended_amp_power",
+        "dimensions_mm",
+        "use_case",
+        "notes",
+        "category"
       ]
     },
     "news_message[System]": {
       "columns": [
         "id",
         "created_at",
-        "sender"
+        "sender",
+        "title",
+        "message",
+        "target"
       ]
     },
     "register_message[System]": {
       "columns": [
         "id",
         "target",
-        "created_at"
-      ]
-    },
-    "video_cards": {
-      "columns": [
-        "ID",
-        "vram_gb",
-        "bus_bit"
-      ]
-    },
-    "coupe_cars": {
-      "columns": [
-        "ID",
-        "Seats",
-        "Avgprice"
+        "created_at",
+        "title",
+        "message"
       ]
     }
   }
