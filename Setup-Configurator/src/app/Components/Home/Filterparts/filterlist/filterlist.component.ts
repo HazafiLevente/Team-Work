@@ -3,7 +3,7 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 
 import { CarfilterComponent, CarFilters } from '../carfilter/carfilter.component';
-import { ComputerfilterComponent, ComputerFilters } from '../computerfilter/computerfilter.component';
+import { ComputerfilterComponent, ComputerFilters } from '../computerfilter/computerfilter/computerfilter.component';
 
 import { ProductFiltersService, CategoryKey } from '../../../Services/Home/Shared/product-filters.service';
 

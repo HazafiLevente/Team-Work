@@ -1,10 +1,10 @@
 {
-  "lastUpdated": 1770152379660,
+  "lastUpdated": 1770234721197,
   "tables": {
     "c_trumpets": {
       "columns": [
-        "ID",
         "release_year",
+        "ID",
         "Manufacturer",
         "Model",
         "series",
@@ -40,6 +40,8 @@
     },
     "effects_pedal": {
       "columns": [
+        "presets",
+        "release_year",
         "ID",
         "analog",
         "digital",
@@ -47,8 +49,6 @@
         "buffered",
         "stereo",
         "midi",
-        "presets",
-        "release_year",
         "Manufacturer",
         "Model",
         "pedal_type",
@@ -76,9 +76,9 @@
     },
     "acoustic_drums": {
       "columns": [
-        "ID",
         "hardware_included",
         "cymbals_included",
+        "ID",
         "Manufacturer",
         "Model",
         "series",
@@ -98,32 +98,16 @@
         "category"
       ]
     },
-    "coupe_cars": {
-      "columns": [
-        "ID",
-        "Seats",
-        "Manufacturer",
-        "Model",
-        "Price Range (Ft)",
-        "Body Type",
-        "Horsepower",
-        "Acceleration (s)",
-        "Fuel Type",
-        "Year",
-        "Transmission",
-        "category"
-      ]
-    },
     "motherboard": {
       "columns": [
+        "SATAPorts",
+        "USBPortsRear",
+        "Price",
         "ID",
         "RamSlots",
         "RamMaxMHZ",
         "RamMaxSizeGB",
         "M2Slots",
-        "SATAPorts",
-        "USBPortsRear",
-        "Price",
         "manufacturer",
         "Model",
         "Socket",
@@ -137,6 +121,23 @@
         "AudioChip",
         "RGBSupport",
         "category"
+      ]
+    },
+    "crossover_cars": {
+      "columns": [
+        "ID",
+        "Manufacturer",
+        "Model",
+        "Price Range (Ft)",
+        "Body Type",
+        "Horsepower",
+        "Acceleration (s)",
+        "Seats",
+        "Fuel Type",
+        "Year",
+        "Transmission",
+        "category",
+        "Avgprice"
       ]
     },
     "processors": {
@@ -168,29 +169,13 @@
         "category"
       ]
     },
-    "crossover_cars": {
-      "columns": [
-        "ID",
-        "Manufacturer",
-        "Model",
-        "Price Range (Ft)",
-        "Body Type",
-        "Horsepower",
-        "Acceleration (s)",
-        "Seats",
-        "Fuel Type",
-        "Year",
-        "Transmission",
-        "category"
-      ]
-    },
     "alt_saxophone": {
       "columns": [
-        "adjustable_thumb_rest",
-        "release_year",
         "ID",
         "engraving",
         "high_f_sharp",
+        "adjustable_thumb_rest",
+        "release_year",
         "manufacturer",
         "Model",
         "Type",
@@ -333,7 +318,8 @@
         "Fuel Type",
         "Year",
         "Transmission",
-        "category"
+        "category",
+        "Avgprice"
       ]
     },
     "electric_drums": {
@@ -519,7 +505,15 @@
         "body_material",
         "neck_material",
         "fretboard_material",
-        "pickups"
+        "pickups",
+        "electronics",
+        "bridge",
+        "finish",
+        "skill_level",
+        "genre_recommended",
+        "country_of_origin",
+        "notes",
+        "category"
       ]
     },
     "daws": {
@@ -530,7 +524,19 @@
         "rotary_encoders",
         "buttons",
         "touch_sensitive",
-        "release_year"
+        "release_year",
+        "Manufacturer",
+        "Model",
+        "controller_type",
+        "connection",
+        "display",
+        "daw_compatibility",
+        "platform_support",
+        "power_supply",
+        "skill_level",
+        "country_of_origin",
+        "notes",
+        "category"
       ]
     },
     "electric_guitars": {
@@ -538,7 +544,17 @@
         "ID",
         "Price",
         "strings",
-        "baritone"
+        "baritone",
+        "Manufacturer",
+        "Model",
+        "Guitar",
+        "Color",
+        "guitar_type",
+        "body_type",
+        "target_genre",
+        "target_level",
+        "notes",
+        "category"
       ]
     },
     "soundcards": {
@@ -563,6 +579,11 @@
         "weight_kg",
         "release_year",
         "created_at",
+        "manufacturer",
+        "model",
+        "generation",
+        "series",
+        "interface",
         "adat_inputs",
         "adat_outputs",
         "dimensions",
@@ -782,7 +803,11 @@
         "Price Range (Ft)",
         "Body Type",
         "Horsepower",
-        "Acceleration (s)"
+        "Acceleration (s)",
+        "Fuel Type",
+        "Year",
+        "Transmission",
+        "category"
       ]
     },
     "back_speaker": {
@@ -793,7 +818,18 @@
         "power_rms_w",
         "power_max_w",
         "weight_kg",
-        "created_at"
+        "created_at",
+        "manufacturer",
+        "model",
+        "speaker_type",
+        "frequency_response",
+        "drivers",
+        "dimensions_mm",
+        "mounting",
+        "color",
+        "recommended_room_size",
+        "notes",
+        "category"
       ]
     },
     "side_speaker": {
@@ -805,6 +841,8 @@
         "power_max_w",
         "weight_kg",
         "created_at",
+        "manufacturer",
+        "model",
         "speaker_type",
         "frequency_response",
         "drivers",
@@ -890,12 +928,7 @@
         "model",
         "amplifier_type",
         "load_impedance_ohm",
-        "amp_class",
-        "frequency_response",
-        "crossover_hz",
-        "inputs",
-        "outputs",
-        "cooling"
+        "amp_class"
       ]
     },
     "bass_shaker": {
@@ -905,50 +938,35 @@
         "power_rms_w",
         "power_peak_w",
         "weight_kg",
-        "created_at",
-        "manufacturer",
-        "model",
-        "shaker_type",
-        "frequency_response",
-        "sensitivity",
-        "mounting",
-        "recommended_amp_power",
-        "dimensions_mm",
-        "use_case",
-        "notes",
-        "category"
+        "created_at"
       ]
     },
     "news_message[System]": {
       "columns": [
         "id",
         "created_at",
-        "sender",
-        "title",
-        "message",
-        "target"
+        "sender"
       ]
     },
     "register_message[System]": {
       "columns": [
         "id",
         "target",
-        "created_at",
-        "title",
-        "message"
+        "created_at"
       ]
     },
     "video_cards": {
       "columns": [
         "ID",
         "vram_gb",
-        "bus_bit",
-        "model",
-        "chipset",
-        "variant",
-        "memory_type",
-        "product_code",
-        "notes"
+        "bus_bit"
+      ]
+    },
+    "coupe_cars": {
+      "columns": [
+        "ID",
+        "Seats",
+        "Avgprice"
       ]
     }
   }

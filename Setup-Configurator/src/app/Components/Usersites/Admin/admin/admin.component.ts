@@ -1,11 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
+import { UsersComponent } from '../users/users.component';
 
 @Component({
   standalone: true,
   selector: 'app-admin',
-  imports: [CommonModule],
+  imports: [CommonModule, UsersComponent],
   templateUrl: './admin.component.html',
   styleUrl: './admin.component.css'
 })
@@ -17,6 +18,8 @@ export class AdminComponent implements OnInit {
   products = 0;
 
   loading = true;
+
+  activeSection: 'dashboard' | 'users' = 'dashboard';
 
   constructor(private http: HttpClient) {}
 
@@ -32,9 +35,17 @@ export class AdminComponent implements OnInit {
         this.loading = false;
       },
       error: err => {
-        console.error("Admin stats error", err);
+        console.error('Admin stats error', err);
         this.loading = false;
       }
     });
+  }
+
+  openUsers() {
+    this.activeSection = 'users';
+  }
+
+  openDashboard() {
+    this.activeSection = 'dashboard';
   }
 }

@@ -43,3 +43,56 @@
   font-size: 12px;
   opacity: 0.6;
 }
+
+/* =====================
+   ADMIN ACTION BAR
+   ===================== */
+.admin-actions-bar {
+  display: flex;
+  gap: 12px;
+  margin-top: 20px;
+  flex-wrap: wrap;
+}
+
+.admin-btn {
+  padding: 10px 16px;
+  border-radius: 14px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.08);
+  color: var(--text);
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+.admin-btn:hover {
+  background: linear-gradient(
+    135deg,
+    rgba(0,255,255,0.25),
+    rgba(138,43,226,0.25)
+  );
+  box-shadow: 0 8px 22px rgba(0,255,255,0.25);
+}
+
+.admin-btn.danger:hover {
+  background: linear-gradient(
+    135deg,
+    rgba(255,80,80,0.35),
+    rgba(255,140,0,0.35)
+  );
+}
+
+.admin-btn.active {
+  background: linear-gradient(
+    135deg,
+    rgba(0,255,255,0.35),
+    rgba(138,43,226,0.35)
+  );
+  box-shadow: 0 8px 22px rgba(0,255,255,0.35);
+}
+.admin-content {
+  margin-top: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}

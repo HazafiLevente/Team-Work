@@ -12,6 +12,7 @@ import {BellMessageComponent} from './Components/Bell/bell-message/bell-message.
 import { Routes } from '@angular/router';
 import { ProductPageComponent } from './Components/Product/product/product-page.component';
 import { ProfileComponent } from './Components/Usersites/Profil/profil/profile.component';
+import {UsersComponent} from './Components/Usersites/Admin/users/users.component';
 
 
 
@@ -35,7 +36,10 @@ export const routes: Routes = [
       {
         path: 'admin',
         component: AdminComponent,
-        canActivate: [adminGuard]
+        canActivate: [adminGuard],
+        children : [
+          {path: 'users', component: UsersComponent},
+        ]
       },
 
       { path: '', redirectTo: 'profile', pathMatch: 'full' }

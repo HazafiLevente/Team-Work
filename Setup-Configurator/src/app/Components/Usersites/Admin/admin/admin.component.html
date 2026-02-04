@@ -1,33 +1,69 @@
 <div class="admin-page">
 
+  <!-- HEADER -->
   <div class="admin-header">
     <h1>🛡 Admin Panel</h1>
     <p class="muted">Valós rendszer statisztikák</p>
   </div>
 
-  <div class="admin-stats">
+  <!-- ACTION BAR (MINDIG LÁTSZIK) -->
+  <div class="admin-actions-bar">
+    <button class="admin-btn" (click)="openDashboard()">
+      📊 Dashboard
+    </button>
 
-    <div class="stat-card">
-      👤 {{ loading ? '…' : users }}
-      <span>Felhasználók</span>
-    </div>
+    <button class="admin-btn" (click)="openUsers()">
+      👥 Users
+    </button>
 
-    <div class="stat-card">
-      🗂 {{ loading ? '…' : tables }}
-      <span>Összes tábla</span>
-    </div>
+    <button class="admin-btn">
+      📦 Products
+    </button>
 
-    <div class="stat-card">
-      📦 {{ loading ? '…' : productTables }}
-      <span>Product táblák</span>
-    </div>
+    <button class="admin-btn">
+      🧾 Logs
+    </button>
 
-    <div class="stat-card">
-      🧰 {{ loading ? '…' : products }}
-      <span>Összes termék</span>
-    </div>
-
+    <button class="admin-btn danger">
+      ⚙️ System
+    </button>
   </div>
 
+  <!-- CONTENT -->
+  <div class="admin-content">
+
+    <!-- DASHBOARD -->
+    <ng-container *ngIf="activeSection === 'dashboard'">
+      <div class="admin-stats">
+
+        <div class="stat-card">
+          👤 {{ loading ? '…' : users }}
+          <span>Felhasználók</span>
+        </div>
+
+        <div class="stat-card">
+          🗂 {{ loading ? '…' : tables }}
+          <span>Összes tábla</span>
+        </div>
+
+        <div class="stat-card">
+          📦 {{ loading ? '…' : productTables }}
+          <span>Product táblák</span>
+        </div>
+
+        <div class="stat-card">
+          🧰 {{ loading ? '…' : products }}
+          <span>Összes termék</span>
+        </div>
+
+      </div>
+    </ng-container>
+
+    <!-- USERS -->
+    <ng-container *ngIf="activeSection === 'users'">
+      <app-users></app-users>
+    </ng-container>
+
+  </div>
 
 </div>

@@ -30,14 +30,13 @@ export class ProductlistComponent implements OnInit, OnDestroy {
 
   allProducts: Product[] = [];
   carProducts: any[] = [];       // autók részletes mezőkkel
-  computerProducts: any[] = [];  // ✅ PC részletes mezőkkel
+  computerProducts: any[] = [];  // ✅ PC részletes mezőkkel (pc_items_view)
   products: Product[] = [];      // (ha használod máshol, maradhat)
 
   filteredProducts: Product[] = [];
 
   loading = true;
 
-  // ha minden kategória kell induláskor, legyen nagyobb
   readonly PRODUCT_LIMIT = 2000;
 
   private sub?: Subscription;
@@ -52,35 +51,44 @@ export class ProductlistComponent implements OnInit, OnDestroy {
       this.applyFilters(f);
     });
 
-    // 1) all products
+    // 1) ALL PRODUCTS
     this.productService.getProducts(this.PRODUCT_LIMIT).subscribe({
       next: res => {
+        console.log('✅ all products:', res.items?.length);
         this.allProducts = res.items || [];
         this.loading = false;
         this.applyFilters(this.filtersService.current);
       },
       error: err => {
-        console.error('API ERROR (products)', err);
+        console.error('❌ API ERROR (products)', err);
         this.loading = false;
       }
     });
 
-    // 2) cars (detailed)
+    // 2) CARS
     this.productService.getCars(this.PRODUCT_LIMIT).subscribe({
       next: res => {
+        console.log('✅ car products:', res.items?.length, res.items?.slice(0, 3));
         this.carProducts = res.items || [];
         this.applyFilters(this.filtersService.current);
       },
-      error: err => console.error('API ERROR (cars)', err)
+      error: err => console.error('❌ API ERROR (cars)', err)
     });
 
-    // 3) computers (detailed)
+    // 3) COMPUTERS
     this.productService.getComputers(this.PRODUCT_LIMIT).subscribe({
       next: res => {
+        console.log('✅ computer products:', res.items?.length, res.items?.slice(0, 3));
         this.computerProducts = res.items || [];
+
+        // ✅ debug minták (most már tényleg van adat)
+        console.log('🖥 sample PC item:', this.computerProducts[0]);
+        console.log('🧠 GPU sample:', this.computerProducts.find(x => String(x?.table_name).toLowerCase() === 'video_cards'));
+        console.log('⚡ PSU sample:', this.computerProducts.find(x => String(x?.table_name).toLowerCase() === 'psu'));
+
         this.applyFilters(this.filtersService.current);
       },
-      error: err => console.error('API ERROR (computers)', err)
+      error: err => console.error('❌ API ERROR (computers)', err)
     });
   }
 
@@ -115,12 +123,6 @@ export class ProductlistComponent implements OnInit, OnDestroy {
       norm(p.Brand) ||
       ''
     );
-  }
-
-  // ✅ nálatok autóknál table_name van: pl cabrio_cars
-  private isCarItem(p: any): boolean {
-    const t = String(p?.table_name ?? p?.table ?? '').toLowerCase();
-    return t.endsWith('_cars') || t.includes('car');
   }
 
   private getPriceNumber(p: any): number | null {
@@ -176,104 +178,67 @@ export class ProductlistComponent implements OnInit, OnDestroy {
     return Number.isFinite(n) ? { min: n, max: n } : { min: null, max: null };
   }
 
+  // ✅ ROOT + data JSON olvasás (PC view miatt)
   private getField(p: any, ...keys: string[]): string {
     for (const k of keys) {
-      const v = p?.[k];
-      if (v !== undefined && v !== null && String(v).trim() !== '') return String(v).trim();
+      const v1 = p?.[k];
+      if (v1 !== undefined && v1 !== null && String(v1).trim() !== '') {
+        return String(v1).trim();
+      }
+
+      const v2 = p?.data?.[k];
+      if (v2 !== undefined && v2 !== null && String(v2).trim() !== '') {
+        return String(v2).trim();
+      }
+
+      const kl = String(k).toLowerCase();
+      const v3 = p?.data?.[kl];
+      if (v3 !== undefined && v3 !== null && String(v3).trim() !== '') {
+        return String(v3).trim();
+      }
     }
     return '';
   }
 
-  // ----- CAR field getters -----
+  // -----------------------------
+  // PC OPTION (select) helpers
+  // -----------------------------
 
-  private getBodyType(p: any): string {
-    return this.getField(p, 'Body Type', 'body_type', 'bodyType');
+  // GPU gyártó select: 'nvidia' | 'amd' | 'intel'
+  private mapGpuBrandFromItem(p: any): string {
+    const t = String(p?.table_name ?? '').toLowerCase();
+    if (t !== 'video_cards') return '';
+
+    const manu = this.normText(this.getField(p, 'manufacturer', 'Manufacturer', 'brand'));
+    const model = this.normText(this.getField(p, 'model', 'Model', 'name', 'title'));
+    const hay = `${manu} ${model}`;
+
+    if (hay.includes('nvidia') || hay.includes('geforce') || hay.includes('rtx') || hay.includes('gtx')) return 'nvidia';
+    if (hay.includes('amd') || hay.includes('radeon') || hay.includes('rx ')) return 'amd';
+    if (hay.includes('intel') || hay.includes('arc')) return 'intel';
+
+    return '';
   }
 
-  private getFuelType(p: any): string {
-    return this.getField(p, 'Fuel Type', 'fuel_type', 'fuel');
-  }
+  // Storage type select: 'nvme' | 'ssd' | 'hdd'  (ha nem azonosítható: '')
+  private mapStorageTypeFromItem(p: any): string {
+    const d = p?.data ?? {};
 
-  private getTransmission(p: any): string {
-    return this.getField(p, 'Transmission', 'transmission', 'gearbox');
-  }
-
-  private getHorsepowerRange(p: any): string {
-    return this.getField(p, 'Horsepower', 'horsepower', 'hp');
-  }
-
-  private getAccelerationRange(p: any): string {
-    return this.getField(p, 'Acceleration (s)', 'acceleration', 'accel');
-  }
-
-  private getYearRange(p: any): string {
-    return this.getField(p, 'Year', 'year');
-  }
-
-  private getPriceRange(p: any): string {
-    return this.getField(p, 'Price Range (Ft)', 'price_range', 'price_range_ft');
-  }
-
-  private mapBodyTypeFromDb(dbValue: any): string {
-    const x = this.normText(dbValue);
-
-    if (x === 'kombi') return 'wagon';
-    if (x === 'egyeru' || x === 'egyteru') return 'mpv';
-    if (x === 'coupe') return 'coupe';
-    if (x === 'cabrio') return 'cabrio';
-    if (x === 'hatchback') return 'hatchback';
-    if (x === 'sedan') return 'sedan';
-    if (x === 'suv') return 'suv';
-
-    return x;
-  }
-
-  // ----- COMPUTER field getters -----
-
-  private isComputerItem(p: any): boolean {
-    const t = String(p?.table_name ?? p?.table ?? '').toLowerCase();
-    return (
-      t.includes('pc') ||
-      t.includes('computer') ||
-      t.includes('cpu') ||
-      t.includes('gpu') ||
-      t.includes('ram') ||
-      t.includes('psu') ||
-      t.includes('motherboard') ||
-      t.includes('storage')
+    // próbáljunk tipikus mezőkből dolgozni
+    const raw = this.normText(
+      d.storage_type ??
+      d.drive_type ??
+      d.type ??
+      d.interface ??
+      d.form_factor ??
+      ''
     );
-  }
 
-  private getCpuBrand(p: any): string {
-    return this.getField(p, 'cpu_brand', 'CPU Brand', 'cpuBrand', 'processor_brand', 'brand_cpu');
-  }
+    if (raw.includes('nvme') || raw.includes('m.2') || raw.includes('pcie')) return 'nvme';
+    if (raw.includes('ssd') || raw.includes('sata')) return 'ssd';
+    if (raw.includes('hdd') || raw.includes('hard')) return 'hdd';
 
-  private getCpuModel(p: any): string {
-    return this.getField(p, 'cpu_model', 'CPU', 'cpu', 'processor', 'processor_model', 'cpuModel');
-  }
-
-  private getGpuBrand(p: any): string {
-    return this.getField(p, 'gpu_brand', 'GPU Brand', 'gpuBrand', 'video_brand');
-  }
-
-  private getGpuModel(p: any): string {
-    return this.getField(p, 'gpu_model', 'GPU', 'gpu', 'video_card', 'gpuModel');
-  }
-
-  private getRamGb(p: any): string {
-    return this.getField(p, 'ram_gb', 'RAM (GB)', 'ram', 'memory_gb', 'Memory (GB)');
-  }
-
-  private getStorageType(p: any): string {
-    return this.getField(p, 'storage_type', 'Storage Type', 'storageType', 'drive_type');
-  }
-
-  private getStorageGb(p: any): string {
-    return this.getField(p, 'storage_gb', 'Storage (GB)', 'storage', 'capacity_gb', 'Drive Size (GB)');
-  }
-
-  private getPsuWatt(p: any): string {
-    return this.getField(p, 'psu_watt', 'PSU (W)', 'psu', 'wattage', 'Power (W)');
+    return '';
   }
 
   // -----------------------------
@@ -286,7 +251,6 @@ export class ProductlistComponent implements OnInit, OnDestroy {
     const term = (s.term || '').toLowerCase().trim();
     const selectedManu = (s.manufacturer || '').toLowerCase().trim();
 
-    // ✅ forráslista kategória szerint
     const source: any[] =
       state.activeCategory === 'car'
         ? (this.carProducts || [])
@@ -294,13 +258,13 @@ export class ProductlistComponent implements OnInit, OnDestroy {
           ? (this.computerProducts || [])
           : (this.allProducts || []);
 
-    // 1) alap keresés (term + manufacturer + ár)
+    // 1) alap keresés
     let result = source.filter((p: any) => {
       const manu = this.getManufacturer(p).toLowerCase();
       const hay = this.getText(p);
 
       const matchText = !term || hay.includes(term);
-      const matchManufacturer = !selectedManu || manu === selectedManu;
+      const matchManufacturer = !selectedManu || manu.includes(selectedManu);
 
       const price = this.getPriceNumber(p);
       const hasPrice = price !== null;
@@ -311,121 +275,85 @@ export class ProductlistComponent implements OnInit, OnDestroy {
       return matchText && matchManufacturer && matchMin && matchMax;
     });
 
-    // 2) carfilter csak car módban
-    if (state.activeCategory === 'car' && state.car) {
-      const cf = state.car;
-
-      const cfManu = (cf.manufacturer || '').toLowerCase().trim();
-      const cfModel = (cf.model || '').toLowerCase().trim();
-
-      const cfPriceMin = this.toNum(cf.priceMin);
-      const cfPriceMax = this.toNum(cf.priceMax);
-
-      const hpMin = this.toNum(cf.hpMin);
-      const hpMax = this.toNum(cf.hpMax);
-
-      const accelMin = this.toNum(cf.accelMin);
-      const accelMax = this.toNum(cf.accelMax);
-
-      const seatsMin = this.toNum(cf.seatsMin);
-      const seatsMax = this.toNum(cf.seatsMax);
-
-      const yearMin = this.toNum(cf.yearMin);
-      const yearMax = this.toNum(cf.yearMax);
-
-      result = result.filter((p: any) => {
-        const manu = this.getManufacturer(p).toLowerCase();
-        const model = String(p.model ?? p.Model ?? '').toLowerCase();
-
-        if (cfManu && !manu.includes(cfManu)) return false;
-        if (cfModel && !model.includes(cfModel)) return false;
-
-        const priceR = this.parseRange(this.getPriceRange(p));
-        if (cfPriceMin != null && (priceR.max == null || priceR.max < cfPriceMin)) return false;
-        if (cfPriceMax != null && (priceR.min == null || priceR.min > cfPriceMax)) return false;
-
-        const hpR = this.parseRange(this.getHorsepowerRange(p));
-        if (hpMin != null && (hpR.max == null || hpR.max < hpMin)) return false;
-        if (hpMax != null && (hpR.min == null || hpR.min > hpMax)) return false;
-
-        const accR = this.parseRange(this.getAccelerationRange(p));
-        if (accelMin != null && (accR.max == null || accR.max < accelMin)) return false;
-        if (accelMax != null && (accR.min == null || accR.min > accelMax)) return false;
-
-        const seats = this.toNum(this.getField(p, 'seats', 'Seats'));
-        if (seatsMin != null && (seats == null || seats < seatsMin)) return false;
-        if (seatsMax != null && (seats == null || seats > seatsMax)) return false;
-
-        const yearR = this.parseRange(this.getYearRange(p));
-        if (yearMin != null && (yearR.max == null || yearR.max < yearMin)) return false;
-        if (yearMax != null && (yearR.min == null || yearR.min > yearMax)) return false;
-
-        const bodyDb = this.getBodyType(p);
-        const body = this.mapBodyTypeFromDb(bodyDb);
-        if (cf.bodyType && body !== cf.bodyType) return false;
-
-        const fuel = this.normText(this.getFuelType(p));
-        if (cf.fuel && fuel !== this.normText(cf.fuel)) return false;
-
-        const tr = this.normText(this.getTransmission(p));
-        if (cf.transmission && tr !== this.normText(cf.transmission)) return false;
-
-        return true;
-      });
-    }
-
-    // 2/B) computerfilter csak computer módban  ✅ FIX: NEM a car blokkba van ágyazva
+    // 2/B) computerfilter csak computer módban
     if (state.activeCategory === 'computer' && state.computer) {
       const cf = state.computer;
 
       const cpuBrand = this.normText(cf.cpuBrand);
       const cpuModel = this.normText(cf.cpuModel);
 
-      const gpuBrand = this.normText(cf.gpuBrand);
+      const gpuBrand = this.normText(cf.gpuBrand);       // select value: nvidia/amd/intel
       const gpuModel = this.normText(cf.gpuModel);
 
       const ramMin = this.toNum(cf.ramMin);
       const ramMax = this.toNum(cf.ramMax);
 
-      const storageType = this.normText(cf.storageType);
-      const storageMin = this.toNum(cf.storageMin);
-      const storageMax = this.toNum(cf.storageMax);
+      const storageType = this.normText(cf.storageType); // select value: nvme/ssd/hdd
 
       const psuMin = this.toNum(cf.psuMin);
       const psuMax = this.toNum(cf.psuMax);
 
       result = result.filter((p: any) => {
-        // CPU
-        const pCpuBrand = this.normText(this.getCpuBrand(p));
-        const pCpuModel = this.normText(this.getCpuModel(p));
+        const t = String(p?.table_name ?? '').toLowerCase();
 
-        if (cpuBrand && !pCpuBrand.includes(cpuBrand)) return false;
-        if (cpuModel && !pCpuModel.includes(cpuModel)) return false;
+        // CPU -> processors
+        if (cpuBrand || cpuModel) {
+          if (t !== 'processors') return false;
 
-        // GPU
-        const pGpuBrand = this.normText(this.getGpuBrand(p));
-        const pGpuModel = this.normText(this.getGpuModel(p));
+          const pCpuBrand = this.normText(this.getField(p, 'manufacturer', 'Manufacturer', 'brand'));
+          const pCpuModel = this.normText(this.getField(p, 'model', 'Model', 'name', 'title'));
 
-        if (gpuBrand && pGpuBrand !== gpuBrand) return false;
-        if (gpuModel && !pGpuModel.includes(gpuModel)) return false;
+          if (cpuBrand && !pCpuBrand.includes(cpuBrand)) return false;
+          if (cpuModel && !pCpuModel.includes(cpuModel)) return false;
+        }
 
-        // RAM (GB)
-        const ramR = this.parseRange(this.getRamGb(p));
-        if (ramMin != null && (ramR.max == null || ramR.max < ramMin)) return false;
-        if (ramMax != null && (ramR.min == null || ramR.min > ramMax)) return false;
+        // GPU -> video_cards
+        if (gpuBrand || gpuModel) {
+          if (t !== 'video_cards') return false;
 
-        // Storage type + size
-        const pStType = this.normText(this.getStorageType(p));
-        if (storageType && pStType !== storageType) return false;
+          // ✅ GPU brand option fix: RTX/RX/ARC alapján
+          const inferredBrand = this.mapGpuBrandFromItem(p);
+          const pGpuModel = this.normText(this.getField(p, 'model', 'Model', 'name', 'title'));
 
-        const stR = this.parseRange(this.getStorageGb(p));
-        if (storageMin != null && (stR.max == null || stR.max < storageMin)) return false;
-        if (storageMax != null && (stR.min == null || stR.min > storageMax)) return false;
+          if (gpuBrand && inferredBrand !== gpuBrand) return false;
+          if (gpuModel && !pGpuModel.includes(gpuModel)) return false;
+        }
 
-        // PSU watt
-        const psuR = this.parseRange(this.getPsuWatt(p));
-        if (psuMin != null && (psuR.max == null || psuR.max < psuMin)) return false;
-        if (psuMax != null && (psuR.min == null || psuR.min > psuMax)) return false;
+        // RAM -> ram
+        if (ramMin != null || ramMax != null) {
+          if (t !== 'ram') return false;
+
+          // nálad RAM: capacity_gb (screenshot alapján)
+          const cap = this.toNum(this.getField(p, 'capacity_gb', 'Capacity (GB)', 'ram_gb', 'memory_gb'));
+          if (ramMin != null && (cap == null || cap < ramMin)) return false;
+          if (ramMax != null && (cap == null || cap > ramMax)) return false;
+        }
+
+        // ✅ Storage type option fix:
+        // - ha tudjuk azonosítani (nvme/ssd/hdd), akkor szűrünk
+        // - ha nem azonosítható az adott itemnél, nem dobjuk ki automatikusan
+        if (storageType) {
+          const inferredStorage = this.mapStorageTypeFromItem(p);
+          if (inferredStorage && inferredStorage !== storageType) return false;
+        }
+
+        // PSU -> psu (W)
+        if (psuMin != null || psuMax != null) {
+          if (t !== 'psu') return false;
+
+          const watt = this.toNum(this.getField(
+            p,
+            'wattage', 'Wattage',
+            'power_w', 'Power (W)',
+            'power', 'Power',
+            'watts', 'Watts',
+            'psu_watt', 'PSU (W)',
+            'w'
+          ));
+
+          if (psuMin != null && (watt == null || watt < psuMin)) return false;
+          if (psuMax != null && (watt == null || watt > psuMax)) return false;
+        }
 
         return true;
       });
@@ -452,11 +380,11 @@ export class ProductlistComponent implements OnInit, OnDestroy {
       });
     } else if (s.sort === 'name_asc') {
       result = [...result].sort((a: any, b: any) =>
-        String(a.model ?? '').localeCompare(String(b.model ?? ''), 'hu')
+        String((a as any).model ?? '').localeCompare(String((b as any).model ?? ''), 'hu')
       );
     } else if (s.sort === 'name_desc') {
       result = [...result].sort((a: any, b: any) =>
-        String(b.model ?? '').localeCompare(String(a.model ?? ''), 'hu')
+        String((b as any).model ?? '').localeCompare(String((a as any).model ?? ''), 'hu')
       );
     }
 

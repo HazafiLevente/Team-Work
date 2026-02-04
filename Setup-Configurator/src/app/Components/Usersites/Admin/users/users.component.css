@@ -1,0 +1,37 @@
+.admin-users {
+  margin-top: 32px;
+}
+
+.users-table {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.users-row {
+  display: grid;
+  grid-template-columns: 1.2fr 2fr 1fr 1.2fr 0.8fr 0.6fr;
+  gap: 10px;
+  padding: 12px;
+  border-radius: 14px;
+  background: rgba(255,255,255,0.04);
+}
+
+.users-row.header {
+  font-weight: 700;
+  background: none;
+}
+
+.users-row input,
+.users-row select {
+  background: rgba(0,0,0,0.3);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 10px;
+  padding: 6px 8px;
+  color: var(--text);
+}
+
+.admin-btn.small {
+  padding: 6px 10px;
+  font-size: 13px;
+}

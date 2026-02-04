@@ -3,7 +3,7 @@ import { BehaviorSubject } from 'rxjs';
 
 import { SearchFilters } from '../../../../Models/Filters/searchfilters.model';
 import { CarFilters } from '../../../Home/Filterparts/carfilter/carfilter.component';
-import { ComputerFilters } from '../../../Home/Filterparts/computerfilter/computerfilter.component';
+import { ComputerFilters } from '../../../Home/Filterparts/computerfilter/computerfilter/computerfilter.component';
 
 export type CategoryKey = 'all' | 'car' | 'computer' | 'ht' | 'instrument';
 
