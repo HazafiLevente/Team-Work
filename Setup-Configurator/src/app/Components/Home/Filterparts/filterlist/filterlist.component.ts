@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 
 import { CarfilterComponent, CarFilters } from '../carfilter/carfilter.component';
 import { ComputerfilterComponent, ComputerFilters } from '../computerfilter/computerfilter/computerfilter.component';
+import { HometheaterfilterComponent, HomeTheaterFilters } from '../hometheaterfilter/hometheaterfilter.component';
 
 import { ProductFiltersService, CategoryKey } from '../../../Services/Home/Shared/product-filters.service';
 
@@ -14,6 +15,7 @@ import { ProductFiltersService, CategoryKey } from '../../../Services/Home/Share
     ReactiveFormsModule,
     CarfilterComponent,
     ComputerfilterComponent,
+    HometheaterfilterComponent, // ✅ EZ HIÁNYZOTT
     CommonModule
   ],
   templateUrl: './filterlist.component.html',
@@ -51,5 +53,10 @@ export class FilterlistComponent {
 
   onComputerChange(data: ComputerFilters) {
     this.filtersService.setComputer(data);
+  }
+
+  // ✅ HT továbbítás a service felé
+  onHtChange(data: HomeTheaterFilters) {
+    this.filtersService.setHt(data);
   }
 }

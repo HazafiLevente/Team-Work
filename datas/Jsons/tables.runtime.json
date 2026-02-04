@@ -1,5 +1,5 @@
 {
-  "lastUpdated": 1770234721197,
+  "lastUpdated": 1770239099211,
   "tables": {
     "c_trumpets": {
       "columns": [
@@ -40,7 +40,6 @@
     },
     "effects_pedal": {
       "columns": [
-        "presets",
         "release_year",
         "ID",
         "analog",
@@ -49,6 +48,7 @@
         "buffered",
         "stereo",
         "midi",
+        "presets",
         "Manufacturer",
         "Model",
         "pedal_type",
@@ -100,7 +100,6 @@
     },
     "motherboard": {
       "columns": [
-        "SATAPorts",
         "USBPortsRear",
         "Price",
         "ID",
@@ -108,6 +107,7 @@
         "RamMaxMHZ",
         "RamMaxSizeGB",
         "M2Slots",
+        "SATAPorts",
         "manufacturer",
         "Model",
         "Socket",
@@ -653,9 +653,9 @@
     },
     "system_message[System]": {
       "columns": [
-        "id",
         "created_at",
         "sender",
+        "id",
         "title",
         "message",
         "target"
@@ -773,6 +773,7 @@
         "magnetic_shielding",
         "release_year",
         "created_at",
+        "terminals",
         "manufacturer",
         "model",
         "speaker_type",
@@ -781,7 +782,6 @@
         "frequency_response_hz",
         "recommended_amp_watt",
         "crossover_hz",
-        "terminals",
         "notes",
         "category"
       ]
@@ -926,9 +926,7 @@
         "created_at",
         "manufacturer",
         "model",
-        "amplifier_type",
-        "load_impedance_ohm",
-        "amp_class"
+        "amplifier_type"
       ]
     },
     "bass_shaker": {
@@ -965,8 +963,7 @@
     "coupe_cars": {
       "columns": [
         "ID",
-        "Seats",
-        "Avgprice"
+        "Seats"
       ]
     }
   }

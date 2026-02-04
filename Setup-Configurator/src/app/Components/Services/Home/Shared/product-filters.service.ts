@@ -4,6 +4,7 @@ import { BehaviorSubject } from 'rxjs';
 import { SearchFilters } from '../../../../Models/Filters/searchfilters.model';
 import { CarFilters } from '../../../Home/Filterparts/carfilter/carfilter.component';
 import { ComputerFilters } from '../../../Home/Filterparts/computerfilter/computerfilter/computerfilter.component';
+import { HomeTheaterFilters } from '../../../Home/Filterparts/hometheaterfilter/hometheaterfilter.component';
 
 export type CategoryKey = 'all' | 'car' | 'computer' | 'ht' | 'instrument';
 
@@ -12,6 +13,7 @@ export interface CombinedFilters {
   activeCategory: CategoryKey;   // melyik panel aktív
   car?: CarFilters;              // részletes autó filterek
   computer?: ComputerFilters;    // részletes PC filterek
+  ht?: HomeTheaterFilters;       // ✅ részletes HT filterek
 }
 
 const DEFAULT_SEARCH: SearchFilters = {
@@ -63,6 +65,21 @@ const DEFAULT_FILTERS: CombinedFilters = {
 
     psuMin: '',
     psuMax: '',
+  },
+
+  // ✅ HT default (ugyanazzal a shape-pel, mint a HT filter komponens)
+  ht: {
+    category: 'ht',
+    type: '',
+    manufacturer: '',
+    model: '',
+    minChannels: '',
+    maxChannels: '',
+    minPower: '',
+    maxPower: '',
+    bluetooth: false,
+    wifi: false,
+    earc: false,
   }
 };
 
@@ -102,6 +119,37 @@ export class ProductFiltersService {
     const cur = this._filters$.value;
     const next: CombinedFilters = { ...cur, computer };
     this.debug('setComputer', next);
+    this._filters$.next(next);
+  }
+
+  /** ✅ Hometheaterfilter hívja */
+  setHt(ht: HomeTheaterFilters) {
+    const cur = this._filters$.value;
+    const next: CombinedFilters = { ...cur, ht };
+    this.debug('setHt', next);
+    this._filters$.next(next);
+  }
+
+  /** ✅ csak HT reset */
+  clearHt() {
+    const cur = this._filters$.value;
+    const next: CombinedFilters = {
+      ...cur,
+      ht: {
+        category: 'ht',
+        type: '',
+        manufacturer: '',
+        model: '',
+        minChannels: '',
+        maxChannels: '',
+        minPower: '',
+        maxPower: '',
+        bluetooth: false,
+        wifi: false,
+        earc: false,
+      }
+    };
+    this.debug('clearHt', next);
     this._filters$.next(next);
   }
 
