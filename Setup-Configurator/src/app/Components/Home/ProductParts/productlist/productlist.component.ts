@@ -31,7 +31,6 @@ export class ProductlistComponent implements OnInit, OnDestroy {
   allProducts: Product[] = [];
   carProducts: any[] = [];       // autók részletes mezőkkel
   computerProducts: any[] = [];  // ✅ PC részletes mezőkkel (pc_items_view)
-  htProducts: any[] = []; // ✅ HT view-ból
   products: Product[] = [];      // (ha használod máshol, maradhat)
 
   filteredProducts: Product[] = [];
@@ -91,20 +90,7 @@ export class ProductlistComponent implements OnInit, OnDestroy {
       },
       error: err => console.error('❌ API ERROR (computers)', err)
     });
-
-    // 4) HOME THEATERS
-    this.productService.getHomeTheaters(this.PRODUCT_LIMIT).subscribe({
-      next: res => {
-        console.log('✅ ht products:', res.items?.length, res.items?.slice(0, 3));
-        this.htProducts = res.items || [];
-        this.applyFilters(this.filtersService.current);
-      },
-      error: err => console.error('❌ API ERROR (hometheaters)', err)
-    });
-
   }
-
-
 
   ngOnDestroy(): void {
     this.sub?.unsubscribe();
@@ -270,10 +256,7 @@ export class ProductlistComponent implements OnInit, OnDestroy {
         ? (this.carProducts || [])
         : state.activeCategory === 'computer'
           ? (this.computerProducts || [])
-          : state.activeCategory === 'ht'
-            ? (this.htProducts || [])
-            : (this.allProducts || []);
-
+          : (this.allProducts || []);
 
     // 1) alap keresés
     let result = source.filter((p: any) => {
@@ -375,88 +358,6 @@ export class ProductlistComponent implements OnInit, OnDestroy {
         return true;
       });
     }
-
-    // 2/C) HT filter csak ht módban
-    // 2/C) HT filter csak ht módban
-    if (state.activeCategory === 'ht' && (state as any).ht) {
-      const hf = (state as any).ht;
-
-      const type = this.normText(hf.type);
-      const manu = this.normText(hf.manufacturer);
-      const model = this.normText(hf.model);
-
-      const minP = this.toNum(hf.minPower);
-      const maxP = this.toNum(hf.maxPower);
-
-      const wantBt = !!hf.bluetooth;
-      const wantWifi = !!hf.wifi;
-      const wantEarc = !!hf.earc;
-
-      // 🔥 ezt igazítsd a te table_name-jeidhez (view-ból jön)
-      const typeToTables: Record<string, string[]> = {
-        speaker: ['front_speaker','back_speaker','side_speaker','center_speakers','ceiling_speakers','floor_speakers'],
-        sub: ['subwoofer','bass_shaker','bass_amplifier'],
-        processor: ['audio_processors'],
-        portable: ['portable_speakers'],
-        set: ['home_theater'],
-      };
-
-
-      const isTruthy = (val: any): boolean => {
-        if (val === true) return true;
-        if (val === false || val == null) return false;
-        const s = this.normText(val);
-        return s === 'true' || s === '1' || s === 'yes' || s === 'y';
-      };
-
-      result = result.filter((p: any) => {
-        const t = this.normText(p?.table_name ?? p?.table ?? '');
-
-        // type -> table szűrés
-        if (type) {
-          const allowed = typeToTables[type] || [];
-          if (allowed.length && !allowed.some(x => t.includes(this.normText(x)))) return false;
-        }
-
-        // manufacturer / model
-        if (manu) {
-          const pm = this.normText(this.getField(p, 'manufacturer', 'Manufacturer', 'brand', 'Brand'));
-          if (!pm.includes(manu)) return false;
-        }
-
-        if (model) {
-          const mdl = this.normText(this.getField(p, 'model', 'Model', 'name', 'title'));
-          if (!mdl.includes(model)) return false;
-        }
-
-        // power W
-        if (minP != null || maxP != null) {
-          const watt = this.toNum(this.getField(p, 'power_w', 'power', 'watt', 'wattage', 'watts'));
-          if (minP != null && (watt == null || watt < minP)) return false;
-          if (maxP != null && (watt == null || watt > maxP)) return false;
-        }
-
-        // connectivity: csak akkor szűrünk, ha be van pipálva
-        if (wantBt) {
-          const v = this.getField(p, 'bluetooth', 'bt', 'has_bluetooth', 'supports_bluetooth');
-          if (!isTruthy(v)) return false;
-        }
-
-        if (wantWifi) {
-          const v = this.getField(p, 'wifi', 'has_wifi', 'wireless_wifi', 'supports_wifi');
-          if (!isTruthy(v)) return false;
-        }
-
-        if (wantEarc) {
-          const v = this.getField(p, 'earc', 'hdmi_earc', 'supports_earc');
-          if (!isTruthy(v)) return false;
-        }
-
-        return true;
-      });
-    }
-
-
 
     // 3) rendezés
     if (s.sort === 'price_asc') {

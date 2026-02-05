@@ -1,11 +1,13 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { HttpClient } from '@angular/common/http'; // Importáld a HttpClient-et
+import { HttpClient, HttpClientModule } from '@angular/common/http';
+import { DragDropModule } from '@angular/cdk/drag-drop'; // ⬅️ Ez kell a huzigáláshoz
+
 
 @Component({
   selector: 'app-setup-roomlist',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, HttpClientModule, DragDropModule], // ⬅️ Importáld be ide
   templateUrl: './setup-roomlist.component.html',
   styleUrls: ['./setup-roomlist.component.css']
 })
@@ -13,24 +15,24 @@ export class SetupRoomlistComponent implements OnInit {
   userSetups: any[] = [];
   loading: boolean = true;
 
-  constructor(private http: HttpClient) { } // Injektáld be közvetlenül
+  constructor(private http: HttpClient) { }
 
   ngOnInit(): void {
-    // Közvetlen API hívás a backend felé
     this.http.get<any>('http://localhost:3000/api/setup', { withCredentials: true })
       .subscribe({
-        next: (response) => {
+        next: (response: any) => {
           this.userSetups = response.setups || [];
           this.loading = false;
+          // Itt a háttérben már megvan a darabszám: this.userSetups.length
+          console.log('Setupok száma:', this.userSetups.length);
         },
-        error: (err) => {
-          console.error('Hiba történt:', err);
+        error: (err: any) => {
+          console.error('Hiba:', err);
           this.loading = false;
         }
       });
   }
 
-  // Ez a getter javítja ki a HTML-ben lévő TS2339 hibát
   get setupCount(): number {
     return this.userSetups.length;
   }

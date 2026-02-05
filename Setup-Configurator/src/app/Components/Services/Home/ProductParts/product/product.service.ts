@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
+
 @Injectable({ providedIn: 'root' })
 export class ProductService {
   private readonly API = 'http://localhost:3000/api';
@@ -9,6 +10,7 @@ export class ProductService {
   constructor(private http: HttpClient) {}
 
   getProducts(limit = 20): Observable<{ items: any[] }> {
+    // ha a backend nem kezel limitet, akkor vedd ki
     const params = new HttpParams().set('limit', String(limit));
 
     return this.http.get<{ items: any[] }>(
@@ -18,11 +20,9 @@ export class ProductService {
   }
 
   getProductDetails(table: string, id: string) {
-    return this.http.get<{ item: any }>(
-      `${this.API}/items/${encodeURIComponent(table)}/${encodeURIComponent(id)}`,
-      { withCredentials: true }
-    );
+    return this.http.get<{ item: any }>(`http://localhost:3000/api/items/${encodeURIComponent(table)}/${encodeURIComponent(id)}`);
   }
+
 
   getComputers(limit = 50) {
     return this.http.get<{ items: any[] }>(
@@ -34,10 +34,11 @@ export class ProductService {
     );
   }
 
-  // ✅ FIX: baseUrl helyett API + withCredentials + params egységesen
-  getHomeTheaters(limit = 2000) {
+
+
+  getCars(limit = 50) {
     return this.http.get<{ items: any[] }>(
-      `${this.API}/hometheaters`,
+      `/api/cars`,
       {
         params: { limit },
         withCredentials: true
@@ -45,14 +46,8 @@ export class ProductService {
     );
   }
 
-  // ✅ FIX: itt is egységesen API-t használjunk (nálad eddig "/api/cars" volt)
-  getCars(limit = 50) {
-    return this.http.get<{ items: any[] }>(
-      `${this.API}/cars`,
-      {
-        params: { limit },
-        withCredentials: true
-      }
-    );
-  }
+
+
 }
+
+
