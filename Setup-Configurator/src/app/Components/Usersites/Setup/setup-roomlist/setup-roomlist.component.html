@@ -1,21 +1,14 @@
-<div class="roomlist-wrapper">
-  @if (!loading) {
-    <div class="counter-card">
-      <h3>Saját Konfigurációk</h3>
-      <p>Aktuálisan mentett szobák száma: <span class="count-badge">{{ setupCount }}</span></p>
-    </div>
-
-    <div class="list-container">
-      @for (setup of userSetups; track setup.id) {
-        <div class="room-item">
-          <span class="room-name">{{ setup.setup_name }}</span>
-          <span class="date-tag">{{ setup.created_at | date:'yyyy.MM.dd' }}</span>
+<div class="setup-workspace">
+  <div class="boundary-area" #boundary>
+    @if (!loading) {
+      <div class="drag-element" cdkDrag [cdkDragBoundary]="boundary">
+        <div class="drag-content">
+          <span>Új Setup Tervezése</span>
+          <small>(Összesen: {{ setupCount }} mentett)</small>
         </div>
-      } @empty {
-        <p>Még nincs mentett setupod.</p>
-      }
-    </div>
-  } @else {
-    <div class="loading">Adatok betöltése...</div>
-  }
+      </div>
+    } @else {
+      <div class="loader">Betöltés...</div>
+    }
+  </div>
 </div>
