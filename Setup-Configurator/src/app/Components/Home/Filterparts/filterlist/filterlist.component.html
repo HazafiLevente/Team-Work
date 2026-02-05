@@ -62,7 +62,10 @@
     (filtersChange)="onComputerChange($event)"
   ></app-computerfilter>
 
-  <!-- később -->
-  <!-- app-hometheaterfilter -->
+  <app-hometheaterfilter
+    *ngIf="active.ht"
+    (filtersChange)="onHtChange($event)"
+  ></app-hometheaterfilter>
+
   <!-- app-instrumentfilter -->
 </details>

@@ -1,9 +1,10 @@
 import { Component } from '@angular/core';
-import { ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { ReactiveFormsModule } from '@angular/forms';
 
 import { CarfilterComponent, CarFilters } from '../carfilter/carfilter.component';
 import { ComputerfilterComponent, ComputerFilters } from '../computerfilter/computerfilter/computerfilter.component';
+import { HometheaterfilterComponent, HomeTheaterFilters } from '../hometheaterfilter/hometheaterfilter.component';
 
 import { ProductFiltersService, CategoryKey } from '../../../Services/Home/Shared/product-filters.service';
 
@@ -11,10 +12,11 @@ import { ProductFiltersService, CategoryKey } from '../../../Services/Home/Share
   selector: 'app-filterlist',
   standalone: true,
   imports: [
+    CommonModule,
     ReactiveFormsModule,
     CarfilterComponent,
     ComputerfilterComponent,
-    CommonModule
+    HometheaterfilterComponent
   ],
   templateUrl: './filterlist.component.html',
   styleUrls: ['./filterlist.component.css']
@@ -34,10 +36,10 @@ export class FilterlistComponent {
     const cur = this.filtersService.current.activeCategory;
     const next: CategoryKey = (cur === key) ? 'all' : key;
 
-    // UI state
     Object.keys(this.active).forEach(k => {
       this.active[k as keyof typeof this.active] = false;
     });
+
     if (next !== 'all') {
       this.active[next as keyof typeof this.active] = true;
     }
@@ -51,5 +53,9 @@ export class FilterlistComponent {
 
   onComputerChange(data: ComputerFilters) {
     this.filtersService.setComputer(data);
+  }
+
+  onHtChange(data: HomeTheaterFilters) {
+    this.filtersService.setHt(data);
   }
 }
