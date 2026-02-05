@@ -27,6 +27,7 @@ export class ProductlistComponent implements OnInit, OnDestroy {
   carProducts: any[] = [];
   computerProducts: any[] = [];
   htProducts: any[] = [];
+  allInstruments: any[] = [];
   products: Product[] = [];
 
   filteredProducts: any[] = [];
@@ -41,51 +42,44 @@ export class ProductlistComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    // figyeli a filter state-et
     this.sub = this.filtersService.filters$.subscribe(f => this.applyFilters(f));
 
     // 1) ALL PRODUCTS
     this.productService.getProducts(this.PRODUCT_LIMIT).subscribe({
       next: res => {
         this.allProducts = res.items || [];
-        console.log('✅ ALL:', this.allProducts.length, this.allProducts[0]);
         this.loading = false;
         this.applyFilters(this.filtersService.current);
       },
-      error: err => {
-        console.error('❌ ALL ERROR', err);
-        this.loading = false;
-      }
+      error: err => { console.error('❌ ALL ERROR', err); this.loading = false; }
     });
 
     // 2) CARS
     this.productService.getCars(this.PRODUCT_LIMIT).subscribe({
-      next: res => {
-        this.carProducts = res.items || [];
-        console.log('✅ CARS:', this.carProducts.length, this.carProducts[0]);
-        this.applyFilters(this.filtersService.current);
-      },
+      next: res => { this.carProducts = res.items || []; this.applyFilters(this.filtersService.current); },
       error: err => console.error('❌ CARS ERROR', err)
     });
 
     // 3) COMPUTERS
     this.productService.getComputers(this.PRODUCT_LIMIT).subscribe({
-      next: res => {
-        this.computerProducts = res.items || [];
-        console.log('✅ PCS:', this.computerProducts.length, this.computerProducts[0]);
-        this.applyFilters(this.filtersService.current);
-      },
+      next: res => { this.computerProducts = res.items || []; this.applyFilters(this.filtersService.current); },
       error: err => console.error('❌ PCS ERROR', err)
     });
 
     // 4) HOME THEATERS
     this.productService.getHomeTheaters(this.PRODUCT_LIMIT).subscribe({
+      next: res => { this.htProducts = res.items || []; this.applyFilters(this.filtersService.current); },
+      error: err => console.error('❌ HT ERROR', err)
+    });
+
+    // ✅ 5) INSTRUMENTS (Ezt adtuk hozzá)
+    this.productService.getInstruments(this.PRODUCT_LIMIT).subscribe({
       next: res => {
-        this.htProducts = res.items || [];
-        console.log('✅ HT:', this.htProducts.length, this.htProducts[0]);
+        this.allInstruments = res.items || [];
+        console.log('✅ INSTRUMENTS:', this.allInstruments.length);
         this.applyFilters(this.filtersService.current);
       },
-      error: err => console.error('❌ HT ERROR', err)
+      error: err => console.error('❌ INSTRUMENTS ERROR', err)
     });
   }
 
@@ -204,7 +198,10 @@ export class ProductlistComponent implements OnInit, OnDestroy {
           ? (this.computerProducts || [])
           : state.activeCategory === 'ht'
             ? (this.htProducts || [])
-            : (this.allProducts || []);
+            : state.activeCategory === 'instrument' // ✅ ÚJ: Ha hangszer módban vagyunk
+              ? (this.allInstruments || [])
+              : (this.allProducts || []);
+
 
     let result = source.filter((p: any) => {
       const manu = this.getManufacturer(p).toLowerCase();
@@ -460,32 +457,39 @@ export class ProductlistComponent implements OnInit, OnDestroy {
 
     if (state.activeCategory === 'instrument' && state.instrument) {
       const inf = state.instrument;
-      const type = this.normText(inf.type);
+
+      // Szűrő feltételek előkészítése (normText-tel a kis/nagybetű érzéketlenség miatt)
+      const filterType = inf.itemType; // 'all' | 'instrument' | 'accessory'
+      const filterTableName = inf.tableName; // pl. 'electric_guitars'
       const manu = this.normText(inf.manufacturer);
       const model = this.normText(inf.model);
-      const strings = this.toNum(inf.strings);
+      const strings = inf.strings ? this.toNum(inf.strings) : null;
 
       result = result.filter((p: any) => {
-        const t = this.normText(p?.table_name ?? p?.category ?? '');
+        // 1. Kategória szűrés (instrument vagy accessory)
+        // A View-ban ez a 'type' oszlopban jön
+        if (filterType !== 'all' && p.type !== filterType) return false;
 
-        // Csak hangszer táblák (példa táblanevekkel)
-        const instrumentTables = ['guitars', 'drums', 'pianos', 'strings', 'wind_instruments'];
-        if (!instrumentTables.some(tab => t.includes(tab))) return false;
+        // 2. Konkrét tábla szűrés (ha a felhasználó választott alkategóriát)
+        if (filterTableName && p.table_name !== filterTableName) return false;
 
-        if (type && !t.includes(type)) return false;
-
+        // 3. Gyártó szűrés
         if (manu) {
-          const pm = this.normText(this.getField(p, 'manufacturer', 'brand', 'Brand'));
+          // A View-ban már egységesen 'manufacturer' a mezőnév!
+          const pm = this.normText(p.manufacturer || '');
           if (!pm.includes(manu)) return false;
         }
 
+        // 4. Modell szűrés
         if (model) {
-          const mdl = this.normText(this.getField(p, 'model', 'name', 'title'));
+          // A View-ban már egységesen 'model' a mezőnév!
+          const mdl = this.normText(p.model || '');
           if (!mdl.includes(model)) return false;
         }
 
-        if (strings != null) {
-          const pStrings = this.toNum(this.getField(p, 'strings', 'number_of_strings'));
+        // 5. Húrok száma (opcionális, csak ha van ilyen adat)
+        if (strings !== null && strings !== 0) {
+          const pStrings = this.toNum(p.strings || 0);
           if (pStrings !== strings) return false;
         }
 

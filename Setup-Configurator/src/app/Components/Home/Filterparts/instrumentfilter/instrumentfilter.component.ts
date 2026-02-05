@@ -5,14 +5,15 @@ import { Subscription } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
 export interface InstrumentFilters {
-  category: 'instrument';
-  type: string;
+  // A SQL View 'type' oszlopa: 'instrument' vagy 'accessory'
+  itemType: 'all' | 'instrument' | 'accessory';
+  // A SQL View 'table_name' oszlopa (pl. 'electric_guitars', 'keyboards')
+  tableName: string;
   manufacturer: string;
   model: string;
   minPrice: string;
   maxPrice: string;
   isUsed: boolean;
-  strings?: string; // Gitároknál pl. 6, 7, 12
 }
 
 @Component({
@@ -20,7 +21,7 @@ export interface InstrumentFilters {
   standalone: true,
   imports: [ReactiveFormsModule, CommonModule],
   templateUrl: './instrumentfilter.component.html',
-  styleUrls: ['./instrumentfilter.component.css'] // Használhatod a hometheater vagy car css-t
+  styleUrls: ['./instrumentfilter.component.css']
 })
 export class InstrumentfilterComponent implements OnInit, OnDestroy {
   @Output() filtersChange = new EventEmitter<InstrumentFilters>();
@@ -33,18 +34,19 @@ export class InstrumentfilterComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.form = this.fb.group({
-      type: '',
+      // Alapértelmezetten 'instrument', hogy a PC billentyűzetek ne zavarjanak be az elején
+      itemType: 'instrument',
+      tableName: '',
       manufacturer: '',
       model: '',
       minPrice: '',
       maxPrice: '',
-      isUsed: false,
-      strings: ''
+      isUsed: false
     });
 
     this.sub = this.form.valueChanges
       .pipe(
-        debounceTime(200),
+        debounceTime(300), // Kicsit emeltem rajta, hogy kíméljük a Supabase-t
         distinctUntilChanged((a, b) => JSON.stringify(a) === JSON.stringify(b))
       )
       .subscribe(() => this.emitFilters());
@@ -56,23 +58,29 @@ export class InstrumentfilterComponent implements OnInit, OnDestroy {
 
   emitFilters(): void {
     const raw = this.form.getRawValue();
+
     const cleaned: InstrumentFilters = {
-      category: 'instrument',
-      type: String(raw.type || ''),
+      itemType: raw.itemType as 'all' | 'instrument' | 'accessory',
+      tableName: String(raw.tableName || ''),
       manufacturer: String(raw.manufacturer || '').trim(),
       model: String(raw.model || '').trim(),
       minPrice: String(raw.minPrice || ''),
       maxPrice: String(raw.maxPrice || ''),
-      isUsed: !!raw.isUsed,
-      strings: String(raw.strings || '')
+      isUsed: !!raw.isUsed
     };
+
     this.filtersChange.emit(cleaned);
   }
 
   clear(): void {
     this.form.reset({
-      type: '', manufacturer: '', model: '',
-      minPrice: '', maxPrice: '', isUsed: false, strings: ''
+      itemType: 'instrument',
+      tableName: '',
+      manufacturer: '',
+      model: '',
+      minPrice: '',
+      maxPrice: '',
+      isUsed: false
     });
     this.clearClicked.emit();
   }

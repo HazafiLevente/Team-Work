@@ -1,0 +1,47 @@
+<div class="filter-container p-4 bg-dark text-white rounded shadow">
+  <form [formGroup]="form">
+    <div class="row g-3">
+
+      <div class="col-md-3">
+        <label class="form-label">Keresési kör</label>
+        <select formControlName="itemType" class="form-select bg-secondary text-white border-0">
+          <option value="all">Minden termék</option>
+          <option value="instrument">Csak Hangszerek</option>
+          <option value="accessory">Kiegészítők / Egyéb</option>
+        </select>
+      </div>
+
+      <div class="col-md-3">
+        <label class="form-label">Típus</label>
+        <select formControlName="tableName" class="form-select bg-secondary text-white border-0">
+          <option value="">Összes típus</option>
+          <optgroup label="Hangszerek">
+            <option value="electric_guitars">Elektromos gitár</option>
+            <option value="acoustic_guitars">Akusztikus gitár</option>
+            <option value="bassers">Basszusgitár</option>
+            <option value="acoustic_drums">Akusztikus dob</option>
+          </optgroup>
+          <optgroup label="Egyéb">
+            <option value="microphones">Mikrofon</option>
+            <option value="keyboards">PC Billentyűzet</option>
+          </optgroup>
+        </select>
+      </div>
+
+      <div class="col-md-3">
+        <label class="form-label">Gyártó</label>
+        <input type="text" formControlName="manufacturer" class="form-control bg-secondary text-white border-0" placeholder="Pl. Fender">
+      </div>
+
+      <div class="col-md-3">
+        <label class="form-label">Modell</label>
+        <input type="text" formControlName="model" class="form-control bg-secondary text-white border-0" placeholder="Pl. Stratocaster">
+      </div>
+
+      <div class="col-12 d-flex justify-content-end gap-2 mt-3">
+        <button type="button" (click)="clear()" class="btn btn-outline-light">Szűrők törlése</button>
+      </div>
+
+    </div>
+  </form>
+</div>
