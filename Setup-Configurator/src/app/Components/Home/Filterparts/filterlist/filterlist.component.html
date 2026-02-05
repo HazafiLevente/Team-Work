@@ -67,5 +67,8 @@
     (filtersChange)="onHtChange($event)"
   ></app-hometheaterfilter>
 
-  <!-- app-instrumentfilter -->
+  <app-instrumentfilter
+    *ngIf="active.instrument"
+    (filtersChange)="onInstrumentChange($event)"
+  ></app-instrumentfilter>
 </details>

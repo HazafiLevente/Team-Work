@@ -7,6 +7,7 @@ require("dotenv").config({
 
 const app = require("./app");
 const { startControl, ROLES } = require("./services/control");
+const { startSyncInterval } = require("./services/syncService");
 
 const PORT = process.env.PORT || 3000;
 

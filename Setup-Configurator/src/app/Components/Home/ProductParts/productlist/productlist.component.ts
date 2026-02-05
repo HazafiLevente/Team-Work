@@ -456,6 +456,43 @@ export class ProductlistComponent implements OnInit, OnDestroy {
       });
     }
 
+    // Az applyFilters végére, a többi if (state.activeCategory === ...) után:
+
+    if (state.activeCategory === 'instrument' && state.instrument) {
+      const inf = state.instrument;
+      const type = this.normText(inf.type);
+      const manu = this.normText(inf.manufacturer);
+      const model = this.normText(inf.model);
+      const strings = this.toNum(inf.strings);
+
+      result = result.filter((p: any) => {
+        const t = this.normText(p?.table_name ?? p?.category ?? '');
+
+        // Csak hangszer táblák (példa táblanevekkel)
+        const instrumentTables = ['guitars', 'drums', 'pianos', 'strings', 'wind_instruments'];
+        if (!instrumentTables.some(tab => t.includes(tab))) return false;
+
+        if (type && !t.includes(type)) return false;
+
+        if (manu) {
+          const pm = this.normText(this.getField(p, 'manufacturer', 'brand', 'Brand'));
+          if (!pm.includes(manu)) return false;
+        }
+
+        if (model) {
+          const mdl = this.normText(this.getField(p, 'model', 'name', 'title'));
+          if (!mdl.includes(model)) return false;
+        }
+
+        if (strings != null) {
+          const pStrings = this.toNum(this.getField(p, 'strings', 'number_of_strings'));
+          if (pStrings !== strings) return false;
+        }
+
+        return true;
+      });
+    }
+
     this.filteredProducts = result;
 
     // extra debug, hogy lásd tényleg van-e találat

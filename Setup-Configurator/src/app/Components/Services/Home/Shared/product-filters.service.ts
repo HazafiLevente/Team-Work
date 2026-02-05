@@ -5,15 +5,17 @@ import { SearchFilters } from '../../../../Models/Filters/searchfilters.model';
 import { CarFilters } from '../../../Home/Filterparts/carfilter/carfilter.component';
 import { ComputerFilters } from '../../../Home/Filterparts/computerfilter/computerfilter/computerfilter.component';
 import { HomeTheaterFilters } from '../../../Home/Filterparts/hometheaterfilter/hometheaterfilter.component';
+import { InstrumentFilters } from '../../../Home/Filterparts/instrumentfilter/instrumentfilter.component';
 
 export type CategoryKey = 'all' | 'car' | 'computer' | 'ht' | 'instrument';
 
 export interface CombinedFilters {
   search: SearchFilters;
-  activeCategory: CategoryKey;   // melyik panel aktív
-  car?: CarFilters;              // részletes autó filterek
-  computer?: ComputerFilters;    // részletes PC filterek
-  ht?: HomeTheaterFilters;       // ✅ részletes HT filterek
+  activeCategory: CategoryKey;
+  car?: CarFilters;
+  computer?: ComputerFilters;
+  ht?: HomeTheaterFilters;
+  instrument?: InstrumentFilters; // 👈 Új
 }
 
 const DEFAULT_SEARCH: SearchFilters = {
@@ -24,6 +26,7 @@ const DEFAULT_SEARCH: SearchFilters = {
   sort: ''
 };
 
+// EGYETLEN DEFAULT_FILTERS objektum, benne az összes kategóriával
 const DEFAULT_FILTERS: CombinedFilters = {
   search: DEFAULT_SEARCH,
   activeCategory: 'all',
@@ -49,25 +52,19 @@ const DEFAULT_FILTERS: CombinedFilters = {
 
   computer: {
     category: 'computer',
-
     cpuBrand: '',
     cpuModel: '',
-
     gpuBrand: '',
     gpuModel: '',
-
     ramMin: '',
     ramMax: '',
-
     storageType: '',
     storageMin: '',
     storageMax: '',
-
     psuMin: '',
     psuMax: '',
   },
 
-  // ✅ HT default (ugyanazzal a shape-pel, mint a HT filter komponens)
   ht: {
     category: 'ht',
     type: '',
@@ -80,9 +77,20 @@ const DEFAULT_FILTERS: CombinedFilters = {
     bluetooth: false,
     wifi: false,
     earc: false,
+  },
+
+  // Itt az instrument is!
+  instrument: {
+    category: 'instrument',
+    type: '',
+    manufacturer: '',
+    model: '',
+    minPrice: '',
+    maxPrice: '',
+    isUsed: false,
+    strings: ''
   }
 };
-
 @Injectable({ providedIn: 'root' })
 export class ProductFiltersService {
   private readonly _filters$ = new BehaviorSubject<CombinedFilters>(DEFAULT_FILTERS);
@@ -104,6 +112,12 @@ export class ProductFiltersService {
     const next: CombinedFilters = { ...cur, activeCategory };
     this.debug('setActiveCategory', next);
     this._filters$.next(next);
+  }
+
+
+  setInstrument(instrument: InstrumentFilters) {
+    const cur = this._filters$.value;
+    this._filters$.next({ ...cur, instrument });
   }
 
   /** Carfilter hívja */
