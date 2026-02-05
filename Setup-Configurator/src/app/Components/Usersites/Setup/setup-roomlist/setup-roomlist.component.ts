@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { DragDropModule } from '@angular/cdk/drag-drop'; // ⬅️ Ez kell a huzigáláshoz
 
+
 @Component({
   selector: 'app-setup-roomlist',
   standalone: true,

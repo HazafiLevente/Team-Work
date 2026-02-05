@@ -1,14 +1,26 @@
 <div class="setup-workspace">
   <div class="boundary-area" #boundary>
     @if (!loading) {
-      <div class="drag-element" cdkDrag [cdkDragBoundary]="boundary">
-        <div class="drag-content">
-          <span>Új Setup Tervezése</span>
-          <small>(Összesen: {{ setupCount }} mentett)</small>
+      @for (setup of userSetups; track setup.id) {
+        <div class="drag-element"
+             cdkDrag
+             [cdkDragBoundary]="boundary">
+
+          <div class="drag-content">
+            <span class="setup-name">{{ setup.setup_name }}</span>
+            <div class="drag-handle" cdkDragHandle>
+              <svg width="24px" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M10 9h4V5h3l-5-5-5 5h3v4zm0 6h4v4h3l-5 5-5-5h3v-4zm6-1h4v-3l5 5-5 5v-3h-4v-4zm-6 0H6v-3l-5 5 5 5v-3h4v-4z"></path>
+              </svg>
+            </div>
+          </div>
+
         </div>
-      </div>
+      } @empty {
+        <div class="no-data">Nincs még mentett setupod a huzigáláshoz.</div>
+      }
     } @else {
-      <div class="loader">Betöltés...</div>
+      <div class="loader">Adatok betöltése a Supabase-ből...</div>
     }
   </div>
 </div>
