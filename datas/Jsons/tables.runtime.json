@@ -1,10 +1,10 @@
 {
-  "lastUpdated": 1769973918044,
+  "lastUpdated": 1770304221637,
   "tables": {
     "c_trumpets": {
       "columns": [
-        "release_year",
         "ID",
+        "release_year",
         "Manufacturer",
         "Model",
         "series",
@@ -24,8 +24,8 @@
     },
     "hatchback_cars": {
       "columns": [
-        "Seats",
         "ID",
+        "Seats",
         "Manufacturer",
         "Model",
         "Price Range (Ft)",
@@ -40,7 +40,6 @@
     },
     "effects_pedal": {
       "columns": [
-        "release_year",
         "ID",
         "analog",
         "digital",
@@ -49,6 +48,7 @@
         "stereo",
         "midi",
         "presets",
+        "release_year",
         "Manufacturer",
         "Model",
         "pedal_type",
@@ -76,9 +76,9 @@
     },
     "acoustic_drums": {
       "columns": [
+        "ID",
         "hardware_included",
         "cymbals_included",
-        "ID",
         "Manufacturer",
         "Model",
         "series",
@@ -98,22 +98,6 @@
         "category"
       ]
     },
-    "coupe_cars": {
-      "columns": [
-        "ID",
-        "Seats",
-        "Manufacturer",
-        "Model",
-        "Price Range (Ft)",
-        "Body Type",
-        "Horsepower",
-        "Acceleration (s)",
-        "Fuel Type",
-        "Year",
-        "Transmission",
-        "category"
-      ]
-    },
     "motherboard": {
       "columns": [
         "ID",
@@ -124,7 +108,7 @@
         "SATAPorts",
         "USBPortsRear",
         "Price",
-        "Manufacturer",
+        "manufacturer",
         "Model",
         "Socket",
         "Chipset",
@@ -139,20 +123,7 @@
         "category"
       ]
     },
-    "processors": {
-      "columns": [
-        "ID",
-        "Threads",
-        "Clock",
-        "Cache",
-        "Price",
-        "Manufacturer",
-        "Model",
-        "Socket",
-        "category"
-      ]
-    },
-    "mpv_cars": {
+    "crossover_cars": {
       "columns": [
         "ID",
         "Manufacturer",
@@ -165,10 +136,24 @@
         "Fuel Type",
         "Year",
         "Transmission",
+        "category",
+        "Avgprice"
+      ]
+    },
+    "processors": {
+      "columns": [
+        "ID",
+        "Threads",
+        "Clock",
+        "Cache",
+        "Price",
+        "manufacturer",
+        "Model",
+        "Socket",
         "category"
       ]
     },
-    "crossover_cars": {
+    "mpv_cars": {
       "columns": [
         "ID",
         "Manufacturer",
@@ -209,7 +194,6 @@
     },
     "floor_speakers": {
       "columns": [
-        "created_at",
         "id",
         "way",
         "impedance_ohm",
@@ -223,6 +207,7 @@
         "weight_kg",
         "bass_reflex",
         "bi_wire",
+        "created_at",
         "manufacturer",
         "model",
         "speaker_type",
@@ -320,22 +305,6 @@
         "category"
       ]
     },
-    "video_cards": {
-      "columns": [
-        "ID",
-        "vram_gb",
-        "bus_bit",
-        "manufacturer",
-        "series",
-        "model",
-        "chipset",
-        "variant",
-        "memory_type",
-        "product_code",
-        "notes",
-        "category"
-      ]
-    },
     "cabrio_cars": {
       "columns": [
         "ID",
@@ -349,19 +318,20 @@
         "Fuel Type",
         "Year",
         "Transmission",
-        "category"
+        "category",
+        "Avgprice"
       ]
     },
     "electric_drums": {
       "columns": [
-        "usb_midi",
-        "bluetooth",
-        "recording",
-        "release_year",
         "ID",
         "shell_design",
         "kit_pieces",
         "cymbals",
+        "usb_midi",
+        "bluetooth",
+        "recording",
+        "release_year",
         "Manufacturer",
         "Model",
         "drum_type",
@@ -512,13 +482,7 @@
         "created_at",
         "manufacturer",
         "model",
-        "series",
-        "daw_integration",
-        "power_type",
-        "dimensions",
-        "compatible_os",
-        "notes",
-        "category"
+        "series"
       ]
     },
     "bassers": {
@@ -526,24 +490,7 @@
         "ID",
         "strings",
         "frets",
-        "release_year",
-        "Manufacturer",
-        "Model",
-        "series",
-        "bass_type",
-        "scale_length",
-        "body_material",
-        "neck_material",
-        "fretboard_material",
-        "pickups",
-        "electronics",
-        "bridge",
-        "finish",
-        "skill_level",
-        "genre_recommended",
-        "country_of_origin",
-        "notes",
-        "category"
+        "release_year"
       ]
     },
     "daws": {
@@ -554,19 +501,7 @@
         "rotary_encoders",
         "buttons",
         "touch_sensitive",
-        "release_year",
-        "Manufacturer",
-        "Model",
-        "controller_type",
-        "connection",
-        "display",
-        "daw_compatibility",
-        "platform_support",
-        "power_supply",
-        "skill_level",
-        "country_of_origin",
-        "notes",
-        "category"
+        "release_year"
       ]
     },
     "electric_guitars": {
@@ -574,17 +509,7 @@
         "ID",
         "Price",
         "strings",
-        "baritone",
-        "Manufacturer",
-        "Model",
-        "Guitar",
-        "Color",
-        "guitar_type",
-        "body_type",
-        "target_genre",
-        "target_level",
-        "notes",
-        "category"
+        "baritone"
       ]
     },
     "soundcards": {
@@ -608,18 +533,7 @@
         "bus_powered",
         "weight_kg",
         "release_year",
-        "created_at",
-        "manufacturer",
-        "model",
-        "generation",
-        "series",
-        "interface",
-        "adat_inputs",
-        "adat_outputs",
-        "dimensions",
-        "compatible_os",
-        "notes",
-        "category"
+        "created_at"
       ]
     },
     "guitarstrings": {
@@ -628,16 +542,7 @@
         "string_count",
         "coated",
         "price",
-        "created_at",
-        "manufacturer",
-        "model",
-        "gauge",
-        "material",
-        "winding",
-        "suitable_for",
-        "tension",
-        "notes",
-        "category"
+        "created_at"
       ]
     },
     "acoustic_guitars": {
@@ -649,36 +554,13 @@
         "electronics",
         "includes_case",
         "includes_accessories",
-        "created_at",
-        "manufacturer",
-        "model",
-        "body_shape",
-        "size",
-        "top_wood",
-        "back_sides_wood",
-        "neck_wood",
-        "fretboard_wood",
-        "finish",
-        "color",
-        "suitable_for",
-        "notes",
-        "category"
+        "created_at"
       ]
     },
     "wagon_cars": {
       "columns": [
         "ID",
-        "Seats",
-        "Year",
-        "Manufacturer",
-        "Model",
-        "Price Range (Ft)",
-        "Body Type",
-        "Horsepower",
-        "Acceleration (s)",
-        "Fuel Type",
-        "Transmission",
-        "category"
+        "Seats"
       ]
     },
     "system_message[System]": {
@@ -686,8 +568,6 @@
         "id",
         "created_at",
         "sender",
-        "title",
-        "message",
         "target"
       ]
     },
@@ -849,8 +729,6 @@
         "power_max_w",
         "weight_kg",
         "created_at",
-        "notes",
-        "category",
         "manufacturer",
         "model",
         "speaker_type",
@@ -859,7 +737,9 @@
         "dimensions_mm",
         "mounting",
         "color",
-        "recommended_room_size"
+        "recommended_room_size",
+        "notes",
+        "category"
       ]
     },
     "side_speaker": {
@@ -899,15 +779,7 @@
         "max_data_rate_gbps",
         "max_power_w",
         "active",
-        "bidirectional",
-        "cable_category",
-        "cable_type",
-        "standard",
-        "cable_structure",
-        "connector_a",
-        "connector_b",
-        "max_resolution",
-        "notes"
+        "bidirectional"
       ]
     },
     "subwoofer": {
@@ -922,20 +794,7 @@
         "width_mm",
         "depth_mm",
         "weight_kg",
-        "created_at",
-        "manufacturer",
-        "model",
-        "sub_type",
-        "driver_type",
-        "enclosure_type",
-        "frequency_response",
-        "amp_class",
-        "crossover_hz",
-        "inputs",
-        "outputs",
-        "recommended_room_size",
-        "notes",
-        "category"
+        "created_at"
       ]
     },
     "bass_amplifier": {
@@ -954,16 +813,6 @@
         "depth_mm",
         "weight_kg",
         "created_at",
-        "manufacturer",
-        "model",
-        "amplifier_type",
-        "load_impedance_ohm",
-        "amp_class",
-        "frequency_response",
-        "crossover_hz",
-        "inputs",
-        "outputs",
-        "cooling",
         "recommended_use",
         "notes",
         "category"
@@ -994,19 +843,125 @@
       "columns": [
         "id",
         "created_at",
-        "sender",
-        "title",
-        "message",
-        "target"
+        "sender"
       ]
     },
     "register_message[System]": {
       "columns": [
         "id",
         "target",
+        "created_at"
+      ]
+    },
+    "video_cards": {
+      "columns": [
+        "ID",
+        "vram_gb",
+        "bus_bit",
+        "manufacturer",
+        "series",
+        "model",
+        "chipset",
+        "variant",
+        "memory_type",
+        "product_code",
+        "notes",
+        "category"
+      ]
+    },
+    "coupe_cars": {
+      "columns": [
+        "ID",
+        "Seats",
+        "Manufacturer",
+        "Model",
+        "Price Range (Ft)",
+        "Body Type",
+        "Horsepower",
+        "Acceleration (s)",
+        "Fuel Type",
+        "Year",
+        "Transmission",
+        "category",
+        "Avgprice"
+      ]
+    },
+    "mice": {
+      "columns": [
+        "id",
+        "max_dpi",
+        "polling_rate_hz",
+        "buttons",
+        "weight_g",
+        "rgb",
+        "battery_life_hours",
         "created_at",
-        "title",
-        "message"
+        "manufacturer",
+        "model",
+        "connection_type",
+        "sensor",
+        "shape",
+        "grip_style",
+        "switch_type",
+        "feet_material",
+        "target_use",
+        "category",
+        "notes"
+      ]
+    },
+    "keyboards": {
+      "columns": [
+        "id",
+        "key_count",
+        "hot_swap",
+        "knob",
+        "display",
+        "battery_life_hours",
+        "polling_rate_hz",
+        "latency_ms",
+        "created_at",
+        "notes"
+      ]
+    },
+    "gaming_headsets": {
+      "columns": [
+        "id",
+        "driver_size_mm",
+        "surround",
+        "microphone",
+        "impedance_ohm",
+        "weight_g",
+        "battery_life_hours",
+        "created_at",
+        "manufacturer",
+        "model",
+        "connection_type",
+        "interface",
+        "surround_type",
+        "mic_type",
+        "mic_pattern",
+        "mic_quality"
+      ]
+    },
+    "storages": {
+      "columns": [
+        "id",
+        "capacity_gb",
+        "read_speed_mb",
+        "write_speed_mb",
+        "rpm",
+        "cache_mb",
+        "endurance_tbw",
+        "bootable",
+        "removable",
+        "release_year",
+        "created_at",
+        "notes",
+        "nand_type",
+        "manufacturer",
+        "model",
+        "storage_type",
+        "interface"
       ]
     }
   }
