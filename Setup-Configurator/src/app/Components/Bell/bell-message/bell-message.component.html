@@ -1,6 +1,6 @@
 <div class="chat-layout">
 
-  <!-- LEFT SIDE: CONVERSATIONS -->
+  <!-- LEFT SIDE -->
   <div class="chat-list">
     <div
       *ngFor="let c of conversations"
@@ -8,8 +8,9 @@
       [class.active]="c.key === activeKey"
       (click)="openConversation(c.key)">
       <div class="chat-avatar">
-        {{ c.title.charAt(0) }}
+        {{ (c.title || '?').charAt(0) }}
       </div>
+
       <div class="chat-info">
         <div class="chat-headers">
           <span class="chat-title">{{ c.title }}</span>
@@ -20,14 +21,15 @@
     </div>
   </div>
 
-  <!-- RIGHT SIDE: MESSAGES -->
+  <!-- RIGHT SIDE -->
   <div class="chat-area">
-    <div class="messages-container" #scrollMe>
-      <div *ngFor="let m of messages" class="message-row" [class.system]="activeKey === 'system'">
-        
-        <!-- SENDER INFO (Only for Register or if needed) -->
-        <div class="sender-name" *ngIf="activeKey.startsWith('register')">
-          {{ m.sender_name || 'System' }}
+    <div class="messages-container">
+
+      <div *ngFor="let m of messages" class="message-row">
+
+        <!-- System beszélgetésben sose mutass sendert -->
+        <div class="sender-name" *ngIf="activeKey !== 'system'">
+          {{ m.sender_name || 'Unknown' }}
         </div>
 
         <div class="message-bubble">
@@ -37,7 +39,7 @@
         </div>
 
       </div>
-      
+
       <div *ngIf="messages.length === 0" class="empty-state">
         Nincs üzenet ebben a beszélgetésben.
       </div>

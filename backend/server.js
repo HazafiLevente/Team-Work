@@ -21,6 +21,7 @@ console.log("ENV CHECK:", {
 startControl();
 startSyncInterval();
 
+
 app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
 });

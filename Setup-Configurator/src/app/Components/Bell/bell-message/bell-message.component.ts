@@ -12,19 +12,23 @@ import { CommonModule } from '@angular/common';
 })
 export class BellMessageComponent implements OnInit {
 
-  message: any;
+  conversations: any[] = [];
+  messages: any[] = [];
+  activeKey: string = 'system';
 
   constructor(
     private route: ActivatedRoute,
     private http: HttpClient
-  ) { }
-
-  conversations: any[] = [];
-  messages: any[] = [];
-  activeKey!: string;
+  ) {}
 
   ngOnInit() {
     this.loadConversations();
+
+    // ha url-ben változik a :key, kövessük
+    this.route.paramMap.subscribe(p => {
+      const k = p.get('key');
+      if (k) this.openConversation(k);
+    });
   }
 
   loadConversations() {
@@ -32,10 +36,11 @@ export class BellMessageComponent implements OnInit {
       .subscribe(res => {
         this.conversations = res || [];
 
-        const keyFromRoute = this.route.snapshot.paramMap.get('key');
+        // fallback: ha nincs semmi, akkor is legyen system
+        const first = this.conversations[0]?.key || 'system';
 
-        if (keyFromRoute) this.openConversation(keyFromRoute);
-        else if (this.conversations.length) this.openConversation(this.conversations[0].key);
+        const k = this.route.snapshot.paramMap.get('key');
+        this.openConversation(k || first);
       });
   }
 
@@ -46,10 +51,8 @@ export class BellMessageComponent implements OnInit {
       .subscribe(m => this.messages = m || []);
   }
 
-
-
-
   timeAgo(date: string): string {
+    if (!date) return '';
     const diff = Math.floor((Date.now() - new Date(date).getTime()) / 1000);
 
     if (diff < 60) return `${diff}s`;

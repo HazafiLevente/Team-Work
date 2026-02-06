@@ -24,7 +24,8 @@ export const routes: Routes = [
   { path: 'home', component: HomeComponent }, //{, canActivate: [authGuard] },
   { path: 'product/:table/:id', component: ProductPageComponent },
   { path: 'user/message/:type/:id', component: BellMessageComponent },
-
+  { path: 'user/bell/:key', component: BellMessageComponent },
+  { path: 'user/bell', redirectTo: 'user/bell/system', pathMatch: 'full' },
   {
     path: 'user',
     component: UsersiteComponent,

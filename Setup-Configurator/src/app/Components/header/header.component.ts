@@ -1,10 +1,10 @@
-import {Component, HostListener, OnInit} from '@angular/core';
+import { Component, HostListener, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
-import { AuthService } from '../Services/Auth/auth.service';
 import { Observable } from 'rxjs';
-import {BellService} from '../Services/Bell/bell.service';
-import { BellItem } from '../Services/Bell/bell.service';
+
+import { AuthService } from '../Services/Auth/auth.service';
+import { BellService, BellItem } from '../Services/Bell/bell.service';
 import { text } from '../../Constants/constants';
 
 @Component({
@@ -23,16 +23,11 @@ export class HeaderComponent implements OnInit {
   bellOpen$!: Observable<boolean>;
   bellItems$!: Observable<BellItem[]>;
 
-
-
-constructor(
+  constructor(
     public auth: AuthService,
     private router: Router,
     public bell: BellService
   ) {}
-
-
-
 
   ngOnInit() {
     this.user$ = this.auth.user$;
@@ -45,30 +40,23 @@ constructor(
     this.bell.toggle();
   }
 
-  markBellRead(n: BellItem, event: MouseEvent) {
-    event.stopPropagation();
-    this.bell.markRead({ source_table: n.source_table, id: n.id });
-  }
-
-
   @HostListener('document:click')
   closeAll() {
     this.dropdownOpen = false;
     this.bell.close();
   }
 
-  openMessage(n: BellItem, event: MouseEvent) {
+  openMessage(n: any, event: MouseEvent) {
     event.stopPropagation();
 
-    this.bell.markRead({ source_table: n.source_table, id: n.id });
-    this.bell.close();
+    // csak system_message esetén van értelmes "read"
+    if (n?.source_table === 'system_message[System]') {
+      this.bell.markReadSystem(Number(n.id));
+    }
 
+    this.bell.close();
     this.router.navigate(['/user/message']);
   }
-
-
-
-
 
 
 

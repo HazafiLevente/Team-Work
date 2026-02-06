@@ -1,5 +1,4 @@
 <header class="top-menu">
-
   <div class="brand" routerLink="/home">
     <div class="logo">SC</div>
     <div>
@@ -10,9 +9,6 @@
 
   <nav class="nav">
 
-
-
-    <!-- 🔐 GUEST -->
     <button
       *ngIf="!(user$ | async)"
       class="btn ghost"
@@ -20,8 +16,6 @@
       Connect
     </button>
 
-
-    <!-- 🔔 BELL -->
     <div
       *ngIf="user$ | async"
       class="bell-wrap"
@@ -29,7 +23,6 @@
 
       <i class="fas fa-bell"></i>
 
-      <!-- 🔽 DROPDOWN -->
       <div
         *ngIf="bellOpen$ | async"
         class="bell-dropdown"
@@ -37,7 +30,7 @@
 
         <div *ngIf="(bellItems$ | async)?.length === 0"
              class="bell-item muted">
-        {{text.headerComponentZeroNotification}}
+          {{text.headerComponentZeroNotification}}
         </div>
 
         <div
@@ -52,35 +45,29 @@
               : 'Register' }}
           </div>
 
-
           <div class="bell-message">
             {{ n.title }}
           </div>
 
-          <div class="bell-date">{{ n.created_at | date:'HH:mm' }}</div>
+          <div class="bell-date">
+            {{ n.created_at | date:'HH:mm' }}
+          </div>
         </div>
 
       </div>
     </div>
 
-
-
-    <!-- 👤 LOGGED IN USER -->
     <div
       *ngIf="user$ | async as user"
       class="user-wrap"
       (click)="toggleMenu(); $event.stopPropagation()">
 
-
-      <span class="username">
-        {{ user.username }}
-      </span>
+      <span class="username">{{ user.username }}</span>
 
       <div class="user-avatar">
         <span class="avatar-placeholder"></span>
       </div>
 
-      <!-- 🔽 DROPDOWN -->
       <div *ngIf="dropdownOpen" class="user-menu neon">
         <div class="menu-title">{{ user.username }}</div>
         <div class="muted">{{ user.email }}</div>
@@ -104,7 +91,7 @@
           🚪 Logout
         </div>
       </div>
-
     </div>
+
   </nav>
 </header>

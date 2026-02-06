@@ -1,65 +1,76 @@
 import { Injectable } from '@angular/core';
+import { BehaviorSubject, Observable } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject } from 'rxjs';
 
-export interface BellItem {
-  source_table: string;                 // ✅ kell
+export type BellItem = {
+  source_table: string;
   id: number;
-  title: string | null;
-  message: string | null;
+  type: string;
+  title: string;
+  message: string;
   created_at: string;
-  read: boolean;
-  type: 'system' | 'news' | 'register' | 'report' | 'messages';
 
-  conversation_key: string;
-  conversation_title: string;
-}
+  conversation_key?: string;
+  conversation_title?: string;
+
+  sender_id?: number | null;
+  receiver_id?: number | null;
+  sender_name?: string | null;
+  receiver_name?: string | null;
+
+  read?: boolean; // ha nincs a view-ban, akkor undefined marad
+};
 
 @Injectable({ providedIn: 'root' })
 export class BellService {
+  private openSub = new BehaviorSubject<boolean>(false);
+  open$: Observable<boolean> = this.openSub.asObservable();
 
-  private _open = new BehaviorSubject(false);
-  open$ = this._open.asObservable();
-
-  private _items = new BehaviorSubject<BellItem[]>([]);
-  items$ = this._items.asObservable();
+  private itemsSub = new BehaviorSubject<BellItem[]>([]);
+  items$: Observable<BellItem[]> = this.itemsSub.asObservable();
 
   constructor(private http: HttpClient) {
+    // induláskor töltsön
+    this.refresh();
   }
 
   toggle() {
-    const next = !this._open.value;
-    this._open.next(next);
+    const next = !this.openSub.value;
+    this.openSub.next(next);
 
-    if (next) this.load();
+    // amikor kinyitod, frissítsen
+    if (next) this.refresh();
   }
 
   close() {
-    this._open.next(false);
+    this.openSub.next(false);
   }
 
-  load() {
-    this.http
-      .get<BellItem[]>('/api/bell', {withCredentials: true})
-      .subscribe(data => this._items.next(data || []));
+  refresh() {
+    this.http.get<any>('/api/bell', { withCredentials: true }).subscribe({
+      next: (res) => {
+        const arr =
+          Array.isArray(res) ? res :
+            Array.isArray(res?.items) ? res.items :
+              Array.isArray(res?.from_view) ? res.from_view :
+                [];
+
+        this.itemsSub.next(arr);
+        console.log("🔔 bell refresh got:", res);
+        console.log("🔔 bell items array:", arr);
+      },
+      error: (err) => {
+        console.log("🔔 bell refresh error:", err);
+        this.itemsSub.next([]);
+      }
+    });
   }
 
-  // ✅ ÚJ: object param
-  markRead(item: { source_table: string; id: number } | null | undefined) {
-    if (!item?.source_table || !item?.id) return;
 
-    this.http.post(
-      '/api/bell/read',
-      {source_table: item.source_table, message_id: item.id},
-      {withCredentials: true}
-    ).subscribe(() => {
-      this._items.next(
-        this._items.value.map(n =>
-          (n.source_table === item.source_table && n.id === item.id)
-            ? {...n, read: true}
-            : n
-        )
-      );
+  markReadSystem(system_id: number) {
+    this.http.post('/api/bell/read', { system_id }, { withCredentials: true }).subscribe({
+      next: () => this.refresh(),
+      error: () => {}
     });
   }
 }

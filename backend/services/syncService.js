@@ -3,6 +3,30 @@ const path = require("path");
 const Database = require("better-sqlite3");
 const { supabase } = require("./supabase");
 
+/* ----------------------------------
+   CONFIG
+---------------------------------- */
+
+// extra cache-elt nevek (view-k is lehetnek)
+const EXTRA_CACHE_OBJECTS = [
+    "bell_messages_view"
+];
+
+// ezeket SOHA ne próbáljuk visszatölteni Supabase-be
+const NEVER_UPLOAD = new Set([
+    "bell_messages_view"
+]);
+
+// upload alapból OFF (mert a SQLite TEXT-esít, és sok táblád nem kompatibilis upsertre)
+const ENABLE_UPLOAD_TO_SUPABASE = false;
+
+// intervallum (ms)
+const INTERVAL_MS = 5000;
+
+
+/* ----------------------------------
+   LOG BUFFER
+---------------------------------- */
 
 function createLogBuffer(title) {
     return {
@@ -20,7 +44,6 @@ function createLogBuffer(title) {
         }
     };
 }
-
 
 /* ----------------------------------
    PATHS
@@ -49,16 +72,21 @@ db.pragma("foreign_keys = ON");
    HELPERS
 ---------------------------------- */
 
+function qIdent(name) {
+    // SQLite identifier escaping: " -> ""
+    return `"${String(name).replace(/"/g, '""')}"`;
+}
+
 function ensureTable(table, sampleRow) {
     const columns = Object.keys(sampleRow)
-        .map(col => `"${col}" TEXT`)
+        .map(col => `${qIdent(col)} TEXT`)
         .join(", ");
 
     const sql = `
-        CREATE TABLE IF NOT EXISTS "${table}" (
-            ${columns}
-        )
-    `;
+    CREATE TABLE IF NOT EXISTS ${qIdent(table)} (
+      ${columns}
+    )
+  `;
 
     db.prepare(sql).run();
 }
@@ -68,8 +96,8 @@ function normalizeValue(value) {
     if (value === null) return null;
 
     if (typeof value === "string") return value;
-    if (typeof value === "number") return value;
-    if (typeof value === "boolean") return value ? 1 : 0;
+    if (typeof value === "number") return String(value);      // ✅ mindig string, hogy ne csússzon a típus
+    if (typeof value === "boolean") return value ? "1" : "0"; // ✅ string
     if (typeof value === "bigint") return value.toString();
 
     if (value instanceof Date) return value.toISOString();
@@ -83,7 +111,7 @@ function normalizeValue(value) {
         }
     }
 
-    return null;
+    return String(value);
 }
 
 function loadTableList() {
@@ -94,15 +122,29 @@ function loadTableList() {
 
     try {
         const json = JSON.parse(fs.readFileSync(TABLE_LIST_FILE, "utf-8"));
-        return Array.isArray(json.tables) ? json.tables : [];
+        const base = Array.isArray(json.tables) ? json.tables : [];
+
+        // ✅ extra cache objects mindig legyenek benne
+        for (const x of EXTRA_CACHE_OBJECTS) {
+            if (!base.includes(x)) base.push(x);
+        }
+
+        return base;
     } catch (e) {
         console.error("❌ tables.list.json parse error:", e.message);
         return [];
     }
 }
 
+function tableExists(table) {
+    const row = db
+        .prepare(`SELECT name FROM sqlite_master WHERE type='table' AND name=?`)
+        .get(table);
+    return !!row;
+}
+
 /* ----------------------------------
-   SYNC FROM SUPABASE
+   SYNC FROM SUPABASE  (Supabase -> SQLite)
 ---------------------------------- */
 
 async function syncFromSupabase() {
@@ -135,14 +177,14 @@ async function syncFromSupabase() {
         }
 
         ensureTable(table, data[0]);
-        db.prepare(`DELETE FROM "${table}"`).run();
+        db.prepare(`DELETE FROM ${qIdent(table)}`).run();
 
         const cols = Object.keys(data[0]);
         const stmt = db.prepare(`
-            INSERT INTO "${table}"
-            (${cols.map(c => `"${c}"`).join(",")})
-            VALUES (${cols.map(() => "?").join(",")})
-        `);
+      INSERT INTO ${qIdent(table)}
+      (${cols.map(c => qIdent(c)).join(",")})
+      VALUES (${cols.map(() => "?").join(",")})
+    `);
 
         const tx = db.transaction(rows => {
             for (const row of rows) {
@@ -165,9 +207,9 @@ async function syncFromSupabase() {
     log.flush();
 }
 
-
 /* ----------------------------------
-   SYNC TO SUPABASE (ALAP VERZIÓ)
+   SYNC TO SUPABASE  (SQLite -> Supabase)
+   ⚠️ erősen opcionális, mert a SQLite TEXT-esít.
 ---------------------------------- */
 
 async function syncToSupabase() {
@@ -176,14 +218,25 @@ async function syncToSupabase() {
     const tables = loadTableList();
 
     for (const table of tables) {
+        if (NEVER_UPLOAD.has(table)) continue; // ✅ view / tiltott object skip
+
+        if (!tableExists(table)) continue;
+
         let rows;
         try {
-            rows = db.prepare(`SELECT * FROM "${table}"`).all();
+            rows = db.prepare(`SELECT * FROM ${qIdent(table)}`).all();
         } catch {
             continue;
         }
 
         if (!rows.length) continue;
+
+        // ⚠️ ha nincs id, nem upsertelünk
+        const hasId = rows[0] && Object.prototype.hasOwnProperty.call(rows[0], "id");
+        if (!hasId) {
+            console.warn(`⚠️ skip upload (${table}): no "id" column`);
+            continue;
+        }
 
         const { error } = await supabase
             .from(table)
@@ -202,18 +255,22 @@ async function syncToSupabase() {
 ---------------------------------- */
 
 function startSyncInterval() {
-    console.log("🚀 Sync Service started (5s interval)");
+    console.log(`🚀 Sync Service started (${INTERVAL_MS}ms interval)`);
+    console.log(`📌 Upload to Supabase: ${ENABLE_UPLOAD_TO_SUPABASE ? "ON" : "OFF"}`);
 
     syncFromSupabase().catch(console.error);
 
     setInterval(async () => {
         try {
             await syncFromSupabase();
-            await syncToSupabase();
+
+            if (ENABLE_UPLOAD_TO_SUPABASE) {
+                await syncToSupabase();
+            }
         } catch (err) {
             console.error("❌ Sync error:", err.message);
         }
-    }, 5000);
+    }, INTERVAL_MS);
 }
 
 module.exports = { startSyncInterval };
