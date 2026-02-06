@@ -2,6 +2,9 @@
   "exclude_table_patterns": [
     "[Setup]",
     "[Auth]",
-    "[Setups]"
+    "[Setups]",
+    "[System]",
+    "[Lists]",
+    "[Cables]"
   ]
 }

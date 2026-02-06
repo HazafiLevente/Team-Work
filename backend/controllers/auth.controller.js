@@ -50,6 +50,10 @@ exports.register = async (req, res) => {
 
     res.json({ success: true });
 
+    // auth uid = req.user.id (UUID)
+
+
+
 };
 
 

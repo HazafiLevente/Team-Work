@@ -1,240 +1,168 @@
 const { supabase } = require("../services/supabase");
 
+// GET /api/bell/
 exports.list = async (req, res) => {
-    const role = req.user.role.toLowerCase();
-    const userId = String(req.user.id);
+    try {
+        const userId = Number(req.user.id);
 
-    const tables = [
-        { table: "system_message[System]", type: "system" },
-        { table: "news_message[System]", type: "news" },
-        { table: "register_message[System]", type: "register" }
-    ];
-
-    let all = [];
-
-    for (const t of tables) {
-        const { data } = await supabase
-            .from(t.table)
-            .select("id, title, message, created_at, target")
-            .order("created_at", { ascending: false })
-            .limit(20);
-
-        const filtered = (data || []).filter(m => {
-            // 1️⃣ ha VAN target → csak annak
-            if (m.target !== null && m.target !== undefined) {
-                const trg = String(m.target).toLowerCase();
-                return (
-                    trg === "all" ||
-                    trg === role ||
-                    trg === userId
-                );
-            }
-
-            // 2️⃣ ha NINCS target → típus alapú fallback
-            if (t.type === "register") {
-                // register mindig user-specifikus
-                return false;
-            }
-
-            // system / news target nélkül → mindenkinek
-            return true;
-        });
-
-        all.push(
-            ...filtered.map(m => ({
-                ...m,
-                type: t.type
-            }))
-        );
-    }
-
-    all.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-
-    const ids = all.map(m => m.id);
-
-    const { data: reads } = await supabase
-        .from("system_reads[System]")
-        .select("message_id")
-        .eq("user_id", userId)
-        .in("message_id", ids);
-
-    const readSet = new Set((reads || []).map(r => r.message_id));
-
-    res.json(
-        all.map(m => ({
-            ...m,
-            read: readSet.has(m.id)
-        }))
-    );
-};
-
-
-
-exports.read = async (req, res) => {
-    const userId = req.user.id;
-    const { messageId } = req.body;
-
-    if (!messageId) {
-        return res.status(400).json({ error: "Missing messageId" });
-    }
-
-    const { data: exists } = await supabase
-        .from("system_reads[System]")
-        .select("id")
-        .eq("user_id", userId)
-        .eq("message_id", messageId)
-        .limit(1);
-
-    if (exists?.length) {
-        return res.json({ success: true });
-    }
-
-    const { error } = await supabase
-        .from("system_reads[System]")
-        .insert([{
-            user_id: userId,
-            message_id: messageId,
-            read_at: new Date().toISOString()
-        }]);
-
-    if (error) {
-        return res.status(500).json({ error: error.message });
-    }
-
-    res.json({ success: true });
-};
-exports.getOne = async (req, res) => {
-    const { type, id } = req.params;
-
-    const tableMap = {
-        system: "system_message[System]",
-        news: "news_message[System]",
-        register: "register_message[System]"
-    };
-
-    const table = tableMap[type];
-    if (!table) {
-        return res.status(400).json({ error: "Invalid message type" });
-    }
-
-    const { data } = await supabase
-        .from(table)
-        .select("*")
-        .eq("id", id)
-        .single();
-
-    if (!data) {
-        return res.status(404).json({ error: "Message not found" });
-    }
-
-    let senderName = "System";
-
-    if (data.sender) {
-        const { data: user } = await supabase
-            .from("user[Auth]")
-            .select("UserName")
-            .eq("ID", data.sender)
-            .single();
-
-        if (user?.UserName) {
-            senderName = user.UserName;
-        }
-    }
-
-    res.json({
-        ...data,
-        type,
-        sender_name: senderName
-    });
-};
-
-
-exports.conversations = async (req, res) => {
-    const userId = String(req.user.id);
-    const role = req.user.role.toLowerCase();
-
-    const tables = [
-        { table: "system_message[System]", type: "system" },
-        { table: "news_message[System]", type: "news" },
-        { table: "register_message[System]", type: "register" }
-    ];
-
-    let conversations = new Map();
-
-    for (const t of tables) {
-        const { data } = await supabase
-            .from(t.table)
-            .select("id, title, created_at, target, sender_name")
+        const { data: items, error } = await supabase
+            .from("bell_messages_view")
+            .select("*")
             .order("created_at", { ascending: false });
 
-        for (const m of data || []) {
+        if (error) return res.status(500).json({ error: error.message });
 
-            // 🔐 target szűrés
-            if (m.target && !["all", role, userId].includes(String(m.target).toLowerCase())) {
-                continue;
-            }
+        const { data: reads, error: rErr } = await supabase
+            .from("system_reads[System]")
+            .select("source_table, message_id")
+            .eq("user_id", userId);
 
-            let key;
-            let label;
+        if (rErr) return res.status(500).json({ error: rErr.message });
 
-            if (t.type === "system") {
-                key = "system";
-                label = "System";
-            } else if (t.type === "news") {
-                key = "news";
-                label = "News";
-            } else if (t.type === "register") {
-                key = `register:${userId}`;
-                label = "Regisztráció";
-            }
+        const readSet = new Set((reads || []).map(r => `${r.source_table}:${r.message_id}`));
 
-            if (!conversations.has(key)) {
-                conversations.set(key, {
-                    key,
-                    type: t.type,
-                    title: label,
-                    lastMessage: m.title,
-                    lastAt: m.created_at
+        const merged = (items || []).map(x => ({
+            ...x,
+            read: readSet.has(`${x.source_table}:${x.id}`)
+        }));
+
+        res.json(merged);
+    } catch (e) {
+        res.status(500).json({ error: String(e) });
+    }
+};
+
+// POST /api/bell/read
+exports.read = async (req, res) => {
+    try {
+        const userId = Number(req.user.id);
+
+        const source_table = req.body.source_table ?? req.body.sourceTable;
+        const message_id = req.body.message_id ?? req.body.messageId;
+
+        if (!source_table || !message_id) {
+            return res.status(400).json({ error: "Missing source_table or message_id" });
+        }
+
+        const { error } = await supabase
+            .from("system_reads[System]")
+            .insert({
+                user_id: userId,
+                source_table,
+                message_id: Number(message_id),
+                created_at: new Date().toISOString()
+            });
+
+        if (error) return res.status(500).json({ error: error.message });
+
+        res.json({ success: true });
+    } catch (e) {
+        res.status(500).json({ error: String(e) });
+    }
+};
+
+// GET /api/bell/:type/:id  (ha kell még)
+exports.getOne = async (req, res) => {
+    try {
+        const { type, id } = req.params;
+
+        const { data, error } = await supabase
+            .from("bell_messages_view")
+            .select("*")
+            .eq("type", type)
+            .eq("id", Number(id))
+            .limit(1)
+            .maybeSingle();
+
+        if (error) return res.status(500).json({ error: error.message });
+
+        res.json(data || null);
+    } catch (e) {
+        res.status(500).json({ error: String(e) });
+    }
+};
+
+// GET /api/bell/conversations
+exports.conversations = async (req, res) => {
+    try {
+        const userId = Number(req.user.id);
+
+        const { data: items, error } = await supabase
+            .from("bell_messages_view")
+            .select("source_table,id,title,message,created_at,conversation_key,conversation_title")
+            .order("created_at", { ascending: false });
+
+        if (error) return res.status(500).json({ error: error.message });
+
+        const { data: reads, error: rErr } = await supabase
+            .from("system_reads[System]")
+            .select("source_table, message_id")
+            .eq("user_id", userId);
+
+        if (rErr) return res.status(500).json({ error: rErr.message });
+
+        const readSet = new Set((reads || []).map(r => `${r.source_table}:${r.message_id}`));
+
+        const map = new Map();
+
+        for (const row of (items || [])) {
+            const isRead = readSet.has(`${row.source_table}:${row.id}`);
+
+            if (!map.has(row.conversation_key)) {
+                map.set(row.conversation_key, {
+                    key: row.conversation_key,
+                    title: row.conversation_title,
+                    lastAt: row.created_at,
+                    lastMessage: row.title || row.message || "",
+                    unreadCount: isRead ? 0 : 1
                 });
+            } else {
+                const cur = map.get(row.conversation_key);
+                if (!isRead) cur.unreadCount += 1;
             }
         }
-    }
 
-    res.json(Array.from(conversations.values()));
+        res.json([...map.values()]);
+    } catch (e) {
+        res.status(500).json({ error: String(e) });
+    }
 };
 
-
+// GET /api/bell/conversation/:key
 exports.conversation = async (req, res) => {
-    const { key } = req.params;
-    const userId = String(req.user.id);
+    try {
+        const userId = Number(req.user.id);
+        const key = req.params.key;
 
-    if (key === "system") {
-        const { data } = await supabase
-            .from("system_message[System]")
-            .select("*")
-            .order("created_at");
-        return res.json(data);
+        const { data: items, error } = await supabase
+            .from("bell_messages_view")
+            .select("source_table,id,title,message,created_at,conversation_key,conversation_title,type")
+            .eq("conversation_key", key)
+            .order("created_at", { ascending: true });
+
+        if (error) return res.status(500).json({ error: error.message });
+
+        const { data: reads, error: rErr } = await supabase
+            .from("system_reads[System]")
+            .select("source_table, message_id")
+            .eq("user_id", userId);
+
+        if (rErr) return res.status(500).json({ error: rErr.message });
+
+        const readSet = new Set((reads || []).map(r => `${r.source_table}:${r.message_id}`));
+
+        const merged = (items || []).map(x => ({
+            id: x.id,
+            title: x.title,
+            message: x.message,
+            created_at: x.created_at,
+            type: x.type,
+            source_table: x.source_table,
+            read: readSet.has(`${x.source_table}:${x.id}`)
+        }));
+
+        res.json(merged);
+    } catch (e) {
+        res.status(500).json({ error: String(e) });
     }
-
-    if (key === "news") {
-        const { data } = await supabase
-            .from("news_message[System]")
-            .select("*")
-            .order("created_at");
-        return res.json(data);
-    }
-
-    if (key.startsWith("register")) {
-        const { data } = await supabase
-            .from("register_message[System]")
-            .select("*")
-            .eq("target", userId)
-            .order("created_at");
-        return res.json(data);
-    }
-
-    res.status(400).json({ error: "Invalid conversation key" });
 };
-
-
-

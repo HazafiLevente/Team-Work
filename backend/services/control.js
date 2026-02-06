@@ -4,13 +4,42 @@ const { createClient } = require("@supabase/supabase-js");
 
 require("dotenv").config();
 
-
-
-
 const filler = require("../../datas/Jsons/filler.json");
 
-const OUT_FILE = path.join(__dirname, "../../datas","Jsons","tables.runtime.json");
+const OUT_FILE = path.join(__dirname, "../../datas", "Jsons", "tables.runtime.json");
 
+function createControlLog() {
+    return {
+        lines: [],
+        add(l) {
+            this.lines.push(l);
+        },
+        flush() {
+            console.log("\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+            console.log("📘 CONTROL / SCHEMA REFRESH");
+            console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+            this.lines.forEach(l => console.log(l));
+            console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n");
+        }
+    };
+}
+
+
+
+
+const ALL_TABLES_FILE = path.join(
+    __dirname,
+    "../../datas",
+    "Jsons",
+    "tables.all.json"
+);
+
+const TABLE_LIST_FILE = path.join(
+    __dirname,
+    "../../datas",
+    "Jsons",
+    "tables.list.json"
+);
 
 const supabase = createClient(
     process.env.SUPABASE_URL,
@@ -22,59 +51,56 @@ const supabase = createClient(
 ====================================================== */
 
 function isExcluded(name) {
-    return filler.exclude_table_patterns.some(p =>
-        name.includes(p)
-    );
-}
-
-async function getTableColumns(table) {
-    const { data, error } = await supabase
-        .from("information_schema.columns")
-        .select("column_name")
-        .eq("table_schema", "public")
-        .eq("table_name", table);
-
-    if (error || !Array.isArray(data)) {
-        console.warn(`⚠️ column load failed for ${table}`);
-        return [];
-    }
-
-    return data.map(c => c.column_name);
+    return filler.exclude_table_patterns.some(p => name.includes(p));
 }
 
 async function refreshTables() {
+    const log = createControlLog();
+
     const { data, error } = await supabase.rpc("get_all_tables");
     if (error || !Array.isArray(data)) {
-        console.error("❌ table list load error", error);
+        log.add(`❌ table list load error`);
+        log.flush();
         return;
     }
 
-    const tableNames = data
-        .map(t => t.table_name)
-        .filter(name => name && !isExcluded(name));
+    const allTableNames = data.map(t => t.table_name).filter(Boolean);
+    const runtimeTableNames = allTableNames.filter(name => !isExcluded(name));
+
+    fs.writeFileSync(ALL_TABLES_FILE, JSON.stringify({
+        lastUpdated: Date.now(),
+        tables: allTableNames
+    }, null, 2));
 
     const columnMap = await getAllTableColumns();
-
     const tables = {};
 
-    tableNames.forEach(table => {
-        const columns = columnMap[table];
-        if (!columns || !columns.length) return;
-
-        tables[table] = { columns };
+    runtimeTableNames.forEach(table => {
+        if (columnMap[table]?.length) {
+            tables[table] = { columns: columnMap[table] };
+        }
     });
 
-    fs.writeFileSync(
-        OUT_FILE,
-        JSON.stringify({
-            lastUpdated: Date.now(),
-            tables
-        }, null, 2)
-    );
+    fs.writeFileSync(OUT_FILE, JSON.stringify({
+        lastUpdated: Date.now(),
+        tables
+    }, null, 2));
 
-    console.log(
-        `🔄 [CONTROL] tables refreshed: ${Object.keys(tables).length}`
-    );
+    fs.writeFileSync(TABLE_LIST_FILE, JSON.stringify({
+        lastUpdated: Date.now(),
+        tables: allTableNames
+    }, null, 2));
+
+    log.add(`🔄 táblák frissítve`);
+    log.add(`   összes: ${allTableNames.length}`);
+    log.add(`   runtime: ${Object.keys(tables).length}`);
+    log.add(`📦 fájlok:`);
+    log.add(`   ✔ tables.all.json`);
+    log.add(`   ✔ tables.runtime.json`);
+    log.add(`   ✔ tables.list.json`);
+
+    log.flush();
+
     updateProductsHomeFunction(tables);
 }
 
@@ -88,11 +114,8 @@ async function getAllTableColumns() {
     }
 
     const map = {};
-
     data.forEach(row => {
-        if (!map[row.table_name]) {
-            map[row.table_name] = [];
-        }
+        if (!map[row.table_name]) map[row.table_name] = [];
         map[row.table_name].push(row.column_name);
     });
 
@@ -100,41 +123,27 @@ async function getAllTableColumns() {
 }
 
 function detectColumns(columns) {
-    const lower = columns.map(c => c.toLowerCase());
-
     const id =
-        columns.find(c =>
-            ["id", "ID"].includes(c)
-        ) || "'0'";
+        columns.find(c => ["id", "ID"].includes(c)) || "'0'";
 
     const manufacturer =
-        columns.find(c =>
-            ["manufacturer", "brand", "maker"].includes(c.toLowerCase())
-        );
+        columns.find(c => ["manufacturer", "brand", "maker"].includes(c.toLowerCase()));
 
     const model =
-        columns.find(c =>
-            ["model", "name", "product_name", "series"].includes(c.toLowerCase())
-        );
+        columns.find(c => ["model", "name", "product_name", "series"].includes(c.toLowerCase()));
 
     const price =
-        columns.find(c =>
-            ["price", "cost", "price_huf"].includes(c.toLowerCase())
-        );
+        columns.find(c => ["price", "cost", "price_huf"].includes(c.toLowerCase()));
 
-    // 🔥 CSAK A MANUFACTURER + MODEL KÖTELEZŐ
+    // CSAK manufacturer + model kell
     if (!manufacturer || !model) return null;
 
-    return {
-        id,
-        manufacturer,
-        model,
-        price: price || null
-    };
+    return { id, manufacturer, model, price: price || null };
 }
 
-
-
+function q(col) {
+    return `"${col.replace(/"/g, '""')}"`;
+}
 
 function buildUnionSQL(tablesMeta) {
     const blocks = [];
@@ -149,24 +158,13 @@ function buildUnionSQL(tablesMeta) {
                 ${cols.id === "'0'" ? "'0'" : q(cols.id)}::text as id,
                 ${q(cols.manufacturer)}::text as manufacturer,
                 ${q(cols.model)}::text as model,
-                ${cols.price
-            ? q(cols.price) + "::numeric"
-            : "null::numeric"} as price
+                ${cols.price ? q(cols.price) + "::numeric" : "null::numeric"} as price
             from "${table}"
         `.trim());
-
     }
 
     return blocks.join("\nunion all\n");
 }
-
-
-
-
-function q(col) {
-    return `"${col.replace(/"/g, '""')}"`;
-}
-
 
 function buildProductsHomeSQL(unionSQL) {
     return `
@@ -194,18 +192,13 @@ $$;
 `;
 }
 
-
-
 async function updateProductsHomeFunction(tablesMeta) {
     const unionSQL = buildUnionSQL(tablesMeta);
     if (!unionSQL) return;
 
     const sql = buildProductsHomeSQL(unionSQL);
 
-    const { error } = await supabase.rpc(
-        "update_products_home",
-        { sql }
-    );
+    const { error } = await supabase.rpc("update_products_home", { sql });
 
     if (error) {
         console.error("❌ products_home update failed", error);
@@ -213,13 +206,6 @@ async function updateProductsHomeFunction(tablesMeta) {
         console.log("✅ products_home updated");
     }
 }
-
-
-/* ======================================================
-   ADMIN
-====================================================== */
-
-
 
 /* ======================================================
    ADMIN / ROLES
@@ -247,40 +233,10 @@ const ADMIN_IDS = new Set(
 );
 
 const ROLES = {
-    owners: OWNER_IDS,          // 🔒 IMMUTABLE
-    adminsPlus: ADMIN_PLUS_IDS, // 🔒 ENV
-    admins: ADMIN_IDS           // 🔒 ENV
+    owners: OWNER_IDS,
+    adminsPlus: ADMIN_PLUS_IDS,
+    admins: ADMIN_IDS
 };
-
-
-function loadRolesFromEnv() {
-    if (!process.env.ADMIN_ROLES) {
-        throw new Error("❌ ADMIN_ROLES missing from .env");
-    }
-
-    let parsed;
-    try {
-        parsed = JSON.parse(process.env.ADMIN_ROLES);
-    } catch {
-        throw new Error("❌ ADMIN_ROLES is not valid JSON");
-    }
-
-    ROLES.owners = new Set(
-        Object.values(parsed.Owners || {}).map(Number)
-    );
-
-    ROLES.admins = new Set(
-        Object.values(parsed.Admin || {}).map(Number)
-    );
-
-    ROLES.adminsPlus = new Set(
-        Object.values(parsed["Admin+"] || {}).map(Number)
-    );
-
-    console.log("👑 Owners:", [...ROLES.owners]);
-    console.log("🔥 Admin+:", [...ROLES.adminsPlus]);
-    console.log("🛡 Admin:", [...ROLES.admins]);
-}
 
 function resolveRole(userId) {
     if (ROLES.owners.has(userId)) return "owner";
@@ -288,7 +244,6 @@ function resolveRole(userId) {
     if (ROLES.admins.has(userId)) return "admin";
     return "user";
 }
-
 
 function canAssignRole(granterRole, targetRole) {
     const rank = { owner: 3, "admin+": 2, admin: 1, user: 0 };
@@ -303,7 +258,6 @@ function hasAdminPlusAccess(role) {
     return ["admin+", "owner"].includes(role);
 }
 
-
 let interval = null;
 
 function startControl() {
@@ -311,17 +265,12 @@ function startControl() {
 
     console.log("🚀 control.js started");
 
-    refreshTables();           // azonnali futás
-    interval = setInterval(
-        refreshTables,
-        5000
-    );
+    refreshTables();
+    interval = setInterval(refreshTables, 5000);
 }
 
 module.exports = {
     startControl,
-
-    // 🔐 admin API
     resolveRole,
     canAssignRole,
     hasAdminAccess,

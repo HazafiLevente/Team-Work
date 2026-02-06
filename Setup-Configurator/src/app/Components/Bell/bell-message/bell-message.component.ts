@@ -31,20 +31,21 @@ export class BellMessageComponent implements OnInit {
     this.http.get<any[]>('/api/bell/conversations', { withCredentials: true })
       .subscribe(res => {
         this.conversations = res || [];
-        if (this.conversations.length) {
-          this.openConversation(this.conversations[0].key);
-        }
+
+        const keyFromRoute = this.route.snapshot.paramMap.get('key');
+
+        if (keyFromRoute) this.openConversation(keyFromRoute);
+        else if (this.conversations.length) this.openConversation(this.conversations[0].key);
       });
   }
 
   openConversation(key: string) {
     this.activeKey = key;
+
     this.http.get<any[]>(`/api/bell/conversation/${key}`, { withCredentials: true })
-      .subscribe(m => {
-        this.messages = m || [];
-        // Scroll to bottom logic could go here
-      });
+      .subscribe(m => this.messages = m || []);
   }
+
 
 
 

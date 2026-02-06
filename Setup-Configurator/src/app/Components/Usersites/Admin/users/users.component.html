@@ -4,6 +4,7 @@
 
   <div class="users-table">
 
+    <!-- HEADER -->
     <div class="users-row header">
       <span>Username</span>
       <span>Email</span>
@@ -13,24 +14,84 @@
       <span>Action</span>
     </div>
 
-    <div
-      class="users-row"
-      *ngFor="let u of usersList">
+    <!-- ROWS -->
+    <div class="users-row" *ngFor="let u of usersList">
 
-      <input [(ngModel)]="u.username" />
+      <!-- USERNAME -->
+      <div class="cell">
+        <span
+          *ngIf="!isEditing(u,'username')"
+          class="editable-text"
+          (click)="edit(u,'username')">
+          {{ u.username || '—' }}
+        </span>
+
+        <input
+          *ngIf="isEditing(u,'username')"
+          [(ngModel)]="u.username"
+          (blur)="stopEdit(u,'username')"
+          autofocus>
+      </div>
+
+      <!-- EMAIL -->
       <span class="muted">{{ u.email }}</span>
 
-      <select [(ngModel)]="u.role">
-        <option value="user">user</option>
-        <option value="admin">admin</option>
-        <option value="admin+">admin+</option>
-        <option value="owner">owner</option>
-      </select>
+      <!-- ROLE -->
+      <div class="cell">
+        <span
+          *ngIf="!isEditing(u,'role')"
+          class="badge"
+          (click)="edit(u,'role')">
+          {{ u.role }}
+        </span>
 
-      <input [(ngModel)]="u.city" />
-      <input type="number" [(ngModel)]="u.age" />
+        <select
+          *ngIf="isEditing(u,'role')"
+          [(ngModel)]="u.role"
+          (blur)="stopEdit(u,'role')">
+          <option value="user">user</option>
+          <option value="admin">admin</option>
+          <option value="admin+">admin+</option>
+          <option value="owner">owner</option>
+        </select>
+      </div>
 
-      <button class="admin-btn small" (click)="saveUser(u)">
+      <!-- CITY -->
+      <div class="cell">
+        <span
+          *ngIf="!isEditing(u,'city')"
+          class="editable-text muted"
+          (click)="edit(u,'city')">
+          {{ u.city || '—' }}
+        </span>
+
+        <input
+          *ngIf="isEditing(u,'city')"
+          [(ngModel)]="u.city"
+          (blur)="stopEdit(u,'city')">
+      </div>
+
+      <!-- AGE -->
+      <div class="cell">
+        <span
+          *ngIf="!isEditing(u,'age')"
+          class="editable-text muted"
+          (click)="edit(u,'age')">
+          {{ u.age || '—' }}
+        </span>
+
+        <input
+          *ngIf="isEditing(u,'age')"
+          type="number"
+          [(ngModel)]="u.age"
+          (blur)="stopEdit(u,'age')">
+      </div>
+
+      <!-- SAVE -->
+      <button
+        class="admin-btn icon"
+        title="Mentés"
+        (click)="saveUser(u)">
         💾
       </button>
 

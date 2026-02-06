@@ -1,21 +1,48 @@
 <div class="setup-workspace">
+
   <div class="boundary-area" #boundary>
     @if (!loading) {
       @for (setup of userSetups; track setup.id) {
-        <div class="drag-element"
-             cdkDrag
-             [cdkDragBoundary]="boundary">
 
-          <div class="drag-content">
-            <span class="setup-name">{{ setup.setup_name }}</span>
-          </div>
+        <app-setup-room
+          [setup]="setup"
+          [boundaryRef]="boundary"
+          (setupDblClick)="onChildSetupClick($event)">
+        </app-setup-room>
 
-        </div>
       } @empty {
-        <div class="no-data">Még nincs mentett setupod.</div>
+        <div class="no-data">Nincs setup.</div>
       }
-    } @else {
-      <div class="loader">Adatok betöltése a Supabase-ből...</div>
     }
   </div>
+
+  <div class="side-panel" [class.open]="showModal">
+    @if (selectedSetup) {
+      <div class="panel-header">
+        <h2>{{ selectedSetup.setup_name }}</h2>
+        <button class="close-btn" (click)="closeModal()">×</button>
+      </div>
+
+      <div class="panel-body">
+        <table class="details-table">
+          <thead><tr><td colspan="2">Eszközök</td></tr></thead>
+          <tbody>
+            @if (loadingItems) {
+              <tr><td colspan="2">Betöltés...</td></tr>
+            } @else {
+              @for (item of setupItems; track item.id) {
+                <tr>
+                  <td>{{ item.category }}</td>
+                  <td>{{ item.display_name }}</td>
+                </tr>
+              } @empty {
+                <tr><td colspan="2">Ez a szoba üres.</td></tr>
+              }
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+
 </div>

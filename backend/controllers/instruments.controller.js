@@ -3,7 +3,8 @@ const { supabase } = require("../services/supabase");
 async function list(req, res) {
     // A korábban létrehozott SQL View-ból kérdezzük le az adatokat
     const { data, error } = await supabase
-        .from("instrument_items_view")
+        .from("instrument_items_view_v2")
+
         .select("*");
 
     if (error) {

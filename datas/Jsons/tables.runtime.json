@@ -1,11 +1,11 @@
 {
-  "lastUpdated": 1770304221637,
+  "lastUpdated": 1770404575516,
   "tables": {
     "c_trumpets": {
       "columns": [
         "ID",
         "release_year",
-        "Manufacturer",
+        "manufacturer",
         "Model",
         "series",
         "key",
@@ -49,7 +49,7 @@
         "midi",
         "presets",
         "release_year",
-        "Manufacturer",
+        "manufacturer",
         "Model",
         "pedal_type",
         "effect_category",
@@ -61,25 +61,12 @@
         "category"
       ]
     },
-    "favorite_pc_components[Lists]": {
-      "columns": [
-        "id",
-        "favorite_list_id",
-        "processor_id",
-        "videocard_id",
-        "motherboard_id",
-        "ram_id",
-        "psu_id",
-        "created_at",
-        "label"
-      ]
-    },
     "acoustic_drums": {
       "columns": [
         "ID",
         "hardware_included",
         "cymbals_included",
-        "Manufacturer",
+        "manufacturer",
         "Model",
         "series",
         "configuration",
@@ -225,7 +212,7 @@
         "expression_pedal",
         "amp_modeling",
         "usb_audio",
-        "Manufacturer",
+        "manufacturer",
         "Model",
         "effect_type",
         "instrument",
@@ -239,7 +226,7 @@
     "wind_instrument_oils": {
       "columns": [
         "ID",
-        "Manufacturer",
+        "manufacturer",
         "Model",
         "Type",
         "HMany",
@@ -268,14 +255,6 @@
         "water_resistance",
         "notes",
         "category"
-      ]
-    },
-    "system_reads[System]": {
-      "columns": [
-        "id",
-        "system_id",
-        "user_id",
-        "created_at"
       ]
     },
     "psu": {
@@ -332,7 +311,7 @@
         "bluetooth",
         "recording",
         "release_year",
-        "Manufacturer",
+        "manufacturer",
         "Model",
         "drum_type",
         "pad_type",
@@ -370,7 +349,7 @@
         "high_f_sharp",
         "adjustable_thumb_rest",
         "release_year",
-        "Manufacturer",
+        "manufacturer",
         "Model",
         "Type",
         "series",
@@ -458,10 +437,7 @@
     "mixer": {
       "columns": [
         "id",
-        "price",
-        "manufacturer",
-        "model",
-        "type"
+        "price"
       ]
     },
     "midis": {
@@ -479,10 +455,7 @@
         "usb_midi",
         "weight_kg",
         "release_year",
-        "created_at",
-        "manufacturer",
-        "model",
-        "series"
+        "created_at"
       ]
     },
     "bassers": {
@@ -563,14 +536,6 @@
         "Seats"
       ]
     },
-    "system_message[System]": {
-      "columns": [
-        "id",
-        "created_at",
-        "sender",
-        "target"
-      ]
-    },
     "microphones": {
       "columns": [
         "id",
@@ -580,11 +545,6 @@
         "usb_interface",
         "matched_pair",
         "created_at",
-        "manufacturer",
-        "model",
-        "microphone_type",
-        "diaphragm",
-        "polar_pattern",
         "connection",
         "frequency_response",
         "application",
@@ -696,14 +656,6 @@
         "category"
       ]
     },
-    "favorite_lists[Lists]": {
-      "columns": [
-        "id",
-        "user_id",
-        "created_at",
-        "name"
-      ]
-    },
     "pickup_cars": {
       "columns": [
         "ID",
@@ -772,16 +724,6 @@
         "Category"
       ]
     },
-    "cables_info[Cables]": {
-      "columns": [
-        "id",
-        "max_length_m",
-        "max_data_rate_gbps",
-        "max_power_w",
-        "active",
-        "bidirectional"
-      ]
-    },
     "subwoofer": {
       "columns": [
         "id",
@@ -812,10 +754,7 @@
         "width_mm",
         "depth_mm",
         "weight_kg",
-        "created_at",
-        "recommended_use",
-        "notes",
-        "category"
+        "created_at"
       ]
     },
     "bass_shaker": {
@@ -839,20 +778,6 @@
         "category"
       ]
     },
-    "news_message[System]": {
-      "columns": [
-        "id",
-        "created_at",
-        "sender"
-      ]
-    },
-    "register_message[System]": {
-      "columns": [
-        "id",
-        "target",
-        "created_at"
-      ]
-    },
     "video_cards": {
       "columns": [
         "ID",
@@ -873,17 +798,7 @@
       "columns": [
         "ID",
         "Seats",
-        "Manufacturer",
-        "Model",
-        "Price Range (Ft)",
-        "Body Type",
-        "Horsepower",
-        "Acceleration (s)",
-        "Fuel Type",
-        "Year",
-        "Transmission",
-        "category",
-        "Avgprice"
+        "Manufacturer"
       ]
     },
     "mice": {
@@ -895,18 +810,7 @@
         "weight_g",
         "rgb",
         "battery_life_hours",
-        "created_at",
-        "manufacturer",
-        "model",
-        "connection_type",
-        "sensor",
-        "shape",
-        "grip_style",
-        "switch_type",
-        "feet_material",
-        "target_use",
-        "category",
-        "notes"
+        "created_at"
       ]
     },
     "keyboards": {
@@ -920,6 +824,18 @@
         "polling_rate_hz",
         "latency_ms",
         "created_at",
+        "manufacturer",
+        "model",
+        "series",
+        "connection_type",
+        "layout",
+        "switch_type",
+        "switch_brand",
+        "backlight",
+        "case_material",
+        "mounting_style",
+        "target_use",
+        "category",
         "notes"
       ]
     },
@@ -938,9 +854,7 @@
         "connection_type",
         "interface",
         "surround_type",
-        "mic_type",
-        "mic_pattern",
-        "mic_quality"
+        "mic_type"
       ]
     },
     "storages": {
@@ -956,12 +870,12 @@
         "removable",
         "release_year",
         "created_at",
-        "notes",
-        "nand_type",
         "manufacturer",
         "model",
         "storage_type",
-        "interface"
+        "interface",
+        "form_factor",
+        "nand_type"
       ]
     }
   }

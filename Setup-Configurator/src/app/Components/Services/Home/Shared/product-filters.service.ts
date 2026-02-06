@@ -81,14 +81,13 @@ const DEFAULT_FILTERS: CombinedFilters = {
 
   // Itt az instrument is!
   instrument: {
-    category: 'instrument',
-    type: '',
+    itemType: 'instrument',  // alapból csak hangszerek
+    tableName: '',
     manufacturer: '',
     model: '',
     minPrice: '',
     maxPrice: '',
-    isUsed: false,
-    strings: ''
+    isUsed: false
   }
 };
 @Injectable({ providedIn: 'root' })
@@ -98,7 +97,27 @@ export class ProductFiltersService {
 
   private _setCount = 0;
 
+  clearInstrument() {
+    const cur = this._filters$.value;
+    const next: CombinedFilters = {
+      ...cur,
+      instrument: {
+        itemType: 'instrument',
+        tableName: '',
+        manufacturer: '',
+        model: '',
+        minPrice: '',
+        maxPrice: '',
+        isUsed: false
+      }
+    };
+    this.debug('clearInstrument', next);
+    this._filters$.next(next);
+  }
+
+
   /** Searchbar hívja */
+
   setSearch(search: SearchFilters) {
     const cur = this._filters$.value;
     const next: CombinedFilters = { ...cur, search };

@@ -1,5 +1,6 @@
 const path = require("path");
 
+
 require("dotenv").config({
     path: path.join(__dirname, "..", ".env"),
     override: true
@@ -18,7 +19,10 @@ console.log("ENV CHECK:", {
 });
 
 startControl();
+startSyncInterval();
 
 app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
 });
+
+

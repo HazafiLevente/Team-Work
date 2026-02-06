@@ -1,7 +1,10 @@
-<div class="boundary-box" #boundaryRef>
+<div class="drag-element"
+     cdkDrag
+     [cdkDragBoundary]="boundaryRef"
+     (dblclick)="onDblClick()">
 
-  <div class="content">
-
+  <div class="drag-content">
+    <span class="setup-name">{{ setup?.setup_name }}</span>
   </div>
 
 </div>

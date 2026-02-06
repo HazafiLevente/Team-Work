@@ -42,15 +42,7 @@
       🎸 Instr
     </button>
 
-    <button
-      type="button"
-      class="tag"
-      (click)="toggle('all'); $event.stopPropagation()"
-    >
-      🌍 Összes
-    </button>
   </div>
-
   <!-- FILTER PANELS -->
   <app-carfilter
     *ngIf="active.car"
@@ -72,3 +64,4 @@
     (filtersChange)="onInstrumentChange($event)"
   ></app-instrumentfilter>
 </details>
+

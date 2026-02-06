@@ -45,10 +45,11 @@ constructor(
     this.bell.toggle();
   }
 
-  markBellRead(id: number, event: MouseEvent) {
+  markBellRead(n: BellItem, event: MouseEvent) {
     event.stopPropagation();
-    this.bell.markRead(id);
+    this.bell.markRead({ source_table: n.source_table, id: n.id });
   }
+
 
   @HostListener('document:click')
   closeAll() {
@@ -56,12 +57,17 @@ constructor(
     this.bell.close();
   }
 
-  openMessage(n: any, event: MouseEvent) {
+  openMessage(n: BellItem, event: MouseEvent) {
     event.stopPropagation();
-    this.bell.markRead(n.id);
+
+    this.bell.markRead({ source_table: n.source_table, id: n.id });
     this.bell.close();
-    this.router.navigate(['/user/message', n.type, n.id]);
+
+    this.router.navigate(['/user/message']);
   }
+
+
+
 
 
 

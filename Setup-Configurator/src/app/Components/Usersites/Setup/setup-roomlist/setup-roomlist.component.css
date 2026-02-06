@@ -1,60 +1,64 @@
 .setup-workspace {
-  padding: 20px;
+  position: relative;
+  width: 100%;
+  height: 80vh;
+  overflow: hidden;
+  background-color: #f3f4f6;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
 }
 
 .boundary-area {
   width: 100%;
-  height: 700px;
-  border: 2px dashed #cbd5e0;
-  background-color: #f8fafc;
-  position: relative;
-  border-radius: 15px;
+  height: 100%;
+  padding: 20px;
   display: flex;
   flex-wrap: wrap;
+  align-content: flex-start;
   gap: 15px;
+}
+
+.no-data {
   padding: 20px;
-  overflow: hidden;
-}
-
-.drag-element {
-  width: 180px;
-  height: 80px;
-  background: white;
-  border: 1px solid #e2e8f0;
-  border-left: 5px solid #667eea;
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 10px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-
-  /* Ez teszi lehetővé, hogy az egész kártya húzható legyen */
-  cursor: grab;
-  user-select: none;
-  position: relative;
-}
-
-/* Kattintás/húzás közbeni állapot */
-.drag-element:active {
-  cursor: grabbing;
-  box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
-  z-index: 100; /* Legyen felül húzás közben */
-}
-
-.setup-name {
-  font-weight: 600;
-  color: #2d3748;
+  color: #666;
+  width: 100%;
   text-align: center;
-  font-size: 1rem;
-  pointer-events: none; /* A szöveg ne zavarjon be a kattintásba */
 }
 
-/* Simább mozgás animációja */
-.cdk-drag-animating {
-  transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+/* SIDE PANEL STÍLUSOK */
+.side-panel {
+  position: absolute;
+  top: 0;
+  right: -550px;
+  width: 500px;
+  height: 100%;
+  background: #1a1a1a;
+  color: white;
+  box-shadow: -5px 0 15px rgba(0,0,0,0.3);
+  border-left: 4px solid #764ba2;
+  transition: right 0.3s ease-in-out;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
 }
 
-.cdk-drag-placeholder {
-  opacity: 0.3;
+.side-panel.open {
+  right: 0;
 }
+
+.panel-header {
+  padding: 20px;
+  background: #262626;
+  border-bottom: 1px solid #333;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.panel-header h2 { margin: 0; font-size: 1.2rem; }
+.close-btn { background: none; border: none; color: #aaa; font-size: 1.5rem; cursor: pointer; }
+.close-btn:hover { color: white; }
+.panel-body { padding: 20px; flex: 1; overflow-y: auto; }
+.details-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+.details-table td { padding: 10px 0; border-bottom: 1px solid #333; }
+.loading-text, .empty-info { text-align: center; color: #666; font-style: italic; padding: 20px; }

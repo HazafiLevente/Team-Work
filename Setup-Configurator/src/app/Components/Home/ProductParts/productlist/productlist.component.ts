@@ -9,6 +9,17 @@ import { ProductComponent } from '../product/product.component';
 import { ProductFiltersService, CombinedFilters } from '../../../Services/Home/Shared/product-filters.service';
 import { ProductDetailsPanelComponent } from '../../../Panels/Product/product-details-panel.component';
 
+type AnyProduct = Product & {
+  table_name?: string;
+  table?: string;
+  data?: any;
+  type?: string;
+  category?: string;
+  manufacturer?: string;
+  model?: string;
+  price?: any;
+};
+
 @Component({
   selector: 'app-productlist',
   standalone: true,
@@ -18,22 +29,22 @@ import { ProductDetailsPanelComponent } from '../../../Panels/Product/product-de
 })
 export class ProductlistComponent implements OnInit, OnDestroy {
 
-  selectedProduct: Product | null = null;
+  selectedProduct: AnyProduct | null = null;
 
-  onOpenProduct(p: Product) { this.selectedProduct = p; }
+  onOpenProduct(p: AnyProduct) { this.selectedProduct = p; }
   onClosePanel() { this.selectedProduct = null; }
 
-  allProducts: Product[] = [];
-  carProducts: any[] = [];
-  computerProducts: any[] = [];
-  htProducts: any[] = [];
-  allInstruments: any[] = [];
-  products: Product[] = [];
+  allProducts: AnyProduct[] = [];
+  carProducts: AnyProduct[] = [];
+  computerProducts: AnyProduct[] = [];
+  htProducts: AnyProduct[] = [];
+  allInstruments: AnyProduct[] = [];
 
-  filteredProducts: any[] = [];
+  filteredProducts: AnyProduct[] = [];
+
   loading = true;
-
   readonly PRODUCT_LIMIT = 2000;
+
   private sub?: Subscription;
 
   constructor(
@@ -47,7 +58,7 @@ export class ProductlistComponent implements OnInit, OnDestroy {
     // 1) ALL PRODUCTS
     this.productService.getProducts(this.PRODUCT_LIMIT).subscribe({
       next: res => {
-        this.allProducts = res.items || [];
+        this.allProducts = (res.items || []) as AnyProduct[];
         this.loading = false;
         this.applyFilters(this.filtersService.current);
       },
@@ -56,26 +67,35 @@ export class ProductlistComponent implements OnInit, OnDestroy {
 
     // 2) CARS
     this.productService.getCars(this.PRODUCT_LIMIT).subscribe({
-      next: res => { this.carProducts = res.items || []; this.applyFilters(this.filtersService.current); },
+      next: res => {
+        this.carProducts = (res.items || []) as AnyProduct[];
+        this.applyFilters(this.filtersService.current);
+      },
       error: err => console.error('❌ CARS ERROR', err)
     });
 
     // 3) COMPUTERS
     this.productService.getComputers(this.PRODUCT_LIMIT).subscribe({
-      next: res => { this.computerProducts = res.items || []; this.applyFilters(this.filtersService.current); },
+      next: res => {
+        this.computerProducts = (res.items || []) as AnyProduct[];
+        this.applyFilters(this.filtersService.current);
+      },
       error: err => console.error('❌ PCS ERROR', err)
     });
 
     // 4) HOME THEATERS
     this.productService.getHomeTheaters(this.PRODUCT_LIMIT).subscribe({
-      next: res => { this.htProducts = res.items || []; this.applyFilters(this.filtersService.current); },
+      next: res => {
+        this.htProducts = (res.items || []) as AnyProduct[];
+        this.applyFilters(this.filtersService.current);
+      },
       error: err => console.error('❌ HT ERROR', err)
     });
 
-    // ✅ 5) INSTRUMENTS (Ezt adtuk hozzá)
+    // 5) INSTRUMENTS
     this.productService.getInstruments(this.PRODUCT_LIMIT).subscribe({
       next: res => {
-        this.allInstruments = res.items || [];
+        this.allInstruments = (res.items || []) as AnyProduct[];
         console.log('✅ INSTRUMENTS:', this.allInstruments.length);
         this.applyFilters(this.filtersService.current);
       },
@@ -191,19 +211,18 @@ export class ProductlistComponent implements OnInit, OnDestroy {
     const term = (s.term || '').toLowerCase().trim();
     const selectedManu = (s.manufacturer || '').toLowerCase().trim();
 
-    const source: any[] =
+    const source: AnyProduct[] =
       state.activeCategory === 'car'
         ? (this.carProducts || [])
         : state.activeCategory === 'computer'
           ? (this.computerProducts || [])
           : state.activeCategory === 'ht'
             ? (this.htProducts || [])
-            : state.activeCategory === 'instrument' // ✅ ÚJ: Ha hangszer módban vagyunk
+            : state.activeCategory === 'instrument'
               ? (this.allInstruments || [])
               : (this.allProducts || []);
 
-
-    let result = source.filter((p: any) => {
+    let result: AnyProduct[] = source.filter((p: AnyProduct) => {
       const manu = this.getManufacturer(p).toLowerCase();
       const hay = this.getText(p);
 
@@ -219,9 +238,9 @@ export class ProductlistComponent implements OnInit, OnDestroy {
       return matchText && matchManufacturer && matchMin && matchMax;
     });
 
-
-
-    // 2/A) carfilter csak car módban
+    // -----------------------------
+    // CAR részletes filter
+    // -----------------------------
     if (state.activeCategory === 'car' && state.car) {
       const cf = state.car;
 
@@ -249,12 +268,11 @@ export class ProductlistComponent implements OnInit, OnDestroy {
 
       const trans = this.normText(cf.transmission);
 
-      result = result.filter((p: any) => {
+      result = result.filter((p: AnyProduct) => {
         const t = this.normText(p?.table_name ?? '');
-        // biztosan csak autó rekord maradjon
+
         if (!t.includes('car')) return false;
 
-        // manufacturer/model (itt a view-ben lehet Manufacturer/brand stb)
         if (manu) {
           const pm = this.normText(this.getField(p, 'manufacturer', 'Manufacturer', 'brand', 'Brand'));
           if (!pm.includes(manu)) return false;
@@ -264,54 +282,46 @@ export class ProductlistComponent implements OnInit, OnDestroy {
           if (!mdl.includes(model)) return false;
         }
 
-        // body type
         if (bodyType) {
           const bt = this.normText(this.getField(p, 'body_type', 'bodyType', 'BodyType', 'type'));
           if (!bt.includes(bodyType)) return false;
         }
 
-        // price
         if (priceMin != null || priceMax != null) {
           const pr = this.toNum(this.getField(p, 'price', 'Price', 'price_huf', 'price_ft'));
           if (priceMin != null && (pr == null || pr < priceMin)) return false;
           if (priceMax != null && (pr == null || pr > priceMax)) return false;
         }
 
-        // horsepower
         if (hpMin != null || hpMax != null) {
           const hp = this.toNum(this.getField(p, 'hp', 'horsepower', 'power_hp', 'loero'));
           if (hpMin != null && (hp == null || hp < hpMin)) return false;
           if (hpMax != null && (hp == null || hp > hpMax)) return false;
         }
 
-        // 0-100 accel (sec)
         if (accelMin != null || accelMax != null) {
           const acc = this.toNum(this.getField(p, 'accel_0_100', 'acceleration_0_100', 'zero_to_hundred', 'accel'));
           if (accelMin != null && (acc == null || acc < accelMin)) return false;
           if (accelMax != null && (acc == null || acc > accelMax)) return false;
         }
 
-        // seats
         if (seatsMin != null || seatsMax != null) {
           const seats = this.toNum(this.getField(p, 'seats', 'seat_count', 'Seats'));
           if (seatsMin != null && (seats == null || seats < seatsMin)) return false;
           if (seatsMax != null && (seats == null || seats > seatsMax)) return false;
         }
 
-        // year
         if (yearMin != null || yearMax != null) {
           const y = this.toNum(this.getField(p, 'year', 'Year', 'model_year'));
           if (yearMin != null && (y == null || y < yearMin)) return false;
           if (yearMax != null && (y == null || y > yearMax)) return false;
         }
 
-        // fuel
         if (fuel) {
           const f = this.normText(this.getField(p, 'fuel', 'Fuel', 'fuel_type', 'fuelType'));
           if (!f.includes(fuel)) return false;
         }
 
-        // transmission
         if (trans) {
           const tr = this.normText(this.getField(p, 'transmission', 'Transmission', 'gearbox', 'gearbox_type'));
           if (!tr.includes(trans)) return false;
@@ -321,8 +331,9 @@ export class ProductlistComponent implements OnInit, OnDestroy {
       });
     }
 
-
-    // PC részletes filter (computer módban)
+    // -----------------------------
+    // PC részletes filter
+    // -----------------------------
     if (state.activeCategory === 'computer' && state.computer) {
       const cf = state.computer;
 
@@ -340,7 +351,7 @@ export class ProductlistComponent implements OnInit, OnDestroy {
       const psuMin = this.toNum(cf.psuMin);
       const psuMax = this.toNum(cf.psuMax);
 
-      result = result.filter((p: any) => {
+      result = result.filter((p: AnyProduct) => {
         const t = String(p?.table_name ?? '').toLowerCase();
 
         if (cpuBrand || cpuModel) {
@@ -382,7 +393,9 @@ export class ProductlistComponent implements OnInit, OnDestroy {
       });
     }
 
-    // HT részletes filter (ht módban)
+    // -----------------------------
+    // HT részletes filter
+    // -----------------------------
     if (state.activeCategory === 'ht' && state.ht) {
       const hf = state.ht;
 
@@ -412,7 +425,7 @@ export class ProductlistComponent implements OnInit, OnDestroy {
         return ss === 'true' || ss === '1' || ss === 'yes' || ss === 'y';
       };
 
-      result = result.filter((p: any) => {
+      result = result.filter((p: AnyProduct) => {
         const t = this.normText(p?.table_name ?? p?.table ?? '');
 
         if (type) {
@@ -453,44 +466,60 @@ export class ProductlistComponent implements OnInit, OnDestroy {
       });
     }
 
-    // Az applyFilters végére, a többi if (state.activeCategory === ...) után:
-
+    // -----------------------------
+    // INSTRUMENT részletes filter
+    // -----------------------------
     if (state.activeCategory === 'instrument' && state.instrument) {
       const inf = state.instrument;
 
-      // Szűrő feltételek előkészítése (normText-tel a kis/nagybetű érzéketlenség miatt)
-      const filterType = inf.itemType; // 'all' | 'instrument' | 'accessory'
-      const filterTableName = inf.tableName; // pl. 'electric_guitars'
+      const filterType = (inf.itemType || 'all') as 'all' | 'instrument' | 'accessory';
+      const filterTableName = this.normText(inf.tableName || '');
+
       const manu = this.normText(inf.manufacturer);
       const model = this.normText(inf.model);
-      const strings = inf.strings ? this.toNum(inf.strings) : null;
 
-      result = result.filter((p: any) => {
-        // 1. Kategória szűrés (instrument vagy accessory)
-        // A View-ban ez a 'type' oszlopban jön
-        if (filterType !== 'all' && p.type !== filterType) return false;
+      const minP = this.toNum(inf.minPrice);
+      const maxP = this.toNum(inf.maxPrice);
+      const wantUsed = !!inf.isUsed;
 
-        // 2. Konkrét tábla szűrés (ha a felhasználó választott alkategóriát)
-        if (filterTableName && p.table_name !== filterTableName) return false;
+      const isTruthy = (val: any): boolean => {
+        if (val === true) return true;
+        if (val === false || val == null) return false;
+        const ss = this.normText(val);
+        return ss === 'true' || ss === '1' || ss === 'yes' || ss === 'y';
+      };
 
-        // 3. Gyártó szűrés
-        if (manu) {
-          // A View-ban már egységesen 'manufacturer' a mezőnév!
-          const pm = this.normText(p.manufacturer || '');
-          if (!pm.includes(manu)) return false;
+      result = result.filter((p: AnyProduct) => {
+        const pType = this.normText(this.getField(p, 'type', 'Type'));
+        const pTable = this.normText(this.getField(p, 'table_name', 'table', 'TableName', 'tablename'));
+        const pManu = this.normText(this.getField(p, 'manufacturer', 'Manufacturer', 'brand', 'Brand'));
+        const pModel = this.normText(this.getField(p, 'model', 'Model', 'name', 'title'));
+
+        if (filterType !== 'all') {
+          if (!pType || pType !== this.normText(filterType)) return false;
         }
 
-        // 4. Modell szűrés
-        if (model) {
-          // A View-ban már egységesen 'model' a mezőnév!
-          const mdl = this.normText(p.model || '');
-          if (!mdl.includes(model)) return false;
+        if (filterTableName) {
+          if (!pTable || pTable !== filterTableName) return false;
         }
 
-        // 5. Húrok száma (opcionális, csak ha van ilyen adat)
-        if (strings !== null && strings !== 0) {
-          const pStrings = this.toNum(p.strings || 0);
-          if (pStrings !== strings) return false;
+        if (manu && !pManu.includes(manu)) return false;
+        if (model && !pModel.includes(model)) return false;
+
+        if (minP != null || maxP != null) {
+          const pr = this.toNum(this.getField(p, 'price', 'Price', 'price_huf', 'price_ft'));
+          if (minP != null && (pr == null || pr < minP)) return false;
+          if (maxP != null && (pr == null || pr > maxP)) return false;
+        }
+
+        if (wantUsed) {
+          const usedField = this.getField(p, 'is_used', 'used', 'IsUsed', 'condition', 'Condition');
+          if (usedField && isTruthy(usedField)) return true;
+
+          const cond = this.normText(usedField);
+          if (cond.includes('used') || cond.includes('second') || cond.includes('hasznalt')) return true;
+
+          return false;
         }
 
         return true;
@@ -499,7 +528,6 @@ export class ProductlistComponent implements OnInit, OnDestroy {
 
     this.filteredProducts = result;
 
-    // extra debug, hogy lásd tényleg van-e találat
     console.log('[ProductList] active=', state.activeCategory, 'source=', source.length, 'filtered=', result.length);
   }
 }
