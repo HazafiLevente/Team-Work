@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, EventEmitter, OnDestroy, OnInit, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Subscription } from 'rxjs';
 
@@ -7,7 +7,6 @@ import { Product } from '../../../../Models/Product/product.model';
 import { ProductComponent } from '../product/product.component';
 
 import { ProductFiltersService, CombinedFilters } from '../../../Services/Home/Shared/product-filters.service';
-import { ProductDetailsPanelComponent } from '../../../Panels/Product/product-details-panel.component';
 
 type AnyProduct = Product & {
   table_name?: string;
@@ -23,16 +22,17 @@ type AnyProduct = Product & {
 @Component({
   selector: 'app-productlist',
   standalone: true,
-  imports: [CommonModule, ProductComponent, ProductDetailsPanelComponent],
+  imports: [CommonModule, ProductComponent],
   templateUrl: './productlist.component.html',
   styleUrls: ['./productlist.component.css']
 })
 export class ProductlistComponent implements OnInit, OnDestroy {
 
-  selectedProduct: AnyProduct | null = null;
+  // ✅ kifelé jelezzük: mit nyisson meg a Home
+  @Output() openProduct = new EventEmitter<AnyProduct>();
 
-  onOpenProduct(p: AnyProduct) { this.selectedProduct = p; }
-  onClosePanel() { this.selectedProduct = null; }
+  // ✅ kifelé jelezzük: aktuális filtered lista (Spotlight pool)
+  @Output() productsChanged = new EventEmitter<AnyProduct[]>();
 
   allProducts: AnyProduct[] = [];
   carProducts: AnyProduct[] = [];
@@ -59,6 +59,7 @@ export class ProductlistComponent implements OnInit, OnDestroy {
     this.productService.getProducts(this.PRODUCT_LIMIT).subscribe({
       next: res => {
         this.allProducts = (res.items || []) as AnyProduct[];
+        console.log('✅ ALL PRODUCTS LOADED:', this.allProducts.length, 'sample:', this.allProducts[0]);
         this.loading = false;
         this.applyFilters(this.filtersService.current);
       },
@@ -98,13 +99,20 @@ export class ProductlistComponent implements OnInit, OnDestroy {
         this.allInstruments = (res.items || []) as AnyProduct[];
         console.log('✅ INSTRUMENTS:', this.allInstruments.length);
         this.applyFilters(this.filtersService.current);
+        
       },
+
       error: err => console.error('❌ INSTRUMENTS ERROR', err)
     });
   }
 
   ngOnDestroy(): void {
     this.sub?.unsubscribe();
+  }
+
+  // ✅ ProductComponent click -> Home kapja meg
+  onOpenProduct(p: AnyProduct) {
+    this.openProduct.emit(p);
   }
 
   // -----------------------------
@@ -527,6 +535,9 @@ export class ProductlistComponent implements OnInit, OnDestroy {
     }
 
     this.filteredProducts = result;
+
+    // ✅ Spotlight pool frissítés (Home kapja)
+    this.productsChanged.emit(this.filteredProducts);
 
     console.log('[ProductList] active=', state.activeCategory, 'source=', source.length, 'filtered=', result.length);
   }

@@ -5,7 +5,6 @@ import { ProductService } from '../../Services/Home/ProductParts/product/product
 import { ProductGalleryComponent } from '../productgallery/product-gallery.component';
 import { HttpClient } from '@angular/common/http';
 
-
 type ImageMap = Record<string, Record<string, Record<string, string[]>>>;
 
 @Component({
@@ -44,7 +43,6 @@ export class ProductPageComponent implements OnInit {
     private productService: ProductService,
     private http: HttpClient
   ) {}
-
 
   get displayTitle(): string {
     return this.primary.model || 'Ismeretlen termék';
@@ -106,6 +104,20 @@ export class ProductPageComponent implements OnInit {
     });
   }
 
+  // ✅ később: kedvenc
+  onToggleFavorite() {
+    console.log('⭐ később: kedvencbe rakás');
+  }
+
+  goBack() {
+    if (window.history.length > 1) window.history.back();
+    else this.router.navigate(['/home']);
+  }
+
+  onPlus() {
+    console.log('➕ később: kosárba/setupba adás');
+  }
+
   private loadImagesFromMap() {
     const manu = this.primary.manufacturer;
     const model = this.primary.model;
@@ -135,9 +147,7 @@ export class ProductPageComponent implements OnInit {
     });
   }
 
-
   private pickImages(map: ImageMap, topFolderWanted: string, manuWanted: string, modelWanted: string): string[] {
-    // 1) Top folder (pl "Electric Guitars") – nem kell egyezzen pontosan, normalizálva keresünk
     const topKey = this.findKey(map, topFolderWanted);
     if (!topKey) return [];
 
@@ -155,12 +165,12 @@ export class ProductPageComponent implements OnInit {
   private findKey(obj: Record<string, any>, wanted: string): string | null {
     const want = this.normKey(wanted);
 
-    // 1) exact normalized match
+    // exact normalized match
     for (const k of Object.keys(obj)) {
       if (this.normKey(k) === want) return k;
     }
 
-    // 2) contains match (ha pl table param "electric_guitars", mappa "Electric Guitars")
+    // contains match
     for (const k of Object.keys(obj)) {
       const nk = this.normKey(k);
       if (nk.includes(want) || want.includes(nk)) return k;
@@ -169,24 +179,13 @@ export class ProductPageComponent implements OnInit {
     return null;
   }
 
-
   private normKey(s: string): string {
     return String(s ?? '')
       .trim()
       .toLowerCase()
       .normalize('NFD')
       .replace(/[\u0300-\u036f]/g, '')
-      .replace(/[_\s-]+/g, ''); // space/_/- mindegy
-  }
-
-
-  goBack() {
-    if (window.history.length > 1) window.history.back();
-    else this.router.navigate(['/home']);
-  }
-
-  onPlus() {
-    console.log('➕ később: kosárba/setupba adás');
+      .replace(/[_\s-]+/g, '');
   }
 
   private pick(obj: any, keys: string[]): string {

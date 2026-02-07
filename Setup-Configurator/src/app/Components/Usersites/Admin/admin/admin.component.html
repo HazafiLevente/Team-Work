@@ -16,9 +16,8 @@
       👥 Users
     </button>
 
-    <button class="admin-btn">
-      📦 Products
-    </button>
+    <button class="admin-btn" (click)="openProducts()">📦 Products</button>
+
 
     <button class="admin-btn">
       🧾 Logs
@@ -64,6 +63,12 @@
       <app-users></app-users>
     </ng-container>
 
+    <!-- PRODUCTS -->
+    <ng-container *ngIf="activeSection === 'products'">
+      <app-admin-products></app-admin-products>
+    </ng-container>
+
   </div>
 
 </div>
+

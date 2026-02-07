@@ -1,7 +1,24 @@
-<app-header></app-header>
-
 <app-searchbar></app-searchbar>
+<app-filterlist></app-filterlist>
 
-<app-filterlist ></app-filterlist>
+<div class="home-row">
+  <div class="left">
+    <app-productlist
+      (openProduct)="onOpenProduct($event)"
+      (productsChanged)="onProductsChanged($event)">
+    </app-productlist>
+  </div>
 
-<app-productlist></app-productlist>
+  <div class="right">
+    <app-featured-spotlight
+      [products]="featuredPool"
+      (openProduct)="onOpenProduct($event)">
+    </app-featured-spotlight>
+  </div>
+</div>
+
+<app-product-details-panel
+  *ngIf="selectedProduct"
+  [product]="selectedProduct"
+  (closed)="onClosePanel()">
+</app-product-details-panel>

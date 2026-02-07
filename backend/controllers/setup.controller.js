@@ -1,86 +1,129 @@
 const { supabase } = require("../services/supabase");
 
-// 1. Setupok listázása
+// ⚠️ IDE ÍRD BE AZ ÖSSZES TÁBLÁT, AMIBEN VAN setup_id
+const tablesToScan = [
+    "acoustic_drums",
+    "acoustic_guitars",
+    "alt_saxophone",
+    "audio_processors",
+    "back_speaker",
+    "bariton_saxophone",
+    "bass_amplifier",
+    "bass_shaker",
+    "bassers",
+    "c_trumpets",
+    "cabrio_cars",
+    "ceiling_speakers",
+    "center_speakers",
+    "cleaning_brushes",
+    "coupe_cars",
+    "crossover_cars",
+    "daws",
+    "effects_pedal",
+    "electric_drums",
+    "electric_guitars",
+    "floor_speakers",
+    "front_speaker",
+    "gaming_headsets",
+    "guitarstrings",
+    "hatchback_cars",
+    "home_theater",
+    "keyboards",
+    "mice",
+    "microphones",
+    "midis",
+    "mixer",
+    "motherboard",
+    "mpv_cars",
+    "pickup_cars",
+    "portable_speakers",
+    "processors",
+    "psu",
+    "ram",
+    "saxophone_cases",
+    "side_speaker",
+    "software_products",
+    "soundcards",
+    "storages",
+    "studio_monitor_speakers",
+    "subwoofer",
+    "utp_cables",
+    "video_cards",
+    "wagon_cars",
+    "wind_instrument_oils"
+];
+
+// SETUP LISTA
 exports.list = async (req, res) => {
     try {
         const userId = req.user.id;
+
         const { data, error } = await supabase
             .from("setup[Setup]")
             .select("*")
             .eq("user_id", userId);
 
         if (error) throw error;
+
         res.json({ setups: data || [] });
     } catch (err) {
-        console.error("List hiba:", err);
-        res.status(500).json({ error: "Hiba a setupok listázásakor" });
+        console.error("❌ Setup list hiba:", err);
+        res.json({ setups: [] });
     }
 };
 
-exports.create = async (req, res) => {
-    res.json({ ok: true });
-};
-
-// 2. GYEREK ELEMEK LEKÉRÉSE (JAVÍTOTT!)
+// SETUP GYEREKEK
 exports.children = async (req, res) => {
-    const setupId = req.params.id;
-    console.log(`\n🚀 Setup keresése (ID: ${setupId})...`);
+    const setupId = Number(req.params.id);
+
+    if (isNaN(setupId)) {
+        console.log("❌ setupId nem szám:", req.params.id);
+        return res.json([]);
+    }
+
+    console.log(`\n🔍 Setup ID keresés: ${setupId}`);
 
     try {
-        // A) Kapcsolótábla lekérdezése
-        // JAVÍTÁS: Kivettük a hibás .or() részt! Csak 'setup_id'-t keresünk.
-        const { data: relations, error: relError } = await supabase
-            .from("setup_rooms[Setup]")
-            .select("*")
-            .eq("setup_id", setupId);
+        let allItems = [];
 
-        if (relError) {
-            console.error("❌ Hiba a setup_rooms olvasásakor:", relError.message);
-            return res.status(500).json({ error: relError.message });
-        }
+        for (const tableName of tablesToScan) {
+            const { data, error } = await supabase
+                .from(tableName)
+                .select("*")
+                .eq("setup_id", setupId);
 
-        // Ha üres, jelezzük a konzolon, de visszaküldünk egy üres tömböt (NEM HIBÁT!)
-        if (!relations || relations.length === 0) {
-            console.log("⚠️ A setup_rooms tábla nem tartalmaz sort ehhez az ID-hoz.");
-            return res.json([]);
-        }
-
-        console.log(`✅ Találtunk ${relations.length} kapcsolatot.`);
-        let resultItems = [];
-
-        // B) Végigmegyünk a sorokon és lekérjük az adatokat a táblákból
-        for (const relation of relations) {
-            const tableName = relation.table_name || relation.Table_Name;
-            const itemId = relation.item_id || relation.Item_ID;
-
-            if (!tableName || !itemId) {
-                console.warn("   ⚠️ Hiányos sor az adatbázisban:", relation);
+            if (error) {
+                console.log(`⚠️ ${tableName} kihagyva:`, error.message);
                 continue;
             }
 
-            // Lekérjük a terméket a saját táblájából
-            const { data: item } = await supabase
-                .from(tableName)
-                .select("*")
-                // Itt marad a védelem, mert az ID lehet nagybetűs a régi tábláknál
-                .or(`ID.eq.${itemId},id.eq.${itemId}`)
-                .maybeSingle();
+            if (data && data.length > 0) {
+                console.log(`✅ ${tableName}: ${data.length} elem`);
 
-            if (item) {
-                resultItems.push({
+                const mapped = data.map(item => ({
                     ...item,
                     category: tableName,
-                    display_name: item.Model || item.model || item.Name || item.name || "Névtelen",
-                    manufacturer: item.Manufacturer || item.manufacturer || ""
-                });
+                    display_name:
+                        item.Model ||
+                        item.model ||
+                        item.Name ||
+                        item.name ||
+                        "Névtelen termék",
+                    manufacturer:
+                        item.Manufacturer ||
+                        item.manufacturer ||
+                        ""
+                }));
+
+                allItems.push(...mapped);
             }
         }
 
-        console.log(`🏁 Küldés a frontendnek: ${resultItems.length} db elem.`);
-        res.json(resultItems);
+        console.log(`🏁 Összes item: ${allItems.length}\n`);
+        res.json(allItems);
 
     } catch (err) {
-        console.error("Végzetes hiba:", err);
-        res.status(500).json({ error: "Szerver hiba" });
+        console.error("❌ Végzetes backend hiba:", err);
+        res.json([]);
     }
 };

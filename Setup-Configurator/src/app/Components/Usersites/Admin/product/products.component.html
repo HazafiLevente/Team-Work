@@ -1,0 +1,56 @@
+<div class="admin-products">
+
+  <!-- BAL OLDAL -->
+  <div class="products-left">
+
+    <input
+      class="search"
+      type="text"
+      placeholder="🔍 Keresés..."
+      [(ngModel)]="search"
+      (input)="loadProducts()"
+    />
+
+    <div
+      class="product-card"
+      *ngFor="let p of products"
+      (click)="selectProduct(p)"
+      [class.active]="selected?.id === p.id"
+    >
+      <div class="brand">{{ p.manufacturer }}</div>
+      <div class="model">{{ p.model }}</div>
+    </div>
+
+  </div>
+
+  <!-- JOBB OLDAL -->
+  <div class="products-right">
+
+    <ng-container *ngIf="selected; else empty">
+      <h2>{{ selected.manufacturer }} {{ selected.model }}</h2>
+
+      <label>
+        Ár
+        <input type="number" [(ngModel)]="selected.price">
+      </label>
+
+      <label>
+        Gyártó
+        <input [(ngModel)]="selected.manufacturer">
+      </label>
+
+      <label>
+        Modell
+        <input [(ngModel)]="selected.model">
+      </label>
+
+      <button class="save" (click)="saveProduct()">💾 Mentés</button>
+    </ng-container>
+
+    <ng-template #empty>
+      <div class="empty">👈 Válassz egy terméket balról</div>
+    </ng-template>
+
+  </div>
+
+</div>

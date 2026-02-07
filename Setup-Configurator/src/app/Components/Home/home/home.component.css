@@ -1,0 +1,22 @@
+.home-row{
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 28px;
+  align-items: start;
+  padding-right: 22px;
+}
+
+.left{
+  width: calc(4 * 220px + 3 * 20px + 40px);
+}
+
+.right{
+  min-width: 520px;
+}
+
+/* mobil */
+@media (max-width: 1200px){
+  .home-row{ grid-template-columns: 1fr; }
+  .left{ width: 100%; }
+  .right{ min-width: 0; }
+}

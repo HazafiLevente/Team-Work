@@ -28,10 +28,21 @@ function selectWhereEquals(table, col, value, limit = 2000) {
     if (!tableExists(table)) return [];
     return db.prepare(`SELECT * FROM "${table}" WHERE "${col}" = ? LIMIT ?`).all(value, limit);
 }
+function countAll(table) {
+    if (!tableExists(table)) return 0;
+    try {
+        const row = db.prepare(`SELECT COUNT(*) as count FROM "${table}"`).get();
+        return row ? row.count : 0;
+    } catch (e) {
+        console.warn(`[localDb] countAll error for ${table}:`, e.message);
+        return 0;
+    }
+}
 
 module.exports = {
     db,
     tableExists,
     selectAll,
-    selectWhereEquals
+    selectWhereEquals,
+    countAll
 };

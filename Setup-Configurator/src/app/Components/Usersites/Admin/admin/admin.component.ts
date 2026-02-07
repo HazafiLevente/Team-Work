@@ -2,13 +2,15 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { UsersComponent } from '../users/users.component';
+import {ProductsComponent} from '../product/products.component';
+
 
 @Component({
   standalone: true,
   selector: 'app-admin',
-  imports: [CommonModule, UsersComponent],
+  imports: [CommonModule, UsersComponent, ProductsComponent],
   templateUrl: './admin.component.html',
-  styleUrl: './admin.component.css'
+  styleUrls: ['./admin.component.css']
 })
 export class AdminComponent implements OnInit {
 
@@ -19,7 +21,7 @@ export class AdminComponent implements OnInit {
 
   loading = true;
 
-  activeSection: 'dashboard' | 'users' = 'dashboard';
+  activeSection: 'dashboard' | 'users' | 'products' = 'dashboard';
 
   constructor(private http: HttpClient) {}
 
@@ -40,6 +42,12 @@ export class AdminComponent implements OnInit {
       }
     });
   }
+
+
+  openProducts() {
+    this.activeSection = 'products';
+  }
+
 
   openUsers() {
     this.activeSection = 'users';

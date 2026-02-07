@@ -130,20 +130,23 @@
    Top menu (fixed, glass + neon)
    ------------------------- */
 .top-menu{
-  position:fixed;
-  left:0; right:0; top:0;
-  height:64px;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  padding:10px 20px;
-  gap:12px;
-  z-index:50;
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 9999;
 
-  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
-  border-bottom: 1px solid var(--glass-border);
-  backdrop-filter: blur(8px) saturate(120%);
-  -webkit-backdrop-filter: blur(8px) saturate(120%);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
 
-  box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+  height: 64px;
+
+  isolation: isolate; /* 🔥 EZ OLDJA MEG */
+
+  background: rgba(18,18,22,0.75);
+
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+
+  border-bottom: 1px solid rgba(255,255,255,0.12);
 }

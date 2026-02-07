@@ -48,6 +48,8 @@ app.use("/api/bell", require("./routes/bell.routes"));
 app.use("/api/admin", require("./routes/admin.routes"));
 app.use("/api/profile", require("./routes/profile.routes"));
 app.use("/api/public", require("./routes/public.routes"));
+app.use("/api/admin/products", require("./routes/admin.products.routes"));
+
 
 /* ----------------------------------
    IMAGES MAP API
@@ -59,5 +61,12 @@ app.use("/api/images", require("./routes/imagesMap.routes"));
    META
 ---------------------------------- */
 app.use("/api", require("./routes/meta.routes"));
+
+
+/* ----------------------------------
+   AI ROUTES
+---------------------------------- */
+app.use("/api/ai", require("./routes/ai.routes"));
+
 
 module.exports = app;

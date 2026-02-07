@@ -1033,3 +1033,32 @@ select {
 .user-menu .menu-item.danger:hover {
   color: rgba(255,77,77,0.6);
 }
+
+app-root {
+  display: block;
+  min-height: 100vh;
+  position: relative;
+}
+
+.app-foreground{
+  position: relative;
+  z-index: 1; /* minden kattintható tartalom a canvas fölött */
+}
+
+
+.bg-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+
+  /* 🔥 sötétítés + enyhe szín */
+  background:
+    linear-gradient(
+      180deg,
+      rgba(0,0,0,0.55) 0%,
+      rgba(0,0,0,0.35) 40%,
+      rgba(0,0,0,0.65) 100%
+    );
+
+  pointer-events: none;
+}

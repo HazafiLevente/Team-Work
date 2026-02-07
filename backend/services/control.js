@@ -271,9 +271,12 @@ function startControl() {
 
 module.exports = {
     startControl,
+    refreshTables,   // ✅ EZ KELL
     resolveRole,
     canAssignRole,
     hasAdminAccess,
     hasAdminPlusAccess,
     ROLES
 };
+
+

@@ -4,6 +4,7 @@ const path = require("path");
 const { supabase } = require("../services/supabase");
 const verifyAdmin = require("../middlewares/verifyAdmin");
 const { resolveRole } = require("../services/control");
+const localDb = require("../services/localDb");
 
 
 router.get("/stats", verifyAdmin, async (req, res) => {
@@ -24,40 +25,24 @@ router.get("/stats", verifyAdmin, async (req, res) => {
         t => !t.includes("[")
     );
 
-    // 🗂 ÖSSZES TÁBLA (DB Actual Count) - User requested "all tables" (approx 92)
-    const { data: allTables } = await supabase.rpc("get_all_tables");
-    const realTableCount = allTables ? allTables.length : runtimeTableNames.length;
+    // 🗂 ÖSSZES TÁBLA (Local DB Count)
+    const realTableCount = localDb.db.prepare("SELECT count(*) as c FROM sqlite_master WHERE type='table'").get().c;
 
-    // 👤 user[Auth] count
-    const { count: usersCount } = await supabase
-        .from("user[Auth]")
-        .select("*", { count: "exact", head: true });
+    // 👤 user[Auth] count (Local)
+    const usersCount = localDb.countAll("user[Auth]");
 
-    // 📦 Összes termék (Explicit Counts from ALL product tables)
-    // The user requested to strictly count rows from all "product tables" (no []).
-    // existing 'products_home' might miss tables without manufacturer/model columns.
-    const productCountPromises = productTables.map(table =>
-        supabase
-            .from(table)
-            .select("*", { count: "exact", head: true })
-            .then(({ count, error }) => {
-                if (error) {
-                    console.error(`Error counting ${table}:`, error.message);
-                    return 0;
-                }
-                return count || 0;
-            })
-    );
-
-    const counts = await Promise.all(productCountPromises);
-    const totalProducts = counts.reduce((sum, c) => sum + c, 0);
+    // 📦 Összes termék (Local Counts)
+    let totalProducts = 0;
+    for (const table of productTables) {
+        totalProducts += localDb.countAll(table);
+    }
 
     // ... existing stats logic ...
     res.json({
         users: usersCount || 0,
-        tables: realTableCount,           // Real DB count
+        tables: realTableCount,           // Local Cache DB count
         productTables: productTables.length, // Runtime Filtered Config count
-        products: totalProducts           // Sum of rows from all product tables
+        products: totalProducts           // Sum of rows from locally cached product tables
     });
 });
 

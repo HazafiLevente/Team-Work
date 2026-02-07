@@ -1,3 +1,4 @@
+// backend/services/syncService.js
 const fs = require("fs");
 const path = require("path");
 const Database = require("better-sqlite3");
@@ -17,12 +18,8 @@ const NEVER_UPLOAD = new Set([
     "bell_messages_view"
 ]);
 
-// upload alapból OFF (mert a SQLite TEXT-esít, és sok táblád nem kompatibilis upsertre)
+// upload alapból OFF
 const ENABLE_UPLOAD_TO_SUPABASE = false;
-
-// intervallum (ms)
-const INTERVAL_MS = 5000;
-
 
 /* ----------------------------------
    LOG BUFFER
@@ -32,9 +29,7 @@ function createLogBuffer(title) {
     return {
         title,
         lines: [],
-        add(line) {
-            this.lines.push(line);
-        },
+        add(line) { this.lines.push(line); },
         flush() {
             console.log("\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
             console.log(`📊 ${this.title}`);
@@ -61,9 +56,7 @@ const TABLE_LIST_FILE = path.join(
    INIT DIR + DB
 ---------------------------------- */
 
-if (!fs.existsSync(DB_DIR)) {
-    fs.mkdirSync(DB_DIR, { recursive: true });
-}
+if (!fs.existsSync(DB_DIR)) fs.mkdirSync(DB_DIR, { recursive: true });
 
 const db = new Database(DB_PATH);
 db.pragma("foreign_keys = ON");
@@ -73,42 +66,27 @@ db.pragma("foreign_keys = ON");
 ---------------------------------- */
 
 function qIdent(name) {
-    // SQLite identifier escaping: " -> ""
     return `"${String(name).replace(/"/g, '""')}"`;
 }
 
 function ensureTable(table, sampleRow) {
-    const columns = Object.keys(sampleRow)
-        .map(col => `${qIdent(col)} TEXT`)
-        .join(", ");
-
-    const sql = `
-    CREATE TABLE IF NOT EXISTS ${qIdent(table)} (
-      ${columns}
-    )
-  `;
-
-    db.prepare(sql).run();
+    const columns = Object.keys(sampleRow).map(col => `${qIdent(col)} TEXT`).join(", ");
+    db.prepare(`CREATE TABLE IF NOT EXISTS ${qIdent(table)} (${columns})`).run();
 }
 
 function normalizeValue(value) {
-    if (value === undefined) return null;
-    if (value === null) return null;
+    if (value === undefined || value === null) return null;
 
     if (typeof value === "string") return value;
-    if (typeof value === "number") return String(value);      // ✅ mindig string, hogy ne csússzon a típus
-    if (typeof value === "boolean") return value ? "1" : "0"; // ✅ string
+    if (typeof value === "number") return String(value);
+    if (typeof value === "boolean") return value ? "1" : "0";
     if (typeof value === "bigint") return value.toString();
 
     if (value instanceof Date) return value.toISOString();
     if (Buffer.isBuffer(value)) return value;
 
     if (typeof value === "object") {
-        try {
-            return JSON.stringify(value);
-        } catch {
-            return null;
-        }
+        try { return JSON.stringify(value); } catch { return null; }
     }
 
     return String(value);
@@ -124,7 +102,6 @@ function loadTableList() {
         const json = JSON.parse(fs.readFileSync(TABLE_LIST_FILE, "utf-8"));
         const base = Array.isArray(json.tables) ? json.tables : [];
 
-        // ✅ extra cache objects mindig legyenek benne
         for (const x of EXTRA_CACHE_OBJECTS) {
             if (!base.includes(x)) base.push(x);
         }
@@ -144,7 +121,7 @@ function tableExists(table) {
 }
 
 /* ----------------------------------
-   SYNC FROM SUPABASE  (Supabase -> SQLite)
+   SYNC FROM SUPABASE (one-shot)
 ---------------------------------- */
 
 async function syncFromSupabase() {
@@ -154,12 +131,10 @@ async function syncFromSupabase() {
     if (!tables.length) {
         log.add("⚠️ nincs szinkronizálható tábla");
         log.flush();
-        return;
+        return { synced: 0, empty: 0, failed: 0 };
     }
 
-    let synced = 0;
-    let empty = 0;
-    let failed = 0;
+    let synced = 0, empty = 0, failed = 0;
 
     for (const table of tables) {
         const { data, error } = await supabase.from(table).select("*");
@@ -203,13 +178,13 @@ async function syncFromSupabase() {
     log.add(`   ✔ szinkronizált: ${synced}`);
     log.add(`   ⚠️ üres: ${empty}`);
     log.add(`   ❌ hibás: ${failed}`);
-
     log.flush();
+
+    return { synced, empty, failed };
 }
 
 /* ----------------------------------
-   SYNC TO SUPABASE  (SQLite -> Supabase)
-   ⚠️ erősen opcionális, mert a SQLite TEXT-esít.
+   SYNC TO SUPABASE (optional)
 ---------------------------------- */
 
 async function syncToSupabase() {
@@ -218,8 +193,7 @@ async function syncToSupabase() {
     const tables = loadTableList();
 
     for (const table of tables) {
-        if (NEVER_UPLOAD.has(table)) continue; // ✅ view / tiltott object skip
-
+        if (NEVER_UPLOAD.has(table)) continue;
         if (!tableExists(table)) continue;
 
         let rows;
@@ -231,46 +205,29 @@ async function syncToSupabase() {
 
         if (!rows.length) continue;
 
-        // ⚠️ ha nincs id, nem upsertelünk
         const hasId = rows[0] && Object.prototype.hasOwnProperty.call(rows[0], "id");
         if (!hasId) {
             console.warn(`⚠️ skip upload (${table}): no "id" column`);
             continue;
         }
 
-        const { error } = await supabase
-            .from(table)
-            .upsert(rows, { onConflict: "id" });
+        const { error } = await supabase.from(table).upsert(rows, { onConflict: "id" });
 
-        if (error) {
-            console.error(`❌ Upload error (${table}):`, error.message);
-        } else {
-            console.log(`⬆️ ${table}: ${rows.length} sor feltöltve`);
-        }
+        if (error) console.error(`❌ Upload error (${table}):`, error.message);
+        else console.log(`⬆️ ${table}: ${rows.length} sor feltöltve`);
     }
 }
 
-/* ----------------------------------
-   INTERVAL
----------------------------------- */
-
-function startSyncInterval() {
-    console.log(`🚀 Sync Service started (${INTERVAL_MS}ms interval)`);
-    console.log(`📌 Upload to Supabase: ${ENABLE_UPLOAD_TO_SUPABASE ? "ON" : "OFF"}`);
-
-    syncFromSupabase().catch(console.error);
-
-    setInterval(async () => {
-        try {
-            await syncFromSupabase();
-
-            if (ENABLE_UPLOAD_TO_SUPABASE) {
-                await syncToSupabase();
-            }
-        } catch (err) {
-            console.error("❌ Sync error:", err.message);
-        }
-    }, INTERVAL_MS);
+async function syncOnce({ upload = false } = {}) {
+    const result = await syncFromSupabase();
+    if (upload && ENABLE_UPLOAD_TO_SUPABASE) {
+        await syncToSupabase();
+    }
+    return result;
 }
 
-module.exports = { startSyncInterval };
+module.exports = {
+    syncFromSupabase,
+    syncToSupabase,
+    syncOnce
+};

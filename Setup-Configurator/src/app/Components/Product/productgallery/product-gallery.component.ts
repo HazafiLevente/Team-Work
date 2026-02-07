@@ -1,10 +1,11 @@
 import { CommonModule } from '@angular/common';
 import { Component, HostListener, Input } from '@angular/core';
+import { CardSwapComponent } from '../../Shared/CardSwap/card-swap.component';
 
 @Component({
   selector: 'app-product-gallery',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, CardSwapComponent],
   templateUrl: './product-gallery.component.html',
   styleUrls: ['./product-gallery.component.css']
 })
@@ -47,6 +48,7 @@ export class ProductGalleryComponent {
     this.active = (this.active + 1) % this.images.length;
   }
 
+  // ✅ THUMB: csak vált, nem nyit viewert
   setActive(i: number) {
     if (!this.hasImages) return;
     this.direction = i > this.active ? 'next' : 'prev';

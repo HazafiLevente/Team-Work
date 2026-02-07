@@ -42,3 +42,26 @@
   display: block;
   margin: 0 auto 10px;
 }
+
+.home-row{
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: start;
+}
+
+.left{
+  width: calc(4 * 220px + 3 * 20px + 40px);
+}
+
+.right{
+  min-width: 340px;
+  padding-right: 20px;
+}
+
+@media (max-width: 1200px){
+  .home-row{
+    grid-template-columns: 1fr;
+  }
+  .left{ width: 100%; }
+  .right{ min-width: 0; }
+}

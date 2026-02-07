@@ -10,12 +10,13 @@ import { DragDropModule } from '@angular/cdk/drag-drop';
   styleUrls: ['./setup-room.component.css']
 })
 export class SetupRoomComponent {
+
   @Input() setup: any;
   @Input() boundaryRef: any;
   @Output() setupDblClick = new EventEmitter<any>();
 
-  onDblClick() {
-    // Jelezzük a szülőnek, hogy ránk kattintottak
+  onDblClick(): void {
+    if (!this.setup) return;
     this.setupDblClick.emit(this.setup);
   }
 }

@@ -2,22 +2,27 @@
 
   <div class="boundary-area" #boundary>
     @if (!loading) {
-      @for (setup of userSetups; track setup.id) {
 
+      @for (setup of userSetups; track $index) {
         <app-setup-room
           [setup]="setup"
           [boundaryRef]="boundary"
           (setupDblClick)="onChildSetupClick($event)">
         </app-setup-room>
+      }
 
-      } @empty {
+      @empty {
         <div class="no-data">Nincs setup.</div>
       }
+
+    } @else {
+      <div class="no-data">Betöltés...</div>
     }
   </div>
 
   <div class="side-panel" [class.open]="showModal">
     @if (selectedSetup) {
+
       <div class="panel-header">
         <h2>{{ selectedSetup.setup_name }}</h2>
         <button class="close-btn" (click)="closeModal()">×</button>
@@ -25,24 +30,43 @@
 
       <div class="panel-body">
         <table class="details-table">
-          <thead><tr><td colspan="2">Eszközök</td></tr></thead>
+          <thead>
+          <tr><td colspan="2">Eszközök</td></tr>
+          </thead>
           <tbody>
+
             @if (loadingItems) {
-              <tr><td colspan="2">Betöltés...</td></tr>
+              <tr>
+                <td colspan="2" class="loading-text">Betöltés...</td>
+              </tr>
             } @else {
-              @for (item of setupItems; track item.id) {
+
+              @for (item of setupItems; track $index) {
                 <tr>
                   <td>{{ item.category }}</td>
-                  <td>{{ item.display_name }}</td>
+                  <td>
+                    {{ item.display_name }}
+                    <div style="font-size:0.8em;color:#888">
+                      {{ item.manufacturer }}
+                    </div>
+                  </td>
                 </tr>
-              } @empty {
-                <tr><td colspan="2">Ez a szoba üres.</td></tr>
               }
+
+              @empty {
+                <tr>
+                  <td colspan="2" class="empty-info">
+                    Ez a setup üres.
+                  </td>
+                </tr>
+              }
+
             }
+
           </tbody>
         </table>
       </div>
+
     }
   </div>
-
 </div>

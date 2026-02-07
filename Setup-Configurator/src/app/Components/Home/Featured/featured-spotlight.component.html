@@ -1,0 +1,50 @@
+<div class="spotlight">
+
+  <div class="spotlight-header">
+    <div class="title">
+      Spotlight
+      <div class="sub">Random termék ajánló</div>
+    </div>
+  </div>
+
+  <!-- ✅ nagy kártya animáció -->
+  <div class="swap-wrap" *ngIf="cards.length">
+    <app-card-swap
+      [images]="images"
+      [width]="'100%'"
+      [height]="'100%'"
+      [delay]="6000"
+      [pauseOnHover]="true"
+      (cardClick)="onCardClick($event)"
+      (activeIndexChanged)="onActiveChanged($event)">
+    </app-card-swap>
+  </div>
+
+  <!-- ✅ ez vált együtt az animációval -->
+  <ng-container *ngIf="current as p">
+    <div class="meta">
+      <div class="manu">{{ p.manufacturer || '—' }}</div>
+      <div class="model">{{ p.model || '—' }}</div>
+      <div class="price">{{ formatPrice(p.price) }}</div>
+
+      <div class="mini">
+        <span class="chip">table: {{ p.table_name || p.table || '—' }}</span>
+        <span class="chip">id: {{ p.id }}</span>
+      </div>
+    </div>
+
+    <div class="specs" *ngIf="specs(p).length">
+      <div class="spec-row" *ngFor="let s of specs(p)">
+        <div class="k">{{ s.k }}</div>
+        <div class="v">{{ s.v }}</div>
+      </div>
+    </div>
+
+    <div class="hint">kattints a kártyára a részletekhez</div>
+  </ng-container>
+
+  <div class="empty" *ngIf="!cards.length">
+    Nincs megjeleníthető termék.
+  </div>
+
+</div>
