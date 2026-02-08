@@ -1,0 +1,25 @@
+<div class="qs">
+  <div class="tile">
+    <div class="k">Összes termék</div>
+    <div class="v">
+      <app-count-up [to]="total" [durationMs]="900"></app-count-up>
+    </div>
+  </div>
+
+  <div class="tile">
+    <div class="k">Spotlight pool</div>
+    <div class="v">
+      <app-count-up [to]="pool" [durationMs]="700"></app-count-up>
+    </div>
+  </div>
+
+  <div class="tile wide">
+    <div class="k">Kategóriák</div>
+    <div class="chips" *ngIf="chips?.length; else none">
+      <span class="chip" *ngFor="let c of chips">{{ c }}</span>
+    </div>
+    <ng-template #none>
+      <span class="chip muted">nincs</span>
+    </ng-template>
+  </div>
+</div>

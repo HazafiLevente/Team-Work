@@ -1,0 +1,159 @@
+
+.switch-auth {
+  margin-top: 14px;
+  font-size: 13px;
+}
+
+.switch-auth a {
+  color: #00ffff;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.switch-auth a:hover {
+  text-decoration: underline;
+}
+.top-menu {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+}
+
+.nav {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* 👤 USER WRAP */
+.user-wrap {
+  position: relative;        /* ⬅️ kell a dropdownhoz */
+  display: flex;
+  align-items: center;
+}
+
+
+/* 🔽 DROPDOWN */
+.user-menu {
+  opacity: 0;
+  pointer-events: none;
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 10px;
+  min-width: 220px;
+
+  transform-origin: top right;
+  will-change: height, transform, opacity;
+}
+
+
+
+/* USER NAME */
+.username {
+  margin-right: 10px;
+  font-weight: 600;
+  font-size: 14px;
+  color: #e9eef8;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+/* AVATAR */
+.user-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: #222;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+@media (max-width: 768px) {
+  .username {
+    display: none;
+  }
+}
+
+
+
+/* 🔔 BELL */
+.bell-wrap {
+  position: relative;
+  cursor: pointer;
+  color: #e9eef8;
+  font-size: 18px;
+  margin-right: 15px;
+}
+
+.bell-dropdown {
+  position: absolute;
+  top: 42%;
+  right: 0;
+  width: 320px;
+  max-height: 360px;
+  overflow: auto;
+  background: #0f0f17;
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 14px;
+  padding: 10px;
+  z-index: 1000;
+}
+
+.bell-item {
+  padding: 10px;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.bell-item:hover {
+  background: rgba(255,255,255,0.05);
+}
+
+.bell-item.unread {
+  background: rgba(0,255,255,0.08);
+}
+
+.bell-title {
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.bell-message {
+  font-size: 13px;
+  opacity: 0.85;
+}
+
+.bell-date {
+  font-size: 11px;
+  opacity: 0.5;
+  margin-top: 4px;
+}
+
+/* -------------------------
+   Top menu (fixed, glass + neon)
+   ------------------------- */
+.top-menu{
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 9999;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+
+  height: 64px;
+
+  isolation: isolate; /* 🔥 EZ OLDJA MEG */
+
+  background: rgba(18,18,22,0.75);
+
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+
+  border-bottom: 1px solid rgba(255,255,255,0.12);
+}
