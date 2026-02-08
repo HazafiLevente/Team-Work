@@ -32,6 +32,7 @@ export class ElectricBorderComponent implements AfterViewInit, OnDestroy {
   @ViewChild('container') containerRef!: ElementRef<HTMLDivElement>;
 
   private raf: number | null = null;
+  private resizeRaf: number | null = null;   // ✅ FIX
   private time = 0;
   private last = 0;
   private ro?: ResizeObserver;
@@ -125,6 +126,10 @@ export class ElectricBorderComponent implements AfterViewInit, OnDestroy {
       canvas.style.width = `${width}px`;
       canvas.style.height = `${height}px`;
 
+      // ✅ reset transform for safety
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.scale(dpr, dpr);
+
       return { width, height, dpr };
     };
 
@@ -177,14 +182,21 @@ export class ElectricBorderComponent implements AfterViewInit, OnDestroy {
       this.raf = requestAnimationFrame(draw);
     };
 
-    this.ro = new ResizeObserver(() => { size = updateSize(); });
-    this.ro.observe(container);
+    this.ro = new ResizeObserver(() => {
+      if (this.resizeRaf) cancelAnimationFrame(this.resizeRaf);
+      this.resizeRaf = requestAnimationFrame(() => {
+        size = updateSize();
+        this.resizeRaf = null;
+      });
+    });
 
+    this.ro.observe(container);
     this.raf = requestAnimationFrame(draw);
   }
 
   ngOnDestroy() {
     if (this.raf) cancelAnimationFrame(this.raf);
+    if (this.resizeRaf) cancelAnimationFrame(this.resizeRaf);
     this.ro?.disconnect();
   }
 }

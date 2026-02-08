@@ -1,49 +1,57 @@
 const { supabase } = require("../services/supabase");
 
 exports.me = async (req, res) => {
+    console.log("👉 /api/ranks/me user =", req.user);
+
+    if (!req.user) {
+        return res.status(401).json({ error: "Not logged in" });
+    }
+
+    const userId = req.user.id;
+
     try {
-        const userId = req.user.id;
+        const { data: ul, error: ulErr } = await supabase
+            .from('user_level[level]')
+            .select('level, points')
+            .eq('user_id', userId)
+            .maybeSingle();
 
-        // points
-        const { data: ptsRow, error: ptsErr } = await supabase
-            .from("user_level_points")
-            .select("points")
-            .eq("user_id", userId)
-            .single();
+        console.log("UL:", ul, ulErr);
 
-        const points = ptsRow?.points ?? 0;
+        if (ulErr) return res.status(500).json({ step: "user_level", error: ulErr.message });
 
-        // level
-        const { data: lvlRow, error: lvlErr } = await supabase
-            .from("user_level")
-            .select("level")
-            .eq("user_id", userId)
-            .single();
+        const level = ul?.level ?? 1;
+        const points = ul?.points ?? 0;
 
-        const level = lvlRow?.level ?? 1;
+        const { data: lc, error: lcErr } = await supabase
+            .from('level_counter[level]')
+            .select('min_point, max_point')
+            .eq('level', level)
+            .maybeSingle();
 
-        // thresholds
-        const { data: lcRow, error: lcErr } = await supabase
-            .from("level_counter")
-            .select("level, min_point, max_point")
-            .eq("level", level)
-            .single();
+        console.log("LC:", lc, lcErr);
 
-        if (lcErr) return res.status(500).json({ error: lcErr.message });
+        if (lcErr || !lc) {
+            return res.status(500).json({ step: "level_counter", error: lcErr?.message ?? "missing row" });
+        }
 
-        const min = lcRow.min_point ?? 0;
-        const max = lcRow.max_point ?? (min + 1);
-
-        const progress = max > min ? Math.max(0, Math.min(1, (points - min) / (max - min))) : 0;
+        const min = lc.min_point;
+        const max = lc.max_point;
+        const progress = (points - min) / (max - min);
 
         res.json({
             level,
             points,
             current: { min, max },
-            progress,
-            next: { level: level < 10 ? level + 1 : 10, pointsNeeded: level < 10 ? Math.max(0, max - points) : 0 }
+            progress: Math.max(0, Math.min(1, progress)),
+            next: {
+                level: level < 10 ? level + 1 : 10,
+                pointsNeeded: Math.max(0, max - points)
+            }
         });
+
     } catch (e) {
-        res.status(500).json({ error: String(e?.message ?? e) });
+        console.error("RANK ERROR:", e);
+        res.status(500).json({ error: String(e.message ?? e) });
     }
 };

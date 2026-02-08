@@ -157,3 +157,19 @@
 
   border-bottom: 1px solid rgba(255,255,255,0.12);
 }
+
+.eb-canvas-container {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 2;
+  overflow: visible;
+}
+
+.eb-canvas {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  display: block;
+}

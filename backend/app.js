@@ -18,6 +18,14 @@ app.use(
    STATIC IMAGES
    Team-Work/datas/images  ->  /images
 ---------------------------------- */
+
+app.use((req, res, next) => {
+    if (req.url.startsWith('/api/ranks')) {
+        console.log('🔥 HIT', req.method, req.url);
+    }
+    next();
+});
+
 const ROOT = path.resolve(__dirname, ".."); // Team-Work (repo root)
 const IMAGES_DIR = path.join(ROOT, "datas", "images"); // FONTOS: datas/images (kisbetű)
 
@@ -41,6 +49,7 @@ app.use("/api/auth", require("./routes/auth.routes"));
 app.use("/api/products", require("./routes/products.routes"));
 app.use("/api/items", require("./routes/items.routes"));
 app.use("/api/setup", require("./routes/setup.routes"));
+app.use('/api/ranks', require('./routes/ranks.routes'));
 app.use("/api/bell", require("./routes/bell.routes"));
 
 

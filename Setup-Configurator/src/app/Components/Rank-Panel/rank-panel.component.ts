@@ -33,7 +33,8 @@ export class RankPanelComponent implements OnInit {
   }
 
   get level() { return this.data?.level ?? 1; }
-  get color() { return RANK_COLORS[Math.max(0, Math.min(9, this.level - 1))]; }
+  get color() { return this.RANK_COLORS[Math.max(0, Math.min(9, this.level - 1))]; }
+
   get progressPct() { return Math.round((this.data?.progress ?? 0) * 100); }
 
   backdropClick(e: MouseEvent) {
