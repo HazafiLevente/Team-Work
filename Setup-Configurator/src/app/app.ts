@@ -3,6 +3,7 @@ import { AuthService } from './Components/Services/Auth/auth.service';
 import { HeaderComponent } from './Components/header/header.component';
 import { RouterOutlet } from '@angular/router';
 import { DarkVeilBgComponent } from './Components/Shared/Background/dark-veil-bg.component';
+import {ClickSparkComponent} from './Components/Shared/Effects/click-spark/click-spark.component';
 
 @Component({
   selector: 'app-root',
@@ -10,7 +11,8 @@ import { DarkVeilBgComponent } from './Components/Shared/Background/dark-veil-bg
   imports: [
     HeaderComponent,
     RouterOutlet,
-    DarkVeilBgComponent
+    DarkVeilBgComponent,
+    ClickSparkComponent
   ],
   templateUrl: './app.html'
 })

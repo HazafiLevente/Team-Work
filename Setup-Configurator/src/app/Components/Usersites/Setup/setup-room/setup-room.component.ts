@@ -10,13 +10,31 @@ import { DragDropModule } from '@angular/cdk/drag-drop';
   styleUrls: ['./setup-room.component.css']
 })
 export class SetupRoomComponent {
-
   @Input() setup: any;
   @Input() boundaryRef: any;
   @Output() setupDblClick = new EventEmitter<any>();
 
-  onDblClick(): void {
+  private lastClickAt = 0;
+  private dragging = false;
+
+  onDragStarted(): void {
+    this.dragging = true;
+  }
+
+  onDragEnded(): void {
+    setTimeout(() => (this.dragging = false), 0);
+  }
+
+  onClick(): void {
     if (!this.setup) return;
-    this.setupDblClick.emit(this.setup);
+    if (this.dragging) return;
+
+    const now = Date.now();
+    const diff = now - this.lastClickAt;
+    this.lastClickAt = now;
+
+    if (diff > 0 && diff < 320) {
+      this.setupDblClick.emit(this.setup);
+    }
   }
 }

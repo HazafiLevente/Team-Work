@@ -3,13 +3,16 @@ import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from
 
 import { CardSwapComponent } from '../../Shared/CardSwap/card-swap.component';
 import { ImageService } from '../../Services/image/image.service';
+import { QuickStatsComponent } from '../../Shared/Stats/quick-stats.component';
+
 
 type AnyProduct = any;
 
 @Component({
   selector: 'app-featured-spotlight',
   standalone: true,
-  imports: [CommonModule, CardSwapComponent],
+  imports: [CommonModule, CardSwapComponent, QuickStatsComponent],
+
   templateUrl: './featured-spotlight.component.html',
   styleUrls: ['./featured-spotlight.component.css']
 
@@ -46,6 +49,24 @@ export class FeaturedSpotlightComponent implements OnChanges {
   // ✅ CardSwap váltás -> frissüljön a current + specs
   onActiveChanged(idx: number) {
     this.activeIndex = idx;
+  }
+
+  get totalProducts(): number {
+    return this.products?.length ?? 0;
+  }
+
+  get poolCount(): number {
+    return this.cards?.length ?? 0;
+  }
+
+  get categories(): string[] {
+    const src = this.products ?? [];
+    const set = new Set<string>();
+    for (const p of src) {
+      const t = (p as any)?.table_name ?? (p as any)?.table ?? '';
+      if (t) set.add(String(t));
+    }
+    return Array.from(set).slice(0, 6); // max 6 chip
   }
 
   private buildCards() {

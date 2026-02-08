@@ -150,7 +150,7 @@
 
 .swap-wrap{
   height: 560px;           /* ezt húzd fel 650-750-re ha kell még nagyobb */
-  margin-top: 10px;
+  margin-top: 16px;
 
   border: 1px solid rgba(255,255,255,.12);
   background: rgba(255,255,255,.04);
@@ -169,3 +169,6 @@
 
 .info{ margin-top: 16px; }
 
+.latest-fixed{
+  top: 140px; /* volt 120px nálad */
+}

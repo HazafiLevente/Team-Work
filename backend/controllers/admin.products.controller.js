@@ -5,7 +5,9 @@ async function list(req, res) {
 
     const { data, error } = await supabase.rpc("products_home", { q });
 
-    if (error) return res.status(500).json({ error: error.message });
+    if (error) {
+        return res.status(500).json({ error: error.message });
+    }
 
     res.json({ products: data || [] });
 }
@@ -18,9 +20,14 @@ async function getOne(req, res) {
         p_id: Number(id)
     });
 
-    if (error) return res.status(500).json({ error: error.message });
+    if (error) {
+        return res.status(500).json({ error: error.message });
+    }
 
     res.json({ product: data });
 }
 
-module.exports = { list, getOne };
+module.exports = {
+    list,
+    getOne
+};

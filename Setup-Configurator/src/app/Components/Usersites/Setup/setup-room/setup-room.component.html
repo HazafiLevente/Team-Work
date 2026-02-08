@@ -1,9 +1,11 @@
 <div class="drag-element"
      cdkDrag
      [cdkDragBoundary]="boundaryRef"
-     (dblclick)="onDblClick()">
+     (cdkDragStarted)="onDragStarted()"
+     (cdkDragEnded)="onDragEnded()"
+     (click)="onClick()">
 
-  <div class="drag-content">
-    <span class="setup-name">{{ setup?.setup_name }}</span>
-  </div>
+  <span class="setup-name">
+    {{ setup?.setup_name || setup?.name || 'Névtelen setup' }}
+  </span>
 </div>

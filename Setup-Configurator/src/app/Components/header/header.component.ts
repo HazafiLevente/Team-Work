@@ -13,13 +13,18 @@ import { Observable } from 'rxjs';
 import { AuthService } from '../Services/Auth/auth.service';
 import { BellService, BellItem } from '../Services/Bell/bell.service';
 import { text } from '../../Constants/constants';
+import { RankPanelComponent } from '../Rank-Panel/rank-panel.component';
+
+
+import { gsap } from 'gsap';
 
 @Component({
   selector: 'app-header',
   standalone: true,
   templateUrl: './header.component.html',
   styleUrl: './header.component.css',
-  imports: [CommonModule, RouterLink]
+  imports: [CommonModule, RouterLink, RankPanelComponent]
+
 })
 export class HeaderComponent implements OnInit, AfterViewInit {
   user$!: Observable<any | null>;
@@ -33,13 +38,33 @@ export class HeaderComponent implements OnInit, AfterViewInit {
   @ViewChild('hdr', { static: true })
   headerRef!: ElementRef<HTMLElement>;
 
+  // ✅ dropdown element ref
+  @ViewChild('userMenu', { static: false })
+  userMenuRef!: ElementRef<HTMLElement>;
+
   private ticking = false;
+
+  // ✅ GSAP timeline
+  private menuTl?: gsap.core.Timeline;
 
   constructor(
     public auth: AuthService,
     private router: Router,
     public bell: BellService
   ) {}
+
+  ranksOpen = false;
+
+  openRanks() {
+    this.ranksOpen = true;
+    this.closeMenuAnimated?.(); // ha van ilyen függvényed, oké
+  }
+
+  closeRanks() {
+    this.ranksOpen = false;
+  }
+
+
 
   ngOnInit() {
     this.user$ = this.auth.user$;
@@ -48,8 +73,57 @@ export class HeaderComponent implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit() {
-    // 🔥 reload után is jól álljon
     this.applyScrollFade();
+    this.initUserMenuAnimation();
+  }
+
+  private initUserMenuAnimation() {
+    const menuEl = this.userMenuRef?.nativeElement;
+    if (!menuEl) return;
+
+    // items (stagger)
+    const items = Array.from(
+      menuEl.querySelectorAll('.menu-title, .muted, hr, .menu-item')
+    ) as HTMLElement[];
+
+
+    // alap állapot (zárt)
+    gsap.set(menuEl, {
+      height: 0,
+      opacity: 0,
+      y: -8,
+      overflow: 'hidden',
+      pointerEvents: 'none'
+    });
+    gsap.set(items, { y: 10, opacity: 0 });
+
+    const tl = gsap.timeline({ paused: true });
+
+
+    tl.to(items, {
+      y: 0,
+      opacity: 1,
+      duration: 0.25,
+      ease: 'power3.out',
+      stagger: 0.03
+    }, '-=0.15');
+
+    this.menuTl = gsap.timeline({ paused: true })
+      .to(menuEl, {
+        height: 'auto',
+        opacity: 1,
+        y: 0,
+        duration: 0.35,
+        ease: 'back.out(1.6)',
+      })
+      .to(items, {
+        y: 0,
+        opacity: 1,
+        duration: 0.25,
+        ease: 'power3.out',
+        stagger: 0.03
+      }, '-=0.15');
+
   }
 
   // 🔥 SCROLL → fekete eltűnik
@@ -68,19 +142,12 @@ export class HeaderComponent implements OnInit, AfterViewInit {
     const el = this.headerRef?.nativeElement;
     if (!el) return;
 
-    // ⬇️ ennyi px alatt tűnik el a fekete
     const MAX_SCROLL = 160;
-
     const y = Math.max(0, window.scrollY);
-    const p = Math.min(1, y / MAX_SCROLL); // 0..1
+    const p = Math.min(1, y / MAX_SCROLL);
 
-    // TOP: fekete 0.92 → scrollnál 0
     const alpha = (1 - p) * 0.92;
-
-    // Blur is eltűnik (ha nem kell blur: hagyd 0-n)
     const blur = (1 - p) * 10;
-
-    // Border is halványul
     const borderA = (1 - p) * 0.10;
 
     el.style.setProperty('--hdrA', alpha.toFixed(3));
@@ -95,7 +162,7 @@ export class HeaderComponent implements OnInit, AfterViewInit {
 
   @HostListener('document:click')
   closeAll() {
-    this.dropdownOpen = false;
+    this.closeMenuAnimated();
     this.bell.close();
   }
 
@@ -111,7 +178,43 @@ export class HeaderComponent implements OnInit, AfterViewInit {
   }
 
   toggleMenu() {
+    this.bell.close();
+
+    const menuEl = this.userMenuRef?.nativeElement;
+    if (!menuEl) return;
+
+    if (!this.menuTl) this.initUserMenuAnimation();
+    if (!this.menuTl) return;
+
     this.dropdownOpen = !this.dropdownOpen;
+
+    if (this.dropdownOpen) {
+      // ✅ nyitás előtt kattintható
+      gsap.set(menuEl, { pointerEvents: 'auto' });
+      this.menuTl.play(0);
+    } else {
+      // ✅ zárás után legyen nem kattintható
+      this.menuTl.eventCallback('onReverseComplete', () => {
+        gsap.set(menuEl, { pointerEvents: 'none' });
+      });
+      this.menuTl.reverse();
+    }
+  }
+
+
+  private closeMenuAnimated() {
+    if (!this.dropdownOpen) return;
+    this.dropdownOpen = false;
+
+    const menuEl = this.userMenuRef?.nativeElement;
+    if (this.menuTl) {
+      this.menuTl.reverse();
+      this.menuTl.eventCallback('onReverseComplete', () => {
+        if (menuEl) gsap.set(menuEl, { pointerEvents: 'none' });
+      });
+    } else {
+      if (menuEl) gsap.set(menuEl, { height: 0, opacity: 0, pointerEvents: 'none' });
+    }
   }
 
   logout() {

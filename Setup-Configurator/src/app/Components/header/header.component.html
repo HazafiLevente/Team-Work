@@ -28,9 +28,8 @@
         class="bell-dropdown"
         (click)="$event.stopPropagation()">
 
-        <div *ngIf="(bellItems$ | async)?.length === 0"
-             class="bell-item muted">
-          {{text.headerComponentZeroNotification}}
+        <div *ngIf="(bellItems$ | async)?.length === 0" class="bell-item muted">
+          {{ text.headerComponentZeroNotification }}
         </div>
 
         <div
@@ -40,9 +39,7 @@
           (click)="openMessage(n, $event)">
 
           <div class="bell-title">
-            {{ n.type === 'system' ? 'System'
-            : n.type === 'news' ? 'News'
-              : 'Register' }}
+            {{ n.type === 'system' ? 'System' : n.type === 'news' ? 'News' : 'Register' }}
           </div>
 
           <div class="bell-message">
@@ -68,7 +65,9 @@
         <span class="avatar-placeholder"></span>
       </div>
 
-      <div *ngIf="dropdownOpen" class="user-menu neon">
+      <!-- ✅ dropdown always in DOM -->
+      <div #userMenu class="user-menu neon" [attr.aria-hidden]="!dropdownOpen">
+
         <div class="menu-title">{{ user.username }}</div>
         <div class="muted">{{ user.email }}</div>
 
@@ -77,6 +76,9 @@
         <div class="menu-item" routerLink="/user/profile">👤 Profile</div>
         <div class="menu-item" routerLink="/user/favorite">⭐ Favorite</div>
         <div class="menu-item" routerLink="/user/setup">🧰 My Setup</div>
+
+        <!-- ✅ Rangok -->
+        <div class="menu-item" (click)="openRanks(); $event.stopPropagation()">🏅 Rangok</div>
 
         <div
           *ngIf="['admin','admin+','owner'].includes(user.role)"
@@ -90,8 +92,17 @@
         <div class="menu-item danger" (click)="logout()">
           🚪 Logout
         </div>
+
       </div>
     </div>
 
   </nav>
 </header>
+
+<!-- ✅ ezt teheted ide is -->
+<app-rank-panel
+  [hidden]="!ranksOpen"
+  (close)="closeRanks()">
+</app-rank-panel>
+
+

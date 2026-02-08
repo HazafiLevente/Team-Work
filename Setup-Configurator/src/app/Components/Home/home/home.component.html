@@ -1,3 +1,10 @@
+<app-click-spark
+  [sparkColor]="'#fff'"
+  [sparkSize]="8"
+  [sparkRadius]="15"
+  [sparkCount]="8"
+  [duration]="400"
+  easing="ease-out">
 <app-searchbar></app-searchbar>
 <app-filterlist></app-filterlist>
 
@@ -5,15 +12,24 @@
   <div class="left">
     <app-productlist
       (openProduct)="onOpenProduct($event)"
-      (productsChanged)="onProductsChanged($event)">
+      (productsChanged)="onProductsChanged($event)"
+      (statsChanged)="onStatsChanged($event)">
     </app-productlist>
   </div>
 
   <div class="right">
-    <app-featured-spotlight
-      [products]="featuredPool"
-      (openProduct)="onOpenProduct($event)">
-    </app-featured-spotlight>
+    <app-quick-stats
+      [total]="totalAll"
+      [pool]="featuredPool.length"
+      [chips]="allCategories">
+    </app-quick-stats>
+
+
+      <app-featured-spotlight
+        [products]="featuredPool"
+        (openProduct)="onOpenProduct($event)">
+      </app-featured-spotlight>
+
   </div>
 </div>
 
@@ -22,3 +38,4 @@
   [product]="selectedProduct"
   (closed)="onClosePanel()">
 </app-product-details-panel>
+</app-click-spark>

@@ -55,7 +55,7 @@ app.use("/api/admin/products", require("./routes/admin.products.routes"));
    IMAGES MAP API
    GET /api/images/map -> datas/Jsons/images.runtime.json
 ---------------------------------- */
-app.use("/api/images", require("./routes/imagesMap.routes"));
+app.use("/images", express.static(path.join(__dirname, "..", "datas", "images")));
 
 /* ----------------------------------
    META
@@ -66,7 +66,7 @@ app.use("/api", require("./routes/meta.routes"));
 /* ----------------------------------
    AI ROUTES
 ---------------------------------- */
-app.use("/api/ai", require("./routes/ai.routes"));
+app.use("/api/ai", require("./ai/ai.routes"));
 
 
 module.exports = app;

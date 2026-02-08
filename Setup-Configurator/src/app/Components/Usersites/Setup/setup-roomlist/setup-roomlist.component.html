@@ -1,72 +1,87 @@
-<div class="setup-workspace">
+<!-- setup-roomlist.component.html -->
+<div class="setup-shell">
 
-  <div class="boundary-area" #boundary>
-    @if (!loading) {
+  <!-- BAL OLDAL: ez lesz a DRAG BOUNDARY -->
+  <div class="setup-workspace" #boundary>
 
-      @for (setup of userSetups; track $index) {
-        <app-setup-room
-          [setup]="setup"
-          [boundaryRef]="boundary"
-          (setupDblClick)="onChildSetupClick($event)">
-        </app-setup-room>
+    <app-dot-grid
+      class="dot-bg"
+      [dotSize]="5"
+      [gap]="15"
+      baseColor="#271E37"
+      activeColor="#5227FF"
+      [proximity]="100"
+      [shockRadius]="250"
+      [shockStrength]="5"
+      [resistance]="750"
+      [returnDuration]="1.5">
+    </app-dot-grid>
+
+    <!-- csak layout tartó -->
+    <div class="boundary-area">
+
+      @if (!loading) {
+        @for (setup of userSetups; track $index) {
+          <app-setup-room
+            [setup]="setup"
+            [boundaryRef]="boundary"
+            (setupDblClick)="onChildSetupClick($event)">
+          </app-setup-room>
+        }
+        @empty {
+          <div class="no-data">Nincs setup.</div>
+        }
+      } @else {
+        <div class="no-data">Betöltés...</div>
       }
 
-      @empty {
-        <div class="no-data">Nincs setup.</div>
+    </div>
+  </div>
+
+  <!-- JOBB OLDAL -->
+  <aside class="side-panel">
+    <div class="panel-header">
+      <div class="head">
+        <div class="title">
+          @if (selectedSetup) { {{ getSetupTitle(selectedSetup) }} } @else { Eszközök }
+        </div>
+        <div class="subtle">
+          @if (selectedSetup) { Setup eszközök } @else { Dupla katt egy setupra, és itt megjelenik. }
+        </div>
+      </div>
+
+      <button class="close-btn" (click)="closeModal()" [disabled]="!selectedSetup">×</button>
+    </div>
+
+    <div class="panel-body">
+      @if (!selectedSetup) {
+        <div class="empty-hint">Válassz egy setupot (dupla katt).</div>
+      } @else {
+
+        @if (loadingItems) {
+          <div class="loading-text">Betöltés...</div>
+        } @else {
+
+          @if (setupItems.length === 0) {
+            <div class="empty-info">Ez a setup üres.</div>
+          } @else {
+            <ul class="item-list">
+              @for (it of setupItems; track $index) {
+                <li class="item">
+                  <div class="cat">{{ it.category }}</div>
+                  <div class="name">{{ it.display_name }}</div>
+                  @if (it.manufacturer) {
+                    <div class="meta">{{ it.manufacturer }}</div>
+                  }
+                </li>
+              }
+            </ul>
+          }
+
+        }
+
       }
+    </div>
+  </aside>
 
-    } @else {
-      <div class="no-data">Betöltés...</div>
-    }
-  </div>
-
-  <div class="side-panel" [class.open]="showModal">
-    @if (selectedSetup) {
-
-      <div class="panel-header">
-        <h2>{{ selectedSetup.setup_name }}</h2>
-        <button class="close-btn" (click)="closeModal()">×</button>
-      </div>
-
-      <div class="panel-body">
-        <table class="details-table">
-          <thead>
-          <tr><td colspan="2">Eszközök</td></tr>
-          </thead>
-          <tbody>
-
-            @if (loadingItems) {
-              <tr>
-                <td colspan="2" class="loading-text">Betöltés...</td>
-              </tr>
-            } @else {
-
-              @for (item of setupItems; track $index) {
-                <tr>
-                  <td>{{ item.category }}</td>
-                  <td>
-                    {{ item.display_name }}
-                    <div style="font-size:0.8em;color:#888">
-                      {{ item.manufacturer }}
-                    </div>
-                  </td>
-                </tr>
-              }
-
-              @empty {
-                <tr>
-                  <td colspan="2" class="empty-info">
-                    Ez a setup üres.
-                  </td>
-                </tr>
-              }
-
-            }
-
-          </tbody>
-        </table>
-      </div>
-
-    }
-  </div>
 </div>

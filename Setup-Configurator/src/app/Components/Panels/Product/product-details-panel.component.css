@@ -1,3 +1,7 @@
+:root{
+  --header-h: 74px;
+}
+
 .overlay{
   position: fixed;
   inset: 0;
@@ -5,18 +9,30 @@
   z-index: 999;
 }
 
+
+
 .panel{
   position: fixed;
-  top: 0;
+
+  /* ✅ EZ A LÉNYEG: ne a viewport tetején kezdődjön */
+  top: var(--header-h);
   right: 0;
-  height: 100vh;
+
+  /* ✅ így nem lóg be a header alá */
+  height: calc(100vh - var(--header-h));
+
   width: min(520px, 92vw);
-  background: #111;
+
+  background: rgba(14,14,18,0.92);
   color: #fff;
+
   z-index: 1000;
   display: flex;
   flex-direction: column;
+
+  border-left: 1px solid rgba(255,255,255,.10);
   box-shadow: -20px 0 60px rgba(0,0,0,.6);
+  backdrop-filter: blur(10px);
 }
 
 .panel-header{
@@ -41,7 +57,7 @@
 }
 
 .panel-body{
-  padding: 16px;
+  flex: 1;
   overflow: auto;
 }
 
@@ -60,15 +76,25 @@
 
 .error{ color: #ff8a8a; }
 
-.panel {
+.panel{
   position: fixed;
-  top: 0;
+  top: 74px;
   right: 0;
-  height: 100vh;
+  height: calc(100vh - 74px);
   width: min(520px, 92vw);
+
+  background: rgba(14,14,18,0.92);
+  color: #fff;
+
+  z-index: 1000;
   display: flex;
   flex-direction: column;
+
+  border-left: 1px solid rgba(255,255,255,.10);
+  box-shadow: -20px 0 60px rgba(0,0,0,.6);
+  backdrop-filter: blur(10px);
 }
+
 
 .panel-body {
   flex: 1;

@@ -17,6 +17,8 @@ type AnyProduct = Product & {
   manufacturer?: string;
   model?: string;
   price?: any;
+  id?: any;
+  ID?: any;
 };
 
 @Component({
@@ -33,6 +35,9 @@ export class ProductlistComponent implements OnInit, OnDestroy {
 
   // ✅ kifelé jelezzük: aktuális filtered lista (Spotlight pool)
   @Output() productsChanged = new EventEmitter<AnyProduct[]>();
+
+  // ✅ ÚJ: valódi total + minden kategória (összefűzve az összes listából)
+  @Output() statsChanged = new EventEmitter<{ totalAll: number; categoriesAll: string[] }>();
 
   allProducts: AnyProduct[] = [];
   carProducts: AnyProduct[] = [];
@@ -61,6 +66,7 @@ export class ProductlistComponent implements OnInit, OnDestroy {
         this.allProducts = (res.items || []) as AnyProduct[];
         console.log('✅ ALL PRODUCTS LOADED:', this.allProducts.length, 'sample:', this.allProducts[0]);
         this.loading = false;
+        this.emitStats();
         this.applyFilters(this.filtersService.current);
       },
       error: err => { console.error('❌ ALL ERROR', err); this.loading = false; }
@@ -70,6 +76,7 @@ export class ProductlistComponent implements OnInit, OnDestroy {
     this.productService.getCars(this.PRODUCT_LIMIT).subscribe({
       next: res => {
         this.carProducts = (res.items || []) as AnyProduct[];
+        this.emitStats();
         this.applyFilters(this.filtersService.current);
       },
       error: err => console.error('❌ CARS ERROR', err)
@@ -79,6 +86,7 @@ export class ProductlistComponent implements OnInit, OnDestroy {
     this.productService.getComputers(this.PRODUCT_LIMIT).subscribe({
       next: res => {
         this.computerProducts = (res.items || []) as AnyProduct[];
+        this.emitStats();
         this.applyFilters(this.filtersService.current);
       },
       error: err => console.error('❌ PCS ERROR', err)
@@ -88,6 +96,7 @@ export class ProductlistComponent implements OnInit, OnDestroy {
     this.productService.getHomeTheaters(this.PRODUCT_LIMIT).subscribe({
       next: res => {
         this.htProducts = (res.items || []) as AnyProduct[];
+        this.emitStats();
         this.applyFilters(this.filtersService.current);
       },
       error: err => console.error('❌ HT ERROR', err)
@@ -98,10 +107,9 @@ export class ProductlistComponent implements OnInit, OnDestroy {
       next: res => {
         this.allInstruments = (res.items || []) as AnyProduct[];
         console.log('✅ INSTRUMENTS:', this.allInstruments.length);
+        this.emitStats();
         this.applyFilters(this.filtersService.current);
-        
       },
-
       error: err => console.error('❌ INSTRUMENTS ERROR', err)
     });
   }
@@ -113,6 +121,64 @@ export class ProductlistComponent implements OnInit, OnDestroy {
   // ✅ ProductComponent click -> Home kapja meg
   onOpenProduct(p: AnyProduct) {
     this.openProduct.emit(p);
+  }
+
+  // -----------------------------
+  // ✅ STATS (valódi total + kategóriák)
+  // -----------------------------
+
+  private getId(p: any): string {
+    const id = p?.id ?? p?.ID ?? p?.data?.id ?? p?.data?.ID;
+    return String(id ?? '').trim();
+  }
+
+  private getTable(p: any): string {
+    return String(p?.table_name ?? p?.table ?? p?.data?.table_name ?? p?.data?.table ?? '').trim();
+  }
+
+  private emitStats() {
+    const merged: AnyProduct[] = [
+      ...(this.allProducts || []),
+      ...(this.carProducts || []),
+      ...(this.computerProducts || []),
+      ...(this.htProducts || []),
+      ...(this.allInstruments || []),
+    ];
+
+    console.log('[STATS] raw counts:', {
+      all: this.allProducts?.length ?? 0,
+      car: this.carProducts?.length ?? 0,
+      pc: this.computerProducts?.length ?? 0,
+      ht: this.htProducts?.length ?? 0,
+      inst: this.allInstruments?.length ?? 0,
+      merged: merged.length
+    });
+
+
+    // dedupe table:id alapján
+    const map = new Map<string, AnyProduct>();
+    for (const p of merged) {
+      const table = this.getTable(p);
+      const id = this.getId(p);
+      if (!table || !id) continue;
+      map.set(`${table}:${id}`, p);
+    }
+
+    const totalAll = map.size;
+    console.log('[STATS] dedup totalAll=', totalAll);
+
+    const cats = new Set<string>();
+    for (const p of map.values()) {
+      const t = this.getTable(p);
+      if (t) cats.add(t);
+    }
+    const payload = { totalAll, categoriesAll: Array.from(cats).sort() };
+    console.log('[STATS] emit payload:', payload);
+
+    this.statsChanged.emit({
+      totalAll,
+      categoriesAll: Array.from(cats).sort()
+    });
   }
 
   // -----------------------------
