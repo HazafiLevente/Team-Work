@@ -1,11 +1,9 @@
-import { Component, EventEmitter, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 import { RankService, RankMeDto } from '../Services/User/Ranks/rank.service';
 import { ElectricBorderComponent } from '../Shared/Electric-Border/electric-border.component';
 import { RANK_COLORS } from '../../Constants/ranks.constants';
-
-
 
 @Component({
   selector: 'app-rank-panel',
@@ -17,8 +15,10 @@ import { RANK_COLORS } from '../../Constants/ranks.constants';
 export class RankPanelComponent implements OnInit {
   @Output() close = new EventEmitter<void>();
 
-  readonly RANK_COLORS = RANK_COLORS;
+  /** ✅ ha true: beágyazott kártya (nincs overlay, nincs X) */
+  @Input() embedded = false;
 
+  readonly RANK_COLORS = RANK_COLORS;
 
   data?: RankMeDto;
   loading = true;
@@ -33,9 +33,7 @@ export class RankPanelComponent implements OnInit {
   }
 
   get level() { return this.data?.level ?? 1; }
-  get color() { return this.RANK_COLORS[Math.max(0, Math.min(9, this.level - 1))]; }
-
-  get progressPct() { return Math.round((this.data?.progress ?? 0) * 100); }
+  get color() { return RANK_COLORS[Math.max(0, Math.min(9, this.level - 1))]; }
 
   backdropClick(e: MouseEvent) {
     if (e.target === e.currentTarget) this.close.emit();

@@ -1,28 +1,9 @@
-.filter-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 220px);
-  gap: 10px;
-}
-@media (max-width: 1024px) {
-  .filter-grid {
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  }
-
-  .carfilter {
-    max-width: 100%;
-    margin-left: 20px;
-  }
-}
-
 .carfilter {
   padding: 12px;
   border-radius: var(--radius);
   background: var(--surface);
   border: 1px solid var(--glass-border);
-
-
 }
-
 
 .carfilter-header {
   display: flex;
@@ -36,17 +17,12 @@
   grid-template-columns: repeat(4, 220px);
   gap: 10px;
 }
+
 @media (max-width: 1024px) {
   .filter-grid {
     grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
   }
-
-  .carfilter {
-    max-width: 100%;
-    margin-left: 20px;
-  }
 }
-
 
 .search-input {
   background: var(--glass-alpha);
@@ -55,10 +31,17 @@
   padding: 8px 10px;
   color: var(--text);
   outline: none;
+  transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease;
 }
 
 .search-input::placeholder {
   color: rgba(233, 238, 248, 0.5);
+}
+
+.search-input:hover {
+  border-color: rgba(0,255,255,.35);
+  box-shadow: 0 0 0 1px rgba(0,255,255,.12);
+  transform: translateY(-1px);
 }
 
 .search-input:focus {
@@ -77,14 +60,12 @@
 .tag {
   padding: 4px 10px;
   border-radius: 999px;
-  background: linear-gradient(
-    135deg,
-    var(--accent-purple),
-    var(--accent-cyan)
-  );
+  background: linear-gradient(135deg, var(--accent-purple), var(--accent-cyan));
   color: #000;
   font-weight: 600;
   font-size: 0.85rem;
 }
 
-
+.btn.small:hover {
+  border-color: rgba(255,255,255,.25);
+}

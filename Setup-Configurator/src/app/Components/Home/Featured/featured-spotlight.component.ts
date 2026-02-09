@@ -3,7 +3,7 @@ import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from
 
 import { CardSwapComponent } from '../../Shared/CardSwap/card-swap.component';
 import { ImageService } from '../../Services/image/image.service';
-import { QuickStatsComponent } from '../../Shared/Stats/quick-stats.component';
+
 
 
 type AnyProduct = any;
@@ -11,7 +11,7 @@ type AnyProduct = any;
 @Component({
   selector: 'app-featured-spotlight',
   standalone: true,
-  imports: [CommonModule, CardSwapComponent, QuickStatsComponent],
+  imports: [CommonModule, CardSwapComponent,],
 
   templateUrl: './featured-spotlight.component.html',
   styleUrls: ['./featured-spotlight.component.css']
@@ -20,7 +20,6 @@ type AnyProduct = any;
 export class FeaturedSpotlightComponent implements OnChanges {
   @Input() products: AnyProduct[] = [];
   @Output() openProduct = new EventEmitter<AnyProduct>();
-
   images: string[] = [];
   cards: AnyProduct[] = [];
 

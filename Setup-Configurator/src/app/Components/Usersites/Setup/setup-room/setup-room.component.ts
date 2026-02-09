@@ -12,7 +12,9 @@ import { DragDropModule } from '@angular/cdk/drag-drop';
 export class SetupRoomComponent {
   @Input() setup: any;
   @Input() boundaryRef: any;
+
   @Output() setupDblClick = new EventEmitter<any>();
+  @Output() setupRightClick = new EventEmitter<any>(); // ✅ ÚJ
 
   private lastClickAt = 0;
   private dragging = false;
@@ -36,5 +38,14 @@ export class SetupRoomComponent {
     if (diff > 0 && diff < 320) {
       this.setupDblClick.emit(this.setup);
     }
+  }
+
+  onRightClick(e: MouseEvent): void {
+    if (!this.setup) return;
+    e.preventDefault(); // ✅ ne a böngésző menüje jöjjön fel
+    e.stopPropagation();
+    if (this.dragging) return;
+
+    this.setupRightClick.emit(this.setup);
   }
 }

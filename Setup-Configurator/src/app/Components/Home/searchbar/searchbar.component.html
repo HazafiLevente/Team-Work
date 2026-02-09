@@ -1,42 +1,38 @@
-<div id="_1" style="display:flex; gap:12px; flex-wrap:wrap; align-items:center;">
+<div id="_1" class="searchbar-row">
 
-  <!-- GYÁRTÓ -->
-  <select [(ngModel)]="manufacturer"
-          style="min-width:240px; padding:14px; border-radius:10px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.12); color:white; font-size:16px;">
+  <select [(ngModel)]="manufacturer" class="ctrl w-manufacturer" title="Gyártó szűrő">
     <option value="">Összes gyártó</option>
     <option *ngFor="let m of manufacturers" [value]="m">{{ m }}</option>
   </select>
 
-  <!-- SZÖVEGES KERESÉS -->
   <input type="text"
+         class="ctrl w-term"
+         title="Keresés modell névre"
          placeholder="Keresés: model..."
          [(ngModel)]="term"
-         (keydown.enter)="searchButton()"
-         style="flex:1; min-width:220px; padding:14px; border-radius:10px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.12); color:white; font-size:16px;" />
+         (keydown.enter)="searchButton()" />
 
-  <!-- MIN ÁR -->
   <input type="number"
+         class="ctrl w-price"
+         title="Minimum ár (Ft)"
          [ngModel]="priceMin"
          (ngModelChange)="priceMin = $event"
          placeholder="Min ár (Ft)"
          min="0"
          step="1"
-         (input)="sanitizePrice('min')"
-         style="width:160px; padding:14px; border-radius:10px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.12); color:white; font-size:16px;" />
+         (input)="sanitizePrice('min')" />
 
-  <!-- MAX ÁR -->
   <input type="number"
+         class="ctrl w-price"
+         title="Maximum ár (Ft)"
          [ngModel]="priceMax"
          (ngModelChange)="priceMax = $event"
          placeholder="Max ár (Ft)"
          min="0"
          step="1"
-         (input)="sanitizePrice('max')"
-         style="width:160px; padding:14px; border-radius:10px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.12); color:white; font-size:16px;" />
+         (input)="sanitizePrice('max')" />
 
-  <!-- RENDEZÉS -->
-  <select [(ngModel)]="sort"
-          style="width:220px; padding:14px; border-radius:10px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.12); color:white; font-size:16px;">
+  <select [(ngModel)]="sort" class="ctrl w-sort" title="Rendezés">
     <option value="">Alap (nincs rendezés)</option>
     <option value="price_asc">Ár ↑ növekvő</option>
     <option value="price_desc">Ár ↓ csökkenő</option>
@@ -44,8 +40,7 @@
     <option value="name_desc">Név Z→A</option>
   </select>
 
-  <!-- ✅ BIZTOS MŰKÖDŐ GOMB -->
-  <button type="button" class="btn" (click)="searchButton()">
+  <button type="button" class="btn small w-btn" title="Keresés indítása" (click)="searchButton()">
     🔎 Keresés
   </button>
 

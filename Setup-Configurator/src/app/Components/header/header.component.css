@@ -45,7 +45,9 @@
 
   transform-origin: top right;
   will-change: height, transform, opacity;
+  overflow: hidden; /* ✅ kell a height animhoz */
 }
+
 
 
 

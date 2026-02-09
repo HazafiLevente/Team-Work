@@ -5,29 +5,26 @@ import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { Observable } from 'rxjs';
 import { gsap } from 'gsap';
+import { take } from 'rxjs/operators';
 
 import { AuthService } from '../Services/Auth/auth.service';
 import { BellService, BellItem } from '../Services/Bell/bell.service';
 import { text } from '../../Constants/constants';
-import { take } from 'rxjs/operators';
-
-
-// ✅ helyes relatív import a Components/header mappából
+import { GoogleTranslateComponent } from '../Shared/GoogleTranslate/google-translate.component';
 import { RankPanelComponent } from '../Rank-Panel/rank-panel.component';
 
 @Component({
   selector: 'app-header',
   standalone: true,
   templateUrl: './header.component.html',
-  styleUrls: ['./header.component.css'],   // ✅ styleUrls, nem styleUrl
-  imports: [CommonModule, RouterLink, RankPanelComponent]
+  styleUrls: ['./header.component.css'],
+  imports: [CommonModule, RouterLink, RankPanelComponent, GoogleTranslateComponent]
 })
 export class HeaderComponent implements OnInit, AfterViewInit {
   user$!: Observable<any | null>;
   dropdownOpen = false;
 
   ranksOpen = false;
-
   text = text;
 
   bellOpen$!: Observable<boolean>;
@@ -52,7 +49,16 @@ export class HeaderComponent implements OnInit, AfterViewInit {
   ngAfterViewInit() {
     const el = this.userMenuRef?.nativeElement;
     if (!el) return;
-    gsap.set(el, { opacity: 0, y: -6, scale: 0.98, pointerEvents: 'none' });
+
+    // ✅ kezdeti állapot: becsukva
+    gsap.set(el, {
+      opacity: 0,
+      height: 0,
+      y: -6,
+      scale: 0.98,
+      overflow: 'hidden',
+      pointerEvents: 'none'
+    });
   }
 
   toggleMenu() {
@@ -65,31 +71,43 @@ export class HeaderComponent implements OnInit, AfterViewInit {
       this.dropdownOpen = true;
 
       this.menuTl = gsap.timeline();
-      this.menuTl.set(el, { pointerEvents: 'auto' });
+
+      // ✅ méréshez: legyen renderelhető
+      this.menuTl.set(el, {
+        pointerEvents: 'auto',
+        overflow: 'hidden',
+        height: 'auto',
+        opacity: 1,     // ideiglenesen 1, hogy layout biztosan frissüljön
+        y: 0,
+        scale: 1
+      });
+
+      // ✅ a tuti magasság: scrollHeight (nem offsetHeight)
+      const targetH = el.scrollHeight;
+
+      // ✅ vissza zárt állapotba, és onnan animálunk
+      this.menuTl.set(el, { height: 0, opacity: 0, y: -6, scale: 0.98 });
+
       this.menuTl.to(el, {
+        height: targetH,
         opacity: 1,
         y: 0,
         scale: 1,
         duration: 0.22,
-        ease: 'power3.out'
+        ease: 'power3.out',
+        onComplete: () => {
+          // ✅ nyitva legyen "auto", hogy ha tartalom változik, ne vágja el
+          // zárás előtt fixáljuk az aktuális magasságot (ha auto volt)
+          gsap.set(el, { height: el.offsetHeight });
+
+        }
       });
+
     } else {
-      this.dropdownOpen = false;
-
-      this.menuTl = gsap.timeline({
-        onComplete: () => { gsap.set(el, { pointerEvents: 'none' }); }
-      });
-
-
-      this.menuTl.to(el, {
-        opacity: 0,
-        y: -6,
-        scale: 0.98,
-        duration: 0.18,
-        ease: 'power2.in'
-      });
+      this.closeMenu();
     }
   }
+
 
   @HostListener('document:click')
   closeAll() {
@@ -99,26 +117,36 @@ export class HeaderComponent implements OnInit, AfterViewInit {
 
   private closeMenu() {
     const el = this.userMenuRef?.nativeElement;
-    if (!el) { this.dropdownOpen = false; return; }
+
+    if (!el) {
+      this.dropdownOpen = false;
+      return;
+    }
     if (!this.dropdownOpen) return;
 
     this.menuTl?.kill();
     this.dropdownOpen = false;
 
-    gsap.to(el, {
+    // ✅ zárás: height vissza 0 + fade
+    this.menuTl = gsap.timeline({
+      onComplete: () => {
+        gsap.set(el, { pointerEvents: 'none' });
+      }
+    });
+
+    this.menuTl.to(el, {
+      height: 0,
       opacity: 0,
       y: -6,
       scale: 0.98,
       duration: 0.18,
-      ease: 'power2.in',
-      onComplete: () => { gsap.set(el, { pointerEvents: 'none' }); }
+      ease: 'power2.in'
     });
   }
 
   openRanks() {
-    // csak akkor nyisson, ha tényleg van user (auth state kész)
     this.user$.pipe(take(1)).subscribe(u => {
-      if (!u) return;           // nincs session, ne nyissa
+      if (!u) return;
       this.ranksOpen = true;
       this.closeMenu();
     });

@@ -9,7 +9,7 @@
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "start": "ng serve",
-    "start:proxy": "ng serve --proxy-config proxy.conf.json"
+    "start:proxy": "ng serve --port 80 --host 0.0.0.0 --proxy-config proxy.conf.json"
   },
   "dependencies": {
     "@angular/cdk": "^20.2.14",

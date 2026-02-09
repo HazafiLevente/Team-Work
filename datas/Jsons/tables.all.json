@@ -1,7 +1,8 @@
 {
-  "lastUpdated": 1770557174021,
+  "lastUpdated": 1770498693637,
   "tables": [
     "c_trumpets",
+    "hatchback_cars",
     "effects_pedal",
     "favorite_pc_components[Lists]",
     "acoustic_drums",
@@ -10,6 +11,7 @@
     "setup[Setup]",
     "crossover_cars",
     "processors",
+    "mpv_cars",
     "alt_saxophone",
     "user_more[Auth]",
     "floor_speakers",
@@ -37,6 +39,7 @@
     "soundcards",
     "guitarstrings",
     "acoustic_guitars",
+    "wagon_cars",
     "system_message[System]",
     "microphones",
     "software_products",
@@ -46,6 +49,7 @@
     "front_speaker",
     "center_speakers",
     "favorite_lists[Lists]",
+    "pickup_cars",
     "back_speaker",
     "side_speaker",
     "utp_cables",
@@ -93,11 +97,7 @@
     "keyboards",
     "gaming_headsets",
     "storages",
-    "hatchback_cars",
     "report_messages[System]",
-    "messages[System]",
-    "mpv_cars",
-    "wagon_cars",
-    "pickup_cars"
+    "messages[System]"
   ]
 }

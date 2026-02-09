@@ -1,19 +1,23 @@
 <div class="carfilter" [formGroup]="form">
 
   <div class="carfilter-header">
-    <span class="tag">🎸 Hangszerek</span>
+    <span class="tag" title="Hangszerek szűrők">🎸 Hangszerek</span>
     <span class="muted">Csak hangszer és kiegészítő táblák</span>
   </div>
 
   <div class="filter-grid">
 
-    <select class="search-input" formControlName="itemType">
+    <select class="search-input"
+            title="Szűrés: hangszerek / kiegészítők"
+            formControlName="itemType">
       <option value="all">Típus (összes)</option>
       <option value="instrument">Csak hangszerek</option>
       <option value="accessory">Kiegészítők</option>
     </select>
 
-    <select class="search-input" formControlName="tableName">
+    <select class="search-input"
+            title="Hangszertípus / tábla"
+            formControlName="tableName">
       <option value="">Hangszertípus (összes)</option>
 
       <optgroup label="Hangszerek">
@@ -30,30 +34,37 @@
     </select>
 
     <input class="search-input"
+           title="Gyártó (pl. Fender)"
            placeholder="Gyártó (pl. Fender)"
            formControlName="manufacturer" />
 
     <input class="search-input"
+           title="Modell (pl. Stratocaster)"
            placeholder="Modell (pl. Stratocaster)"
            formControlName="model" />
 
     <input class="search-input" type="number" min="0"
+           title="Minimum ár (Ft)"
            placeholder="Min ár (Ft)"
            formControlName="minPrice" />
 
     <input class="search-input" type="number" min="0"
+           title="Maximum ár (Ft)"
            placeholder="Max ár (Ft)"
            formControlName="maxPrice" />
 
   </div>
 
   <div class="carfilter-footer">
-    <label class="checkbox">
+    <label class="checkbox" title="Csak használt termékek">
       <input type="checkbox" formControlName="isUsed" />
       Használt
     </label>
 
-    <button type="button" class="btn small" (click)="clear()">
+    <button type="button"
+            class="btn small"
+            title="Törli a hangszer szűrőket"
+            (click)="clear()">
       🧹 Hangszer szűrők törlése
     </button>
 

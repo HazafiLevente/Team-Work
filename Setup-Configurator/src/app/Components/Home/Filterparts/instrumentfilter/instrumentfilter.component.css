@@ -4,6 +4,28 @@
   gap: 10px;
 }
 
+/* általános hover feedback minden mezőre */
+.search-input{
+  transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease;
+}
+
+.search-input:hover{
+  border-color: rgba(0,255,255,.35);
+  box-shadow: 0 0 0 1px rgba(0,255,255,.15);
+  transform: translateY(-1px);
+}
+
+/* gombok */
+.btn, .tag{
+  transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease, opacity .12s ease;
+}
+
+.btn:hover, .tag:hover{
+  transform: translateY(-1px);
+  box-shadow: 0 0 0 1px rgba(0,255,255,.18);
+}
+
+
 @media (max-width: 1024px) {
   .filter-grid {
     grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));

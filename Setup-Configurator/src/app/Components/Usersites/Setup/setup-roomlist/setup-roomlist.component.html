@@ -25,7 +25,8 @@
           <app-setup-room
             [setup]="setup"
             [boundaryRef]="boundary"
-            (setupDblClick)="onChildSetupClick($event)">
+            (setupDblClick)="onChildSetupClick($event)"
+            (setupRightClick)="openProperties($event)">
           </app-setup-room>
         }
         @empty {
@@ -85,3 +86,14 @@
   </aside>
 
 </div>
+
+<!-- ✅ Tulajdonság ablak (jobb klikkre) -->
+@if (propertiesOpen && propertiesSetup) {
+  <app-setup-properties-modal
+    [setup]="propertiesSetup"
+    [items]="propertiesItems"
+    [loadingItems]="propertiesLoading"
+    (close)="closeProperties()"
+    (saved)="onPropertiesSaved($event)">
+  </app-setup-properties-modal>
+}

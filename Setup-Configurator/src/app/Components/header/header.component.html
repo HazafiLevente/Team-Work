@@ -1,4 +1,5 @@
 <header class="top-menu">
+
   <div class="brand" routerLink="/home">
     <div class="logo">SC</div>
     <div>
@@ -8,7 +9,9 @@
   </div>
 
   <nav class="nav">
-
+    <div class="header-right">
+      <app-google-translate></app-google-translate>
+    </div>
     <button
       *ngIf="!(user$ | async)"
       class="btn ghost"
@@ -78,7 +81,11 @@
         <div class="menu-item" routerLink="/user/setup">🧰 My Setup</div>
 
         <!-- ✅ Rangok -->
-        <div class="menu-item" (click)="openRanks(); $event.stopPropagation()">🏅 Rangok</div>
+        <div id="rank">
+          <app-rank-panel [embedded]="true"></app-rank-panel>
+        </div>
+
+
 
         <div
           *ngIf="['admin','admin+','owner'].includes(user.role)"

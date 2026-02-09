@@ -1,13 +1,15 @@
 <div class="carfilter" [formGroup]="form">
 
   <div class="carfilter-header">
-    <span class="tag">🎬 HT</span>
-    <span class="muted">Csak HomeTheatre táblákra szűr</span>
+    <span class="tag" title="Home Theatre kategória szűrők">🎬 HT</span>
+    <span class="muted2">Csak HomeTheatre táblákra szűr</span>
   </div>
 
   <div class="filter-grid">
 
-    <select class="search-input" formControlName="type">
+    <select class="search-input"
+            title="Eszköz típusa"
+            formControlName="type">
       <option value="">Típus (összes)</option>
       <option value="speaker">Hangfalak (összes)</option>
       <option value="sub">Sub / Bass</option>
@@ -16,58 +18,52 @@
       <option value="set">Home Theatre szett</option>
     </select>
 
-    <input
-      class="search-input"
-      placeholder="Gyártó (pl. Sony, Samsung)"
-      formControlName="manufacturer"
-    />
+    <input class="search-input"
+           title="Gyártó (pl. Sony, Samsung)"
+           placeholder="Gyártó (pl. Sony, Samsung)"
+           formControlName="manufacturer" />
 
-    <input
-      class="search-input"
-      placeholder="Modell (pl. Q990D)"
-      formControlName="model"
-    />
+    <input class="search-input"
+           title="Modell (pl. Q990D)"
+           placeholder="Modell (pl. Q990D)"
+           formControlName="model" />
 
-    <input
-      class="search-input"
-      placeholder="Min csatorna (pl. 2.1)"
-      formControlName="minChannels"
-    />
+    <input class="search-input"
+           title="Minimum csatornaszám (pl. 2.1)"
+           placeholder="Min csatorna (pl. 2.1)"
+           formControlName="minChannels" />
 
-    <input
-      class="search-input"
-      placeholder="Max csatorna (pl. 7.1.2)"
-      formControlName="maxChannels"
-    />
+    <input class="search-input"
+           title="Maximum csatornaszám (pl. 7.1.2)"
+           placeholder="Max csatorna (pl. 7.1.2)"
+           formControlName="maxChannels" />
 
-    <input
-      class="search-input"
-      type="number"
-      min="0"
-      placeholder="Min teljesítmény (W)"
-      formControlName="minPower"
-    />
+    <input class="search-input"
+           type="number"
+           min="0"
+           title="Minimum teljesítmény (W)"
+           placeholder="Min teljesítmény (W)"
+           formControlName="minPower" />
 
-    <input
-      class="search-input"
-      type="number"
-      min="0"
-      placeholder="Max teljesítmény (W)"
-      formControlName="maxPower"
-    />
+    <input class="search-input"
+           type="number"
+           min="0"
+           title="Maximum teljesítmény (W)"
+           placeholder="Max teljesítmény (W)"
+           formControlName="maxPower" />
 
     <div class="toggle-row">
-      <label class="toggle">
+      <label class="toggle" title="Bluetooth szűrő">
         <input type="checkbox" formControlName="bluetooth">
         <span class="pill">Bluetooth</span>
       </label>
 
-      <label class="toggle">
+      <label class="toggle" title="Wi-Fi szűrő">
         <input type="checkbox" formControlName="wifi">
         <span class="pill">Wi-Fi</span>
       </label>
 
-      <label class="toggle">
+      <label class="toggle" title="HDMI eARC szűrő">
         <input type="checkbox" formControlName="earc">
         <span class="pill">HDMI eARC</span>
       </label>
@@ -76,7 +72,10 @@
   </div>
 
   <div class="carfilter-footer">
-    <button type="button" class="btn small" (click)="clear()">
+    <button type="button"
+            class="btn small"
+            title="Törli a HT szűrőket"
+            (click)="clear()">
       🧹 HT szűrők törlése
     </button>
 

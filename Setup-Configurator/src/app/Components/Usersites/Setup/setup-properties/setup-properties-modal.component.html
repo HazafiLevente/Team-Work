@@ -1,0 +1,82 @@
+<div class="overlay" (click)="onBackdropClick()">
+  <div class="window" (click)="stop($event)">
+
+    <div class="titlebar">
+      <div class="caption">
+        <div class="big">{{ title() }}</div>
+        <div class="small">Tulajdonságok</div>
+      </div>
+      <button class="x" (click)="close.emit()">×</button>
+    </div>
+
+    <div class="tabs">
+      <button class="tab" [class.active]="tab==='general'" (click)="tab='general'">Általános</button>
+      <button class="tab" [class.active]="tab==='items'" (click)="tab='items'">Eszközök</button>
+      <button class="tab" [class.active]="tab==='edit'" (click)="tab='edit'">Módosítás</button>
+    </div>
+
+    <div class="content">
+
+      @if (tab === 'general') {
+        <div class="section">
+          <div class="row">
+            <div class="label">Név</div>
+            <div class="value">{{ setup?.setup_name || setup?.name || '—' }}</div>
+          </div>
+          <div class="row">
+            <div class="label">ID</div>
+            <div class="value mono">{{ setup?.id || setup?.setup_id || setup?.setupId || '—' }}</div>
+          </div>
+          <div class="row">
+            <div class="label">Elemek száma</div>
+            <div class="value">{{ items?.length || 0 }}</div>
+          </div>
+        </div>
+      }
+
+      @if (tab === 'items') {
+        @if (loadingItems) {
+          <div class="hint">Betöltés...</div>
+        } @else {
+          @if (!items || items.length === 0) {
+            <div class="hint">Ez a setup üres.</div>
+          } @else {
+            <div class="items">
+              @for (it of items; track $index) {
+                <div class="item">
+                  <div class="cat">{{ it.category }}</div>
+                  <div class="name">{{ it.display_name }}</div>
+                  @if (it.manufacturer) {
+                    <div class="meta">{{ it.manufacturer }}</div>
+                  }
+                </div>
+              }
+            </div>
+          }
+        }
+      }
+
+      @if (tab === 'edit') {
+        <div class="section">
+          <div class="field">
+            <label>Setup neve</label>
+            <input [(ngModel)]="editName" placeholder="pl. Nappali hifi setup" />
+          </div>
+
+          @if (errorMsg) {
+            <div class="error">{{ errorMsg }}</div>
+          }
+
+          <div class="actions">
+            <button class="btn" (click)="close.emit()">Mégse</button>
+            <button class="btn primary" (click)="saveChanges()" [disabled]="saving">
+              @if (saving) { Mentés... } @else { Mentés }
+            </button>
+          </div>
+        </div>
+      }
+
+    </div>
+
+  </div>
+</div>

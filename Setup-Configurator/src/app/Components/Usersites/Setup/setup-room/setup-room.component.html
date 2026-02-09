@@ -3,7 +3,8 @@
      [cdkDragBoundary]="boundaryRef"
      (cdkDragStarted)="onDragStarted()"
      (cdkDragEnded)="onDragEnded()"
-     (click)="onClick()">
+     (click)="onClick()"
+     (contextmenu)="onRightClick($event)">
 
   <span class="setup-name">
     {{ setup?.setup_name || setup?.name || 'Névtelen setup' }}

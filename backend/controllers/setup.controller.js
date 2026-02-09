@@ -144,4 +144,44 @@ exports.children = async (req, res) => {
         console.error("❌ Végzetes backend hiba:", err);
         res.json([]);
     }
+
+
+    // SETUP UPDATE (név módosítás)
+    exports.update = async (req, res) => {
+        try {
+            const userId = req.user.id;
+            const setupId = req.params.id;
+            const { setup_name } = req.body;
+
+            if (!setupId) return res.status(400).json({ error: "Missing setup id" });
+
+            const name = (setup_name || "").trim();
+            if (!name) return res.status(400).json({ error: "setup_name is required" });
+
+            // kompat: néhány táblában name is lehet
+            const payload = { setup_name: name, name };
+
+            const { data, error } = await supabase
+                .from("setup[Setup]")
+                .update(payload)
+                .eq("id", setupId)
+                .eq("user_id", userId)
+                .select("*")
+                .single();
+
+            if (error) throw error;
+
+            // UI kompat normalizálás
+            const normalized = {
+                ...data,
+                setup_name: data.setup_name ?? data.name ?? name
+            };
+
+            res.json({ setup: normalized });
+        } catch (err) {
+            console.error("❌ Setup update hiba:", err);
+            res.status(500).json({ error: "Update failed" });
+        }
+    };
+
 };

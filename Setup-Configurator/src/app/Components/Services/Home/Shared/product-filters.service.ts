@@ -10,15 +10,17 @@ import { InstrumentFilters } from '../../../Home/Filterparts/instrumentfilter/in
 export type CategoryKey = 'all' | 'car' | 'computer' | 'ht' | 'instrument';
 
 export interface CombinedFilters {
-  search: SearchFilters;
   activeCategory: CategoryKey;
-  car?: CarFilters;
-  computer?: ComputerFilters;
-  ht?: HomeTheaterFilters;
-  instrument?: InstrumentFilters; // 👈 Új
+
+  // ✅ a Productlist ezekre a nevekre fog hivatkozni
+  search: SearchFilters;
+  car: CarFilters;
+  computer: ComputerFilters;
+  ht: HomeTheaterFilters;
+  instrument: InstrumentFilters;
 }
 
-const DEFAULT_SEARCH: SearchFilters = {
+const EMPTY_SEARCH: SearchFilters = {
   term: '',
   manufacturer: '',
   priceMin: null,
@@ -26,177 +28,153 @@ const DEFAULT_SEARCH: SearchFilters = {
   sort: ''
 };
 
-// EGYETLEN DEFAULT_FILTERS objektum, benne az összes kategóriával
-const DEFAULT_FILTERS: CombinedFilters = {
-  search: DEFAULT_SEARCH,
-  activeCategory: 'all',
+const EMPTY_CAR: CarFilters = {
+  category: 'car',
+  manufacturer: '',
+  model: '',
+  minPrice: '',
+  maxPrice: '',
+  // ha nálad több mező van, maradhatnak itt üresen (TS nem fog összeomlani ha interface bővebb)
+} as any;
 
-  car: {
-    category: 'car',
-    manufacturer: '',
-    model: '',
-    priceMin: '',
-    priceMax: '',
-    bodyType: '',
-    hpMin: '',
-    hpMax: '',
-    accelMin: '',
-    accelMax: '',
-    seatsMin: '',
-    seatsMax: '',
-    fuel: '',
-    yearMin: '',
-    yearMax: '',
-    transmission: '',
-  },
-
-  computer: {
-    category: 'computer',
-    cpuBrand: '',
-    cpuModel: '',
-    gpuBrand: '',
-    gpuModel: '',
-    ramMin: '',
-    ramMax: '',
-    storageType: '',
-    storageMin: '',
-    storageMax: '',
-    psuMin: '',
-    psuMax: '',
-  },
-
-  ht: {
-    category: 'ht',
-    type: '',
-    manufacturer: '',
-    model: '',
-    minChannels: '',
-    maxChannels: '',
-    minPower: '',
-    maxPower: '',
-    bluetooth: false,
-    wifi: false,
-    earc: false,
-  },
-
-  // Itt az instrument is!
-  instrument: {
-    itemType: 'instrument',  // alapból csak hangszerek
-    tableName: '',
-    manufacturer: '',
-    model: '',
-    minPrice: '',
-    maxPrice: '',
-    isUsed: false
-  }
+const EMPTY_COMPUTER: ComputerFilters = {
+  category: 'computer',
+  cpuBrand: '',
+  cpuModel: '',
+  gpuBrand: '',
+  gpuModel: '',
+  ramMin: '',
+  ramMax: '',
+  storageType: '',
+  storageMin: '',
+  storageMax: '',
+  psuMin: '',
+  psuMax: ''
 };
+
+const EMPTY_HT: HomeTheaterFilters = {
+  category: 'ht',
+  type: '',
+  manufacturer: '',
+  model: '',
+  minChannels: '',
+  maxChannels: '',
+  minPower: '',
+  maxPower: '',
+  bluetooth: false,
+  wifi: false,
+  earc: false
+};
+
+const EMPTY_INSTRUMENT: InstrumentFilters = {
+  itemType: 'instrument',
+  tableName: '',
+  manufacturer: '',
+  model: '',
+  minPrice: '',
+  maxPrice: '',
+  isUsed: false
+};
+
 @Injectable({ providedIn: 'root' })
 export class ProductFiltersService {
-  private readonly _filters$ = new BehaviorSubject<CombinedFilters>(DEFAULT_FILTERS);
-  readonly filters$ = this._filters$.asObservable();
 
-  private _setCount = 0;
+  // ✅ single source of truth
+  current: CombinedFilters = {
+    activeCategory: 'all',
+    search: { ...EMPTY_SEARCH },
+    car: { ...EMPTY_CAR },
+    computer: { ...EMPTY_COMPUTER },
+    ht: { ...EMPTY_HT },
+    instrument: { ...EMPTY_INSTRUMENT }
+  };
 
-  clearInstrument() {
-    const cur = this._filters$.value;
-    const next: CombinedFilters = {
-      ...cur,
-      instrument: {
-        itemType: 'instrument',
-        tableName: '',
-        manufacturer: '',
-        model: '',
-        minPrice: '',
-        maxPrice: '',
-        isUsed: false
-      }
+  private subj = new BehaviorSubject<CombinedFilters>({ ...this.current });
+  filters$ = this.subj.asObservable();
+
+  /** Mindig hívjuk, ha változott valami */
+  private emit() {
+    // fontos: új object reference, hogy minden subscriber reagáljon
+    this.subj.next({
+      ...this.current,
+      search: { ...this.current.search },
+      car: { ...(this.current.car as any) },
+      computer: { ...this.current.computer },
+      ht: { ...this.current.ht },
+      instrument: { ...this.current.instrument }
+    });
+
+    // DEBUG - ezt nyugodtan hagyd bent, amíg teszteled
+    console.log('✅ filters emit:', this.current);
+  }
+
+  /* -----------------------------
+     CATEGORY
+  ----------------------------- */
+
+  setActiveCategory(cat: CategoryKey) {
+    this.current.activeCategory = cat;
+    this.emit();
+  }
+
+  /* -----------------------------
+     SEARCHBAR
+  ----------------------------- */
+
+  setSearch(s: SearchFilters) {
+    this.current.search = {
+      ...this.current.search,
+      term: (s.term ?? '').trim(),
+      manufacturer: (s.manufacturer ?? '').trim(),
+      priceMin: s.priceMin ?? null,
+      priceMax: s.priceMax ?? null,
+      sort: (s.sort ?? '').trim()
     };
-    this.debug('clearInstrument', next);
-    this._filters$.next(next);
+    this.emit();
   }
 
-
-  /** Searchbar hívja */
-
-  setSearch(search: SearchFilters) {
-    const cur = this._filters$.value;
-    const next: CombinedFilters = { ...cur, search };
-    this.debug('setSearch', next);
-    this._filters$.next(next);
+  clearSearch() {
+    this.current.search = { ...EMPTY_SEARCH };
+    this.emit();
   }
 
-  /** Filterlist hívja (kategória váltás) */
-  setActiveCategory(activeCategory: CategoryKey) {
-    const cur = this._filters$.value;
-    const next: CombinedFilters = { ...cur, activeCategory };
-    this.debug('setActiveCategory', next);
-    this._filters$.next(next);
+  /* -----------------------------
+     DETAILED PANELS
+  ----------------------------- */
+
+  setCar(f: CarFilters) {
+    this.current.car = { ...(f as any) };
+    this.emit();
   }
 
-
-  setInstrument(instrument: InstrumentFilters) {
-    const cur = this._filters$.value;
-    this._filters$.next({ ...cur, instrument });
+  setComputer(f: ComputerFilters) {
+    this.current.computer = { ...f };
+    this.emit();
   }
 
-  /** Carfilter hívja */
-  setCar(car: CarFilters) {
-    const cur = this._filters$.value;
-    const next: CombinedFilters = { ...cur, car };
-    this.debug('setCar', next);
-    this._filters$.next(next);
+  setHt(f: HomeTheaterFilters) {
+    this.current.ht = { ...f };
+    this.emit();
   }
 
-  /** Computerfilter hívja */
-  setComputer(computer: ComputerFilters) {
-    const cur = this._filters$.value;
-    const next: CombinedFilters = { ...cur, computer };
-    this.debug('setComputer', next);
-    this._filters$.next(next);
+  setInstrument(f: InstrumentFilters) {
+    this.current.instrument = { ...f };
+    this.emit();
   }
 
-  /** ✅ Hometheaterfilter hívja */
-  setHt(ht: HomeTheaterFilters) {
-    const cur = this._filters$.value;
-    const next: CombinedFilters = { ...cur, ht };
-    this.debug('setHt', next);
-    this._filters$.next(next);
-  }
-
-  /** ✅ csak HT reset */
-  clearHt() {
-    const cur = this._filters$.value;
-    const next: CombinedFilters = {
-      ...cur,
-      ht: {
-        category: 'ht',
-        type: '',
-        manufacturer: '',
-        model: '',
-        minChannels: '',
-        maxChannels: '',
-        minPower: '',
-        maxPower: '',
-        bluetooth: false,
-        wifi: false,
-        earc: false,
-      }
-    };
-    this.debug('clearHt', next);
-    this._filters$.next(next);
-  }
+  /* -----------------------------
+     FULL RESET (optional)
+  ----------------------------- */
 
   resetAll() {
-    this.debug('resetAll', DEFAULT_FILTERS);
-    this._filters$.next(DEFAULT_FILTERS);
-  }
-
-  get current(): CombinedFilters {
-    return this._filters$.value;
-  }
-
-  private debug(label: string, payload: any) {
-    this._setCount++;
-    console.log(`[FiltersService] ${label} #${this._setCount}`, payload);
+    this.current = {
+      activeCategory: 'all',
+      search: { ...EMPTY_SEARCH },
+      car: { ...EMPTY_CAR },
+      computer: { ...EMPTY_COMPUTER },
+      ht: { ...EMPTY_HT },
+      instrument: { ...EMPTY_INSTRUMENT }
+    };
+    this.emit();
   }
 }

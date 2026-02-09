@@ -5,37 +5,40 @@
   [sparkCount]="8"
   [duration]="400"
   easing="ease-out">
-<app-searchbar></app-searchbar>
-<app-filterlist></app-filterlist>
 
-<div class="home-row">
-  <div class="left">
-    <app-productlist
-      (openProduct)="onOpenProduct($event)"
-      (productsChanged)="onProductsChanged($event)"
-      (statsChanged)="onStatsChanged($event)">
-    </app-productlist>
+  <!-- TOP: kereső + részletes filter egy blokkban -->
+  <div class="home-top">
+    <app-searchbar></app-searchbar>
+    <app-filterlist></app-filterlist>
   </div>
 
-  <div class="right">
-    <app-quick-stats
-      [total]="totalAll"
-      [pool]="featuredPool.length"
-      [chips]="allCategories">
-    </app-quick-stats>
+  <div class="home-row">
+    <div class="left">
+      <app-productlist
+        (openProduct)="onOpenProduct($event)"
+        (productsChanged)="onProductsChanged($event)"
+        (statsChanged)="onStatsChanged($event)">
+      </app-productlist>
+    </div>
 
+    <div class="right">
+      <app-quick-stats
+        [total]="totalAll"
+        [pool]="featuredPool.length"
+        [chips]="allCategories">
+      </app-quick-stats>
 
       <app-featured-spotlight
         [products]="featuredPool"
         (openProduct)="onOpenProduct($event)">
       </app-featured-spotlight>
-
+    </div>
   </div>
-</div>
 
-<app-product-details-panel
-  *ngIf="selectedProduct"
-  [product]="selectedProduct"
-  (closed)="onClosePanel()">
-</app-product-details-panel>
+  <app-product-details-panel
+    *ngIf="selectedProduct"
+    [product]="selectedProduct"
+    (closed)="onClosePanel()">
+  </app-product-details-panel>
+
 </app-click-spark>

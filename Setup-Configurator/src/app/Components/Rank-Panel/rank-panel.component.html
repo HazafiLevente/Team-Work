@@ -1,4 +1,34 @@
-<div class="rank-backdrop" (click)="backdropClick($event)">
+<!-- ✅ EMBEDDED mód: nincs backdrop, nincs X -->
+<div class="rank-embedded" *ngIf="embedded">
+  <app-electric-border class="rank-shell" [color]="color" [borderRadius]="18">
+    <div class="rank-card" [style.color]="color">
+      <div class="top">
+        <div>
+          <div class="pill">Rangok</div>
+          <div class="title">Szinted: {{ level }}/10</div>
+          <div class="muted" *ngIf="data">
+            {{ data.points }} pont • Következőhöz még {{ data.next.pointsNeeded }} pont
+          </div>
+        </div>
+      </div>
+
+      <div *ngIf="data" class="bar-wrap">
+        <div class="bar-meta">
+          <span>{{ data.current.min }}</span>
+          <span>{{ data.current.max }}</span>
+        </div>
+
+        <div class="bar">
+          <div class="fill" [style.width.%]="(data.progress ?? 0) * 100"></div>
+        </div>
+      </div>
+    </div>
+  </app-electric-border>
+</div>
+
+
+<!-- ✅ POPUP mód: backdrop + X -->
+<div class="rank-backdrop" *ngIf="!embedded" (click)="backdropClick($event)">
   <app-electric-border class="rank-shell" [color]="color" [borderRadius]="18">
     <div class="rank-card" [style.color]="color">
       <div class="top">
@@ -21,11 +51,8 @@
 
         <div class="bar">
           <div class="fill" [style.width.%]="(data.progress ?? 0) * 100"></div>
-
         </div>
       </div>
-
-
     </div>
   </app-electric-border>
 </div>

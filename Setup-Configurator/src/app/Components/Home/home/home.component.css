@@ -1,22 +1,45 @@
+.home-top{
+  display: grid;
+  gap: 12px;
+  margin-bottom: 14px; /* <-- EZ akadályozza meg, hogy ráfussanak a kártyákra */
+}
+
+/* két oszlop: bal rugalmas, jobb fixebb, de nem “kilógós” */
 .home-row{
   display: grid;
-  grid-template-columns: max-content 1fr;
+  grid-template-columns: minmax(0, 1fr) 560px;
   gap: 28px;
   align-items: start;
   padding-right: 22px;
 }
 
-.left{
-  width: calc(4 * 220px + 3 * 20px + 40px);
-}
+/* NE fixáld szélességre a balt – ez okozza a csúszás/átfedés 80%-át */
+.left{ min-width: 0; }
 
-.right{
-  min-width: 520px;
-}
+/* jobb oldal ne kényszerítse rá magát a layout-ra */
+.right{ min-width: 0; }
 
-/* mobil */
 @media (max-width: 1200px){
   .home-row{ grid-template-columns: 1fr; }
-  .left{ width: 100%; }
-  .right{ min-width: 0; }
+}
+
+/* általános hover feedback minden mezőre */
+.search-input{
+  transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease;
+}
+
+.search-input:hover{
+  border-color: rgba(0,255,255,.35);
+  box-shadow: 0 0 0 1px rgba(0,255,255,.15);
+  transform: translateY(-1px);
+}
+
+/* gombok */
+.btn, .tag{
+  transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease, opacity .12s ease;
+}
+
+.btn:hover, .tag:hover{
+  transform: translateY(-1px);
+  box-shadow: 0 0 0 1px rgba(0,255,255,.18);
 }

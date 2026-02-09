@@ -1,35 +1,49 @@
 <div class="carfilter" [formGroup]="form">
 
   <div class="carfilter-header">
-    <span class="tag">🖥️ PC</span>
+    <span class="tag" title="PC kategória szűrők">🖥️ PC</span>
     <span class="muted">Csak PC táblákra szűr</span>
   </div>
 
   <div class="filter-grid">
 
-    <input class="search-input" placeholder="CPU gyártó (pl. AMD / Intel)"
+    <input class="search-input"
+           title="CPU gyártó (pl. AMD / Intel)"
+           placeholder="CPU gyártó (pl. AMD / Intel)"
            formControlName="cpuBrand" />
 
-    <input class="search-input" placeholder="CPU modell (pl. Ryzen 7 7800X3D)"
+    <input class="search-input"
+           title="CPU modell (pl. Ryzen 7 7800X3D)"
+           placeholder="CPU modell (pl. Ryzen 7 7800X3D)"
            formControlName="cpuModel" />
 
-    <select class="search-input" formControlName="gpuBrand">
+    <select class="search-input"
+            title="GPU gyártó"
+            formControlName="gpuBrand">
       <option value="">GPU gyártó (összes)</option>
       <option value="nvidia">NVIDIA</option>
       <option value="amd">AMD</option>
       <option value="intel">Intel</option>
     </select>
 
-    <input class="search-input" placeholder="GPU modell (pl. RTX 4070)"
+    <input class="search-input"
+           title="GPU modell (pl. RTX 4070)"
+           placeholder="GPU modell (pl. RTX 4070)"
            formControlName="gpuModel" />
 
     <input class="search-input" type="number" min="0"
-           placeholder="RAM min (GB)" formControlName="ramMin" />
+           title="Minimum RAM (GB)"
+           placeholder="RAM min (GB)"
+           formControlName="ramMin" />
 
     <input class="search-input" type="number" min="0"
-           placeholder="RAM max (GB)" formControlName="ramMax" />
+           title="Maximum RAM (GB)"
+           placeholder="RAM max (GB)"
+           formControlName="ramMax" />
 
-    <select class="search-input" formControlName="storageType">
+    <select class="search-input"
+            title="Tárhely típusa"
+            formControlName="storageType">
       <option value="">Tárhely típus (összes)</option>
       <option value="hdd">HDD</option>
       <option value="ssd">SSD</option>
@@ -37,21 +51,32 @@
     </select>
 
     <input class="search-input" type="number" min="0"
-           placeholder="Tárhely min (GB)" formControlName="storageMin" />
+           title="Minimum tárhely (GB)"
+           placeholder="Tárhely min (GB)"
+           formControlName="storageMin" />
 
     <input class="search-input" type="number" min="0"
-           placeholder="Tárhely max (GB)" formControlName="storageMax" />
+           title="Maximum tárhely (GB)"
+           placeholder="Tárhely max (GB)"
+           formControlName="storageMax" />
 
     <input class="search-input" type="number" min="0"
-           placeholder="PSU min (W)" formControlName="psuMin" />
+           title="Minimum tápegység (W)"
+           placeholder="PSU min (W)"
+           formControlName="psuMin" />
 
     <input class="search-input" type="number" min="0"
-           placeholder="PSU max (W)" formControlName="psuMax" />
+           title="Maximum tápegység (W)"
+           placeholder="PSU max (W)"
+           formControlName="psuMax" />
 
   </div>
 
   <div class="carfilter-footer">
-    <button type="button" class="btn small" (click)="clear()">
+    <button type="button"
+            class="btn small"
+            title="Törli a PC szűrőket"
+            (click)="clear()">
       🧹 PC szűrők törlése
     </button>
 
