@@ -30,8 +30,9 @@
 
 .bar-wrap{margin-top:16px;}
 .bar-meta{display:flex;justify-content:space-between;font-size:12px;opacity:.7;color:#cdd6f4;}
-.bar{margin-top:8px;height:10px;border-radius:999px;background:rgba(255,255,255,0.08);overflow:hidden;}
-.fill{height:100%;border-radius:999px;background: currentColor;}
+.bar { height: 10px; border-radius: 999px; background: rgba(255,255,255,0.12); overflow: hidden; }
+.fill { height: 100%; background: currentColor; width: 0; transition: width .35s ease; }
+
 
 .levels{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:16px;}
 .lvl{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:12px;background:rgba(255,255,255,0.05);color:#e9eef8;}

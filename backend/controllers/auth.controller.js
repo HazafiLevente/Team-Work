@@ -48,6 +48,22 @@ exports.register = async (req, res) => {
                 created_at: new Date().toISOString()
             }]);
 
+        // ✅ create initial rank row
+        const { error: levelErr } = // ✅ create initial rank row
+            await supabase
+                .from('user_level[Level]')
+                .insert([{
+                    user_id: users.ID,
+                    level: 1,
+                    points: 100
+                }]);
+
+
+        if (levelErr) {
+            return res.status(500).json({ error: levelErr.message });
+        }
+
+
         return res.json({ success: true });
     } catch (e) {
         console.error("❌ register error:", e);

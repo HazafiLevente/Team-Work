@@ -1,50 +1,68 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Observable, map, tap, switchMap, catchError, of } from 'rxjs';
+
+export type AuthUser = {
+  id: number;
+  username: string;
+  email: string;
+  role: string;
+};
+
+type MeResp = {
+  loggedIn: boolean;
+  user?: AuthUser;
+};
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  private base = '/api/auth';
-
-  private userSubject = new BehaviorSubject<any | null>(null);
+  private userSubject = new BehaviorSubject<AuthUser | null>(null);
   user$ = this.userSubject.asObservable();
 
   constructor(private http: HttpClient) {}
 
-  check() {
-    this.http.get<any>(`${this.base}/me`, { withCredentials: true })
-      .subscribe({
-        next: res => {
-          if (res?.user) {
-            this.userSubject.next(res.user);
-          }
-        },
-        error: err => {
-          // ❗ NE nullázd ki azonnal
-          console.warn('auth check failed (ignored):', err.status);
-        }
-      });
+  /**
+   * Lekéri a jelenlegi session usert a backendtől és frissíti a user$-t.
+   * Ezt hívjuk login után (és app initkor is lehet).
+   */
+  check(): Observable<AuthUser | null> {
+    return this.http.get<MeResp>('/api/auth/me', { withCredentials: true }).pipe(
+      map(r => (r.loggedIn ? (r.user ?? null) : null)),
+      tap(u => this.userSubject.next(u)),
+      catchError(() => {
+        this.userSubject.next(null);
+        return of(null);
+      })
+    );
+  }
+  register(payload: {
+    fullname: string;
+    username: string;
+    email: string;
+    password: string;
+  }): Observable<AuthUser | null> {
+    return this.http.post('/api/auth/register', payload, { withCredentials: true }).pipe(
+      // 🔥 regisztráció után azonnal kérjük le az aktuális usert
+      switchMap(() => this.check())
+    );
   }
 
-
-  login(data: any) {
-    return this.http.post(`${this.base}/login`, data, {
-      withCredentials: true
-    });
+  /**
+   * Login: cookie beáll -> utána azonnal check() -> user$ frissül, nincs F5.
+   */
+  login(payload: { email: string; password: string; rememberMe: boolean }): Observable<AuthUser | null> {
+    return this.http.post('/api/auth/login', payload, { withCredentials: true }).pipe(
+      switchMap(() => this.check())
+    );
   }
 
-  register(data: any) {
-    return this.http.post(`${this.base}/register`, data, {
-      withCredentials: true
-    });
-  }
-
-  logout() {
-    return this.http.post(`${this.base}/logout`, {}, {
-      withCredentials: true
-    }).subscribe(() => {
-      this.userSubject.next(null); // ✔️ ILYENKOR SZABAD
-    });
+  /**
+   * Logout: cookie törlés -> user$ null
+   */
+  logout(): Observable<any> {
+    return this.http.post('/api/auth/logout', {}, { withCredentials: true }).pipe(
+      tap(() => this.userSubject.next(null))
+    );
   }
 
 }

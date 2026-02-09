@@ -1,8 +1,8 @@
 import { Component } from "@angular/core";
-import {Router, RouterLink} from "@angular/router";
+import { Router, RouterLink } from "@angular/router";
+import { FormsModule } from '@angular/forms';
 import { AuthService } from "../../Services/Auth/auth.service";
-import {FormsModule} from '@angular/forms';
-
+import { filter, take } from "rxjs/operators";
 
 @Component({
   selector: 'app-login',
@@ -11,34 +11,27 @@ import {FormsModule} from '@angular/forms';
   templateUrl: './login.component.html',
   styleUrl: './login.component.css'
 })
-
-
 export class LoginComponent {
   email = "";
   password = "";
+  rememberMe = false;
 
   constructor(
     private auth: AuthService,
     private router: Router
   ) {}
 
-  rememberMe = false;
-
   submit() {
     this.auth.login({
       email: this.email,
       password: this.password,
       rememberMe: this.rememberMe
-    }).subscribe({
-      next: () => {
-        this.auth.check();          // ⬅️ marad
-        setTimeout(() => {
-          this.auth.check();        // ⬅️ extra biztonság
-        }, 50);
-        this.router.navigateByUrl('/home');
-      }
+    }).pipe(
+      // ✅ biztosan csak akkor navigálunk, ha az új user tényleg megjött
+      filter(u => !!u),
+      take(1)
+    ).subscribe({
+      next: () => this.router.navigateByUrl('/home')
     });
   }
-
-
 }

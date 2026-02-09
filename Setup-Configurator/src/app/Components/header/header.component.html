@@ -1,4 +1,4 @@
-<header class="top-menu" #hdr>
+<header class="top-menu">
   <div class="brand" routerLink="/home">
     <div class="logo">SC</div>
     <div>
@@ -100,9 +100,8 @@
 </header>
 
 <!-- ✅ ezt teheted ide is -->
-<app-rank-panel
-  [hidden]="!ranksOpen"
-  (close)="closeRanks()">
-</app-rank-panel>
+<app-rank-panel *ngIf="ranksOpen" (close)="closeRanks()"></app-rank-panel>
+
+
 
 

@@ -15,6 +15,7 @@ export class RankService {
   constructor(private http: HttpClient) {}
 
   me(): Observable<RankMeDto> {
-    return this.http.get<RankMeDto>('/api/ranks/me');
+    return this.http.get<RankMeDto>('/api/ranks/me', { withCredentials: true });
   }
+
 }

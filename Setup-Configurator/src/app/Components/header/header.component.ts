@@ -9,6 +9,8 @@ import { gsap } from 'gsap';
 import { AuthService } from '../Services/Auth/auth.service';
 import { BellService, BellItem } from '../Services/Bell/bell.service';
 import { text } from '../../Constants/constants';
+import { take } from 'rxjs/operators';
+
 
 // ✅ helyes relatív import a Components/header mappából
 import { RankPanelComponent } from '../Rank-Panel/rank-panel.component';
@@ -114,8 +116,12 @@ export class HeaderComponent implements OnInit, AfterViewInit {
   }
 
   openRanks() {
-    this.ranksOpen = true;
-    this.closeMenu();
+    // csak akkor nyisson, ha tényleg van user (auth state kész)
+    this.user$.pipe(take(1)).subscribe(u => {
+      if (!u) return;           // nincs session, ne nyissa
+      this.ranksOpen = true;
+      this.closeMenu();
+    });
   }
 
   closeRanks() {

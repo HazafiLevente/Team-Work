@@ -30,11 +30,9 @@ export class RegisterComponent {
       email: this.email,
       password: this.password
     }).subscribe({
-      next: () => {
-        this.auth.check();   // ⬅️ FONTOS
-        this.router.navigateByUrl('/home');
-      }
+      next: () => this.router.navigateByUrl('/home')
     });
   }
+
 
 }

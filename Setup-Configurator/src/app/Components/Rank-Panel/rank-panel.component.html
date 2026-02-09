@@ -20,16 +20,12 @@
         </div>
 
         <div class="bar">
-          <div class="fill" [style.width.%]="data.progress * 100"></div>
+          <div class="fill" [style.width.%]="(data.progress ?? 0) * 100"></div>
+
         </div>
       </div>
 
-      <div class="levels" *ngIf="data">
-        <div class="lvl" *ngFor="let n of [1,2,3,4,5,6,7,8,9,10]" [class.active]="n === level">
-          <span class="dot" [style.background]="RANK_COLORS[n-1]"></span>
-          <span>Lvl {{ n }}</span>
-        </div>
-      </div>
+
     </div>
   </app-electric-border>
 </div>

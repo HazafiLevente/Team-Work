@@ -1,6 +1,6 @@
-<div class="product-grid" *ngIf="filteredProducts.length > 0">
+<div class="product-grid" *ngIf="pagedProducts.length > 0">
   <app-product
-    *ngFor="let p of filteredProducts"
+    *ngFor="let p of pagedProducts"
     [product]="p"
     (openProduct)="onOpenProduct($event)">
   </app-product>
@@ -10,7 +10,17 @@
   Nincs találat.
 </p>
 
-<!-- ✅ Details panel -->
+<!-- ✅ Pagination -->
+<div class="pager" *ngIf="filteredProducts.length > PAGE_SIZE">
+  <button (click)="prevPage()" [disabled]="page === 1">
+    ◀ Prev
+  </button>
 
+  <span class="muted">
+    {{ page }} / {{ totalPages }}
+  </span>
 
-
+  <button (click)="nextPage()" [disabled]="page === totalPages">
+    Next ▶
+  </button>
+</div>
