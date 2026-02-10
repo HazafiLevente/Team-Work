@@ -4,7 +4,8 @@ import { BehaviorSubject } from 'rxjs';
 import { SearchFilters } from '../../../../Models/Filters/searchfilters.model';
 import { CarFilters } from '../../../Home/Filterparts/carfilter/carfilter.component';
 import { ComputerFilters } from '../../../Home/Filterparts/computerfilter/computerfilter/computerfilter.component';
-import { HomeTheaterFilters } from '../../../Home/Filterparts/hometheaterfilter/hometheaterfilter.component';
+import { HomeTheaterFiltersV2 as HomeTheaterFilters } from '../../../Home/Filterparts/hometheaterfilter/hometheaterfilter.component';
+
 import { InstrumentFilters } from '../../../Home/Filterparts/instrumentfilter/instrumentfilter.component';
 
 export type CategoryKey = 'all' | 'car' | 'computer' | 'ht' | 'instrument';
@@ -64,7 +65,8 @@ const EMPTY_HT: HomeTheaterFilters = {
   bluetooth: false,
   wifi: false,
   earc: false
-};
+} as any;
+
 
 const EMPTY_INSTRUMENT: InstrumentFilters = {
   itemType: 'instrument',

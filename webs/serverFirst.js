@@ -4,14 +4,7 @@ console.log("ENV CHECK:", {
     HAS_SERVICE_KEY: !!process.env.SUPABASE_SERVICE_ROLE_KEY
 });
 
-const {
-    startControl,
-    resolveRole,
-    canAssignRole,
-    hasAdminAccess,
-    hasAdminPlusAccess,
-    ROLES
-} = require("./services/control");
+
 
 const express = require("express");
 const path = require("path");
@@ -21,8 +14,6 @@ const jwt = require("jsonwebtoken");
 const cookieParser = require("cookie-parser");
 const { createClient } = require("@supabase/supabase-js");
 const cors = require("cors");
-const {registerUser} = require("./backend/registration");
-const registerBellRoutes = require("./backend/bell-message");
 
 /* ======================================================
    APP + CONFIG
@@ -61,18 +52,43 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "webs")));
 
-app.use(cors({
-    origin: "http://localhost:4200",
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-    credentials: true
-}));
 
 
 /* ======================================================
    AUTH MIDDLEWARE
 ====================================================== */
 
+function verifyUser(req, res, next) {
+    const token =
+        req.cookies?.auth_token ||
+        req.headers.authorization?.split(" ")[1];
+
+    if (!token) {
+        return res.status(401).json({
+            error: "Not authenticated"
+        });
+    }
+
+    try {
+        const decoded = jwt.verify(token, JWT_SECRET);
+
+        // 🔥 ide kerül minden, amit a tokenbe raktál login-kor
+        req.user = {
+            id: Number(decoded.id),
+            name: decoded.name,
+            username: decoded.username,
+            email: decoded.email,
+            role: resolveRole(Number(decoded.id))
+        };
+
+        next();
+    } catch (err) {
+        console.error("❌ JWT verify error:", err.message);
+        return res.status(401).json({
+            error: "Invalid or expired token"
+        });
+    }
+}
 
 function verifyAdmin(req, res, next) {
     verifyUser(req, res, () => {
@@ -770,210 +786,6 @@ app.get("/api/items/pc-list", verifyUser, async (req, res) => {
 
 
 /* ======================================================
-   ITEM KERESŐ (TÖBB TÁBLA + Manufacturer/Model KEZELÉS)
-====================================================== */
-app.get("/api/items/search", verifyUser, async (req, res) => {
-    const { type, query } = req.query;
-
-    // Ha nincs keresőszó, üres listát adunk vissza
-    if (!query || query.length < 2) return res.json({ results: [] });
-
-    app.post("/api/search/cars", async (req, res) => {
-        const filters = req.body;
-
-        const { data, error } = await supabase
-            .rpc("search_cars", filters);
-
-        if (error) {
-            console.error("❌ search_cars error:", error);
-            return res.status(500).json({ error: error.message });
-        }
-
-        res.json({ items: data || [] });
-    });
-
-
-
-    /* ======================================================
-       AUTH API
-    ====================================================== */
-    const { registerUser } = require("./registration");
-
-    app.post("/api/register", registerUser);
-
-
-    app.post("/api/login", async (req, res) => {
-        const { email, password } = req.body;
-
-        const { data: users } = await supabase
-            .from("user[Auth]")
-            .select("*")
-            .eq("Email", email)
-            .limit(1);
-
-        if (!users || !users.length)
-            return res.status(401).json({ error: "Invalid credentials" });
-
-        const user = users[0];
-        const ok = await bcrypt.compare(password, user.password);
-        if (!ok) return res.status(401).json({ error: "Invalid credentials" });
-
-        const role = resolveRole(Number(user.ID));
-
-        const token = jwt.sign({
-            id: Number(user.ID), // 🔥 EZ A FIX
-            name: user.Name,
-            username: user.UserName,
-            email: user.Email
-        }, JWT_SECRET, { expiresIn: "24h" });
-
-
-        res.cookie("auth_token", token, {
-            httpOnly: true,
-            sameSite: "lax",
-            maxAge: 24 * 60 * 60 * 1000
-        });
-
-        res.json({ message: "Login successful", role });
-    });
-
-
-    app.post("/api/logout", (_, res) => {
-        res.clearCookie("auth_token");
-        res.json({ message: "Logged out" });
-    });
-
-    app.get("/api/me", verifyUser, (req, res) => {
-        res.json({
-            loggedIn: true,
-            user: req.user
-        });
-    });
-
-
-    /* ======================================================
-       RUNTIME API'S
-    ====================================================== */
-    const registerBellRoutes = require("./bell-message");
-    registerBellRoutes(app, supabase, verifyUser);
-
-
-
-    app.get("/api/runtime/tables", (_, res) => {
-        const json = JSON.parse(
-            fs.readFileSync(
-                path.join(__dirname, "tables.runtime1.json"),
-                "utf8"
-            )
-        );
-        res.json(json);
-    });
-
-    let searchResults = [];
-
-    try {
-        // -------------------------------------------------
-        // 🚗 AUTÓK KERESÉSE (Most már 7 táblából)
-        // -------------------------------------------------
-        if (type === "car") {
-            // Segédfüggvény a kereséshez
-            const searchTable = (tableName) => {
-                return supabase
-                    .from(tableName)
-                    .select("id, Manufacturer, Model, category")
-                    .or(`Manufacturer.ilike.%${query}%,Model.ilike.%${query}%`)
-                    .limit(5); // Ha többet akarsz látni, ezt írd át 50-re vagy 100-ra
-            };
-
-            // Itt adtam hozzá a 3 új táblát a listához:
-            const [cabrio, coupe, hatchback, wagon, mpv, pickup, crossover] = await Promise.all([
-                searchTable("cabrio_cars"),
-                searchTable("coupe_cars"),
-                searchTable("hatchback_cars"),
-                searchTable("wagon_cars"),
-                searchTable("mpv_cars"),       // ÚJ
-                searchTable("pickup_cars"),    // ÚJ
-                searchTable("crossover_cars")  // ÚJ
-            ]);
-
-            // Itt fűzzük hozzá az eredményeiket a listához:
-            const allCars = [
-                ...(cabrio.data || []),
-                ...(coupe.data || []),
-                ...(hatchback.data || []),
-                ...(wagon.data || []),
-                ...(mpv.data || []),       // ÚJ
-                ...(pickup.data || []),    // ÚJ
-                ...(crossover.data || [])  // ÚJ
-            ];
-
-            // Formázás a Frontendnek
-            searchResults = allCars.map(item => ({
-                id: item.id,
-                name: `${item.Manufacturer} ${item.Model}`,
-                category: item.category || "Autó",
-                type: "car"
-            }));
-        }
-
-            // -------------------------------------------------
-            // 🎵 STÚDIÓ / HANGSZER (Példa a sidebar alapján)
-        // -------------------------------------------------
-        else if (type === "studio") {
-            // Itt is felsorolhatod a tábláidat (acoustic_guitars, microphones, stb.)
-            const [guitars, drums] = await Promise.all([
-                supabase.from("acoustic_guitars")
-                    .select("id, Manufacturer, Model, category")
-                    .or(`Manufacturer.ilike.%${query}%,Model.ilike.%${query}%`)
-                    .limit(5),
-                // Ide írhatsz további táblákat (pl. electric_guitars, microphones)
-                supabase.from("microphones") // Ha van ilyen táblád
-                    .select("id, Manufacturer, Model, category")
-                    .or(`Manufacturer.ilike.%${query}%,Model.ilike.%${query}%`)
-                    .limit(5)
-            ]);
-
-            const allStudio = [
-                ...(guitars.data || []),
-                ...(drums.data || []) // Ha nincs microphones tábla, ez undefined lesz, kezeld óvatosan!
-            ];
-
-            searchResults = allStudio.map(item => ({
-                id: item.id,
-                name: `${item.Manufacturer} ${item.Model}`,
-                category: item.category || "Stúdió",
-                type: "studio"
-            }));
-        }
-
-            // -------------------------------------------------
-            // 🖥️ PC ALKATRÉSZ (Ha vannak tábláid)
-        // -------------------------------------------------
-        else if (type === "pc") {
-            // Példa: processzorok
-            const { data } = await supabase
-                .from("processors") // Ellenőrizd a tábla nevét!
-                .select("*")
-                .or(`Manufacturer.ilike.%${query}%,Model.ilike.%${query}%`)
-                .limit(5);
-
-            searchResults = (data || []).map(item => ({
-                id: item.id,
-                name: `${item.Manufacturer} ${item.Model}`,
-                category: "PC",
-                type: "pc"
-            }));
-        }
-
-        res.json({ results: searchResults });
-
-    } catch (err) {
-        console.error("KERESÉSI HIBA:", err);
-        res.status(500).json({ error: "Hiba történt a keresés közben." });
-    }
-});
-
-/* ======================================================
    3. AL-ELEMEK LISTÁZÁSA (EZ HIÁNYZIK NÁLAD!)
 ====================================================== */
 app.get("/api/setup/:id/children", verifyUser, async (req, res) => {
@@ -1253,17 +1065,12 @@ app.get("/api/runtime/tables", (_, res) => {
    SERVER START
 ====================================================== */
 
-startControl();
-
 app.listen(PORT, () => {
     console.clear();
     console.log(`
 ╔══════════════════════════════════════════════╗
 ║  💫 SETUP CONFIGURATOR – SERVER RUNNING 💫   
 ║  🌐 http://localhost:${PORT}             
-║  👑 Owners: ${[...ROLES.owners].join(", ")} 
-║  🔥 Admin+: ${[...ROLES.adminsPlus].join(", ")} 
-║  🛡 Admin: ${[...ROLES.admins].join(", ")}   
 ╚══════════════════════════════════════════════╝
 `);
 });

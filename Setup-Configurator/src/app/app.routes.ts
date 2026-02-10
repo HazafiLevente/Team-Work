@@ -13,7 +13,7 @@ import { Routes } from '@angular/router';
 import { ProductPageComponent } from './Components/Product/product/product-page.component';
 import { ProfileComponent } from './Components/Usersites/Profil/profil/profile.component';
 import {UsersComponent} from './Components/Usersites/Admin/users/users.component';
-
+import { SettingsComponent } from './Components/Settings/settings.component';
 
 
 
@@ -26,6 +26,7 @@ export const routes: Routes = [
   { path: 'user/message/:type/:id', component: BellMessageComponent },
   { path: 'user/bell/:key', component: BellMessageComponent },
   { path: 'user/bell', redirectTo: 'user/bell/system', pathMatch: 'full' },
+  { path: 'settings', component: SettingsComponent },
   {
     path: 'user',
     component: UsersiteComponent,

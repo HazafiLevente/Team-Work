@@ -18,8 +18,12 @@ const FILTER_PATH = path.join(
    HELPERS
 ---------------------------------- */
 function pick(obj, keys) {
+    if (!obj) return null;
+    const objKeys = Object.keys(obj);
     for (const k of keys) {
-        const v = obj?.[k];
+        // Keressük meg azt a kulcsot az objektumban, ami megegyezik a kért kulccsal (case-insensitive)
+        const realKey = objKeys.find(ok => ok.toLowerCase() === k.toLowerCase());
+        const v = realKey ? obj[realKey] : null;
         if (v !== undefined && v !== null && v !== "") return v;
     }
     return null;
@@ -210,13 +214,13 @@ function getProductsForAI(question = "") {
             }
 
             /* 🎯 EXACT MATCH */
-            if (modelNorm && modelNorm.includes(qNorm.replace(/[^a-z0-9]/g, ""))) {
+            if (modelNorm && qNorm.replace(/[^a-z0-9]/g, "").includes(modelNorm)) {
                 exact.push(row);
                 continue;
             }
 
             /* 🟡 SIMILAR */
-            if (modelNorm && modelNorm.includes(qNorm.slice(0, 6))) {
+            if (modelNorm && qNorm.includes(modelNorm.slice(0, 6))) {
                 similar.push(row);
             }
         }

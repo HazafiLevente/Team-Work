@@ -239,7 +239,44 @@ export class ProductlistComponent implements OnInit, OnDestroy {
     const get = (p: AnyProduct, key: string) =>
       (p as any)?.[key] ?? (p as any)?.data?.[key];
 
-    // ---------------- CAR (all_cars) ----------------
+    const getField = (p: AnyProduct, key: string) => {
+      const d = (p as any).data ?? {};
+      if (d[key] !== undefined) return d[key];
+      if ((p as any)[key] !== undefined) return (p as any)[key];
+      return undefined;
+    };
+
+    const matchText = (value: any, needle: string) => {
+      if (!needle) return true;
+      return norm(value).includes(norm(needle));
+    };
+
+    const matchExact = (value: any, expected: string) => {
+      if (!expected) return true;
+      return norm(value) === norm(expected);
+    };
+
+    const matchRange = (value: any, minV: any, maxV: any) => {
+      const min = toNum(minV);
+      const max = toNum(maxV);
+      if (min == null && max == null) return true;
+
+      const v = toNum(value);
+      if (v == null) return false;
+
+      if (min != null && v < min) return false;
+      if (max != null && v > max) return false;
+      return true;
+    };
+
+    const matchBool = (value: any, wantTrue: boolean) => {
+      if (!wantTrue) return true;
+      if (typeof value === 'boolean') return value === true;
+      const s = norm(value);
+      return s === 'true' || s === '1' || s === 'yes' || s === 'igen';
+    };
+
+    // ---------------- CAR ----------------
     if (state.activeCategory === 'car') {
       const f: any = (state as any).car ?? {};
 
@@ -252,19 +289,18 @@ export class ProductlistComponent implements OnInit, OnDestroy {
       const seatsMin = toNum(f.seatsMin);
       const seatsMax = toNum(f.seatsMax);
 
-      const hpMin = toNum(f.horsepowerMin);
-      const hpMax = toNum(f.horsepowerMax);
+      // ✅ FIX: hpMin/hpMax a komponensből jön
+      const hpMin = toNum(f.hpMin);
+      const hpMax = toNum(f.hpMax);
 
-      const accMin = toNum(f.accelerationMin);
-      const accMax = toNum(f.accelerationMax);
+      // ✅ FIX: accelMin/accelMax a komponensből jön
+      const accMin = toNum(f.accelMin);
+      const accMax = toNum(f.accelMax);
 
-      const fuel = norm(f.fuelType);
+      // ✅ FIX: fuel / bodyType a komponensből jön
+      const fuel = norm(f.fuel);
       const trans = norm(f.transmission);
       const body = norm(f.bodyType);
-      let carType = norm(f.carType);
-
-      // UI-ban SUV -> crossover
-      if (carType === 'suv') carType = 'crossover';
 
       return list.filter(p => {
         const manu = norm(get(p, 'manufacturer'));
@@ -289,7 +325,6 @@ export class ProductlistComponent implements OnInit, OnDestroy {
         if (accMin != null && (acc == null || acc < accMin)) return false;
         if (accMax != null && (acc == null || acc > accMax)) return false;
 
-        // ⛽ fuel: ha van filter, akkor kötelező legyen találni fuel_type-ot
         const fuelVal = norm(get(p, 'fuel_type'));
         if (fuel) {
           if (!fuelVal) return false;
@@ -302,61 +337,95 @@ export class ProductlistComponent implements OnInit, OnDestroy {
         const bodyVal = norm(get(p, 'body_type'));
         if (body && !bodyVal.includes(body)) return false;
 
-        // DB: crossover_cars -> crossover
-        let carTypeVal = norm(get(p, 'car_type'));
-        if (carTypeVal === 'crossover_cars') carTypeVal = 'crossover';
-        if (carTypeVal === 'suv') carTypeVal = 'crossover';
-
-        if (carType && !carTypeVal.includes(carType)) return false;
-
         return true;
       });
     }
 
-    // ---------------- HT (ht_items_view) ----------------
+    // ---------------- HT ----------------
     if (state.activeCategory === 'ht') {
       const f: any = (state as any).ht ?? {};
 
-      const typeWanted = norm(f.type); // UI: type, view: category
+      // közös mezők
       const manF = norm(f.manufacturer);
       const modelF = norm(f.model);
 
+      // ✅ V2 meta-driven forma: tableName/priceMin/priceMax/dynamic
+      const hasV2 = ('dynamic' in f) || ('tableName' in f) || ('priceMin' in f);
+
       return list.filter(p => {
-        const manu = norm(get(p, 'manufacturer'));
-        const model = norm(get(p, 'model'));
+        const manu = norm(getField(p, 'manufacturer'));
+        const model = norm(getField(p, 'model'));
 
         if (manF && !manu.includes(manF)) return false;
         if (modelF && !model.includes(modelF)) return false;
 
+        // --- V2 (meta-driven)
+        if (hasV2) {
+          const tableName = norm(f.tableName);
+          if (tableName) {
+            const t = norm(getField(p, 'table_name'));
+            if (t !== tableName) return false;
+          }
+
+          // price: p.price vagy data.Price
+          const priceVal = getField(p, 'price') ?? getField(p, 'Price');
+          if (!matchRange(priceVal, f.priceMin, f.priceMax)) return false;
+
+          const dyn = f.dynamic ?? {};
+          for (const key of Object.keys(dyn)) {
+            const v = dyn[key];
+
+            // boolean
+            if (typeof v === 'boolean') {
+              if (!matchBool(getField(p, key), v)) return false;
+            }
+            // select
+            else if (typeof v === 'string') {
+              if (v && !matchExact(getField(p, key), v)) return false;
+            }
+            // range {min,max}
+            else if (v && typeof v === 'object') {
+              if (!matchRange(getField(p, key), v.min, v.max)) return false;
+            }
+          }
+
+          return true;
+        }
+
+        // --- Régi HT form (a te mostani komponensed)
+        const typeWanted = norm(f.type); // nálad: speaker/sub/processor/portable/set
         if (typeWanted) {
-          const cat = norm(get(p, 'category'));
-          const table = norm(get(p, 'table_name'));
+          const cat = norm(getField(p, 'category'));
+          const table = norm(getField(p, 'table_name'));
           if (!cat.includes(typeWanted) && !table.includes(typeWanted)) return false;
         }
 
-        const d = (p as any).data ?? {};
-        const has = (key: string) => {
-          const v = d[key];
-          if (typeof v === 'boolean') return v;
-          const s = norm(v);
-          return s === 'true' || s === '1' || s === 'yes' || s === 'igen';
-        };
+        // booleans
+        if (f.bluetooth === true && !matchBool(getField(p, 'bluetooth') ?? getField(p, 'bt'), true)) return false;
+        if (f.wifi === true && !matchBool(getField(p, 'wifi') ?? getField(p, 'network') ?? getField(p, 'wlan'), true)) return false;
+        if (f.earc === true && !matchBool(getField(p, 'hdmi_earc') ?? getField(p, 'earc'), true)) return false;
 
-        if (f.bluetooth === true && !(has('bluetooth') || has('bt'))) return false;
-        if (f.wifi === true && !(has('wifi') || has('WiFi') || has('wlan'))) return false;
-        if (f.earc === true && !(has('earc') || has('hdmi_earc') || has('eArc'))) return false;
+        // power
+        const powerVal =
+          getField(p, 'power_rms_w') ??
+          getField(p, 'power_max_w') ??
+          getField(p, 'power') ??
+          getField(p, 'watt');
 
-        const power = toNum(d.power ?? d.power_w ?? d.watt ?? d.rms_w);
-        const pMin = toNum(f.minPower);
-        const pMax = toNum(f.maxPower);
-        if (pMin != null && (power == null || power < pMin)) return false;
-        if (pMax != null && (power == null || power > pMax)) return false;
+        if (!matchRange(powerVal, f.minPower, f.maxPower)) return false;
+
+        // channels
+        if (f.minChannels || f.maxChannels) {
+          const chVal = getField(p, 'channels');
+          // csatornák lehetnek "7.1" stringek -> toNum kivágja az elejét
+          if (!matchRange(chVal, f.minChannels, f.maxChannels)) return false;
+        }
 
         return true;
       });
     }
 
-    // ---------------- COMPUTER (pc_items_view) ----------------
+    // ---------------- COMPUTER ----------------
     if (state.activeCategory === 'computer') {
       const f: any = (state as any).computer ?? {};
 
@@ -368,26 +437,31 @@ export class ProductlistComponent implements OnInit, OnDestroy {
         const gpuBrand = norm(f.gpuBrand);
         const gpuModel = norm(f.gpuModel);
 
-        const hay1 = norm(`${d.Socket ?? ''} ${d.chipset ?? ''} ${d.series ?? ''} ${d.variant ?? ''} ${d.notes ?? ''} ${get(p,'manufacturer') ?? ''}`);
-        const hay2 = norm(`${d.Model ?? ''} ${d.model ?? ''} ${d.product_code ?? ''} ${get(p,'model') ?? ''}`);
+        const hay = norm(
+          `${getField(p,'manufacturer') ?? ''} ${getField(p,'model') ?? ''} ${d.notes ?? ''} ${d.Model ?? ''} ${d.model ?? ''}`
+        );
 
-        if (cpuBrand && !hay1.includes(cpuBrand)) return false;
-        if (cpuModel && !hay2.includes(cpuModel)) return false;
+        if (cpuBrand && !hay.includes(cpuBrand)) return false;
+        if (cpuModel && !hay.includes(cpuModel)) return false;
 
-        if (gpuBrand && !(hay1.includes(gpuBrand) || hay2.includes(gpuBrand))) return false;
-        if (gpuModel && !hay2.includes(gpuModel)) return false;
+        if (gpuBrand && !hay.includes(gpuBrand)) return false;
+        if (gpuModel && !hay.includes(gpuModel)) return false;
 
-        const cap = toNum(d.capacity_gb);
-        const ramMin = toNum(f.ramMin);
-        const ramMax = toNum(f.ramMax);
-        if (ramMin != null && (cap == null || cap < ramMin)) return false;
-        if (ramMax != null && (cap == null || cap > ramMax)) return false;
+        // RAM: itt neked nincs biztos kulcsod (ram_gb?), ezért ez csak akkor oké, ha tényleg a te view-od így adja
+        const ramVal = d.ram_gb ?? d.memory_gb ?? d.capacity_gb;
+        if (!matchRange(ramVal, f.ramMin, f.ramMax)) return false;
 
         const st = norm(f.storageType);
         if (st) {
-          const mt = norm(d.memory_type);
+          const mt = norm(d.storage_type ?? d.memory_type ?? d.type);
           if (mt && !mt.includes(st)) return false;
         }
+
+        const storageVal = d.storage_gb ?? d.capacity_gb;
+        if (!matchRange(storageVal, f.storageMin, f.storageMax)) return false;
+
+        const psuVal = d.psu_w ?? d.power_w ?? d.watt;
+        if (!matchRange(psuVal, f.psuMin, f.psuMax)) return false;
 
         return true;
       });
@@ -400,8 +474,8 @@ export class ProductlistComponent implements OnInit, OnDestroy {
       const wantType = norm(f.itemType); // instrument | accessory | all
 
       return list.filter(p => {
-        const table = norm(get(p, 'table_name'));
-        const type = norm(get(p, 'type')); // view-oszlop: instrument/accessory
+        const table = norm(getField(p, 'table_name'));
+        const type = norm(getField(p, 'type')); // view: instrument/accessory
 
         if (wantType && wantType !== 'all') {
           if (!type) return false;
@@ -410,14 +484,24 @@ export class ProductlistComponent implements OnInit, OnDestroy {
 
         if (wantTable && table !== wantTable) return false;
 
+        // plusz keresés a te formodból:
+        if (!matchText(getField(p, 'manufacturer'), f.manufacturer)) return false;
+        if (!matchText(getField(p, 'model'), f.model)) return false;
+
+        if (!matchRange(getField(p, 'price') ?? getField(p, 'Price'), f.minPrice, f.maxPrice)) return false;
+
+        // isUsed: csak akkor tudsz rá szűrni, ha van ilyen meződ (pl. condition)
+        if (f.isUsed === true) {
+          const cond = norm(getField(p, 'condition') ?? getField(p, 'is_used'));
+          if (!(cond.includes('used') || cond === 'true' || cond === '1' || cond.includes('használt'))) return false;
+        }
+
         return true;
       });
     }
 
-    // default: nincs extra részletes filter
     return list;
   }
-
   /* -----------------------------
      SORT
   ----------------------------- */

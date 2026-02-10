@@ -8,13 +8,21 @@ const JWT_SECRET = process.env.JWT_SECRET;
 function setAuthCookie(res, token, rememberMe = false) {
     res.cookie("auth_token", token, {
         httpOnly: true,
-        sameSite: "none",   // 🔥 KÖTELEZŐ cross-site-hoz
-        secure: true,       // 🔥 KÖTELEZŐ (HTTPS!)
+        sameSite: "lax",
+        secure: false,
         path: "/",
-        maxAge: 12 * 60 * 60 * 1000
+        maxAge: rememberMe
+            ? 25 * 24 * 60 * 60 * 1000
+            : 12 * 60 * 60 * 1000
     });
-
 }
+
+
+
+
+
+
+
 
 exports.register = async (req, res) => {
     try {
@@ -71,23 +79,29 @@ exports.login = async (req, res) => {
     const ok = await bcrypt.compare(password, user.password);
     if (!ok) return res.status(401).json({ error: "Invalid login" });
 
-    const token = jwt.sign({
-        id: user.ID,
-        username: user.UserName,
-        email: user.Email,
-        role: resolveRole(user.ID)
-    }, JWT_SECRET, { expiresIn: rememberMe ? "25d" : "12h" });
+    const token = jwt.sign(
+        { id: user.ID, username: user.UserName, email: user.Email, role: resolveRole(user.ID) },
+        JWT_SECRET,
+        { expiresIn: rememberMe ? "25d" : "12h" }
+    );
 
-
-    setAuthCookie(res, token, rememberMe);
+    setAuthCookie(res, token, rememberMe); // ✅ IDE JÖN BE
 
     res.json({ success: true });
 };
 
 exports.logout = (_, res) => {
-    res.clearCookie("auth_token", { path: "/" });
+    const isProd = process.env.NODE_ENV === "production";
+
+    res.clearCookie("auth_token", {
+        path: "/",
+        sameSite: isProd ? "none" : "lax",
+        secure: isProd
+    });
+
     res.json({ success: true });
 };
+
 
 exports.me = (req, res) => {
     if (!req.user) return res.json({ loggedIn: false });

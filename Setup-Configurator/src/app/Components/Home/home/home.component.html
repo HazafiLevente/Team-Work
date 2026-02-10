@@ -1,16 +1,13 @@
 <app-click-spark
+  *ngIf="!setupMode"
   [sparkColor]="'#fff'"
   [sparkSize]="8"
   [sparkRadius]="15"
   [sparkCount]="8"
-  [duration]="400"
-  easing="ease-out">
+  [duration]="400">
 
-  <!-- TOP: kereső + részletes filter egy blokkban -->
-  <div class="home-top">
-    <app-searchbar></app-searchbar>
-    <app-filterlist></app-filterlist>
-  </div>
+<app-searchbar></app-searchbar>
+  <app-filterlist></app-filterlist>
 
   <div class="home-row">
     <div class="left">
@@ -35,10 +32,15 @@
     </div>
   </div>
 
-  <app-product-details-panel
-    *ngIf="selectedProduct"
+  <app-product-staggered-panel
+    [open]="!!selectedProduct"
     [product]="selectedProduct"
+    position="right"
+    [colors]="['#B19EEF', '#5227FF']"
     (closed)="onClosePanel()">
-  </app-product-details-panel>
+  </app-product-staggered-panel>
 
 </app-click-spark>
+<!-- ...a meglévő home contented -->
+
+

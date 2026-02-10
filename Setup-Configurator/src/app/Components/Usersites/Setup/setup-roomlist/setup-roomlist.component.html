@@ -25,8 +25,7 @@
           <app-setup-room
             [setup]="setup"
             [boundaryRef]="boundary"
-            (setupDblClick)="onChildSetupClick($event)"
-            (setupRightClick)="openProperties($event)">
+            (setupRightClick)="openContextMenu($event)">
           </app-setup-room>
         }
         @empty {
@@ -37,63 +36,40 @@
       }
 
     </div>
-  </div>
 
-  <!-- JOBB OLDAL -->
-  <aside class="side-panel">
-    <div class="panel-header">
-      <div class="head">
-        <div class="title">
-          @if (selectedSetup) { {{ getSetupTitle(selectedSetup) }} } @else { Eszközök }
-        </div>
-        <div class="subtle">
-          @if (selectedSetup) { Setup eszközök } @else { Dupla katt egy setupra, és itt megjelenik. }
+    <!-- ✅ Jobb klikk menü -->
+    @if (ctxOpen) {
+      <div class="ctx-backdrop" (mousedown)="closeContextMenu()">
+        <div
+          class="ctx-menu"
+          [style.left.px]="ctxX"
+          [style.top.px]="ctxY"
+          (mousedown)="$event.stopPropagation()">
+
+          <button class="ctx-item" type="button">Megnyitás</button>
+
+          <!-- ✅ CSAK EZ MŰKÖDJÖN MOST -->
+          <button class="ctx-item" type="button" (click)="openToolsFromMenu()">Eszközök</button>
+
+          <button class="ctx-item" type="button">Módosítás</button>
+          <button class="ctx-item" type="button">Kapcsolatok</button>
+
+          <div class="ctx-sep"></div>
+
+          <button class="ctx-item" type="button">Favorite</button>
+          <button class="ctx-item" type="button">Tulajdonságok</button>
+
         </div>
       </div>
+    }
 
-      <button class="close-btn" (click)="closeModal()" [disabled]="!selectedSetup">×</button>
-    </div>
-
-    <div class="panel-body">
-      @if (!selectedSetup) {
-        <div class="empty-hint">Válassz egy setupot (dupla katt).</div>
-      } @else {
-
-        @if (loadingItems) {
-          <div class="loading-text">Betöltés...</div>
-        } @else {
-
-          @if (setupItems.length === 0) {
-            <div class="empty-info">Ez a setup üres.</div>
-          } @else {
-            <ul class="item-list">
-              @for (it of setupItems; track $index) {
-                <li class="item">
-                  <div class="cat">{{ it.category }}</div>
-                  <div class="name">{{ it.display_name }}</div>
-                  @if (it.manufacturer) {
-                    <div class="meta">{{ it.manufacturer }}</div>
-                  }
-                </li>
-              }
-            </ul>
-          }
-
-        }
-
-      }
-    </div>
-  </aside>
-
+  </div>
 </div>
 
-<!-- ✅ Tulajdonság ablak (jobb klikkre) -->
-@if (propertiesOpen && propertiesSetup) {
-  <app-setup-properties-modal
-    [setup]="propertiesSetup"
-    [items]="propertiesItems"
-    [loadingItems]="propertiesLoading"
-    (close)="closeProperties()"
-    (saved)="onPropertiesSaved($event)">
-  </app-setup-properties-modal>
+<!-- ✅ Eszközök modal -->
+@if (toolsOpen && toolsSetup) {
+  <app-setup-tools-modal
+    [setup]="toolsSetup"
+    (close)="closeTools()">
+  </app-setup-tools-modal>
 }

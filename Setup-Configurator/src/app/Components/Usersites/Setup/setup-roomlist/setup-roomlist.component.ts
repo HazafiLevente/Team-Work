@@ -1,13 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, HostListener, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 
-import { SetupRoomComponent } from '../setup-room/setup-room.component';
+import { SetupRoomComponent, SetupRightClickPayload } from '../setup-room/setup-room.component';
 import { DotGridComponent } from '../../../Shared/Background/dot-grid.component';
-import { SetupPropertiesModalComponent } from '../setup-properties/setup-properties-modal.component';// ✅ ÚJ
-
-
-type UiItem = { category: string; display_name: string; manufacturer?: string };
+import { SetupToolsModalComponent } from '../setup-tools-modal/setup-tools-modal.component';
 
 @Component({
   selector: 'app-setup-roomlist',
@@ -17,28 +14,28 @@ type UiItem = { category: string; display_name: string; manufacturer?: string };
     HttpClientModule,
     SetupRoomComponent,
     DotGridComponent,
-    SetupPropertiesModalComponent // ✅ ÚJ
+    SetupToolsModalComponent
   ],
   templateUrl: './setup-roomlist.component.html',
   styleUrls: ['./setup-roomlist.component.css']
 })
 export class SetupRoomlistComponent implements OnInit {
 
-  positions: Record<string, { x: number; y: number }> = {};
-
   userSetups: any[] = [];
   loading = true;
 
-  selectedSetup: any = null;
+  // ✅ Context menu state
+  ctxOpen = false;
+  ctxX = 0;
+  ctxY = 0;
+  ctxSetup: any = null;
 
-  setupItems: UiItem[] = [];
-  loadingItems = false;
+  // ✅ Tools modal state
+  toolsOpen = false;
+  toolsSetup: any = null;
 
-  // ✅ Tulajdonságok ablak state
-  propertiesOpen = false;
-  propertiesSetup: any = null;
-  propertiesItems: UiItem[] = [];
-  propertiesLoading = false;
+  // ✅ workspace ref (#boundary)
+  @ViewChild('boundary', { static: true }) boundaryEl!: ElementRef<HTMLElement>;
 
   constructor(private http: HttpClient) {}
 
@@ -63,84 +60,58 @@ export class SetupRoomlistComponent implements OnInit {
       });
   }
 
-  onChildSetupClick(setup: any): void {
-    const setupId = setup?.id ?? setup?.setup_id ?? setup?.setupId;
-    if (!setupId) return;
+  // ✅ JOBB KLIKK: csak a menü nyíljon le (pontos pozícióval a workspace-en belül)
+  openContextMenu(payload: SetupRightClickPayload): void {
+    this.ctxSetup = payload?.setup ?? null;
 
-    this.selectedSetup = setup;
-    this.loadingItems = true;
-    this.setupItems = [];
+    const host = this.boundaryEl?.nativeElement;
+    if (!host) return;
 
-    this.http.get<UiItem[]>(`/api/setup/${setupId}/children`, { withCredentials: true })
-      .subscribe({
-        next: (items) => {
-          this.setupItems = Array.isArray(items) ? items : [];
-          this.loadingItems = false;
-        },
-        error: (err) => {
-          console.error('❌ children hiba:', err);
-          this.setupItems = [];
-          this.loadingItems = false;
-        }
-      });
+    const rect = host.getBoundingClientRect();
+
+    // koordináta a workspace-hez képest
+    const localX = payload.x - rect.left;
+    const localY = payload.y - rect.top;
+
+    // clamp a workspace határain belül
+    const MENU_W = 220;
+    const MENU_H = 240;
+    const pad = 8;
+
+    const maxX = Math.max(pad, rect.width - MENU_W - pad);
+    const maxY = Math.max(pad, rect.height - MENU_H - pad);
+
+    this.ctxX = Math.min(Math.max(localX, pad), maxX);
+    this.ctxY = Math.min(Math.max(localY, pad), maxY);
+
+    this.ctxOpen = true;
   }
 
-  // ✅ JOBB KLIKK: tulajdonságok megnyitása + items betöltése a modalba
-  openProperties(setup: any): void {
-    const setupId = setup?.id ?? setup?.setup_id ?? setup?.setupId;
-    if (!setupId) return;
-
-    this.propertiesSetup = { ...setup };
-    this.propertiesOpen = true;
-
-    this.propertiesLoading = true;
-    this.propertiesItems = [];
-
-    this.http.get<UiItem[]>(`/api/setup/${setupId}/children`, { withCredentials: true })
-      .subscribe({
-        next: (items) => {
-          this.propertiesItems = Array.isArray(items) ? items : [];
-          this.propertiesLoading = false;
-        },
-        error: (err) => {
-          console.error('❌ properties children hiba:', err);
-          this.propertiesItems = [];
-          this.propertiesLoading = false;
-        }
-      });
+  closeContextMenu(): void {
+    this.ctxOpen = false;
+    this.ctxSetup = null;
   }
 
-  closeProperties(): void {
-    this.propertiesOpen = false;
-    this.propertiesSetup = null;
-    this.propertiesItems = [];
-    this.propertiesLoading = false;
+  // ✅ ESC-re zárjuk a menüt (és a modalt is)
+  @HostListener('document:keydown.escape')
+  onEsc(): void {
+    if (this.ctxOpen) this.closeContextMenu();
+    if (this.toolsOpen) this.closeTools();
   }
 
-  // ✅ ha mentés történt, frissítsük a listát is, hogy az új név látszódjon
-  onPropertiesSaved(updatedSetup: any): void {
-    const id = updatedSetup?.id ?? updatedSetup?.setup_id ?? updatedSetup?.setupId;
-    if (!id) return;
+  // ✅ CSAK az "Eszközök" menüpont működik most
+  openToolsFromMenu(): void {
+    if (!this.ctxSetup) return;
 
-    this.userSetups = this.userSetups.map(s => {
-      const sid = s?.id ?? s?.setup_id ?? s?.setupId;
-      return sid === id ? { ...s, ...updatedSetup } : s;
-    });
+    this.toolsSetup = this.ctxSetup;
+    this.toolsOpen = true;
 
-    // ha épp a jobb panelen is ez van kiválasztva, frissítjük azt is
-    const selId = this.selectedSetup?.id ?? this.selectedSetup?.setup_id ?? this.selectedSetup?.setupId;
-    if (selId === id) {
-      this.selectedSetup = { ...this.selectedSetup, ...updatedSetup };
-    }
+    // menü zárása
+    this.closeContextMenu();
   }
 
-  closeModal(): void {
-    this.selectedSetup = null;
-    this.setupItems = [];
-    this.loadingItems = false;
-  }
-
-  getSetupTitle(s: any): string {
-    return s?.setup_name ?? s?.name ?? 'Névtelen setup';
+  closeTools(): void {
+    this.toolsOpen = false;
+    this.toolsSetup = null;
   }
 }

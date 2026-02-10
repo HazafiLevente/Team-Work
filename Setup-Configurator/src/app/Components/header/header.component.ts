@@ -42,9 +42,14 @@ export class HeaderComponent implements OnInit, AfterViewInit {
 
   ngOnInit() {
     this.user$ = this.auth.user$;
+
+    // 🔥 EZ HIÁNYZOTT
+    this.auth.check().subscribe();
+
     this.bellOpen$ = this.bell.open$;
     this.bellItems$ = this.bell.items$;
   }
+
 
   ngAfterViewInit() {
     const el = this.userMenuRef?.nativeElement;
@@ -173,7 +178,9 @@ export class HeaderComponent implements OnInit, AfterViewInit {
   }
 
   logout() {
-    this.auth.logout();
-    this.router.navigateByUrl('/auth/login');
+    this.auth.logout().subscribe(() => {
+      this.router.navigateByUrl('/auth/login');
+    });
   }
+
 }

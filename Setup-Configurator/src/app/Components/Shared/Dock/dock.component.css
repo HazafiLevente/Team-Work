@@ -1,0 +1,76 @@
+.dock-outer{
+  position: fixed;
+  left: 50%;
+  bottom: 0.75rem;
+  transform: translateX(-50%);
+  z-index: 9999;
+  pointer-events: none; /* csak a panel kapjon */
+}
+
+.dock-panel{
+  pointer-events: auto;
+  display: flex;
+  align-items: flex-end;
+  gap: 1rem;
+  width: fit-content;
+
+  border-radius: 1rem;
+  background: #060010;
+  border: 1px solid #222;
+  padding: 0 0.5rem 0.5rem;
+
+  box-shadow: 0 12px 30px rgba(0,0,0,.35);
+}
+
+.dock-item{
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 10px;
+  background: #060010;
+  border: 1px solid #222;
+
+  cursor: pointer;
+  outline: none;
+
+  /* ez adja a “spring” feelinget Angular nélkül is */
+  transition: width .14s ease, height .14s ease, transform .14s ease;
+}
+
+.dock-item:hover{
+  transform: translateY(-2px);
+}
+
+.dock-icon{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+  font-size: 18px;
+}
+
+.dock-label{
+  position: absolute;
+  top: -1.75rem;
+  left: 50%;
+  transform: translateX(-50%) translateY(6px);
+  opacity: 0;
+  pointer-events: none;
+
+  white-space: pre;
+  border-radius: 0.375rem;
+  border: 1px solid #222;
+  background: #060010;
+  padding: 0.125rem 0.5rem;
+  font-size: 0.75rem;
+  color: #fff;
+
+  transition: opacity .15s ease, transform .15s ease;
+}
+
+.dock-item:hover .dock-label{
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}

@@ -1,0 +1,39 @@
+<div class="overlay" (click)="onBackdropClick()">
+  <div class="window" (click)="stop($event)">
+
+    <div class="titlebar">
+      <div class="caption">
+        <div class="big">{{ title() }}</div>
+        <div class="small">Eszközök</div>
+      </div>
+      <button class="x" (click)="close.emit()">×</button>
+    </div>
+
+    <div class="content">
+      @if (loading) {
+        <div class="hint">Betöltés...</div>
+      } @else {
+        @if (errorMsg) {
+          <div class="error">{{ errorMsg }}</div>
+        } @else {
+          @if (!items || items.length === 0) {
+            <div class="hint">Ez a setup üres.</div>
+          } @else {
+            <div class="items">
+              @for (it of items; track $index) {
+                <div class="item">
+                  <div class="cat">{{ it.category }}</div>
+                  <div class="name">{{ it.display_name }}</div>
+                  @if (it.manufacturer) {
+                    <div class="meta">{{ it.manufacturer }}</div>
+                  }
+                </div>
+              }
+            </div>
+          }
+        }
+      }
+    </div>
+
+  </div>
+</div>

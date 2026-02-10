@@ -5,7 +5,8 @@ import { ReactiveFormsModule } from '@angular/forms';
 // Importok bővítése
 import { CarfilterComponent, CarFilters } from '../carfilter/carfilter.component';
 import { ComputerfilterComponent, ComputerFilters } from '../computerfilter/computerfilter/computerfilter.component';
-import { HometheaterfilterComponent, HomeTheaterFilters } from '../hometheaterfilter/hometheaterfilter.component';
+import { HometheaterfilterComponent, HomeTheaterFiltersV2 } from '../hometheaterfilter/hometheaterfilter.component';
+
 import { InstrumentfilterComponent, InstrumentFilters } from '../instrumentfilter/instrumentfilter.component'; // 👈 Ez hiányzott
 
 import { ProductFiltersService, CategoryKey } from '../../../Services/Home/Shared/product-filters.service';
@@ -63,9 +64,10 @@ export class FilterlistComponent {
     this.filtersService.setComputer(data);
   }
 
-  onHtChange(data: HomeTheaterFilters) {
+  onHtChange(data: HomeTheaterFiltersV2) {
     this.filtersService.setHt(data);
   }
+
 
   onInstrumentChange(data: InstrumentFilters) {
     this.filtersService.setInstrument(data);

@@ -1,6 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
+import { Router } from '@angular/router';
+import { Subscription } from 'rxjs';
 
 import { SearchbarComponent } from '../searchbar/searchbar.component';
 import { FilterlistComponent } from '../Filterparts/filterlist/filterlist.component';
@@ -9,6 +11,10 @@ import { FeaturedSpotlightComponent } from '../Featured/featured-spotlight.compo
 import { ProductDetailsPanelComponent } from '../../Panels/Product/product-details-panel.component';
 import { QuickStatsComponent } from '../../Shared/Stats/quick-stats.component';
 import { ClickSparkComponent } from '../../Shared/Effects/click-spark/click-spark.component';
+import { ProductStaggeredPanelComponent } from '../../Shared/Panels/product-staggered-panel.component';
+import { DockComponent, DockItemData } from '../../Shared/Dock/dock.component';
+
+import { UiSettingsService } from '../../Services/SettingService/ui-settings.service';
 
 type AnyProduct = any;
 
@@ -22,13 +28,25 @@ type AnyProduct = any;
     SearchbarComponent,
     FilterlistComponent,
     ProductlistComponent,
+    ProductStaggeredPanelComponent,
+    DockComponent,
     FeaturedSpotlightComponent,
     QuickStatsComponent,
     ProductDetailsPanelComponent,
     ClickSparkComponent
   ]
 })
-export class HomeComponent {
+export class HomeComponent implements OnDestroy {
+
+  /* -----------------------------
+     UI SETTINGS (Settings oldalról)
+  ----------------------------- */
+
+  setupMode = false;
+  compactLayout = false;
+
+  private uiSub?: Subscription;
+
 
   /* -----------------------------
      UI STATE
@@ -38,19 +56,47 @@ export class HomeComponent {
   featuredPool: AnyProduct[] = [];
 
   /* -----------------------------
-     QUICK STATS (DB / backend truth)
+     QUICK STATS
   ----------------------------- */
 
   totalAll = 0;
   allCategories: string[] = [];
 
-  constructor(private http: HttpClient) {}
+  constructor(
+    private http: HttpClient,
+    private router: Router,
+    private ui: UiSettingsService
+  ) {
+    // figyeljük a Settings állapotot
+    this.uiSub = this.ui.state$.subscribe(s => {
+      this.setupMode = !!s.setupMode;
+      this.compactLayout = !!s.compactLayout;
+    });
+  }
+
+  /* -----------------------------
+     NAV HELPERS
+  ----------------------------- */
+
+  private scrollHomeTop() {
+    if (this.router.url !== '/home' && this.router.url !== '/') {
+      this.router.navigateByUrl('/home').then(() => {
+        setTimeout(() =>
+          window.scrollTo({ top: 0, behavior: 'smooth' }), 0
+        );
+      });
+      return;
+    }
+
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
 
   /* -----------------------------
      PRODUCT DETAILS PANEL
   ----------------------------- */
 
   onOpenProduct(p: AnyProduct) {
+    // auto-open product (ha később rákötöd a settingre, itt a helye)
     this.selectedProduct = p;
   }
 
@@ -59,7 +105,7 @@ export class HomeComponent {
   }
 
   /* -----------------------------
-     SPOTLIGHT POOL (frontend filter)
+     SPOTLIGHT POOL
   ----------------------------- */
 
   onProductsChanged(list: AnyProduct[]) {
@@ -68,7 +114,6 @@ export class HomeComponent {
 
   /* -----------------------------
      STATS FROM PRODUCTLIST
-     (ideiglenes megoldás – később DB view)
   ----------------------------- */
 
   onStatsChanged(s: { totalAll: number; categoriesAll: string[] }) {
@@ -78,4 +123,7 @@ export class HomeComponent {
       : [];
   }
 
+  ngOnDestroy(): void {
+    this.uiSub?.unsubscribe();
+  }
 }

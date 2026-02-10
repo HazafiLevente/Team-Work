@@ -1,73 +1,87 @@
-<div class="carfilter" [formGroup]="form">
+<div class="carfilter" *ngIf="form" [formGroup]="form">
 
   <div class="carfilter-header">
     <span class="tag" title="Home Theatre kategória szűrők">🎬 HT</span>
-    <span class="muted2">Csak HomeTheatre táblákra szűr</span>
+    <span class="muted2">Meta-alapú (dinamikus) HT szűrő</span>
   </div>
 
-  <div class="filter-grid">
+  <div class="muted" *ngIf="loading">Betöltés…</div>
+  <div class="muted" *ngIf="error">{{ error }}</div>
 
-    <select class="search-input"
-            title="Eszköz típusa"
-            formControlName="type">
-      <option value="">Típus (összes)</option>
-      <option value="speaker">Hangfalak (összes)</option>
-      <option value="sub">Sub / Bass</option>
-      <option value="processor">AV proci / erősítő</option>
-      <option value="portable">Hordozható hangszóró</option>
-      <option value="set">Home Theatre szett</option>
+  <div class="filter-grid" *ngIf="!loading">
+
+    <!-- TÁBLA / TÍPUS -->
+    <select class="search-input" title="HT tábla" formControlName="tableName">
+      <option value="">HT típus (összes)</option>
+      <option *ngFor="let t of meta?.table_names" [value]="t">{{ t }}</option>
     </select>
 
-    <input class="search-input"
-           title="Gyártó (pl. Sony, Samsung)"
-           placeholder="Gyártó (pl. Sony, Samsung)"
-           formControlName="manufacturer" />
+    <!-- MANUFACTURER -->
+    <select class="search-input" title="Gyártó" formControlName="manufacturer">
+      <option value="">Gyártó (összes)</option>
+      <option *ngFor="let m of meta?.manufacturers" [value]="m">{{ m }}</option>
+    </select>
 
+    <!-- MODEL -->
     <input class="search-input"
-           title="Modell (pl. Q990D)"
+           title="Modell részlet"
            placeholder="Modell (pl. Q990D)"
            formControlName="model" />
 
+    <!-- PRICE -->
     <input class="search-input"
-           title="Minimum csatornaszám (pl. 2.1)"
-           placeholder="Min csatorna (pl. 2.1)"
-           formControlName="minChannels" />
-
-    <input class="search-input"
-           title="Maximum csatornaszám (pl. 7.1.2)"
-           placeholder="Max csatorna (pl. 7.1.2)"
-           formControlName="maxChannels" />
+           type="number"
+           min="0"
+           title="Min ár"
+           placeholder="Ár min"
+           formControlName="priceMin" />
 
     <input class="search-input"
            type="number"
            min="0"
-           title="Minimum teljesítmény (W)"
-           placeholder="Min teljesítmény (W)"
-           formControlName="minPower" />
+           title="Max ár"
+           placeholder="Ár max"
+           formControlName="priceMax" />
 
-    <input class="search-input"
-           type="number"
-           min="0"
-           title="Maximum teljesítmény (W)"
-           placeholder="Max teljesítmény (W)"
-           formControlName="maxPower" />
+    <!-- DYNAMIC FIELDS -->
+    <ng-container *ngFor="let f of meta?.dynamic">
 
-    <div class="toggle-row">
-      <label class="toggle" title="Bluetooth szűrő">
-        <input type="checkbox" formControlName="bluetooth">
-        <span class="pill">Bluetooth</span>
-      </label>
+      <!-- BOOLEAN -->
+      <div class="toggle-row" *ngIf="f.kind === 'boolean'">
+        <label class="toggle" [title]="f.key">
+          <input type="checkbox" [formControlName]="f.key" />
+          <span class="pill">{{ f.key }}</span>
+        </label>
+      </div>
 
-      <label class="toggle" title="Wi-Fi szűrő">
-        <input type="checkbox" formControlName="wifi">
-        <span class="pill">Wi-Fi</span>
-      </label>
+      <!-- SELECT -->
+      <select class="search-input"
+              *ngIf="f.kind === 'select'"
+              [title]="f.key"
+              [formControlName]="f.key">
+        <option value="">{{ f.key }} (összes)</option>
+        <option *ngFor="let opt of f.options" [value]="opt">{{ opt }}</option>
+      </select>
 
-      <label class="toggle" title="HDMI eARC szűrő">
-        <input type="checkbox" formControlName="earc">
-        <span class="pill">HDMI eARC</span>
-      </label>
-    </div>
+      <!-- RANGE -->
+      <ng-container *ngIf="f.kind === 'range'">
+        <!-- itt csinálhatod inputból is, de a meta->options listázás jól működik -->
+        <select class="search-input"
+                [title]="f.key + ' min'"
+                [formControlName]="f.key + 'Min'">
+          <option value="">{{ f.key }} min</option>
+          <option *ngFor="let opt of f.options" [value]="opt">{{ opt }}</option>
+        </select>
+
+        <select class="search-input"
+                [title]="f.key + ' max'"
+                [formControlName]="f.key + 'Max'">
+          <option value="">{{ f.key }} max</option>
+          <option *ngFor="let opt of f.options" [value]="opt">{{ opt }}</option>
+        </select>
+      </ng-container>
+
+    </ng-container>
 
   </div>
 
