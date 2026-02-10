@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
@@ -18,34 +18,45 @@ type UiItem = {
 })
 export class SetupPropertiesModalComponent {
 
-  // ===== INPUTOK =====
   @Input() setup: any;
   @Input() items: UiItem[] = [];
   @Input() loadingItems = false;
 
-  // ===== OUTPUTOK =====
   @Output() close = new EventEmitter<void>();
   @Output() saved = new EventEmitter<any>();
 
-  // ===== STATE =====
   tab: 'general' | 'items' | 'edit' = 'general';
 
   saving = false;
   errorMsg = '';
-
   editName = '';
+
+  // ✅ hogy csak akkor reseteljünk, ha tényleg másik setup nyílt meg
+  private lastSetupKey: string | number | null = null;
 
   constructor(private http: HttpClient) {}
 
-  // ===== LIFECYCLE =====
-  ngOnChanges(): void {
-    this.editName = this.setup?.setup_name ?? this.setup?.name ?? '';
-    this.errorMsg = '';
-    this.saving = false;
-    this.tab = 'general';
-  }
+  ngOnChanges(changes: SimpleChanges): void {
+    // csak a setup változás érdekel minket, ne az items/loading
+    if (!changes['setup']) return;
 
-  // ===== TEMPLATE METÓDUSOK =====
+    const key =
+      this.setup?.id ??
+      this.setup?.setup_id ??
+      this.setup?.setupId ??
+      null;
+
+    const isNewSetup = key !== this.lastSetupKey;
+    this.lastSetupKey = key;
+
+    if (isNewSetup) {
+      // ✅ csak új setup nyitáskor inicializálunk
+      this.editName = this.setup?.setup_name ?? this.setup?.name ?? '';
+      this.errorMsg = '';
+      this.saving = false;
+      this.tab = 'general';
+    }
+  }
 
   onBackdropClick(): void {
     this.close.emit();
@@ -59,7 +70,6 @@ export class SetupPropertiesModalComponent {
     return this.setup?.setup_name ?? this.setup?.name ?? 'Tulajdonságok';
   }
 
-  // ===== MENTÉS =====
   saveChanges(): void {
     const setupId =
       this.setup?.id ??
@@ -77,9 +87,12 @@ export class SetupPropertiesModalComponent {
     this.saving = true;
     this.errorMsg = '';
 
+    // ✅ marad ugyanazon a fülön mentés után is
+    const keepTab = this.tab;
+
     this.http
       .patch<any>(
-        `/api/setup/${setupId}`,
+        `http://localhost:3000/api/setup/${setupId}`,
         { setup_name: name },
         { withCredentials: true }
       )
@@ -87,19 +100,20 @@ export class SetupPropertiesModalComponent {
         next: (res) => {
           const updated = res?.setup ?? {
             ...this.setup,
-            setup_name: name,
-            name
+            setup_name: name
           };
 
           this.saved.emit(updated);
-          this.setup = updated;
-          this.tab = 'general';
+          this.setup = { ...this.setup, ...updated };
+
           this.saving = false;
+          this.tab = keepTab; // ✅ nem dob vissza generalra
         },
         error: (err) => {
           console.error('❌ Setup mentési hiba:', err);
           this.errorMsg = 'Mentés sikertelen.';
           this.saving = false;
+          this.tab = keepTab; // ✅ hiba esetén se váltson
         }
       });
   }

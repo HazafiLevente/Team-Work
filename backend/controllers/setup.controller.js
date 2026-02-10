@@ -52,8 +52,7 @@ exports.list = async (req, res) => {
 
         if (error) throw error;
 
-        // ✅ UI kompat: ha nálad "name" van, adunk mellé "setup_name"-t is
-        const normalized = (data || []).map(s => ({
+        const normalized = (data || []).map((s) => ({
             ...s,
             setup_name: s.setup_name ?? s.name ?? "Névtelen setup",
         }));
@@ -68,7 +67,6 @@ exports.list = async (req, res) => {
 // SETUP GYEREKEK
 exports.children = async (req, res) => {
     const setupId = req.params.id; // ✅ STRING/UUID/NUMBER mind ok
-
     if (!setupId) return res.json([]);
 
     console.log(`\n🔍 Setup ID keresés: ${setupId}`);
@@ -90,7 +88,7 @@ exports.children = async (req, res) => {
             if (data && data.length > 0) {
                 console.log(`✅ ${tableName}: ${data.length} elem`);
 
-                const mapped = data.map(item => {
+                const mapped = data.map((item) => {
                     const manufacturer =
                         item.Manufacturer ||
                         item.manufacturer ||
@@ -117,7 +115,6 @@ exports.children = async (req, res) => {
                         ...item,
                         category: tableName,
 
-                        // 🔥 IGAZI TERMÉKNÉV LOGIKA
                         display_name:
                             manufacturer && model
                                 ? `${manufacturer} ${model}`
@@ -139,49 +136,44 @@ exports.children = async (req, res) => {
 
         console.log(`🏁 Összes item: ${allItems.length}\n`);
         res.json(allItems);
-
     } catch (err) {
         console.error("❌ Végzetes backend hiba:", err);
         res.json([]);
     }
+};
 
+exports.update = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const setupId = req.params.id;
+        const { setup_name } = req.body;
 
-    // SETUP UPDATE (név módosítás)
-    exports.update = async (req, res) => {
-        try {
-            const userId = req.user.id;
-            const setupId = req.params.id;
-            const { setup_name } = req.body;
+        if (!setupId) return res.status(400).json({ error: "Missing setup id" });
 
-            if (!setupId) return res.status(400).json({ error: "Missing setup id" });
+        const name = (setup_name || "").trim();
+        if (!name) return res.status(400).json({ error: "setup_name is required" });
 
-            const name = (setup_name || "").trim();
-            if (!name) return res.status(400).json({ error: "setup_name is required" });
+        // ✅ csak a létező oszlopot update-eljük (nincs 'name' oszlop)
+        const payload = { setup_name: name };
 
-            // kompat: néhány táblában name is lehet
-            const payload = { setup_name: name, name };
+        const { data, error } = await supabase
+            .from("setup[Setup]")
+            .update(payload)
+            .eq("id", setupId)
+            .eq("user_id", userId)
+            .select("*")
+            .single();
 
-            const { data, error } = await supabase
-                .from("setup[Setup]")
-                .update(payload)
-                .eq("id", setupId)
-                .eq("user_id", userId)
-                .select("*")
-                .single();
+        if (error) throw error;
 
-            if (error) throw error;
-
-            // UI kompat normalizálás
-            const normalized = {
+        res.json({
+            setup: {
                 ...data,
-                setup_name: data.setup_name ?? data.name ?? name
-            };
-
-            res.json({ setup: normalized });
-        } catch (err) {
-            console.error("❌ Setup update hiba:", err);
-            res.status(500).json({ error: "Update failed" });
-        }
-    };
-
+                setup_name: data.setup_name ?? name
+            }
+        });
+    } catch (err) {
+        console.error("❌ Setup update hiba:", err);
+        res.status(500).json({ error: "Update failed" });
+    }
 };
