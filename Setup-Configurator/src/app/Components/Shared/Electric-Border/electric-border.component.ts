@@ -10,12 +10,15 @@ import { CommonModule } from '@angular/common';
       <div class="eb-canvas-container">
         <canvas #canvas class="eb-canvas"></canvas>
       </div>
+
       <div class="eb-layers">
         <div class="eb-glow-1"></div>
         <div class="eb-glow-2"></div>
         <div class="eb-background-glow"></div>
       </div>
-      <div class="eb-content">
+
+      <!-- ✅ EZT fogjuk mérni, nem a hostot -->
+      <div #content class="eb-content">
         <ng-content></ng-content>
       </div>
     </div>
@@ -30,16 +33,18 @@ export class ElectricBorderComponent implements AfterViewInit, OnDestroy {
 
   @ViewChild('canvas') canvasRef!: ElementRef<HTMLCanvasElement>;
   @ViewChild('container') containerRef!: ElementRef<HTMLDivElement>;
+  @ViewChild('content') contentRef!: ElementRef<HTMLDivElement>;
 
   private raf: number | null = null;
-  private resizeRaf: number | null = null;   // ✅ FIX
   private time = 0;
   private last = 0;
   private ro?: ResizeObserver;
+  private resizeRaf: number | null = null;
 
   get styleVars() {
     return {
       '--electric-border-color': this.color,
+      '--eb-radius': `${this.borderRadius}px`,
       borderRadius: `${this.borderRadius}px`
     } as any;
   }
@@ -47,6 +52,8 @@ export class ElectricBorderComponent implements AfterViewInit, OnDestroy {
   ngAfterViewInit() {
     const canvas = this.canvasRef.nativeElement;
     const container = this.containerRef.nativeElement;
+    const content = this.contentRef.nativeElement;
+
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
@@ -94,29 +101,30 @@ export class ElectricBorderComponent implements AfterViewInit, OnDestroy {
       if (dist <= acc + sw) return { x: left + r + ((dist - acc) / sw) * sw, y: top };
       acc += sw;
 
-      if (dist <= acc + ca) return cornerPoint(left + w - r, top + r, r, -Math.PI/2, Math.PI/2, (dist-acc)/ca);
+      if (dist <= acc + ca) return cornerPoint(left + w - r, top + r, r, -Math.PI / 2, Math.PI / 2, (dist - acc) / ca);
       acc += ca;
 
       if (dist <= acc + sh) return { x: left + w, y: top + r + ((dist - acc) / sh) * sh };
       acc += sh;
 
-      if (dist <= acc + ca) return cornerPoint(left + w - r, top + h - r, r, 0, Math.PI/2, (dist-acc)/ca);
+      if (dist <= acc + ca) return cornerPoint(left + w - r, top + h - r, r, 0, Math.PI / 2, (dist - acc) / ca);
       acc += ca;
 
       if (dist <= acc + sw) return { x: left + w - r - ((dist - acc) / sw) * sw, y: top + h };
       acc += sw;
 
-      if (dist <= acc + ca) return cornerPoint(left + r, top + h - r, r, Math.PI/2, Math.PI/2, (dist-acc)/ca);
+      if (dist <= acc + ca) return cornerPoint(left + r, top + h - r, r, Math.PI / 2, Math.PI / 2, (dist - acc) / ca);
       acc += ca;
 
       if (dist <= acc + sh) return { x: left, y: top + h - r - ((dist - acc) / sh) * sh };
       acc += sh;
 
-      return cornerPoint(left + r, top + r, r, Math.PI, Math.PI/2, (dist-acc)/ca);
+      return cornerPoint(left + r, top + r, r, Math.PI, Math.PI / 2, (dist - acc) / ca);
     };
 
+    // ✅ CONTENT-et mérünk, és a CANVAS-t a CONTENT köré feszítjük
     const updateSize = () => {
-      const rect = container.getBoundingClientRect();
+      const rect = content.getBoundingClientRect();
       const width = rect.width + borderOffset * 2;
       const height = rect.height + borderOffset * 2;
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -126,9 +134,12 @@ export class ElectricBorderComponent implements AfterViewInit, OnDestroy {
       canvas.style.width = `${width}px`;
       canvas.style.height = `${height}px`;
 
-      // ✅ reset transform for safety
-      ctx.setTransform(1, 0, 0, 1, 0, 0);
-      ctx.scale(dpr, dpr);
+      // ✅ a canvas középre kerül a content fölé (különben elcsúszik)
+      const left = (content.offsetLeft - borderOffset);
+      const top = (content.offsetTop - borderOffset);
+
+      canvas.style.left = `${left}px`;
+      canvas.style.top = `${top}px`;
 
       return { width, height, dpr };
     };
@@ -182,6 +193,7 @@ export class ElectricBorderComponent implements AfterViewInit, OnDestroy {
       this.raf = requestAnimationFrame(draw);
     };
 
+    // ✅ content + container resize figyelés
     this.ro = new ResizeObserver(() => {
       if (this.resizeRaf) cancelAnimationFrame(this.resizeRaf);
       this.resizeRaf = requestAnimationFrame(() => {
@@ -190,13 +202,15 @@ export class ElectricBorderComponent implements AfterViewInit, OnDestroy {
       });
     });
 
+    this.ro.observe(content);
     this.ro.observe(container);
+
     this.raf = requestAnimationFrame(draw);
   }
 
   ngOnDestroy() {
-    if (this.raf) cancelAnimationFrame(this.raf);
     if (this.resizeRaf) cancelAnimationFrame(this.resizeRaf);
+    if (this.raf) cancelAnimationFrame(this.raf);
     this.ro?.disconnect();
   }
 }

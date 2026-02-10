@@ -93,3 +93,71 @@ exports.me = (req, res) => {
     if (!req.user) return res.json({ loggedIn: false });
     res.json({ loggedIn: true, user: req.user });
 };
+exports.requestRegisterCode = async (req, res) => {
+    const { fullname, username, email, password } = req.body;
+    if (!fullname || !username || !email || !password) {
+        return res.status(400).json({ error: "Missing fields" });
+    }
+
+    const code = Math.floor(100000 + Math.random() * 900000).toString();
+    const expires = new Date(Date.now() + 5 * 60 * 1000);
+
+    await supabase.from("user_register_code").insert({
+        email,
+        code,
+        expires_at: expires
+    });
+
+    await sendRegisterCode(email, code);
+
+    res.json({ success: true });
+};
+exports.verifyRegisterCode = async (req, res) => {
+    const { fullname, username, email, password, code } = req.body;
+
+    const { data, error } = await supabase
+        .from("user_register_code")
+        .select("*")
+        .eq("email", email)
+        .eq("code", code)
+        .eq("used", false)
+        .gt("expires_at", new Date().toISOString())
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .single();
+
+    if (error || !data) {
+        return res.status(400).json({ error: "Invalid or expired code" });
+    }
+
+    await supabase
+        .from("user_register_code")
+        .update({ used: true })
+        .eq("id", data.id);
+
+    const hashed = await bcrypt.hash(password, 10);
+
+    const { data: user } = await supabase
+        .from("user[Auth]")
+        .insert({
+            Name: fullname,
+            UserName: username,
+            Email: email,
+            password: hashed
+        })
+        .select()
+        .single();
+
+    await supabase.from("user_more[Auth]").insert({ user_id: user.ID });
+
+    const token = jwt.sign({
+        id: user.ID,
+        username: user.UserName,
+        email: user.Email,
+        role: resolveRole(user.ID)
+    }, JWT_SECRET, { expiresIn: "12h" });
+
+    setAuthCookie(res, token);
+
+    res.json({ success: true });
+};

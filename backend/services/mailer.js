@@ -24,5 +24,21 @@ async function sendWelcomeEmail(to, username) {
         `
     });
 }
+async function sendRegisterCode(to, code) {
+    await transporter.sendMail({
+        from: process.env.MAIL_FROM,
+        to,
+        subject: "🔐 Regisztrációs kód",
+        html: `
+          <h2>Regisztráció megerősítése</h2>
+          <p>A kódod:</p>
+          <h1 style="letter-spacing:4px">${code}</h1>
+          <p>5 percig érvényes.</p>
+        `
+    });
+}
+
+module.exports = { sendWelcomeEmail, sendRegisterCode };
+
 
 module.exports = { sendWelcomeEmail };

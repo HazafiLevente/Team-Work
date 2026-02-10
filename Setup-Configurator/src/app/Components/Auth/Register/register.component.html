@@ -1,16 +1,13 @@
-<form (ngSubmit)="submit()" class="panel">
-  <h2>Registration</h2>
+<form *ngIf="step === 'form'" (ngSubmit)="submit()">
+  <input [(ngModel)]="fullname" name="fullname" required />
+  <input [(ngModel)]="username" name="username" required />
+  <input [(ngModel)]="email" name="email" required />
+  <input type="password" [(ngModel)]="password" name="password" required />
+  <button type="submit">Regisztráció</button>
+</form>
 
-  <input placeholder="Fullname" [(ngModel)]="fullname" name="fullname" required />
-  <input placeholder="Username" [(ngModel)]="username" name="username" required />
-  <input placeholder="Email" [(ngModel)]="email" name="email" required />
-  <input type="password" placeholder="Password" [(ngModel)]="password" name="password" required />
-
-  <button class="btn">Connect</button>
-
-  <p>
-    Van már fiókod?
-    <a routerLink="/auth/login">Bejelentkezés</a>
-  </p>
-
+<form *ngIf="step === 'code'" (ngSubmit)="verify()">
+  <h3>Emailben kaptál egy kódot</h3>
+  <input [(ngModel)]="code" name="code" required />
+  <button type="submit">Megerősítés</button>
 </form>

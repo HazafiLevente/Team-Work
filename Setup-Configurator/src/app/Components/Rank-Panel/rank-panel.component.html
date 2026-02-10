@@ -1,5 +1,5 @@
-<!-- ✅ EMBEDDED mód: nincs backdrop, nincs X -->
-<div class="rank-embedded" *ngIf="embedded">
+<!-- ✅ EMBEDDED: profil oldalon (nincs backdrop) -->
+<div *ngIf="embedded" class="rank-embedded">
   <app-electric-border class="rank-shell" [color]="color" [borderRadius]="18">
     <div class="rank-card" [style.color]="color">
       <div class="top">
@@ -26,9 +26,8 @@
   </app-electric-border>
 </div>
 
-
-<!-- ✅ POPUP mód: backdrop + X -->
-<div class="rank-backdrop" *ngIf="!embedded" (click)="backdropClick($event)">
+<!-- ✅ POPUP: dropdownból -->
+<div *ngIf="!embedded" class="rank-backdrop" (click)="backdropClick($event)">
   <app-electric-border class="rank-shell" [color]="color" [borderRadius]="18">
     <div class="rank-card" [style.color]="color">
       <div class="top">

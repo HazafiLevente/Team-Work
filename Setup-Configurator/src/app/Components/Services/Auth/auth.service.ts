@@ -64,5 +64,35 @@ export class AuthService {
       tap(() => this.userSubject.next(null))
     );
   }
+  verifyRegisterCode(data: {
+    fullname: string;
+    username: string;
+    email: string;
+    password: string;
+    code: string;
+  }) {
+    return this.http.post(
+      '/api/auth/register/verify',
+      data,
+      { withCredentials: true }
+    ).pipe(
+      switchMap(() => this.check()) // 🔥 login után user frissül
+    );
+  }
+
+  requestRegisterCode(data: {
+    fullname: string;
+    username: string;
+    email: string;
+    password: string;
+  }) {
+    return this.http.post(
+      '/api/auth/register/request',
+      data
+    );
+  }
+
+
+
 
 }
