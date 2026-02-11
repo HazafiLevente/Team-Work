@@ -56,10 +56,29 @@ function extractModelToken(question = "") {
    LIST INTENT
 ---------------------------------- */
 function isListQuestion(q) {
-    return /(listaz|listazd|irj|ird|sorold|mutasd|milyen|talalhato|termekek)/.test(
-        normalize(q)
-    );
+    const n = normalize(q);
+
+    const listWords = [
+        "listaz",
+        "listazd",
+        "irj",
+        "ird",
+        "sorold",
+        "mutasd",
+        "milyen",
+        "talalhato",
+        "termek",
+        "termekek",
+        "eszkoz",
+        "eszkozok",
+        "osszes",
+        "osszest"
+    ];
+
+    return listWords.some(w => n.includes(w));
 }
+
+
 
 /* ----------------------------------
    MANUFACTURERS FROM JSON
@@ -109,9 +128,9 @@ function extractBrand(question) {
    MAIN
 ---------------------------------- */
 function getProductsForAI(question = "") {
-    const modelToken = extractModelToken(question);
     const listIntent = isListQuestion(question);
     const brand = extractBrand(question);
+    const modelToken = extractModelToken(question);
 
     const tables = db
         .prepare(`SELECT name FROM sqlite_master WHERE type='table'`)
@@ -130,7 +149,7 @@ function getProductsForAI(question = "") {
         }
 
         for (const r of rows) {
-            const manufacturer = pick(r, ["manufacturer", "brand", "maker"]);
+            let manufacturer = pick(r, ["manufacturer", "brand", "maker"]);
             const model = pick(r, [
                 "model",
                 "model_name",
@@ -141,49 +160,62 @@ function getProductsForAI(question = "") {
                 "product_name",
                 "title"
             ]);
+
+            if (!manufacturer && model) {
+                manufacturer = model.split(" ")[0];
+            }
+
             const priceRaw = pick(r, ["price", "price_huf", "cost", "amount"]);
-            const socket = pick(r, ["socket", "cpu_socket"]);
-
-            if (!manufacturer && !model) continue;
-
             let price = null;
+
             if (priceRaw !== null && priceRaw !== undefined) {
                 const cleaned = String(priceRaw).replace(/[^0-9]/g, "");
                 const p = Number(cleaned);
                 if (!Number.isNaN(p)) price = p;
             }
 
-            const row = { table, manufacturer, model, price, socket };
+            const row = { table, manufacturer, model, price };
 
-            /* 🎯 PRODUCT FIRST */
-            if (modelToken) {
-                const text = normalize(rowText(r));
+            /* ===============================
+               LIST MODE (ELSŐ PRIORITÁS)
+            =============================== */
 
-                if (text.includes(modelToken)) {
-                    exact.push(row);
-                    continue;
-                }
-            }
-
-
-            /* 📋 LIST */
-            if (!exact.length && listIntent && brand && manufacturer) {
+            if (listIntent && brand && manufacturer) {
                 if (normalize(manufacturer) === normalize(brand)) {
                     list.push(row);
                 }
+                continue; // fontos: product logika ne fusson lista kérdésnél
             }
+
+            /* ===============================
+               PRODUCT MODE
+            =============================== */
+
+            if (!listIntent && modelToken) {
+                const text = normalize(rowText(r));
+                if (text.includes(modelToken)) {
+                    exact.push(row);
+                }
+            }
+            console.log("LIST INTENT:", listIntent);
+            console.log("BRAND:", brand);
         }
     }
 
-    if (exact.length) {
-        return { mode: "product", exact: exact.slice(0, 3), similar: [] };
+    if (listIntent) {
+        return list.length
+            ? { mode: "list", brand, list }
+            : { mode: "none" };
     }
 
-    if (list.length) {
-        return { mode: "list", brand, list: list.slice(0, 20) };
+    if (exact.length) {
+        return { mode: "product", exact };
     }
 
     return { mode: "none" };
 }
+
+
+
 
 module.exports = { getProductsForAI };

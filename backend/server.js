@@ -13,7 +13,7 @@ console.log("ENV CHECK:", {
     SUPABASE_URL: process.env.SUPABASE_URL,
     HAS_KEY: !!process.env.SUPABASE_SERVICE_ROLE_KEY,
     JWT: !!process.env.JWT_SECRET,
-    GEMINI: !!process.env.GEMINI_API_KEY
+    DEEPSEEK: !!process.env.DEEPSEEK_API_KEY
 });
 
 app.listen(PORT, () => {
