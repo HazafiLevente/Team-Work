@@ -17,11 +17,14 @@
       [returnDuration]="1.5">
     </app-dot-grid>
 
+    <!-- ✅ jobb felső gomb -->
+    <button class="new-setup-btn" type="button" (click)="createNewSetup()">+ Új setup</button>
+
     <!-- csak layout tartó -->
     <div class="boundary-area">
 
       @if (!loading) {
-        @for (setup of userSetups; track $index) {
+        @for (setup of userSetups; track trackBySetup($index, setup)) {
           <app-setup-room
             [setup]="setup"
             [boundaryRef]="boundary"
@@ -47,15 +50,16 @@
           (mousedown)="$event.stopPropagation()">
 
           <button class="ctx-item" type="button">Megnyitás</button>
-
-          <!-- ✅ CSAK EZ MŰKÖDJÖN MOST -->
           <button class="ctx-item" type="button" (click)="openToolsFromMenu()">Eszközök</button>
 
-          <button class="ctx-item" type="button">Módosítás</button>
-          <button class="ctx-item" type="button">Kapcsolatok</button>
+          <!-- ✅ MÓDOSÍTÁS blokk -->
+          <div class="ctx-sep"></div>
+          <div class="ctx-group-title">Módosítás</div>
+          <button class="ctx-item" type="button" (click)="openRenameFromMenu()">Átnevezés</button>
 
           <div class="ctx-sep"></div>
 
+          <button class="ctx-item" type="button">Kapcsolatok</button>
           <button class="ctx-item" type="button">Favorite</button>
           <button class="ctx-item" type="button">Tulajdonságok</button>
 
@@ -64,7 +68,12 @@
     }
 
   </div>
+
 </div>
+
+<div class="ctx-sep"></div>
+<button class="ctx-item danger" type="button" (click)="deleteSetupFromMenu()">Törlés</button>
+
 
 <!-- ✅ Eszközök modal -->
 @if (toolsOpen && toolsSetup) {
@@ -72,4 +81,39 @@
     [setup]="toolsSetup"
     (close)="closeTools()">
   </app-setup-tools-modal>
+}
+
+<!-- ✅ Átnevezés modal -->
+@if (renameOpen && renameSetup) {
+  <div class="overlay" (click)="closeRename()">
+    <div class="window" (click)="$event.stopPropagation()">
+
+      <div class="titlebar">
+        <div class="caption">
+          <div class="big">Átnevezés</div>
+          <div class="small">{{ getSetupTitle(renameSetup) }}</div>
+        </div>
+        <button class="x" (click)="closeRename()">×</button>
+      </div>
+
+      <div class="content">
+        <div class="field">
+          <label>Új név</label>
+          <input [(ngModel)]="renameValue" placeholder="pl. Nappali setup" />
+        </div>
+
+        @if (renameError) {
+          <div class="error">{{ renameError }}</div>
+        }
+
+        <div class="actions">
+          <button class="btn" (click)="closeRename()">Mégse</button>
+          <button class="btn primary" (click)="saveRename()" [disabled]="renameSaving">
+            @if (renameSaving) { Mentés... } @else { Mentés }
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
 }

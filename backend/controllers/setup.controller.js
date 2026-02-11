@@ -66,7 +66,7 @@ exports.list = async (req, res) => {
 
 // SETUP GYEREKEK
 exports.children = async (req, res) => {
-    const setupId = req.params.id; // ✅ STRING/UUID/NUMBER mind ok
+    const setupId = req.params.id;
     if (!setupId) return res.json([]);
 
     console.log(`\n🔍 Setup ID keresés: ${setupId}`);
@@ -142,6 +142,7 @@ exports.children = async (req, res) => {
     }
 };
 
+// UPDATE
 exports.update = async (req, res) => {
     try {
         const userId = req.user.id;
@@ -153,7 +154,6 @@ exports.update = async (req, res) => {
         const name = (setup_name || "").trim();
         if (!name) return res.status(400).json({ error: "setup_name is required" });
 
-        // ✅ csak a létező oszlopot update-eljük (nincs 'name' oszlop)
         const payload = { setup_name: name };
 
         const { data, error } = await supabase
@@ -175,5 +175,71 @@ exports.update = async (req, res) => {
     } catch (err) {
         console.error("❌ Setup update hiba:", err);
         res.status(500).json({ error: "Update failed" });
+    }
+};
+
+// CREATE
+exports.create = async (req, res) => {
+    try {
+        const userId = req.user?.id ?? req.user?.user_id ?? req.userId;
+        if (!userId) return res.status(401).json({ error: "Unauthorized" });
+
+        const setup_name = (req.body?.setup_name || "").trim();
+        if (!setup_name) return res.status(400).json({ error: "setup_name required" });
+
+        const { data, error } = await supabase
+            .from("setup[Setup]")
+            .insert([{ setup_name, user_id: userId }])
+            .select("*")
+            .single();
+
+        if (error) {
+            console.error("❌ Supabase insert error:", error);
+            return res.status(500).json({
+                error: error.message,
+                code: error.code,
+                details: error.details,
+                hint: error.hint
+            });
+        }
+
+        return res.json({ setup: data });
+    } catch (err) {
+        console.error("❌ create setup error:", err);
+        return res.status(500).json({ error: "Server error" });
+    }
+};
+
+// ✅ DELETE (ÚJ) – Supabase-ből is töröl
+exports.remove = async (req, res) => {
+    try {
+        const userId = req.user?.id;
+        const setupId = req.params.id;
+
+        if (!userId) return res.status(401).json({ error: "Unauthorized" });
+        if (!setupId) return res.status(400).json({ error: "Missing setup id" });
+
+        const { data, error } = await supabase
+            .from("setup[Setup]")
+            .delete()
+            .eq("id", setupId)
+            .eq("user_id", userId)
+            .select("*")
+            .single();
+
+        if (error) {
+            console.error("❌ Supabase delete error:", error);
+            return res.status(500).json({
+                error: error.message,
+                code: error.code,
+                details: error.details,
+                hint: error.hint
+            });
+        }
+
+        return res.json({ ok: true, deleted: data });
+    } catch (err) {
+        console.error("❌ Setup delete hiba:", err);
+        return res.status(500).json({ error: "Server error" });
     }
 };

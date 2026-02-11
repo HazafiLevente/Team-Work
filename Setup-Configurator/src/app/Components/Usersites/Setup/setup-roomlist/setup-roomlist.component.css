@@ -23,6 +23,40 @@
   backdrop-filter: blur(10px);
 }
 
+/* ✅ felső sáv (jobb felső gombnak) */
+.toolbar{
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 5; /* dotgrid + kártyák fölé */
+  pointer-events: none; /* csak a gomb kapjon kattot */
+}
+
+.new-setup-btn{
+  pointer-events: auto;
+
+  height: 38px;
+  padding: 0 14px;
+  border-radius: 12px;
+
+  border: 1px solid rgba(255,255,255,0.16);
+  background: rgba(255,255,255,0.06);
+  color: rgba(255,255,255,0.92);
+
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 800;
+
+  box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+  backdrop-filter: blur(10px);
+}
+
+.new-setup-btn:hover{
+  background: rgba(82,39,255,0.22);
+  border-color: rgba(82,39,255,0.45);
+  color: #fff;
+}
+
 /* DotGrid háttér */
 .dot-bg{
   position: absolute;
@@ -42,6 +76,7 @@
   height: 100%;
 
   padding: 18px;
+  padding-top: 62px; /* ✅ hely a gombnak */
   padding-bottom: 200px;
 
   display: flex;
