@@ -1,6 +1,68 @@
 const router = require("express").Router();
 const { supabase } = require("../services/supabase");
 
+// meglévő: /all, /instruments, /ht ... maradhat
+
+router.get("/cars", async (req, res) => {
+    const CAR_TABLES = [
+        "cabrio_cars",
+        "coupe_cars",
+        "crossover_cars",
+        "hatchback_cars",
+        "mpv_cars",
+        "pickup_cars",     // FIGYELJ: pickup_cars vagy pickup_car nálad?
+        "wagon_cars",
+    ];
+
+    const uniq = (arr) =>
+        Array.from(new Set((arr || [])
+            .filter(Boolean)
+            .map(x => String(x).trim())
+            .filter(x => x.length)));
+
+    async function colValues(table, col) {
+        const { data, error } = await supabase
+            .from(table)
+            .select(`"${col}"`)   // <- fontos: szóközös oszlopok miatt idézőjel
+            .limit(2000);
+
+        if (error) {
+            console.error("❌ meta/cars error:", table, col, error);
+            throw error;
+        }
+
+        return uniq((data || []).map(r => r[col]));
+    }
+
+    try {
+        const results = await Promise.all(
+            CAR_TABLES.map(async (t) => {
+                const [m, b, f, tr] = await Promise.all([
+                    colValues(t, "Manufacturer"),
+                    colValues(t, "Body Type"),
+                    colValues(t, "Fuel Type"),
+                    colValues(t, "Transmission"),
+                ]);
+                return { m, b, f, tr };
+            })
+        );
+
+        res.json({
+            table_names: CAR_TABLES,
+            manufacturers: uniq(results.flatMap(x => x.m)).sort(),
+            body_types: uniq(results.flatMap(x => x.b)).sort(),
+            fuel_types: uniq(results.flatMap(x => x.f)).sort(),
+            transmissions: uniq(results.flatMap(x => x.tr)).sort(),
+        });
+    } catch (e) {
+        return res.status(500).json({
+            error: e?.message ?? String(e),
+        });
+    }
+});
+
+
+
 /**
  * GET /meta/all
  * -> táblák listája (ez megmaradt)
@@ -55,5 +117,7 @@ router.get("/ht", async (req, res) => {
     if (error) return res.status(500).json({ error: error.message || String(error) });
     res.json(data);
 });
+
+
 
 module.exports = router;

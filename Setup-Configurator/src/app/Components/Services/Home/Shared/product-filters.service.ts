@@ -31,12 +31,23 @@ const EMPTY_SEARCH: SearchFilters = {
 
 const EMPTY_CAR: CarFilters = {
   category: 'car',
+  tableName: '',
   manufacturer: '',
   model: '',
-  minPrice: '',
-  maxPrice: '',
-  // ha nálad több mező van, maradhatnak itt üresen (TS nem fog összeomlani ha interface bővebb)
-} as any;
+  priceMin: '',
+  priceMax: '',
+  bodyType: '',
+  hpMin: '',
+  hpMax: '',
+  accelMin: '',
+  accelMax: '',
+  seatsMin: '',
+  seatsMax: '',
+  fuel: '',
+  yearMin: '',
+  yearMax: '',
+  transmission: ''
+};
 
 const EMPTY_COMPUTER: ComputerFilters = {
   category: 'computer',

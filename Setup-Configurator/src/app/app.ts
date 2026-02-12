@@ -1,11 +1,14 @@
 import { Component, OnInit } from '@angular/core';
 import { Router, RouterOutlet } from '@angular/router';
+import { CommonModule } from '@angular/common';
 
 import { AuthService } from './Components/Services/Auth/auth.service';
 import { HeaderComponent } from './Components/header/header.component';
 import { DarkVeilBgComponent } from './Components/Shared/Background/dark-veil-bg.component';
 import { ClickSparkComponent } from './Components/Shared/Effects/click-spark/click-spark.component';
 import { DockComponent, DockItemData } from './Components/Shared/Dock/dock.component';
+import {MessageButtonComponent} from './Components/Shared/Messages/messages-button/messages.button.component';
+import {MessagesPanelComponent} from './Components/Shared/Messages/messages-panel/messages.panel.component';
 
 @Component({
   selector: 'app-root',
@@ -15,11 +18,15 @@ import { DockComponent, DockItemData } from './Components/Shared/Dock/dock.compo
     RouterOutlet,
     DarkVeilBgComponent,
     ClickSparkComponent,
-    DockComponent
+    DockComponent,
+    MessageButtonComponent,
+    MessagesPanelComponent,
+    CommonModule
   ],
   templateUrl: './app.html'
 })
 export class App implements OnInit {
+  open = false;
   constructor(
     private auth: AuthService,
     private router: Router

@@ -1,0 +1,60 @@
+<div class="overlay" (click)="close.emit()"></div>
+
+<div class="panel" (click)="$event.stopPropagation()">
+
+  <div class="panel-header">
+    Setup AI
+    <span class="close-btn" (click)="close.emit()">✖</span>
+  </div>
+
+  <div class="panel-body">
+
+    <div
+      *ngFor="let m of messages"
+      class="message"
+      [class.me]="m.sender === 'me'"
+      [class.ai]="m.sender === 'ai'"
+      [class.system]="m.sender === 'system'"
+      [class.product-wrapper]="m.sender === 'product'">
+
+      <!-- sima text -->
+      <ng-container *ngIf="m.text">
+        {{ m.text }}
+      </ng-container>
+
+      <!-- product lista -->
+      <div *ngIf="m.products" class="product-list">
+        <div
+          *ngFor="let p of m.products"
+          class="product-card"
+          (click)="openProduct(p)">
+
+          <div class="product-title">
+            {{ p.manufacturer }} {{ p.model }}
+          </div>
+
+          <div class="product-price" *ngIf="p.price">
+            {{ p.price | number:'1.0-0' }} Ft
+          </div>
+
+          <div class="product-price" *ngIf="!p.price">
+            Ár nem elérhető
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <div class="panel-input">
+    <input
+      [(ngModel)]="newMessage"
+      (keyup.enter)="send()"
+      placeholder="Írj kérdést a termékekről..."
+    />
+    <button (click)="send()">Küldés</button>
+  </div>
+
+</div>

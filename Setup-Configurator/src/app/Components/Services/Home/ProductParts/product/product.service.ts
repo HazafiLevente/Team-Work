@@ -15,12 +15,23 @@ export class ProductService {
     );
   }
 
-  getProductDetails(table: string, id: string) {
-    return this.http.get<{ item: any }>(
-      `${this.API}/items/${encodeURIComponent(table)}/${encodeURIComponent(id)}`,
-      { withCredentials: true }
-    );
+  getProductDetails(table: string, id: string | number) {
+    const t = String(table);
+    const sid = String(id);
+
+    const carTables = new Set([
+      'cabrio_cars','coupe_cars','crossover_cars','hatchback_cars','mpv_cars','pickup_cars','wagon_cars'
+    ]);
+
+    const url = carTables.has(t)
+      ? `${this.API}/cars/${encodeURIComponent(t)}/${encodeURIComponent(sid)}`
+      : `${this.API}/items/${encodeURIComponent(t)}/${encodeURIComponent(sid)}`;
+
+    return this.http.get<{ item: any }>(url, { withCredentials: true });
   }
+
+
+
 
   getComputers(limit = 50) {
     return this.http.get<{ items: any[] }>(

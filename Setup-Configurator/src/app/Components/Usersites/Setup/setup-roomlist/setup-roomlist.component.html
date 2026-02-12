@@ -52,6 +52,9 @@
           <button class="ctx-item" type="button">Megnyitás</button>
           <button class="ctx-item" type="button" (click)="openToolsFromMenu()">Eszközök</button>
 
+          <!-- ✅ ÚJ: PC összerakó (Eszközök modal PC füllel) -->
+          <button class="ctx-item" type="button" (click)="openPcBuilderFromMenu()">Számítógép összerakó</button>
+
           <!-- ✅ MÓDOSÍTÁS blokk -->
           <div class="ctx-sep"></div>
           <div class="ctx-group-title">Módosítás</div>
@@ -63,6 +66,10 @@
           <button class="ctx-item" type="button">Favorite</button>
           <button class="ctx-item" type="button">Tulajdonságok</button>
 
+          <!-- ✅ TÖRLÉS A MENÜBEN -->
+          <div class="ctx-sep"></div>
+          <button class="ctx-item danger" type="button" (click)="deleteSetupFromMenu()">Törlés</button>
+
         </div>
       </div>
     }
@@ -71,14 +78,11 @@
 
 </div>
 
-<div class="ctx-sep"></div>
-<button class="ctx-item danger" type="button" (click)="deleteSetupFromMenu()">Törlés</button>
-
-
 <!-- ✅ Eszközök modal -->
 @if (toolsOpen && toolsSetup) {
   <app-setup-tools-modal
     [setup]="toolsSetup"
+    [startTab]="toolsStartTab"
     (close)="closeTools()">
   </app-setup-tools-modal>
 }

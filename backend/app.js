@@ -68,7 +68,9 @@ app.use("/images", express.static(path.join(__dirname, "..", "datas", "images"))
 /* ----------------------------------
 META
 ---------------------------------- */
-app.use("/api", require("./routes/meta.routes"));
+app.use("/api/meta", require("./routes/meta.routes"));
+
+
 
 /* ----------------------------------
 AI ROUTES

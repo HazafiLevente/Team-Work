@@ -18,6 +18,13 @@
   <router-outlet></router-outlet>
 </div>
 
+<app-message-button (toggle)="open = !open"></app-message-button>
+
+<app-messages-panel
+  *ngIf="open"
+  (close)="open = false">
+</app-messages-panel>
+
 <app-dock
   [items]="dockItems"
   [panelHeight]="70"

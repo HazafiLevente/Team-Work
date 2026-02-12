@@ -25,9 +25,12 @@ export class ProductDetailsPanelComponent implements OnChanges {
   constructor(
     private productService: ProductService,
     private router: Router
-  ) {}
+  ) {
+    console.log('🔥 ProductDetailsPanelComponent CREATED');
+  }
 
   ngOnChanges(): void {
+    console.log('🟦 ProductDetailsPanelComponent ngOnChanges, product =', this.product);
     this.fetchDetails();
   }
 
@@ -52,15 +55,20 @@ export class ProductDetailsPanelComponent implements OnChanges {
   }
 
   private fetchDetails() {
+
+
     this.loading = true;
     this.error = null;
     this.details = null;
 
     const table = (this.product as any).table_name ?? (this.product as any).table;
     const id = (this.product as any).id;
+    console.log('DETAILS request table/id:', table, id);
 
     this.productService.getProductDetails(table, id).subscribe({
       next: (res) => {
+        console.log('DETAILS response:', res);
+
         this.details = res?.item ?? res;
         this.loading = false;
       },
@@ -81,4 +89,25 @@ export class ProductDetailsPanelComponent implements OnChanges {
     const x = k.toLowerCase();
     return x === 'id' || x === 'created_at' || x === 'updated_at';
   }
+  displayPrice(details: any): string {
+    if (!details) return 'N/A';
+
+    const p = details.price ?? details.Price;
+    if (p != null && String(p).trim() !== '') {
+      const num = Number(p);
+      return Number.isFinite(num) ? `${num.toLocaleString('hu-HU')} Ft` : String(p);
+    }
+
+    const avg = details.Avgprice ?? details.avgprice;
+    if (avg != null && String(avg).trim() !== '') {
+      const num = Number(String(avg).replace(/[^0-9]/g, ''));
+      return Number.isFinite(num) ? `${num.toLocaleString('hu-HU')} Ft (átlag)` : `${avg} (átlag)`;
+    }
+
+    const pr = details['Price Range (Ft)'] ?? details.price_range;
+    if (pr != null && String(pr).trim() !== '') return String(pr);
+
+    return 'N/A';
+  }
+
 }

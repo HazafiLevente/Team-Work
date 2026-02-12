@@ -106,8 +106,8 @@
   align-self: flex-start; /* Default: Left aligned (System/Others) */
 }
 
-/* Example: If you want user messages on right, you'd check sender */
-/* But here all messages are incoming notifications mostly */
+/* Example: If you want user messages-panel on right, you'd check sender */
+/* But here all messages-panel are incoming notifications mostly */
 
 .sender-name {
   font-size: 11px;

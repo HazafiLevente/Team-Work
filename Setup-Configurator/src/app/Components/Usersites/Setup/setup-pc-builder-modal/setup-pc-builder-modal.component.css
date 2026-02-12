@@ -9,8 +9,8 @@
 }
 
 .window{
-  width: min(760px, calc(100vw - 32px));
-  max-height: min(620px, calc(100vh - 40px));
+  width: min(820px, calc(100vw - 32px));
+  max-height: min(680px, calc(100vh - 40px));
   background: rgba(18,18,22,0.96);
   border: 1px solid rgba(255,255,255,0.12);
   border-radius: 14px;
@@ -57,7 +57,6 @@
   color: #fff;
 }
 
-/* ✅ Tabs */
 .tabs{
   display: flex;
   gap: 6px;
@@ -99,59 +98,27 @@
   padding: 10px;
 }
 
-.items{
+.section{
   display: grid;
   gap: 10px;
 }
-.item{
-  border: 1px solid rgba(255,255,255,0.08);
-  background: rgba(255,255,255,0.03);
-  border-radius: 12px;
-  padding: 10px;
-}
-.cat{
-  font-size: 12px;
-  opacity: .75;
-  margin-bottom: 4px;
-  color: rgba(0,255,255,0.85);
-}
-.name{
-  font-size: 13px;
-  font-weight: 800;
-  color: rgba(255,255,255,0.92);
-}
-.meta{
-  margin-top: 4px;
-  font-size: 12px;
-  opacity: .65;
-  color: rgba(233,238,248,0.8);
-}
 
-/* ✅ PC create */
-.pc-create{
-  display: flex;
-  gap: 10px;
-  align-items: end;
-  padding: 10px;
-  border-radius: 12px;
-  border: 1px solid rgba(255,255,255,0.08);
-  background: rgba(255,255,255,0.03);
-  margin-bottom: 10px;
-}
-
-.pc-field{
-  flex: 1;
+.field{
   display: grid;
   gap: 6px;
+  padding: 10px;
+  border-radius: 12px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.06);
 }
 
-.pc-field label{
+.field label{
   font-size: 12px;
   opacity: 0.75;
   color: rgba(233,238,248,0.9);
 }
 
-.pc-field input{
+.field select{
   height: 40px;
   border-radius: 12px;
   border: 1px solid rgba(255,255,255,0.12);
@@ -161,50 +128,28 @@
   outline: none;
 }
 
-.pc-btn{
+.actions{
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.btn{
   height: 40px;
   padding: 0 14px;
   border-radius: 12px;
   border: 1px solid rgba(255,255,255,0.14);
+  background: rgba(255,255,255,0.06);
+  color: rgba(255,255,255,0.9);
+  cursor: pointer;
+}
+.btn.primary{
   background: rgba(82,39,255,0.35);
   border-color: rgba(82,39,255,0.55);
   color: #fff;
-  cursor: pointer;
 }
-
-.pc-btn:disabled{
+.btn:disabled{
   opacity: 0.5;
   cursor: default;
-}
-
-/* ✅ PC list */
-.pcs{
-  display: grid;
-  gap: 10px;
-}
-
-.pc-card{
-  border: 1px solid rgba(255,255,255,0.08);
-  background: rgba(255,255,255,0.03);
-  border-radius: 12px;
-  padding: 12px;
-  cursor: pointer;
-}
-
-.pc-card:hover{
-  background: rgba(82,39,255,0.14);
-  border-color: rgba(82,39,255,0.30);
-}
-
-.pc-title{
-  font-size: 13px;
-  font-weight: 900;
-  color: rgba(255,255,255,0.92);
-}
-
-.pc-sub{
-  margin-top: 4px;
-  font-size: 12px;
-  opacity: .7;
-  color: rgba(233,238,248,0.8);
 }

@@ -36,6 +36,9 @@ export class SetupRoomlistComponent implements OnInit {
   toolsOpen = false;
   toolsSetup: any = null;
 
+  // ✅ ÚJ: Tools modal kezdő fül (items / pc)
+  toolsStartTab: 'items' | 'pc' = 'items';
+
   // ✅ Rename modal state
   renameOpen = false;
   renameSetup: any = null;
@@ -111,7 +114,7 @@ export class SetupRoomlistComponent implements OnInit {
     const localY = payload.y - rect.top;
 
     const MENU_W = 260;
-    const MENU_H = 300; // kicsit magasabb, ha van törlés menüpont
+    const MENU_H = 320; // ✅ kicsit magasabb (PC + törlés miatt)
     const pad = 8;
 
     const maxX = Math.max(pad, rect.width - MENU_W - pad);
@@ -136,17 +139,32 @@ export class SetupRoomlistComponent implements OnInit {
     if (this.renameOpen) this.closeRename();
   }
 
-  // ✅ Tools
+  // ✅ Tools (Eszközök fül)
   openToolsFromMenu(): void {
     if (!this.ctxSetup) return;
+
+    this.toolsStartTab = 'items';
     this.toolsSetup = this.ctxSetup;
     this.toolsOpen = true;
+
+    this.closeContextMenu();
+  }
+
+  // ✅ ÚJ: PC Builder (PC fül)
+  openPcBuilderFromMenu(): void {
+    if (!this.ctxSetup) return;
+
+    this.toolsStartTab = 'pc';
+    this.toolsSetup = this.ctxSetup;
+    this.toolsOpen = true;
+
     this.closeContextMenu();
   }
 
   closeTools(): void {
     this.toolsOpen = false;
     this.toolsSetup = null;
+    this.toolsStartTab = 'items';
   }
 
   // ✅ Rename modal nyitás menüből

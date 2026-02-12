@@ -9,31 +9,91 @@
       <button class="x" (click)="close.emit()">×</button>
     </div>
 
+    <div class="tabs">
+      <button class="tab" [class.active]="tab==='items'" (click)="tab='items'">Eszközök</button>
+      <button class="tab" [class.active]="tab==='pc'" (click)="tab='pc'">PC-k</button>
+    </div>
+
     <div class="content">
-      @if (loading) {
-        <div class="hint">Betöltés...</div>
-      } @else {
-        @if (errorMsg) {
-          <div class="error">{{ errorMsg }}</div>
+
+      <!-- ---------- ESZKÖZÖK TAB ---------- -->
+      @if (tab === 'items') {
+        @if (loading) {
+          <div class="hint">Betöltés...</div>
         } @else {
-          @if (!items || items.length === 0) {
-            <div class="hint">Ez a setup üres.</div>
+          @if (errorMsg) {
+            <div class="error">{{ errorMsg }}</div>
           } @else {
-            <div class="items">
-              @for (it of items; track $index) {
-                <div class="item">
-                  <div class="cat">{{ it.category }}</div>
-                  <div class="name">{{ it.display_name }}</div>
-                  @if (it.manufacturer) {
-                    <div class="meta">{{ it.manufacturer }}</div>
-                  }
-                </div>
-              }
-            </div>
+            @if (!items || items.length === 0) {
+              <div class="hint">Ez a setup üres.</div>
+            } @else {
+              <div class="items">
+                @for (it of items; track $index) {
+                  <div class="item">
+                    <div class="cat">{{ it.category }}</div>
+                    <div class="name">{{ it.display_name }}</div>
+                    @if (it.manufacturer) {
+                      <div class="meta">{{ it.manufacturer }}</div>
+                    }
+                  </div>
+                }
+              </div>
+            }
           }
         }
       }
+
+      <!-- ---------- PC TAB ---------- -->
+      @if (tab === 'pc') {
+
+        <div class="pc-create">
+          <div class="pc-field">
+            <label>Új PC neve</label>
+            <input [(ngModel)]="pcCreateName" placeholder="pl. GamingPc" />
+          </div>
+
+          <button class="pc-btn" type="button" (click)="createPc()" [disabled]="pcCreateSaving">
+            @if (pcCreateSaving) { Létrehozás... } @else { + Létrehozás }
+          </button>
+        </div>
+
+        @if (pcCreateError) {
+          <div class="error">{{ pcCreateError }}</div>
+        }
+
+        @if (pcLoading) {
+          <div class="hint">Betöltés...</div>
+        } @else {
+          @if (pcError) {
+            <div class="error">{{ pcError }}</div>
+          } @else {
+            @if (!pcs || pcs.length === 0) {
+              <div class="hint">Még nincs PC ehhez a setuphoz.</div>
+            } @else {
+              <div class="pcs">
+                @for (pc of pcs; track pc.id) {
+                  <div class="pc-card" (dblclick)="openPcBuilder(pc)">
+                    <div class="pc-title">{{ pc.setup_name || 'Névtelen PC' }}</div>
+                    <div class="pc-sub">Dupla katt: szerkesztés</div>
+                  </div>
+                }
+              </div>
+            }
+          }
+        }
+      }
+
     </div>
 
   </div>
 </div>
+
+<!-- ✅ PC Builder modal -->
+@if (pcBuilderOpen && pcBuilderRow) {
+  <app-setup-pc-builder-modal
+    [setup]="setup"
+    [pc]="pcBuilderRow"
+    (close)="closePcBuilder()"
+    (saved)="onPcSaved($event)">
+  </app-setup-pc-builder-modal>
+}

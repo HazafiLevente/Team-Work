@@ -1,0 +1,120 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(3px);
+  z-index: 1999;
+}
+
+.panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 420px;
+  height: 100vh;
+  background: rgba(15, 15, 23, 0.97);
+  border-left: 1px solid rgba(138,43,226,0.4);
+  box-shadow: -10px 0 40px rgba(138,43,226,0.5);
+  display: flex;
+  flex-direction: column;
+  z-index: 2000;
+}
+
+.panel-header {
+  padding: 16px;
+  font-weight: 600;
+  background: linear-gradient(90deg, #5227FF, #B19EEF);
+  display: flex;
+  justify-content: space-between;
+}
+
+.panel-body {
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.message {
+  padding: 12px 16px;
+  border-radius: 18px;
+  max-width: 85%;
+  font-size: 14px;
+}
+
+.message.me {
+  align-self: flex-end;
+  background: linear-gradient(90deg, #8A2BE2, #FF00FF);
+  color: white;
+}
+
+.message.ai {
+  align-self: flex-start;
+  background: rgba(255,255,255,0.06);
+}
+
+.message.system {
+  background: rgba(0,255,255,0.08);
+  font-size: 12px;
+}
+
+.product-wrapper {
+  align-self: stretch;
+}
+
+.product-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.product-card {
+  padding: 14px;
+  border-radius: 14px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(138,43,226,0.4);
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.product-card:hover {
+  background: rgba(138,43,226,0.15);
+  transform: scale(1.02);
+}
+
+.product-title {
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.product-price {
+  font-size: 13px;
+  opacity: 0.8;
+}
+
+.panel-input {
+  display: flex;
+  padding: 14px;
+  gap: 10px;
+  border-top: 1px solid rgba(255,255,255,0.08);
+}
+
+.panel-input input {
+  flex: 1;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(138,43,226,0.4);
+  padding: 10px 14px;
+  border-radius: 12px;
+  color: white;
+}
+
+.panel-input button {
+  padding: 10px 16px;
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+  background: linear-gradient(90deg, #5227FF, #B19EEF);
+  color: white;
+}

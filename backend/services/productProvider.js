@@ -2,9 +2,10 @@ const fs = require("fs");
 const path = require("path");
 const { db } = require("./localDb");
 
-/* ----------------------------------
-   PATH: search-filter.json
----------------------------------- */
+/* =====================================================
+   FILTER JSON
+===================================================== */
+
 const FILTER_PATH = path.join(
     __dirname,
     "..",
@@ -14,141 +15,160 @@ const FILTER_PATH = path.join(
     "search-filter.json"
 );
 
-/* ----------------------------------
+/* =====================================================
    HELPERS
----------------------------------- */
-function pick(obj, keys) {
-    if (!obj) return null;
-    const objKeys = Object.keys(obj);
-    for (const k of keys) {
-        // Keressük meg azt a kulcsot az objektumban, ami megegyezik a kért kulccsal (case-insensitive)
-        const realKey = objKeys.find(ok => ok.toLowerCase() === k.toLowerCase());
-        const v = realKey ? obj[realKey] : null;
-        if (v !== undefined && v !== null && v !== "") return v;
-    }
-    return null;
-}
+===================================================== */
 
-function modelMatchesQuestion(model, question) {
-    const mTokens = normalize(model).match(/[a-z]+|\d+/g) || [];
-    const qNorm = normalize(question);
-
-    let hits = 0;
-    for (const t of mTokens) {
-        if (qNorm.includes(t)) hits++;
-    }
-
-    return hits >= Math.ceil(mTokens.length * 0.7);
-}
-
-
-// lazább normalizálás: ékezet OK, de egyezéshez mindent összehúzunk
 function normalize(str = "") {
     return String(str)
         .toLowerCase()
-        // ékezetek egyszerűsítése (hogy "kerül" / "kerul" mindegy legyen)
         .normalize("NFD")
         .replace(/[\u0300-\u036f]/g, "")
-        // csak betű/szám marad
         .replace(/[^a-z0-9]/g, "");
 }
 
-// listázás intent (többféle forma)
+function tokens(str = "") {
+    return normalize(str).match(/[a-z]+|\d+/g) || [];
+}
+
+function pick(obj, keys) {
+    if (!obj) return null;
+    const objKeys = Object.keys(obj);
+
+    for (const k of keys) {
+        const realKey = objKeys.find(ok => ok.toLowerCase() === k.toLowerCase());
+        if (!realKey) continue;
+        const v = obj[realKey];
+        if (v !== undefined && v !== null && v !== "") return v;
+    }
+
+    return null;
+}
+
+function parsePrice(priceRaw) {
+    if (priceRaw === null || priceRaw === undefined) return null;
+
+    const cleaned = String(priceRaw).replace(/[^0-9]/g, "");
+    const p = Number(cleaned);
+
+    return Number.isNaN(p) ? null : p;
+}
+
+/* =====================================================
+   INTENT DETECTION
+===================================================== */
+
 function isListQuestion(q) {
-    return /(listaz|listazd|irj|ird|sorold|mutasd|milyen|talalhato|termekek)/.test(
-        normalize(q)
+    const n = normalize(q);
+
+    const listWords = [
+        "listaz",
+        "listazd",
+        "irj",
+        "ird",
+        "sorold",
+        "mutasd",
+        "milyen",
+        "talalhato",
+        "termek",
+        "termekek",
+        "eszkoz",
+        "eszkozok",
+        "osszes",
+        "osszest"
+    ];
+
+    return listWords.some(w => n.includes(w));
+}
+
+function isPriceQuestion(q) {
+    const n = normalize(q);
+
+    return (
+        n.includes("mennyibe") ||
+        n.includes("ar") ||
+        n.includes("kerul") ||
+        n.includes("ft")
     );
 }
 
-// CPU/GPU jellegű model token (bővíthető)
-function extractModelToken(question) {
-    const q = question.toLowerCase();
+/* =====================================================
+   MANUFACTURERS
+===================================================== */
 
-    // pl: ryzen 7 9800x3d, 9800x3d, ryzen 7 5800x
-    const m = q.match(
-        /(ryzen\s*\d+\s*\d+x3d|ryzen\s*\d+\s*\d+x|ryzen\s*\d+\s*\d+|\d{4}x3d|\d{4}x)/i
-    );
-    return m ? normalize(m[1]) : null;
-}
-
-/* ----------------------------------
-   MANUFACTURERS LOADER (dynamic)
----------------------------------- */
 let MANUFACTURERS_CACHE = null;
 
 function loadManufacturersFromFilter() {
     if (MANUFACTURERS_CACHE) return MANUFACTURERS_CACHE;
+    if (!fs.existsSync(FILTER_PATH)) return [];
 
     let json;
     try {
-        if (!fs.existsSync(FILTER_PATH)) {
-            console.warn("[AI] search-filter.json not found at:", FILTER_PATH);
-            MANUFACTURERS_CACHE = [];
-            return MANUFACTURERS_CACHE;
-        }
         json = JSON.parse(fs.readFileSync(FILTER_PATH, "utf8"));
-    } catch (e) {
-        console.warn("[AI] search-filter.json parse error:", e.message);
-        MANUFACTURERS_CACHE = [];
-        return MANUFACTURERS_CACHE;
+    } catch {
+        return [];
     }
 
-    // Rugalmas: lehet manufacturers, brands, manufacturer, stb.
-    // Ha nem talál semmit, üres.
     let list = [];
+
     if (Array.isArray(json)) list = json;
     else if (Array.isArray(json.manufacturers)) list = json.manufacturers;
     else if (Array.isArray(json.brands)) list = json.brands;
-    else if (Array.isArray(json.brand)) list = json.brand;
 
-    // Ha objektumok (pl. {label:"ASUS"}) akkor szedd ki belőle
-    const out = [];
-    for (const x of list) {
-        if (typeof x === "string") out.push(x);
-        else if (x && typeof x === "object") {
-            out.push(x.name || x.label || x.value || "");
-        }
-    }
+    MANUFACTURERS_CACHE = Array.from(
+        new Set(
+            list
+                .map(x =>
+                    typeof x === "string"
+                        ? x.trim()
+                        : x?.name || x?.label || ""
+                )
+                .filter(Boolean)
+        )
+    ).sort((a, b) => b.length - a.length);
 
-    // tisztítás, duplikátum eldobás
-    const uniq = Array.from(
-        new Set(out.map(s => String(s).trim()).filter(Boolean))
-    );
-
-    // longest-first (hogy "be quiet" előbb kapjon match-et mint "be")
-    uniq.sort((a, b) => b.length - a.length);
-
-    MANUFACTURERS_CACHE = uniq;
     return MANUFACTURERS_CACHE;
 }
 
-/**
- * Brand felismerés a kérdésből úgy, hogy
- * - a filter.json-ben lévő gyártókat keressük benne
- * - normalizált szöveggel (ékezet/kötőjel/rag ne számítson)
- */
-function extractBrandDynamic(question) {
-    const manufacturers = loadManufacturersFromFilter();
-    if (!manufacturers.length) return null;
-
+function extractBrand(question) {
+    const brands = loadManufacturersFromFilter();
     const qNorm = normalize(question);
 
-    for (const brand of manufacturers) {
-        const bNorm = normalize(brand);
-        if (!bNorm) continue;
-
-        // ha a kérdés tartalmazza a brand normalizált alakját
-        if (qNorm.includes(bNorm)) return brand;
+    for (const b of brands) {
+        if (qNorm.includes(normalize(b))) return b;
     }
 
     return null;
 }
 
-/* ----------------------------------
-   MAIN
----------------------------------- */
+/* =====================================================
+   TOKEN MATCH LOGIC
+===================================================== */
+
+function tokenMatch(model, question) {
+    const mTokens = tokens(model);
+    const qTokens = tokens(question);
+
+    if (!mTokens.length) return false;
+
+    let hits = 0;
+
+    for (const t of mTokens) {
+        if (qTokens.includes(t)) hits++;
+    }
+
+    // legalább 60% token egyezés kell
+    return hits >= Math.ceil(mTokens.length * 0.6);
+}
+
+/* =====================================================
+   MAIN SEARCH
+===================================================== */
+
 function getProductsForAI(question = "") {
-    const qNorm = normalize(question);
+    const listIntent = isListQuestion(question);
+    const priceIntent = isPriceQuestion(question);
+    const brand = extractBrand(question);
 
     const tables = db
         .prepare(`SELECT name FROM sqlite_master WHERE type='table'`)
@@ -159,11 +179,9 @@ function getProductsForAI(question = "") {
     const similar = [];
     const list = [];
 
-    const listIntent = isListQuestion(question);
-    const brand = extractBrandDynamic(question);
-
     for (const table of tables) {
         let rows;
+
         try {
             rows = db.prepare(`SELECT * FROM "${table}"`).all();
         } catch {
@@ -171,10 +189,10 @@ function getProductsForAI(question = "") {
         }
 
         for (const r of rows) {
-            const manufacturer = pick(r, ["manufacturer", "brand", "maker"]);
+            let manufacturer = pick(r, ["manufacturer", "brand", "maker"]);
+
             const model = pick(r, [
                 "model",
-                "models",
                 "model_name",
                 "full_name",
                 "cpu_model",
@@ -184,20 +202,15 @@ function getProductsForAI(question = "") {
                 "title"
             ]);
 
-            const priceRaw = pick(r, ["price", "price_huf", "cost", "amount"]);
-            const socket = pick(r, ["socket", "cpu_socket"]);
+            if (!manufacturer && model) {
+                manufacturer = model.split(" ")[0];
+            }
 
             if (!manufacturer && !model) continue;
 
-            const mNorm = normalize(manufacturer);
-            const modelNorm = normalize(model);
-
-            let price = null;
-            if (priceRaw !== null && priceRaw !== undefined && priceRaw !== "") {
-                const cleaned = String(priceRaw).replace(/[^0-9]/g, "");
-                const p = Number(cleaned);
-                if (!Number.isNaN(p)) price = p;
-            }
+            const priceRaw = pick(r, ["price", "price_huf", "cost", "amount"]);
+            const price = parsePrice(priceRaw);
+            const socket = pick(r, ["socket", "cpu_socket"]);
 
             const row = {
                 table,
@@ -207,43 +220,65 @@ function getProductsForAI(question = "") {
                 socket
             };
 
-            /* 📋 LIST */
-            if (listIntent && brand && normalize(brand) === mNorm) {
-                list.push(row);
+            /* =============================
+               LIST MODE (PRIORITY)
+            ============================= */
+
+            if (listIntent && brand && manufacturer) {
+                if (normalize(manufacturer) === normalize(brand)) {
+                    list.push(row);
+                }
                 continue;
             }
 
-            /* 🎯 EXACT MATCH */
-            if (modelNorm && qNorm.replace(/[^a-z0-9]/g, "").includes(modelNorm)) {
-                exact.push(row);
-                continue;
-            }
+            /* =============================
+               PRODUCT MODE
+            ============================= */
 
-            /* 🟡 SIMILAR */
-            if (modelNorm && qNorm.includes(modelNorm.slice(0, 6))) {
-                similar.push(row);
+            if (!listIntent && model) {
+                if (tokenMatch(model, question)) {
+                    exact.push(row);
+                    continue;
+                }
+
+                // lazább similar match
+                const modelNorm = normalize(model);
+                const qNorm = normalize(question);
+
+                if (modelNorm.length > 5 && qNorm.includes(modelNorm.slice(0, 6))) {
+                    similar.push(row);
+                }
             }
         }
     }
 
-    if (exact.length || similar.length) {
+    /* =============================
+       RESULT PRIORITY
+    ============================= */
+
+    if (listIntent) {
+        return list.length
+            ? { mode: "list", brand, list: list.slice(0, 30) }
+            : { mode: "none" };
+    }
+
+    if (exact.length) {
         return {
             mode: "product",
             exact: exact.slice(0, 3),
-            similar: similar.slice(0, 5)
+            priceIntent
         };
     }
 
-    if (list.length) {
+    if (similar.length) {
         return {
-            mode: "list",
-            brand,
-            list: list.slice(0, 20)
+            mode: "product",
+            similar: similar.slice(0, 5),
+            priceIntent
         };
     }
 
     return { mode: "none" };
 }
-
 
 module.exports = { getProductsForAI };

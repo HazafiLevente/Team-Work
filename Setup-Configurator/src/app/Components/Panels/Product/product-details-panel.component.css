@@ -1,6 +1,4 @@
-:root{
-  --header-h: 74px;
-}
+:root { --header-h: 74px; }
 
 .overlay{
   position: fixed;
@@ -9,18 +7,11 @@
   z-index: 999;
 }
 
-
-
 .panel{
   position: fixed;
-
-  /* ✅ EZ A LÉNYEG: ne a viewport tetején kezdődjön */
   top: var(--header-h);
   right: 0;
-
-  /* ✅ így nem lóg be a header alá */
   height: calc(100vh - var(--header-h));
-
   width: min(520px, 92vw);
 
   background: rgba(14,14,18,0.92);
@@ -59,6 +50,7 @@
 .panel-body{
   flex: 1;
   overflow: auto;
+  padding: 16px; /* ✅ EZ HIÁNYZOTT */
 }
 
 .price{ margin-bottom: 14px; }
@@ -75,31 +67,6 @@
 .v{ word-break: break-word; }
 
 .error{ color: #ff8a8a; }
-
-.panel{
-  position: fixed;
-  top: 74px;
-  right: 0;
-  height: calc(100vh - 74px);
-  width: min(520px, 92vw);
-
-  background: rgba(14,14,18,0.92);
-  color: #fff;
-
-  z-index: 1000;
-  display: flex;
-  flex-direction: column;
-
-  border-left: 1px solid rgba(255,255,255,.10);
-  box-shadow: -20px 0 60px rgba(0,0,0,.6);
-  backdrop-filter: blur(10px);
-}
-
-
-.panel-body {
-  flex: 1;
-  overflow: auto;
-}
 
 .panel-footer{
   margin-top: auto;

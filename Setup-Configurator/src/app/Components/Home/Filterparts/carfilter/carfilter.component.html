@@ -1,145 +1,68 @@
-<div class="carfilter" [formGroup]="form">
+<div class="carfilter" *ngIf="form" [formGroup]="form">
 
   <div class="carfilter-header">
     <span class="tag">🚗 Autók</span>
     <span class="muted">Csak autó táblákra szűr</span>
   </div>
 
-  <div class="filter-grid">
+  <div class="muted" *ngIf="loading">Betöltés…</div>
+  <div class="muted" *ngIf="error">{{ error }}</div>
 
-    <input
-      class="search-input"
-      placeholder="Gyártó (pl. BMW)"
-      formControlName="manufacturer"
-    />
+  <div class="filter-grid" *ngIf="!loading">
 
-    <input
-      class="search-input"
-      placeholder="Modell (pl. 320d)"
-      formControlName="model"
-    />
+    <!-- TÁBLA (bodyType helyett ez a tuti) -->
+    <select class="search-input" formControlName="tableName" title="Autó tábla">
+      <option value="">Autó típus (összes)</option>
+      <option *ngFor="let t of meta?.table_names" [value]="t">{{ t }}</option>
+    </select>
 
-    <input
-      class="search-input"
-      type="number"
-      min="0"
-      placeholder="Ár min (Ft)"
-      formControlName="priceMin"
-    />
+    <!-- MANUFACTURER -->
+    <select class="search-input" formControlName="manufacturer" title="Gyártó">
+      <option value="">Gyártó (összes)</option>
+      <option *ngFor="let m of meta?.manufacturers" [value]="m">{{ m }}</option>
+    </select>
 
-    <input
-      class="search-input"
-      type="number"
-      min="0"
-      placeholder="Ár max (Ft)"
-      formControlName="priceMax"
-    />
+    <input class="search-input" placeholder="Modell (pl. 320d)" formControlName="model"/>
 
-    <select class="search-input" formControlName="bodyType">
+    <input class="search-input" type="number" min="0" placeholder="Ár min (Ft)" formControlName="priceMin"/>
+    <input class="search-input" type="number" min="0" placeholder="Ár max (Ft)" formControlName="priceMax"/>
+
+    <!-- BODY TYPE (valós DB értékek!) -->
+    <select class="search-input" formControlName="bodyType" title="Kivitel">
       <option value="">Kivitel (összes)</option>
-      <option value="hatchback">Hatchback</option>
-      <option value="coupe">Coupé</option>
-      <option value="cabrio">Cabrio</option>
-      <option value="wagon">Kombi</option>
-      <option value="mpv">Egyterű</option>
-      <option value="sedan">Sedan</option>
-      <option value="suv">SUV</option>
+      <option *ngFor="let x of meta?.body_types" [value]="x">{{ x }}</option>
     </select>
 
-    <input
-      class="search-input"
-      type="number"
-      min="0"
-      placeholder="Lóerő min"
-      formControlName="hpMin"
-    />
+    <input class="search-input" type="number" min="0" placeholder="Lóerő min" formControlName="hpMin"/>
+    <input class="search-input" type="number" min="0" placeholder="Lóerő max" formControlName="hpMax"/>
 
-    <input
-      class="search-input"
-      type="number"
-      min="0"
-      placeholder="Lóerő max"
-      formControlName="hpMax"
-    />
+    <input class="search-input" type="number" min="0" step="0.1" placeholder="0–100 min (s)" formControlName="accelMin"/>
+    <input class="search-input" type="number" min="0" step="0.1" placeholder="0–100 max (s)" formControlName="accelMax"/>
 
-    <input
-      class="search-input"
-      type="number"
-      min="0"
-      step="0.1"
-      placeholder="0–100 min (s)"
-      formControlName="accelMin"
-    />
+    <input class="search-input" type="number" min="1" placeholder="Ülések min" formControlName="seatsMin"/>
+    <input class="search-input" type="number" min="1" placeholder="Ülések max" formControlName="seatsMax"/>
 
-    <input
-      class="search-input"
-      type="number"
-      min="0"
-      step="0.1"
-      placeholder="0–100 max (s)"
-      formControlName="accelMax"
-    />
+    <!-- FUEL (valós DB értékek!) -->
 
-    <input
-      class="search-input"
-      type="number"
-      min="1"
-      placeholder="Ülések min"
-      formControlName="seatsMin"
-    />
-
-    <input
-      class="search-input"
-      type="number"
-      min="1"
-      placeholder="Ülések max"
-      formControlName="seatsMax"
-    />
-
-    <select class="search-input" formControlName="fuel">
+    <select class="search-input" formControlName="fuel" title="Üzemanyag">
       <option value="">Üzemanyag (összes)</option>
-      <option value="hybrid">Hibrid</option>
-      <option value="petrol">Benzin</option>
-      <option value="diesel">Dízel</option>
-      <option value="electric">Elektromos</option>
+      <option *ngFor="let x of meta?.fuel_types" [value]="x">{{ x }}</option>
     </select>
 
-    <input
-      class="search-input"
-      type="number"
-      min="1950"
-      placeholder="Évjárat min"
-      formControlName="yearMin"
-    />
+    <input class="search-input" type="number" min="1950" placeholder="Évjárat min" formControlName="yearMin"/>
+    <input class="search-input" type="number" min="1950" placeholder="Évjárat max" formControlName="yearMax"/>
 
-    <input
-      class="search-input"
-      type="number"
-      min="1950"
-      placeholder="Évjárat max"
-      formControlName="yearMax"
-    />
-
-    <select class="search-input" formControlName="transmission">
+    <!-- TRANSMISSION (valós DB értékek!) -->
+    <select class="search-input" formControlName="transmission" title="Váltó">
       <option value="">Váltó (összes)</option>
-      <option value="manual">Manuális</option>
-      <option value="automatic">Automata</option>
+      <option *ngFor="let x of meta?.transmissions" [value]="x">{{ x }}</option>
     </select>
 
   </div>
 
   <div class="carfilter-footer">
-    <button
-      type="button"
-      class="btn small"
-      (click)="clear()"
-    >
-      🧹 Autó szűrők törlése
-    </button>
-
-    <span class="muted">
-      A 🔎 Keresés gomb ezeket is figyelembe veszi.
-    </span>
+    <button type="button" class="btn small" (click)="clear()">🧹 Autó szűrők törlése</button>
+    <span class="muted">A 🔎 Keresés gomb ezeket is figyelembe veszi.</span>
   </div>
 
 </div>
