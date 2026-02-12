@@ -20,7 +20,7 @@ router.get("/stats", verifyAdmin, async (req, res) => {
     const json = JSON.parse(fs.readFileSync(file, "utf8"));
     const runtimeTableNames = Object.keys(json.tables || {});
 
-    // Filter product tables from runtime config
+    // Filter product-site tables from runtime config
     const productTables = runtimeTableNames.filter(
         t => !t.includes("[")
     );
@@ -42,7 +42,7 @@ router.get("/stats", verifyAdmin, async (req, res) => {
         users: usersCount || 0,
         tables: realTableCount,           // Local Cache DB count
         productTables: productTables.length, // Runtime Filtered Config count
-        products: totalProducts           // Sum of rows from locally cached product tables
+        products: totalProducts           // Sum of rows from locally cached product-site tables
     });
 });
 

@@ -1,46 +1,18 @@
 const { supabase } = require("../services/supabase");
 
-const tablesToScan = [
-    "acoustic_keyboards[Setup]",
-    "acoustic[Setup]",
-    "audio_processor[Setup]",
-    "back_speaker[Setup]",
-    "bass_amplifier[Setup]",
-    "bass_shaker[Setup]",
-    "bowed_string_instruments[Setup]",
-    "brass_instruments[Setup]",
-    "Car_setup[Setup]",
-    "ceiling_speaker[Setup]",
-    "center_speaker[Setup]",
-    "digital_instruments[Setup]",
-    "electric[Setup]",
-    "electronic_keyboards[Setup]",
-    "electronic_percussion[Setup]",
-    "floor_speaker[Setup]",
-    "front_speaker[Setup]",
-    "home_theater_setups[Setup]",
-    "idiophones[Setup]",
-    "instruments[Setup]",
-    "keyboard_instruments[Setup]",
-    "membranophones[Setup]",
+// ⚠️ CSAK OLYAN TÁBLÁK, AMIK TÉNYLEG setup-hoz kötöttek
+const SETUP_CHILD_TABLES = [
     "pc_details[Setup]",
-    "percussion_instruments[Setup]",
-    "plucked_string_instruments[Setup]",
-    "reciever_setup[Setup]",
-    "saxophone[Setup]",
+    "home_theater_setups[Setup]",
     "setup_rooms[Setup]",
-    "setup[Setup]",
-    "side_speaker[Setup]",
-    "sound-producing[Setup]",
-    "string_instruments[Setup]",
-    "struck_string_instruments[Setup]",
     "studio_monitor_setup[Setup]",
-    "subwoofer[Setup]",
-    "wind_instruments[Setup]",
-    "woodwind_instruments[Setup]"
+    "reciever_setup[Setup]",
+    "Car_setup[Setup]"
 ];
 
-// SETUP LISTA
+// ======================
+// SETUP LIST
+// ======================
 exports.list = async (req, res) => {
     try {
         const userId = req.user.id;
@@ -52,140 +24,73 @@ exports.list = async (req, res) => {
 
         if (error) throw error;
 
-        const normalized = (data || []).map((s) => ({
-            ...s,
-            setup_name: s.setup_name ?? s.name ?? "Névtelen setup",
-        }));
-
-        res.json({ setups: normalized });
+        res.json({
+            setups: (data || []).map(s => ({
+                ...s,
+                setup_name: s.setup_name ?? s.name ?? "Névtelen setup"
+            }))
+        });
     } catch (err) {
-        console.error("❌ Setup list hiba:", err);
-        res.json({ setups: [] });
+        console.error("❌ Setup list error:", err);
+        res.status(500).json({ setups: [] });
     }
 };
 
-// SETUP GYEREKEK
+// ======================
+// SETUP CHILDREN
+// ======================
 exports.children = async (req, res) => {
     const setupId = req.params.id;
     if (!setupId) return res.json([]);
 
-    console.log(`\n🔍 Setup ID keresés: ${setupId}`);
-
     try {
-        let allItems = [];
+        const allItems = [];
 
-        for (const tableName of tablesToScan) {
+        for (const table of SETUP_CHILD_TABLES) {
             const { data, error } = await supabase
-                .from(tableName)
+                .from(table)
                 .select("*")
                 .eq("setup_id", setupId);
 
             if (error) {
-                console.log(`⚠️ ${tableName} kihagyva:`, error.message);
+                console.warn(`⚠️ ${table} skipped:`, error.message);
                 continue;
             }
 
-            if (data && data.length > 0) {
-                console.log(`✅ ${tableName}: ${data.length} elem`);
-
-                const mapped = data.map((item) => {
-                    const manufacturer =
-                        item.Manufacturer ||
-                        item.manufacturer ||
-                        item.brand ||
-                        item.Brand ||
-                        "";
-
-                    const model =
-                        item.Model ||
-                        item.model ||
-                        item.product_model ||
-                        item.type ||
-                        "";
-
-                    const name =
-                        item.product_name ||
-                        item.setup_name ||
-                        item.name ||
-                        item.Name ||
-                        item.title ||
-                        "";
-
-                    return {
+            if (Array.isArray(data)) {
+                allItems.push(
+                    ...data.map(item => ({
                         ...item,
-                        category: tableName,
-
+                        category: table,
                         display_name:
-                            manufacturer && model
-                                ? `${manufacturer} ${model}`
-                                : manufacturer && name
-                                    ? `${manufacturer} ${name}`
-                                    : model
-                                        ? model
-                                        : name
-                                            ? name
-                                            : `Ismeretlen termék (#${item.id ?? "?"})`,
-
-                        manufacturer
-                    };
-                });
-
-                allItems.push(...mapped);
+                            item.setup_name ||
+                            item.name ||
+                            item.product_name ||
+                            `Elem #${item.id ?? "?"}`
+                    }))
+                );
             }
         }
 
-        console.log(`🏁 Összes item: ${allItems.length}\n`);
         res.json(allItems);
     } catch (err) {
-        console.error("❌ Végzetes backend hiba:", err);
-        res.json([]);
+        console.error("❌ Setup children fatal error:", err);
+        res.status(500).json([]);
     }
 };
 
-// UPDATE
-exports.update = async (req, res) => {
-    try {
-        const userId = req.user.id;
-        const setupId = req.params.id;
-        const { setup_name } = req.body;
-
-        if (!setupId) return res.status(400).json({ error: "Missing setup id" });
-
-        const name = (setup_name || "").trim();
-        if (!name) return res.status(400).json({ error: "setup_name is required" });
-
-        const payload = { setup_name: name };
-
-        const { data, error } = await supabase
-            .from("setup[Setup]")
-            .update(payload)
-            .eq("id", setupId)
-            .eq("user_id", userId)
-            .select("*")
-            .single();
-
-        if (error) throw error;
-
-        res.json({
-            setup: {
-                ...data,
-                setup_name: data.setup_name ?? name
-            }
-        });
-    } catch (err) {
-        console.error("❌ Setup update hiba:", err);
-        res.status(500).json({ error: "Update failed" });
-    }
-};
-
+// ======================
 // CREATE
+// ======================
 exports.create = async (req, res) => {
     try {
-        const userId = req.user?.id ?? req.user?.user_id ?? req.userId;
+        const userId = req.user?.id;
         if (!userId) return res.status(401).json({ error: "Unauthorized" });
 
         const setup_name = (req.body?.setup_name || "").trim();
-        if (!setup_name) return res.status(400).json({ error: "setup_name required" });
+        if (!setup_name) {
+            return res.status(400).json({ error: "setup_name required" });
+        }
 
         const { data, error } = await supabase
             .from("setup[Setup]")
@@ -193,31 +98,52 @@ exports.create = async (req, res) => {
             .select("*")
             .single();
 
-        if (error) {
-            console.error("❌ Supabase insert error:", error);
-            return res.status(500).json({
-                error: error.message,
-                code: error.code,
-                details: error.details,
-                hint: error.hint
-            });
-        }
+        if (error) throw error;
 
-        return res.json({ setup: data });
+        res.json({ setup: data });
     } catch (err) {
-        console.error("❌ create setup error:", err);
-        return res.status(500).json({ error: "Server error" });
+        console.error("❌ Setup create error:", err);
+        res.status(500).json({ error: "Create failed" });
     }
 };
 
-// ✅ DELETE (ÚJ) – Supabase-ből is töröl
+// ======================
+// UPDATE
+// ======================
+exports.update = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const setupId = req.params.id;
+        const name = (req.body?.setup_name || "").trim();
+
+        if (!name) {
+            return res.status(400).json({ error: "setup_name required" });
+        }
+
+        const { data, error } = await supabase
+            .from("setup[Setup]")
+            .update({ setup_name: name })
+            .eq("id", setupId)
+            .eq("user_id", userId)
+            .select("*")
+            .single();
+
+        if (error) throw error;
+
+        res.json({ setup: data });
+    } catch (err) {
+        console.error("❌ Setup update error:", err);
+        res.status(500).json({ error: "Update failed" });
+    }
+};
+
+// ======================
+// DELETE
+// ======================
 exports.remove = async (req, res) => {
     try {
-        const userId = req.user?.id;
+        const userId = req.user.id;
         const setupId = req.params.id;
-
-        if (!userId) return res.status(401).json({ error: "Unauthorized" });
-        if (!setupId) return res.status(400).json({ error: "Missing setup id" });
 
         const { data, error } = await supabase
             .from("setup[Setup]")
@@ -227,19 +153,11 @@ exports.remove = async (req, res) => {
             .select("*")
             .single();
 
-        if (error) {
-            console.error("❌ Supabase delete error:", error);
-            return res.status(500).json({
-                error: error.message,
-                code: error.code,
-                details: error.details,
-                hint: error.hint
-            });
-        }
+        if (error) throw error;
 
-        return res.json({ ok: true, deleted: data });
+        res.json({ ok: true, deleted: data });
     } catch (err) {
-        console.error("❌ Setup delete hiba:", err);
-        return res.status(500).json({ error: "Server error" });
+        console.error("❌ Setup delete error:", err);
+        res.status(500).json({ error: "Delete failed" });
     }
 };

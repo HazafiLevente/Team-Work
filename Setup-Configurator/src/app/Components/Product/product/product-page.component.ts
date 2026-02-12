@@ -5,14 +5,15 @@ import { ProductService } from '../../Services/Home/ProductParts/product/product
 import { ProductGalleryComponent } from '../productgallery/product-gallery.component';
 import { HttpClient } from '@angular/common/http';
 
+
 type ImageMap = Record<string, Record<string, Record<string, string[]>>>;
 
 @Component({
-  selector: 'app-product-page',
+  selector: 'app-product-site-page',
   standalone: true,
   imports: [CommonModule, ProductGalleryComponent],
-  templateUrl: `product-page.component.html`,
-  styleUrls: ['product-page.component.css']
+  templateUrl: './product-page.component.html',
+  styleUrls: ['./product-page.component.css']
 })
 export class ProductPageComponent implements OnInit {
 

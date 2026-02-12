@@ -1,0 +1,18 @@
+<div class="admin-products">
+
+  <app-product-list
+    [products]="products"
+    [search]="search"
+    [selected]="selected"
+    (searchChange)="onSearchChange($event)"
+    (productSelect)="onProductSelect($event)">
+  </app-product-list>
+
+  <app-product
+    [product]="selected"
+    [adminMode]="true"
+    (saveProduct)="onSave($event)">
+  </app-product>
+
+
+</div>

@@ -1,0 +1,100 @@
+.products-right {
+  flex: 1;
+  min-height: 420px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 24px;
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.title-row h2 {
+  margin: 0;
+  font-size: 20px;
+  color: #e9eef8;
+}
+
+.pill {
+  font-size: 12px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.08);
+  color: rgba(255,255,255,0.8);
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  color: rgba(255,255,255,0.75);
+  font-size: 13px;
+}
+
+input {
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(0,0,0,0.35);
+  color: white;
+  outline: none;
+}
+
+input:focus {
+  border-color: rgba(255,140,26,0.45);
+  box-shadow: 0 0 0 3px rgba(255,140,26,0.12);
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 6px;
+}
+
+.save {
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: none;
+  background: #ff8c1a;
+  color: #111;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.save:hover {
+  filter: brightness(1.05);
+}
+
+.empty {
+  opacity: 0.65;
+  font-size: 18px;
+  display: grid;
+  place-items: center;
+  height: 100%;
+}
+
+.debug {
+  margin-top: 12px;
+  font-size: 12px;
+  opacity: 0.6;
+  background: rgba(0,0,0,0.35);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 14px;
+  padding: 12px;
+  overflow: auto;
+}

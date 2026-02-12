@@ -17,7 +17,7 @@ import { gsap } from 'gsap';
 type AnyProduct = any;
 
 @Component({
-  selector: 'app-product-staggered-panel',
+  selector: 'app-product-site-staggered-panel',
   standalone: true,
   imports: [CommonModule],
   templateUrl: './product-staggered-panel.component.html',

@@ -58,7 +58,27 @@
   padding-right: 20px;
 }
 
-@media (max-width: 1200px){
+@media (max-width: 768px){
+  .product-card{
+    width: 160px;       /* eddig 220px volt */
+    padding: 8px;
+    border-radius: 10px;
+  }
+
+  .product-img{
+    width: 90px;
+    height: 90px;
+    margin-bottom: 6px;
+  }
+
+  .product-card h3{
+    font-size: 12px;
+  }
+
+  .product-card p{
+    font-size: 11px;
+  }
+
   .home-row{
     grid-template-columns: 1fr;
   }

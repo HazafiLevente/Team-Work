@@ -1,0 +1,90 @@
+<!-- ===========================
+        HOME MODE
+=========================== -->
+<ng-container *ngIf="!adminMode; else adminTemplate">
+
+  <div class="product-card" (click)="onOpen()">
+    <h3>
+      {{ obj.manufacturer }} {{ obj.model }}
+    </h3>
+
+    <p *ngIf="obj.price != null">
+      {{ obj.price | number }} Ft
+    </p>
+  </div>
+
+</ng-container>
+
+
+<!-- ===========================
+        ADMIN MODE
+=========================== -->
+<ng-template #adminTemplate>
+
+  <div class="products-right" *ngIf="product; else empty">
+
+    <div class="title-row">
+      <h2>
+        {{ obj.manufacturer }} {{ obj.model }}
+      </h2>
+      <span class="pill">
+        {{ product?.table_name }} #{{ obj.id }}
+      </span>
+    </div>
+
+    <div class="form-grid">
+
+      <ng-container *ngFor="let key of editableKeys()">
+
+        <label>
+          {{ formatLabel(key) }}
+
+          <!-- Number -->
+          <input
+            *ngIf="getInputType(obj[key]) === 'number'"
+            type="number"
+            [(ngModel)]="obj[key]" />
+
+          <!-- Checkbox -->
+          <input
+            *ngIf="getInputType(obj[key]) === 'checkbox'"
+            type="checkbox"
+            [(ngModel)]="obj[key]" />
+
+          <!-- Textarea -->
+          <textarea
+            *ngIf="getInputType(obj[key]) === 'textarea'"
+            rows="3"
+            [(ngModel)]="obj[key]">
+          </textarea>
+
+          <!-- Text -->
+          <input
+            *ngIf="getInputType(obj[key]) === 'text'"
+            type="text"
+            [(ngModel)]="obj[key]" />
+
+        </label>
+
+      </ng-container>
+
+    </div>
+
+    <div class="actions">
+      <button class="save" type="button" (click)="onSave()">
+        Mentés
+      </button>
+    </div>
+
+    <!-- DEBUG -->
+    <pre class="debug">{{ obj | json }}</pre>
+
+  </div>
+
+  <ng-template #empty>
+    <div class="empty">
+      Válassz ki egy terméket
+    </div>
+  </ng-template>
+
+</ng-template>

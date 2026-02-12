@@ -100,3 +100,27 @@
   font-size: 22px;
   line-height: 1;
 }
+
+:host{
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+}
+
+
+@media (max-width: 768px){
+
+  .panel{
+    left: 0 !important;
+    right: 0 !important;
+    width: 100vw !important;
+
+    top: auto !important;
+    bottom: 0 !important;
+    height: 85vh;
+
+    border-radius: 16px 16px 0 0;
+    max-width: none !important;
+  }
+
+}

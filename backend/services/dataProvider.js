@@ -184,7 +184,7 @@ function getProductsForAI(question = "") {
                 if (normalize(manufacturer) === normalize(brand)) {
                     list.push(row);
                 }
-                continue; // fontos: product logika ne fusson lista kérdésnél
+                continue; // fontos: product-site logika ne fusson lista kérdésnél
             }
 
             /* ===============================

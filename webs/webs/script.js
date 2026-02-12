@@ -5,7 +5,7 @@
 document.addEventListener("DOMContentLoaded", async () => {
     const path = window.location.pathname;
 
-    // ✅ KELL minden oldalra, mert product.html-en is kell a kép
+    // ✅ KELL minden oldalra, mert product-site.html-en is kell a kép
     await loadImageMap();
 
     if (path === "/home" || path === "/") {
@@ -57,7 +57,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 
 
-    // ✅ és utána jöhet a product page loader rész (ami nálad lentebb van)
+    // ✅ és utána jöhet a product-site page loader rész (ami nálad lentebb van)
 
 
 
@@ -68,10 +68,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     ---------------------------------- */
 
 
-    // ❗ Csak product oldalon fusson
-    // ✅ HELYES – csak product logika
-    if (window.location.pathname.includes("product.html")) {
-        const box = document.getElementById("product-box");
+    // ❗ Csak product-site oldalon fusson
+    // ✅ HELYES – csak product-site logika
+    if (window.location.pathname.includes("product-site.html")) {
+        const box = document.getElementById("product-site-box");
         if (!box) return;
 
         const params = new URLSearchParams(window.location.search);
@@ -132,7 +132,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         `;
 
         } catch (err) {
-            console.error("❌ product load error:", err);
+            console.error("❌ product-site load error:", err);
             box.innerHTML = `<h2>❌ Hiba történt.</h2>`;
         }
     }
@@ -520,7 +520,7 @@ let activeBrands = new Set();
 let filterPanelOpen = false;
 
 /*async function loadProducts() {
-    const grid = document.getElementById("product-grid");
+    const grid = document.getElementById("product-site-grid");
     try {
         const res = await fetch("/api/products/tables");
 
@@ -536,7 +536,7 @@ let filterPanelOpen = false;
         console.log("✅ PRODUCT TABLES:", tables);
 
         if (!Array.isArray(tables) || tables.length === 0) {
-            if (grid) grid.innerHTML = `<p class="muted">Nincs egyetlen product tábla sem (nincs [ a névben).</p>`;
+            if (grid) grid.innerHTML = `<p class="muted">Nincs egyetlen product-site tábla sem (nincs [ a névben).</p>`;
             return;
         }
 
@@ -1515,7 +1515,7 @@ document.addEventListener("click", e => {
 ---------------------------------- */
 
 function renderProducts(list) {
-    const grid = document.getElementById("product-grid");
+    const grid = document.getElementById("product-site-grid");
     if (!grid) return;
 
     if (!list.length) {

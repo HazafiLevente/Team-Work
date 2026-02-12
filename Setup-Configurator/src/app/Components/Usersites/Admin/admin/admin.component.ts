@@ -2,13 +2,13 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { UsersComponent } from '../users/users.component';
-import {ProductsComponent} from '../product/products.component';
+import {ProductsSiteComponent} from '../product-site/products.site.component';
 
 
 @Component({
   standalone: true,
   selector: 'app-admin',
-  imports: [CommonModule, UsersComponent, ProductsComponent],
+  imports: [CommonModule, UsersComponent, ProductsSiteComponent],
   templateUrl: './admin.component.html',
   styleUrls: ['./admin.component.css']
 })

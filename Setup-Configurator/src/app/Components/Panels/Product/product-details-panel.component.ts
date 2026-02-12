@@ -7,6 +7,7 @@ import { ProductService } from '../../Services/Home/ProductParts/product/product
 
 @Component({
   selector: 'app-product-details-panel',
+
   standalone: true,
   imports: [CommonModule],
   templateUrl: './product-details-panel.component.html',
@@ -35,20 +36,51 @@ export class ProductDetailsPanelComponent implements OnChanges {
     this.closed.emit();
   }
 
-  // ✅ "Több" gomb: átvisz a részletes product oldalra
+  // ✅ "Több" gomb: átvisz a részletes product-site oldalra
   onMore() {
-    const table = (this.product as any).table_name ?? (this.product as any).table;
-    const id = (this.product as any).id;
+    const table = this.getTable(this.product);
+    const id = this.getId(this.product);
 
-    // ha nincs routingotok még, ez a rész nem fog működni
-    // (de a kód jó – csak kell route)
+    if (!table || id == null) {
+      console.warn('onMore: missing table/id', { table, id, product: this.product });
+      return;
+    }
+
     this.closed.emit();
     this.router.navigate(['/product', table, id]);
   }
 
-  // ✅ "+" gomb: egyelőre semmi
   onPlus() {
     console.log('➕ plus clicked (TODO)');
+  }
+
+  // -------------------------
+  // SAFE GETTERS (ez a lényeg)
+  // -------------------------
+
+  private obj(p: any): any {
+    return p?.data ?? p ?? {};
+  }
+
+  private getTable(p: any): string {
+    const o = this.obj(p);
+    return String(p?.table_name ?? p?.table ?? o?.table_name ?? o?.table ?? '').trim();
+  }
+
+  private getId(p: any): any {
+    const o = this.obj(p);
+    // autóknál sokszor ID
+    return p?.id ?? p?.ID ?? o?.id ?? o?.ID;
+  }
+
+  get displayModel(): string {
+    const o = this.obj(this.product as any);
+    return String((this.product as any)?.model ?? o?.model ?? o?.Model ?? '').trim();
+  }
+
+  get displayManufacturer(): string {
+    const o = this.obj(this.product as any);
+    return String((this.product as any)?.manufacturer ?? o?.manufacturer ?? o?.Manufacturer ?? '').trim();
   }
 
   private fetchDetails() {
@@ -56,8 +88,15 @@ export class ProductDetailsPanelComponent implements OnChanges {
     this.error = null;
     this.details = null;
 
-    const table = (this.product as any).table_name ?? (this.product as any).table;
-    const id = (this.product as any).id;
+    const table = this.getTable(this.product);
+    const id = this.getId(this.product);
+
+    if (!table || id == null) {
+      this.loading = false;
+      this.error = 'Hiányzó azonosító (table/id) – nem tölthető be a részlet.';
+      console.warn('fetchDetails: missing table/id', { table, id, product: this.product });
+      return;
+    }
 
     this.productService.getProductDetails(table, id).subscribe({
       next: (res) => {

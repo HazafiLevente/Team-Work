@@ -6,9 +6,30 @@
   [sparkCount]="8"
   [duration]="400">
 
-<app-searchbar></app-searchbar>
-  <app-filterlist></app-filterlist>
+  <!-- TOP: search + mobile filter button -->
+  <div class="home-top">
 
+    <!-- Searchbar wrapper (hogy a mobil sticky CSS biztosan eltalálja) -->
+    <div class="searchbar">
+      <app-searchbar></app-searchbar>
+    </div>
+
+    <!-- Mobile: “Több” gomb (bottom sheet) -->
+    <button
+      type="button"
+      class="more-btn mobile-only"
+      (click)="mobileFiltersOpen = true">
+      Több: <span class="muted">(részletes keresés)</span>
+    </button>
+
+    <!-- Desktop: filterlist kint marad -->
+    <div class="desktop-only">
+      <app-filterlist></app-filterlist>
+    </div>
+
+  </div>
+
+  <!-- MAIN: products + right side -->
   <div class="home-row">
     <div class="left">
       <app-productlist
@@ -18,7 +39,8 @@
       </app-productlist>
     </div>
 
-    <div class="right">
+    <!-- Right side: desktop only -->
+    <div class="right desktop-only">
       <app-quick-stats
         [total]="totalAll"
         [pool]="featuredPool.length"
@@ -32,15 +54,29 @@
     </div>
   </div>
 
-  <app-product-staggered-panel
-    [open]="!!selectedProduct"
+  <!-- Product details panel -->
+
+  <app-product-details-panel
+    *ngIf="selectedProduct"
     [product]="selectedProduct"
-    position="right"
-    [colors]="['#B19EEF', '#5227FF']"
     (closed)="onClosePanel()">
-  </app-product-staggered-panel>
+  </app-product-details-panel>
+
+
+  <!-- MOBILE FILTER SHEET -->
+  <div
+    class="mobile-overlay"
+    *ngIf="mobileFiltersOpen"
+    (click)="closeMobileFilters()">
+  </div>
+
+  <div class="mobile-sheet" [class.open]="mobileFiltersOpen">
+    <div class="sheet-header">
+      <div class="title">Részletes szűrők</div>
+      <button type="button" class="x" (click)="closeMobileFilters()">✕</button>
+    </div>
+
+    <app-filterlist></app-filterlist>
+  </div>
 
 </app-click-spark>
-<!-- ...a meglévő home contented -->
-
-

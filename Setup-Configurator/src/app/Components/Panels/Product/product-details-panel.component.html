@@ -3,9 +3,10 @@
 <div class="panel">
   <div class="panel-header">
     <div class="title">
-      <div class="model">{{ product?.model }}</div>
-      <div class="sub">{{ product?.manufacturer }}</div>
+      <div class="model">{{ displayModel || 'N/A' }}</div>
+      <div class="sub">{{ displayManufacturer || 'N/A' }}</div>
     </div>
+
 
     <button class="close-btn" (click)="close()">✕</button>
   </div>

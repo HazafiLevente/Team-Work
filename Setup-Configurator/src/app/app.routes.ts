@@ -22,7 +22,7 @@ import { SettingsComponent } from './Components/Settings/settings.component';
 export const routes: Routes = [
   { path: '', redirectTo: 'home', pathMatch: 'full'},
   { path: 'home', component: HomeComponent }, //{, canActivate: [authGuard] },
-  { path: 'product/:table/:id', component: ProductPageComponent },
+  { path: 'product-site/:table/:id', component: ProductPageComponent },
   { path: 'user/message/:type/:id', component: BellMessageComponent },
   { path: 'user/bell/:key', component: BellMessageComponent },
   { path: 'user/bell', redirectTo: 'user/bell/system', pathMatch: 'full' },

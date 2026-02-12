@@ -8,10 +8,11 @@ import { SearchbarComponent } from '../searchbar/searchbar.component';
 import { FilterlistComponent } from '../Filterparts/filterlist/filterlist.component';
 import { ProductlistComponent } from '../ProductParts/productlist/productlist.component';
 import { FeaturedSpotlightComponent } from '../Featured/featured-spotlight.component';
-import { ProductDetailsPanelComponent } from '../../Panels/Product/product-details-panel.component';
+
 import { QuickStatsComponent } from '../../Shared/Stats/quick-stats.component';
 import { ClickSparkComponent } from '../../Shared/Effects/click-spark/click-spark.component';
-import { ProductStaggeredPanelComponent } from '../../Shared/Panels/product-staggered-panel.component';
+import { ProductDetailsPanelComponent } from '../../Panels/Product/product-details-panel.component';
+
 import { DockComponent, DockItemData } from '../../Shared/Dock/dock.component';
 
 import { UiSettingsService } from '../../Services/SettingService/ui-settings.service';
@@ -28,11 +29,11 @@ type AnyProduct = any;
     SearchbarComponent,
     FilterlistComponent,
     ProductlistComponent,
-    ProductStaggeredPanelComponent,
+    ProductDetailsPanelComponent,
     DockComponent,
     FeaturedSpotlightComponent,
     QuickStatsComponent,
-    ProductDetailsPanelComponent,
+
     ClickSparkComponent
   ]
 })
@@ -96,7 +97,7 @@ export class HomeComponent implements OnDestroy {
   ----------------------------- */
 
   onOpenProduct(p: AnyProduct) {
-    // auto-open product (ha később rákötöd a settingre, itt a helye)
+    // auto-open product-site (ha később rákötöd a settingre, itt a helye)
     this.selectedProduct = p;
   }
 
@@ -126,4 +127,10 @@ export class HomeComponent implements OnDestroy {
   ngOnDestroy(): void {
     this.uiSub?.unsubscribe();
   }
+  mobileFiltersOpen = false;
+
+  closeMobileFilters() {
+    this.mobileFiltersOpen = false;
+  }
+
 }

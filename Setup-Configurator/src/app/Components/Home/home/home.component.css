@@ -19,9 +19,36 @@
 /* jobb oldal ne kényszerítse rá magát a layout-ra */
 .right{ min-width: 0; }
 
-@media (max-width: 1200px){
-  .home-row{ grid-template-columns: 1fr; }
+@media (max-width: 768px) {
+  .searchbar{
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    position: sticky;
+    top: 0;
+    z-index: 60;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    backdrop-filter: blur(10px);
+  }
+
+  /* a “Keresés: model...” legyen teljes széles */
+  .searchbar .term {
+    grid-column: 1 / -1;
+  }
+
+  /* a Keresés gomb is legyen full */
+  .searchbar .search-btn {
+    grid-column: 1 / -1;
+    justify-content: center;
+  }
+
+  /* inputok ne legyenek túl magasak */
+  .searchbar .search-input{
+    padding: 10px 10px;
+  }
 }
+
 
 /* általános hover feedback minden mezőre */
 .search-input{
@@ -42,4 +69,103 @@
 .btn:hover, .tag:hover{
   transform: translateY(-1px);
   box-shadow: 0 0 0 1px rgba(0,255,255,.18);
+}
+
+
+/* show/hide helpers */
+.mobile-only { display: none; }
+.desktop-only { display: block; }
+
+@media (max-width: 768px) {
+  .desktop-only { display: none !important; }
+  .mobile-only  { display: block !important; }
+
+  /* a searchbar legyen rendesen sticky (nem az egész oldal teteje) */
+  .searchbar {
+    position: sticky;
+    top: 0;
+    z-index: 60;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    backdrop-filter: blur(10px);
+  }
+
+  /* a fő layout legyen egy oszlop */
+  .home-row{
+    grid-template-columns: 1fr !important;
+    gap: 14px !important;
+    padding-right: 0 !important;
+  }
+
+  /* Mobile bottom sheet */
+  .mobile-overlay{
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.55);
+    z-index: 9998;
+  }
+
+  .mobile-sheet{
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 85vh;
+    background: var(--surface);
+    border-top: 1px solid var(--glass-border);
+    border-radius: 16px 16px 0 0;
+    transform: translateY(110%);
+    transition: transform .2s ease;
+    z-index: 9999;
+    overflow: auto;
+    padding: 12px;
+  }
+  .mobile-sheet.open{ transform: translateY(0); }
+
+  .sheet-header{
+    display:flex;
+    justify-content: space-between;
+    align-items:center;
+    margin-bottom: 10px;
+  }
+
+  .sheet-header .x{
+    background: transparent;
+    border: 1px solid var(--glass-border);
+    color: var(--text);
+    border-radius: 10px;
+    padding: 6px 10px;
+  }
+
+  /* “Több” gomb egységes stílus */
+  .more-btn{
+    width: 100%;
+    text-align: left;
+    padding: 10px 12px;
+    border-radius: 12px;
+    border: 1px solid var(--glass-border);
+    background: var(--surface);
+    color: var(--text);
+    margin-top: 6px;
+  }
+}
+
+
+/* 📱 MOBILE – Searchbar középre */
+@media (max-width: 768px){
+
+  .searchbar{
+    display: flex;
+    flex-direction: column;
+    align-items: center;   /* EZ teszi középre */
+    gap: 12px;
+  }
+
+  .searchbar .search-input,
+  .searchbar select,
+  .searchbar .search-btn{
+    width: 90%;            /* ne legyen full 100%, így szebb */
+    max-width: 420px;      /* ne nőjön túl nagyra */
+  }
+
 }
