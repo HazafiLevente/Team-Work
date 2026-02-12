@@ -111,6 +111,32 @@ export class ProductlistComponent implements OnInit, OnDestroy {
      HELPERS
   ----------------------------- */
 
+  private pcKind(p: AnyProduct): 'cpu' | 'gpu' | 'ram' | 'storage' | 'psu' | 'other' {
+    const t = this.norm(this.getTable(p));
+
+    const CPU_TABLES = new Set(['processors', 'cpus']);
+    const GPU_TABLES = new Set(['videocards', 'gpus', 'graphics_cards']);
+    const RAM_TABLES = new Set(['rams', 'memory', 'ram_modules']);
+    const STORAGE_TABLES = new Set(['hdds', 'ssds', 'nvme_ssds', 'storage']);
+    const PSU_TABLES = new Set(['psus', 'power_supplies', 'power_supplies_units']);
+
+    if (CPU_TABLES.has(t)) return 'cpu';
+    if (GPU_TABLES.has(t)) return 'gpu';
+    if (RAM_TABLES.has(t)) return 'ram';
+    if (STORAGE_TABLES.has(t)) return 'storage';
+    if (PSU_TABLES.has(t)) return 'psu';
+
+    return 'other';
+  }
+
+  private inferStorageTypeFromTable(p: AnyProduct): '' | 'hdd' | 'ssd' | 'nvme' {
+    const t = this.norm(this.getTable(p));
+    if (t.includes('nvme')) return 'nvme';
+    if (t.includes('ssd')) return 'ssd';
+    if (t.includes('hdd')) return 'hdd';
+    return '';
+  }
+
   private norm(v: any): string {
     return String(v ?? '').trim().toLowerCase();
   }
@@ -349,12 +375,15 @@ export class ProductlistComponent implements OnInit, OnDestroy {
       const manF = norm(f.manufacturer);
       const modelF = norm(f.model);
 
+
+
       // ✅ V2 meta-driven forma: tableName/priceMin/priceMax/dynamic
       const hasV2 = ('dynamic' in f) || ('tableName' in f) || ('priceMin' in f);
 
       return list.filter(p => {
         const manu = norm(getField(p, 'manufacturer'));
         const model = norm(getField(p, 'model'));
+
 
         if (manF && !manu.includes(manF)) return false;
         if (modelF && !model.includes(modelF)) return false;
@@ -426,46 +455,69 @@ export class ProductlistComponent implements OnInit, OnDestroy {
     }
 
     // ---------------- COMPUTER ----------------
+    // ---------------- COMPUTER ----------------
+    // ---------------- COMPUTER ----------------
     if (state.activeCategory === 'computer') {
       const f: any = (state as any).computer ?? {};
 
       return list.filter(p => {
+        const table = norm(this.getTable(p));
         const d = (p as any).data ?? {};
 
-        const cpuBrand = norm(f.cpuBrand);
-        const cpuModel = norm(f.cpuModel);
-        const gpuBrand = norm(f.gpuBrand);
-        const gpuModel = norm(f.gpuModel);
+        // ---------- CPU (processors) ----------
+        if (f.cpuBrand || f.cpuModel) {
+          if (table !== 'processors') return false;
 
-        const hay = norm(
-          `${getField(p,'manufacturer') ?? ''} ${getField(p,'model') ?? ''} ${d.notes ?? ''} ${d.Model ?? ''} ${d.model ?? ''}`
-        );
+          if (f.cpuBrand && !norm(d.manufacturer).includes(norm(f.cpuBrand)))
+            return false;
 
-        if (cpuBrand && !hay.includes(cpuBrand)) return false;
-        if (cpuModel && !hay.includes(cpuModel)) return false;
-
-        if (gpuBrand && !hay.includes(gpuBrand)) return false;
-        if (gpuModel && !hay.includes(gpuModel)) return false;
-
-        // RAM: itt neked nincs biztos kulcsod (ram_gb?), ezért ez csak akkor oké, ha tényleg a te view-od így adja
-        const ramVal = d.ram_gb ?? d.memory_gb ?? d.capacity_gb;
-        if (!matchRange(ramVal, f.ramMin, f.ramMax)) return false;
-
-        const st = norm(f.storageType);
-        if (st) {
-          const mt = norm(d.storage_type ?? d.memory_type ?? d.type);
-          if (mt && !mt.includes(st)) return false;
+          if (f.cpuModel && !norm(d.Model ?? d.model).includes(norm(f.cpuModel)))
+            return false;
         }
 
-        const storageVal = d.storage_gb ?? d.capacity_gb;
-        if (!matchRange(storageVal, f.storageMin, f.storageMax)) return false;
+        // ---------- GPU (video_cards) ----------
+        if (f.gpuBrand || f.gpuModel) {
+          if (table !== 'video_cards') return false;
 
-        const psuVal = d.psu_w ?? d.power_w ?? d.watt;
-        if (!matchRange(psuVal, f.psuMin, f.psuMax)) return false;
+          if (f.gpuBrand && !norm(d.manufacturer).includes(norm(f.gpuBrand)))
+            return false;
+
+          if (f.gpuModel && !norm(d.model ?? d.Model).includes(norm(f.gpuModel)))
+            return false;
+        }
+
+        // ---------- RAM ----------
+        if (f.ramMin || f.ramMax) {
+          if (table !== 'ram') return false;
+
+          if (!matchRange(d.capacity_gb, f.ramMin, f.ramMax))
+            return false;
+        }
+
+        // ---------- Storage ----------
+        if (f.storageType) {
+          const mt = norm(d.memory_type ?? '');
+          if (!mt.includes(norm(f.storageType))) return false;
+        }
+
+        if (f.storageMin || f.storageMax) {
+          if (!matchRange(d.capacity_gb, f.storageMin, f.storageMax))
+            return false;
+        }
+
+        // ---------- PSU ----------
+        if (f.psuMin || f.psuMax) {
+          if (table !== 'psu') return false;
+
+          if (!matchRange(d.wattage ?? d.watt, f.psuMin, f.psuMax))
+            return false;
+        }
 
         return true;
       });
     }
+
+
 
     // ---------------- INSTRUMENT ----------------
     if (state.activeCategory === 'instrument') {

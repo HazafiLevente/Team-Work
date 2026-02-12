@@ -7,6 +7,8 @@ import { CommonModule } from '@angular/common';
 export type PcGpuBrand = '' | 'nvidia' | 'amd' | 'intel';
 export type PcStorageType = '' | 'hdd' | 'ssd' | 'nvme';
 
+
+
 export interface ComputerFilters {
   category: 'computer';
 
@@ -89,6 +91,8 @@ export class ComputerfilterComponent implements OnInit, OnDestroy {
   emitFilters(): void {
     const raw = this.form.getRawValue() as any;
 
+
+
     const cleaned: ComputerFilters = {
       category: 'computer',
 
@@ -135,4 +139,6 @@ export class ComputerfilterComponent implements OnInit, OnDestroy {
     this.clearClicked.emit();
     this.emitFilters();
   }
+
+
 }

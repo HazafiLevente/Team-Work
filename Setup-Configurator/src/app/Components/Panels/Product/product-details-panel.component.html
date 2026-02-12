@@ -11,19 +11,18 @@
   </div>
 
   <div class="panel-body">
-    <div style="color: lime; font-weight: 800; margin-bottom: 12px;">
-      DETAILS DEBUG: {{ details | json }}
-    </div>
-
     <div *ngIf="loading">Betöltés...</div>
 
     <div *ngIf="!loading && error" class="error">
       {{ error }}
     </div>
 
-    <ng-container *ngIf="!loading && details">
+    <div *ngIf="!loading && details">
       <div class="price">
-        Ár: <strong>{{ displayPrice(details) }}</strong>
+        Ár:
+        <strong>
+          {{ details.price ? (details.price | number:'1.0-0') + ' Ft' : 'N/A' }}
+        </strong>
       </div>
 
       <div class="kv">
@@ -39,6 +38,7 @@
         <button class="btn secondary" (click)="onMore()">Több</button>
         <button class="btn primary icon" (click)="onPlus()">+</button>
       </div>
-    </ng-container>
+
+    </div>
   </div>
 </div>

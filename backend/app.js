@@ -64,6 +64,8 @@ app.use("/api/admin/products", require("./routes/admin.products.routes"));
  GET /api/images/map -> datas/Jsons/images.runtime.json
  ---------------------------------- */
 app.use("/images", express.static(path.join(__dirname, "..", "datas", "images")));
+app.use("/api/meta", require("./routes/meta.routes"));
+
 
 /* ----------------------------------
 META

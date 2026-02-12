@@ -73,38 +73,4 @@ async function listCars(req, res) {
     }
 }
 
-async function getCarDetails(req, res) {
-    const { table, id } = req.params;
-
-    if (!CAR_TABLES.includes(table)) {
-        return res.status(400).json({ error: "invalid car table" });
-    }
-
-    const { data, error } = await supabase
-        .from(table)
-        .select(`
-      "ID",
-      "Manufacturer",
-      "Model",
-      "Price Range (Ft)",
-      "Body Type",
-      "Horsepower",
-      "Acceleration (s)",
-      "Seats",
-      "Fuel Type",
-      "Year",
-      "Transmission",
-      "category",
-      "Avgprice"
-    `)
-        .eq("ID", id)
-        .single();
-
-    if (error) return res.status(500).json({ error: error.message });
-
-    return res.json({ item: mapCarRow(table, data) });
-}
-
-
-module.exports = { listCars, getCarDetails };
-
+module.exports = { listCars };

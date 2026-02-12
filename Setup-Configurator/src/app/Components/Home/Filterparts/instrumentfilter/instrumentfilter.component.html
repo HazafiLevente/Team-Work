@@ -1,8 +1,8 @@
 <div class="carfilter" [formGroup]="form">
 
   <div class="carfilter-header">
-    <span class="tag" title="Home Theatre kategória szűrők">🎬 HT</span>
-    <span class="muted2">Minden HT táblára (meta-driven)</span>
+    <span class="tag" title="Instrument kategória szűrők">🎸 Instr</span>
+    <span class="muted">Egyszerű szűrő (meta: gyártók + táblák)</span>
   </div>
 
   <div *ngIf="loadingMeta" class="muted" style="padding: 10px;">
@@ -11,87 +11,39 @@
 
   <div class="filter-grid" *ngIf="!loadingMeta">
 
-    <!-- Gyártó: meta.manufacturers -->
+    <!-- TYPE -->
+    <select class="search-input" formControlName="itemType" title="Típus">
+      <option value="all">Minden</option>
+      <option value="instrument">Instrument</option>
+      <option value="accessory">Accessory</option>
+    </select>
+
+    <!-- TABLE -->
+    <select class="search-input" formControlName="tableName" title="Tábla">
+      <option value="">Tábla (összes)</option>
+      <option *ngFor="let t of (meta?.table_names || [])" [value]="t">{{ t }}</option>
+    </select>
+
+    <!-- MANUFACTURER -->
     <select class="search-input" formControlName="manufacturer" title="Gyártó">
       <option value="">Gyártó (összes)</option>
       <option *ngFor="let m of (meta?.manufacturers || [])" [value]="m">{{ m }}</option>
     </select>
 
-    <!-- Modell -->
+    <!-- MODEL -->
     <input class="search-input"
-           title="Modell"
            placeholder="Modell"
+           title="Modell"
            formControlName="model" />
-
-    <!-- Tábla választó (multi) -->
-    <select class="search-input"
-            formControlName="tableNames"
-            multiple
-            title="HT táblák (több is választható)">
-      <option *ngFor="let t of (meta?.table_names || [])" [value]="t">{{ t }}</option>
-    </select>
-
-    <!-- Ár (ha később lesz min/max) -->
-    <input class="search-input"
-           type="number"
-           min="0"
-           title="Ár min"
-           placeholder="Ár min"
-           formControlName="priceMin" />
-
-    <input class="search-input"
-           type="number"
-           min="0"
-           title="Ár max"
-           placeholder="Ár max"
-           formControlName="priceMax" />
-
-    <!-- Dinamikus mezők -->
-    <div formGroupName="dynamic" class="filter-grid" style="grid-column: 1 / -1;">
-      <ng-container *ngFor="let f of (meta?.dynamic || [])">
-
-        <!-- SELECT -->
-        <ng-container *ngIf="f.kind === 'select'">
-          <select class="search-input" [formControlName]="f.key" [title]="f.key">
-            <option value="">{{ f.key }} (összes)</option>
-            <option *ngFor="let opt of f.options" [value]="opt">{{ opt }}</option>
-          </select>
-        </ng-container>
-
-        <!-- RANGE -->
-        <ng-container *ngIf="f.kind === 'range'">
-          <input class="search-input"
-                 type="number"
-                 [placeholder]="f.key + ' min'"
-                 [title]="f.key + ' min'"
-                 [formControlName]="f.key + 'Min'" />
-
-          <input class="search-input"
-                 type="number"
-                 [placeholder]="f.key + ' max'"
-                 [title]="f.key + ' max'"
-                 [formControlName]="f.key + 'Max'" />
-        </ng-container>
-
-        <!-- BOOLEAN -->
-        <ng-container *ngIf="f.kind === 'boolean'">
-          <label class="toggle" [title]="f.key">
-            <input type="checkbox" [formControlName]="f.key">
-            <span class="pill">{{ f.key }}</span>
-          </label>
-        </ng-container>
-
-      </ng-container>
-    </div>
 
   </div>
 
   <div class="carfilter-footer">
     <button type="button"
             class="btn small"
-            title="Törli a HT szűrőket"
+            title="Törli az Instr szűrőket"
             (click)="clear()">
-      🧹 HT szűrők törlése
+      🧹 Instr szűrők törlése
     </button>
 
     <span class="muted">A 🔎 Keresés gomb ezeket is figyelembe veszi.</span>
