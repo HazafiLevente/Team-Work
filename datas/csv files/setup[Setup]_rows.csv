@@ -1,0 +1,17 @@
+id,user_id,setup_name,created_at,isFavorite
+2,1,Haloszoba(Levi),2025-12-11 18:12:28.839521+00,false
+3,1,Nappali(Levi),2025-12-14 11:20:35.417227+00,false
+4,1,Garázs(Levi),2025-12-14 19:28:48.009155+00,false
+5,2,Haloszoba(Roli),2025-12-17 13:04:42.011641+00,false
+6,2,Nappali(Roli),2025-12-17 13:05:17.543471+00,false
+7,6,halo(levi),2025-12-18 10:09:24.887402+00,false
+8,6,nappali(levi),2025-12-18 10:13:36.704514+00,false
+10,5,horbi kaka gepee,2025-12-21 16:21:03.197539+00,false
+11,5,itt jart a horbika szia rolini spongyi,2025-12-21 16:21:33.907614+00,false
+14,2,Garazs(Roli),2025-12-22 18:39:00.272555+00,false
+24,10,SZoba,2026-01-19 11:12:28.904413+00,false
+53,2,proba setup,2026-02-10 23:53:11.368481+00,false
+59,2,Cs2,2026-02-11 17:14:07.340904+00,false
+67,5,Új setup,2026-02-12 19:49:24.932752+00,false
+68,2,probbb,2026-02-12 20:10:38.155799+00,false
+70,2,pc-prob,2026-02-12 20:59:06.354725+00,false

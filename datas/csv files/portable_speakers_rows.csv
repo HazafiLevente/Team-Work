@@ -1,0 +1,37 @@
+id,manufacturer,model,series,speaker_type,power_mode,wired_inputs,wireless,water_resistance,battery_hours,notes,category,created_at
+1,JBL,JBL Boombox 3,Boombox,portable,battery_or_plug,,bluetooth,,,,homeT,2026-01-31 16:41:19.451698+00
+2,JBL,JBL Boombox 3 Wi-Fi,Boombox,smart_wifi,battery_or_plug,,wifi+bluetooth,,,,homeT,2026-01-31 16:41:19.451698+00
+3,JBL,JBL Boombox 4,Boombox,portable,battery_or_plug,,bluetooth,,,,homeT,2026-01-31 16:41:19.451698+00
+4,JBL,JBL Charge 5,Charge,portable,battery_or_plug,,bluetooth,,,,homeT,2026-01-31 16:41:19.451698+00
+5,JBL,JBL Charge 5 Wi-Fi,Charge,smart_wifi,battery_or_plug,,wifi+bluetooth,,,,homeT,2026-01-31 16:41:19.451698+00
+6,JBL,JBL Charge 5 Wi-Fi SE,Charge,smart_wifi,battery_or_plug,,wifi+bluetooth,,,,homeT,2026-01-31 16:41:19.451698+00
+7,JBL,JBL Charge 6,Charge,portable,battery_or_plug,,bluetooth,,,,homeT,2026-01-31 16:41:19.451698+00
+8,JBL,JBL Xtreme 3,Xtreme,portable,battery_or_plug,,bluetooth,,,,homeT,2026-01-31 16:41:19.451698+00
+9,JBL,JBL Xtreme 4,Xtreme,portable,battery_or_plug,,bluetooth,,,,homeT,2026-01-31 16:41:19.451698+00
+10,JBL,JBL Flip 6,Flip,portable,battery_or_plug,,bluetooth,IP67,12,Official JBL lists 12h playtime.,homeT,2026-01-31 16:41:19.451698+00
+11,JBL,JBL Flip 7,Flip,portable,battery_or_plug,,bluetooth,,,,homeT,2026-01-31 16:41:19.451698+00
+12,JBL,JBL Flip 7 Tomorrowland,Flip,portable,battery_or_plug,,bluetooth,,,Special edition.,homeT,2026-01-31 16:41:19.451698+00
+13,JBL,JBL Clip 4,Clip,portable,battery,--,bluetooth,,,,homeT,2026-01-31 16:41:19.451698+00
+14,JBL,JBL Clip 4 Eco,Clip,portable,battery,--,bluetooth,,,,homeT,2026-01-31 16:41:19.451698+00
+15,JBL,JBL Clip 5,Clip,portable,battery,--,bluetooth,,,,homeT,2026-01-31 16:41:19.451698+00
+16,JBL,JBL Go 4,Go,portable,battery,--,bluetooth,,,,homeT,2026-01-31 16:41:19.451698+00
+17,JBL,JBL Go Essential,Go,portable,battery,--,bluetooth,,,,homeT,2026-01-31 16:41:19.451698+00
+18,JBL,JBL Go Essential 2,Go,portable,battery,--,bluetooth,,,,homeT,2026-01-31 16:41:19.451698+00
+19,JBL,JBL Go Essential Special Edition,Go,portable,battery,--,bluetooth,,,,homeT,2026-01-31 16:41:19.451698+00
+20,JBL,JBL Pulse 4,Pulse,portable,battery_or_plug,,bluetooth,,,,homeT,2026-01-31 16:41:19.451698+00
+21,JBL,JBL Pulse 5,Pulse,portable,battery_or_plug,,bluetooth,IP67,12,"Spec sheet: 30W+10W RMS, up to 12h.",homeT,2026-01-31 16:41:19.451698+00
+22,JBL,JBL Horizon 2 FM,Horizon,radio,plug_only,,bluetooth,,,Clock radio.,homeT,2026-01-31 16:41:19.451698+00
+23,JBL,JBL Tuner 2,Tuner,radio,battery_or_plug,,bluetooth,,,DAB/DAB+/FM radio.,homeT,2026-01-31 16:41:19.451698+00
+24,JBL,JBL Tuner 2 FM,Tuner,radio,battery_or_plug,,bluetooth,,,FM version.,homeT,2026-01-31 16:41:19.451698+00
+25,JBL,JBL Tuner 3,Tuner,radio,battery_or_plug,,bluetooth,,15,"Portable radio speaker, up to 15h listed.",homeT,2026-01-31 16:41:19.451698+00
+26,JBL,JBL Tuner XL,Tuner,radio,battery_or_plug,,bluetooth,,,,homeT,2026-01-31 16:41:19.451698+00
+27,JBL,JBL Tuner XL FM,Tuner,radio,battery_or_plug,,bluetooth,,,,homeT,2026-01-31 16:41:19.451698+00
+28,JBL,JBL PartyBox On-The-Go,PartyBox,party,battery_or_plug,mic,bluetooth,,,Party speaker.,homeT,2026-01-31 16:41:19.451698+00
+29,JBL,JBL PartyBox On-The-Go Essential,PartyBox,party,battery_or_plug,mic,bluetooth,,,,homeT,2026-01-31 16:41:19.451698+00
+30,JBL,JBL PartyBox Club 120,PartyBox,party,battery_or_plug,mic,bluetooth,splashproof,,,homeT,2026-01-31 16:41:19.451698+00
+31,JBL,JBL PartyBox Stage 320,PartyBox,party,battery_or_plug,mic,bluetooth,splashproof,,"Replaceable battery, wheels.",homeT,2026-01-31 16:41:19.451698+00
+32,JBL,JBL PartyBox 520,PartyBox,party,battery_or_plug,mic,bluetooth,,,,homeT,2026-01-31 16:41:19.451698+00
+33,JBL,JBL PartyBox 710,PartyBox,party,plug_only,mic,bluetooth,splashproof,,Listed as 800W RMS on JBL page.,homeT,2026-01-31 16:41:19.451698+00
+34,JBL,JBL PartyBox 720,PartyBox,party,battery_or_plug,mic,bluetooth,,,Battery-powered PartyBox (JBL Party Speakers page).,homeT,2026-01-31 16:41:19.451698+00
+35,JBL,JBL PartyBox 310,PartyBox,party,battery_or_plug,mic,bluetooth,,,JBL Party Speakers page.,homeT,2026-01-31 16:41:19.451698+00
+36,JBL,JBL PartyBox Ultimate,PartyBox,party,plug_only,mic,bluetooth,splashproof,,,homeT,2026-01-31 16:41:19.451698+00

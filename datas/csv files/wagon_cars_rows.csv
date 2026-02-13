@@ -1,0 +1,14 @@
+ID,Manufacturer,Model,Price Range (Ft),Body Type,Horsepower,Acceleration (s),Seats,Fuel Type,Year,Transmission,category,Avgprice
+1,OPEL,Vectra 1.6 16V Elegance,100000 - 499999,Wagon,100 - 149,14.9 - 10,5,Petrol,2000-2001,Manual,car,407000
+2,FORD,Focus 1.6 TDCi Trend,500000 - 999999,Wagon,100 - 149,14.9 - 10,5,Diesel,2004-2005,Manual,car,733000
+3,TOYOTA,Avensis Wagon 2.0 D-4D Sol,1000000 - 3900000,Wagon,100 - 149,14.9 - 10,5,Diesel,2012–,Manual,car,2960000
+4,SKODA,Octavia Combi 1.4 TSI Ambition,1000000 - 3900000,Wagon,150 - 199,9.9 - 8,5,Petrol,2015–,Manual,car,2660000
+5,VOLKSWAGEN,"Passat 2.0 TDI BMT SCR Highline ",4000000 - 9900000,Wagon,150 - 199,9.9 - 8,5,Diesel,2017–2018,Manual,car,6285000
+6,SKODA,Superb Combi 2.0 TSI SportLine 4x4 DSG,4000000 - 9900000,Wagon,250 - 299,5.9 - 4,5,Petrol,2018–,Automatic,car,8800000
+7,CUPRA,Leon ST 2.0 TSI 4Drive DSG,10000000 - 24900000,Wagon,300 - 399,5.9 - 4,5,Petrol,2021–,Automatic,car,14000000
+8,PORSCHE,Panamera 4S Sport Turismo PDK,10000000 - 24900000,Wagon,400 - 499,5.9 - 4,5,Petrol,2017–,Automatic,car,23300000
+9,AUDI,RS4 Avant 60 TFSI quattro Tiptronic ic,25000000 - 49900000,Wagon,400 - 499,5.9 - 4,5,Petrol,2019–,Automatic,car,27300000
+10,PORSCHE,Panamera GTS Sport Turismo PDK,25000000 - 49900000,Wagon,400 - 499,Under 4,5,Petrol,2021–,Automatic,car,48500000
+11,AUDI,RS6 Avant TFSI performance quattro Tiptronic,50000000 - 99000000,Wagon,500+,Under 4,5,Petrol,2025–,Automatic,car,59500000
+12,ASTON MARTIN,DBX707 4.0 V8,50000000 - 99900000,Wagon,500+,Under 4,5,Petrol,2022–,Automatic,car,87250000
+13,FERRARI,Purosangue,100000000+,Wagon,500+,Under 4,5,Petrol,2022–,Automatic,car,208610000

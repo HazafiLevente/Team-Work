@@ -1,0 +1,31 @@
+id,manufacturer,model,speaker_type,passive,outputs,impedance_ohm,sensitivity_db,frequency_response,crossover_hz,power_rms_w,power_max_w,woofer_size_inch,tweeter_type,cabinet_type,bi_wire,height_mm,width_mm,depth_mm,weight_kg,recommended_room_size,notes,category,created_at
+1,Focal,Chorus V 807V,bookshelf,true,2,8,92,50Hz–28kHz,3000,100,200,6.5,Al/Mg inverted dome,Bass Reflex,true,327,244,250,8.5,15–30 m²,High-end bookshelf front speaker,homeT,2026-01-24 09:17:48.298037+00
+2,Focal,Aria 906,bookshelf,true,2,8,89,55Hz–28kHz,2800,120,200,6.5,TNF Al/Mg,Bass Reflex,true,390,225,280,8.5,15–30 m²,Natural flax cone,homeT,2026-01-24 09:17:48.298037+00
+3,Focal,Aria 926,floorstanding,true,2,8,92,45Hz–28kHz,2800,200,300,6.5,TNF Al/Mg,Bass Reflex,true,1035,294,371,25,25–45 m²,Floorstanding front,homeT,2026-01-24 09:17:48.298037+00
+4,Klipsch,RP-600M,bookshelf,true,2,8,96,45Hz–25kHz,1500,100,400,6.5,LTS Titanium,Bass Reflex,true,399,202,301,7.3,15–35 m²,High sensitivity horn speaker,homeT,2026-01-24 09:17:48.298037+00
+5,Klipsch,RP-8000F,floorstanding,true,2,8,98,32Hz–25kHz,1800,150,600,8,LTS Titanium,Bass Reflex,true,1095,277,443,27,30–60 m²,Powerful cinema front,homeT,2026-01-24 09:17:48.298037+00
+6,DALI,Oberon 5,floorstanding,true,2,6,88,39Hz–26kHz,2400,150,300,5.25,Soft Dome,Bass Reflex,false,830,162,283,10.8,20–40 m²,Compact floorstanding,homeT,2026-01-24 09:17:48.298037+00
+7,DALI,Oberon 7,floorstanding,true,2,6,89,36Hz–26kHz,2300,180,300,7,Soft Dome,Bass Reflex,false,1015,200,340,14.8,30–50 m²,Bigger room front,homeT,2026-01-24 09:17:48.298037+00
+8,Bowers & Wilkins,606 S2 Anniversary,bookshelf,true,2,8,88,52Hz–28kHz,3000,120,200,6.5,Decoupled Double Dome,Bass Reflex,true,345,190,300,6.9,15–30 m²,Balanced British sound,homeT,2026-01-24 09:17:48.298037+00
+9,Bowers & Wilkins,603 S2,floorstanding,true,2,8,90,48Hz–28kHz,2500,200,400,6.5,Double Dome,Bass Reflex,true,1055,190,350,25,30–50 m²,Dynamic front,homeT,2026-01-24 09:17:48.298037+00
+10,Monitor Audio,Bronze 100,bookshelf,true,2,8,87,37Hz–30kHz,2800,100,200,8,C-CAM Gold,Bass Reflex,true,376,231,325,7.8,15–35 m²,Large bookshelf,homeT,2026-01-24 09:17:48.298037+00
+11,Monitor Audio,Silver 300,floorstanding,true,2,8,90,32Hz–35kHz,2500,200,300,6,C-CAM Gold,Bass Reflex,true,1000,185,300,18,30–50 m²,Prevented distortion,homeT,2026-01-24 09:17:48.298037+00
+12,KEF,Q350,bookshelf,true,2,8,87,63Hz–28kHz,2800,120,200,6.5,Uni-Q,Bass Reflex,true,358,210,306,7.6,15–30 m²,Coaxial driver,homeT,2026-01-24 09:17:48.298037+00
+13,KEF,Q750,floorstanding,true,2,8,88,48Hz–28kHz,2500,150,300,6.5,Uni-Q,Bass Reflex,true,923,210,306,16,25–45 m²,Slim front,homeT,2026-01-24 09:17:48.298037+00
+14,JBL,Studio 530,bookshelf,true,2,6,86,45Hz–40kHz,1500,125,200,5.25,Compression Driver,Bass Reflex,false,350,215,300,7.7,15–30 m²,Cinema tuned,homeT,2026-01-24 09:17:48.298037+00
+15,JBL,Stage A190,floorstanding,true,2,6,91,36Hz–40kHz,2000,225,400,8,Aluminium,Bass Reflex,false,1058,260,370,24,30–55 m²,High output front,homeT,2026-01-24 09:17:48.298037+00
+16,Wharfedale,Diamond 12.2,bookshelf,true,2,8,88,50Hz–20kHz,2500,120,200,6.5,Soft Dome,Bass Reflex,false,335,200,300,8.5,15–30 m²,Warm sound,homeT,2026-01-24 09:17:48.298037+00
+17,Wharfedale,Evo 4.4,floorstanding,true,2,8,89,44Hz–22kHz,2900,200,400,6.5,AMT,Bass Reflex,true,1060,250,370,25,30–55 m²,AMT tweeter,homeT,2026-01-24 09:17:48.298037+00
+18,Elac,Debut 2.0 B6.2,bookshelf,true,2,6,87,44Hz–35kHz,2200,120,200,6.5,Cloth Dome,Bass Reflex,false,375,195,268,7.4,15–30 m²,Excellent value,homeT,2026-01-24 09:17:48.298037+00
+19,Elac,Debut F6.2,floorstanding,true,2,6,87,39Hz–35kHz,2200,200,300,6.5,Cloth Dome,Bass Reflex,false,1090,230,330,20,30–50 m²,Cinema ready,homeT,2026-01-24 09:17:48.298037+00
+20,Triangle,Borea BR08,floorstanding,true,2,8,92,40Hz–22kHz,3000,200,300,6.5,Silk Dome,Bass Reflex,true,1020,206,314,22,30–55 m²,High efficiency,homeT,2026-01-24 09:17:48.298037+00
+21,Polk Audio,Signature S55,floorstanding,true,2,8,90,32Hz–40kHz,2500,150,300,6.5,Terylene,Bass Reflex,true,1045,191,318,20,30–50 m²,Dolby Atmos ready,homeT,2026-01-24 09:17:48.298037+00
+22,Polk Audio,Signature S20,bookshelf,true,2,8,88,39Hz–40kHz,2500,125,200,6.5,Terylene,Bass Reflex,true,375,215,350,8.2,15–30 m²,Strong bass bookshelf,homeT,2026-01-24 09:17:48.298037+00
+23,SVS,Prime Bookshelf,bookshelf,true,2,8,87,48Hz–25kHz,2200,150,300,6.5,Aluminium Dome,Bass Reflex,true,344,193,220,6.4,15–30 m²,Neutral tuning,homeT,2026-01-24 09:17:48.298037+00
+24,SVS,Prime Tower,floorstanding,true,2,8,87,30Hz–25kHz,2200,200,400,6.5,Aluminium Dome,Bass Reflex,true,1042,203,330,21,30–60 m²,Deep bass front,homeT,2026-01-24 09:17:48.298037+00
+25,Magnat,Signature 707,floorstanding,true,2,4,92,32Hz–52kHz,2800,200,350,6.5,Dual Dome,Bass Reflex,true,1050,215,350,22,30–55 m²,High resolution,homeT,2026-01-24 09:17:48.298037+00
+26,Magnat,Monitor Supreme 202,bookshelf,true,2,8,91,42Hz–34kHz,3000,100,200,6.5,Dome,Bass Reflex,false,365,215,280,5.5,15–30 m²,Budget friendly,homeT,2026-01-24 09:17:48.298037+00
+27,Q Acoustics,3030i,bookshelf,true,2,8,88,46Hz–30kHz,2500,125,200,6.5,Soft Dome,Bass Reflex,false,325,200,329,6.4,15–30 m²,Clean modern sound,homeT,2026-01-24 09:17:48.298037+00
+28,Q Acoustics,3050i,floorstanding,true,2,6,91,44Hz–30kHz,2500,165,300,6.5,Soft Dome,Bass Reflex,false,1020,310,315,17.8,30–55 m²,Wide soundstage,homeT,2026-01-24 09:17:48.298037+00
+29,Dynaudio,Emit 20,bookshelf,true,2,6,86,44Hz–23kHz,3600,150,300,7,Cerotar,Bass Reflex,false,370,205,311,9.6,15–30 m²,Audiophile bookshelf,homeT,2026-01-24 09:17:48.298037+00
+30,Dynaudio,Emit 30,floorstanding,true,2,6,88,39Hz–23kHz,3200,200,300,6.5,Cerotar,Bass Reflex,false,900,170,270,15.5,25–45 m²,Accurate front,homeT,2026-01-24 09:17:48.298037+00

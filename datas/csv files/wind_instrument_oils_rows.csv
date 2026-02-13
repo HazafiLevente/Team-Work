@@ -1,0 +1,4 @@
+ID,manufacturer,Model,Type,HMany,oil_category,instrument_type,viscosity,application_area,suitable_for,target_level,notes,category
+1,Yamaha,BMMSLIDEOIL03," Olaj/krém fúvós hangszerekre"," 30 ml",Slide Oil,Brass,Light,Slide,Trombone,Beginner / Professional,"Könnyű csúszóolaj harsonához, sima mozgást biztosít",accessory
+2,Yamaha," BMMVALVEOILREG3"," Olaj/krém fúvós hangszerekre"," 60 ml",Valve Oil,Brass,Medium,Valves,"Trumpet, Cornet",Beginner / Professional,Általános szelepolaj rézfúvós hangszerekhez,accessory
+3,La Tromba," 493510"," Olaj/krém fúvós hangszerekre"," 30 ml",Valve Oil,Brass,Medium,Valves,"Trumpet, Trombone",Intermediate / Professional,"La Tromba prémium szelepolaj, hosszú élettartamú kenés",accessory

@@ -1,0 +1,4 @@
+id,manufacturer,model,sax_type,case_type,color,material,backpack_straps,notes,created_at,category
+1,Gator,GL-TENOR,Tenor,Soft case,Black,Nylon,true,"Könnyű, párnázott tenor szaxofon tok",2025-12-18 10:45:50.582154,wind_accessories
+2,BAM,4011SNN Cabine,Tenor,Hard case,Black,ABS shell,true,"Prémium, repülőgépre is alkalmas tenor szaxofon tok",2025-12-18 10:45:50.582154,wind_accessories
+3,SKB Cases,1SKB-450,Tenor,Hard case,Black,Molded plastic,false,"Masszív, ütésálló tenor szaxofon tok",2025-12-18 10:45:50.582154,wind_accessories

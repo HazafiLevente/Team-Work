@@ -1,0 +1,32 @@
+id,manufacturer,model,package_quantity,speaker_type,woofer_size_inch,tweeter_size_inch,power_watts_rms,peak_power_watts,sensitivity_db,max_spl_db,db_per_watt,benchmark_score,bluetooth,dsp,notes,category
+1,Yamaha,HS5,1,Active Studio Monitor,5.0,1.0,45,70,96.00,102.00,2.000,75.00,false,false,,speakerS
+2,Yamaha,HS5 SET,2,Active Studio Monitor,5.0,1.0,45,70,96.00,102.00,2.000,75.00,false,false,Pair,speakerS
+3,Yamaha,HS7,1,Active Studio Monitor,6.5,1.0,95,150,97.50,105.00,1.026,85.00,false,false,,speakerS
+4,Yamaha,HS7 SET,2,Active Studio Monitor,6.5,1.0,95,150,97.50,105.00,1.026,85.00,false,false,Pair,speakerS
+5,Yamaha,HS8,1,Active Studio Monitor,8.0,1.0,120,200,99.00,112.00,0.000,90.00,false,false,,speakerS
+6,Yamaha,HS8 SET,2,Active Studio Monitor,8.0,1.0,120,200,99.00,112.00,0.000,90.00,false,false,Pair,speakerS
+7,Yamaha,HS4,2,Active Studio Monitor,4.0,1.0,30,50,94.00,98.00,3.000,68.00,false,false,Compact pair,speakerS
+8,ADAM Audio,T5V,1,Active Studio Monitor,5.0,1.9,50,100,96.00,102.00,1.000,78.00,false,true,,speakerS
+9,ADAM Audio,T5V SET,2,Active Studio Monitor,5.0,1.9,50,100,96.00,102.00,1.000,78.00,false,true,Pair,speakerS
+10,ADAM Audio,T7V,1,Active Studio Monitor,7.0,1.9,70,140,98.00,108.00,1.000,85.00,false,true,,speakerS
+11,ADAM Audio,T7V SET,2,Active Studio Monitor,7.0,1.9,70,140,98.00,108.00,1.000,85.00,false,true,Pair,speakerS
+12,ADAM Audio,T8V,1,Active Studio Monitor,8.0,1.9,120,200,99.00,112.00,0.000,90.00,false,true,,speakerS
+13,ADAM Audio,T8V SET,2,Active Studio Monitor,8.0,1.9,120,200,99.00,112.00,0.000,90.00,false,true,Pair,speakerS
+14,ADAM Audio,A7V,1,Active Studio Monitor,7.0,1.9,110,200,100.00,114.00,0.000,92.00,false,true,High-end,speakerS
+15,KRK,Classic 5,2,Active Studio Monitor,5.0,1.0,50,100,96.00,102.00,1.000,76.00,false,false,Pack,speakerS
+16,KRK,RP5 G5,1,Active Studio Monitor,5.0,1.0,55,100,97.00,104.00,1.000,78.00,false,true,,speakerS
+17,KRK,RP5 G5 SET,2,Active Studio Monitor,5.0,1.0,55,100,97.00,104.00,1.000,78.00,false,true,Pair,speakerS
+18,KRK,RP7 G5,1,Active Studio Monitor,7.0,1.0,85,145,98.00,108.00,1.000,85.00,false,true,,speakerS
+19,KRK,RP7 G5 SET,2,Active Studio Monitor,7.0,1.0,85,145,98.00,108.00,1.000,85.00,false,true,Pair,speakerS
+20,KRK,RP8 G5,1,Active Studio Monitor,8.0,1.0,120,200,100.00,112.00,0.000,90.00,false,true,,speakerS
+21,KRK,RP8 G5 SET,2,Active Studio Monitor,8.0,1.0,120,200,100.00,112.00,0.000,90.00,false,true,Pair,speakerS
+22,JBL,LSR305P MKII,1,Active Studio Monitor,5.0,1.0,41,82,95.00,102.00,2.000,77.00,false,false,,speakerS
+23,JBL,LSR305P MKII Pair,2,Active Studio Monitor,5.0,1.0,41,82,95.00,102.00,2.000,77.00,false,false,Pair,speakerS
+24,Presonus,Eris 3.5,2,Active Studio Monitor,3.5,1.0,25,50,94.00,98.00,3.000,68.00,true,false,Desktop,speakerS
+25,Presonus,Eris 4.5,2,Active Studio Monitor,4.5,1.0,50,75,96.00,102.00,1.000,75.00,true,false,,speakerS
+26,Presonus,Eris 5,2,Active Studio Monitor,5.0,1.0,55,100,97.00,104.00,1.000,78.00,true,false,,speakerS
+27,Mackie,CR3.5,2,Active Studio Monitor,3.5,1.0,25,50,94.00,98.00,3.000,68.00,true,false,,speakerS
+28,Mackie,CR5BT,2,Active Studio Monitor,5.0,1.0,50,100,96.00,102.00,1.000,75.00,true,false,,speakerS
+29,Focal,Alpha 50 Evo,1,Active Studio Monitor,5.0,1.0,55,100,97.00,104.00,1.000,82.00,false,true,Pro monitor,speakerS
+30,IK Multimedia,iLoud MTM MKII,2,Active Studio Monitor,3.5,1.0,100,150,98.00,110.00,0.000,90.00,true,true,Calibration,speakerS
+31,Behringer,Truth 4.5 BT,2,Active Studio Monitor,4.5,1.0,60,100,96.00,102.00,1.000,72.00,true,false,,speakerS

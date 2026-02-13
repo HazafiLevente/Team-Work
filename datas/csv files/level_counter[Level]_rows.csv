@@ -1,0 +1,9 @@
+id,type,points,created_at,isPositive
+1,register,100,2026-02-09 11:41:53.375906+00,true
+2,"setup_create
+",150,2026-02-09 11:42:25.711518+00,true
+3,setup_delete,150,2026-02-09 11:44:40.461411+00,false
+4,product_add,150,2026-02-09 11:45:07.674673+00,true
+5,product_delete,150,2026-02-09 11:45:39.403779+00,false
+6,product_view,100,2026-02-09 11:46:39.859287+00,true
+7,product_search,50,2026-02-09 11:47:00.36227+00,true

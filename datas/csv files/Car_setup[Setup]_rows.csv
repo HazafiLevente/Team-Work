@@ -1,0 +1,12 @@
+id,cabrio_id,hatchback_id,coupe_id,wagon_id,created_at,setup_id,setup_name,mpv_id,crossover_id,pickup_id
+2,,,,,2026-01-11 17:01:26.776022+00,14,HONDA Civic 1.8 Sport,,,
+4,,,,,2026-01-11 17:08:40.431564+00,14,HONDA Civic 2.0 Type R GT Pack,,,
+6,,,,,2026-01-11 17:37:23.135678+00,14,FERRARI Purosangue,,,
+7,,,,,2026-01-11 17:42:03.659932+00,14,PORSCHE 911 GT3 PDK,,,
+8,,,,,2026-01-16 12:02:39.956347+00,14,SUBARU Impreza 2.5 WRX,,,
+12,,,,,2026-01-19 11:12:53.395402+00,24,SUZUKI Ignis 1.3 GLX AC,,,
+15,,,,,2026-01-23 18:38:35.82527+00,14,VOLVO XC90 2.0 T8 Ultra Bright,,,
+16,,,,,2026-01-25 12:38:55.433535+00,14,ALFA ROMEO Stelvio 2.9 T-V6 Quadrifoglio Q4,,,
+17,,,,,2026-01-25 13:00:39.469415+00,14,TOYOTA RAV4 2.2 D-4D 4x4 Sol,,,
+18,,,,,2026-01-25 13:48:49.773586+00,4,SKODA Octavia Combi 1.4 TSI Ambition,,,
+19,,,,,2026-01-26 11:56:55.261353+00,14,FORD S-Max 2.0 TDCi Titanium Powershift,,,

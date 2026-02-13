@@ -1,0 +1,13 @@
+ID,manufacturer,Model,Guitar,Color,Price,guitar_type,strings,baritone,body_type,target_genre,target_level,notes,category
+1,Ibanez,RG421PB-CHF,Elektromos gitár,Choco Fade,0,Electric,6,false,Solid,"Metal, Rock",Intermediate,"RG forma, vékony Wizard nyak, gyors riffekhez és szólókhoz",instrument
+2,Schecter,C-7 Pro Aqua Burst,Elektromos gitár,Aqua Burst,0,Electric,7,false,Solid,"Metal, Djent",Advanced,"7 húros gitár modern metal stílushoz, vastag mély hangzás",instrument
+3,ESP LTD,SC-608 Baritone Yellow,8 húros elektromos gitár,Yellow,0,Electric,8,true,Solid,"Extreme Metal, Djent",Advanced,8 húros baritone gitár extrém mély hangolásokhoz,instrument
+4,Ibanez,RG421MSP-TSP,Elektromos gitár,Tropical Seashore,0,Electric,6,false,Solid,"Rock, Metal",Intermediate,Modern RG modell színes Tropical Seashore finish-sel,instrument
+5,Spira,S-450 TPP,Elektromos gitár,Trans Purple,0,Electric,6,false,Solid,Modern Metal,Advanced,"Modern metal orientált hangszer, agresszív hangzás",instrument
+6,Solar Guitars,A2.6FRPN Canibalismo,Elektromos gitár,Black/Red,0,Electric,6,false,Solid,"Metal, Modern Metal",Professional,"Solar signature modell, Floyd Rose tremoló, színpadra tervezve",instrument
+7,LTD,M-200DX Purple Burst,Elektromos gitár,Purple Burst,0,Electric,6,false,Solid,"Metal, Rock",Intermediate,"Superstrat forma, kiváló ár/érték arány",instrument
+8,Spira,S-500 Q Fire Burst,Elektromos gitár,Fire Burst,0,Electric,6,false,Solid,"Metal, Progressive",Advanced,"Quilted top, modern megjelenés, progresszív stílus",instrument
+9,Ibanez,RG565R-DY,Elektromos gitár,Desert Yellow,0,Electric,6,false,Solid,"Shred, Metal",Advanced,Klasszikus RG modell shred játékstílushoz,instrument
+10,Jackson,Pro Plus Series Dinky DKAQ Firestorm,Elektromos gitár,Firestorm,0,Electric,6,false,Solid,"Metal, Shred",Advanced,"Dinky forma, gyors nyak, agresszív Firestorm dizájn",instrument
+11,Ibanez,GRG220PA,Elektromos gitár,Blue,0,Electric,6,false,Solid,"Metal, Rock",Intermediate,"Ibanez GRG220PA – belépő/középkategóriás RG stílus, rock/metalra jó.",instrument
+12,Ibanez,GRG121DX,Elektromos gitár,Black,0,Electric,6,false,Solid,"Metal, Rock",Intermediate,"Ibanez GRG121DX – GRG széria, rock/metalra, klasszikus “sharktooth” inlay vibe.",instrument

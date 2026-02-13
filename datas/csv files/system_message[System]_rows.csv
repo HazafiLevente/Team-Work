@@ -1,0 +1,5 @@
+id,title,message,target,created_at,sender
+1,System message #1,Ez egy teszt 'message'!!,OWNER,2026-01-19 12:21:28.378891+00,1
+2,System message #2,Ezb egy teszt 'message'!!,OWNER,2026-01-19 14:19:48.013138+00,1
+3,"System message #3 ",ez egy teszt 'message'!!,All,2026-01-25 13:11:11.182774+00,1
+4,Teszt értesítés 🔔,"Ha ezt látod, a bell rendszer működik.",all,2026-02-06 20:48:12.957559+00,

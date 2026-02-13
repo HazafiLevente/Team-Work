@@ -1,0 +1,12 @@
+ID,Manufacturer,Model,Price Range (Ft),Body Type,Horsepower,Acceleration (s),Seats,Fuel Type,Year,Transmission,category,Avgprice
+1,PEUGEOT,206 CC 1.6 16V,100000 - 499999,Cabrio,100 - 149,14.9 - 10,4,Petrol,2003-2007,Manual,car,500000
+2,OPEL,TIGRA TT 1.4 16V,500000 - 999999,Cabrio,61 - 99,14.9 - 10,2,Petrol,2004-2010,Manual,car,900000
+3,FORD,FOCUS Coupe Cabrio 2.0 TDCi,1000000 - 3900000,Cabrio,100 - 149,14.9 - 10,4,Diesel,2008-2009,Manual,car,1675000
+4,AUDI,A4 Cabrio 2.0 TFSI,1000000 - 3900000,Cabrio,200 - 249,7.9 - 6,4,Petrol,2007-2009,Manual,car,2700000
+5,AUDI,A5 CABRIO 3.0 TDI DPF quattro S-tronic,4000000 - 9900000,Cabrio,200 - 249,7.9 - 6,4,Diesel,2009-2011,Manual,car,5500000
+6,BMW,M235I,4000000 - 9900000,Cabrio,300 - 399,5.9 - 4,4,Petrol,2014–,Automatic,car,9000000
+7,BMW,M4 Competition DKG,10000000 - 24900000,Cabrio,400 - 499,5.9 - 4,4,Petrol,2017–,Automatic,car,18000000
+8,FERRARI,California 4.3 V8,50000000 - 99000000,Cabrio,400 - 499,5.9 - 4,2,Petrol,2009–,Automatic,car,50000000
+9,MG,Cyberster Trophy 77kWh,25000000 - 49900000,Cabrio,300 - 399,5.9 - 4,2,Electric,2025–,Automatic,car,27250000
+10,MERCEDES-AMG,SL 63 4Matic+ 9G-TRONIC,50000000 - 99900000,Cabrio,500+,Under 4,2,Petrol,2022–,Automatic,car,66000000
+11,FERRARI,SF90 SPIDER,100000000+,Cabrio,500+,Under 4,2,Petrol,2021–,Automatic,car,277000000

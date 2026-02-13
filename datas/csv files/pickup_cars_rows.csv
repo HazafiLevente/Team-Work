@@ -1,0 +1,9 @@
+ID,Manufacturer,Model,Price Range (Ft),Body Type,Horsepower,Acceleration (s),Seats,Fuel Type,Year,Transmission,category,Avgprice
+1,NISSAN,Navara 4WD Double 2.5D LE,1000000 - 3900000,Pickup,150 - 199,14.9 - 10,5,Diesel,2005-2007,Manual,car,2700000
+2,FORD,Ranger 2.5 TD 4x4,1000000 - 3900000,Pickup,100 - 149,29.9 - 25,5,Diesel,2002-2007,Manual,car,2660000
+3,MAZDA,BT-50 2.5 D 4x4 DK TE,1000000 - 3900000,Pickup,100 - 149,14.9 - 10,5,Diesel,2009-2012,Manual,car,3375000
+4,MITSUBISHI,L 200 Pick Up 2.5 TD DC Intense,4000000 - 9900000,Pickup,100 - 149,14.9 - 10,5,Diesel,2006-2010,Manual,car,4600000
+5,TOYOTA,Hilux 3.0 D-4D 4x4 Double SR+,4000000 - 9900000,Pickup,150 - 199,14.9 - 10,5,Diesel,2006-2010,Manual,car,9435000
+6,FORD,Ranger 3.2 TDCi 4x4 Wild Trak EURO6,4000000 - 9900000,Pickup,200 - 249,14.9 - 10,5,Diesel,2016–,Automatic,car,8760000
+7,ISUZU,D-Max 1.9 D LS Plus,10000000 - 24900000,Pickup,150 - 199,14.9 - 10,5,Diesel,2024–,Automatic,car,20100000
+8,FORD,F150 3.5 4x4 Hybrid Limited,4000000 - 9900000,Pickup,300 - 399,5.9 - 4,5,Petrol,2021–,Automatic,car,47000000

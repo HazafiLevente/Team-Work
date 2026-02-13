@@ -1,0 +1,22 @@
+id,manufacturer,model,speaker_type,way,impedance_ohm,sensitivity_db,frequency_response,rms_power_w,peak_power_w,woofer_count,woofer_size_inch,midrange_size_inch,tweeter_type,height_mm,weight_kg,bass_reflex,bi_wire,recommended_use,category,notes,created_at
+1,Focal,Chorus 726,floorstanding,3,8,91,49Hz–28kHz,250,500,2,6.5,6.5,Al/Mg inverted dome,990,23,true,true,Home cinema / music,homeT,Dynamic French tuning,2026-01-31 15:35:41.749479+00
+2,Focal,Aria 926,floorstanding,3,8,91,45Hz–28kHz,250,500,2,6.5,6.5,TNF inverted dome,1035,25,true,true,High-end cinema,homeT,Flax cone series,2026-01-31 15:35:41.749479+00
+3,Focal,Chora 826,floorstanding,3,8,91,48Hz–28kHz,250,500,2,6.5,6.5,Al/Mg dome,1035,22,true,true,Cinema,homeT,Modern design,2026-01-31 15:35:41.749479+00
+4,Bowers & Wilkins,603 S2 Anniversary,floorstanding,3,8,88,48Hz–28kHz,200,400,2,6.5,6.5,Decoupled double dome,985,24,true,true,Cinema / stereo,homeT,Clean British sound,2026-01-31 15:35:41.749479+00
+5,Bowers & Wilkins,702 S2,floorstanding,3,8,90,46Hz–28kHz,300,600,3,6.5,6.5,Carbon dome,1010,30,true,true,Reference,homeT,High resolution,2026-01-31 15:35:41.749479+00
+6,JBL,Stage A190,floorstanding,3,8,91,36Hz–40kHz,225,450,2,8,8,Aluminum dome,1095,25,true,true,Cinema,homeT,High sensitivity,2026-01-31 15:35:41.749479+00
+7,JBL,Studio 698,floorstanding,3,8,90,36Hz–40kHz,250,500,3,6.5,6.5,HDI compression,1100,38,true,true,High-end,homeT,Wide dispersion,2026-01-31 15:35:41.749479+00
+8,Klipsch,RP-8000F,floorstanding,2,8,98,32Hz–25kHz,150,600,2,8,,Titanium horn,1090,27,true,true,Cinema,homeT,Extremely efficient,2026-01-31 15:35:41.749479+00
+9,Klipsch,Reference R-620F,floorstanding,2,8,96,38Hz–21kHz,100,400,2,6.5,,Horn tweeter,1017,19,true,false,Entry cinema,homeT,Loud & dynamic,2026-01-31 15:35:41.749479+00
+10,SVS,Prime Tower,floorstanding,3,8,87,30Hz–25kHz,250,500,2,6.5,4.5,Aluminum dome,1042,21,true,true,Cinema,homeT,Deep bass without sub,2026-01-31 15:35:41.749479+00
+11,SVS,Ultra Tower,floorstanding,3,8,88,28Hz–32kHz,300,600,2,8,6.5,Aluminum dome,1150,35,true,true,Reference,homeT,Room-filling sound,2026-01-31 15:35:41.749479+00
+12,KEF,Q750,floorstanding,3,8,88,48Hz–28kHz,200,400,2,6.5,6.5,Uni-Q aluminum,923,22,true,true,Cinema,homeT,Wide sweet spot,2026-01-31 15:35:41.749479+00
+13,KEF,R7,floorstanding,3,8,88,33Hz–50kHz,250,500,2,6.5,5,Uni-Q hybrid,1100,31,true,true,High-end,homeT,Audiophile,2026-01-31 15:35:41.749479+00
+14,Monitor Audio,Silver 300,floorstanding,3,8,90,32Hz–35kHz,200,400,2,8,4,C-CAM gold dome,1000,26,true,true,Cinema,homeT,Tight bass,2026-01-31 15:35:41.749479+00
+15,Monitor Audio,Bronze 500,floorstanding,3,8,90,32Hz–30kHz,200,400,2,8,,C-CAM dome,1050,23,true,true,Cinema,homeT,Best value,2026-01-31 15:35:41.749479+00
+16,Polk Audio,RTi A7,floorstanding,3,8,89,20Hz–27kHz,300,600,2,7,,Silk dome,1100,29,true,true,Cinema,homeT,Big bass,2026-01-31 15:35:41.749479+00
+17,Polk Audio,Signature S60,floorstanding,3,8,90,26Hz–40kHz,300,600,2,6.5,,Terylene dome,1080,26,true,true,Cinema,homeT,Modern tuning,2026-01-31 15:35:41.749479+00
+18,DALI,Oberon 7,floorstanding,2,6,88,36Hz–26kHz,180,360,2,7,,Soft dome,1015,25,true,true,Cinema,homeT,Natural sound,2026-01-31 15:35:41.749479+00
+19,DALI,Opticon 6,floorstanding,3,4,88,39Hz–32kHz,200,400,2,6.5,,Hybrid dome+ribbon,1001,24,true,true,High-end,homeT,Airy highs,2026-01-31 15:35:41.749479+00
+20,Wharfedale,Diamond 12.4,floorstanding,3,8,89,40Hz–20kHz,200,400,2,6.5,,Soft dome,1015,24,true,true,Cinema,homeT,Warm sound,2026-01-31 15:35:41.749479+00
+21,Wharfedale,Evo 4.4,floorstanding,3,8,89,44Hz–22kHz,220,440,2,6.5,2,AMT ribbon,1060,29,true,true,High-end,homeT,Ribbon tweeter,2026-01-31 15:35:41.749479+00

@@ -1,0 +1,68 @@
+id,manufacturer,model,device_type,channels,dolby_atmos,dts_x,surround,hdmi_in,hdmi_out,hdmi_earc,console_ready,network,bluetooth,airplay,spotify_connect,phono_input,sub_out,notes,category
+1,Marantz,Model M1,Stereo Amp,2.0,false,false,false,,,false,false,true,true,true,true,false,1,,homeT
+2,Marantz,PM6007,Integrated Amp,2.0,false,false,false,,,false,false,false,false,false,false,true,1,,homeT
+3,Marantz,Cinema 60,AVR,7.2,true,true,true,6,2,true,true,true,true,true,true,true,2,,homeT
+4,Marantz,Stereo 70s,AVR,7.2,true,true,true,6,2,true,true,true,true,true,true,true,2,,homeT
+5,Marantz,Melody X M-CR612,Stereo Receiver,2.1,false,false,false,1,1,true,false,true,true,true,true,false,1,,homeT
+6,Marantz,NR1510,AVR,5.2,true,false,true,6,1,true,false,true,true,true,true,false,2,,homeT
+7,Marantz,Cinema 50,AVR,9.4,true,true,true,6,3,true,true,true,true,true,true,true,4,,homeT
+8,Marantz,Cinema 40,AVR,9.4,true,true,true,7,3,true,true,true,true,true,true,true,4,,homeT
+9,Marantz,MODEL 60n,Integrated Amp,2.0,false,false,false,,,false,false,true,true,true,true,true,1,,homeT
+10,Marantz,Model 30,Integrated Amp,2.0,false,false,false,,,false,false,false,false,false,false,true,1,,homeT
+11,Marantz,Cinema 30,AVR,11.4,true,true,true,7,3,true,true,true,true,true,true,true,4,,homeT
+12,Denon,AVR-X1800H,AVR,7.2,true,true,true,6,1,true,true,true,true,true,true,true,2,,homeT
+13,Denon,AVR-X2800H,AVR,7.2,true,true,true,6,2,true,true,true,true,true,true,true,2,,homeT
+14,Denon,AVC-X2850H,AVR,7.2,true,true,true,6,2,true,true,true,true,true,true,true,2,,homeT
+15,Denon,AVC-X3800H,AVR,9.4,true,true,true,6,3,true,true,true,true,true,true,true,4,,homeT
+16,Denon,AVC-X4800H,AVR,9.4,true,true,true,7,3,true,true,true,true,true,true,true,4,,homeT
+17,Denon,AVC-S670H,AVR,5.2,true,true,true,6,1,true,true,true,true,true,true,true,2,,homeT
+18,Denon,DRA-900H,Stereo Receiver,2.0,false,false,false,6,1,true,true,true,true,true,true,true,2,,homeT
+19,Denon,PMA-600NE,Integrated Amp,2.0,false,false,false,,,false,false,false,true,false,false,true,1,,homeT
+20,Denon,PMA-900HNE,Integrated Amp,2.0,false,false,false,,,false,false,true,true,true,true,true,1,,homeT
+21,Yamaha,RX-V4A,AVR,5.2,true,false,true,4,1,true,true,true,true,true,true,false,1,,homeT
+22,Yamaha,RX-V6A,AVR,7.2,true,true,true,7,1,true,true,true,true,true,true,false,2,,homeT
+23,Yamaha,R-S202D,Stereo Receiver,2.0,false,false,false,,,false,false,false,true,false,false,false,1,,homeT
+24,Yamaha,A-S201,Integrated Amp,2.0,false,false,false,,,false,false,false,false,false,false,false,1,,homeT
+25,Yamaha,A-S301,Integrated Amp,2.0,false,false,false,,,false,false,false,false,false,false,true,1,,homeT
+26,Yamaha,A-S501,Integrated Amp,2.0,false,false,false,,,false,false,false,false,false,false,true,1,,homeT
+27,Yamaha,A-S701,Integrated Amp,2.0,false,false,false,,,false,false,false,false,false,false,true,1,,homeT
+28,Yamaha,A-S1200,Integrated Amp,2.0,false,false,false,,,false,false,false,false,false,false,true,1,,homeT
+29,Yamaha,R-N600A,Stereo Receiver,2.0,false,false,false,,,false,false,true,true,true,true,true,1,,homeT
+30,Yamaha,R-N800A,Stereo Receiver,2.0,false,false,false,,,false,false,true,true,true,true,true,1,,homeT
+31,Onkyo,TX-SR393,AVR,5.2,true,true,true,4,1,true,false,false,true,false,false,false,2,,homeT
+32,Onkyo,TX-SR494,AVR,7.2,true,true,true,4,1,true,false,true,true,false,false,false,2,,homeT
+33,Onkyo,TX-SR3100,AVR,5.2,true,true,true,4,1,true,true,true,true,false,false,false,2,,homeT
+34,Onkyo,TX-NR6100,AVR,7.2,true,true,true,6,2,true,true,true,true,true,true,false,2,,homeT
+35,Onkyo,TX-NR7100,AVR,9.2,true,true,true,6,2,true,true,true,true,true,true,false,2,,homeT
+36,Onkyo,TX-RZ30,AVR,9.2,true,true,true,6,2,true,true,true,true,true,true,false,2,,homeT
+37,Onkyo,TX-RZ50,AVR,9.2,true,true,true,6,2,true,true,true,true,true,true,false,2,,homeT
+38,Onkyo,TX-RZ70,AVR,11.2,true,true,true,7,3,true,true,true,true,true,true,false,2,,homeT
+39,Onkyo,TX-8220,Stereo Receiver,2.0,false,false,false,4,1,true,false,false,true,false,false,true,1,,homeT
+40,Onkyo,TX-8470,Stereo Receiver,2.0,false,false,false,6,1,true,false,true,true,true,true,true,2,,homeT
+41,Sony,STR-DH190,Stereo Receiver,2.0,false,false,false,,,false,false,false,true,false,false,false,1,,homeT
+42,Sony,STR-DH590,AVR,5.2,true,false,true,4,1,true,false,false,true,false,false,false,2,,homeT
+43,Sony,STR-DH790,AVR,7.2,true,true,true,4,1,true,false,false,true,false,false,false,2,,homeT
+44,Sony,TA-AN1000,AVR,7.2,true,true,true,6,2,true,true,true,true,true,true,false,2,,homeT
+45,Pioneer,VSX-535D,AVR,5.2,true,false,true,4,1,true,false,false,true,false,false,false,2,,homeT
+46,Pioneer,VSX-835D-B,AVR,7.2,true,true,true,6,1,true,true,true,true,false,false,false,2,,homeT
+47,Pioneer,VSX-935,AVR,7.2,true,true,true,6,2,true,true,true,true,false,false,false,2,,homeT
+48,Pioneer,VSX-LX305,AVR,9.2,true,true,true,6,2,true,true,true,true,false,false,false,2,,homeT
+49,Pioneer,VSX-LX505,AVR,9.2,true,true,true,6,2,true,true,true,true,false,false,false,2,,homeT
+50,Pioneer,A-10AE,Integrated Amp,2.0,false,false,false,,,false,false,false,false,false,false,true,1,,homeT
+51,Pioneer,SC-LX81,AVR,7.1,true,true,true,5,1,false,false,false,false,false,false,false,2,,homeT
+52,Cambridge Audio,AXA35,Integrated Amp,2.0,false,false,false,,,false,false,false,false,false,false,true,1,,homeT
+53,Cambridge Audio,AXR100,Stereo Receiver,2.0,false,false,false,3,1,true,false,false,false,false,false,true,2,,homeT
+54,Cambridge Audio,CXA81 MKII,Integrated Amp,2.0,false,false,false,,,false,false,true,true,true,true,false,1,,homeT
+55,Cambridge Audio,EXA100,Integrated Amp,2.0,false,false,false,,,false,false,true,true,true,true,false,1,,homeT
+56,JBL,MA310,AVR,5.2,true,false,true,4,1,true,true,true,true,false,false,false,2,,homeT
+57,JBL,MA510,AVR,5.2,true,false,true,4,1,true,true,true,true,false,false,false,2,,homeT
+58,WiiM,Amp,Stereo Amp,2.0,false,false,false,,,false,false,true,true,true,true,false,1,,homeT
+59,Harman/Kardon,Citation Amp,Stereo Amp,2.0,false,false,false,,,false,false,true,true,true,true,false,1,,homeT
+60,Tangent,Ampster II BT,Stereo Amp,2.0,false,false,false,,,false,false,false,true,false,false,false,1,,homeT
+61,BlitzWolf,AS-22,Stereo Amp,2.0,false,false,false,,,false,false,false,true,false,false,false,1,,homeT
+62,Aiwa,AMU-120BT,Stereo Amp,2.0,false,false,false,,,false,false,false,true,false,false,false,1,,homeT
+63,Musical Fidelity,M2si,Integrated Amp,2.0,false,false,false,,,false,false,false,false,false,false,false,1,,homeT
+64,Musical Fidelity,M6si,Integrated Amp,2.0,false,false,false,,,false,false,false,false,false,false,false,1,,homeT
+65,Audiolab,6000A MKII,Integrated Amp,2.0,false,false,false,,,false,false,true,true,true,true,false,1,,homeT
+66,Audiolab,7000A,Integrated Amp,2.0,false,false,false,,,false,false,true,true,true,true,false,1,,homeT
+67,Technics,SU-G700M2E-K,Integrated Amp,2.0,false,false,false,,,false,false,true,true,true,true,false,1,,homeT

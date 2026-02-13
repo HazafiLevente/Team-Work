@@ -1,0 +1,7 @@
+id,manufacturer,model,series,keys_count,pads,knobs,faders,aftertouch,velocity_sensitive,midi_in,midi_out,midi_thru,usb_midi,daw_integration,power_type,dimensions,weight_kg,compatible_os,release_year,notes,created_at,category
+1,Akai,MPK Mini MK3,MPK,25,8,8,0,false,true,false,false,false,true,"Ableton, FL Studio, Logic",USB,318 x 181 x 44 mm,0.75,"Windows, macOS",2020,Kompakt MIDI billentyű padekkel,2025-12-17 13:58:40.169982,accessory
+2,M-Audio,Keystation 49 MK3,Keystation,49,0,0,0,false,true,false,false,false,true,"Ableton, Pro Tools",USB,822 x 189 x 68 mm,2.1,"Windows, macOS",2019,Egyszerű MIDI billentyűzet,2025-12-17 13:58:40.169982,accessory
+3,Arturia,KeyLab Essential 49,KeyLab,49,8,9,9,false,true,false,false,false,true,"Ableton, Logic, FL",USB,784 x 248 x 76 mm,3,"Windows, macOS",2021,DAW-barát MIDI kontroller,2025-12-17 13:58:40.169982,accessory
+4,Nektar,Impact LX49+,Impact,49,8,8,9,false,true,false,false,false,true,"Ableton, Cubase, Logic",USB,804 x 267 x 69 mm,3.1,"Windows, macOS",2018,Nagyon jó DAW integráció,2025-12-17 13:58:40.169982,accessory
+5,Native Instruments,Komplete Kontrol A49,Komplete Kontrol,49,0,8,0,false,true,false,false,false,true,"Komplete, Ableton",USB,820 x 257 x 89 mm,2.8,"Windows, macOS",2019,NI ökoszisztémára optimalizálva,2025-12-17 13:58:40.169982,accessory
+6,Novation,Launchkey 49 MK3,Launchkey,49,16,8,9,false,true,false,false,false,true,Ableton Live,USB,789 x 258 x 77 mm,3.4,"Windows, macOS",2020,Abletonre kihegyezve,2025-12-17 13:58:40.169982,accessory
