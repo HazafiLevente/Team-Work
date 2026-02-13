@@ -1,4 +1,5 @@
-const { supabase } = require("../services/supabase");
+/*const { supabase } = require("../services/supabase");
+
 
 // ⚠️ CSAK OLYAN TÁBLÁK, AMIK TÉNYLEG setup-hoz kötöttek
 const SETUP_CHILD_TABLES = [
@@ -161,3 +162,4 @@ exports.remove = async (req, res) => {
         res.status(500).json({ error: "Delete failed" });
     }
 };
+*/

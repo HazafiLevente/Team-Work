@@ -3,18 +3,22 @@ import { Router, RouterLink } from "@angular/router";
 import { FormsModule } from '@angular/forms';
 import { AuthService } from "../../Services/Auth/auth.service";
 import { filter, take } from "rxjs/operators";
+import { CommonModule } from '@angular/common';
+
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink],
   templateUrl: './login.component.html',
   styleUrl: './login.component.css'
 })
+
 export class LoginComponent {
   email = "";
   password = "";
   rememberMe = false;
+  errorMessage = "";
 
   constructor(
     private auth: AuthService,
@@ -22,16 +26,31 @@ export class LoginComponent {
   ) {}
 
   submit() {
+    this.errorMessage = "";
+
     this.auth.login({
       email: this.email,
       password: this.password,
       rememberMe: this.rememberMe
-    }).pipe(
-      // ✅ biztosan csak akkor navigálunk, ha az új user tényleg megjött
-      filter(u => !!u),
-      take(1)
-    ).subscribe({
-      next: () => this.router.navigateByUrl('/home')
-    });
+    })
+      .pipe(take(1))
+      .subscribe({
+        next: (user) => {
+          if (!user) {
+            this.errorMessage = "Hibás email vagy jelszó!";
+            return;
+          }
+          this.router.navigateByUrl('/home');
+        },
+        error: (err) => {
+          if (err.status === 401) {
+            this.errorMessage = "Hibás email vagy jelszó!";
+          } else {
+            this.errorMessage = "Szerver hiba. Próbáld újra.";
+          }
+        }
+      });
   }
+
 }
+
