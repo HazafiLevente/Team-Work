@@ -169,3 +169,77 @@
   }
 
 }
+/* alapból desktop: NE látszódjon */
+.mobile-only { display: none; }
+.desktop-only { display: block; }
+
+/* a gomb mobilon legyen fix lent */
+@media (max-width: 768px) {
+  .mobile-only { display: inline-flex; }
+  .desktop-only { display: none; }
+
+  .more-btn{
+    position: fixed;
+    left: 12px;
+    bottom: 92px; /* dock fölé */
+    z-index: 80;
+
+    padding: 10px 12px;
+    border-radius: 12px;
+
+    background: var(--surface);
+    border: 1px solid var(--glass-border);
+    color: var(--text);
+    cursor: pointer;
+  }
+}
+
+/* bottom sheet */
+.mobile-overlay{
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.55);
+  z-index: 90;
+}
+
+.mobile-sheet{
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 82vh;
+
+  transform: translateY(100%);
+  transition: transform .18s ease;
+
+  z-index: 100;
+  background: var(--surface);
+  border-top: 1px solid var(--glass-border);
+  border-radius: 16px 16px 0 0;
+  overflow: auto;
+}
+
+.mobile-sheet.open{
+  transform: translateY(0);
+}
+
+.sheet-header{
+  position: sticky;
+  top: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  padding: 12px;
+  border-bottom: 1px solid var(--glass-border);
+  background: var(--surface);
+  z-index: 2;
+}
+
+.sheet-header .x{
+  background: transparent;
+  border: 1px solid var(--glass-border);
+  border-radius: 10px;
+  color: var(--text);
+  padding: 6px 10px;
+}

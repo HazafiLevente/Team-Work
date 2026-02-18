@@ -7,23 +7,17 @@
       <div class="sub">{{ displayManufacturer || 'N/A' }}</div>
     </div>
 
-
     <button class="close-btn" (click)="close()">✕</button>
   </div>
 
   <div class="panel-body">
     <div *ngIf="loading">Betöltés...</div>
 
-    <div *ngIf="!loading && error" class="error">
-      {{ error }}
-    </div>
+    <div *ngIf="!loading && error" class="error">{{ error }}</div>
 
     <div *ngIf="!loading && details">
       <div class="price">
-        Ár:
-        <strong>
-          {{ details.price ? (details.price | number:'1.0-0') + ' Ft' : 'N/A' }}
-        </strong>
+        Ár: <strong>{{ details.price ? (details.price | number:'1.0-0') + ' Ft' : 'N/A' }}</strong>
       </div>
 
       <div class="kv">
@@ -34,12 +28,12 @@
           </ng-container>
         </div>
       </div>
-
-      <div class="panel-footer">
-        <button class="btn secondary" (click)="onMore()">Több</button>
-        <button class="btn primary icon" (click)="onPlus()">+</button>
-      </div>
-
     </div>
+  </div>
+
+  <!-- ✅ footer külön, nem a scrollban -->
+  <div class="panel-footer" *ngIf="!loading && details">
+    <button type="button" class="btn secondary" (click)="onMore()">Több</button>
+    <button type="button" class="btn primary icon" (click)="onPlus()">+</button>
   </div>
 </div>

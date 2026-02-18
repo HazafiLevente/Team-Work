@@ -12,6 +12,7 @@ import { ProductService } from '../../Services/Home/ProductParts/product/product
   imports: [CommonModule],
   templateUrl: './product-details-panel.component.html',
   styleUrls: ['./product-details-panel.component.css']
+
 })
 export class ProductDetailsPanelComponent implements OnChanges {
 

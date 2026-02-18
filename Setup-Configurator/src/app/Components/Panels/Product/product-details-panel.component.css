@@ -1,12 +1,20 @@
 :root { --header-h: 74px; }
 
+:host{
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+}
+
+/* háttér */
 .overlay{
   position: fixed;
   inset: 0;
   background: rgba(0,0,0,.45);
-  z-index: 999;
+  z-index: 9998;
 }
 
+/* panel */
 .panel{
   position: fixed;
   top: var(--header-h);
@@ -17,15 +25,20 @@
   background: rgba(14,14,18,0.92);
   color: #fff;
 
-  z-index: 1000;
+  z-index: 9999;
+
   display: flex;
   flex-direction: column;
 
   border-left: 1px solid rgba(255,255,255,.10);
   box-shadow: -20px 0 60px rgba(0,0,0,.6);
   backdrop-filter: blur(10px);
+
+  /* ✅ fontos: a scroll csak a body-ban legyen */
+  overflow: hidden;
 }
 
+/* fejléc */
 .panel-header{
   padding: 16px;
   border-bottom: 1px solid rgba(255,255,255,.12);
@@ -33,6 +46,12 @@
   align-items: center;
   justify-content: space-between;
   gap: 12px;
+
+  /* maradjon fent */
+  position: sticky;
+  top: 0;
+  background: rgba(14,14,18,0.92);
+  z-index: 2;
 }
 
 .title .model{ font-size: 18px; font-weight: 700; }
@@ -47,12 +66,32 @@
   cursor: pointer;
 }
 
+/* ✅ itt görgetünk */
 .panel-body{
   flex: 1;
-  overflow: auto;
-  padding: 16px; /* ✅ EZ HIÁNYZOTT */
+  min-height: 0;                 /* ✅ EZ A KULCS */
+  overflow-y: auto;              /* ✅ */
+  overflow-x: hidden;
+  padding: 16px;
+  -webkit-overflow-scrolling: touch;
 }
 
+/* ✅ footer fixen elérhető */
+.panel-footer{
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
+
+  padding: 14px 16px;
+  border-top: 1px solid rgba(255,255,255,.12);
+  background: rgba(14,14,18,0.92);
+
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+/* tartalom */
 .price{ margin-bottom: 14px; }
 
 .kv .row{
@@ -68,15 +107,7 @@
 
 .error{ color: #ff8a8a; }
 
-.panel-footer{
-  margin-top: auto;
-  padding: 14px 16px;
-  border-top: 1px solid rgba(255,255,255,.12);
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-}
-
+/* gombok */
 .btn{
   border: 1px solid rgba(255,255,255,.2);
   background: transparent;
@@ -101,26 +132,18 @@
   line-height: 1;
 }
 
-:host{
-  position: fixed;
-  inset: 0;
-  z-index: 9999;
-}
-
-
+/* mobil */
 @media (max-width: 768px){
-
   .panel{
-    left: 0 !important;
-    right: 0 !important;
-    width: 100vw !important;
+    left: 0;
+    right: 0;
+    width: 100vw;
 
-    top: auto !important;
-    bottom: 0 !important;
+    top: auto;
+    bottom: 0;
     height: 85vh;
 
     border-radius: 16px 16px 0 0;
-    max-width: none !important;
+    max-width: none;
   }
-
 }

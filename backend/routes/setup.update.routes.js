@@ -1,15 +1,17 @@
-/*const router = require("express").Router();
+const router = require("express").Router();
 const ctrl = require("../controllers/setup.controller");
 const verifyUser = require("../middlewares/verifyUser");
 
-// ✅ CREATE (ha nálad itt van)
+// ✅ PC BUILD mentés (FONTOS: a "/:id" elé!)
+router.patch("/pcbuilds/:pcId", verifyUser, ctrl.pcBuildsUpdate);
+
+// CREATE
 router.post("/create", verifyUser, ctrl.create);
 
-// ✅ UPDATE
+// UPDATE setup
 router.patch("/:id", verifyUser, ctrl.update);
 
-// ✅ DELETE  (ÚJ)
+// DELETE setup
 router.delete("/:id", verifyUser, ctrl.remove);
 
 module.exports = router;
-*/
