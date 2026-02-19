@@ -50,14 +50,40 @@ export class SetupToolsModalComponent implements OnChanges {
 
   constructor(private http: HttpClient) {}
 
+  // ✅ router/modem tiltás (isNetwork)
+  isNetworkSetup(): boolean {
+    // Supabase bool mezők: isNetwork (és lehet isNetwork vagy isnetwork)
+    return !!(this.setup?.isNetwork ?? this.setup?.isnetwork);
+  }
+
+  // ✅ megjeleníthető-e a PC funkció
+  canUsePc(): boolean {
+    return !this.isNetworkSetup();
+  }
+
   ngOnChanges(changes: SimpleChanges): void {
     if (!changes['setup']) return;
     if (!this.setup) return;
 
-    this.tab = this.startTab ?? 'items';
+    // ✅ ha network setup, akkor mindig items fül
+    if (!this.canUsePc()) {
+      this.tab = 'items';
+    } else {
+      this.tab = this.startTab ?? 'items';
+    }
 
     this.loadItems();
-    this.loadPcBuilds();
+
+    // ✅ csak akkor töltünk PC-ket, ha szabad
+    if (this.canUsePc()) {
+      this.loadPcBuilds();
+    } else {
+      this.pcLoading = false;
+      this.pcs = [];
+      this.pcError = '';
+      this.pcCreateName = '';
+      this.pcCreateError = '';
+    }
   }
 
   private loadItems(): void {
@@ -121,6 +147,11 @@ export class SetupToolsModalComponent implements OnChanges {
 
   // ---------- PC create ----------
   createPc(): void {
+    if (!this.canUsePc()) {
+      this.pcCreateError = 'Router/modem setupban nem hozhatsz létre PC-t.';
+      return;
+    }
+
     const setupId = this.setup?.id ?? this.setup?.setup_id ?? this.setup?.setupId;
     if (!setupId) return;
 
@@ -150,6 +181,7 @@ export class SetupToolsModalComponent implements OnChanges {
   }
 
   openPcBuilder(pc: any): void {
+    if (!this.canUsePc()) return;
     this.pcBuilderRow = pc;
     this.pcBuilderOpen = true;
   }

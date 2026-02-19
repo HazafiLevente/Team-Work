@@ -1,28 +1,51 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Input, OnChanges, Output } from '@angular/core';
+import {
+  Component,
+  EventEmitter,
+  Input,
+  OnChanges,
+  OnDestroy,
+  Output
+} from '@angular/core';
 import { Router } from '@angular/router';
+import { Subscription } from 'rxjs';
 
 import { Product } from '../../../Models/Product/product.model';
 import { ProductService } from '../../Services/Home/ProductParts/product/product.service';
+import { HostListener } from '@angular/core';
+
 
 @Component({
   selector: 'app-product-details-panel',
-
   standalone: true,
   imports: [CommonModule],
   templateUrl: './product-details-panel.component.html',
   styleUrls: ['./product-details-panel.component.css']
-
 })
-export class ProductDetailsPanelComponent implements OnChanges {
+export class ProductDetailsPanelComponent implements OnChanges, OnDestroy {
 
   @Input({ required: true }) product!: Product;
   @Output() closed = new EventEmitter<void>();
+  @HostListener('document:keydown.escape')
+  onEsc() {
+    this.close();
+  }
 
   loading = true;
   error: string | null = null;
 
   details: any = null;
+
+  // ✅ performance: ne számolja újra minden change detectionnél
+  detailsKeys: string[] = [];
+  trackKey = (_: number, k: string) => k;
+
+  private sub?: Subscription;
+  private lastKey = '';
+
+  // ✅ scroll lock
+  private prevOverflow = '';
+  private scrollLocked = false;
 
   constructor(
     private productService: ProductService,
@@ -30,10 +53,27 @@ export class ProductDetailsPanelComponent implements OnChanges {
   ) {}
 
   ngOnChanges(): void {
+    const table = this.getTable(this.product);
+    const id = this.getId(this.product);
+    if (!table || id == null) return;
+
+    const key = `${table}::${id}`;
+    if (key === this.lastKey) return;
+
+    this.lastKey = key;
+
+    // ✅ amikor megnyílik / terméket váltasz a panelen belül
+    this.lockScroll();
     this.fetchDetails();
   }
 
+  ngOnDestroy(): void {
+    this.sub?.unsubscribe();
+    this.unlockScroll();
+  }
+
   close() {
+    this.unlockScroll();
     this.closed.emit();
   }
 
@@ -47,8 +87,11 @@ export class ProductDetailsPanelComponent implements OnChanges {
       return;
     }
 
+    // ⛔️ FONTOS: ne a parent overlay click miatt zárjon be
+    // (HTML-ben a panelre van stopPropagation, de itt is oké)
+    this.unlockScroll();
     this.closed.emit();
-    this.router.navigate(['/product', table, id]);
+    this.router.navigate(['/product-site', table, id]);
   }
 
   onPlus() {
@@ -56,7 +99,7 @@ export class ProductDetailsPanelComponent implements OnChanges {
   }
 
   // -------------------------
-  // SAFE GETTERS (ez a lényeg)
+  // SAFE GETTERS
   // -------------------------
 
   private obj(p: any): any {
@@ -70,7 +113,6 @@ export class ProductDetailsPanelComponent implements OnChanges {
 
   private getId(p: any): any {
     const o = this.obj(p);
-    // autóknál sokszor ID
     return p?.id ?? p?.ID ?? o?.id ?? o?.ID;
   }
 
@@ -84,10 +126,18 @@ export class ProductDetailsPanelComponent implements OnChanges {
     return String((this.product as any)?.manufacturer ?? o?.manufacturer ?? o?.Manufacturer ?? '').trim();
   }
 
+  // -------------------------
+  // DATA LOAD
+  // -------------------------
+
   private fetchDetails() {
     this.loading = true;
     this.error = null;
     this.details = null;
+    this.detailsKeys = [];
+
+    // előző request leiratkozás (ha gyorsan kattintgatsz)
+    this.sub?.unsubscribe();
 
     const table = this.getTable(this.product);
     const id = this.getId(this.product);
@@ -99,9 +149,10 @@ export class ProductDetailsPanelComponent implements OnChanges {
       return;
     }
 
-    this.productService.getProductDetails(table, id).subscribe({
+    this.sub = this.productService.getProductDetails(table, id).subscribe({
       next: (res) => {
         this.details = res?.item ?? res;
+        this.detailsKeys = Object.keys(this.details ?? {});
         this.loading = false;
       },
       error: (err) => {
@@ -112,13 +163,36 @@ export class ProductDetailsPanelComponent implements OnChanges {
     });
   }
 
+  // -------------------------
+  // TEMPLATE HELPERS
+  // -------------------------
+
   keysOf(obj: any): string[] {
-    if (!obj) return [];
-    return Object.keys(obj);
+    // ha a régi HTML-ed ezt hívja, ne törjön el
+    return Array.isArray(this.detailsKeys) && this.detailsKeys.length
+      ? this.detailsKeys
+      : Object.keys(obj ?? {});
   }
 
   isHiddenKey(k: string): boolean {
-    const x = k.toLowerCase();
+    const x = String(k).toLowerCase();
     return x === 'id' || x === 'created_at' || x === 'updated_at';
+  }
+
+  // -------------------------
+  // SCROLL LOCK
+  // -------------------------
+
+  private lockScroll() {
+    if (this.scrollLocked) return;
+    this.prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    this.scrollLocked = true;
+  }
+
+  private unlockScroll() {
+    if (!this.scrollLocked) return;
+    document.body.style.overflow = this.prevOverflow || '';
+    this.scrollLocked = false;
   }
 }

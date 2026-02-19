@@ -19,6 +19,14 @@
   user-select: none;
 }
 
+.drag-element.circle{
+  width: 110px;
+  height: 110px;
+  border-radius: 999px;
+  border-left: 1px solid #d1d5db; /* ne legyen bal csík körnél */
+  border: 2px solid rgba(82,39,255,0.55);
+}
+
 .drag-element:active{
   cursor: grabbing;
   box-shadow: 0 10px 15px rgba(0,0,0,0.15);
@@ -36,6 +44,7 @@
   text-align: center;
   font-size: 0.95rem;
   pointer-events: none;
+  line-height: 1.1;
 }
 
 .cdk-drag-animating{

@@ -1,18 +1,14 @@
 .product-card {
   width: 220px;
   padding: 12px;
-
   background: #111;
   border-radius: 12px;
   border: 1px solid rgba(255,255,255,0.08);
-
   cursor: pointer;
   transition: transform 0.15s ease, box-shadow 0.15s ease;
-
   display: flex;
   flex-direction: column;
   gap: 6px;
-
   text-align: center;
 }
 
@@ -59,25 +55,21 @@
 }
 
 @media (max-width: 768px){
-  .product-card{
-    width: 160px;       /* eddig 220px volt */
-    padding: 8px;
-    border-radius: 10px;
+  .product-card {
+    width: 100%;          /* ✅ ne fix 220 */
+    padding: 10px;
+    border-radius: 14px;
+    gap: 4px;
   }
 
-  .product-img{
-    width: 90px;
-    height: 90px;
-    margin-bottom: 6px;
+  .product-img {
+    width: 92px;
+    height: 92px;
+    margin-bottom: 8px;
   }
 
-  .product-card h3{
-    font-size: 12px;
-  }
-
-  .product-card p{
-    font-size: 11px;
-  }
+  .product-card h3 { font-size: 13px; }
+  .product-card p  { font-size: 12px; }
 
   .home-row{
     grid-template-columns: 1fr;

@@ -72,6 +72,17 @@ META
 ---------------------------------- */
 app.use("/api/meta", require("./routes/meta.routes"));
 
+/* ----------------------------------
+USERS
+---------------------------------- */
+app.use("/api/users", require("./routes/users.routes"));
+
+
+/* ----------------------------------
+MESSAGES
+---------------------------------- */
+app.use("/api/messages", require("./routes/messages.routes"));
+
 
 
 /* ----------------------------------

@@ -8,7 +8,7 @@ import {authGuard} from './Components/Auth/authguard/auth.guard';
 import {UsersiteComponent} from './Components/Usersites/usersite/usersite.component';
 import {FavoriteComponent} from './Components/Usersites/Favorite/favorite/favorite.component';
 import {SetupComponent} from './Components/Usersites/Setup/setup/setup.component';
-import {BellMessageComponent} from './Components/Bell/bell-message/bell-message.component';
+import {BellMessageComponent} from './Components/Usersites/Messages/message.component';
 import { Routes } from '@angular/router';
 import { ProductPageComponent } from './Components/Product/product/product-page.component';
 import { ProfileComponent } from './Components/Usersites/Profil/profil/profile.component';
@@ -23,10 +23,8 @@ export const routes: Routes = [
   { path: '', redirectTo: 'home', pathMatch: 'full'},
   { path: 'home', component: HomeComponent }, //{, canActivate: [authGuard] },
   { path: 'product-site/:table/:id', component: ProductPageComponent },
-  { path: 'user/message/:type/:id', component: BellMessageComponent },
-  { path: 'user/bell/:key', component: BellMessageComponent },
-  { path: 'user/bell', redirectTo: 'user/bell/system', pathMatch: 'full' },
   { path: 'settings', component: SettingsComponent },
+
   {
     path: 'user',
     component: UsersiteComponent,
@@ -34,6 +32,8 @@ export const routes: Routes = [
       { path: 'profile', component: ProfileComponent },
       { path: 'favorite', component: FavoriteComponent },
       { path: 'setup', component: SetupComponent },
+
+      { path: 'message/:key', component: BellMessageComponent },
 
       {
         path: 'admin',
@@ -47,6 +47,7 @@ export const routes: Routes = [
       { path: '', redirectTo: 'profile', pathMatch: 'full' }
     ]
   },
+
 
 
 

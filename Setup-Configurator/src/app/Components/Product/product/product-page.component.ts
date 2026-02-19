@@ -45,6 +45,8 @@ export class ProductPageComponent implements OnInit {
     private http: HttpClient
   ) {}
 
+  userRole: string | null = null;
+
   get displayTitle(): string {
     return this.primary.model || 'Ismeretlen termék';
   }
@@ -64,6 +66,16 @@ export class ProductPageComponent implements OnInit {
     this.route.paramMap.subscribe(params => {
       const table = params.get('table');
       const id = params.get('id');
+
+      this.http.get<any>('/api/profile', { withCredentials: true })
+        .subscribe({
+          next: (res) => {
+            this.userRole = res?.role ?? null;
+          },
+          error: () => {
+            this.userRole = null;
+          }
+        });
 
       if (!table || !id) {
         this.error = 'Hiányzó paraméter.';

@@ -1,4 +1,4 @@
-/* a home-top wrapper fogja adni a “bal margót”, ne itt */
+/* Wrapper */
 .searchbar-row{
   display: flex;
   gap: 12px;
@@ -13,7 +13,7 @@
 /* közös input/select kinézet */
 .ctrl{
   padding: 14px;
-  border-radius: 10px;
+  border-radius: 12px;
   background: rgba(255,255,255,0.05);
   border: 1px solid rgba(255,255,255,0.12);
   color: white;
@@ -31,6 +31,12 @@
   transform: translateY(-1px);
 }
 
+.ctrl:focus{
+  border-color: rgba(0,255,255,.55);
+  box-shadow: 0 0 0 1px rgba(0,255,255,.18);
+}
+
+/* gomb */
 .btn{
   transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease;
 }
@@ -39,28 +45,51 @@
   box-shadow: 0 0 0 1px rgba(0,255,255,.18);
 }
 
-
-.ctrl:focus{
-  border-color: rgba(0,255,255,.55);
-  box-shadow: 0 0 0 1px rgba(0,255,255,.18);
-}
-
-/* szélesség szabályok */
+/* szélesség szabályok (desktop) */
 .w-manufacturer{ min-width: 240px; }
 .w-term{ flex: 1; min-width: 240px; }
 .w-price{ width: 160px; }
 .w-sort{ width: 220px; }
-.w-btn{ height: 48px; } /* vizuálisan passzoljon a 14px paddinghez */
+.w-btn{ height: 48px; }
 
-/* mobilon legyen minden full width */
-@media (max-width: 700px){
+/* ✅ MOBIL: csak gyártó + keresés + gomb marad */
+@media (max-width: 768px){
+
+  /* rejtsük mobilon */
+  .min-price,
+  .max-price,
+  .sort-select{
+    display: none !important;
+  }
+
+  /* mobil layout: középre, max szélesség */
+  .searchbar-row{
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+
+    width: 100%;
+    max-width: 420px;   /* ✅ középre fogja */
+    margin: 12px auto 10px;
+    padding: 0 12px;
+  }
+
   .w-manufacturer,
   .w-term,
-  .w-price,
-  .w-sort,
   .w-btn{
     width: 100%;
     min-width: 0;
-    flex: 1 1 100%;
+  }
+
+  .ctrl{
+    padding: 12px;
+    font-size: 15px;
+    border-radius: 14px;
+  }
+
+  .w-btn{
+    height: 46px;
+    justify-content: center;
   }
 }
+

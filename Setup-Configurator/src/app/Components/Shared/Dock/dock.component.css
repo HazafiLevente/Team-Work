@@ -74,3 +74,22 @@
   opacity: 1;
   transform: translateX(-50%) translateY(0);
 }
+
+@media (max-width: 768px){
+  .dock-outer{
+    left: calc(8px + env(safe-area-inset-left)) !important;
+    right: auto !important;
+    transform: none !important;
+    bottom: calc(12px + env(safe-area-inset-bottom)) !important;
+  }
+}
+
+
+  /* opcionális: kisebb gap mobilon */
+  .dock-panel{
+    gap: .6rem;
+    padding: 0 .4rem .4rem;
+  }
+
+
+

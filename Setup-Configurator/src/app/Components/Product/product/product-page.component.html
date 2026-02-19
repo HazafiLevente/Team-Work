@@ -14,9 +14,7 @@
         <div class="subtitle">{{ displaySubtitle }}</div>
       </div>
 
-      <div class="chip">
-        {{ table }} / #{{ id }}
-      </div>
+
     </div>
 
     <div class="actions">
@@ -86,12 +84,14 @@
     </div>
 
     <!-- Debug -->
-    <div class="card subtle-card">
+    <div class="card subtle-card" *ngIf="userRole === 'admin' || userRole === 'admin+' || userRole === 'owner'">
       <details>
         <summary>Debug / nyers adat</summary>
         <pre class="raw">{{ item | json }}</pre>
       </details>
     </div>
+
+
   </div>
 
   <ng-template #loadingBlock>

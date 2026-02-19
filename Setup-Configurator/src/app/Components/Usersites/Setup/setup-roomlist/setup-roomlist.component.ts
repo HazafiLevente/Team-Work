@@ -1,4 +1,4 @@
-import { Component, OnInit, HostListener, ViewChild, ElementRef } from '@angular/core';
+import { Component, OnInit, HostListener, ViewChild, ElementRef, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
@@ -23,30 +23,30 @@ import { SetupToolsModalComponent } from '../setup-tools-modal/setup-tools-modal
 })
 export class SetupRoomlistComponent implements OnInit {
 
+  // ✅ my = isFavorite false, favorite = isFavorite true
+  @Input() mode: 'my' | 'favorite' = 'my';
+
   userSetups: any[] = [];
   loading = true;
 
-  // ✅ Context menu state
+  // Context menu
   ctxOpen = false;
   ctxX = 0;
   ctxY = 0;
   ctxSetup: any = null;
 
-  // ✅ Tools modal state
+  // Tools modal
   toolsOpen = false;
   toolsSetup: any = null;
-
-  // ✅ ÚJ: Tools modal kezdő fül (items / pc)
   toolsStartTab: 'items' | 'pc' = 'items';
 
-  // ✅ Rename modal state
+  // Rename modal
   renameOpen = false;
   renameSetup: any = null;
   renameValue = '';
   renameSaving = false;
   renameError = '';
 
-  // ✅ workspace ref (#boundary)
   @ViewChild('boundary', { static: true }) boundaryEl!: ElementRef<HTMLElement>;
 
   constructor(private http: HttpClient) {}
@@ -55,10 +55,21 @@ export class SetupRoomlistComponent implements OnInit {
     this.loadUserSetups();
   }
 
+  private get isFavoriteMode(): boolean {
+    return this.mode === 'favorite';
+  }
+
+  private isNetworkSetup(s: any): boolean {
+    return s?.isNetwork === true;
+  }
+
   loadUserSetups(): void {
     this.loading = true;
 
-    this.http.get<any>('/api/setup', { withCredentials: true })
+    // ✅ backend: /api/setup?favorite=true|false  (isFavorite oszlop!)
+    const fav = this.isFavoriteMode ? 'true' : 'false';
+
+    this.http.get<any>(`/api/setup?favorite=${fav}`, { withCredentials: true })
       .subscribe({
         next: res => {
           this.userSetups = res?.setups || [];
@@ -80,19 +91,22 @@ export class SetupRoomlistComponent implements OnInit {
     return s?.setup_name ?? s?.name ?? 'Névtelen setup';
   }
 
-  // ✅ ÚJ SETUP
+  // ✅ ÚJ SETUP: favorite oldalon automatikusan isFavorite=true
   createNewSetup(): void {
     const setup_name = 'Új setup';
 
     this.http.post<any>(
       '/api/setup/create',
-      { setup_name },
+      {
+        setup_name,
+        isFavorite: this.isFavoriteMode,
+        isNetwork: false
+      },
       { withCredentials: true }
     ).subscribe({
       next: (res) => {
         const created = res?.setup;
         if (!created) return;
-
         this.userSetups = [created, ...this.userSetups];
       },
       error: (err) => {
@@ -101,7 +115,7 @@ export class SetupRoomlistComponent implements OnInit {
     });
   }
 
-  // ✅ JOBB KLIKK menü pozíció
+  // Jobb klikk menü pozíció
   openContextMenu(payload: SetupRightClickPayload): void {
     this.ctxSetup = payload?.setup ?? null;
 
@@ -114,7 +128,7 @@ export class SetupRoomlistComponent implements OnInit {
     const localY = payload.y - rect.top;
 
     const MENU_W = 260;
-    const MENU_H = 320; // ✅ kicsit magasabb (PC + törlés miatt)
+    const MENU_H = this.isNetworkSetup(this.ctxSetup) ? 190 : 320;
     const pad = 8;
 
     const maxX = Math.max(pad, rect.width - MENU_W - pad);
@@ -131,7 +145,6 @@ export class SetupRoomlistComponent implements OnInit {
     this.ctxSetup = null;
   }
 
-  // ✅ ESC
   @HostListener('document:keydown.escape')
   onEsc(): void {
     if (this.ctxOpen) this.closeContextMenu();
@@ -139,7 +152,6 @@ export class SetupRoomlistComponent implements OnInit {
     if (this.renameOpen) this.closeRename();
   }
 
-  // ✅ Tools (Eszközök fül)
   openToolsFromMenu(): void {
     if (!this.ctxSetup) return;
 
@@ -150,9 +162,10 @@ export class SetupRoomlistComponent implements OnInit {
     this.closeContextMenu();
   }
 
-  // ✅ ÚJ: PC Builder (PC fül)
+  // ✅ PC builder csak ha NEM network
   openPcBuilderFromMenu(): void {
     if (!this.ctxSetup) return;
+    if (this.isNetworkSetup(this.ctxSetup)) return;
 
     this.toolsStartTab = 'pc';
     this.toolsSetup = this.ctxSetup;
@@ -167,7 +180,6 @@ export class SetupRoomlistComponent implements OnInit {
     this.toolsStartTab = 'items';
   }
 
-  // ✅ Rename modal nyitás menüből
   openRenameFromMenu(): void {
     if (!this.ctxSetup) return;
 
@@ -188,7 +200,6 @@ export class SetupRoomlistComponent implements OnInit {
     this.renameError = '';
   }
 
-  // ✅ Mentés: backend PATCH -> Supabase update
   saveRename(): void {
     if (!this.renameSetup) return;
 
@@ -232,7 +243,6 @@ export class SetupRoomlistComponent implements OnInit {
     });
   }
 
-  // ✅ TÖRLÉS menüből (Supabase-ből is)
   deleteSetupFromMenu(): void {
     if (!this.ctxSetup) return;
 

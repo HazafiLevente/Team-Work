@@ -20,10 +20,27 @@ export class SetupRoomComponent {
   @Input() boundaryRef: any;
 
   @Output() setupDblClick = new EventEmitter<any>();
-  @Output() setupRightClick = new EventEmitter<SetupRightClickPayload>(); // ✅ már pozícióval
+  @Output() setupRightClick = new EventEmitter<SetupRightClickPayload>();
 
   private lastClickAt = 0;
   private dragging = false;
+
+  private toBool(v: any): boolean {
+    if (v === true || v === false) return v;
+    if (v === 1 || v === '1') return true;
+    if (v === 0 || v === '0') return false;
+    if (typeof v === 'string') {
+      const s = v.trim().toLowerCase();
+      if (s === 'true') return true;
+      if (s === 'false') return false;
+    }
+    return false;
+  }
+
+  isNetwork(): boolean {
+    const s = this.setup || {};
+    return this.toBool(s.isNetwork ?? s.is_network ?? s.network);
+  }
 
   onDragStarted(): void {
     this.dragging = true;
@@ -49,7 +66,7 @@ export class SetupRoomComponent {
   onRightClick(e: MouseEvent): void {
     if (!this.setup) return;
 
-    e.preventDefault(); // ✅ ne a böngésző menüje
+    e.preventDefault();
     e.stopPropagation();
     if (this.dragging) return;
 

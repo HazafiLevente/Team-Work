@@ -1,0 +1,136 @@
+<div class="chat-layout">
+
+  <!-- SIDEBAR -->
+  <div class="chat-sidebar">
+
+    <div class="sidebar-header">
+      <span>Beszélgetések</span>
+    </div>
+
+    <div
+      *ngFor="let c of conversations"
+      class="chat-item"
+      [class.active]="c.key === activeKey"
+      (click)="goToConversation(c.key)">
+
+      <div class="avatar">
+        {{ (c.title || '?').charAt(0) }}
+      </div>
+
+      <div class="chat-info">
+        <div class="chat-title">{{ c.title }}</div>
+        <div class="chat-preview"></div>
+      </div>
+    </div>
+
+    <button class="new-chat-btn" (click)="toggleNewChat()">
+      + Új beszélgetés
+    </button>
+
+    <div *ngIf="showNewChat" class="user-list">
+      <div
+        *ngFor="let u of users"
+        class="user-row"
+        (click)="startConversation(u)">
+        {{ u.username }}
+      </div>
+    </div>
+
+  </div>
+
+  <!-- CHAT AREA -->
+  <div class="chat-content">
+
+    <div class="messages-container">
+
+      <div
+        *ngFor="let m of messages"
+        class="message"
+        [class.mine]="m.user_id === authUserId">
+
+        <!-- EDIT MODE -->
+        <ng-container *ngIf="editingMessageId === m.id; else normalMessage">
+
+          <div class="edit-box">
+            <input
+              [(ngModel)]="editText"
+              (keyup.enter)="saveEdit()"
+            />
+            <div class="edit-actions">
+              <button (click)="saveEdit()">✔</button>
+              <button (click)="cancelEdit()">✖</button>
+            </div>
+          </div>
+
+        </ng-container>
+
+        <!-- NORMAL MODE -->
+        <ng-template #normalMessage>
+
+          <div class="bubble-wrapper">
+
+            <div class="bubble">
+              {{ m.context }}
+            </div>
+
+            <!-- 3 DOT MENU -->
+            <div
+              *ngIf="m.user_id === authUserId"
+              class="menu-wrapper">
+
+              <button
+                class="dots-btn"
+                (click)="toggleMenu(m.id, $event)">
+                ⋮
+              </button>
+
+              <div
+                *ngIf="openMenuId === m.id"
+                class="dropdown-menu"
+                (click)="$event.stopPropagation()">
+
+
+              <div class="dropdown-item"
+                     (click)="startEdit(m)">
+                  ✏ Szerkesztés
+                </div>
+
+                <div class="dropdown-item danger"
+                     (click)="deleteMessage(m.id)">
+                  🗑 Törlés
+                </div>
+
+              </div>
+
+            </div>
+
+          </div>
+
+          <div class="time">
+            {{ timeAgo(m.created_at) }}
+          </div>
+
+        </ng-template>
+
+      </div>
+
+
+      <div *ngIf="messages.length === 0" class="empty">
+        Nincs üzenet
+      </div>
+
+    </div>
+
+    <!-- INPUT -->
+    <div *ngIf="activeKey" class="chat-input">
+      <input
+        [(ngModel)]="newMessage"
+        placeholder="Írj üzenetet..."
+        (keyup.enter)="sendMessage()"
+      />
+      <button (click)="sendMessage()">Küldés</button>
+    </div>
+
+  </div>
+
+</div>

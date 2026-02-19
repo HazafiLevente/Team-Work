@@ -6,7 +6,7 @@
 /* Vissza gomb fent: mindig elérhető */
 .topbar{
   position: fixed;
-  top: 74px;              /* nálad body padding-top: 74px */
+  top: 74px;
   z-index: 50;
   display:flex;
   justify-content:flex-start;
@@ -33,7 +33,6 @@
   font-size: 14px;
 }
 
-/* Bal oldali összefogó panel */
 .left-panel{
   border: 1px solid rgba(255,255,255,.12);
   background: rgba(255,255,255,.04);
@@ -48,17 +47,6 @@
   justify-content: space-between;
   gap: 12px;
   margin-bottom: 12px;
-}
-
-/* route chip jobb felül */
-.chip{
-  padding: 8px 10px;
-  border-radius: 999px;
-  border: 1px solid rgba(255,255,255,.14);
-  background: rgba(255,255,255,.06);
-  font-weight: 700;
-  white-space: nowrap;
-  opacity: .95;
 }
 
 .actions{
@@ -154,7 +142,6 @@ details summary{
   font-weight: 800;
 }
 
-/* KÉPEK blokk legalul */
 .gallery-bottom{
   margin-top: 14px;
 }

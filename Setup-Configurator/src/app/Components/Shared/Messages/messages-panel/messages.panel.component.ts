@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Output } from '@angular/core';
+import { Component, EventEmitter, Output, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -19,7 +19,7 @@ interface ChatMessage {
   templateUrl: './messages.panel.component.html',
   styleUrls: ['./messages.panel.component.css']
 })
-export class MessagesPanelComponent {
+export class MessagesPanelComponent implements OnInit, OnDestroy {
 
   @Output() close = new EventEmitter<void>();
 
@@ -38,6 +38,19 @@ export class MessagesPanelComponent {
 
   newMessage = '';
   isLoading = false;
+
+  ngOnInit(): void {
+    document.body.classList.add('ai-open');
+  }
+
+  ngOnDestroy(): void {
+    document.body.classList.remove('ai-open');
+  }
+
+  // ha van X gombod: ezt hívd
+  onClose(): void {
+    this.close.emit();
+  }
 
   send() {
     if (!this.newMessage.trim() || this.isLoading) return;
@@ -64,7 +77,6 @@ export class MessagesPanelComponent {
 
     this.ai.ask(userText).subscribe({
       next: (res: any) => {
-
         const result = res?.data;
 
         this.removeLoading();
@@ -94,7 +106,6 @@ export class MessagesPanelComponent {
           sender: 'ai',
           text: res?.answer ?? 'Nincs válasz.'
         });
-
       },
       error: () => {
         this.removeLoading();

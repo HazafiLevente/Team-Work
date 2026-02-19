@@ -2,6 +2,8 @@ const fs = require("fs");
 const path = require("path");
 const { db } = require("./localDb");
 
+const { supabase } = require("./supabase");
+
 /* ----------------------------------
    search-filter.json
 ---------------------------------- */
@@ -13,6 +15,64 @@ const FILTER_PATH = path.join(
     "Jsons",
     "search-filter.json"
 );
+
+/**
+ * selectWithFallback
+ * Próbál Supabase-ből olvasni, ha nem megy (error), akkor SQLite local_cache.db-ből.
+ */
+async function selectWithFallback({
+    supabaseName,
+    sqliteName,
+    select = "*",
+    orderBy = "id",
+    ascending = true,
+    limit = 200
+}) {
+    // 1. Megpróbáljuk a Supabase-t
+    try {
+        let query = supabase.from(supabaseName).select(select);
+
+        if (orderBy) {
+            query = query.order(orderBy, { ascending });
+        }
+        if (limit) {
+            query = query.limit(limit);
+        }
+
+        const { data, error } = await query;
+
+        if (!error && data) {
+            return data;
+        }
+        console.warn(`⚠️ Supabase error (${supabaseName}), falling back to SQLite:`, error?.message);
+    } catch (e) {
+        console.warn(`⚠️ Supabase exception (${supabaseName}), falling back to SQLite:`, e.message);
+    }
+
+    // 2. Fallback: SQLite
+    try {
+        // Ellenőrizzük, létezik-e a tábla
+        const exists = db.prepare(`SELECT name FROM sqlite_master WHERE type='table' AND name=?`).get(sqliteName || supabaseName);
+        if (!exists) return [];
+
+        const table = sqliteName || supabaseName;
+        const sortDir = ascending ? "ASC" : "DESC";
+
+        // Alapvédelem injection ellen: qIdent helyett itt fix mezők, de a biztonság kedvéért érdemesebb lenne qIdent-et használni ha változó a mezőnév.
+        // Itt most egyszerűsített query-t írunk.
+        const rows = db.prepare(`
+            SELECT ${select === "*" ? "*" : select} 
+            FROM "${table}" 
+            ORDER BY "${orderBy}" ${sortDir} 
+            LIMIT ?
+        `).all(limit);
+
+        return rows;
+    } catch (e) {
+        console.error("❌ selectWithFallback SQLite error:", e.message);
+        return [];
+    }
+}
 
 /* ----------------------------------
    HELPERS
@@ -218,4 +278,4 @@ function getProductsForAI(question = "") {
 
 
 
-module.exports = { getProductsForAI };
+module.exports = { getProductsForAI, selectWithFallback };

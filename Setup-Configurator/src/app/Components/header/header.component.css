@@ -74,10 +74,27 @@
 }
 
 @media (max-width: 768px) {
-  .username {
-    display: none;
+  .top-menu {
+    height: 56px;
+    padding: 0 10px;
+  }
+
+  .user-avatar {
+    width: 28px;
+    height: 28px;
   }
 }
+
+  /* a jobb oldali sáv ne nőjön túl */
+  .nav { gap: 8px; }
+
+  /* ha a translate egy sima select / wrapper */
+  .goog-te-combo,
+  .lang-select,
+  .translate-select {
+    max-width: 140px !important;
+    font-size: 12px !important;
+  }
 
 
 

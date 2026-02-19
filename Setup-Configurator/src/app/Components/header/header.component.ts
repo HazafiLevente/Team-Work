@@ -174,7 +174,10 @@ export class HeaderComponent implements OnInit, AfterViewInit {
     }
 
     this.bell.close();
-    this.router.navigate(['/user/message']);
+
+    const key = n.conversation_key || n.type || 'system';
+
+    this.router.navigate(['/user/message', key]);
   }
 
   logout() {

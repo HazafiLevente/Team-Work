@@ -42,6 +42,10 @@ input[type="text"], input[type="password"], input[type="email"], textarea{
   font-weight:500;
   transition: all .16s;
 }
+
+body.compact .card { padding: 10px !important; }
+body.compact .row { padding: 6px 0 !important; }
+
 /* =========================
    CYBERPUNK SCROLLBAR (NO RAINBOW)
 ========================= */
@@ -1087,4 +1091,8 @@ app-root {
   .card, .panel, .carfilter {
     border-radius: 14px !important;
   }
+}
+
+body.ai-open .dock-outer{
+  display: none !important;
 }

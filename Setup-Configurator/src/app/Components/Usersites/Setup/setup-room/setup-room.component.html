@@ -1,4 +1,5 @@
 <div class="drag-element"
+     [class.circle]="setup?.isNetwork === true"
      cdkDrag
      [cdkDragBoundary]="boundaryRef"
      (cdkDragStarted)="onDragStarted()"

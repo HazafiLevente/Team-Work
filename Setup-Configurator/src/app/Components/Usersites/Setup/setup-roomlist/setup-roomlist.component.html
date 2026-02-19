@@ -1,7 +1,4 @@
-<!-- setup-roomlist.component.html -->
 <div class="setup-shell">
-
-  <!-- BAL OLDAL: ez lesz a DRAG BOUNDARY -->
   <div class="setup-workspace" #boundary>
 
     <app-dot-grid
@@ -17,12 +14,9 @@
       [returnDuration]="1.5">
     </app-dot-grid>
 
-    <!-- ✅ jobb felső gomb -->
     <button class="new-setup-btn" type="button" (click)="createNewSetup()">+ Új setup</button>
 
-    <!-- csak layout tartó -->
     <div class="boundary-area">
-
       @if (!loading) {
         @for (setup of userSetups; track trackBySetup($index, setup)) {
           <app-setup-room
@@ -37,10 +31,8 @@
       } @else {
         <div class="no-data">Betöltés...</div>
       }
-
     </div>
 
-    <!-- ✅ Jobb klikk menü -->
     @if (ctxOpen) {
       <div class="ctx-backdrop" (mousedown)="closeContextMenu()">
         <div
@@ -49,36 +41,33 @@
           [style.top.px]="ctxY"
           (mousedown)="$event.stopPropagation()">
 
-          <button class="ctx-item" type="button">Megnyitás</button>
-          <button class="ctx-item" type="button" (click)="openToolsFromMenu()">Eszközök</button>
+          <!-- ✅ Router/Modem (isNetwork) menü -->
+          @if (ctxSetup?.isNetwork === true) {
+            <button class="ctx-item" type="button" (click)="openToolsFromMenu()">Eszközök</button>
+            <div class="ctx-sep"></div>
+            <button class="ctx-item" type="button" (click)="openRenameFromMenu()">Átnevezés</button>
+            <div class="ctx-sep"></div>
+            <button class="ctx-item danger" type="button" (click)="deleteSetupFromMenu()">Törlés</button>
+          } @else {
+            <!-- ✅ Normál setup menü -->
+            <button class="ctx-item" type="button">Megnyitás</button>
+            <button class="ctx-item" type="button" (click)="openToolsFromMenu()">Eszközök</button>
+            <button class="ctx-item" type="button" (click)="openPcBuilderFromMenu()">Számítógép összerakó</button>
 
-          <!-- ✅ ÚJ: PC összerakó (Eszközök modal PC füllel) -->
-          <button class="ctx-item" type="button" (click)="openPcBuilderFromMenu()">Számítógép összerakó</button>
+            <div class="ctx-sep"></div>
+            <button class="ctx-item" type="button" (click)="openRenameFromMenu()">Átnevezés</button>
 
-          <!-- ✅ MÓDOSÍTÁS blokk -->
-          <div class="ctx-sep"></div>
-          <div class="ctx-group-title">Módosítás</div>
-          <button class="ctx-item" type="button" (click)="openRenameFromMenu()">Átnevezés</button>
-
-          <div class="ctx-sep"></div>
-
-          <button class="ctx-item" type="button">Kapcsolatok</button>
-          <button class="ctx-item" type="button">Favorite</button>
-          <button class="ctx-item" type="button">Tulajdonságok</button>
-
-          <!-- ✅ TÖRLÉS A MENÜBEN -->
-          <div class="ctx-sep"></div>
-          <button class="ctx-item danger" type="button" (click)="deleteSetupFromMenu()">Törlés</button>
+            <div class="ctx-sep"></div>
+            <button class="ctx-item danger" type="button" (click)="deleteSetupFromMenu()">Törlés</button>
+          }
 
         </div>
       </div>
     }
 
   </div>
-
 </div>
 
-<!-- ✅ Eszközök modal -->
 @if (toolsOpen && toolsSetup) {
   <app-setup-tools-modal
     [setup]="toolsSetup"
@@ -87,7 +76,6 @@
   </app-setup-tools-modal>
 }
 
-<!-- ✅ Átnevezés modal -->
 @if (renameOpen && renameSetup) {
   <div class="overlay" (click)="closeRename()">
     <div class="window" (click)="$event.stopPropagation()">

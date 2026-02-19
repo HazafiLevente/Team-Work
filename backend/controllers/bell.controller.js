@@ -7,20 +7,60 @@ const { supabase } = require("../services/supabase");
  */
 exports.list = async (req, res) => {
     try {
-        const items = await selectWithFallback({
-            supabaseName: "bell_messages_view",
-            sqliteName: "bell_messages_view",
-            select: "*",
-            orderBy: "created_at",
-            ascending: false,
-            limit: 50
+        const userId = Number(req.user.id);
+        const userRole = req.user.role;
+
+        // -------- SYSTEM MESSAGES --------
+        const { data: system } = await supabase
+            .from('system_message[System]')
+            .select('*')
+            .order('created_at', { ascending: false });
+
+        // -------- NEWS MESSAGES --------
+        const { data: news } = await supabase
+            .from('news_message[System]')
+            .select('*')
+            .order('created_at', { ascending: false });
+
+        // -------- REGISTER MESSAGES --------
+        const { data: register } = await supabase
+            .from('register_message[System]')
+            .select('*')
+            .order('created_at', { ascending: false });
+
+        const all = [
+            ...(system || []).map(m => ({ ...m, type: 'system' })),
+            ...(news || []).map(m => ({ ...m, type: 'news' })),
+            ...(register || []).map(m => ({ ...m, type: 'register' }))
+        ];
+
+        // 🔥 TARGET SZŰRÉS
+        const filtered = all.filter(m => {
+
+            const target = String(m.target || '').toLowerCase().trim();
+            const userIdStr = String(userId);
+
+            if (target === 'all') return true;
+            if (target === userIdStr) return true;
+
+            if (target === 'owner' && userRole === 'owner') return true;
+            if (target === 'admin' && ['admin','admin+','owner'].includes(userRole)) return true;
+            if (target === 'admin+' && ['admin+','owner'].includes(userRole)) return true;
+
+            return false;
         });
 
-        return res.json({ items: items || [] });
+        // idő szerint rendezés
+        filtered.sort((a,b) => new Date(b.created_at) - new Date(a.created_at));
+
+        return res.json({ items: filtered });
+
     } catch (e) {
         return res.status(500).json({ error: e.message, items: [] });
     }
 };
+
+
 
 /**
  * POST /api/bell/read
@@ -75,37 +115,11 @@ exports.getOne = async (req, res) => {
     }
 };
 
-exports.conversations = async (req, res) => {
-    try {
-        const rows = await selectWithFallback({
-            supabaseName: "bell_messages_view",
-            sqliteName: "bell_messages_view",
-            select: "conversation_key,conversation_title,created_at",
-            orderBy: "created_at",
-            ascending: false,
-            limit: 500
-        });
-
-        const map = new Map();
-        for (const r of rows || []) {
-            if (!r?.conversation_key) continue;
-            if (!map.has(r.conversation_key)) {
-                map.set(r.conversation_key, {
-                    key: r.conversation_key,
-                    title: r.conversation_title || r.conversation_key
-                });
-            }
-        }
-
-        return res.json({ conversations: Array.from(map.values()) });
-    } catch (e) {
-        return res.status(500).json({ error: e.message, conversations: [] });
-    }
-};
-
 exports.conversation = async (req, res) => {
     try {
         const key = String(req.params.key);
+        const userId = Number(req.user.id);
+        const userRole = req.user.role;
 
         const rows = await selectWithFallback({
             supabaseName: "bell_messages_view",
@@ -116,9 +130,75 @@ exports.conversation = async (req, res) => {
             limit: 200
         });
 
-        const items = (rows || []).filter(r => String(r.conversation_key) === key);
+        const items = (rows || []).filter(r => {
+            if (String(r.conversation_key) !== key) return false;
+
+            const targetRaw = String(r.target || '').toLowerCase().trim();
+            const userIdStr = String(userId);
+
+            const allowed =
+                targetRaw === 'all' ||
+                targetRaw === userIdStr ||
+                (targetRaw === 'owner' && userRole === 'owner') ||
+                (targetRaw === 'admin' && (userRole === 'admin' || userRole === 'admin+' || userRole === 'owner')) ||
+                (targetRaw === 'admin+' && (userRole === 'admin+' || userRole === 'owner'));
+
+            return allowed;
+        });
+
         return res.json({ items });
     } catch (e) {
         return res.status(500).json({ error: e.message, items: [] });
     }
 };
+
+
+exports.conversations = async (req, res) => {
+    try {
+        const userId = Number(req.user.id);
+        const userRole = req.user.role;
+
+        const rows = await selectWithFallback({
+            supabaseName: "bell_messages_view",
+            sqliteName: "bell_messages_view",
+            select: "*",
+            orderBy: "created_at",
+            ascending: false,
+            limit: 500
+        });
+
+        const map = new Map();
+
+        for (const r of rows || []) {
+
+            const targetRaw = String(r.target || '').toLowerCase().trim();
+            const userIdStr = String(userId);
+
+            // 🔥 target szűrés
+            const allowed =
+                targetRaw === 'all' ||
+                targetRaw === userIdStr ||
+                (targetRaw === 'owner' && userRole === 'owner') ||
+                (targetRaw === 'admin' && (userRole === 'admin' || userRole === 'admin+' || userRole === 'owner')) ||
+                (targetRaw === 'admin+' && (userRole === 'admin+' || userRole === 'owner'));
+
+            if (!allowed) continue;
+            if (!r?.conversation_key) continue;
+
+            if (!map.has(r.conversation_key)) {
+                map.set(r.conversation_key, {
+                    key: r.conversation_key,
+                    title: r.conversation_title || r.conversation_key,
+                    lastAt: r.created_at,
+                    lastMessage: r.message
+                });
+            }
+        }
+
+        return res.json(Array.from(map.values()));
+
+    } catch (e) {
+        return res.status(500).json({ error: e.message });
+    }
+};
+

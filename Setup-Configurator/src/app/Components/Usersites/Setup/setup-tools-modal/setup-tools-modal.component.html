@@ -11,7 +11,11 @@
 
     <div class="tabs">
       <button class="tab" [class.active]="tab==='items'" (click)="tab='items'">Eszközök</button>
-      <button class="tab" [class.active]="tab==='pc'" (click)="tab='pc'">PC-k</button>
+
+      <!-- ✅ PC tab csak akkor, ha nem router/modem -->
+      @if (canUsePc()) {
+        <button class="tab" [class.active]="tab==='pc'" (click)="tab='pc'">PC-k</button>
+      }
     </div>
 
     <div class="content">
@@ -46,40 +50,47 @@
       <!-- ---------- PC TAB ---------- -->
       @if (tab === 'pc') {
 
-        <div class="pc-create">
-          <div class="pc-field">
-            <label>Új PC neve</label>
-            <input [(ngModel)]="pcCreateName" placeholder="pl. GamingPc" />
+        <!-- ✅ extra biztonság: ha mégis valahogy network, akkor üzenet -->
+        @if (!canUsePc()) {
+          <div class="hint">Router/modem setupban nincs PC funkció.</div>
+        } @else {
+
+          <div class="pc-create">
+            <div class="pc-field">
+              <label>Új PC neve</label>
+              <input [(ngModel)]="pcCreateName" placeholder="pl. GamingPc" />
+            </div>
+
+            <button class="pc-btn" type="button" (click)="createPc()" [disabled]="pcCreateSaving">
+              @if (pcCreateSaving) { Létrehozás... } @else { + Létrehozás }
+            </button>
           </div>
 
-          <button class="pc-btn" type="button" (click)="createPc()" [disabled]="pcCreateSaving">
-            @if (pcCreateSaving) { Létrehozás... } @else { + Létrehozás }
-          </button>
-        </div>
+          @if (pcCreateError) {
+            <div class="error">{{ pcCreateError }}</div>
+          }
 
-        @if (pcCreateError) {
-          <div class="error">{{ pcCreateError }}</div>
-        }
-
-        @if (pcLoading) {
-          <div class="hint">Betöltés...</div>
-        } @else {
-          @if (pcError) {
-            <div class="error">{{ pcError }}</div>
+          @if (pcLoading) {
+            <div class="hint">Betöltés...</div>
           } @else {
-            @if (!pcs || pcs.length === 0) {
-              <div class="hint">Még nincs PC ehhez a setuphoz.</div>
+            @if (pcError) {
+              <div class="error">{{ pcError }}</div>
             } @else {
-              <div class="pcs">
-                @for (pc of pcs; track pc.id) {
-                  <div class="pc-card" (dblclick)="openPcBuilder(pc)">
-                    <div class="pc-title">{{ pc.setup_name || 'Névtelen PC' }}</div>
-                    <div class="pc-sub">Dupla katt: szerkesztés</div>
-                  </div>
-                }
-              </div>
+              @if (!pcs || pcs.length === 0) {
+                <div class="hint">Még nincs PC ehhez a setuphoz.</div>
+              } @else {
+                <div class="pcs">
+                  @for (pc of pcs; track pc.id) {
+                    <div class="pc-card" (dblclick)="openPcBuilder(pc)">
+                      <div class="pc-title">{{ pc.setup_name || 'Névtelen PC' }}</div>
+                      <div class="pc-sub">Dupla katt: szerkesztés</div>
+                    </div>
+                  }
+                </div>
+              }
             }
           }
+
         }
       }
 

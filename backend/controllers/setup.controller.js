@@ -11,11 +11,9 @@ const SETUP_TABLE = "setup[Setup]";
 const PC_BUILDS_TABLE = "pc_details[Setup]";
 
 /* =========================================================
-   ✅ FIX: előre blacklisteljük az összes eddig logolt táblát,
-   amiben biztosan nincs setup_id
+   ✅ NO setup_id tables (blacklist)
    ========================================================= */
 const NO_SETUPID_TABLES = new Set([
-    // --- korábbi logok ---
     "bass_shaker[Setup]",
     "bass_amplifier[Setup]",
     "acoustic_keyboards[Setup]",
@@ -33,7 +31,6 @@ const NO_SETUPID_TABLES = new Set([
     "saxophone[Setup]",
     "reciever_setup[Setup]",
 
-    // --- mostani 15 hiba ---
     "plucked_string_instruments[Setup]",
     "percussion_instruments[Setup]",
     "membranophones[Setup]",
@@ -51,12 +48,6 @@ const NO_SETUPID_TABLES = new Set([
     "brass_instruments[Setup]"
 ]);
 
-/**
- * Teljes táblalista maradhat, mert a children úgyis skippeli a NO_SETUPID_TABLES-t.
- * (Ha akarod, ki is vehetjük őket, de így legalább dokumentálva van, miből állt össze.)
- *
- * FONTOS: "setup[Setup]" nem children tábla, ezért nincs itt.
- */
 const tablesToScan = [
     "acoustic_keyboards[Setup]",
     "acoustic[Setup]",
@@ -184,22 +175,33 @@ async function runWithConcurrency(items, limit, worker) {
 }
 
 /* =========================================================
-   SETUP LISTA
+   ✅ SETUP LISTA
+   GET /api/setup
+   - default: isFavorite = false (MySetups)
+   - /api/setup?favorite=true -> isFavorite = true (Favorite)
    ========================================================= */
 exports.list = async (req, res) => {
     try {
         const userId = req.user.id;
 
+        const favoriteParam = String(req.query.favorite ?? "").toLowerCase();
+        const wantFavorite =
+            favoriteParam === "true" || favoriteParam === "1" || favoriteParam === "yes";
+
+        // MySetups = NOT favorite, Favorite = favorite
         const { data, error } = await supabase
             .from(SETUP_TABLE)
             .select("*")
-            .eq("user_id", userId);
+            .eq("user_id", userId)
+            .eq("isFavorite", wantFavorite);
 
         if (error) throw error;
 
         const normalized = (data || []).map((s) => ({
             ...s,
             setup_name: s.setup_name ?? s.name ?? "Névtelen setup",
+            isFavorite: !!s.isFavorite,
+            isNetwork: !!s.isNetwork
         }));
 
         res.json({ setups: normalized });
@@ -229,7 +231,6 @@ exports.children = async (req, res) => {
         await runWithConcurrency(tablesToScan, CONCURRENCY, async (tableName) => {
             if (allItems.length >= TOTAL_CAP) return;
 
-            // ✅ biztosan nincs setup_id -> skip (nem lesz error)
             if (NO_SETUPID_TABLES.has(tableName)) return;
 
             const { data, error } = await supabase
@@ -241,7 +242,6 @@ exports.children = async (req, res) => {
             if (error) {
                 const msg = String(error.message || "");
 
-                // ✅ ha mégis belefutunk: azonnal blacklist
                 if (msg.includes("setup_id") && msg.includes("does not exist")) {
                     NO_SETUPID_TABLES.add(tableName);
                     console.log(`🚫 blacklist: ${tableName} (no setup_id)`);
@@ -311,9 +311,13 @@ exports.create = async (req, res) => {
         const setup_name = (req.body?.setup_name || "").trim();
         if (!setup_name) return res.status(400).json({ error: "setup_name required" });
 
+        // ⬇️ új mezők: isFavorite + isNetwork
+        const isFavorite = !!req.body?.isFavorite;
+        const isNetwork = !!req.body?.isNetwork;
+
         const { data, error } = await supabase
             .from(SETUP_TABLE)
-            .insert([{ setup_name, user_id: userId }])
+            .insert([{ setup_name, user_id: userId, isFavorite, isNetwork }])
             .select("*")
             .single();
 

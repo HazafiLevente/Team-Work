@@ -1,10 +1,14 @@
-<div id="_1" class="searchbar-row">
+<div class="searchbar-row" role="search">
 
-  <select [(ngModel)]="manufacturer" class="ctrl w-manufacturer" title="Gyártó szűrő">
+  <!-- Gyártó -->
+  <select [(ngModel)]="manufacturer"
+          class="ctrl w-manufacturer"
+          title="Gyártó szűrő">
     <option value="">Összes gyártó</option>
     <option *ngFor="let m of manufacturers" [value]="m">{{ m }}</option>
   </select>
 
+  <!-- Modell keresés -->
   <input type="text"
          class="ctrl w-term"
          title="Keresés modell névre"
@@ -12,8 +16,9 @@
          [(ngModel)]="term"
          (keydown.enter)="searchButton()" />
 
+  <!-- Min ár (desktop only mobilon elrejtjük CSS-sel) -->
   <input type="number"
-         class="ctrl w-price"
+         class="ctrl w-price min-price"
          title="Minimum ár (Ft)"
          [ngModel]="priceMin"
          (ngModelChange)="priceMin = $event"
@@ -22,8 +27,9 @@
          step="1"
          (input)="sanitizePrice('min')" />
 
+  <!-- Max ár (desktop only mobilon elrejtjük CSS-sel) -->
   <input type="number"
-         class="ctrl w-price"
+         class="ctrl w-price max-price"
          title="Maximum ár (Ft)"
          [ngModel]="priceMax"
          (ngModelChange)="priceMax = $event"
@@ -32,7 +38,10 @@
          step="1"
          (input)="sanitizePrice('max')" />
 
-  <select [(ngModel)]="sort" class="ctrl w-sort" title="Rendezés">
+  <!-- Rendezés (desktop only mobilon elrejtjük CSS-sel) -->
+  <select [(ngModel)]="sort"
+          class="ctrl w-sort sort-select"
+          title="Rendezés">
     <option value="">Alap (nincs rendezés)</option>
     <option value="price_asc">Ár ↑ növekvő</option>
     <option value="price_desc">Ár ↓ csökkenő</option>
@@ -40,7 +49,11 @@
     <option value="name_desc">Név Z→A</option>
   </select>
 
-  <button type="button" class="btn small w-btn" title="Keresés indítása" (click)="searchButton()">
+  <!-- Keresés gomb -->
+  <button type="button"
+          class="btn small w-btn"
+          title="Keresés indítása"
+          (click)="searchButton()">
     🔎 Keresés
   </button>
 

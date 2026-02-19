@@ -1,31 +1,28 @@
-:root { --header-h: 74px; }
-
 :host{
   position: fixed;
   inset: 0;
-  z-index: 9999;
+  z-index: 10000;
+  isolation: isolate;
 }
 
-/* háttér */
 .overlay{
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,.45);
-  z-index: 9998;
+  background: rgba(0,0,0,.35);
+  z-index: 0;
 }
 
-/* panel */
 .panel{
   position: fixed;
-  top: var(--header-h);
+  top: 0;          /* ✅ NINCS header-h, biztosan látszik a teteje */
   right: 0;
-  height: calc(100vh - var(--header-h));
+  bottom: 0;
   width: min(520px, 92vw);
 
   background: rgba(14,14,18,0.92);
   color: #fff;
 
-  z-index: 9999;
+  z-index: 1;
 
   display: flex;
   flex-direction: column;
@@ -34,64 +31,59 @@
   box-shadow: -20px 0 60px rgba(0,0,0,.6);
   backdrop-filter: blur(10px);
 
-  /* ✅ fontos: a scroll csak a body-ban legyen */
   overflow: hidden;
 }
 
-/* fejléc */
-.panel-header{
-  padding: 16px;
-  border-bottom: 1px solid rgba(255,255,255,.12);
-  display: flex;
+/* FIX X mindig */
+.x{
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 38px;
+  height: 38px;
+  display: inline-flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 12px;
+  justify-content: center;
 
-  /* maradjon fent */
-  position: sticky;
-  top: 0;
-  background: rgba(14,14,18,0.92);
-  z-index: 2;
-}
+  line-height: 1;
+  font-size: 18px;
 
-.title .model{ font-size: 18px; font-weight: 700; }
-.title .sub{ opacity: .8; font-size: 13px; margin-top: 2px; }
-
-.close-btn{
-  background: transparent;
-  border: 1px solid rgba(255,255,255,.2);
+  background: rgba(0,0,0,.25);
+  border: 1px solid rgba(255,255,255,.25);
   color: #fff;
-  padding: 6px 10px;
   border-radius: 10px;
   cursor: pointer;
+  z-index: 5;
 }
 
-/* ✅ itt görgetünk */
+.panel-header{
+  padding: 16px 56px 12px 16px; /* ✅ hely az X-nek */
+  border-bottom: 1px solid rgba(255,255,255,.12);
+  flex: 0 0 auto;
+}
+
+.title .model{ font-size: 18px; font-weight: 800; }
+.title .sub{ opacity: .8; font-size: 13px; margin-top: 2px; }
+
 .panel-body{
-  flex: 1;
-  min-height: 0;                 /* ✅ EZ A KULCS */
-  overflow-y: auto;              /* ✅ */
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
   overflow-x: hidden;
   padding: 16px;
   -webkit-overflow-scrolling: touch;
 }
 
-/* ✅ footer fixen elérhető */
 .panel-footer{
-  position: sticky;
-  bottom: 0;
-  z-index: 2;
-
+  flex: 0 0 auto;
   padding: 14px 16px;
   border-top: 1px solid rgba(255,255,255,.12);
   background: rgba(14,14,18,0.92);
-
   display: flex;
   justify-content: flex-end;
   gap: 10px;
 }
 
-/* tartalom */
 .price{ margin-bottom: 14px; }
 
 .kv .row{
@@ -104,46 +96,17 @@
 
 .k{ opacity: .8; }
 .v{ word-break: break-word; }
-
 .error{ color: #ff8a8a; }
-
-/* gombok */
-.btn{
-  border: 1px solid rgba(255,255,255,.2);
-  background: transparent;
-  color: #fff;
-  padding: 10px 14px;
-  border-radius: 12px;
-  cursor: pointer;
-}
-
-.btn.primary{
-  border-color: rgba(255,255,255,.35);
-  font-weight: 700;
-}
-
-.btn.icon{
-  width: 44px;
-  height: 44px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 22px;
-  line-height: 1;
-}
 
 /* mobil */
 @media (max-width: 768px){
   .panel{
     left: 0;
-    right: 0;
     width: 100vw;
-
     top: auto;
     bottom: 0;
     height: 85vh;
-
     border-radius: 16px 16px 0 0;
-    max-width: none;
   }
+  .x{ top: 10px; right: 10px; }
 }

@@ -1,18 +1,18 @@
 <div class="overlay" (click)="close()"></div>
 
-<div class="panel">
+<div class="panel" (click)="$event.stopPropagation()">
+  <!-- FIX X mindig látható -->
+  <button class="x" type="button" (click)="close()" aria-label="Bezárás">✕</button>
+
   <div class="panel-header">
     <div class="title">
       <div class="model">{{ displayModel || 'N/A' }}</div>
       <div class="sub">{{ displayManufacturer || 'N/A' }}</div>
     </div>
-
-    <button class="close-btn" (click)="close()">✕</button>
   </div>
 
   <div class="panel-body">
     <div *ngIf="loading">Betöltés...</div>
-
     <div *ngIf="!loading && error" class="error">{{ error }}</div>
 
     <div *ngIf="!loading && details">
@@ -21,7 +21,7 @@
       </div>
 
       <div class="kv">
-        <div class="row" *ngFor="let k of keysOf(details)">
+        <div class="row" *ngFor="let k of detailsKeys; trackBy: trackKey">
           <ng-container *ngIf="!isHiddenKey(k)">
             <div class="k">{{ k }}</div>
             <div class="v">{{ details[k] }}</div>
@@ -31,7 +31,6 @@
     </div>
   </div>
 
-  <!-- ✅ footer külön, nem a scrollban -->
   <div class="panel-footer" *ngIf="!loading && details">
     <button type="button" class="btn secondary" (click)="onMore()">Több</button>
     <button type="button" class="btn primary icon" (click)="onPlus()">+</button>
