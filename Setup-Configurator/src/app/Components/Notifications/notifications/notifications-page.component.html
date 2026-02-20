@@ -1,0 +1,71 @@
+<div class="notifications-layout">
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+
+    <div class="sidebar-title">
+      Értesítések
+    </div>
+
+    <div
+      class="tab-item"
+      [class.active]="activeTab === 'system'"
+      (click)="setTab('system')">
+      🔔 System
+    </div>
+
+    <div
+      class="tab-item"
+      [class.active]="activeTab === 'news'"
+      (click)="setTab('news')">
+      📰 News
+    </div>
+
+    <div
+      class="tab-item"
+      [class.active]="activeTab === 'register'"
+      (click)="setTab('register')">
+      🎉 Register
+    </div>
+
+  </div>
+
+  <!-- CONTENT -->
+  <div class="content">
+
+    <!-- SYSTEM -->
+    <div *ngIf="activeTab === 'system'">
+      <div *ngFor="let m of systemMessages" class="message-box">
+        <div class="msg-title">{{ m.title }}</div>
+        <div class="msg-body">{{ m.message }}</div>
+        <div class="msg-time">
+          {{ m.created_at | date:'yyyy.MM.dd HH:mm' }}
+        </div>
+      </div>
+    </div>
+
+    <!-- NEWS -->
+    <div *ngIf="activeTab === 'news'">
+      <div *ngFor="let m of newsMessages" class="message-box">
+        <div class="msg-title">{{ m.title }}</div>
+        <div class="msg-body">{{ m.message }}</div>
+        <div class="msg-time">
+          {{ m.created_at | date:'yyyy.MM.dd HH:mm' }}
+        </div>
+      </div>
+    </div>
+
+    <!-- REGISTER -->
+    <div *ngIf="activeTab === 'register'">
+      <div *ngFor="let m of registerMessages" class="message-box">
+        <div class="msg-title">{{ m.title }}</div>
+        <div class="msg-body">{{ m.message }}</div>
+        <div class="msg-time">
+          {{ m.created_at | date:'yyyy.MM.dd HH:mm' }}
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</div>

@@ -1,3 +1,4 @@
+
 import { Component, OnInit, HostListener, ViewChild, ElementRef, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
@@ -6,6 +7,8 @@ import { FormsModule } from '@angular/forms';
 import { SetupRoomComponent, SetupRightClickPayload } from '../setup-room/setup-room.component';
 import { DotGridComponent } from '../../../Shared/Background/dot-grid.component';
 import { SetupToolsModalComponent } from '../setup-tools-modal/setup-tools-modal.component';
+
+type SetupItem = any;
 
 @Component({
   selector: 'app-setup-roomlist',
@@ -23,24 +26,35 @@ import { SetupToolsModalComponent } from '../setup-tools-modal/setup-tools-modal
 })
 export class SetupRoomlistComponent implements OnInit {
 
-  // ✅ my = isFavorite false, favorite = isFavorite true
-  @Input() mode: 'my' | 'favorite' = 'my';
+  @Input() favoriteMode = false;
+  @Input() allowCreate = true;
 
+  // -------------------------
+  // LISTA NÉZET (setup kártyák)
+  // -------------------------
   userSetups: any[] = [];
   loading = true;
 
-  // Context menu
+  // -------------------------
+  // RÉSZLETEK NÉZET (setup elemei)
+  // -------------------------
+  viewingSetup: any = null;        // ha nem null -> details view
+  loadingItems = false;
+  items: SetupItem[] = [];
+  itemsError = '';
+
+  // ✅ Context menu state
   ctxOpen = false;
   ctxX = 0;
   ctxY = 0;
   ctxSetup: any = null;
 
-  // Tools modal
+  // ✅ Tools modal state
   toolsOpen = false;
   toolsSetup: any = null;
-  toolsStartTab: 'items' | 'pc' = 'items';
+  toolsStartTab: 'items' | 'pc' | 'cars' = 'items';
 
-  // Rename modal
+  // ✅ Rename modal state
   renameOpen = false;
   renameSetup: any = null;
   renameValue = '';
@@ -55,21 +69,15 @@ export class SetupRoomlistComponent implements OnInit {
     this.loadUserSetups();
   }
 
-  private get isFavoriteMode(): boolean {
-    return this.mode === 'favorite';
-  }
-
-  private isNetworkSetup(s: any): boolean {
-    return s?.isNetwork === true;
+  private buildListUrl(): string {
+    const fav = this.favoriteMode ? 'true' : 'false';
+    return `/api/setup?favorite=${fav}`;
   }
 
   loadUserSetups(): void {
     this.loading = true;
 
-    // ✅ backend: /api/setup?favorite=true|false  (isFavorite oszlop!)
-    const fav = this.isFavoriteMode ? 'true' : 'false';
-
-    this.http.get<any>(`/api/setup?favorite=${fav}`, { withCredentials: true })
+    this.http.get<any>(this.buildListUrl(), { withCredentials: true })
       .subscribe({
         next: res => {
           this.userSetups = res?.setups || [];
@@ -91,22 +99,34 @@ export class SetupRoomlistComponent implements OnInit {
     return s?.setup_name ?? s?.name ?? 'Névtelen setup';
   }
 
-  // ✅ ÚJ SETUP: favorite oldalon automatikusan isFavorite=true
+  // ✅ items track
+  trackByItem(index: number, it: any): any {
+    return `${it?.category ?? 'x'}:${it?.id ?? index}`;
+  }
+
+  isNetworkSetup(s: any): boolean {
+    return String(s?.isNetwork).toLowerCase() === 'true' || s?.isNetwork === true;
+  }
+
+  // -------------------------
+  // ✅ ÚJ SETUP (csak ha allowCreate)
+  // -------------------------
   createNewSetup(): void {
+    if (!this.allowCreate) return;
+
     const setup_name = 'Új setup';
 
     this.http.post<any>(
       '/api/setup/create',
-      {
-        setup_name,
-        isFavorite: this.isFavoriteMode,
-        isNetwork: false
-      },
+      { setup_name },
       { withCredentials: true }
     ).subscribe({
       next: (res) => {
         const created = res?.setup;
         if (!created) return;
+
+        if (this.favoriteMode) return; // favorite nézetben ne jelenjen meg alapból
+
         this.userSetups = [created, ...this.userSetups];
       },
       error: (err) => {
@@ -115,7 +135,55 @@ export class SetupRoomlistComponent implements OnInit {
     });
   }
 
-  // Jobb klikk menü pozíció
+  // -------------------------
+  // ✅ DUPLA KATT -> DETAIL VIEW
+  // -------------------------
+  openSetupDetails(setup: any): void {
+    if (!setup) return;
+
+    this.viewingSetup = setup;
+    this.items = [];
+    this.itemsError = '';
+    this.loadingItems = true;
+
+    const setupId = setup?.id ?? setup?.setup_id ?? setup?.setupId;
+    if (!setupId) {
+      this.loadingItems = false;
+      this.itemsError = 'Hiányzó setup ID.';
+      return;
+    }
+
+    this.http.get<any[]>(`/api/setup/${setupId}/children`, { withCredentials: true })
+      .subscribe({
+        next: (items) => {
+          this.items = Array.isArray(items) ? items : [];
+          this.loadingItems = false;
+        },
+        error: (err) => {
+          console.error('❌ children hiba:', err);
+          this.items = [];
+          this.loadingItems = false;
+          this.itemsError = 'Betöltés sikertelen.';
+        }
+      });
+  }
+
+  // ✅ Vissza gomb
+  backToSetups(): void {
+    this.viewingSetup = null;
+    this.items = [];
+    this.itemsError = '';
+    this.loadingItems = false;
+
+    // safety: context/menu/modalok zárása
+    if (this.ctxOpen) this.closeContextMenu();
+    if (this.toolsOpen) this.closeTools();
+    if (this.renameOpen) this.closeRename();
+  }
+
+  // -------------------------
+  // ✅ Jobb klikk menü pozíció
+  // -------------------------
   openContextMenu(payload: SetupRightClickPayload): void {
     this.ctxSetup = payload?.setup ?? null;
 
@@ -123,12 +191,11 @@ export class SetupRoomlistComponent implements OnInit {
     if (!host) return;
 
     const rect = host.getBoundingClientRect();
-
     const localX = payload.x - rect.left;
     const localY = payload.y - rect.top;
 
     const MENU_W = 260;
-    const MENU_H = this.isNetworkSetup(this.ctxSetup) ? 190 : 320;
+    const MENU_H = 360; // ✅ kicsit magasabb (Cars + PC miatt)
     const pad = 8;
 
     const maxX = Math.max(pad, rect.width - MENU_W - pad);
@@ -145,13 +212,18 @@ export class SetupRoomlistComponent implements OnInit {
     this.ctxSetup = null;
   }
 
+  // ✅ ESC
   @HostListener('document:keydown.escape')
   onEsc(): void {
     if (this.ctxOpen) this.closeContextMenu();
     if (this.toolsOpen) this.closeTools();
     if (this.renameOpen) this.closeRename();
+
+    // ✅ ha részletek nézetben vagyunk, ESC = vissza
+    if (this.viewingSetup) this.backToSetups();
   }
 
+  // ✅ Tools
   openToolsFromMenu(): void {
     if (!this.ctxSetup) return;
 
@@ -162,12 +234,24 @@ export class SetupRoomlistComponent implements OnInit {
     this.closeContextMenu();
   }
 
-  // ✅ PC builder csak ha NEM network
+  // ✅ PC Builder (csak ha NEM network)
   openPcBuilderFromMenu(): void {
     if (!this.ctxSetup) return;
     if (this.isNetworkSetup(this.ctxSetup)) return;
 
     this.toolsStartTab = 'pc';
+    this.toolsSetup = this.ctxSetup;
+    this.toolsOpen = true;
+
+    this.closeContextMenu();
+  }
+
+  // ✅ Cars (csak ha NEM network)
+  openCarsFromMenu(): void {
+    if (!this.ctxSetup) return;
+    if (this.isNetworkSetup(this.ctxSetup)) return;
+
+    this.toolsStartTab = 'cars';
     this.toolsSetup = this.ctxSetup;
     this.toolsOpen = true;
 
@@ -180,6 +264,7 @@ export class SetupRoomlistComponent implements OnInit {
     this.toolsStartTab = 'items';
   }
 
+  // ✅ Rename
   openRenameFromMenu(): void {
     if (!this.ctxSetup) return;
 
@@ -224,13 +309,20 @@ export class SetupRoomlistComponent implements OnInit {
     ).subscribe({
       next: (res) => {
         const updated = res?.setup ?? { ...this.renameSetup, setup_name: name };
-
         const id = updated?.id ?? updated?.setup_id ?? updated?.setupId ?? setupId;
 
         this.userSetups = this.userSetups.map(s => {
           const sid = s?.id ?? s?.setup_id ?? s?.setupId;
-          return sid === id ? { ...s, ...updated } : s;
+          return String(sid) === String(id) ? { ...s, ...updated } : s;
         });
+
+        // ha épp azt nézzük, amit átneveztünk, frissítsük a header-t is
+        if (this.viewingSetup) {
+          const vid = this.viewingSetup?.id ?? this.viewingSetup?.setup_id ?? this.viewingSetup?.setupId;
+          if (String(vid) === String(id)) {
+            this.viewingSetup = { ...this.viewingSetup, ...updated };
+          }
+        }
 
         this.renameSaving = false;
         this.closeRename();
@@ -243,6 +335,7 @@ export class SetupRoomlistComponent implements OnInit {
     });
   }
 
+  // ✅ TÖRLÉS
   deleteSetupFromMenu(): void {
     if (!this.ctxSetup) return;
 
@@ -262,8 +355,14 @@ export class SetupRoomlistComponent implements OnInit {
         next: () => {
           this.userSetups = this.userSetups.filter(s => {
             const sid = s?.id ?? s?.setup_id ?? s?.setupId;
-            return sid !== setupId;
+            return String(sid) !== String(setupId);
           });
+
+          // ha épp ezt néztük detailben, lépjünk vissza
+          const vid = this.viewingSetup?.id ?? this.viewingSetup?.setup_id ?? this.viewingSetup?.setupId;
+          if (this.viewingSetup && String(vid) === String(setupId)) {
+            this.backToSetups();
+          }
 
           this.closeContextMenu();
         },

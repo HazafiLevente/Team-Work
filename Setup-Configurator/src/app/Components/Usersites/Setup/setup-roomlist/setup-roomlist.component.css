@@ -1,3 +1,4 @@
+
 :root{
   --header-h: 74px;
   --grid-extra-h: 150px;
@@ -23,16 +24,19 @@
   backdrop-filter: blur(10px);
 }
 
-/* ✅ felső sáv (jobb felső gombnak) */
+/* ✅ felső gombsor: Új setup + Vissza */
 .toolbar{
   position: absolute;
   top: 12px;
   right: 12px;
-  z-index: 5; /* dotgrid + kártyák fölé */
-  pointer-events: none; /* csak a gomb kapjon kattot */
+  z-index: 5;
+  display: flex;
+  gap: 10px;
+  pointer-events: none;
 }
 
-.new-setup-btn{
+.new-setup-btn,
+.back-btn{
   pointer-events: auto;
 
   height: 38px;
@@ -51,7 +55,8 @@
   backdrop-filter: blur(10px);
 }
 
-.new-setup-btn:hover{
+.new-setup-btn:hover,
+.back-btn:hover{
   background: rgba(82,39,255,0.22);
   border-color: rgba(82,39,255,0.45);
   color: #fff;
@@ -66,7 +71,7 @@
   pointer-events: none;
 }
 
-/* kártyák tartója – kitölti a teljes dotgrid teret */
+/* kártyák tartója */
 .boundary-area{
   position: relative;
   z-index: 1;
@@ -76,7 +81,7 @@
   height: 100%;
 
   padding: 18px;
-  padding-top: 62px; /* ✅ hely a gombnak */
+  padding-top: 62px; /* hely a gomboknak */
   padding-bottom: 200px;
 
   display: flex;
@@ -98,7 +103,51 @@
   text-align: center;
 }
 
-/* ✅ Context menü – a workspace-en belül */
+/* ✅ DETAIL VIEW item kártyák (ugyanaz a stílus mint a setup kártyák) */
+.item-card{
+  width: 160px;
+  height: 90px;
+  background: white;
+  border: 1px solid #d1d5db;
+  border-left: 5px solid #667eea;
+  border-radius: 8px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  padding: 10px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+  position: relative;
+  z-index: 2;
+
+  transition: transform 0.1s, box-shadow 0.2s;
+  user-select: none;
+}
+
+.item-card:hover{
+  border-color: #764ba2;
+  transform: translateY(-2px);
+}
+
+.item-title{
+  font-weight: 800;
+  color: #1f2937;
+  text-align: center;
+  font-size: 0.95rem;
+  line-height: 1.1;
+}
+
+.item-sub{
+  margin-top: 6px;
+  font-size: 12px;
+  color: #6b7280;
+  opacity: 0.9;
+  text-align: center;
+}
+
+/* ✅ Context menü */
 .ctx-backdrop{
   position: absolute;
   inset: 0;
@@ -134,6 +183,10 @@
 
 .ctx-item:hover{
   background: rgba(82,39,255,0.22);
+}
+
+.ctx-item.danger{
+  color: rgba(255,120,120,0.95);
 }
 
 .ctx-sep{

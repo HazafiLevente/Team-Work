@@ -37,7 +37,7 @@ export class HeaderComponent implements OnInit, AfterViewInit {
   constructor(
     public auth: AuthService,
     private router: Router,
-    public bell: BellService
+    public bell: BellService,
   ) {}
 
   ngOnInit() {
@@ -168,16 +168,13 @@ export class HeaderComponent implements OnInit, AfterViewInit {
 
   openMessage(n: any, event: MouseEvent) {
     event.stopPropagation();
-
-    if (n?.source_table === 'system_message[System]') {
-      this.bell.markReadSystem(Number(n.id));
-    }
-
     this.bell.close();
 
-    const key = n.conversation_key || n.type || 'system';
-
-    this.router.navigate(['/user/message', key]);
+    this.router.navigate(['/notifications'], {
+      queryParams: {
+        tab: n.type   // 'system' | 'news' | 'register'
+      }
+    });
   }
 
   logout() {

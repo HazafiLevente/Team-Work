@@ -1,43 +1,8 @@
-<div class="fav-page">
+<div class="favorite-page">
   <h1>Favorite</h1>
 
-  <div class="fav-shell">
-    <div class="fav-workspace" #boundary>
-
-      <app-dot-grid
-        class="dot-bg"
-        [dotSize]="5"
-        [gap]="15"
-        baseColor="#271E37"
-        activeColor="#5227FF"
-        [proximity]="100"
-        [shockRadius]="250"
-        [shockStrength]="5"
-        [resistance]="750"
-        [returnDuration]="1.5">
-      </app-dot-grid>
-
-      <div class="boundary-area">
-
-        @if (!loading) {
-          @if (favorites.length === 0) {
-            <div class="no-data">Nincs kedvenc setup.</div>
-          } @else {
-            <div class="fav-list">
-              @for (s of favorites; track trackBySetup($index, s)) {
-                <div class="fav-card">
-                  <div class="fav-title">{{ getSetupTitle(s) }}</div>
-                  <div class="fav-sub">ID: {{ s?.id }}</div>
-                </div>
-              }
-            </div>
-          }
-        } @else {
-          <div class="no-data">Betöltés...</div>
-        }
-
-      </div>
-
-    </div>
-  </div>
+  <app-setup-roomlist
+    [favoriteMode]="true"
+    [allowCreate]="false">
+  </app-setup-roomlist>
 </div>

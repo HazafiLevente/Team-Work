@@ -1,3 +1,4 @@
+
 <div class="overlay" (click)="onBackdropClick()">
   <div class="window" (click)="stop($event)">
 
@@ -11,11 +12,8 @@
 
     <div class="tabs">
       <button class="tab" [class.active]="tab==='items'" (click)="tab='items'">Eszközök</button>
-
-      <!-- ✅ PC tab csak akkor, ha nem router/modem -->
-      @if (canUsePc()) {
-        <button class="tab" [class.active]="tab==='pc'" (click)="tab='pc'">PC-k</button>
-      }
+      <button class="tab" [class.active]="tab==='pc'" (click)="tab='pc'">PC-k</button>
+      <button class="tab" [class.active]="tab==='cars'" (click)="tab='cars'">Autók</button>
     </div>
 
     <div class="content">
@@ -50,47 +48,93 @@
       <!-- ---------- PC TAB ---------- -->
       @if (tab === 'pc') {
 
-        <!-- ✅ extra biztonság: ha mégis valahogy network, akkor üzenet -->
-        @if (!canUsePc()) {
-          <div class="hint">Router/modem setupban nincs PC funkció.</div>
-        } @else {
-
-          <div class="pc-create">
-            <div class="pc-field">
-              <label>Új PC neve</label>
-              <input [(ngModel)]="pcCreateName" placeholder="pl. GamingPc" />
-            </div>
-
-            <button class="pc-btn" type="button" (click)="createPc()" [disabled]="pcCreateSaving">
-              @if (pcCreateSaving) { Létrehozás... } @else { + Létrehozás }
-            </button>
+        <div class="pc-create">
+          <div class="pc-field">
+            <label>Új PC neve</label>
+            <input [(ngModel)]="pcCreateName" placeholder="pl. GamingPc" />
           </div>
 
-          @if (pcCreateError) {
-            <div class="error">{{ pcCreateError }}</div>
-          }
+          <button class="pc-btn" type="button" (click)="createPc()" [disabled]="pcCreateSaving">
+            @if (pcCreateSaving) { Létrehozás... } @else { + Létrehozás }
+          </button>
+        </div>
 
-          @if (pcLoading) {
-            <div class="hint">Betöltés...</div>
+        @if (pcCreateError) {
+          <div class="error">{{ pcCreateError }}</div>
+        }
+
+        @if (pcLoading) {
+          <div class="hint">Betöltés...</div>
+        } @else {
+          @if (pcError) {
+            <div class="error">{{ pcError }}</div>
           } @else {
-            @if (pcError) {
-              <div class="error">{{ pcError }}</div>
+            @if (!pcs || pcs.length === 0) {
+              <div class="hint">Még nincs PC ehhez a setuphoz.</div>
             } @else {
-              @if (!pcs || pcs.length === 0) {
-                <div class="hint">Még nincs PC ehhez a setuphoz.</div>
-              } @else {
-                <div class="pcs">
-                  @for (pc of pcs; track pc.id) {
-                    <div class="pc-card" (dblclick)="openPcBuilder(pc)">
-                      <div class="pc-title">{{ pc.setup_name || 'Névtelen PC' }}</div>
-                      <div class="pc-sub">Dupla katt: szerkesztés</div>
-                    </div>
-                  }
-                </div>
-              }
+              <div class="pcs">
+                @for (pc of pcs; track pc.id) {
+                  <div class="pc-card" (dblclick)="openPcBuilder(pc)">
+                    <div class="pc-title">{{ pc.setup_name || 'Névtelen PC' }}</div>
+                    <div class="pc-sub">Dupla katt: szerkesztés</div>
+                  </div>
+                }
+              </div>
             }
           }
+        }
+      }
 
+      <!-- ---------- CARS TAB ---------- -->
+      @if (tab === 'cars') {
+
+        <div class="car-create">
+          <div class="car-field">
+            <label>Autó kiválasztása</label>
+
+            @if (carOptionsLoading) {
+              <div class="hint">Autók betöltése...</div>
+            } @else {
+              <select [(ngModel)]="selectedCarKey">
+                <option [ngValue]="''">— válassz autót —</option>
+                @for (c of carOptions; track c.source_table + ':' + c.id) {
+                  <option [ngValue]="c.source_table + ':' + c.id">{{ c.display_name }}</option>
+                }
+              </select>
+            }
+          </div>
+
+          <button class="car-btn" type="button" (click)="createCar()" [disabled]="carCreateSaving || carOptionsLoading">
+            @if (carCreateSaving) { Hozzáadás... } @else { + Hozzáadás }
+          </button>
+        </div>
+
+        @if (carOptionsError) {
+          <div class="error">{{ carOptionsError }}</div>
+        }
+        @if (carCreateError) {
+          <div class="error">{{ carCreateError }}</div>
+        }
+
+        @if (carLoading) {
+          <div class="hint">Betöltés...</div>
+        } @else {
+          @if (carError) {
+            <div class="error">{{ carError }}</div>
+          } @else {
+            @if (!cars || cars.length === 0) {
+              <div class="hint">Még nincs autó ehhez a setuphoz.</div>
+            } @else {
+              <div class="cars">
+                @for (c of cars; track c.id) {
+                  <div class="car-card">
+                    <div class="car-title">{{ c.setup_name || 'Névtelen autó' }}</div>
+                    <div class="car-sub">Mentve a Car_setup[Setup] táblába</div>
+                  </div>
+                }
+              </div>
+            }
+          }
         }
       }
 

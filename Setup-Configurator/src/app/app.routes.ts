@@ -8,12 +8,13 @@ import {authGuard} from './Components/Auth/authguard/auth.guard';
 import {UsersiteComponent} from './Components/Usersites/usersite/usersite.component';
 import {FavoriteComponent} from './Components/Usersites/Favorite/favorite/favorite.component';
 import {SetupComponent} from './Components/Usersites/Setup/setup/setup.component';
-import {BellMessageComponent} from './Components/Usersites/Messages/message.component';
+import {MessagesComponent} from './Components/Usersites/Messages/message.component';
 import { Routes } from '@angular/router';
 import { ProductPageComponent } from './Components/Product/product/product-page.component';
 import { ProfileComponent } from './Components/Usersites/Profil/profil/profile.component';
 import {UsersComponent} from './Components/Usersites/Admin/users/users.component';
 import { SettingsComponent } from './Components/Settings/settings.component';
+import { NotificationsPageComponent } from './Components/Notifications/notifications/notifications-page.component';
 
 
 
@@ -33,7 +34,9 @@ export const routes: Routes = [
       { path: 'favorite', component: FavoriteComponent },
       { path: 'setup', component: SetupComponent },
 
-      { path: 'message/:key', component: BellMessageComponent },
+      { path: 'messages', component: MessagesComponent },
+      { path: 'messages/:key', component: MessagesComponent },
+
 
       {
         path: 'admin',
@@ -47,6 +50,7 @@ export const routes: Routes = [
       { path: '', redirectTo: 'profile', pathMatch: 'full' }
     ]
   },
+  { path: 'notifications', component: NotificationsPageComponent },
 
 
 

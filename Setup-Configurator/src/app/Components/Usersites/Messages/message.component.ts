@@ -12,7 +12,7 @@ import { ActivatedRoute, Router } from '@angular/router';
   styleUrl: './message.component.css'
 })
 
-export class BellMessageComponent implements OnInit {
+export class MessagesComponent implements OnInit {
 
   users: any[] = [];
   conversations: any[] = [];
@@ -109,7 +109,7 @@ export class BellMessageComponent implements OnInit {
 
 
   goToConversation(key: string) {
-    this.router.navigate(['/user/message', key]);
+    this.router.navigate(['/user/messages', key]);
   }
 
   loadAuth() {
@@ -169,7 +169,7 @@ export class BellMessageComponent implements OnInit {
         this.showNewChat = false;
 
         // 🔥 navigáljunk route-ra
-        this.router.navigate(['/user/message', panelId]);
+        this.router.navigate(['/user/messages', panelId]);
 
         this.loadConversations();
       });
