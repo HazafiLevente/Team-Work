@@ -1,42 +1,23 @@
-<form *ngIf="step === 'form'" (ngSubmit)="submit()">
+<app-register-form
+  *ngIf="step === 'form'"
+  [fullname]="fullname" (fullnameChange)="fullname = $event"
+  [username]="username" (usernameChange)="username = $event"
+  [email]="email" (emailChange)="email = $event"
+  [password]="password" (passwordChange)="password = $event"
+  [loading]="loading"
+  [errorMessage]="errorMessage"
+  [successMessage]="successMessage"
+  (submit)="submit()">
+</app-register-form>
 
-  <h2 class="title">Regisztráció</h2>
-
-  <input
-    [(ngModel)]="fullname"
-    name="fullname"
-    placeholder="Teljes név"
-    required
-  />
-
-  <input
-    [(ngModel)]="username"
-    name="username"
-    placeholder="Felhasználónév"
-    required
-  />
-
-  <input
-    [(ngModel)]="email"
-    name="email"
-    type="email"
-    placeholder="Email cím"
-    required
-  />
-
-  <input
-    type="password"
-    [(ngModel)]="password"
-    name="password"
-    placeholder="Jelszó (legalább 6 karakter)"
-    required
-  />
-
-  <p class="switch-auth">
-    Van már fiókom?
-    <a routerLink="/login">Bejelentkezés</a>
-  </p>
-
-  <button type="submit">Regisztráció</button>
-
-</form>
+<app-register-code
+  *ngIf="step === 'code'"
+  [email]="email"
+  [code]="code" (codeChange)="code = $event"
+  [loading]="loading"
+  [errorMessage]="errorMessage"
+  [successMessage]="successMessage"
+  (verify)="verify()"
+  (resend)="resendCode()"
+  (back)="backToForm()">
+</app-register-code>

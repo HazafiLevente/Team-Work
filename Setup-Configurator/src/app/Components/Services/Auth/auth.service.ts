@@ -91,8 +91,12 @@ export class AuthService {
       data
     );
   }
+  requestPasswordReset(email: string) {
+    return this.http.post('/api/auth/password/request', { email });
+  }
 
-
-
+  resetPassword(email: string, code: string, newPassword: string) {
+    return this.http.post('/api/auth/password/reset', { email, code, newPassword });
+  }
 
 }

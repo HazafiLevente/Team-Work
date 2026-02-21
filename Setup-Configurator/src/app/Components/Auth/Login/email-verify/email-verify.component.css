@@ -28,7 +28,7 @@ input:focus {
   transition: 0.2s;
 }
 
-.btn:disabled { opacity: 0.6; cursor: not-allowed; }
+.btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
 
 .link-btn {
   background: transparent;
@@ -38,22 +38,6 @@ input:focus {
   font-weight: 600;
   text-align: center;
 }
-
-.password-wrap { position: relative; width: 100%; }
-.password-wrap input { width: 100%; padding-right: 46px; }
-.eye-btn {
-  position: absolute;
-  top: 50%;
-  right: 10px;
-  transform: translateY(-50%);
-  border: none;
-  background: transparent;
-  cursor: pointer;
-  font-size: 18px;
-  opacity: 0.85;
-  color: white;
-}
-.eye-btn:hover { opacity: 1; }
 
 .error-box {
   background: rgba(255,0,0,0.15);
@@ -74,16 +58,3 @@ input:focus {
   text-align: center;
   font-size: 13px;
 }
-
-.switch-auth {
-  margin-top: 10px;
-  font-size: 13px;
-  text-align: center;
-  color: #bbb;
-}
-.switch-auth a {
-  color: #a855f7;
-  font-weight: 600;
-  text-decoration: none;
-}
-.switch-auth a:hover { text-decoration: underline; }

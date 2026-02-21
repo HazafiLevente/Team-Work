@@ -2,6 +2,8 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Router, RouterOutlet } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { Subscription } from 'rxjs';
+import { map } from 'rxjs/operators';
+import { Observable } from 'rxjs';
 
 import { AuthService } from './Components/Services/Auth/auth.service';
 import { UiSettingsService } from './Components/Services/SettingService/ui-settings.service';
@@ -52,8 +54,67 @@ export class App implements OnInit, OnDestroy {
     });
   }
 
+  user$!: Observable<any | null>;
+  dockItems: DockItemData[] = [];
+
   ngOnInit(): void {
     this.auth.check();
+
+    this.user$ = this.auth.user$;
+
+    this.user$.subscribe(user => {
+
+      if (!user) {
+        this.dockItems = [];
+        return;
+      }
+
+      const items: DockItemData[] = [
+        {
+          icon: '🏠',
+          label: 'Home',
+          onClick: () => this.router.navigateByUrl('/home')
+        },
+        {
+          icon: '🌟',
+          label: 'Favorites',
+          onClick: () => this.router.navigateByUrl('/user/favorite')
+        },
+        {
+          icon: '🗂️',
+          label: 'MySetup',
+          onClick: () => this.router.navigateByUrl('/user/setup')
+        },
+        {
+          icon: '👤',
+          label: 'Profile',
+          onClick: () => this.router.navigateByUrl('/user/profile')
+        },
+        {
+          icon: '⚙️',
+          label: 'Settings',
+          onClick: () => this.router.navigateByUrl('/settings')
+        }
+      ];
+
+      // 🔥 Messages csak bejelentkezve
+      items.push({
+        icon: '💬',
+        label: 'Messages',
+        onClick: () => this.router.navigateByUrl('/user/messages')
+      });
+
+      // 🔥 Admin csak jogosultsággal
+      if (['admin', 'admin+', 'owner'].includes(user.role)) {
+        items.push({
+          icon: '🛡',
+          label: 'Admin',
+          onClick: () => this.router.navigateByUrl('/user/admin')
+        });
+      }
+
+      this.dockItems = items;
+    });
   }
 
   ngOnDestroy(): void {
@@ -63,13 +124,6 @@ export class App implements OnInit, OnDestroy {
   /* -----------------------------
      DOCK
   ----------------------------- */
-
-  dockItems: DockItemData[] = [
-    { icon: '🏠', label: 'Home', onClick: () => this.router.navigateByUrl('/home') },
-    { icon: '🗂️', label: 'MySetup', onClick: () => this.router.navigateByUrl('/user/setup') },
-    { icon: '👤', label: 'Profile', onClick: () => this.router.navigateByUrl('/user/profile') },
-    { icon: '⚙️', label: 'Settings', onClick: () => this.router.navigateByUrl('/settings') },
-  ];
 
   private scrollHomeTop(): void {
     window.scrollTo({ top: 0, behavior: 'smooth' });

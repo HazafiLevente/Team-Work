@@ -10,6 +10,7 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
+
 export type DockItemData = {
   icon: string;     // pl: '🏠' vagy '⚙️' vagy egy SVG string (egyszerűen)
   label: string;

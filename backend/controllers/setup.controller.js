@@ -95,6 +95,10 @@ const tablesToScan = [
     "subwoofer[Setup]",
     "wind_instruments[Setup]",
     "woodwind_instruments[Setup]",
+    "modem[Setup]",
+    "router[Setup]",
+    "switches[Setup]",
+    "mixer[Setup]",
 ];
 
 /* -----------------------------
@@ -140,9 +144,11 @@ function mapDisplay(item, tableName) {
     const model = item.Model || item.model || item.product_model || item.type || "";
     const name = item.product_name || item.setup_name || item.name || item.Name || item.title || "";
 
+    const isNetwork = tableName === "router[Setup]" || tableName === "switches[Setup]" || tableName === "modem[Setup]";
     return {
         ...item,
         category: tableName,
+        isNetwork,
         display_name:
             manufacturer && model
                 ? `${manufacturer} ${model}`
@@ -694,3 +700,148 @@ exports.carsAdd = async (req, res) => {
         return res.status(500).json({ error: "Create failed" });
     }
 };
+
+/* =========================================================
+   ✅ CONNECTIONS (Network device links)
+   ========================================================= */
+const connectionTables = [
+    "connects_modem_audiop_utp[Connects]",
+    "connects_modem_ht_utp[Connects]",
+    "connects_modem_modem_utp[Connects]",
+    "connects_modem_pc_utp[Connects]",
+    "connects_modem_router_utp[Connects]",
+    "connects_modem_switch_utp[Connects]",
+    "connects_router_audiop_utp[Connects]",
+    "connects_router_ht_utp[Connects]",
+    "connects_router_pc_utp[Connects]",
+    "connects_router_router_utp[Connects]",
+    "connects_router_switch_utp[Connects]",
+    "connects_switch_audiop_utp[Connects]",
+    "connects_switch_ht_utp[Connects]",
+    "connects_switch_mixer_utp[Connects]",
+    "connects_switch_pc_utp[Connects]",
+    "connects_switch_switch_utp[Connects]",
+];
+
+const catMap = {
+    "audio_processor": "audiop",
+    "home_theater_setups": "ht",
+    "pc_details": "pc",
+    "switches": "switch",
+    "audio_processors": "audiop"
+};
+
+const colMap = {
+    "ht": "home_theater",
+    "audiop": "audiop",
+    "pc": "pc",
+    "switch": "switch",
+    "router": "router",
+    "modem": "modem",
+    "mixer": "mixer"
+};
+
+exports.connections = async (req, res) => {
+    const setupId = req.params.id;
+    if (!setupId) return res.json([]);
+
+    try {
+        const children = await exports.childrenInternal(setupId);
+        const deviceIdsByCategory = {};
+        children.forEach(c => {
+            let cat = c.category.replace("[Setup]", "").replace("[Connects]", "").toLowerCase();
+            // Apply mapping
+            if (catMap[cat]) cat = catMap[cat];
+
+            if (!deviceIdsByCategory[cat]) deviceIdsByCategory[cat] = new Set();
+            deviceIdsByCategory[cat].add(String(c.id));
+        });
+
+        const allConnections = [];
+        const CONCURRENCY = 4;
+
+        await runWithConcurrency(connectionTables, CONCURRENCY, async (tableName) => {
+            const { data, error } = await supabase.from(tableName).select("*");
+            if (error) return;
+
+            if (Array.isArray(data)) {
+                const parts = tableName.replace("[Connects]", "").split("_");
+                const sourceCat = parts[1];
+                const destCat = parts[2];
+
+                // Column name overrides or defaults
+                let sourceCol = (colMap[sourceCat] || sourceCat) + "_id";
+                let destCol = (colMap[destCat] || destCat) + "_id";
+
+                if (sourceCat === "modem" && destCat === "modem") {
+                    sourceCol = "modem1_id";
+                    destCol = "modem2_id";
+                } else if (sourceCat === "router" && destCat === "router") {
+                    sourceCol = "router1_id";
+                    destCol = "router2_id";
+                } else if (sourceCat === "switch" && destCat === "switch") {
+                    sourceCol = "switch1_id";
+                    destCol = "switch2_id";
+                }
+
+                data.forEach(row => {
+                    const sId = row[sourceCol];
+                    const dId = row[destCol];
+
+                    if (sId == null || dId == null) return;
+
+                    const sIn = deviceIdsByCategory[sourceCat]?.has(String(sId));
+                    const dIn = deviceIdsByCategory[destCat]?.has(String(dId));
+
+                    if (sIn && dIn) {
+                        const sourceChild = children.find(c => {
+                            let cCat = c.category.replace("[Setup]", "").toLowerCase();
+                            return (catMap[cCat] || cCat) === sourceCat && String(c.id) === String(sId);
+                        });
+                        const targetChild = children.find(c => {
+                            let cCat = c.category.replace("[Setup]", "").toLowerCase();
+                            return (catMap[cCat] || cCat) === destCat && String(c.id) === String(dId);
+                        });
+
+                        allConnections.push({
+                            id: row.id,
+                            table: tableName,
+                            source: {
+                                category: sourceChild?.category || `${sourceCat}[Setup]`,
+                                id: sId
+                            },
+                            target: {
+                                category: targetChild?.category || `${destCat}[Setup]`,
+                                id: dId
+                            }
+                        });
+                    }
+                });
+            }
+        });
+
+        return res.json(allConnections);
+    } catch (err) {
+        console.error("❌ connections fatal:", err);
+        return res.json([]);
+    }
+};
+
+exports.childrenInternal = async (setupId) => {
+    let allItems = [];
+    const PER_TABLE_LIMIT = 200;
+    const TOTAL_CAP = 1500;
+    const CONCURRENCY = 4;
+
+    await runWithConcurrency(tablesToScan, CONCURRENCY, async (tableName) => {
+        if (allItems.length >= TOTAL_CAP) return;
+        if (NO_SETUPID_TABLES.has(tableName)) return;
+        const { data, error } = await supabase.from(tableName).select("*").eq("setup_id", setupId).limit(PER_TABLE_LIMIT);
+        if (!error && Array.isArray(data)) {
+            const mapped = data.map((item) => mapDisplay(item, tableName));
+            allItems.push(...mapped);
+        }
+    });
+    return allItems;
+};
+;

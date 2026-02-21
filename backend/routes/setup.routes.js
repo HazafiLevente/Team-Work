@@ -12,6 +12,7 @@ router.get("/", verifyUser, ctrl.list);
 
 // SETUP gyerekek
 router.get("/:id/children", verifyUser, ctrl.children);
+router.get("/:id/connections", verifyUser, ctrl.connections);
 
 // PC BUILDER: PC build lista + létrehozás + alkatrészek
 router.get("/:id/pcbuilds", verifyUser, ctrl.pcBuildsList);

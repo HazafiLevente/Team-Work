@@ -1,11 +1,12 @@
-.home-top{
+.home-top {
   display: grid;
   gap: 12px;
-  margin-bottom: 14px; /* <-- EZ akadályozza meg, hogy ráfussanak a kártyákra */
+  margin-bottom: 14px;
+  /* <-- EZ akadályozza meg, hogy ráfussanak a kártyákra */
 }
 
 /* két oszlop: bal rugalmas, jobb fixebb, de nem “kilógós” */
-.home-row{
+.home-row {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 560px;
   gap: 28px;
@@ -14,13 +15,17 @@
 }
 
 /* NE fixáld szélességre a balt – ez okozza a csúszás/átfedés 80%-át */
-.left{ min-width: 0; }
+.left {
+  min-width: 0;
+}
 
 /* jobb oldal ne kényszerítse rá magát a layout-ra */
-.right{ min-width: 0; }
+.right {
+  min-width: 0;
+}
 
 @media (max-width: 768px) {
-  .searchbar{
+  .searchbar {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 10px;
@@ -44,41 +49,53 @@
   }
 
   /* inputok ne legyenek túl magasak */
-  .searchbar .search-input{
+  .searchbar .search-input {
     padding: 10px 10px;
   }
 }
 
 
 /* általános hover feedback minden mezőre */
-.search-input{
+.search-input {
   transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease;
 }
 
-.search-input:hover{
-  border-color: rgba(0,255,255,.35);
-  box-shadow: 0 0 0 1px rgba(0,255,255,.15);
+.search-input:hover {
+  border-color: rgba(0, 255, 255, .35);
+  box-shadow: 0 0 0 1px rgba(0, 255, 255, .15);
   transform: translateY(-1px);
 }
 
 /* gombok */
-.btn, .tag{
+.btn,
+.tag {
   transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease, opacity .12s ease;
 }
 
-.btn:hover, .tag:hover{
+.btn:hover,
+.tag:hover {
   transform: translateY(-1px);
-  box-shadow: 0 0 0 1px rgba(0,255,255,.18);
+  box-shadow: 0 0 0 1px rgba(0, 255, 255, .18);
 }
 
 
 /* show/hide helpers */
-.mobile-only { display: none; }
-.desktop-only { display: block; }
+.mobile-only {
+  display: none;
+}
+
+.desktop-only {
+  display: block;
+}
 
 @media (max-width: 768px) {
-  .desktop-only { display: none !important; }
-  .mobile-only  { display: block !important; }
+  .desktop-only {
+    display: none !important;
+  }
+
+  .mobile-only {
+    display: block !important;
+  }
 
   /* a searchbar legyen rendesen sticky (nem az egész oldal teteje) */
   .searchbar {
@@ -91,21 +108,21 @@
   }
 
   /* a fő layout legyen egy oszlop */
-  .home-row{
+  .home-row {
     grid-template-columns: 1fr !important;
     gap: 14px !important;
     padding-right: 0 !important;
   }
 
   /* Mobile bottom sheet */
-  .mobile-overlay{
+  .mobile-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(0,0,0,.55);
+    background: rgba(0, 0, 0, .55);
     z-index: 9998;
   }
 
-  .mobile-sheet{
+  .mobile-sheet {
     position: fixed;
     left: 0;
     right: 0;
@@ -119,17 +136,21 @@
     z-index: 9999;
     overflow: auto;
     padding: 12px;
+    padding-bottom: 150px;
   }
-  .mobile-sheet.open{ transform: translateY(0); }
 
-  .sheet-header{
-    display:flex;
+  .mobile-sheet.open {
+    transform: translateY(0);
+  }
+
+  .sheet-header {
+    display: flex;
     justify-content: space-between;
-    align-items:center;
+    align-items: center;
     margin-bottom: 10px;
   }
 
-  .sheet-header .x{
+  .sheet-header .x {
     background: transparent;
     border: 1px solid var(--glass-border);
     color: var(--text);
@@ -138,7 +159,7 @@
   }
 
   /* “Több” gomb egységes stílus */
-  .more-btn{
+  .more-btn {
     width: 100%;
     text-align: left;
     padding: 10px 12px;
@@ -152,36 +173,51 @@
 
 
 /* 📱 MOBILE – Searchbar középre */
-@media (max-width: 768px){
+@media (max-width: 768px) {
 
-  .searchbar{
+  .searchbar {
     display: flex;
     flex-direction: column;
-    align-items: center;   /* EZ teszi középre */
+    align-items: center;
+    /* EZ teszi középre */
     gap: 12px;
   }
 
   .searchbar .search-input,
   .searchbar select,
-  .searchbar .search-btn{
-    width: 90%;            /* ne legyen full 100%, így szebb */
-    max-width: 420px;      /* ne nőjön túl nagyra */
+  .searchbar .search-btn {
+    width: 90%;
+    /* ne legyen full 100%, így szebb */
+    max-width: 420px;
+    /* ne nőjön túl nagyra */
   }
 
 }
+
 /* alapból desktop: NE látszódjon */
-.mobile-only { display: none; }
-.desktop-only { display: block; }
+.mobile-only {
+  display: none;
+}
+
+.desktop-only {
+  display: block;
+}
 
 /* a gomb mobilon legyen fix lent */
 @media (max-width: 768px) {
-  .mobile-only { display: inline-flex; }
-  .desktop-only { display: none; }
+  .mobile-only {
+    display: inline-flex;
+  }
 
-  .more-btn{
+  .desktop-only {
+    display: none;
+  }
+
+  .more-btn {
     position: fixed;
     left: 12px;
-    bottom: 92px; /* dock fölé */
+    bottom: 92px;
+    /* dock fölé */
     z-index: 80;
 
     padding: 10px 12px;
@@ -195,14 +231,14 @@
 }
 
 /* bottom sheet */
-.mobile-overlay{
+.mobile-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,.55);
+  background: rgba(0, 0, 0, .55);
   z-index: 90;
 }
 
-.mobile-sheet{
+.mobile-sheet {
   position: fixed;
   left: 0;
   right: 0;
@@ -219,11 +255,11 @@
   overflow: auto;
 }
 
-.mobile-sheet.open{
+.mobile-sheet.open {
   transform: translateY(0);
 }
 
-.sheet-header{
+.sheet-header {
   position: sticky;
   top: 0;
   display: flex;
@@ -236,7 +272,7 @@
   z-index: 2;
 }
 
-.sheet-header .x{
+.sheet-header .x {
   background: transparent;
   border: 1px solid var(--glass-border);
   border-radius: 10px;

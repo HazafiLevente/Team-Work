@@ -42,6 +42,7 @@ export class SetupRoomlistComponent implements OnInit {
   loadingItems = false;
   items: SetupItem[] = [];
   itemsError = '';
+  connections: any[] = [];
 
   // ✅ Context menu state
   ctxOpen = false;
@@ -63,7 +64,7 @@ export class SetupRoomlistComponent implements OnInit {
 
   @ViewChild('boundary', { static: true }) boundaryEl!: ElementRef<HTMLElement>;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   ngOnInit(): void {
     this.loadUserSetups();
@@ -158,6 +159,7 @@ export class SetupRoomlistComponent implements OnInit {
         next: (items) => {
           this.items = Array.isArray(items) ? items : [];
           this.loadingItems = false;
+          this.loadConnections(setupId);
         },
         error: (err) => {
           console.error('❌ children hiba:', err);
@@ -166,6 +168,46 @@ export class SetupRoomlistComponent implements OnInit {
           this.itemsError = 'Betöltés sikertelen.';
         }
       });
+  }
+
+  loadConnections(setupId: any): void {
+    this.http.get<any[]>(`/api/setup/${setupId}/connections`, { withCredentials: true })
+      .subscribe({
+        next: (conns) => {
+          this.connections = Array.isArray(conns) ? conns : [];
+        },
+        error: (err) => {
+          console.error('❌ connections hiba:', err);
+          this.connections = [];
+        }
+      });
+  }
+
+  lineRefreshTrigger = 0;
+  updateLines(): void {
+    // Force Change Detection for SVG layer
+    this.lineRefreshTrigger++;
+  }
+
+  getLinePath(conn: any, _trigger?: any): string {
+    const sId = `${conn.source.category}:${conn.source.id}`;
+    const tId = `${conn.target.category}:${conn.target.id}`;
+
+    const sEl = document.querySelector(`[data-id="${sId}"]`) as HTMLElement;
+    const tEl = document.querySelector(`[data-id="${tId}"]`) as HTMLElement;
+
+    if (!sEl || !tEl) return '';
+
+    const rect = this.boundaryEl.nativeElement.getBoundingClientRect();
+    const sRect = sEl.getBoundingClientRect();
+    const tRect = tEl.getBoundingClientRect();
+
+    const x1 = sRect.left + sRect.width / 2 - rect.left;
+    const y1 = sRect.top + sRect.height / 2 - rect.top;
+    const x2 = tRect.left + tRect.width / 2 - rect.left;
+    const y2 = tRect.top + tRect.height / 2 - rect.top;
+
+    return `M ${x1} ${y1} L ${x2} ${y2}`;
   }
 
   // ✅ Vissza gomb

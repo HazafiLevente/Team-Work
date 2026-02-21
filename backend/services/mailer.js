@@ -18,12 +18,11 @@ async function sendWelcomeEmail(to, username) {
         html: `
             <h2>Szia ${username}!</h2>
             <p>Sikeresen regisztráltál a <b>Setup Configurator</b> oldalra.</p>
-            <p>Most már be tudsz jelentkezni és elkezdheted az összeállításaidat 🚀</p>
-            <hr>
-            <small>Ez egy automatikus email.</small>
+            <p>Most már be tudsz jelentkezni 🚀</p>
         `
     });
 }
+
 async function sendRegisterCode(to, code) {
     await transporter.sendMail({
         from: process.env.MAIL_FROM,
@@ -38,7 +37,22 @@ async function sendRegisterCode(to, code) {
     });
 }
 
-module.exports = { sendWelcomeEmail, sendRegisterCode };
+async function sendPasswordResetCode(to, code) {
+    await transporter.sendMail({
+        from: process.env.MAIL_FROM,
+        to,
+        subject: "🔑 Jelszó visszaállítás",
+        html: `
+          <h2>Jelszó visszaállítás</h2>
+          <p>A visszaállító kódod:</p>
+          <h1 style="letter-spacing:4px">${code}</h1>
+          <p>5 percig érvényes.</p>
+        `
+    });
+}
 
-
-module.exports = { sendWelcomeEmail };
+module.exports = {
+    sendWelcomeEmail,
+    sendRegisterCode,
+    sendPasswordResetCode
+};

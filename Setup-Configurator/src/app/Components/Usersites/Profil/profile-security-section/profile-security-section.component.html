@@ -1,0 +1,21 @@
+<section class="section">
+  <div class="section-header">
+    <h3>Biztonság</h3>
+    <span class="section-sub">Jelszó módosítás kóddal</span>
+  </div>
+  <div class="section-hr"></div>
+
+  <div class="security-wrap">
+    <app-email-verify
+      *ngIf="mode === 'emailVerify'"
+      (codeSent)="handleCodeSent($event)">
+    </app-email-verify>
+
+    <app-new-password
+      *ngIf="mode === 'newPassword'"
+      [email]="resetEmail"
+      (back)="backToVerify()"
+      (success)="afterResetFromProfile()">
+    </app-new-password>
+  </div>
+</section>

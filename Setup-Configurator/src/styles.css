@@ -1,50 +1,67 @@
 /*  -------------------------
     Színváltozók (Cyberpunk Neon Core)
     ------------------------- */
-:root{
-  --bg:#0A0A0A;
-  --surface:#0F0F17;
-  --accent-purple:#8A2BE2;
-  --accent-magenta:#FF00FF;
-  --accent-cyan:#00FFFF;
-  --hotpink:#FF1493;
-  --glass-alpha: rgba(255,255,255,0.04);
-  --glass-border: rgba(255,255,255,0.06);
-  --radius:14px;
-  --text:#E9EEF8;
+:root {
+  --bg: #0A0A0A;
+  --surface: #0F0F17;
+  --accent-purple: #8A2BE2;
+  --accent-magenta: #FF00FF;
+  --accent-cyan: #00FFFF;
+  --hotpink: #FF1493;
+  --glass-alpha: rgba(255, 255, 255, 0.04);
+  --glass-border: rgba(255, 255, 255, 0.06);
+  --radius: 14px;
+  --text: #E9EEF8;
 }
 
 /* -------------------------
    Reset & alapok
    ------------------------- */
-*{box-sizing:border-box}
-html,body{height:100%}
-body{
-  margin:0;
-  min-height:100%;
+* {
+  box-sizing: border-box
+}
+
+html,
+body {
+  height: 100%
+}
+
+body {
+  margin: 0;
+  min-height: 100%;
   font-family: Inter, Roboto, "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial;
   background:
-    radial-gradient(1200px 600px at 10% 10%, rgba(138,43,226,0.08), transparent 10%),
-    radial-gradient(900px 400px at 90% 90%, rgba(0,255,255,0.05), transparent 10%),
+    radial-gradient(1200px 600px at 10% 10%, rgba(138, 43, 226, 0.08), transparent 10%),
+    radial-gradient(900px 400px at 90% 90%, rgba(0, 255, 255, 0.05), transparent 10%),
     var(--bg);
-  color:var(--text);
-  -webkit-font-smoothing:antialiased;
-  -moz-osx-font-smoothing:grayscale;
-  padding-top:74px;
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  padding-top: 74px;
+  padding-bottom: 250px;
 }
-input[type="text"], input[type="password"], input[type="email"], textarea{
+
+input[type="text"],
+input[type="password"],
+input[type="email"],
+textarea {
   background: var(--glass-alpha);
-  border:1px solid var(--glass-border);
-  border-radius:var(--radius);
-  padding:12px 14px;
-  color:var(--text);
-  font-size:14px;
-  font-weight:500;
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 500;
   transition: all .16s;
 }
 
-body.compact .card { padding: 10px !important; }
-body.compact .row { padding: 6px 0 !important; }
+body.compact .card {
+  padding: 10px !important;
+}
+
+body.compact .row {
+  padding: 6px 0 !important;
+}
 
 /* =========================
    CYBERPUNK SCROLLBAR (NO RAINBOW)
@@ -56,77 +73,107 @@ body.compact .row { padding: 6px 0 !important; }
 }
 
 ::-webkit-scrollbar-track {
-  background: rgba(255,255,255,0.02);
+  background: rgba(255, 255, 255, 0.02);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: linear-gradient(
-    180deg,
-    rgba(138,43,226,0.55),   /* purple */
-    rgba(0,255,255,0.45)     /* cyan */
-  );
+  background: linear-gradient(180deg,
+      rgba(138, 43, 226, 0.55),
+      /* purple */
+      rgba(0, 255, 255, 0.45)
+      /* cyan */
+    );
   border-radius: 10px;
-  border: 3px solid rgba(10,10,10,0.9);
+  border: 3px solid rgba(10, 10, 10, 0.9);
 }
 
 /* 🔥 finom hover glow */
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(0,255,255,0.65);
-  box-shadow: 0 0 10px rgba(0,255,255,0.35);
+  background: rgba(0, 255, 255, 0.65);
+  box-shadow: 0 0 10px rgba(0, 255, 255, 0.35);
 }
 
 
 
-.brand{
-  display:flex;
-  align-items:center;
-  gap:12px;
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
-.logo{
-  width:42px;height:42px;border-radius:10px;
+
+.logo {
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
   background: linear-gradient(135deg, var(--accent-purple), var(--accent-magenta));
-  box-shadow: 0 6px 20px rgba(138,43,226,0.28), 0 0 10px rgba(255,0,255,0.08) inset;
-  display:grid; place-items:center;
-  font-weight:800;color:rgba(255,255,255,0.95);
-  text-shadow: 0 2px 14px rgba(138,43,226,0.6);
-  font-family:monospace;
+  box-shadow: 0 6px 20px rgba(138, 43, 226, 0.28), 0 0 10px rgba(255, 0, 255, 0.08) inset;
+  display: grid;
+  place-items: center;
+  font-weight: 800;
+  color: rgba(255, 255, 255, 0.95);
+  text-shadow: 0 2px 14px rgba(138, 43, 226, 0.6);
+  font-family: monospace;
 }
-.brand h1{margin:0;font-size:16px;letter-spacing:0.6px}
 
-.nav{
-  display:flex; gap:10px; align-items:center;
+.brand h1 {
+  margin: 0;
+  font-size: 16px;
+  letter-spacing: 0.6px
 }
-.nav a{
-  color:var(--text); text-decoration:none; padding:8px 12px; border-radius:8px;
-  font-weight:600; font-size:14px;
-  transition: all .18s cubic-bezier(.2,.9,.2,1);
-  position:relative;
+
+.nav {
+  display: flex;
+  gap: 10px;
+  align-items: center;
 }
-.nav a::after{
-  content:""; position:absolute; left:8px; right:8px; bottom:6px; height:2px; border-radius:2px;
-  background:transparent; transition: all .18s;
+
+.nav a {
+  color: var(--text);
+  text-decoration: none;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 14px;
+  transition: all .18s cubic-bezier(.2, .9, .2, 1);
+  position: relative;
+}
+
+.nav a::after {
+  content: "";
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  bottom: 6px;
+  height: 2px;
+  border-radius: 2px;
+  background: transparent;
+  transition: all .18s;
   filter: blur(6px);
 }
-.nav a:hover{
-  transform:translateY(-2px);
-  color:white;
+
+.nav a:hover {
+  transform: translateY(-2px);
+  color: white;
 }
-.nav a:hover::after{
+
+.nav a:hover::after {
   background: linear-gradient(90deg, var(--accent-cyan), var(--accent-magenta));
-  opacity:0.95;
-  height:6px; bottom:4px;
+  opacity: 0.95;
+  height: 6px;
+  bottom: 4px;
 }
 
 /*  ----------------------------
     Glow action button in top menu
     ---------------------------- */
-.cta{
-  padding:8px 14px;
+.cta {
+  padding: 8px 14px;
   background: linear-gradient(90deg, var(--accent-magenta), var(--accent-cyan));
-  border-radius:10px;
-  color:#050505;font-weight:700;
-  box-shadow: 0 6px 30px rgba(0,255,255,0.08), 0 0 28px rgba(255,0,255,0.06);
-  border:1px solid rgba(255,255,255,0.06);
+  border-radius: 10px;
+  color: #050505;
+  font-weight: 700;
+  box-shadow: 0 6px 30px rgba(0, 255, 255, 0.08), 0 0 28px rgba(255, 0, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 /* -------------------------
@@ -141,9 +188,11 @@ body.compact .row { padding: 6px 0 !important; }
     display: none;
   }
 }
+
 main.content {
   max-width: 1200px;
-  margin: 28px 380px 28px 20px;  /* TOP | RIGHT | BOTTOM | LEFT */
+  margin: 28px 380px 28px 20px;
+  /* TOP | RIGHT | BOTTOM | LEFT */
   padding: 24px;
   display: grid;
   gap: 22px;
@@ -156,106 +205,150 @@ main.content {
 /*  --------------
     fő kártya / panel
     -------------- */
-.panel{
-  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+.panel {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01));
   border: 1px solid var(--glass-border);
   border-radius: var(--radius);
-  padding:22px;
-  box-shadow: 0 10px 40px rgba(0,0,0,0.6);
-  min-height:220px;
+  padding: 22px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+  min-height: 220px;
 }
 
-.hero{
-  padding:36px;
-  border-radius:12px;
+.hero {
+  padding: 36px;
+  border-radius: 12px;
   background:
-    linear-gradient(180deg, rgba(138,43,226,0.06), rgba(0,255,255,0.03));
-  display:flex;
-  flex-direction:column;
-  gap:14px;
-  position:relative;
-  overflow:hidden;
+    linear-gradient(180deg, rgba(138, 43, 226, 0.06), rgba(0, 255, 255, 0.03));
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  position: relative;
+  overflow: hidden;
 }
-.hero h2{
-  margin:0;
-  font-size:30px;
-  letter-spacing:0.6px;
-  text-shadow: 0 8px 30px rgba(138,43,226,0.18);
+
+.hero h2 {
+  margin: 0;
+  font-size: 30px;
+  letter-spacing: 0.6px;
+  text-shadow: 0 8px 30px rgba(138, 43, 226, 0.18);
 }
-.hero p{margin:0; color:rgba(233,238,248,0.9)}
+
+.hero p {
+  margin: 0;
+  color: rgba(233, 238, 248, 0.9)
+}
 
 /* ------------------
     Neon accent separator
    ------------------ */
-.neon-line{
-  height:6px; border-radius:999px; margin:8px 0;
+.neon-line {
+  height: 6px;
+  border-radius: 999px;
+  margin: 8px 0;
   background: linear-gradient(90deg, var(--accent-cyan), var(--accent-purple), var(--accent-magenta));
-  box-shadow: 0 6px 30px rgba(0,255,255,0.06), 0 0 40px rgba(138,43,226,0.06);
+  box-shadow: 0 6px 30px rgba(0, 255, 255, 0.06), 0 0 40px rgba(138, 43, 226, 0.06);
 }
 
 /* --------------------
     cards list on the right
    -------------------- */
-.sidebar{
-  display:flex; flex-direction:column; gap:14px;
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
 }
-.small-card{
-  padding:14px; border-radius:12px; min-height:80px;
-  background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.005));
-  border:1px solid rgba(255,255,255,0.03);
+
+.small-card {
+  padding: 14px;
+  border-radius: 12px;
+  min-height: 80px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.01), rgba(255, 255, 255, 0.005));
+  border: 1px solid rgba(255, 255, 255, 0.03);
 }
-.tag{
-  display:inline-block; padding:6px 10px; border-radius:999px;
-  font-size:12px; font-weight:700;
-  background: linear-gradient(90deg, rgba(138,43,226,0.12), rgba(255,0,255,0.08));
-  color:var(--text);
+
+.tag {
+  display: inline-block;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  background: linear-gradient(90deg, rgba(138, 43, 226, 0.12), rgba(255, 0, 255, 0.08));
+  color: var(--text);
 }
 
 /*  ----------------
     link-styled buttons
     ---------------- */
-.btn{
-  display:inline-block; padding:10px 16px; border-radius:10px; font-weight:700;
-  text-decoration:none; border:1px solid rgba(255,255,255,0.04);
+.btn {
+  display: inline-block;
+  padding: 10px 16px;
+  border-radius: 10px;
+  font-weight: 700;
+  text-decoration: none;
+  border: 1px solid rgba(255, 255, 255, 0.04);
   transition: transform .16s, box-shadow .16s;
-  background: linear-gradient(90deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01));
   color: white;
 }
-.btn:hover{ transform: translateY(-3px); box-shadow:0 12px 40px rgba(0,0,0,0.6);}
+
+.btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
+}
 
 /*  ---------------------------
     tipográfia kisebb részletekhez
     --------------------------- */
-.muted{ color:rgba(233,238,248,0.65); font-size:13px }
-.mono{ font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, "Roboto Mono", monospace; font-size:13px }
+.muted {
+  color: rgba(233, 238, 248, 0.65);
+  font-size: 13px
+}
+
+.mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, "Roboto Mono", monospace;
+  font-size: 13px
+}
 
 /* ---------
     responsive
    ---------*/
-@media (max-width:980px){
-  main.content{ grid-template-columns: 1fr; padding:18px; margin:16px;}
-  .top-menu{padding:10px 14px}
-  .nav{display:none}
+@media (max-width:980px) {
+  main.content {
+    grid-template-columns: 1fr;
+    padding: 18px;
+    margin: 16px;
+  }
+
+  .top-menu {
+    padding: 10px 14px
+  }
+
+  .nav {
+    display: none
+  }
 }
 
 /*  --------------------
     prefers-reduced-motion
     --------------------*/
-@media (prefers-reduced-motion: reduce){
-  *{transition:none!important;animation:none!important}
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+    animation: none !important
+  }
 }
 
 .logorreg {
   color: darkgray;
   font-size: 15px;
 }
-a.logorreg
-{
+
+a.logorreg {
   color: darkgray;
   text-decoration: none;
 }
-a.logorreg:hover
-{
+
+a.logorreg:hover {
   color: #474747;
   text-decoration: none;
 }
@@ -266,32 +359,38 @@ a.logorreg:hover
   gap: 20px;
   margin-top: 20px;
 }
+
 .cpu-card {
-  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
-  border: 1px solid rgba(255,255,255,0.06);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01));
+  border: 1px solid rgba(255, 255, 255, 0.06);
   border-radius: 12px;
   padding: 14px;
   text-align: center;
   transition: all 0.2s ease-in-out;
 }
+
 .cpu-card:hover {
   transform: translateY(-3px);
-  box-shadow: 0 0 20px rgba(138,43,226,0.25);
+  box-shadow: 0 0 20px rgba(138, 43, 226, 0.25);
 }
+
 .cpu-card img {
   width: 100%;
   border-radius: 10px;
   margin-bottom: 10px;
 }
+
 .cpu-card h3 {
   font-size: 16px;
   margin: 8px 0 4px;
 }
+
 .cpu-card p {
   font-size: 13px;
   color: var(--text);
   opacity: 0.8;
 }
+
 /* --------------------------
    Szélesebb tartalom CPU nézethez
    -------------------------- */
@@ -337,12 +436,13 @@ a.logorreg:hover
    SIDEBAR
 ========================= */
 .admin-sidebar {
-  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01));
   border: 1px solid var(--glass-border);
   border-radius: var(--radius);
   padding: 16px;
   height: calc(100vh - 120px);
   overflow-y: auto;
+  padding-bottom: 180px;
 }
 
 .admin-sidebar h3 {
@@ -366,11 +466,11 @@ a.logorreg:hover
 }
 
 .admin-sidebar li:hover {
-  background: rgba(255,255,255,0.06);
+  background: rgba(255, 255, 255, 0.06);
 }
 
 .admin-sidebar li.active {
-  background: linear-gradient(90deg, rgba(0,255,255,0.15), rgba(255,0,255,0.12));
+  background: linear-gradient(90deg, rgba(0, 255, 255, 0.15), rgba(255, 0, 255, 0.12));
   font-weight: 700;
 }
 
@@ -378,7 +478,7 @@ a.logorreg:hover
    MAIN PANEL
 ========================= */
 .admin-main {
-  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01));
   border: 1px solid var(--glass-border);
   border-radius: var(--radius);
   padding: 20px;
@@ -403,13 +503,13 @@ a.logorreg:hover
 }
 
 .admin-table thead {
-  background: rgba(255,255,255,0.05);
+  background: rgba(255, 255, 255, 0.05);
 }
 
 .admin-table th,
 .admin-table td {
   padding: 10px 12px;
-  border-bottom: 1px solid rgba(255,255,255,0.06);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
   text-align: left;
   white-space: nowrap;
 }
@@ -420,7 +520,7 @@ a.logorreg:hover
 }
 
 .admin-table tr:hover td {
-  background: rgba(255,255,255,0.03);
+  background: rgba(255, 255, 255, 0.03);
 }
 
 /* =========================
@@ -432,13 +532,13 @@ a.logorreg:hover
   margin-bottom: 12px;
   border-radius: 8px;
   font-size: 13px;
-  background: rgba(255,255,255,0.05);
-  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   color: var(--text);
 }
 
 .admin-table-search::placeholder {
-  color: rgba(233,238,248,0.5);
+  color: rgba(233, 238, 248, 0.5);
 }
 
 
@@ -448,15 +548,15 @@ a.logorreg:hover
   width: 100%;
   max-width: 320px;
   border-radius: 10px;
-  background: rgba(255,255,255,0.06);
-  border: 1px solid rgba(255,255,255,0.15);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.15);
   color: white;
 }
 
 .admin-queries {
   margin-top: 20px;
   padding-top: 10px;
-  border-top: 1px solid rgba(255,255,255,0.1);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .queries-header {
@@ -472,7 +572,7 @@ a.logorreg:hover
   height: 26px;
   border-radius: 6px;
   border: none;
-  background: rgba(255,255,255,0.15);
+  background: rgba(255, 255, 255, 0.15);
   color: white;
   cursor: pointer;
 }
@@ -485,7 +585,7 @@ a.logorreg:hover
 }
 
 #query-list li:hover {
-  background: rgba(255,255,255,0.08);
+  background: rgba(255, 255, 255, 0.08);
 }
 
 
@@ -493,7 +593,7 @@ a.logorreg:hover
   margin-bottom: 20px;
   padding: 12px;
   border-radius: 12px;
-  background: rgba(0,0,0,0.4);
+  background: rgba(0, 0, 0, 0.4);
 }
 
 .sql-editor textarea {
@@ -501,7 +601,7 @@ a.logorreg:hover
   height: 120px;
   background: #0e0e0e;
   color: #c7f9ff;
-  border: 1px solid rgba(255,255,255,0.15);
+  border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 8px;
   padding: 10px;
   font-family: monospace;
@@ -546,16 +646,18 @@ a.logorreg:hover
   /* 🔥 EZ A LÉNYEG */
   width: 100%;
   max-width: 1200px;
-  margin-left: 0;      /* balra */
-  margin-right: auto; /* ne középre */
+  margin-left: 0;
+  /* balra */
+  margin-right: auto;
+  /* ne középre */
 }
 
 
 .setup-card {
   padding: 16px;
   border-radius: 12px;
-  background: rgba(255,255,255,0.05);
-  border: 1px solid rgba(255,255,255,0.1);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   cursor: pointer;
   transition: 0.2s ease;
 }
@@ -577,7 +679,7 @@ a.logorreg:hover
 }
 
 .setup-card-add:hover {
-  background: rgba(100,200,255,0.15);
+  background: rgba(100, 200, 255, 0.15);
 }
 
 .setup-plus {
@@ -597,8 +699,10 @@ a.logorreg:hover
 /* 🔓 Setup oldalaknál engedjük ki a tartalmat balra */
 .setup-page-wide {
   width: 100%;
-  max-width: none;        /* 🔥 nincs korlát */
-  padding-left: 40px;     /* ahol bekarikáztad */
+  max-width: none;
+  /* 🔥 nincs korlát */
+  padding-left: 40px;
+  /* ahol bekarikáztad */
   padding-right: 40px;
 }
 
@@ -619,12 +723,12 @@ a.logorreg:hover
   z-index: 9999;
 
   background: rgba(18, 20, 28, 0.96);
-  border: 1px solid rgba(255,255,255,0.08);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 12px;
   padding: 14px;
   min-width: 240px;
 
-  box-shadow: 0 20px 50px rgba(0,0,0,0.55);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.55);
   backdrop-filter: blur(10px);
   animation: fadeIn 0.12s ease;
 }
@@ -632,13 +736,13 @@ a.logorreg:hover
 .user-menu .menu-title {
   font-size: 13px;
   font-weight: 700;
-  color: rgba(255,255,255,0.85);
+  color: rgba(255, 255, 255, 0.85);
   margin-bottom: 6px;
 }
 
 .user-menu hr {
   border: none;
-  border-top: 1px solid rgba(255,255,255,0.08);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
   margin: 8px 0;
 }
 
@@ -657,10 +761,24 @@ a.logorreg:hover
   text-transform: uppercase;
 }
 
-.role-badge.owner { background: gold; color: black; }
-.role-badge.admin\+ { background: #ff6; color: black; }
-.role-badge.admin { background: #6cf; color: black; }
-.role-badge.user { background: #555; }
+.role-badge.owner {
+  background: gold;
+  color: black;
+}
+
+.role-badge.admin\+ {
+  background: #ff6;
+  color: black;
+}
+
+.role-badge.admin {
+  background: #6cf;
+  color: black;
+}
+
+.role-badge.user {
+  background: #555;
+}
 
 .role-grid {
   display: grid;
@@ -672,26 +790,33 @@ a.logorreg:hover
 .role-btn {
   padding: 8px;
   border-radius: 8px;
-  border: 1px solid rgba(255,255,255,0.2);
-  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.05);
   color: white;
   cursor: pointer;
   transition: 0.2s;
 }
 
 .role-btn:hover {
-  background: rgba(120,200,255,0.25);
+  background: rgba(120, 200, 255, 0.25);
 }
 
 .role-btn.active {
-  background: rgba(120,200,255,0.5);
+  background: rgba(120, 200, 255, 0.5);
   border-color: #6cf;
   font-weight: bold;
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(-6px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 
@@ -700,16 +825,16 @@ a.logorreg:hover
   border-radius: 8px;
   font-size: 13px;
   cursor: pointer;
-  color: rgba(255,255,255,0.9);
+  color: rgba(255, 255, 255, 0.9);
   transition: background .15s;
 }
 
 .role-option:hover {
-  background: rgba(255,255,255,0.08);
+  background: rgba(255, 255, 255, 0.08);
 }
 
 .role-option.disabled {
-  color: rgba(255,255,255,0.35);
+  color: rgba(255, 255, 255, 0.35);
   cursor: not-allowed;
 }
 
@@ -721,7 +846,7 @@ a.logorreg:hover
   place-items: center;
   cursor: pointer;
 
-  color: rgba(255,255,255,0.6);
+  color: rgba(255, 255, 255, 0.6);
   font-size: 18px;
   border-radius: 8px;
 
@@ -729,7 +854,7 @@ a.logorreg:hover
 }
 
 .menu-dots:hover {
-  background: rgba(255,255,255,0.08);
+  background: rgba(255, 255, 255, 0.08);
   color: white;
   transform: scale(1.1);
 }
@@ -738,7 +863,7 @@ a.logorreg:hover
 .user-edit-modal {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.6);
+  background: rgba(0, 0, 0, 0.6);
   display: grid;
   place-items: center;
   z-index: 9999;
@@ -819,131 +944,143 @@ tr.editing {
   cursor: pointer;
   padding: 10px;
   border-radius: 10px;
-  border: 1px dashed rgba(0,255,255,0.4);
+  border: 1px dashed rgba(0, 255, 255, 0.4);
   color: #7ff;
   transition: all .2s;
 }
 
 .add-row-btn:hover {
-  background: rgba(0,255,255,0.08);
+  background: rgba(0, 255, 255, 0.08);
 }
 
 
 .menu-item.danger {
   color: #ff4d4d;
 }
+
 .menu-item.danger:hover {
-  background: rgba(255,77,77,0.15);
+  background: rgba(255, 77, 77, 0.15);
 }
 
 
-.search-row{
-  display:flex;
-  gap:12px;
-  align-items:center;
+.search-row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
   margin-bottom: 20px;
   grid-column: 1 / -1;
 }
 
-.search-input{
-  flex:1;
-  padding:14px;
-  border-radius:10px;
-  background:rgba(255,255,255,0.05);
-  border:1px solid rgba(255,255,255,0.12);
-  color:white;
-  font-size:16px;
+.search-input {
+  flex: 1;
+  padding: 14px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: white;
+  font-size: 16px;
 }
 
-.dd{ position:relative; min-width:220px; }
-
-.dd-btn{
-  width:100%;
-  padding:14px;
-  border-radius:10px;
-  background:rgba(255,255,255,0.05);
-  border:1px solid rgba(255,255,255,0.12);
-  color:white;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  cursor:pointer;
+.dd {
+  position: relative;
+  min-width: 220px;
 }
 
-.dd-caret{ opacity:0.8; }
+.dd-btn {
+  width: 100%;
+  padding: 14px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+}
 
-.dd-menu{
-  position:absolute;
-  z-index:9999;
+.dd-caret {
+  opacity: 0.8;
+}
+
+.dd-menu {
+  position: absolute;
+  z-index: 9999;
   top: calc(100% + 8px);
-  left:0;
-  right:0;
-  border-radius:12px;
-  padding:10px;
-  background:rgba(255,255,255,0.04); /* ✅ ugyanaz mint a div-ek */
-  border:1px solid rgba(255,255,255,0.10);
+  left: 0;
+  right: 0;
+  border-radius: 12px;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.04);
+  /* ✅ ugyanaz mint a div-ek */
+  border: 1px solid rgba(255, 255, 255, 0.10);
   backdrop-filter: blur(10px);
 }
 
-.dd-search{
-  width:100%;
-  padding:10px;
-  border-radius:10px;
-  background:rgba(255,255,255,0.06);
-  border:1px solid rgba(255,255,255,0.12);
-  color:white;
-  margin-bottom:10px;
+.dd-search {
+  width: 100%;
+  padding: 10px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: white;
+  margin-bottom: 10px;
 }
 
-.dd-options{
-  max-height:260px;
-  overflow:auto;
-  display:flex;
-  flex-direction:column;
-  gap:6px;
+.dd-options {
+  max-height: 260px;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
-.dd-option{
-  text-align:left;
-  width:100%;
-  padding:10px;
-  border-radius:10px;
-  border:1px solid rgba(255,255,255,0.10);
-  background:rgba(255,255,255,0.03);
-  color:white;
-  cursor:pointer;
+.dd-option {
+  text-align: left;
+  width: 100%;
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  background: rgba(255, 255, 255, 0.03);
+  color: white;
+  cursor: pointer;
 }
 
-.dd-option:hover{
-  background:rgba(255,255,255,0.08);
+.dd-option:hover {
+  background: rgba(255, 255, 255, 0.08);
 }
 
-.dd-option.active{
-  border-color: rgba(255,255,255,0.35);
-  background: rgba(255,255,255,0.10);
+.dd-option.active {
+  border-color: rgba(255, 255, 255, 0.35);
+  background: rgba(255, 255, 255, 0.10);
 }
 
-.hidden{ display:none; }
+.hidden {
+  display: none;
+}
 
 
 
 
 
 /* a "sáv" (maga a select) */
-#manufacturer-select{
+#manufacturer-select {
   background: #121212;
   color: #eaeaea;
-  border: 1px solid rgba(255,255,255,0.12);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 10px;
   padding: 10px 12px;
   outline: none;
-  appearance: none;           /* Chrome/Edge */
-  -webkit-appearance: none;   /* Safari */
-  -moz-appearance: none;      /* Firefox */
+  appearance: none;
+  /* Chrome/Edge */
+  -webkit-appearance: none;
+  /* Safari */
+  -moz-appearance: none;
+  /* Firefox */
 }
 
 /* hover/focus */
-#manufacturer-select:focus{
+#manufacturer-select:focus {
   border-color: rgba(180, 120, 255, 0.6);
   box-shadow: 0 0 0 3px rgba(180, 120, 255, 0.15);
 }
@@ -960,14 +1097,17 @@ select {
 }
 
 select option {
-  background-color: #1a1a1a; /* lenyíló lista háttere */
-  color: #ffffff;            /* SZÖVEG SZÍNE */
+  background-color: #1a1a1a;
+  /* lenyíló lista háttere */
+  color: #ffffff;
+  /* SZÖVEG SZÍNE */
 }
 
 /* hover / kiválasztott */
 select option:hover,
 select option:checked {
-  background-color: #6a4cff; /* lila */
+  background-color: #6a4cff;
+  /* lila */
   color: #ffffff;
 }
 
@@ -997,18 +1137,19 @@ select {
   display: grid;
   place-items: center;
   cursor: pointer;
-  box-shadow: 0 0 18px rgba(138,43,226,0.45);
+  box-shadow: 0 0 18px rgba(138, 43, 226, 0.45);
 }
 
 .avatar-placeholder {
   width: 18px;
   height: 18px;
   border-radius: 50%;
-  background: rgba(0,0,0,0.35);
+  background: rgba(0, 0, 0, 0.35);
 }
+
 .btn.ghost {
-  background: rgba(255,255,255,0.06);
-  border: 1px solid rgba(255,255,255,0.15);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.15);
   box-shadow: none;
 }
 
@@ -1020,13 +1161,13 @@ select {
 
 /* alap szöveg */
 .user-menu .menu-item {
-  color: rgba(255,255,255,0.9);
+  color: rgba(255, 255, 255, 0.9);
   transition: color 0.15s ease, opacity 0.15s ease;
 }
 
 /* 🔥 HOVER: csak a szöveg halványul */
 .user-menu .menu-item:hover {
-  color: rgba(255,255,255,0.55);
+  color: rgba(255, 255, 255, 0.55);
 }
 
 /* danger marad piros, de halványodik */
@@ -1035,7 +1176,7 @@ select {
 }
 
 .user-menu .menu-item.danger:hover {
-  color: rgba(255,77,77,0.6);
+  color: rgba(255, 77, 77, 0.6);
 }
 
 app-root {
@@ -1044,9 +1185,10 @@ app-root {
   position: relative;
 }
 
-.app-foreground{
+.app-foreground {
   position: relative;
-  z-index: 1; /* minden kattintható tartalom a canvas fölött */
+  z-index: 1;
+  /* minden kattintható tartalom a canvas fölött */
 }
 
 
@@ -1057,12 +1199,10 @@ app-root {
 
   /* 🔥 sötétítés + enyhe szín */
   background:
-    linear-gradient(
-      180deg,
-      rgba(0,0,0,0.55) 0%,
-      rgba(0,0,0,0.35) 40%,
-      rgba(0,0,0,0.65) 100%
-    );
+    linear-gradient(180deg,
+      rgba(0, 0, 0, 0.55) 0%,
+      rgba(0, 0, 0, 0.35) 40%,
+      rgba(0, 0, 0, 0.65) 100%);
 
   pointer-events: none;
 }
@@ -1084,15 +1224,22 @@ app-root {
   }
 
   /* kisebb gap mobilon */
-  .gap-lg { gap: 12px !important; }
-  .gap-md { gap: 10px !important; }
+  .gap-lg {
+    gap: 12px !important;
+  }
+
+  .gap-md {
+    gap: 10px !important;
+  }
 
   /* cardok ne legyenek túl nagyok */
-  .card, .panel, .carfilter {
+  .card,
+  .panel,
+  .carfilter {
     border-radius: 14px !important;
   }
 }
 
-body.ai-open .dock-outer{
+body.ai-open .dock-outer {
   display: none !important;
 }

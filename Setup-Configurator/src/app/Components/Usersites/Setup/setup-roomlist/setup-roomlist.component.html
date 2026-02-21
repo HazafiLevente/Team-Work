@@ -1,32 +1,22 @@
-
 <div class="setup-shell">
 
   <!-- BAL OLDAL: ez lesz a DRAG BOUNDARY -->
   <div class="setup-workspace" #boundary>
 
-    <app-dot-grid
-      class="dot-bg"
-      [dotSize]="5"
-      [gap]="15"
-      baseColor="#271E37"
-      activeColor="#5227FF"
-      [proximity]="100"
-      [shockRadius]="250"
-      [shockStrength]="5"
-      [resistance]="750"
-      [returnDuration]="1.5">
+    <app-dot-grid class="dot-bg" [dotSize]="5" [gap]="15" baseColor="#271E37" activeColor="#5227FF" [proximity]="100"
+      [shockRadius]="250" [shockStrength]="5" [resistance]="750" [returnDuration]="1.5">
     </app-dot-grid>
 
     <!-- ✅ felső gombsor -->
     <div class="toolbar">
       <!-- Új setup csak LISTA nézetben és ha engedélyezett -->
       @if (!viewingSetup && allowCreate) {
-        <button class="new-setup-btn" type="button" (click)="createNewSetup()">+ Új setup</button>
+      <button class="new-setup-btn" type="button" (click)="createNewSetup()">+ Új setup</button>
       }
 
       <!-- Vissza csak DETAIL nézetben -->
       @if (viewingSetup) {
-        <button class="back-btn" type="button" (click)="backToSetups()">Vissza</button>
+      <button class="back-btn" type="button" (click)="backToSetups()">Vissza</button>
       }
     </div>
 
@@ -38,21 +28,18 @@
            ========================= -->
       @if (!viewingSetup) {
 
-        @if (!loading) {
-          @for (setup of userSetups; track trackBySetup($index, setup)) {
-            <app-setup-room
-              [setup]="setup"
-              [boundaryRef]="boundary"
-              (setupDblClick)="openSetupDetails($event)"
-              (setupRightClick)="openContextMenu($event)">
-            </app-setup-room>
-          }
-          @empty {
-            <div class="no-data">Nincs setup.</div>
-          }
-        } @else {
-          <div class="no-data">Betöltés...</div>
-        }
+      @if (!loading) {
+      @for (setup of userSetups; track trackBySetup($index, setup)) {
+      <app-setup-room [setup]="setup" [boundaryRef]="boundary" (setupDblClick)="openSetupDetails($event)"
+        (setupRightClick)="openContextMenu($event)">
+      </app-setup-room>
+      }
+      @empty {
+      <div class="no-data">Nincs setup.</div>
+      }
+      } @else {
+      <div class="no-data">Betöltés...</div>
+      }
 
       }
 
@@ -61,31 +48,36 @@
            ========================= -->
       @if (viewingSetup) {
 
-        @if (loadingItems) {
-          <div class="no-data">Betöltés...</div>
-        } @else {
+      @if (loadingItems) {
+      <div class="no-data">Betöltés...</div>
+      } @else {
 
-          @if (itemsError) {
-            <div class="no-data">{{ itemsError }}</div>
-          } @else {
+      @if (itemsError) {
+      <div class="no-data">{{ itemsError }}</div>
+      } @else {
 
-            @if (!items || items.length === 0) {
-              <div class="no-data">Ez a setup üres.</div>
-            } @else {
+      @if (!items || items.length === 0) {
+      <div class="no-data">Ez a setup üres.</div>
+      } @else {
 
-              <!-- ✅ itt kártyák legyenek (setup-stílus), NINCS jobb klikk -->
-              @for (it of items; track trackByItem($index, it)) {
-                <div class="item-card">
-                  <div class="item-title">{{ it?.display_name || it?.name || 'Ismeretlen elem' }}</div>
-                  <div class="item-sub">{{ it?.category || '' }}</div>
-                </div>
-              }
-
-            }
-
-          }
-
+      <!-- ✅ SVG réteg a vonalaknak -->
+      <svg class="connections-svg">
+        @for (conn of connections; track conn.id) {
+        <path [attr.d]="getLinePath(conn, lineRefreshTrigger)" class="connection-line" />
         }
+      </svg>
+
+      <!-- ✅ Eszközök mint körök (vagy téglalapok ha nem network) -->
+      @for (it of items; track trackByItem($index, it)) {
+      <app-setup-room [dataId]="trackByItem($index, it)" [setup]="it" [boundaryRef]="boundary" (moved)="updateLines()">
+      </app-setup-room>
+      }
+
+      }
+
+      }
+
+      }
 
       }
 
@@ -93,29 +85,25 @@
 
     <!-- ✅ Jobb klikk menü (csak LISTA nézetben) -->
     @if (ctxOpen && !viewingSetup) {
-      <div class="ctx-backdrop" (mousedown)="closeContextMenu()">
-        <div
-          class="ctx-menu"
-          [style.left.px]="ctxX"
-          [style.top.px]="ctxY"
-          (mousedown)="$event.stopPropagation()">
+    <div class="ctx-backdrop" (mousedown)="closeContextMenu()">
+      <div class="ctx-menu" [style.left.px]="ctxX" [style.top.px]="ctxY" (mousedown)="$event.stopPropagation()">
 
-          <button class="ctx-item" type="button">Megnyitás</button>
-          <button class="ctx-item" type="button" (click)="openToolsFromMenu()">Eszközök</button>
+        <button class="ctx-item" type="button">Megnyitás</button>
+        <button class="ctx-item" type="button" (click)="openToolsFromMenu()">Eszközök</button>
 
-          <!-- ✅ PC összerakó csak NEM network -->
-          @if (!isNetworkSetup(ctxSetup)) {
-            <button class="ctx-item" type="button" (click)="openPcBuilderFromMenu()">Számítógép összerakó</button>
-          }
+        <!-- ✅ PC összerakó csak NEM network -->
+        @if (!isNetworkSetup(ctxSetup)) {
+        <button class="ctx-item" type="button" (click)="openPcBuilderFromMenu()">Számítógép összerakó</button>
+        }
 
-          <div class="ctx-sep"></div>
-          <button class="ctx-item" type="button" (click)="openRenameFromMenu()">Átnevezés</button>
+        <div class="ctx-sep"></div>
+        <button class="ctx-item" type="button" (click)="openRenameFromMenu()">Átnevezés</button>
 
-          <div class="ctx-sep"></div>
-          <button class="ctx-item danger" type="button" (click)="deleteSetupFromMenu()">Törlés</button>
+        <div class="ctx-sep"></div>
+        <button class="ctx-item danger" type="button" (click)="deleteSetupFromMenu()">Törlés</button>
 
-        </div>
       </div>
+    </div>
     }
 
   </div>
@@ -124,44 +112,41 @@
 
 <!-- ✅ Eszközök modal -->
 @if (toolsOpen && toolsSetup) {
-  <app-setup-tools-modal
-    [setup]="toolsSetup"
-    [startTab]="toolsStartTab"
-    (close)="closeTools()">
-  </app-setup-tools-modal>
+<app-setup-tools-modal [setup]="toolsSetup" [startTab]="toolsStartTab" (close)="closeTools()">
+</app-setup-tools-modal>
 }
 
 <!-- ✅ Átnevezés modal -->
 @if (renameOpen && renameSetup) {
-  <div class="overlay" (click)="closeRename()">
-    <div class="window" (click)="$event.stopPropagation()">
+<div class="overlay" (click)="closeRename()">
+  <div class="window" (click)="$event.stopPropagation()">
 
-      <div class="titlebar">
-        <div class="caption">
-          <div class="big">Átnevezés</div>
-          <div class="small">{{ getSetupTitle(renameSetup) }}</div>
-        </div>
-        <button class="x" (click)="closeRename()">×</button>
+    <div class="titlebar">
+      <div class="caption">
+        <div class="big">Átnevezés</div>
+        <div class="small">{{ getSetupTitle(renameSetup) }}</div>
       </div>
-
-      <div class="content">
-        <div class="field">
-          <label>Új név</label>
-          <input [(ngModel)]="renameValue" placeholder="pl. Nappali setup" />
-        </div>
-
-        @if (renameError) {
-          <div class="error">{{ renameError }}</div>
-        }
-
-        <div class="actions">
-          <button class="btn" (click)="closeRename()">Mégse</button>
-          <button class="btn primary" (click)="saveRename()" [disabled]="renameSaving">
-            @if (renameSaving) { Mentés... } @else { Mentés }
-          </button>
-        </div>
-      </div>
-
+      <button class="x" (click)="closeRename()">×</button>
     </div>
+
+    <div class="content">
+      <div class="field">
+        <label>Új név</label>
+        <input [(ngModel)]="renameValue" placeholder="pl. Nappali setup" />
+      </div>
+
+      @if (renameError) {
+      <div class="error">{{ renameError }}</div>
+      }
+
+      <div class="actions">
+        <button class="btn" (click)="closeRename()">Mégse</button>
+        <button class="btn primary" (click)="saveRename()" [disabled]="renameSaving">
+          @if (renameSaving) { Mentés... } @else { Mentés }
+        </button>
+      </div>
+    </div>
+
   </div>
+</div>
 }

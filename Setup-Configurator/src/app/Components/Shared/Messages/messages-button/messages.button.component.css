@@ -1,6 +1,6 @@
 .message-fab {
   position: fixed;
-  bottom: 24px;
+  bottom: 5px;
   right: 24px;
   width: 60px;
   height: 60px;
@@ -12,7 +12,7 @@
   z-index: 1000;
 
   background: linear-gradient(135deg, #5227FF, #B19EEF);
-  box-shadow: 0 0 15px rgba(138,43,226,0.6);
+  box-shadow: 0 0 15px rgba(138, 43, 226, 0.6);
   transition: 0.2s;
 }
 

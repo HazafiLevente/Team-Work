@@ -8,6 +8,10 @@ router.post("/logout", ctrl.logout);
 router.post("/register/request", ctrl.requestRegisterCode);
 router.post("/register/verify", ctrl.verifyRegisterCode);
 
+router.post("/password/request", ctrl.requestPasswordReset);
+router.post("/password/reset", ctrl.resetPassword);
+
+
 // 🔥 EZ KÖTELEZŐ
 router.get("/me", verifyUser, ctrl.me);
 

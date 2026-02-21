@@ -1,13 +1,8 @@
-<div class="drag-element"
-     [class.circle]="setup?.isNetwork === true"
-     cdkDrag
-     [cdkDragBoundary]="boundaryRef"
-     (cdkDragStarted)="onDragStarted()"
-     (cdkDragEnded)="onDragEnded()"
-     (click)="onClick()"
-     (contextmenu)="onRightClick($event)">
+<div class="drag-element" [class.circle]="isNetwork()" cdkDrag [attr.data-id]="dataId" [cdkDragBoundary]="boundaryRef"
+  (cdkDragStarted)="onDragStarted()" (cdkDragEnded)="onDragEnded()" (cdkDragMoved)="onDragMoved()" (click)="onClick()"
+  (contextmenu)="onRightClick($event)">
 
   <span class="setup-name">
-    {{ setup?.setup_name || setup?.name || 'Névtelen setup' }}
+    {{ setup?.display_name || setup?.setup_name || setup?.name || 'Névtelen setup' }}
   </span>
 </div>

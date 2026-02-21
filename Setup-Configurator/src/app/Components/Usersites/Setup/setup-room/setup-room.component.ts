@@ -17,10 +17,12 @@ export type SetupRightClickPayload = {
 })
 export class SetupRoomComponent {
   @Input() setup: any;
-  @Input() boundaryRef: any;
+  @Input() boundaryRef!: HTMLElement;
+  @Input() dataId: string = '';
 
   @Output() setupDblClick = new EventEmitter<any>();
   @Output() setupRightClick = new EventEmitter<SetupRightClickPayload>();
+  @Output() moved = new EventEmitter<void>();
 
   private lastClickAt = 0;
   private dragging = false;
@@ -48,6 +50,10 @@ export class SetupRoomComponent {
 
   onDragEnded(): void {
     setTimeout(() => (this.dragging = false), 0);
+  }
+
+  onDragMoved(): void {
+    this.moved.emit();
   }
 
   onClick(): void {
