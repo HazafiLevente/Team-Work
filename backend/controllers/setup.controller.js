@@ -1,4 +1,3 @@
-
 const { supabase } = require("../services/supabase");
 
 /**
@@ -7,6 +6,7 @@ const { supabase } = require("../services/supabase");
  * - cache + limit + concurrency -> nem terheli túl a Supabase-t
  * - PC builder működik (pcbuilds + pcparts)
  * - ✅ Cars: car-options + cars list + cars add (Car_setup[Setup])
+ * - ✅ NEW: Car_setup details (egy Car_setup sorhoz tartozó autó adatok)
  */
 
 const SETUP_TABLE = "setup[Setup]";
@@ -18,7 +18,6 @@ const CAR_SETUP_TABLE = "Car_setup[Setup]";
    amiben biztosan nincs setup_id
    ========================================================= */
 const NO_SETUPID_TABLES = new Set([
-    // --- korábbi logok ---
     "bass_shaker[Setup]",
     "bass_amplifier[Setup]",
     "acoustic_keyboards[Setup]",
@@ -36,7 +35,6 @@ const NO_SETUPID_TABLES = new Set([
     "saxophone[Setup]",
     "reciever_setup[Setup]",
 
-    // --- mostani 15 hiba ---
     "plucked_string_instruments[Setup]",
     "percussion_instruments[Setup]",
     "membranophones[Setup]",
@@ -86,7 +84,6 @@ const tablesToScan = [
     "plucked_string_instruments[Setup]",
     "reciever_setup[Setup]",
     "saxophone[Setup]",
-    "setup_rooms[Setup]",
     "side_speaker[Setup]",
     "sound-producing[Setup]",
     "string_instruments[Setup]",
@@ -107,10 +104,12 @@ const tablesToScan = [
 const childrenCache = new Map(); // setupId -> { exp, value }
 const pcPartsCache = new Map(); // global -> { exp, value }
 const carOptionsCache = new Map(); // global -> { exp, value }
+const carDetailsCache = new Map(); // carSetupId -> { exp, value }  ✅ NEW
 
 const CHILDREN_TTL_MS = 30_000;
 const PCPARTS_TTL_MS = 10 * 60_000;
 const CAROPTIONS_TTL_MS = 10 * 60_000;
+const CARDETAILS_TTL_MS = 30_000; // ✅ NEW (kicsi TTL, de védi a Supabase-t)
 
 function cacheGet(map, key) {
     const hit = map.get(key);
@@ -189,18 +188,71 @@ exports.list = async (req, res) => {
         let q = supabase.from(SETUP_TABLE).select("*").eq("user_id", userId);
         if (hasFav) q = q.eq("isFavorite", favBool);
 
-        const { data, error } = await q;
-        if (error) throw error;
+        const { data: setupData, error: setupErr } = await q;
+        if (setupErr) throw setupErr;
 
-        const normalized = (data || []).map((s) => ({
-            ...s,
-            setup_name: s.setup_name ?? s.name ?? "Névtelen setup",
-        }));
+        // ✅ Lekérjük a szobák pozícióit is
+        const { data: posData, error: posErr } = await supabase
+            .from("setup_rooms[Coordinates]")
+            .select("setup_id, x, y");
+
+        const normalized = (setupData || []).map((s) => {
+            const pos = (posData || []).find(p => String(p.setup_id) === String(s.id));
+            return {
+                ...s,
+                setup_name: s.setup_name ?? s.name ?? "Névtelen setup",
+                x: pos?.x ?? null,
+                y: pos?.y ?? null,
+            };
+        });
 
         res.json({ setups: normalized });
     } catch (err) {
         console.error("❌ Setup list hiba:", err);
         res.json({ setups: [] });
+    }
+};
+
+exports.upsertRoomPosition = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const setupId = req.params.setupId;
+        const { x, y } = req.body;
+
+        if (!setupId) return res.status(400).json({ error: "Missing setupId" });
+
+        // Ellenőrizzük a jogosultságot
+        const ok = await assertSetupOwnedByUser(setupId, userId);
+        if (!ok) return res.status(403).json({ error: "Forbidden" });
+
+        // Megkeressük, létezik-e már
+        const { data: existing } = await supabase
+            .from("setup_rooms[Coordinates]")
+            .select("id")
+            .eq("setup_id", setupId)
+            .single();
+
+        let result;
+        if (existing) {
+            result = await supabase
+                .from("setup_rooms[Coordinates]")
+                .update({ x: Number(x), y: Number(y) })
+                .eq("id", existing.id);
+        } else {
+            result = await supabase
+                .from("setup_rooms[Coordinates]")
+                .insert({
+                    setup_id: setupId,
+                    x: Number(x),
+                    y: Number(y)
+                });
+        }
+
+        if (result.error) throw result.error;
+        res.json({ success: true });
+    } catch (err) {
+        console.error("❌ upsertRoomPosition fatal:", err);
+        res.status(500).json({ error: "Update failed" });
     }
 };
 
@@ -351,7 +403,7 @@ exports.remove = async (req, res) => {
 };
 
 /* =========================================================
-   PC BUILDER
+   PC BUILDER   ✅ (ITT SEMMI NEM VÁLTOZOTT)
    ========================================================= */
 
 // GET /api/setup/:id/pcbuilds
@@ -701,44 +753,152 @@ exports.carsAdd = async (req, res) => {
     }
 };
 
-/* =========================================================
-   ✅ CONNECTIONS (Network device links)
-   ========================================================= */
-const connectionTables = [
-    "connects_modem_audiop_utp[Connects]",
-    "connects_modem_ht_utp[Connects]",
-    "connects_modem_modem_utp[Connects]",
-    "connects_modem_pc_utp[Connects]",
-    "connects_modem_router_utp[Connects]",
-    "connects_modem_switch_utp[Connects]",
-    "connects_router_audiop_utp[Connects]",
-    "connects_router_ht_utp[Connects]",
-    "connects_router_pc_utp[Connects]",
-    "connects_router_router_utp[Connects]",
-    "connects_router_switch_utp[Connects]",
-    "connects_switch_audiop_utp[Connects]",
-    "connects_switch_ht_utp[Connects]",
-    "connects_switch_mixer_utp[Connects]",
-    "connects_switch_pc_utp[Connects]",
-    "connects_switch_switch_utp[Connects]",
-];
+function pickFirstCarLink(row) {
+    if (!row) return null;
 
-const catMap = {
-    "audio_processor": "audiop",
-    "home_theater_setups": "ht",
-    "pc_details": "pc",
-    "switches": "switch",
-    "audio_processors": "audiop"
+    const map = [
+        { fk: "cabrio_id", table: "cabrio_cars" },
+        { fk: "hatchback_id", table: "hatchback_cars" },
+        { fk: "coupe_id", table: "coupe_cars" },
+        { fk: "wagon_id", table: "wagon_cars" },
+        { fk: "mpv_id", table: "mpv_cars" },
+        { fk: "crossover_id", table: "crossover_cars" },
+        { fk: "pickup_id", table: "pickup_cars" },
+    ];
+
+    for (const m of map) {
+        const id = row[m.fk];
+        if (id !== null && id !== undefined) return { table: m.table, id: Number(id) };
+    }
+    return null;
+}
+
+function pick(obj, keys) {
+    for (const k of keys) {
+        if (obj && obj[k] !== undefined && obj[k] !== null) return obj[k];
+    }
+    return null;
+}
+
+exports.carSetupDetails = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const carSetupId = req.params.carSetupId;
+
+        if (!carSetupId) return res.status(400).json({ error: "Missing carSetupId" });
+
+        const cached = cacheGet(carDetailsCache, String(carSetupId));
+        if (cached) return res.json(cached);
+
+        // 1) Car_setup row
+        const { data: carSetupRow, error: csErr } = await supabase
+            .from(CAR_SETUP_TABLE)
+            .select("*")
+            .eq("id", carSetupId)
+            .single();
+
+        if (csErr || !carSetupRow) {
+            return res.status(404).json({ error: "Car setup row not found" });
+        }
+
+        // 2) ownership check
+        const ok = await assertSetupOwnedByUser(carSetupRow.setup_id, userId);
+        if (!ok) return res.status(403).json({ error: "Forbidden" });
+
+        // 3) melyik fk van kitöltve?
+        const link = pickFirstCarLink(carSetupRow);
+
+        // alap response shape (amit a frontend vár)
+        const base = {
+            car_setup_id: Number(carSetupId),
+            setup_id: Number(carSetupRow.setup_id),
+            setup_name: carSetupRow.setup_name ?? "Autó",
+            source_table: link?.table ?? null,
+            car_id: link?.id ?? null,
+            fields: {
+                "Manufacturer": "—",
+                "Model": "—",
+                "Price": "—",
+                "Body Type": "—",
+                "Horsepower": "—",
+                "Acceleration (s)": "—",
+                "Seats": "—",
+                "Fuel Type": "—",
+                "Year": "—",
+                "Transmission": "—",
+                "category": "—",
+            }
+        };
+
+        if (!link) {
+            cacheSet(carDetailsCache, String(carSetupId), base, CARDETAILS_TTL_MS);
+            return res.json(base);
+        }
+
+        // 4) car rekord betöltés - toleráns (különböző táblák/mezők miatt)
+        const { data: carRow, error: carErr } = await supabase
+            .from(link.table)
+            .select("*")
+            .eq("ID", link.id)
+            .single();
+
+        if (carErr || !carRow) {
+            cacheSet(carDetailsCache, String(carSetupId), base, CARDETAILS_TTL_MS);
+            return res.json(base);
+        }
+
+        // 5) mezők kinyerése többféle kulcsnévvel
+        const manufacturer = pick(carRow, ["Manufacturer", "manufacturer", "Brand", "brand"]) ?? "—";
+        const model = pick(carRow, ["Model", "model"]) ?? "—";
+        const price = pick(carRow, ["Price", "price"]) ?? "—";
+        const bodyType = pick(carRow, ["Body Type", "BodyType", "body_type", "bodyType"]) ?? "—";
+        const hp = pick(carRow, ["Horsepower", "horsepower", "HP", "hp"]) ?? "—";
+        const acc = pick(carRow, ["Acceleration (s)", "Acceleration", "acceleration", "acceleration_s"]) ?? "—";
+        const seats = pick(carRow, ["Seats", "seats"]) ?? "—";
+        const fuel = pick(carRow, ["Fuel Type", "FuelType", "fuel_type", "fuelType"]) ?? "—";
+        const year = pick(carRow, ["Year", "year"]) ?? "—";
+        const trans = pick(carRow, ["Transmission", "transmission"]) ?? "—";
+        const category = pick(carRow, ["category", "Category"]) ?? "—";
+
+        const response = {
+            ...base,
+            setup_name: (String(manufacturer).trim() || "—") + " " + (String(model).trim() || "—"),
+            fields: {
+                "Manufacturer": manufacturer,
+                "Model": model,
+                "Price": price,
+                "Body Type": bodyType,
+                "Horsepower": hp,
+                "Acceleration (s)": acc,
+                "Seats": seats,
+                "Fuel Type": fuel,
+                "Year": year,
+                "Transmission": trans,
+                "category": category,
+            }
+        };
+
+        cacheSet(carDetailsCache, String(carSetupId), response, CARDETAILS_TTL_MS);
+        return res.json(response);
+
+    } catch (err) {
+        console.error("❌ carSetupDetails hiba:", err);
+        return res.status(500).json({ error: "Server error" });
+    }
 };
 
-const colMap = {
-    "ht": "home_theater",
-    "audiop": "audiop",
-    "pc": "pc",
-    "switch": "switch",
-    "router": "router",
-    "modem": "modem",
-    "mixer": "mixer"
+/* =========================================================
+   ✅ CONNECTIONS (Network device links)
+   - A korábbi kategória-specifikus táblák helyett a közös "connections[Connects]" táblát használjuk.
+   ========================================================= */
+const typeToTableMap = {
+    "pc": "pc_details[Setup]",
+    "switch": "switches[Setup]",
+    "router": "router[Setup]",
+    "modem": "modem[Setup]",
+    "ht": "home_theater_setups[Setup]",
+    "audiop": "audio_processor[Setup]",
+    "mixer": "mixer[Setup]"
 };
 
 exports.connections = async (req, res) => {
@@ -746,84 +906,90 @@ exports.connections = async (req, res) => {
     if (!setupId) return res.json([]);
 
     try {
+        // Csak azokat a kapcsolatokat kérjük le, ahol MINDKÉT végpont ebben a setup-ban van
+        const { data: rawConns, error: connErr } = await supabase
+            .from("connections[Connects]")
+            .select("*")
+            .eq("from_setup_id", setupId)
+            .eq("to_setup_id", setupId);
+
+        if (connErr) throw connErr;
+        if (!rawConns || rawConns.length === 0) return res.json([]);
+
+        // Lekérjük a setup gyerekeit, hogy az output formátum konzisztens legyen
         const children = await exports.childrenInternal(setupId);
-        const deviceIdsByCategory = {};
-        children.forEach(c => {
-            let cat = c.category.replace("[Setup]", "").replace("[Connects]", "").toLowerCase();
-            // Apply mapping
-            if (catMap[cat]) cat = catMap[cat];
 
-            if (!deviceIdsByCategory[cat]) deviceIdsByCategory[cat] = new Set();
-            deviceIdsByCategory[cat].add(String(c.id));
-        });
+        const allConnections = rawConns.map(row => {
+            const sourceTable = typeToTableMap[row.from_device_type] || `${row.from_device_type}[Setup]`;
+            const targetTable = typeToTableMap[row.to_device_type] || `${row.to_device_type}[Setup]`;
 
-        const allConnections = [];
-        const CONCURRENCY = 4;
+            // crossSetup: ha a két setup ID eltér
+            const crossSetup = String(row.from_setup_id) !== String(row.to_setup_id);
 
-        await runWithConcurrency(connectionTables, CONCURRENCY, async (tableName) => {
-            const { data, error } = await supabase.from(tableName).select("*");
-            if (error) return;
-
-            if (Array.isArray(data)) {
-                const parts = tableName.replace("[Connects]", "").split("_");
-                const sourceCat = parts[1];
-                const destCat = parts[2];
-
-                // Column name overrides or defaults
-                let sourceCol = (colMap[sourceCat] || sourceCat) + "_id";
-                let destCol = (colMap[destCat] || destCat) + "_id";
-
-                if (sourceCat === "modem" && destCat === "modem") {
-                    sourceCol = "modem1_id";
-                    destCol = "modem2_id";
-                } else if (sourceCat === "router" && destCat === "router") {
-                    sourceCol = "router1_id";
-                    destCol = "router2_id";
-                } else if (sourceCat === "switch" && destCat === "switch") {
-                    sourceCol = "switch1_id";
-                    destCol = "switch2_id";
-                }
-
-                data.forEach(row => {
-                    const sId = row[sourceCol];
-                    const dId = row[destCol];
-
-                    if (sId == null || dId == null) return;
-
-                    const sIn = deviceIdsByCategory[sourceCat]?.has(String(sId));
-                    const dIn = deviceIdsByCategory[destCat]?.has(String(dId));
-
-                    if (sIn && dIn) {
-                        const sourceChild = children.find(c => {
-                            let cCat = c.category.replace("[Setup]", "").toLowerCase();
-                            return (catMap[cCat] || cCat) === sourceCat && String(c.id) === String(sId);
-                        });
-                        const targetChild = children.find(c => {
-                            let cCat = c.category.replace("[Setup]", "").toLowerCase();
-                            return (catMap[cCat] || cCat) === destCat && String(c.id) === String(dId);
-                        });
-
-                        allConnections.push({
-                            id: row.id,
-                            table: tableName,
-                            source: {
-                                category: sourceChild?.category || `${sourceCat}[Setup]`,
-                                id: sId
-                            },
-                            target: {
-                                category: targetChild?.category || `${destCat}[Setup]`,
-                                id: dId
-                            }
-                        });
-                    }
-                });
-            }
+            return {
+                id: row.id,
+                source: {
+                    category: sourceTable,
+                    id: row.from_device_id
+                },
+                target: {
+                    category: targetTable,
+                    id: row.to_device_id
+                },
+                crossSetup,
+                from_setup_id: row.from_setup_id,
+                to_setup_id: row.to_setup_id
+            };
         });
 
         return res.json(allConnections);
     } catch (err) {
         console.error("❌ connections fatal:", err);
         return res.json([]);
+    }
+};
+
+exports.allConnections = async (req, res) => {
+    try {
+        const userId = req.user.id;
+
+        // 1) Felhasználó összes setup ID-ja
+        const { data: setups, error: setupErr } = await supabase
+            .from(SETUP_TABLE)
+            .select("id")
+            .eq("user_id", userId);
+
+        if (setupErr || !setups) throw setupErr;
+        const setupIds = setups.map(s => s.id);
+        if (setupIds.length === 0) return res.json([]);
+
+        // 2) Összes kapcsolat, ami érinti ezeket a setup-okat
+        const { data: rawConns, error: connErr } = await supabase
+            .from("connections[Connects]")
+            .select("*")
+            .or(`from_setup_id.in.(${setupIds.join(",")}),to_setup_id.in.(${setupIds.join(",")})`);
+
+        if (connErr) throw connErr;
+
+        const allConnections = (rawConns || []).map(row => {
+            const sourceTable = typeToTableMap[row.from_device_type] || `${row.from_device_type}[Setup]`;
+            const targetTable = typeToTableMap[row.to_device_type] || `${row.to_device_type}[Setup]`;
+            const crossSetup = String(row.from_setup_id) !== String(row.to_setup_id);
+
+            return {
+                id: row.id,
+                source: { category: sourceTable, id: row.from_device_id },
+                target: { category: targetTable, id: row.to_device_id },
+                crossSetup,
+                from_setup_id: row.from_setup_id,
+                to_setup_id: row.to_setup_id
+            };
+        });
+
+        res.json(allConnections);
+    } catch (err) {
+        console.error("❌ allConnections fatal:", err);
+        res.json([]);
     }
 };
 
@@ -844,4 +1010,3 @@ exports.childrenInternal = async (setupId) => {
     });
     return allItems;
 };
-;

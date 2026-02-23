@@ -1,5 +1,6 @@
-<div class="drag-element" [class.circle]="isNetwork()" cdkDrag [attr.data-id]="dataId" [cdkDragBoundary]="boundaryRef"
-  (cdkDragStarted)="onDragStarted()" (cdkDragEnded)="onDragEnded()" (cdkDragMoved)="onDragMoved()" (click)="onClick()"
+<div #root class="drag-element" [class.circle]="isNetwork()" cdkDrag [cdkDragFreeDragPosition]="initialPosition"
+  [attr.data-id]="dataId" [cdkDragBoundary]="boundaryRef" (cdkDragStarted)="onDragStarted()"
+  (cdkDragEnded)="onDragEnded($event)" (cdkDragMoved)="onDragMoved()" (click)="onClick()"
   (contextmenu)="onRightClick($event)">
 
   <span class="setup-name">

@@ -108,35 +108,31 @@ async function refreshTables() {
 async function getAllTableColumns() {
     const { data, error } = await supabase.rpc("get_table_columns");
 
-    if (error || !Array.isArray(data)) {
+    if (error || !data) {
         console.error("❌ column rpc failed", error);
         return {};
     }
 
-    const map = {};
-    data.forEach(row => {
-        if (!map[row.table_name]) map[row.table_name] = [];
-        map[row.table_name].push(row.column_name);
-    });
-
-    return map;
+    // A data most már közvetlenül a map (jsonb miatt)
+    return data;
 }
 
-function detectColumns(columns) {
+function detectColumns(columns, tableName) {
     const id =
         columns.find(c => ["id", "ID"].includes(c)) || "'0'";
 
-    const manufacturer =
+    let manufacturer =
         columns.find(c => ["manufacturer", "brand", "maker"].includes(c.toLowerCase()));
 
-    const model =
-        columns.find(c => ["model", "name", "product_name", "series"].includes(c.toLowerCase()));
+    let model =
+        columns.find(c => ["model", "name", "product_name", "series", "title"].includes(c.toLowerCase()));
 
     const price =
         columns.find(c => ["price", "cost", "price_huf"].includes(c.toLowerCase()));
 
-    // CSAK manufacturer + model kell
-    if (!manufacturer || !model) return null;
+    // Fallbacks ha hiányzik valami
+    if (!manufacturer) manufacturer = null; // buildUnionSQL fogja kezelni
+    if (!model) model = null;
 
     return { id, manufacturer, model, price: price || null };
 }
@@ -149,15 +145,18 @@ function buildUnionSQL(tablesMeta) {
     const blocks = [];
 
     for (const [table, meta] of Object.entries(tablesMeta)) {
-        const cols = detectColumns(meta.columns);
+        const cols = detectColumns(meta.columns, table);
         if (!cols) continue;
+
+        const mfrExpr = cols.manufacturer ? q(cols.manufacturer) : `'${table}'`;
+        const modelExpr = cols.model ? q(cols.model) : "'Ismeretlen'";
 
         blocks.push(`
             select
                 '${table}'::text as table_name,
                 ${cols.id === "'0'" ? "'0'" : q(cols.id)}::text as id,
-                ${q(cols.manufacturer)}::text as manufacturer,
-                ${q(cols.model)}::text as model,
+                ${mfrExpr}::text as manufacturer,
+                ${modelExpr}::text as model,
                 ${cols.price ? q(cols.price) + "::numeric" : "null::numeric"} as price
             from "${table}"
         `.trim());
@@ -186,6 +185,7 @@ as $$
     ) all_products
     where
         q is null
+        or lower(table_name) like '%' || q || '%'
         or lower(manufacturer) like '%' || q || '%'
         or lower(model) like '%' || q || '%';
 $$;

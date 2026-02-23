@@ -1,6 +1,7 @@
 const fs = require("fs");
 const path = require("path");
 const { db } = require("./localDb");
+const { shouldExclude } = require("./tableFilter");
 
 const { supabase } = require("./supabase");
 
@@ -90,7 +91,9 @@ function normalize(str = "") {
         .toLowerCase()
         .normalize("NFD")
         .replace(/[\u0300-\u036f]/g, "")
-        .replace(/[^a-z0-9]/g, "");
+        .replace(/[^a-z0-9-]/g, "")
+        .replace(/-+/g, "-")
+        .replace(/^-|-$/g, "");
 }
 function rowText(row) {
     return Object.values(row)
@@ -99,9 +102,26 @@ function rowText(row) {
         .toLowerCase();
 }
 
+function tokens(str = "") {
+    return normalize(str).match(/[a-z]+|\d+/g) || [];
+}
+
+function tokenMatch(model, question) {
+    const mTokens = tokens(model);
+    const qTokens = tokens(question);
+
+    if (!mTokens.length) return false;
+
+    let hits = 0;
+    for (const t of mTokens) {
+        if (qTokens.includes(t)) hits++;
+    }
+    return hits >= Math.ceil(mTokens.length * 0.6);
+}
+
 /* ----------------------------------
    MODEL TOKEN (EZ A KULCS!)
----------------------------------- */
+   ---------------------------------- */
 function extractModelToken(question = "") {
     const q = question.toLowerCase();
 
@@ -195,7 +215,8 @@ function getProductsForAI(question = "") {
     const tables = db
         .prepare(`SELECT name FROM sqlite_master WHERE type='table'`)
         .all()
-        .map(r => r.name);
+        .map(r => r.name)
+        .filter(name => !shouldExclude(name));
 
     const exact = [];
     const list = [];
@@ -240,16 +261,40 @@ function getProductsForAI(question = "") {
                LIST MODE (ELSŐ PRIORITÁS)
             =============================== */
 
-            if (listIntent && brand && manufacturer) {
-                if (normalize(manufacturer) === normalize(brand)) {
+            const qTokens = tokens(question);
+            const tTokens = tokens(table);
+            const tStem = normalize(table).replace(/es$/, "").replace(/s$/, "");
+            const tableMatch = tTokens.some(tt => qTokens.some(qt => qt.includes(tStem) || tt.includes(qt)));
+
+            if (listIntent && manufacturer) {
+                if (brand && normalize(manufacturer) === normalize(brand)) {
                     list.push(row);
+                    continue;
                 }
-                continue; // fontos: product-site logika ne fusson lista kérdésnél
+
+                if (!brand && tableMatch) {
+                    list.push(row);
+                    continue;
+                }
             }
 
             /* ===============================
                PRODUCT MODE
             =============================== */
+
+            if (model) {
+                if (tokenMatch(model, question)) {
+                    exact.push(row);
+                    continue;
+                }
+
+                if (tableMatch) {
+                    exact.push(row);
+                    continue;
+                }
+            } else if (tableMatch) {
+                exact.push(row);
+            }
 
             if (!listIntent && modelToken) {
                 const text = normalize(rowText(r));
@@ -257,8 +302,6 @@ function getProductsForAI(question = "") {
                     exact.push(row);
                 }
             }
-            console.log("LIST INTENT:", listIntent);
-            console.log("BRAND:", brand);
         }
     }
 

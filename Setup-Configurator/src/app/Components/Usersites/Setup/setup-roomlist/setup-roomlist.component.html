@@ -9,12 +9,10 @@
 
     <!-- ✅ felső gombsor -->
     <div class="toolbar">
-      <!-- Új setup csak LISTA nézetben és ha engedélyezett -->
       @if (!viewingSetup && allowCreate) {
       <button class="new-setup-btn" type="button" (click)="createNewSetup()">+ Új setup</button>
       }
 
-      <!-- Vissza csak DETAIL nézetben -->
       @if (viewingSetup) {
       <button class="back-btn" type="button" (click)="backToSetups()">Vissza</button>
       }
@@ -28,9 +26,18 @@
            ========================= -->
       @if (!viewingSetup) {
 
+      <!-- ✅ Globális SVG réteg a szobák közötti vonalaknak -->
+      <svg class="connections-svg">
+        @for (conn of globalRoomConnections; track conn.id) {
+        <path [attr.d]="getRoomLinePath(conn, lineRefreshTrigger)" class="connection-line" [class.cross]="true" />
+        }
+      </svg>
+
       @if (!loading) {
       @for (setup of userSetups; track trackBySetup($index, setup)) {
-      <app-setup-room [setup]="setup" [boundaryRef]="boundary" (setupDblClick)="openSetupDetails($event)"
+      <app-setup-room [dataId]="'room:' + (setup.id || setup.setup_id)" [setup]="setup" [boundaryRef]="boundary"
+        [initialPosition]="{ x: setup.x || 0, y: setup.y || 0 }" (elementReady)="registerElement($event)"
+        (moved)="updateLines()" (dragEnded)="onRoomDragEnded(setup, $event)" (setupDblClick)="openSetupDetails($event)"
         (setupRightClick)="openContextMenu($event)">
       </app-setup-room>
       }
@@ -63,13 +70,15 @@
       <!-- ✅ SVG réteg a vonalaknak -->
       <svg class="connections-svg">
         @for (conn of connections; track conn.id) {
-        <path [attr.d]="getLinePath(conn, lineRefreshTrigger)" class="connection-line" />
+        <path [attr.d]="getLinePath(conn, lineRefreshTrigger)" class="connection-line"
+          [class.cross]="conn.crossSetup" />
         }
       </svg>
 
-      <!-- ✅ Eszközök mint körök (vagy téglalapok ha nem network) -->
+      <!-- ✅ Eszközök -->
       @for (it of items; track trackByItem($index, it)) {
-      <app-setup-room [dataId]="trackByItem($index, it)" [setup]="it" [boundaryRef]="boundary" (moved)="updateLines()">
+      <app-setup-room [dataId]="trackByItem($index, it)" [setup]="it" [boundaryRef]="boundary"
+        (elementReady)="registerElement($event)" (moved)="updateLines()" (setupDblClick)="onItemDblClick($event)">
       </app-setup-room>
       }
 
@@ -91,7 +100,6 @@
         <button class="ctx-item" type="button">Megnyitás</button>
         <button class="ctx-item" type="button" (click)="openToolsFromMenu()">Eszközök</button>
 
-        <!-- ✅ PC összerakó csak NEM network -->
         @if (!isNetworkSetup(ctxSetup)) {
         <button class="ctx-item" type="button" (click)="openPcBuilderFromMenu()">Számítógép összerakó</button>
         }
@@ -104,6 +112,19 @@
 
       </div>
     </div>
+    }
+
+    <!-- ✅ Car draggable panel (DETAIL nézetben) -->
+    @if (carPanelOpen && carPanelItem && viewingSetup) {
+    <app-setup-car-details-panel [carItem]="carPanelItem" [boundaryRef]="boundary" (close)="closeCarPanel()">
+    </app-setup-car-details-panel>
+    }
+
+    <!-- ✅ PC drawer (DETAIL nézetben) -->
+    @if (pcDrawerOpen && pcDrawerPc && viewingSetup) {
+    <app-pc-drawer [pc]="pcDrawerPc" [parts]="pcParts" [partsLoading]="pcPartsLoading" [partsError]="pcPartsError"
+      (close)="closePcDrawer()">
+    </app-pc-drawer>
     }
 
   </div>

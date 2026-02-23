@@ -1,3 +1,6 @@
+// 📋 Logger MUST be first – intercepts all console output
+require("./services/logger");
+
 const cookieParser = require("cookie-parser");
 const cors = require("cors");
 const express = require("express");
@@ -16,6 +19,10 @@ app.use(
         credentials: true,
     })
 );
+
+// 👥 Active user tracking (after cookie parser so cookies are available)
+const { trackMiddleware } = require("./services/activeUsers");
+app.use(trackMiddleware);
 
 /* ----------------------------------
 STATIC IMAGES

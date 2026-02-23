@@ -3,6 +3,7 @@ const fs = require("fs");
 const path = require("path");
 const Database = require("better-sqlite3");
 const { supabase } = require("./supabase");
+const { shouldExclude } = require("./tableFilter");
 
 /* ----------------------------------
    CONFIG
@@ -70,8 +71,21 @@ function qIdent(name) {
 }
 
 function ensureTable(table, sampleRow) {
-    const columns = Object.keys(sampleRow).map(col => `${qIdent(col)} TEXT`).join(", ");
-    db.prepare(`CREATE TABLE IF NOT EXISTS ${qIdent(table)} (${columns})`).run();
+    db.prepare(`DROP TABLE IF EXISTS ${qIdent(table)}`).run();
+
+    // Deduplikáljuk az oszlopneveket case-insensitive módon
+    const seen = new Set();
+    const uniqueCols = [];
+    for (const col of Object.keys(sampleRow)) {
+        const lower = col.toLowerCase();
+        if (!seen.has(lower)) {
+            seen.add(lower);
+            uniqueCols.push(col);
+        }
+    }
+
+    const columns = uniqueCols.map(col => `${qIdent(col)} TEXT`).join(", ");
+    db.prepare(`CREATE TABLE ${qIdent(table)} (${columns})`).run();
 }
 
 function normalizeValue(value) {
@@ -100,10 +114,11 @@ function loadTableList() {
 
     try {
         const json = JSON.parse(fs.readFileSync(TABLE_LIST_FILE, "utf-8"));
-        const base = Array.isArray(json.tables) ? json.tables : [];
+        const base = (Array.isArray(json.tables) ? json.tables : [])
+            .filter(t => !shouldExclude(t));
 
         for (const x of EXTRA_CACHE_OBJECTS) {
-            if (!base.includes(x)) base.push(x);
+            if (!base.includes(x) && !shouldExclude(x)) base.push(x);
         }
 
         return base;

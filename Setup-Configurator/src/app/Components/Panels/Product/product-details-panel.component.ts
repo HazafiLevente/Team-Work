@@ -14,7 +14,6 @@ import { Product } from '../../../Models/Product/product.model';
 import { ProductService } from '../../Services/Home/ProductParts/product/product.service';
 import { HostListener } from '@angular/core';
 
-
 @Component({
   selector: 'app-product-details-panel',
   standalone: true,
@@ -26,6 +25,7 @@ export class ProductDetailsPanelComponent implements OnChanges, OnDestroy {
 
   @Input({ required: true }) product!: Product;
   @Output() closed = new EventEmitter<void>();
+
   @HostListener('document:keydown.escape')
   onEsc() {
     this.close();
@@ -36,14 +36,12 @@ export class ProductDetailsPanelComponent implements OnChanges, OnDestroy {
 
   details: any = null;
 
-  // ✅ performance: ne számolja újra minden change detectionnél
   detailsKeys: string[] = [];
   trackKey = (_: number, k: string) => k;
 
   private sub?: Subscription;
   private lastKey = '';
 
-  // ✅ scroll lock
   private prevOverflow = '';
   private scrollLocked = false;
 
@@ -62,7 +60,6 @@ export class ProductDetailsPanelComponent implements OnChanges, OnDestroy {
 
     this.lastKey = key;
 
-    // ✅ amikor megnyílik / terméket váltasz a panelen belül
     this.lockScroll();
     this.fetchDetails();
   }
@@ -77,7 +74,6 @@ export class ProductDetailsPanelComponent implements OnChanges, OnDestroy {
     this.closed.emit();
   }
 
-  // ✅ "Több" gomb: átvisz a részletes product-site oldalra
   onMore() {
     const table = this.getTable(this.product);
     const id = this.getId(this.product);
@@ -87,8 +83,6 @@ export class ProductDetailsPanelComponent implements OnChanges, OnDestroy {
       return;
     }
 
-    // ⛔️ FONTOS: ne a parent overlay click miatt zárjon be
-    // (HTML-ben a panelre van stopPropagation, de itt is oké)
     this.unlockScroll();
     this.closed.emit();
     this.router.navigate(['/product-site', table, id]);
@@ -97,10 +91,6 @@ export class ProductDetailsPanelComponent implements OnChanges, OnDestroy {
   onPlus() {
     console.log('➕ plus clicked (TODO)');
   }
-
-  // -------------------------
-  // SAFE GETTERS
-  // -------------------------
 
   private obj(p: any): any {
     return p?.data ?? p ?? {};
@@ -126,17 +116,12 @@ export class ProductDetailsPanelComponent implements OnChanges, OnDestroy {
     return String((this.product as any)?.manufacturer ?? o?.manufacturer ?? o?.Manufacturer ?? '').trim();
   }
 
-  // -------------------------
-  // DATA LOAD
-  // -------------------------
-
   private fetchDetails() {
     this.loading = true;
     this.error = null;
     this.details = null;
     this.detailsKeys = [];
 
-    // előző request leiratkozás (ha gyorsan kattintgatsz)
     this.sub?.unsubscribe();
 
     const table = this.getTable(this.product);
@@ -151,7 +136,15 @@ export class ProductDetailsPanelComponent implements OnChanges, OnDestroy {
 
     this.sub = this.productService.getProductDetails(table, id).subscribe({
       next: (res) => {
-        this.details = res?.item ?? res;
+        const item = res?.item ?? res;
+
+        // ✅ normalize Price -> price
+        if (item && (item.price == null || item.price === '') && item.Price != null) {
+          const n = Number(item.Price);
+          item.price = Number.isFinite(n) ? n : item.Price;
+        }
+
+        this.details = item;
         this.detailsKeys = Object.keys(this.details ?? {});
         this.loading = false;
       },
@@ -163,12 +156,7 @@ export class ProductDetailsPanelComponent implements OnChanges, OnDestroy {
     });
   }
 
-  // -------------------------
-  // TEMPLATE HELPERS
-  // -------------------------
-
   keysOf(obj: any): string[] {
-    // ha a régi HTML-ed ezt hívja, ne törjön el
     return Array.isArray(this.detailsKeys) && this.detailsKeys.length
       ? this.detailsKeys
       : Object.keys(obj ?? {});
@@ -176,12 +164,9 @@ export class ProductDetailsPanelComponent implements OnChanges, OnDestroy {
 
   isHiddenKey(k: string): boolean {
     const x = String(k).toLowerCase();
-    return x === 'id' || x === 'created_at' || x === 'updated_at';
+    return x === 'id' || x === 'created_at' || x === 'updated_at'
+      || x === 'price' || x === 'price ' || x === 'Price'.toLowerCase(); // (oké így is)
   }
-
-  // -------------------------
-  // SCROLL LOCK
-  // -------------------------
 
   private lockScroll() {
     if (this.scrollLocked) return;

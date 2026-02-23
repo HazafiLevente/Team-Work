@@ -8,22 +8,23 @@
 
   <!-- ACTION BAR (MINDIG LÁTSZIK) -->
   <div class="admin-actions-bar">
-    <button class="admin-btn" (click)="openDashboard()">
+    <button class="admin-btn" [class.active]="activeSection === 'dashboard'" (click)="openDashboard()">
       📊 Dashboard
     </button>
 
-    <button class="admin-btn" (click)="openUsers()">
+    <button class="admin-btn" [class.active]="activeSection === 'users'" (click)="openUsers()">
       👥 Users
     </button>
 
-    <button class="admin-btn" (click)="openProducts()">📦 Products</button>
+    <button class="admin-btn" [class.active]="activeSection === 'products'" (click)="openProducts()">📦
+      Products</button>
 
 
-    <button class="admin-btn">
+    <button class="admin-btn" [class.active]="activeSection === 'logs'" (click)="openLogs()">
       🧾 Logs
     </button>
 
-    <button class="admin-btn danger">
+    <button class="admin-btn" [class.active]="activeSection === 'system'" (click)="openSystem()">
       ⚙️ System
     </button>
   </div>
@@ -38,6 +39,11 @@
         <div class="stat-card">
           👤 {{ loading ? '…' : users }}
           <span>Felhasználók</span>
+        </div>
+
+        <div class="stat-card clickable" (click)="toggleDailyStats()">
+          🟢 {{ loading ? '…' : onlineUsers }}
+          <span>Online most</span>
         </div>
 
         <div class="stat-card">
@@ -56,6 +62,45 @@
         </div>
 
       </div>
+
+      <!-- DAILY ACTIVITY PANEL -->
+      @if (showDailyStats) {
+      <div class="daily-panel">
+        <h3>📊 Napi aktivitás</h3>
+
+        <!-- Currently online users -->
+        @if (onlineList.length > 0) {
+        <div class="online-section">
+          <h4>🟢 Jelenleg online ({{ onlineList.length }})</h4>
+          <div class="online-list">
+            @for (u of onlineList; track u.id) {
+            <span class="online-badge">{{ u.username }}</span>
+            }
+          </div>
+        </div>
+        }
+
+        <!-- Daily bar chart -->
+        @if (dailyStats.length > 0) {
+        <div class="chart-section">
+          <h4>📅 Napi egyedi felhasználók</h4>
+          <div class="bar-chart">
+            @for (day of dailyStats; track day.date) {
+            <div class="bar-col"
+              [title]="day.date + ': ' + day.unique + ' felhasználó, ' + day.total_requests + ' kérés'">
+              <div class="bar-fill" [style.height.%]="day.unique > 0 ? (day.unique / getMaxUsers()) * 100 : 2">
+              </div>
+              <span class="bar-val">{{ day.unique }}</span>
+              <span class="bar-label">{{ day.date.slice(5) }}</span>
+            </div>
+            }
+          </div>
+        </div>
+        } @else {
+        <div class="muted">Még nincs napi adat.</div>
+        }
+      </div>
+      }
     </ng-container>
 
     <!-- USERS -->
@@ -68,7 +113,16 @@
       <app-admin-products></app-admin-products>
     </ng-container>
 
+    <!-- SYSTEM -->
+    <ng-container *ngIf="activeSection === 'system'">
+      <app-admin-system></app-admin-system>
+    </ng-container>
+
+    <!-- LOGS -->
+    <ng-container *ngIf="activeSection === 'logs'">
+      <app-admin-logs></app-admin-logs>
+    </ng-container>
+
   </div>
 
 </div>
-

@@ -1,6 +1,7 @@
 const fs = require("fs");
 const path = require("path");
 const { db } = require("./localDb");
+const { shouldExclude } = require("./tableFilter");
 
 /* =====================================================
    FILTER JSON
@@ -24,7 +25,9 @@ function normalize(str = "") {
         .toLowerCase()
         .normalize("NFD")
         .replace(/[\u0300-\u036f]/g, "")
-        .replace(/[^a-z0-9]/g, "");
+        .replace(/[^a-z0-9-]/g, "") // Megtartjuk a kötőjelet
+        .replace(/-+/g, "-") // Dupla kötőjel -> szimpla
+        .replace(/^-|-$/g, ""); // Szélekről leszedjük
 }
 
 function tokens(str = "") {
@@ -173,7 +176,8 @@ function getProductsForAI(question = "") {
     const tables = db
         .prepare(`SELECT name FROM sqlite_master WHERE type='table'`)
         .all()
-        .map(r => r.name);
+        .map(r => r.name)
+        .filter(name => !shouldExclude(name));
 
     const exact = [];
     const similar = [];
@@ -220,34 +224,51 @@ function getProductsForAI(question = "") {
                 socket
             };
 
+            const qTokens = tokens(question);
+            const qNorm = normalize(question);
+            const tTokens = tokens(table);
+            const tStem = normalize(table).replace(/es$/, "").replace(/s$/, "");
+            const tableMatch = tTokens.some(tt => qTokens.some(qt => qt.includes(tStem) || tt.includes(qt)));
+
             /* =============================
                LIST MODE (PRIORITY)
             ============================= */
 
-            if (listIntent && brand && manufacturer) {
-                if (normalize(manufacturer) === normalize(brand)) {
+            if (listIntent && manufacturer) {
+                if (brand && normalize(manufacturer) === normalize(brand)) {
                     list.push(row);
+                    continue;
                 }
-                continue;
+
+                if (!brand && tableMatch) {
+                    list.push(row);
+                    continue;
+                }
             }
 
             /* =============================
                PRODUCT MODE
             ============================= */
 
-            if (!listIntent && model) {
+            if (model) {
                 if (tokenMatch(model, question)) {
+                    exact.push(row);
+                    continue;
+                }
+
+                if (tableMatch) {
                     exact.push(row);
                     continue;
                 }
 
                 // lazább similar match
                 const modelNorm = normalize(model);
-                const qNorm = normalize(question);
-
                 if (modelNorm.length > 5 && qNorm.includes(modelNorm.slice(0, 6))) {
                     similar.push(row);
                 }
+            } else if (tableTokenMatch || isCategoryMatch) {
+                // Ha nincs modellünk, de a tábla neve telibetalál
+                exact.push(row);
             }
         }
     }

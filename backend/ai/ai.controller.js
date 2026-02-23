@@ -19,9 +19,9 @@ function buildSearchCandidates(message) {
 
     // nagyon gyakori "zaj" szavak (bővítheted)
     const stop = new Set([
-        "és","vagy","a","az","egy","mennyi","mennyibe","kerül","ára","ár","price",
-        "van","vannak","listázd","sorold","mutasd","kérlek","legyen","mond","meg",
-        "ilyen","olyan","ez","azt","itt","ott","nekem","szeretnék"
+        "és", "vagy", "a", "az", "egy", "mennyi", "mennyibe", "kerül", "ára", "ár", "price",
+        "van", "vannak", "listázd", "sorold", "mutasd", "kérlek", "legyen", "mond", "meg",
+        "ilyen", "olyan", "ez", "azt", "itt", "ott", "nekem", "szeretnék"
     ]);
 
     const tokens = cleaned
@@ -59,9 +59,9 @@ async function searchProducts(message) {
 
     const words = message
         .toLowerCase()
-        .replace(/[^\w\s]/g, " ")
+        .replace(/[^\w\s-]/g, " ") // Meghagyjuk a kötőjelet ideiglenesen
         .split(/\s+/)
-        .filter(w => w.length > 2);
+        .filter(w => w.length >= 2);
 
     let allResults = [];
 

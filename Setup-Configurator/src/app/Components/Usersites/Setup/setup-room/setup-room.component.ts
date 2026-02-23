@@ -1,6 +1,7 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { DragDropModule } from '@angular/cdk/drag-drop';
+import { ViewChild, ElementRef, AfterViewInit } from '@angular/core';
 
 export type SetupRightClickPayload = {
   setup: any;
@@ -15,14 +16,30 @@ export type SetupRightClickPayload = {
   templateUrl: './setup-room.component.html',
   styleUrls: ['./setup-room.component.css']
 })
-export class SetupRoomComponent {
+export class SetupRoomComponent implements AfterViewInit {
   @Input() setup: any;
   @Input() boundaryRef!: HTMLElement;
   @Input() dataId: string = '';
+  @Input() initialPosition: { x: number; y: number } = { x: 0, y: 0 };
 
   @Output() setupDblClick = new EventEmitter<any>();
   @Output() setupRightClick = new EventEmitter<SetupRightClickPayload>();
   @Output() moved = new EventEmitter<void>();
+  @Output() dragEnded = new EventEmitter<{ x: number; y: number }>();
+
+  @ViewChild('root', { static: true }) root!: ElementRef<HTMLElement>;
+
+  @Output() elementReady = new EventEmitter<{ id: string; el: HTMLElement }>();
+
+  ngAfterViewInit(): void {
+    if (this.dataId) {
+      this.elementReady.emit({
+        id: this.dataId,
+        el: this.root.nativeElement
+      });
+    }
+  }
+
 
   private lastClickAt = 0;
   private dragging = false;
@@ -48,12 +65,21 @@ export class SetupRoomComponent {
     this.dragging = true;
   }
 
-  onDragEnded(): void {
+  onDragEnded(event: any): void {
+    const offset = event.source.getFreeDragPosition();
+    this.dragEnded.emit(offset);
     setTimeout(() => (this.dragging = false), 0);
   }
 
+  private moveRaf: number | null = null;
+
   onDragMoved(): void {
-    this.moved.emit();
+    if (this.moveRaf) return;
+
+    this.moveRaf = requestAnimationFrame(() => {
+      this.moveRaf = null;
+      this.moved.emit();
+    });
   }
 
   onClick(): void {

@@ -1,5 +1,4 @@
-
-import { Component, OnInit, HostListener, ViewChild, ElementRef, Input } from '@angular/core';
+import { Component, OnInit, HostListener, ViewChild, ElementRef, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
@@ -7,8 +6,17 @@ import { FormsModule } from '@angular/forms';
 import { SetupRoomComponent, SetupRightClickPayload } from '../setup-room/setup-room.component';
 import { DotGridComponent } from '../../../Shared/Background/dot-grid.component';
 import { SetupToolsModalComponent } from '../setup-tools-modal/setup-tools-modal.component';
+import { SetupCarDetailsPanelComponent } from '../setup-car-details-panel/setup-car-details-panel.component';
+import { PcDrawerComponent } from '../pc-drawer/pc-drawer.component';
 
 type SetupItem = any;
+
+type PcPart = {
+  id: number;
+  slot: 'cpu' | 'gpu' | 'motherboard' | 'ram' | 'psu' | 'other';
+  source_table: string;
+  display_name: string;
+};
 
 @Component({
   selector: 'app-setup-roomlist',
@@ -19,7 +27,9 @@ type SetupItem = any;
     FormsModule,
     SetupRoomComponent,
     DotGridComponent,
-    SetupToolsModalComponent
+    SetupToolsModalComponent,
+    SetupCarDetailsPanelComponent,
+    PcDrawerComponent
   ],
   templateUrl: './setup-roomlist.component.html',
   styleUrls: ['./setup-roomlist.component.css']
@@ -43,6 +53,8 @@ export class SetupRoomlistComponent implements OnInit {
   items: SetupItem[] = [];
   itemsError = '';
   connections: any[] = [];
+  allUserConnections: any[] = []; // ✅ ÚJ: Minden kapcsolat a főképernyőhöz
+  globalRoomConnections: any[] = []; // ✅ Aggregált szobák közötti vonalak
 
   // ✅ Context menu state
   ctxOpen = false;
@@ -62,12 +74,25 @@ export class SetupRoomlistComponent implements OnInit {
   renameSaving = false;
   renameError = '';
 
+  // ✅ Car draggable panel state
+  carPanelOpen = false;
+  carPanelItem: any = null;
+
+  // ✅ PC Drawer state (NEW)
+  pcDrawerOpen = false;
+  pcDrawerPc: any = null;
+  pcParts: PcPart[] = [];
+  pcPartsLoading = false;
+  pcPartsError = '';
+  private elementRegistry = new Map<string, HTMLElement>();
+
   @ViewChild('boundary', { static: true }) boundaryEl!: ElementRef<HTMLElement>;
 
   constructor(private http: HttpClient) { }
 
   ngOnInit(): void {
     this.loadUserSetups();
+    this.loadGlobalConnections();
   }
 
   private buildListUrl(): string {
@@ -83,6 +108,8 @@ export class SetupRoomlistComponent implements OnInit {
         next: res => {
           this.userSetups = res?.setups || [];
           this.loading = false;
+          // Ha frissül a lista, frissítsük a globális vonalakat is
+          this.processGlobalConnections();
         },
         error: err => {
           console.error('❌ Setup lista hiba:', err);
@@ -147,6 +174,10 @@ export class SetupRoomlistComponent implements OnInit {
     this.itemsError = '';
     this.loadingItems = true;
 
+    // detail váltáskor zárjunk paneleket
+    this.closeCarPanel();
+    this.closePcDrawer();
+
     const setupId = setup?.id ?? setup?.setup_id ?? setup?.setupId;
     if (!setupId) {
       this.loadingItems = false;
@@ -170,7 +201,55 @@ export class SetupRoomlistComponent implements OnInit {
       });
   }
 
+  // ✅ ÚJ: Összes kapcsolat lekérése (szobák közötti vonalakhoz)
+  loadGlobalConnections(): void {
+    this.http.get<any[]>('/api/setup/all-connections', { withCredentials: true })
+      .subscribe({
+        next: (conns) => {
+          this.allUserConnections = Array.isArray(conns) ? conns : [];
+          this.processGlobalConnections();
+        },
+        error: (err) => {
+          console.error('❌ all-connections hiba:', err);
+        }
+      });
+  }
+
+  // ✅ ÚJ: Kapcsolatok csoportosítása szobák szerint ( Overview nézethez )
+  processGlobalConnections(): void {
+    if (!this.allUserConnections.length || !this.userSetups.length) {
+      this.globalRoomConnections = [];
+      return;
+    }
+
+    const aggregated = new Map<string, any>();
+
+    this.allUserConnections.forEach(conn => {
+      const sId = String(conn.from_setup_id);
+      const tId = String(conn.to_setup_id);
+
+      if (sId !== tId) {
+        const key = [sId, tId].sort().join('-');
+        if (!aggregated.has(key)) {
+          aggregated.set(key, {
+            id: `global-${key}`,
+            source: { category: 'setup[Setup]', id: sId },
+            target: { category: 'setup[Setup]', id: tId }
+          });
+        }
+      }
+    });
+
+    this.globalRoomConnections = Array.from(aggregated.values());
+  }
+
+  private connectionCache = new Map<string, any[]>();
+
   loadConnections(setupId: any): void {
+    if (this.connectionCache.has(setupId)) {
+      this.connections = this.connectionCache.get(setupId)!;
+      return;
+    }
     this.http.get<any[]>(`/api/setup/${setupId}/connections`, { withCredentials: true })
       .subscribe({
         next: (conns) => {
@@ -184,21 +263,65 @@ export class SetupRoomlistComponent implements OnInit {
   }
 
   lineRefreshTrigger = 0;
+  private cachedBoundaryRect: DOMRect | null = null;
+  private rafId: number | null = null;
+
   updateLines(): void {
-    // Force Change Detection for SVG layer
-    this.lineRefreshTrigger++;
+    if (this.rafId) return;
+
+    this.rafId = requestAnimationFrame(() => {
+      if (this.boundaryEl) {
+        this.cachedBoundaryRect = this.boundaryEl.nativeElement.getBoundingClientRect();
+      }
+      this.lineRefreshTrigger++;
+      this.rafId = null;
+    });
   }
 
+  registerElement(e: { id: string, el: HTMLElement }) {
+    this.elementRegistry.set(e.id, e.el);
+  }
   getLinePath(conn: any, _trigger?: any): string {
+
     const sId = `${conn.source.category}:${conn.source.id}`;
     const tId = `${conn.target.category}:${conn.target.id}`;
 
-    const sEl = document.querySelector(`[data-id="${sId}"]`) as HTMLElement;
-    const tEl = document.querySelector(`[data-id="${tId}"]`) as HTMLElement;
+    const sEl = this.elementRegistry.get(sId);
+    const tEl = this.elementRegistry.get(tId);
+
+    if (!sEl) return '';
+
+    // ✅ Használjuk a cache-elt rect-et vagy kérjük le ha nincs meg
+    const rect = this.cachedBoundaryRect || this.boundaryEl.nativeElement.getBoundingClientRect();
+    const sRect = sEl.getBoundingClientRect();
+
+    const x1 = sRect.left + sRect.width / 2 - rect.left;
+    const y1 = sRect.top + sRect.height / 2 - rect.top;
+
+    if (!tEl) {
+      const x2 = rect.width - 20;
+      const y2 = y1;
+      return `M ${x1} ${y1} L ${x2} ${y2}`;
+    }
+
+    const tRect = tEl.getBoundingClientRect();
+    const x2 = tRect.left + tRect.width / 2 - rect.left;
+    const y2 = tRect.top + tRect.height / 2 - rect.top;
+
+    return `M ${x1} ${y1} L ${x2} ${y2}`;
+  }
+
+  // ✅ Overview nézethez (szobák összekötése)
+  getRoomLinePath(conn: any, _trigger?: any): string {
+    const sId = `room:${conn.source.id}`;
+    const tId = `room:${conn.target.id}`;
+
+    const sEl = this.elementRegistry.get(sId);
+    const tEl = this.elementRegistry.get(tId);
 
     if (!sEl || !tEl) return '';
 
-    const rect = this.boundaryEl.nativeElement.getBoundingClientRect();
+    const rect = this.cachedBoundaryRect || this.boundaryEl.nativeElement.getBoundingClientRect();
     const sRect = sEl.getBoundingClientRect();
     const tRect = tEl.getBoundingClientRect();
 
@@ -210,14 +333,119 @@ export class SetupRoomlistComponent implements OnInit {
     return `M ${x1} ${y1} L ${x2} ${y2}`;
   }
 
+
+  // ✅ ROOM (overview) Drag Ended
+  onRoomDragEnded(setup: any, pos: { x: number, y: number }): void {
+    const setupId = setup.id || setup.setup_id || setup.setupId;
+    if (!setupId) return;
+
+    // Frissítjük a lokális elhelyezkedést, hogy a vonalak is jól számoljanak
+    setup.x = pos.x;
+    setup.y = pos.y;
+
+    this.updateLines();
+
+    // Mentés a backendre
+    this.http.patch(`/api/setup/rooms/${setupId}/position`, { x: pos.x, y: pos.y }, { withCredentials: true })
+      .subscribe({
+        next: () => {
+          console.log(`✅ Room ${setupId} pozíció mentve:`, pos);
+        },
+        error: (err) => {
+          console.error(`❌ Room ${setupId} pozíció mentés hiba:`, err);
+        }
+      });
+  }
+
+  // ✅ DETAIL nézet item dupla katt
+  onItemDblClick(it: any): void {
+    if (!it) return;
+
+    const cat = String(it?.category ?? '');
+
+    // ✅ CAR
+    if (cat === 'Car_setup[Setup]') {
+      this.closePcDrawer();     // ne legyen egyszerre nyitva
+      this.openCarPanel(it);
+      return;
+    }
+
+    // ✅ PC (pc_details[Setup])
+    if (cat === 'pc_details[Setup]') {
+      this.closeCarPanel();     // ne legyen egyszerre nyitva
+      this.openPcDrawer(it);
+      return;
+    }
+
+    // másra nem csinálunk semmit
+  }
+
+  // -------------------------
+  // ✅ CAR PANEL
+  // -------------------------
+  openCarPanel(it: any): void {
+    this.carPanelItem = it;
+    this.carPanelOpen = true;
+  }
+
+  closeCarPanel(): void {
+    this.carPanelOpen = false;
+    this.carPanelItem = null;
+  }
+
+  // -------------------------
+  // ✅ PC DRAWER (NEW)
+  // -------------------------
+  openPcDrawer(pcItem: any): void {
+    this.pcDrawerPc = pcItem;
+    this.pcDrawerOpen = true;
+    this.loadPcParts();
+  }
+
+  closePcDrawer(): void {
+    this.pcDrawerOpen = false;
+    this.pcDrawerPc = null;
+    this.pcParts = [];
+    this.pcPartsLoading = false;
+    this.pcPartsError = '';
+  }
+
+  private loadPcParts(): void {
+    const setupId = this.viewingSetup?.id ?? this.viewingSetup?.setup_id ?? this.viewingSetup?.setupId;
+    if (!setupId) return;
+
+    this.pcPartsLoading = true;
+    this.pcPartsError = '';
+    this.pcParts = [];
+
+    this.http.get<any>(`/api/setup/${setupId}/pcparts`, { withCredentials: true })
+      .subscribe({
+        next: (res) => {
+          const list = res?.parts;
+          this.pcParts = Array.isArray(list) ? list : [];
+          this.pcPartsLoading = false;
+        },
+        error: (err) => {
+          console.error('❌ pcparts hiba:', err);
+          this.pcParts = [];
+          this.pcPartsLoading = false;
+          this.pcPartsError = 'Alkatrészek betöltése sikertelen.';
+        }
+      });
+  }
+
   // ✅ Vissza gomb
   backToSetups(): void {
     this.viewingSetup = null;
     this.items = [];
     this.itemsError = '';
     this.loadingItems = false;
+    this.connections = [];
+    this.elementRegistry.clear();
 
-    // safety: context/menu/modalok zárása
+    this.closeCarPanel();
+    this.closePcDrawer();
+
     if (this.ctxOpen) this.closeContextMenu();
     if (this.toolsOpen) this.closeTools();
     if (this.renameOpen) this.closeRename();
@@ -237,7 +465,7 @@ export class SetupRoomlistComponent implements OnInit {
     const localY = payload.y - rect.top;
 
     const MENU_W = 260;
-    const MENU_H = 360; // ✅ kicsit magasabb (Cars + PC miatt)
+    const MENU_H = 360;
     const pad = 8;
 
     const maxX = Math.max(pad, rect.width - MENU_W - pad);
@@ -260,8 +488,9 @@ export class SetupRoomlistComponent implements OnInit {
     if (this.ctxOpen) this.closeContextMenu();
     if (this.toolsOpen) this.closeTools();
     if (this.renameOpen) this.closeRename();
+    if (this.carPanelOpen) this.closeCarPanel();
+    if (this.pcDrawerOpen) this.closePcDrawer();
 
-    // ✅ ha részletek nézetben vagyunk, ESC = vissza
     if (this.viewingSetup) this.backToSetups();
   }
 
@@ -276,7 +505,6 @@ export class SetupRoomlistComponent implements OnInit {
     this.closeContextMenu();
   }
 
-  // ✅ PC Builder (csak ha NEM network)
   openPcBuilderFromMenu(): void {
     if (!this.ctxSetup) return;
     if (this.isNetworkSetup(this.ctxSetup)) return;
@@ -288,7 +516,6 @@ export class SetupRoomlistComponent implements OnInit {
     this.closeContextMenu();
   }
 
-  // ✅ Cars (csak ha NEM network)
   openCarsFromMenu(): void {
     if (!this.ctxSetup) return;
     if (this.isNetworkSetup(this.ctxSetup)) return;
@@ -358,7 +585,6 @@ export class SetupRoomlistComponent implements OnInit {
           return String(sid) === String(id) ? { ...s, ...updated } : s;
         });
 
-        // ha épp azt nézzük, amit átneveztünk, frissítsük a header-t is
         if (this.viewingSetup) {
           const vid = this.viewingSetup?.id ?? this.viewingSetup?.setup_id ?? this.viewingSetup?.setupId;
           if (String(vid) === String(id)) {
@@ -400,7 +626,6 @@ export class SetupRoomlistComponent implements OnInit {
             return String(sid) !== String(setupId);
           });
 
-          // ha épp ezt néztük detailben, lépjünk vissza
           const vid = this.viewingSetup?.id ?? this.viewingSetup?.setup_id ?? this.viewingSetup?.setupId;
           if (this.viewingSetup && String(vid) === String(setupId)) {
             this.backToSetups();

@@ -56,7 +56,7 @@ export class ProductPageComponent implements OnInit {
   }
 
   get displayPrice(): string | null {
-    const p = this.item?.price;
+    const p = this.item?.price ?? this.item?.Price;
     const n = Number(p);
     if (!Number.isFinite(n)) return null;
     return `${Math.round(n).toLocaleString('hu-HU')} Ft`;

@@ -11,22 +11,25 @@ import { ImageService } from '../../../Services/image/image.service';
   styleUrls: ['./product.component.css']
 })
 export class ProductComponent implements OnInit {
-
   @Input({ required: true }) product!: Product;
-
   @Output() openProduct = new EventEmitter<Product>();
 
   imageUrl = 'https://via.placeholder.com/200?text=Loading';
 
-  constructor(private images: ImageService) {}
+  constructor(private images: ImageService) { }
+
+  get displayPrice(): number | null {
+    return this.product.price ?? null;
+  }
 
   async ngOnInit() {
     await this.images.load();
-    this.imageUrl = this.images.getImage(this.product.table ?? (this.product as any).table_name, this.product);
+
+    const table = this.product.table;
+    this.imageUrl = this.images.getImage(table, this.product);
   }
 
   open(): void {
-    console.log('✅ ProductComponent click:', this.product);
     this.openProduct.emit(this.product);
   }
 }

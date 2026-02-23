@@ -6,10 +6,29 @@
 }
 
 .search-wrap {
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 14px;
   padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.new-btn {
+  width: 100%;
+  padding: 10px;
+  border-radius: 12px;
+  border: none;
+  background: #28a745;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.new-btn:hover {
+  opacity: 0.9;
 }
 
 .search {
@@ -18,7 +37,7 @@
   border-radius: 12px;
   border: none;
   outline: none;
-  background: rgba(0,0,0,0.35);
+  background: rgba(0, 0, 0, 0.35);
   color: white;
 }
 
@@ -35,21 +54,21 @@
   text-align: left;
   padding: 14px;
   border-radius: 16px;
-  border: 1px solid rgba(255,255,255,0.07);
-  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  background: rgba(255, 255, 255, 0.04);
   cursor: pointer;
   transition: 0.15s ease;
 }
 
 .product-card:hover {
-  background: rgba(255,255,255,0.07);
+  background: rgba(255, 255, 255, 0.07);
   transform: translateY(-1px);
 }
 
 .product-card.active {
-  background: rgba(255,140,26,0.12);
-  border-color: rgba(255,140,26,0.35);
-  box-shadow: 0 0 0 1px rgba(255,140,26,0.25) inset;
+  background: rgba(255, 140, 26, 0.12);
+  border-color: rgba(255, 140, 26, 0.35);
+  box-shadow: 0 0 0 1px rgba(255, 140, 26, 0.25) inset;
 }
 
 .brand {

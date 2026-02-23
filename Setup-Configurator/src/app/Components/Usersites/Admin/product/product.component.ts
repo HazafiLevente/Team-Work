@@ -20,6 +20,7 @@ export class ProductComponent {
 
   @Output() saveProduct = new EventEmitter<any>();
   @Output() openProduct = new EventEmitter<any>();
+  @Output() deleteProduct = new EventEmitter<any>();
 
   /**
    * Ha view-ból jön (data mezőben vannak a specifikációk),
@@ -32,8 +33,9 @@ export class ProductComponent {
   /** Dinamikusan szerkeszthető mezők */
   editableKeys(): string[] {
     const o = this.obj;
+    const exclusions = ['id', 'table_name', 'data', 'type', 'category', 'created_at', 'image', 'image_url'];
     return Object.keys(o).filter(k =>
-      !['id', 'table_name', 'data', 'type', 'category'].includes(k)
+      !exclusions.some(ex => ex.toLowerCase() === k.toLowerCase())
     );
   }
 
@@ -52,6 +54,10 @@ export class ProductComponent {
 
   onSave() {
     this.saveProduct.emit(this.product);
+  }
+
+  onDelete() {
+    this.deleteProduct.emit(this.product);
   }
 
   onOpen() {

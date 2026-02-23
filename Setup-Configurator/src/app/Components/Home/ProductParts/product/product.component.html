@@ -1,18 +1,12 @@
 <div class="product-card" (click)="open()">
-
-  <img
-    [attr.src]="imageUrl"
-    alt="product image"
-    class="product-img"
-  />
+  <img [attr.src]="imageUrl" alt="product image" class="product-img" />
 
   <h3>{{ product.model }}</h3>
   <p>{{ product.manufacturer }}</p>
 
   <p>
     <strong>
-      {{ product.price ? (product.price | number:'1.0-0') + ' Ft' : 'N/A' }}
+      {{ displayPrice !== null ? (displayPrice | number:'1.0-0') + ' Ft' : 'N/A' }}
     </strong>
   </p>
-
 </div>

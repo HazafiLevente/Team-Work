@@ -4,4 +4,6 @@ export interface Product {
   manufacturer: string;
   model: string;
   price: number | null;
+  category?: string;
+  type?: string;
 }

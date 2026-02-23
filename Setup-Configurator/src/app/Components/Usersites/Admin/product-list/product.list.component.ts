@@ -18,5 +18,9 @@ export class ProductListComponent {
 
   @Output() searchChange = new EventEmitter<string>();
   @Output() productSelect = new EventEmitter<AdminProduct>();
+  @Output() newProduct = new EventEmitter<void>();
 
+  onNew() {
+    this.newProduct.emit();
+  }
 }
