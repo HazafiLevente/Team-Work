@@ -354,7 +354,9 @@ exports.create = async (req, res) => {
         const setup_name = (req.body?.setup_name || "").trim();
         if (!setup_name) return res.status(400).json({ error: "setup_name required" });
 
-        const { data, error } = await supabase.from(SETUP_TABLE).insert([{ setup_name, user_id: userId }]).select("*").single();
+        const isFavorite = req.body?.isFavorite === true;
+
+        const { data, error } = await supabase.from(SETUP_TABLE).insert([{ setup_name, user_id: userId, isFavorite }]).select("*").single();
 
         if (error) {
             console.error("❌ Supabase insert error:", error);
@@ -906,12 +908,15 @@ exports.connections = async (req, res) => {
     if (!setupId) return res.json([]);
 
     try {
-        // Csak azokat a kapcsolatokat kérjük le, ahol MINDKÉT végpont ebben a setup-ban van
+        // ✅ Bárki is legyen a forrás vagy a cél, ha érinti ezt a setup-ot, hozza le
         const { data: rawConns, error: connErr } = await supabase
             .from("connections[Connects]")
-            .select("*")
-            .eq("from_setup_id", setupId)
-            .eq("to_setup_id", setupId);
+            .select(`
+                *,
+                from_setup:from_setup_id(setup_name),
+                to_setup:to_setup_id(setup_name)
+            `)
+            .or(`from_setup_id.eq.${setupId},to_setup_id.eq.${setupId}`);
 
         if (connErr) throw connErr;
         if (!rawConns || rawConns.length === 0) return res.json([]);
@@ -938,7 +943,9 @@ exports.connections = async (req, res) => {
                 },
                 crossSetup,
                 from_setup_id: row.from_setup_id,
-                to_setup_id: row.to_setup_id
+                to_setup_id: row.to_setup_id,
+                from_setup: row.from_setup,
+                to_setup: row.to_setup
             };
         });
 
@@ -946,6 +953,137 @@ exports.connections = async (req, res) => {
     } catch (err) {
         console.error("❌ connections fatal:", err);
         return res.json([]);
+    }
+};
+
+exports.connectionsCreate = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const {
+            from_setup_id,
+            to_setup_id,
+            from_device_type,
+            from_device_id,
+            to_device_type,
+            to_device_id,
+            utp_id
+        } = req.body;
+
+        // 1. Ownership checks
+        const okFrom = await assertSetupOwnedByUser(from_setup_id, userId);
+        const okTo = await assertSetupOwnedByUser(to_setup_id, userId);
+
+        if (!okFrom || !okTo) {
+            return res.status(403).json({ error: "Forbidden: You don't own one of these setups" });
+        }
+
+        // 2. Insert connection
+        const payload = {
+            from_setup_id,
+            to_setup_id,
+            from_device_type,
+            from_device_id,
+            to_device_type,
+            to_device_id,
+            utp_id: utp_id || 1 // Fallback to basic UTP if not provided
+        };
+
+        const { data, error } = await supabase
+            .from("connections[Connects]")
+            .insert([payload])
+            .select("*")
+            .single();
+
+        if (error) throw error;
+
+        // 3. Clear relevant caches
+        childrenCache.delete(String(from_setup_id));
+        if (from_setup_id !== to_setup_id) {
+            childrenCache.delete(String(to_setup_id));
+        }
+
+        res.json({ success: true, connection: data });
+    } catch (err) {
+        console.error("❌ connectionsCreate fatal:", err);
+        res.status(500).json({ error: "Failed to create connection" });
+    }
+};
+
+exports.connectionsRemove = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const connId = req.params.id;
+
+        // 1. Find connection to check ownership
+        const { data: conn, error: findErr } = await supabase
+            .from("connections[Connects]")
+            .select("from_setup_id")
+            .eq("id", connId)
+            .single();
+
+        if (findErr || !conn) return res.status(404).json({ error: "Connection not found" });
+
+        // 2. Ownership check
+        const ok = await assertSetupOwnedByUser(conn.from_setup_id, userId);
+        if (!ok) return res.status(403).json({ error: "Forbidden" });
+
+        // 3. Delete
+        const { error: delErr } = await supabase
+            .from("connections[Connects]")
+            .delete()
+            .eq("id", connId);
+
+        if (delErr) throw delErr;
+
+        // 4. Clear cache
+        childrenCache.delete(String(conn.from_setup_id));
+
+        res.json({ success: true });
+    } catch (err) {
+        console.error("❌ connectionsRemove fatal:", err);
+        res.status(500).json({ error: "Failed to remove connection" });
+    }
+};
+
+exports.removeItem = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const { itemId, tableName } = req.body;
+
+        if (!itemId || !tableName) {
+            return res.status(400).json({ error: "Missing itemId or tableName" });
+        }
+
+        // 1. Check if item exists and find its setup_id
+        const { data: item, error: findErr } = await supabase
+            .from(tableName)
+            .select("setup_id")
+            .eq("id", itemId)
+            .single();
+
+        if (findErr || !item) {
+            return res.status(404).json({ error: "Item not found" });
+        }
+
+        // 2. Check ownership of the parent setup
+        const ok = await assertSetupOwnedByUser(item.setup_id, userId);
+        if (!ok) return res.status(403).json({ error: "Forbidden" });
+
+        // 3. Delete
+        const { error: delErr } = await supabase
+            .from(tableName)
+            .delete()
+            .eq("id", itemId);
+
+        if (delErr) throw delErr;
+
+        // 4. Clear cache
+        childrenCache.delete(String(item.setup_id));
+
+        res.json({ success: true });
+    } catch (err) {
+        console.error("❌ removeItem fatal:", err);
+        res.status(500).json({ error: "Failed to remove item" });
     }
 };
 
@@ -966,7 +1104,11 @@ exports.allConnections = async (req, res) => {
         // 2) Összes kapcsolat, ami érinti ezeket a setup-okat
         const { data: rawConns, error: connErr } = await supabase
             .from("connections[Connects]")
-            .select("*")
+            .select(`
+                *,
+                from_setup:from_setup_id(setup_name),
+                to_setup:to_setup_id(setup_name)
+            `)
             .or(`from_setup_id.in.(${setupIds.join(",")}),to_setup_id.in.(${setupIds.join(",")})`);
 
         if (connErr) throw connErr;
@@ -982,7 +1124,9 @@ exports.allConnections = async (req, res) => {
                 target: { category: targetTable, id: row.to_device_id },
                 crossSetup,
                 from_setup_id: row.from_setup_id,
-                to_setup_id: row.to_setup_id
+                to_setup_id: row.to_setup_id,
+                from_setup: row.from_setup,
+                to_setup: row.to_setup
             };
         });
 

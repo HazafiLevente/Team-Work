@@ -42,13 +42,60 @@ exports.getProfile = async (req, res) => {
         more = inserted;
     }
 
+    // 3️⃣ Összesített érték (Total Price)
+    let totalSetupPrice = 0;
+    try {
+        const tablesToScan = [
+            "acoustic_keyboards[Setup]", "acoustic[Setup]", "audio_processor[Setup]", "back_speaker[Setup]",
+            "bass_amplifier[Setup]", "bass_shaker[Setup]", "bowed_string_instruments[Setup]", "brass_instruments[Setup]",
+            "Car_setup[Setup]", "ceiling_speaker[Setup]", "center_speaker[Setup]", "digital_instruments[Setup]",
+            "electric[Setup]", "electronic_keyboards[Setup]", "electronic_percussion[Setup]", "floor_speaker[Setup]",
+            "front_speaker[Setup]", "home_theater_setups[Setup]", "idiophones[Setup]", "instruments[Setup]",
+            "keyboard_instruments[Setup]", "membranophones[Setup]", "pc_details[Setup]", "percussion_instruments[Setup]",
+            "plucked_string_instruments[Setup]", "reciever_setup[Setup]", "saxophone[Setup]", "side_speaker[Setup]",
+            "sound-producing[Setup]", "string_instruments[Setup]", "struck_string_instruments[Setup]", "studio_monitor_setup[Setup]",
+            "subwoofer[Setup]", "wind_instruments[Setup]", "woodwind_instruments[Setup]", "modem[Setup]",
+            "router[Setup]", "switches[Setup]", "mixer[Setup]"
+        ];
+
+        // Fetch all setup IDs for this user
+        const { data: setups } = await supabase
+            .from("setup[Setup]")
+            .select("id")
+            .eq("user_id", userId);
+
+        if (setups && setups.length > 0) {
+            const setupIds = setups.map(s => s.id);
+
+            // Parallel calculate across all mapped components
+            const pricePromises = tablesToScan.map(async (tableName) => {
+                const { data, error } = await supabase
+                    .from(tableName)
+                    .select("price, price_huf")
+                    .in("setup_id", setupIds); // match any of the user's setups
+
+                if (error || !data) return 0;
+                return data.reduce((sum, item) => {
+                    const p = item.price || item.price_huf || 0;
+                    return sum + Number(p);
+                }, 0);
+            });
+
+            const prices = await Promise.all(pricePromises);
+            totalSetupPrice = prices.reduce((a, b) => a + b, 0);
+        }
+    } catch (err) {
+        console.error("Hiba a profil összérték számításában:", err);
+    }
+
     res.json({
         username: user.UserName,
         fullname: user.Name,
         email: user.Email,
         age: more?.age ?? null,
         phone: more?.phone_number ?? null,
-        city: more?.city ?? null
+        city: more?.city ?? null,
+        totalSetupPrice // ✅ Új mező
     });
 };
 

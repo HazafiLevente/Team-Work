@@ -15,7 +15,7 @@ module.exports = function verifyUser(req, res, next) {
         const decoded = jwt.verify(token, JWT_SECRET);
 
         let role = "user";
-        try { role = resolveRole(Number(decoded.id)); } catch {}
+        try { role = resolveRole(Number(decoded.id), decoded.role); } catch { }
 
         req.user = {
             id: Number(decoded.id),

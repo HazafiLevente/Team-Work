@@ -7,6 +7,18 @@ exports.createPanelAndMessage = async (req, res) => {
         const user2 = Number(req.body.user2_id);
         const context = req.body.context?.trim();
 
+        // ✅ ha a user2 blokkolt téged, ne tudj panelt indítani
+        const { data: rel } = await supabase
+            .from('messages_relations[Messages]')
+            .select('blocked')
+            .eq('owner_id', user2)
+            .eq('target_user_id', user1)
+            .maybeSingle();
+
+        if (rel?.blocked) {
+            return res.status(403).json({ error: "Blocked" });
+        }
+
         if (!user2) return res.status(400).json({ error: "Missing user2_id" });
 
         // 🔎 Panel keresés (mindkét irány)
@@ -65,6 +77,17 @@ exports.send = async (req, res) => {
         const user1 = Number(req.user.id);
         const user2 = Number(req.body.user2_id);
         const context = String(req.body.context || '');
+
+        // ✅ ha a címzett (user2) blokkolt vagy tiltott téged, akkor ne tudj írni
+        const { data: rel } = await supabase
+            .from('messages_relations[Messages]')
+            .select('blocked, disabled')
+            .eq('owner_id', user2)
+            .eq('target_user_id', user1)
+            .maybeSingle();
+
+        if (rel?.blocked) return res.status(403).json({ error: "Blocked" });
+        if (rel?.disabled) return res.status(403).json({ error: "Disabled" });
 
         if (!user2 || !context.trim()) {
             return res.status(400).json({ error: "Missing data" });
@@ -305,3 +328,130 @@ exports.deleteMessage = async (req, res) => {
     }
 };
 
+// ✅ DELETE /api/messages/conversation/:key
+exports.deleteConversation = async (req, res) => {
+    try {
+        const userId = Number(req.user.id);
+        const key = Number(req.params.key); // panel id
+
+        // 1️⃣ panel ellenőrzés + jogosultság
+        const { data: panel, error: panelErr } = await supabase
+            .from("messages_panel[Messages]")
+            .select("id, user1_id, user2_id")
+            .eq("id", key)
+            .single();
+
+        if (panelErr || !panel) {
+            return res.status(404).json({ error: "Panel not found" });
+        }
+
+        if (panel.user1_id !== userId && panel.user2_id !== userId) {
+            return res.status(403).json({ error: "Forbidden" });
+        }
+
+        // 2️⃣ üzenetek törlése (✅ helyes oszlop: messages_panel_id)
+        const { error: msgErr } = await supabase
+            .from("messages[Messages]")
+            .delete()
+            .eq("messages_panel_id", key);
+
+        if (msgErr) {
+            return res.status(500).json({ error: msgErr.message });
+        }
+
+        // 3️⃣ panel törlése (✅ helyes tábla: messages_panel[Messages])
+        const { error: delErr } = await supabase
+            .from("messages_panel[Messages]")
+            .delete()
+            .eq("id", key);
+
+        if (delErr) {
+            return res.status(500).json({ error: delErr.message });
+        }
+
+        return res.json({ ok: true });
+    } catch (e) {
+        return res.status(500).json({ error: e.message });
+    }
+};
+
+
+
+// ✅ Relations (mute/disable/block)
+async function upsertRelation(ownerId, targetId, patch) {
+
+    const { data: existing, error: findErr } = await supabase
+        .from('messages_relations[Messages]')
+        .select('id')
+        .eq('owner_id', ownerId)
+        .eq('target_user_id', targetId)
+        .maybeSingle();
+
+    if (findErr) return { error: findErr };
+
+    if (existing?.id) {
+        return supabase
+            .from('messages_relations[Messages]')
+            .update({ ...patch, updated_at: new Date().toISOString() })
+            .eq('id', existing.id)
+            .select()
+            .single();
+    }
+
+    return supabase
+        .from('messages_relations[Messages]')
+        .insert([{ owner_id: ownerId, target_user_id: targetId, ...patch }])
+        .select()
+        .single();
+}
+
+exports.setMute = async (req, res) => {
+    try {
+        const ownerId = Number(req.user.id);
+        const targetId = Number(req.body.target_user_id);
+        const muted = !!req.body.muted;
+
+        if (!targetId) return res.status(400).json({ error: "Missing target_user_id" });
+
+        const { data, error } = await upsertRelation(ownerId, targetId, { muted });
+        if (error) return res.status(500).json({ error: error.message });
+
+        res.json({ ok: true, relation: data });
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+};
+
+exports.setDisable = async (req, res) => {
+    try {
+        const ownerId = Number(req.user.id);
+        const targetId = Number(req.body.target_user_id);
+        const disabled = !!req.body.disabled;
+
+        if (!targetId) return res.status(400).json({ error: "Missing target_user_id" });
+
+        const { data, error } = await upsertRelation(ownerId, targetId, { disabled });
+        if (error) return res.status(500).json({ error: error.message });
+
+        res.json({ ok: true, relation: data });
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+};
+
+exports.setBlock = async (req, res) => {
+    try {
+        const ownerId = Number(req.user.id);
+        const targetId = Number(req.body.target_user_id);
+        const blocked = !!req.body.blocked;
+
+        if (!targetId) return res.status(400).json({ error: "Missing target_user_id" });
+
+        const { data, error } = await upsertRelation(ownerId, targetId, { blocked });
+        if (error) return res.status(500).json({ error: error.message });
+
+        res.json({ ok: true, relation: data });
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+};

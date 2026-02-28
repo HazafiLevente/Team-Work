@@ -48,9 +48,23 @@ function scheduleSave() {
         try {
             // Update today's entry
             const key = todayKey();
+
+            // Map current sessions for detailed history
+            const userDetails = [];
+            todaySeenUserIds.forEach(id => {
+                // We might not have the username if they logged in before server restart
+                // but we can try to find it in activeSessions or just label as User#ID
+                const session = activeSessions.get(id);
+                userDetails.push({
+                    id,
+                    username: session?.username || `User#${id}`
+                });
+            });
+
             dailyHistory[key] = {
                 unique: todaySeenUserIds.size,
-                total_requests: todayRequestCount
+                total_requests: todayRequestCount,
+                users: userDetails
             };
 
             fs.writeFileSync(HISTORY_FILE, JSON.stringify(dailyHistory, null, 2), "utf-8");
@@ -122,7 +136,8 @@ function getDailyHistory() {
         .map(([date, data]) => ({
             date,
             unique: data.unique,
-            total_requests: data.total_requests
+            total_requests: data.total_requests,
+            users: data.users || []
         }));
 
     return sorted;

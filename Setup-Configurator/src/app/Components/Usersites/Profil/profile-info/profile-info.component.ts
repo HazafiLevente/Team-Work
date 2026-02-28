@@ -14,8 +14,9 @@ export class ProfileInfoSectionComponent implements OnInit {
 
   form!: FormGroup;
   editingField: string | null = null;
+  totalPrice: number = 0; // ✅ Store total price separately from the form
 
-  constructor(private fb: FormBuilder, private http: HttpClient) {}
+  constructor(private fb: FormBuilder, private http: HttpClient) { }
 
   ngOnInit(): void {
     this.form = this.fb.group({
@@ -31,7 +32,10 @@ export class ProfileInfoSectionComponent implements OnInit {
 
   loadProfile() {
     this.http.get<any>('/api/profile', { withCredentials: true })
-      .subscribe(data => this.form.patchValue(data));
+      .subscribe(data => {
+        this.form.patchValue(data);
+        this.totalPrice = data.totalSetupPrice || 0;
+      });
   }
 
   enableEdit(field: string) {

@@ -32,4 +32,10 @@ router.patch("/rooms/:setupId/position", verifyUser, ctrl.upsertRoomPosition);
 router.get("/:id/cars", verifyUser, ctrl.carsList);
 router.post("/:id/cars", verifyUser, ctrl.carsAdd);
 
+
+// ✅ CONNECTIONS
+router.post("/connections", verifyUser, ctrl.connectionsCreate);
+router.delete("/connections/:id", verifyUser, ctrl.connectionsRemove);
+router.delete("/item", verifyUser, ctrl.removeItem);
+
 module.exports = router;

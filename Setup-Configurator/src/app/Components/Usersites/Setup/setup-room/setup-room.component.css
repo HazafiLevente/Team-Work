@@ -54,3 +54,18 @@
 .cdk-drag-animating {
   transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
 }
+
+.setup-edit-input {
+  width: 100%;
+  background: rgba(0, 0, 0, 0.05);
+  border: 1px solid #667eea;
+  border-radius: 4px;
+  padding: 4px 8px;
+  text-align: center;
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #1f2937;
+  outline: none;
+  box-sizing: border-box;
+}

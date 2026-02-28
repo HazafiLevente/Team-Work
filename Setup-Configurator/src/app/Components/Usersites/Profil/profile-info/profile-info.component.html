@@ -13,91 +13,68 @@
     <div class="profile-row">
       <label>Felhasználónév</label>
 
-      <span
-        *ngIf="editingField !== 'username'"
-        (dblclick)="enableEdit('username')">
+      <span *ngIf="editingField !== 'username'" (dblclick)="enableEdit('username')">
         {{ form.value.username || '-' }}
       </span>
 
-      <input
-        *ngIf="editingField === 'username'"
-        formControlName="username"
-        (blur)="saveField()"
-        (keydown.enter)="saveField()"
-      />
+      <input *ngIf="editingField === 'username'" formControlName="username" (blur)="saveField()"
+        (keydown.enter)="saveField()" />
     </div>
 
     <!-- FULLNAME -->
     <div class="profile-row">
       <label>Teljes név</label>
 
-      <span
-        *ngIf="editingField !== 'fullname'"
-        (dblclick)="enableEdit('fullname')">
+      <span *ngIf="editingField !== 'fullname'" (dblclick)="enableEdit('fullname')">
         {{ form.value.fullname || '-' }}
       </span>
 
-      <input
-        *ngIf="editingField === 'fullname'"
-        formControlName="fullname"
-        (blur)="saveField()"
-        (keydown.enter)="saveField()"
-      />
+      <input *ngIf="editingField === 'fullname'" formControlName="fullname" (blur)="saveField()"
+        (keydown.enter)="saveField()" />
     </div>
 
     <!-- PHONE -->
     <div class="profile-row">
       <label>Telefonszám</label>
 
-      <span
-        *ngIf="editingField !== 'phone'"
-        (dblclick)="enableEdit('phone')">
+      <span *ngIf="editingField !== 'phone'" (dblclick)="enableEdit('phone')">
         {{ form.value.phone || '-' }}
       </span>
 
-      <input
-        *ngIf="editingField === 'phone'"
-        formControlName="phone"
-        (blur)="saveField()"
-        (keydown.enter)="saveField()"
-      />
+      <input *ngIf="editingField === 'phone'" formControlName="phone" (blur)="saveField()"
+        (keydown.enter)="saveField()" />
     </div>
 
     <!-- AGE -->
     <div class="profile-row">
       <label>Életkor</label>
 
-      <span
-        *ngIf="editingField !== 'age'"
-        (dblclick)="enableEdit('age')">
+      <span *ngIf="editingField !== 'age'" (dblclick)="enableEdit('age')">
         {{ form.value.age || '-' }}
       </span>
 
-      <input
-        *ngIf="editingField === 'age'"
-        type="number"
-        formControlName="age"
-        (blur)="saveField()"
-        (keydown.enter)="saveField()"
-      />
+      <input *ngIf="editingField === 'age'" type="number" formControlName="age" (blur)="saveField()"
+        (keydown.enter)="saveField()" />
     </div>
 
     <!-- CITY -->
     <div class="profile-row">
       <label>Város</label>
 
-      <span
-        *ngIf="editingField !== 'city'"
-        (dblclick)="enableEdit('city')">
+      <span *ngIf="editingField !== 'city'" (dblclick)="enableEdit('city')">
         {{ form.value.city || '-' }}
       </span>
 
-      <input
-        *ngIf="editingField === 'city'"
-        formControlName="city"
-        (blur)="saveField()"
-        (keydown.enter)="saveField()"
-      />
+      <input *ngIf="editingField === 'city'" formControlName="city" (blur)="saveField()"
+        (keydown.enter)="saveField()" />
+    </div>
+
+    <!-- TOTAL PRICE (Nem szerkeszthető) -->
+    <div class="profile-row">
+      <label>Setupok összértéke</label>
+      <span class="price-badge" style="font-weight: bold; color: #5227FF;">
+        {{ totalPrice | number:'1.0-0' }} Ft
+      </span>
     </div>
 
   </div>

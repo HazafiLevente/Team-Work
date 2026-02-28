@@ -55,7 +55,7 @@ exports.register = async (req, res) => {
             id: user.ID,
             username: user.UserName,
             email: user.Email,
-            role: resolveRole(user.ID)
+            role: resolveRole(user.ID, user.Role)
         }, JWT_SECRET, { expiresIn: "12h" });
 
         setAuthCookie(res, token);
@@ -83,7 +83,7 @@ exports.login = async (req, res) => {
     if (!ok) return res.status(401).json({ error: "Invalid login" });
 
     const token = jwt.sign(
-        { id: user.ID, username: user.UserName, email: user.Email, role: resolveRole(user.ID) },
+        { id: user.ID, username: user.UserName, email: user.Email, role: resolveRole(user.ID, user.Role) },
         JWT_SECRET,
         { expiresIn: rememberMe ? "25d" : "12h" }
     );
@@ -191,7 +191,7 @@ exports.verifyRegisterCode = async (req, res) => {
         id: user.ID,
         username: user.UserName,
         email: user.Email,
-        role: resolveRole(user.ID)
+        role: resolveRole(user.ID, user.Role)
     }, JWT_SECRET, { expiresIn: "12h" });
 
     setAuthCookie(res, token);

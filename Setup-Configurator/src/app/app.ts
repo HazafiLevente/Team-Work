@@ -91,18 +91,16 @@ export class App implements OnInit, OnDestroy {
           onClick: () => this.router.navigateByUrl('/user/profile')
         },
         {
+          icon: '💬',
+          label: 'Messages',
+          onClick: () => this.router.navigateByUrl('/user/messages')
+        },
+        {
           icon: '⚙️',
           label: 'Settings',
           onClick: () => this.router.navigateByUrl('/settings')
         }
       ];
-
-      // 🔥 Messages csak bejelentkezve
-      items.push({
-        icon: '💬',
-        label: 'Messages',
-        onClick: () => this.router.navigateByUrl('/user/messages')
-      });
 
       // 🔥 Admin csak jogosultsággal
       if (['admin', 'admin+', 'owner'].includes(user.role)) {

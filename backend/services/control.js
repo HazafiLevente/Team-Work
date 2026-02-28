@@ -232,10 +232,18 @@ const ADMIN_IDS = new Set(
         .filter(Boolean)
 );
 
+const BANNED_IDS = new Set(
+    (process.env.BANNED_USERS || "")
+        .split(",")
+        .map(Number)
+        .filter(Boolean)
+);
+
 const ROLES = {
     owners: OWNER_IDS,
     adminsPlus: ADMIN_PLUS_IDS,
-    admins: ADMIN_IDS
+    admins: ADMIN_IDS,
+    banned: BANNED_IDS
 };
 
 function resolveRole(userId) {
@@ -243,6 +251,73 @@ function resolveRole(userId) {
     if (ROLES.adminsPlus.has(userId)) return "admin+";
     if (ROLES.admins.has(userId)) return "admin";
     return "user";
+}
+
+function updateUserEnvRole(userId, newRole) {
+    const envPath = path.join(__dirname, "..", "..", ".env");
+    if (!fs.existsSync(envPath)) {
+        console.error("❌ .env file not found at", envPath);
+        return;
+    }
+
+    let content = fs.readFileSync(envPath, "utf-8");
+
+    const owners = ROLES.owners;
+    const adminPlus = ROLES.adminsPlus;
+    const admins = ROLES.admins;
+
+    const numId = Number(userId);
+    if (owners.has(numId)) {
+        console.warn(`⚠️ Attempt to modify owner role for ID ${numId} ignored.`);
+        return;
+    }
+
+    // 1. Update in-memory sets
+    adminPlus.delete(numId);
+    admins.delete(numId);
+
+    if (newRole === "admin+") adminPlus.add(numId);
+    if (newRole === "admin") admins.add(numId);
+
+    // 2. Update process.env strings for other parts of the app
+    process.env.ADMINS_PLUS = Array.from(adminPlus).join(",");
+    process.env.ADMINS = Array.from(admins).join(",");
+
+    // 3. Update the physical .env file
+    content = content.replace(/^ADMINS_PLUS=.*$/m, `ADMINS_PLUS=${process.env.ADMINS_PLUS}`);
+    content = content.replace(/^ADMINS=.*$/m, `ADMINS=${process.env.ADMINS}`);
+
+    fs.writeFileSync(envPath, content, "utf-8");
+    console.log(`✅ .env and memory updated for user ${numId} -> ${newRole}`);
+}
+
+function isBanned(userId) {
+    return ROLES.banned.has(Number(userId));
+}
+
+function updateUserBanStatus(userId, banned) {
+    const envPath = path.join(__dirname, "..", "..", ".env");
+    if (!fs.existsSync(envPath)) return;
+
+    let content = fs.readFileSync(envPath, "utf-8");
+    const numId = Number(userId);
+
+    if (banned) {
+        ROLES.banned.add(numId);
+    } else {
+        ROLES.banned.delete(numId);
+    }
+
+    process.env.BANNED_USERS = Array.from(ROLES.banned).join(",");
+
+    if (/^BANNED_USERS=.*$/m.test(content)) {
+        content = content.replace(/^BANNED_USERS=.*$/m, `BANNED_USERS=${process.env.BANNED_USERS}`);
+    } else {
+        content += `\nBANNED_USERS=${process.env.BANNED_USERS}`;
+    }
+
+    fs.writeFileSync(envPath, content, "utf-8");
+    console.log(`✅ .env updated: user ${numId} banned status -> ${banned}`);
 }
 
 function canAssignRole(granterRole, targetRole) {
@@ -271,8 +346,11 @@ function startControl() {
 
 module.exports = {
     startControl,
-    refreshTables,   // ✅ EZ KELL
+    refreshTables,
     resolveRole,
+    updateUserEnvRole, // ✅ NEW
+    isBanned,          // ✅ NEW
+    updateUserBanStatus, // ✅ NEW
     canAssignRole,
     hasAdminAccess,
     hasAdminPlusAccess,

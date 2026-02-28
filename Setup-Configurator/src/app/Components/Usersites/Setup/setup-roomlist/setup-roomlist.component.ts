@@ -60,7 +60,13 @@ export class SetupRoomlistComponent implements OnInit {
   ctxOpen = false;
   ctxX = 0;
   ctxY = 0;
+  ctxPayload: SetupRightClickPayload | null = null;
   ctxSetup: any = null;
+
+  // ✅ Background context menu state
+  bgCtxOpen = false;
+  bgCtxX = 0;
+  bgCtxY = 0;
 
   // ✅ Tools modal state
   toolsOpen = false;
@@ -84,6 +90,23 @@ export class SetupRoomlistComponent implements OnInit {
   pcParts: PcPart[] = [];
   pcPartsLoading = false;
   pcPartsError = '';
+
+  // ✅ CONNECTION MODE (NEW)
+  pairingStage: 'NONE' | 'PICK_SOURCE' | 'PICK_TARGET_SETUP' | 'PICK_TARGET_ITEM' = 'NONE';
+  connectSourceItem: any = null;
+  connectSourceSetup: any = null;
+  connectTargetSetup: any = null;
+  pairingItemList: any[] = [];
+  connectMousePos = { x: 0, y: 0 };
+
+  // ✅ CONNECTION MANAGEMENT (NEW)
+  viewingConnsSetup: any = null;
+  setupConnectionsList: any[] = [];
+  loadingConns = false;
+
+  // ✅ CONTEXT MENU (NEW)
+  ctxItem: any = null;
+
   private elementRegistry = new Map<string, HTMLElement>();
 
   @ViewChild('boundary', { static: true }) boundaryEl!: ElementRef<HTMLElement>;
@@ -137,24 +160,30 @@ export class SetupRoomlistComponent implements OnInit {
   }
 
   // -------------------------
-  // ✅ ÚJ SETUP (csak ha allowCreate)
+  // ✅ ÚJ SETUP
   // -------------------------
-  createNewSetup(): void {
+  createNewSetup(customX?: number, customY?: number): void {
     if (!this.allowCreate) return;
 
     const setup_name = 'Új setup';
 
     this.http.post<any>(
       '/api/setup/create',
-      { setup_name },
+      {
+        setup_name,
+        x: customX ?? 50,
+        y: customY ?? 50,
+        isFavorite: this.favoriteMode
+      },
       { withCredentials: true }
     ).subscribe({
       next: (res) => {
         const created = res?.setup;
         if (!created) return;
 
-        if (this.favoriteMode) return; // favorite nézetben ne jelenjen meg alapból
+        if (this.viewingSetup) return; // detailben ne frissítsük a szobákat
 
+        // Ha a favoriteMode be van kapcsolva, akkor is hozzáadjuk, ha esetleg filterelve van, de az UI-nek tudnia kell róla
         this.userSetups = [created, ...this.userSetups];
       },
       error: (err) => {
@@ -163,10 +192,18 @@ export class SetupRoomlistComponent implements OnInit {
     });
   }
 
+  createNewSetupFromMenu(): void {
+    const x = this.bgCtxX;
+    const y = this.bgCtxY;
+    this.createNewSetup(x, y);
+    this.closeBackgroundContextMenu();
+  }
+
   // -------------------------
   // ✅ DUPLA KATT -> DETAIL VIEW
   // -------------------------
   openSetupDetails(setup: any): void {
+    if (this.pairingStage !== 'NONE') return;
     if (!setup) return;
 
     this.viewingSetup = setup;
@@ -434,6 +471,173 @@ export class SetupRoomlistComponent implements OnInit {
       });
   }
 
+  // ✅ CONNECTION LOGIC (REFINED 2-STEP)
+  startConnectingFromMenu(): void {
+    if (!this.ctxSetup) return;
+    this.connectSourceSetup = this.ctxSetup;
+    this.pairingStage = 'PICK_SOURCE';
+    this.closeContextMenu();
+    this.loadPairingItems(this.connectSourceSetup.id || this.connectSourceSetup.setup_id);
+  }
+
+  startItemConnectingFromMenu(): void {
+    if (!this.ctxItem || !this.viewingSetup) return;
+    this.connectSourceSetup = this.viewingSetup;
+    this.connectSourceItem = this.ctxItem;
+    this.pairingStage = 'PICK_TARGET_SETUP';
+    this.closeContextMenu();
+  }
+
+  cancelConnecting(): void {
+    this.pairingStage = 'NONE';
+    this.connectSourceItem = null;
+    this.connectSourceSetup = null;
+    this.connectTargetSetup = null;
+    this.pairingItemList = [];
+  }
+
+  private loadPairingItems(setupId: any): void {
+    this.http.get<any>(`/api/setup/${setupId}/children`, { withCredentials: true })
+      .subscribe({
+        next: res => {
+          this.pairingItemList = res || [];
+        },
+        error: err => {
+          console.error('❌ Pairing items loading error:', err);
+          this.cancelConnecting();
+        }
+      });
+  }
+
+  selectSourceItem(item: any): void {
+    this.connectSourceItem = item;
+    this.pairingStage = 'PICK_TARGET_SETUP';
+    this.pairingItemList = [];
+    console.log('🔌 Source item picked. Select target setup.');
+  }
+
+  onSetupClick(setup: any): void {
+    if (this.pairingStage === 'PICK_TARGET_SETUP') {
+      this.selectTargetSetup(setup);
+    }
+  }
+
+  selectTargetSetup(setup: any): void {
+    if (this.pairingStage !== 'PICK_TARGET_SETUP') return;
+
+    this.connectTargetSetup = setup;
+    this.pairingStage = 'PICK_TARGET_ITEM';
+    const setupId = setup.id || setup.setup_id;
+
+    this.http.get<any>(`/api/setup/${setupId}/children`, { withCredentials: true })
+      .subscribe({
+        next: res => {
+          this.pairingItemList = res || [];
+          console.log('🔌 Target items loaded for setup:', setupId);
+        },
+        error: err => {
+          console.error('❌ Target items loading error:', err);
+          this.cancelConnecting();
+        }
+      });
+  }
+
+  finalizeConnection(targetItem: any): void {
+    const sId = this.connectSourceItem.id || this.connectSourceItem.setup_id;
+    const tId = targetItem.id || targetItem.setup_id;
+
+    if (String(this.connectSourceItem.category) === String(targetItem.category) && String(sId) === String(tId)) {
+      alert('Saját magával nem kötheted össze az eszközt.');
+      this.cancelConnecting();
+      return;
+    }
+
+    const payload = {
+      from_setup_id: this.connectSourceSetup.id || this.connectSourceSetup.setup_id,
+      to_setup_id: this.connectTargetSetup.id || this.connectTargetSetup.setup_id,
+      from_device_type: this.getDeviceType(this.connectSourceItem),
+      from_device_id: sId,
+      to_device_type: this.getDeviceType(targetItem),
+      to_device_id: tId,
+      utp_id: 1
+    };
+
+    this.http.post('/api/setup/connections', payload, { withCredentials: true })
+      .subscribe({
+        next: () => {
+          console.log('✅ Connection created');
+          this.cancelConnecting();
+          if (this.viewingSetup) this.loadConnections(this.viewingSetup.id);
+          this.loadGlobalConnections();
+        },
+        error: (err) => {
+          console.error('❌ Connection error:', err);
+          alert('Hiba történt az összekötés során.');
+          this.cancelConnecting();
+        }
+      });
+  }
+
+  // ✅ CONNECTION MANAGEMENT (NEW)
+  openConnectionsFromMenu(): void {
+    if (!this.ctxSetup) return;
+    this.viewingConnsSetup = this.ctxSetup;
+    const sId = this.viewingConnsSetup.id || this.viewingConnsSetup.setup_id;
+    this.loadingConns = true;
+    this.closeContextMenu();
+
+    this.http.get<any[]>(`/api/setup/${sId}/connections`, { withCredentials: true })
+      .subscribe({
+        next: (conns) => {
+          this.setupConnectionsList = conns || [];
+          this.loadingConns = false;
+        },
+        error: (err) => {
+          console.error('❌ Connections load error:', err);
+          this.loadingConns = false;
+          this.viewingConnsSetup = null;
+        }
+      });
+  }
+
+  closeConnections(): void {
+    this.viewingConnsSetup = null;
+    this.setupConnectionsList = [];
+  }
+
+  deleteConnection(id: number): void {
+    if (!confirm('Biztosan törlöd ezt az összekötést?')) return;
+
+    this.http.delete(`/api/setup/connections/${id}`, { withCredentials: true })
+      .subscribe({
+        next: () => {
+          this.setupConnectionsList = this.setupConnectionsList.filter(c => c.id !== id);
+          if (this.viewingSetup) this.loadConnections(this.viewingSetup.id);
+          this.loadGlobalConnections();
+        },
+        error: (err) => {
+          console.error('❌ Connection delete error:', err);
+          alert('Hiba történt a törlés során.');
+        }
+      });
+  }
+
+  openItemConnectionsFromMenu(): void {
+    if (!this.ctxItem || !this.viewingSetup) return;
+    this.openConnectionsFromMenu();
+  }
+
+  public getDeviceType(item: any): string {
+    const cat = String(item.category || '').toLowerCase();
+    if (cat.includes('pc')) return 'pc';
+    if (cat.includes('switch')) return 'switch';
+    if (cat.includes('router')) return 'router';
+    if (cat.includes('modem')) return 'modem';
+    if (cat.includes('home_theater')) return 'ht';
+    if (cat.includes('setup')) return 'setup';
+    return 'other';
+  }
+
   // ✅ Vissza gomb
   backToSetups(): void {
     this.viewingSetup = null;
@@ -447,15 +651,22 @@ export class SetupRoomlistComponent implements OnInit {
     this.closePcDrawer();
 
     if (this.ctxOpen) this.closeContextMenu();
+    if (this.bgCtxOpen) this.closeBackgroundContextMenu();
     if (this.toolsOpen) this.closeTools();
     if (this.renameOpen) this.closeRename();
   }
 
-  // -------------------------
   // ✅ Jobb klikk menü pozíció
   // -------------------------
+  onSetupRightClick(payload: SetupRightClickPayload): void {
+    this.closeContextMenu(); // ✅ Előbb pucolás
+    this.ctxSetup = payload.setup;
+    this.ctxItem = null;
+    this.openContextMenu(payload);
+  }
+
   openContextMenu(payload: SetupRightClickPayload): void {
-    this.ctxSetup = payload?.setup ?? null;
+    this.ctxPayload = payload;
 
     const host = this.boundaryEl?.nativeElement;
     if (!host) return;
@@ -477,21 +688,119 @@ export class SetupRoomlistComponent implements OnInit {
     this.ctxOpen = true;
   }
 
+  onItemRightClick(payload: SetupRightClickPayload): void {
+    this.closeContextMenu(); // ✅ Előbb pucolás
+    this.ctxItem = payload.setup; // payload.setup is the item here
+    this.ctxSetup = null;
+    this.openContextMenu(payload);
+  }
+
+  openItemDetailsFromMenu(): void {
+    if (!this.ctxItem) return;
+    this.onItemDblClick(this.ctxItem);
+    this.closeContextMenu();
+  }
+
+  deleteItemFromMenu(): void {
+    if (!this.ctxItem) return;
+    const it = this.ctxItem;
+    if (!confirm(`Biztosan törlöd ezt az eszközt: ${it.display_name}?`)) return;
+
+    this.http.request('delete', '/api/setup/item', {
+      body: { itemId: it.id, tableName: it.category },
+      withCredentials: true
+    })
+      .subscribe({
+        next: () => {
+          this.items = this.items.filter(i => i.id !== it.id);
+          this.closeContextMenu();
+        },
+        error: (err) => {
+          console.error('❌ Item delete error:', err);
+          alert('Hiba történt a törlés során.');
+        }
+      });
+  }
+
   closeContextMenu(): void {
     this.ctxOpen = false;
     this.ctxSetup = null;
+    this.ctxItem = null;
+  }
+
+  // ✅ Background context menu logic
+  onBackgroundRightClick(e: MouseEvent): void {
+    if (!this.allowCreate) return;
+
+    // Ha szobára kattintottunk, ne a háttér menu jöjjön elő
+    // (A szoba component már meghívta a stopPropagation-t a contextmenu eventre?
+    // Nézzük meg a setup-room.component.ts-t!)
+
+    e.preventDefault();
+
+    const host = this.boundaryEl?.nativeElement;
+    if (!host) return;
+
+    const rect = host.getBoundingClientRect();
+    const localX = e.clientX - rect.left;
+    const localY = e.clientY - rect.top;
+
+    this.bgCtxX = localX;
+    this.bgCtxY = localY;
+    this.bgCtxOpen = true;
+
+    // Ha a másik menu nyitva volt, zárjuk be
+    if (this.ctxOpen) this.closeContextMenu();
+  }
+
+  closeBackgroundContextMenu(): void {
+    this.bgCtxOpen = false;
   }
 
   // ✅ ESC
   @HostListener('document:keydown.escape')
   onEsc(): void {
     if (this.ctxOpen) this.closeContextMenu();
+    if (this.bgCtxOpen) this.closeBackgroundContextMenu();
     if (this.toolsOpen) this.closeTools();
     if (this.renameOpen) this.closeRename();
     if (this.carPanelOpen) this.closeCarPanel();
     if (this.pcDrawerOpen) this.closePcDrawer();
 
+    if (this.pairingStage !== 'NONE') {
+      this.cancelConnecting();
+      return;
+    }
+
     if (this.viewingSetup) this.backToSetups();
+  }
+
+  @HostListener('mousemove', ['$event'])
+  onMouseMove(e: MouseEvent): void {
+    if (this.pairingStage === 'NONE' || this.pairingStage === 'PICK_SOURCE') return;
+
+    const rect = this.boundaryEl.nativeElement.getBoundingClientRect();
+    this.connectMousePos = {
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top
+    };
+  }
+
+  getGhostLinePath(): string {
+    if (!this.connectSourceSetup) return '';
+    const sid = 'room:' + (this.connectSourceSetup.id || this.connectSourceSetup.setup_id);
+    const sourceEl = this.elementRegistry.get(sid);
+    if (!sourceEl) return '';
+
+    const rect = sourceEl.getBoundingClientRect();
+    const parentRect = this.boundaryEl.nativeElement.getBoundingClientRect();
+
+    const x1 = (rect.left + rect.width / 2) - parentRect.left;
+    const y1 = (rect.top + rect.height / 2) - parentRect.top;
+    const x2 = this.connectMousePos.x;
+    const y2 = this.connectMousePos.y;
+
+    return `M ${x1} ${y1} L ${x2} ${y2}`;
   }
 
   // ✅ Tools
@@ -534,15 +843,11 @@ export class SetupRoomlistComponent implements OnInit {
   }
 
   // ✅ Rename
+
   openRenameFromMenu(): void {
-    if (!this.ctxSetup) return;
+    if (!this.ctxPayload) return;
 
-    this.renameSetup = this.ctxSetup;
-    this.renameValue = this.getSetupTitle(this.ctxSetup);
-    this.renameError = '';
-    this.renameSaving = false;
-    this.renameOpen = true;
-
+    this.ctxPayload.component.startRename();
     this.closeContextMenu();
   }
 
@@ -601,6 +906,32 @@ export class SetupRoomlistComponent implements OnInit {
         this.renameSaving = false;
       }
     });
+  }
+
+  onRoomRenamed(updated: any): void {
+    if (!updated) return;
+
+    const id = updated?.id ?? updated?.setup_id ?? updated?.setupId;
+
+    // 1. Frissítjük a fő listát
+    this.userSetups = this.userSetups.map(s => {
+      const sid = s?.id ?? s?.setup_id ?? s?.setupId;
+      return String(sid) === String(id) ? { ...s, ...updated } : s;
+    });
+
+    // 2. Frissítjük az items listát is (ha épp bent vagyunk)
+    this.items = this.items.map(it => {
+      const iid = it?.id ?? it?.setup_id ?? it?.setupId;
+      return String(iid) === String(id) ? { ...it, ...updated } : it;
+    });
+
+    // 3. Frissítjük a viewingSetup-ot ha az lett átnevezve
+    if (this.viewingSetup) {
+      const vid = this.viewingSetup?.id ?? this.viewingSetup?.setup_id ?? this.viewingSetup?.setupId;
+      if (String(vid) === String(id)) {
+        this.viewingSetup = { ...this.viewingSetup, ...updated };
+      }
+    }
   }
 
   // ✅ TÖRLÉS

@@ -3,7 +3,7 @@ const fs = require("fs");
 const path = require("path");
 const { supabase } = require("../services/supabase");
 const verifyAdmin = require("../middlewares/verifyAdmin");
-const { resolveRole } = require("../services/control");
+const { resolveRole, updateUserEnvRole, isBanned, updateUserBanStatus } = require("../services/control");
 const localDb = require("../services/localDb");
 const { shouldExclude } = require("../services/tableFilter");
 const activeUsersTracker = require("../services/activeUsers");
@@ -66,7 +66,7 @@ router.get("/users", verifyAdmin, async (req, res) => {
     // 1️⃣ user[Auth]
     const { data: users, error: userError } = await supabase
         .from("user[Auth]")
-        .select("ID, UserName, Email");
+        .select("ID, UserName, Email, created_at"); // REMOVED role, banned
 
     if (userError) {
         console.error(userError);
@@ -91,7 +91,9 @@ router.get("/users", verifyAdmin, async (req, res) => {
             id: u.ID,
             username: u.UserName,
             email: u.Email,
-            role: resolveRole(u.ID), // saját logikád
+            created_at: u.created_at,
+            role: resolveRole(u.ID, u.Role), // Use control.js resolution
+            banned: isBanned(u.ID), // Check local set
             city: extra?.city ?? "",
             age: extra?.age ?? null,
             phone: extra?.phone_number ?? ""
@@ -110,22 +112,181 @@ router.patch("/users/:id", verifyAdmin, async (req, res) => {
     const { id } = req.params;
     const { username, city, age, phone, role } = req.body;
 
-    const updateData = {
-        UserName: username,
-        City: city,
-        Age: age,
-        Phone: phone,
-        Role: role
-    };
+    try {
+        const numId = Number(id);
+        console.log(`👤 Admin updating user ID: ${numId}`, { username, role, city, age, phone });
 
-    const { error } = await supabase
-        .from("user[Auth]")
-        .update(updateData)
-        .eq("ID", id);
+        // 1. Update user[Auth]
+        const { error: authError } = await supabase
+            .from("user[Auth]")
+            .update({ UserName: username })
+            .eq("ID", numId);
 
-    if (error) return res.status(500).json({ error: error.message });
+        if (authError) {
+            console.error("❌ Step 1 (user[Auth]) failed:", authError);
+            throw authError;
+        }
 
-    res.json({ success: true });
+        // 2. Update Roles in .env
+        try {
+            const { updateUserEnvRole } = require("../services/control");
+            updateUserEnvRole(numId, role);
+            console.log("✅ Step 2 (.env role) updated");
+        } catch (envErr) {
+            console.error("❌ Step 2 (.env role) failed:", envErr);
+            // Non-critical, but let's log it
+        }
+
+        // 3. Upsert user_more[Auth]
+        console.log(`🔍 Checking user_more for user_id: ${numId}`);
+        const { data: existingMore, error: findError } = await supabase
+            .from("user_more[Auth]")
+            .select("id")
+            .eq("user_id", numId)
+            .maybeSingle();
+
+        if (findError) {
+            console.error("❌ Step 3 (find user_more) failed:", findError);
+            throw findError;
+        }
+
+        if (existingMore) {
+            console.log(`📝 Updating existing user_more entry ID: ${existingMore.id}`);
+            const { error: moreError } = await supabase
+                .from("user_more[Auth]")
+                .update({
+                    city: city,
+                    age: age,
+                    phone_number: phone
+                })
+                .eq("user_id", numId);
+            if (moreError) {
+                console.error("❌ Step 3 (update user_more) failed:", moreError);
+                throw moreError;
+            }
+        } else {
+            console.log(`➕ Creating new user_more entry for user_id: ${numId}`);
+            const { error: moreError } = await supabase
+                .from("user_more[Auth]")
+                .insert({
+                    user_id: numId,
+                    city: city,
+                    age: age,
+                    phone_number: phone
+                });
+            if (moreError) {
+                console.error("❌ Step 3 (insert user_more) failed:", moreError);
+                throw moreError;
+            }
+        }
+
+        console.log("🎊 User update completed successfully");
+        res.json({ success: true });
+    } catch (err) {
+        console.error("💥 CRITICAL: Admin user update fatal error:", err);
+        res.status(500).json({ error: err.message || "Internal Server Error" });
+    }
+});
+
+// 🚫 BAN USER
+router.post("/users/:id/ban", verifyAdmin, async (req, res) => {
+    const { id } = req.params;
+    const adminRole = resolveRole(req.user.id);
+
+    if (adminRole !== "admin+" && adminRole !== "owner") {
+        return res.status(403).json({ error: "Only Admin+ or Owner can ban users." });
+    }
+
+    try {
+        updateUserBanStatus(id, true);
+        res.json({ success: true });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// ✅ UNBAN USER
+router.post("/users/:id/unban", verifyAdmin, async (req, res) => {
+    const { id } = req.params;
+    const adminRole = resolveRole(req.user.id);
+
+    if (adminRole !== "admin+" && adminRole !== "owner") {
+        return res.status(403).json({ error: "Only Admin+ or Owner can unban users." });
+    }
+
+    try {
+        updateUserBanStatus(id, false);
+        res.json({ success: true });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+/**
+ * GET /api/admin/users/:id/setups
+ * Returns all setups for a specific user with price summary.
+ */
+router.get("/users/:id/setups", verifyAdmin, async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        // 1. All setups
+        const { data: setups, error: setupsError } = await supabase
+            .from("setup[Setup]")
+            .select("*")
+            .eq("user_id", id);
+
+        if (setupsError) throw setupsError;
+
+        // 2. Room positions
+        const { data: posData } = await supabase
+            .from("setup_rooms[Coordinates]")
+            .select("setup_id, x, y");
+
+        // 3. Price calculation setup
+        // We'll use the tables.runtime.json to know which tables to scan
+        const runtimeFile = path.join(__dirname, "../../datas/Jsons/tables.runtime.json");
+        const runtimeJson = JSON.parse(fs.readFileSync(runtimeFile, "utf8"));
+        const productTables = Object.keys(runtimeJson.tables || {});
+
+        const result = [];
+        for (const s of (setups || [])) {
+            const pos = (posData || []).find(p => String(p.setup_id) === String(s.id));
+
+            // Calculate total price for THIS setup
+            let totalPrice = 0;
+
+            // We can do this in parallel for speed if there aren't too many tables
+            const pricePromises = productTables.map(async (tableName) => {
+                const { data, error } = await supabase
+                    .from(tableName)
+                    .select("price, price_huf") // Some tables use price, some price_huf
+                    .eq("setup_id", s.id);
+
+                if (error || !data) return 0;
+                return data.reduce((sum, item) => {
+                    const p = item.price || item.price_huf || 0;
+                    return sum + Number(p);
+                }, 0);
+            });
+
+            const prices = await Promise.all(pricePromises);
+            totalPrice = prices.reduce((a, b) => a + b, 0);
+
+            result.push({
+                ...s,
+                setup_name: s.setup_name ?? s.name ?? "Névtelen setup",
+                x: pos?.x ?? 0,
+                y: pos?.y ?? 0,
+                total_price: totalPrice
+            });
+        }
+
+        res.json({ setups: result });
+    } catch (err) {
+        console.error("❌ Admin user setups error:", err);
+        res.status(500).json({ error: err.message });
+    }
 });
 
 // ========================================

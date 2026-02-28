@@ -19,7 +19,10 @@ export class AuthService {
   private userSubject = new BehaviorSubject<AuthUser | null>(null);
   user$ = this.userSubject.asObservable();
 
-  constructor(private http: HttpClient) {}
+  private initializedSubject = new BehaviorSubject<boolean>(false);
+  initialized$ = this.initializedSubject.asObservable();
+
+  constructor(private http: HttpClient) { }
 
   /**
    * Lekéri a jelenlegi session usert a backendtől és frissíti a user$-t.
@@ -28,9 +31,13 @@ export class AuthService {
   check(): Observable<AuthUser | null> {
     return this.http.get<MeResp>('/api/auth/me', { withCredentials: true }).pipe(
       map(r => (r.loggedIn ? (r.user ?? null) : null)),
-      tap(u => this.userSubject.next(u)),
+      tap(u => {
+        this.userSubject.next(u);
+        this.initializedSubject.next(true);
+      }),
       catchError(() => {
         this.userSubject.next(null);
+        this.initializedSubject.next(true);
         return of(null);
       })
     );
@@ -61,7 +68,10 @@ export class AuthService {
    */
   logout(): Observable<any> {
     return this.http.post('/api/auth/logout', {}, { withCredentials: true }).pipe(
-      tap(() => this.userSubject.next(null))
+      tap(() => {
+        this.userSubject.next(null);
+        this.initializedSubject.next(true);
+      })
     );
   }
   verifyRegisterCode(data: {

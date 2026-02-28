@@ -2,5 +2,27 @@
   "2026-02-23": {
     "unique": 1,
     "total_requests": 30
+  },
+  "2026-02-24": {
+    "unique": 1,
+    "total_requests": 186
+  },
+  "2026-02-26": {
+    "unique": 1,
+    "total_requests": 289
+  },
+  "2026-02-28": {
+    "unique": 2,
+    "total_requests": 66,
+    "users": [
+      {
+        "id": 1,
+        "username": "HazafiLev"
+      },
+      {
+        "id": 5,
+        "username": "Horbikám"
+      }
+    ]
   }
 }

@@ -1,102 +1,133 @@
-<div class="admin-users">
+<div class="admin-users" [class.panel-open]="itemsViewOpen">
 
-  <h2>👥 Felhasználók</h2>
+  <div class="users-main">
+    <h2>👥 Felhasználók</h2>
 
-  <div class="users-table">
+    <div class="users-list">
+      <div class="user-card" *ngFor="let u of usersList" [class.expanded]="expandedUserId === u.id"
+        [id]="'user-card-' + u.id" [class.banned]="u.banned" (contextmenu)="onUserContextMenu($event, u)">
 
-    <!-- HEADER -->
-    <div class="users-row header">
-      <span>Username</span>
-      <span>Email</span>
-      <span>Role</span>
-      <span>City</span>
-      <span>Age</span>
-      <span>Action</span>
+        <!-- CARD HEADER -->
+        <div class="user-header" (click)="toggleUser(u)">
+          <div class="user-info">
+            <span class="user-name">{{ u.username }}</span>
+            <span class="muted small">{{ u.email }}</span>
+          </div>
+          <div class="user-meta">
+            <span class="muted smaller date-label">{{ u.created_at | date:'yyyy.MM.dd' }}</span>
+            <span class="badge ban-badge" *ngIf="u.banned">BANNED</span>
+            <span class="badge">{{ u.role }}</span>
+            <span class="chevron">▼</span>
+          </div>
+        </div>
+
+        <!-- EXPANDED CONTENT -->
+        <div class="user-details" *ngIf="expandedUserId === u.id">
+
+          <div class="details-grid">
+            <div class="field">
+              <label>Felhasználónév</label>
+              <input [(ngModel)]="u.username">
+            </div>
+            <div class="field">
+              <label>Role</label>
+              <select [(ngModel)]="u.role">
+                <option value="user">user</option>
+                <option value="admin">admin</option>
+                <option value="admin+">admin+</option>
+                <option value="owner">owner</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Város</label>
+              <input [(ngModel)]="u.city">
+            </div>
+            <div class="field">
+              <label>Kor</label>
+              <input type="number" [(ngModel)]="u.age">
+            </div>
+            <div class="field">
+              <label>Telefon</label>
+              <input [(ngModel)]="u.phone">
+            </div>
+            <div class="actions">
+              <button class="admin-btn primary" (click)="saveUser(u)">Mentés</button>
+            </div>
+          </div>
+
+          <hr class="sep">
+
+          <!-- SETUPS GRID -->
+          <div class="setups-section">
+            <h3>Setups</h3>
+
+            <div *ngIf="loadingSetups[u.id]" class="muted">Setups betöltése...</div>
+
+            <div class="setups-grid" *ngIf="!loadingSetups[u.id]">
+              <div class="setup-card" *ngFor="let s of userSetups[u.id]" (dblclick)="onSetupDblClick(s)"
+                [class.active]="selectedSetup?.id === s.id">
+
+                <div class="setup-price-tag">
+                  {{ s.level ? 'LVL ' + s.level : '' }}
+                  <span class="price" *ngIf="getSetupPrice(s) > 0">{{ getSetupPrice(s) | number }} HUF</span>
+                </div>
+
+                <div class="setup-visual">
+                  <div class="room-icon">🏠</div>
+                  <div class="setup-name">{{ s.setup_name }}</div>
+                </div>
+
+              </div>
+
+              <div *ngIf="userSetups[u.id]?.length === 0" class="muted small">Nincs setup.</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SIDE PANEL: SETUP ITEMS -->
+  <div class="items-side-panel" *ngIf="itemsViewOpen">
+    <div class="panel-header">
+      <div class="panel-title">
+        <h3>{{ selectedSetup?.setup_name }} elemei</h3>
+        <span class="muted small">Dupla katt az elrejtéshez</span>
+      </div>
+      <button class="close-btn" (click)="closeItemsView()">×</button>
     </div>
 
-    <!-- ROWS -->
-    <div class="users-row" *ngFor="let u of usersList">
+    <div class="panel-content">
+      <div *ngIf="loadingItems" class="loading-spinner">Betöltés...</div>
 
-      <!-- USERNAME -->
-      <div class="cell">
-        <span
-          *ngIf="!isEditing(u,'username')"
-          class="editable-text"
-          (click)="edit(u,'username')">
-          {{ u.username || '—' }}
-        </span>
-
-        <input
-          *ngIf="isEditing(u,'username')"
-          [(ngModel)]="u.username"
-          (blur)="stopEdit(u,'username')"
-          autofocus>
+      <div class="items-list" *ngIf="!loadingItems">
+        <div class="item-row" *ngFor="let item of setupItems">
+          <div class="item-icon">📦</div>
+          <div class="item-info">
+            <div class="item-name">{{ item.display_name }}</div>
+            <div class="item-meta muted smaller">{{ item.category }}</div>
+          </div>
+        </div>
+        <div *ngIf="setupItems.length === 0" class="muted">Ez a setup üres.</div>
       </div>
-
-      <!-- EMAIL -->
-      <span class="muted">{{ u.email }}</span>
-
-      <!-- ROLE -->
-      <div class="cell">
-        <span
-          *ngIf="!isEditing(u,'role')"
-          class="badge"
-          (click)="edit(u,'role')">
-          {{ u.role }}
-        </span>
-
-        <select
-          *ngIf="isEditing(u,'role')"
-          [(ngModel)]="u.role"
-          (blur)="stopEdit(u,'role')">
-          <option value="user">user</option>
-          <option value="admin">admin</option>
-          <option value="admin+">admin+</option>
-          <option value="owner">owner</option>
-        </select>
-      </div>
-
-      <!-- CITY -->
-      <div class="cell">
-        <span
-          *ngIf="!isEditing(u,'city')"
-          class="editable-text muted"
-          (click)="edit(u,'city')">
-          {{ u.city || '—' }}
-        </span>
-
-        <input
-          *ngIf="isEditing(u,'city')"
-          [(ngModel)]="u.city"
-          (blur)="stopEdit(u,'city')">
-      </div>
-
-      <!-- AGE -->
-      <div class="cell">
-        <span
-          *ngIf="!isEditing(u,'age')"
-          class="editable-text muted"
-          (click)="edit(u,'age')">
-          {{ u.age || '—' }}
-        </span>
-
-        <input
-          *ngIf="isEditing(u,'age')"
-          type="number"
-          [(ngModel)]="u.age"
-          (blur)="stopEdit(u,'age')">
-      </div>
-
-      <!-- SAVE -->
-      <button
-        class="admin-btn icon"
-        title="Mentés"
-        (click)="saveUser(u)">
-        💾
-      </button>
-
     </div>
+  </div>
 
+  <!-- CONTEXT MENU -->
+  <div class="custom-context-menu" *ngIf="contextMenuVisible" [style.top.px]="contextMenuPos.y"
+    [style.left.px]="contextMenuPos.x">
+    <div class="menu-item danger" *ngIf="canBan && !contextUser?.banned" (click)="banUser(contextUser)">
+      🚫 Kitiltás (Ban)
+    </div>
+    <div class="menu-item" *ngIf="canBan && contextUser?.banned" (click)="unbanUser(contextUser)">
+      ✅ Feloldás (Unban)
+    </div>
+    <div class="menu-item" (click)="toggleUser(contextUser)">
+      ℹ️ Részletek
+    </div>
+    <div class="menu-sep"></div>
+    <div class="menu-item muted" (click)="closeContextMenu()">Mégse</div>
   </div>
 
 </div>

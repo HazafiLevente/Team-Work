@@ -28,6 +28,7 @@ export class AdminComponent implements OnInit, OnDestroy {
   showDailyStats = false;
   dailyStats: any[] = [];
   onlineList: any[] = [];
+  selectedUserId: number | null = null; // Track user to auto-expand
 
   activeSection: 'dashboard' | 'users' | 'products' | 'system' | 'logs' = 'dashboard';
 
@@ -112,5 +113,17 @@ export class AdminComponent implements OnInit, OnDestroy {
   getMaxUsers(): number {
     if (!this.dailyStats.length) return 1;
     return Math.max(1, ...this.dailyStats.map((d: any) => d.unique));
+  }
+
+  onUserDblClick(user: any) {
+    this.selectedUserId = user.id;
+    this.activeSection = 'users';
+  }
+
+  onUserExpanded(userId: number | null) {
+    // Clear the selection once it's handled by child
+    if (userId === this.selectedUserId) {
+      this.selectedUserId = null;
+    }
   }
 }

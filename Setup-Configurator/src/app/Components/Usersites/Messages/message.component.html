@@ -1,7 +1,7 @@
 <div class="chat-layout">
 
   <!-- SIDEBAR -->
-  <div class="chat-sidebar">
+  <div class="chat-sidebar" [class.hidden-mobile]="isMobile && mobileView !== 'list'">
 
     <div class="sidebar-header">
       <span>Beszélgetések</span>
@@ -11,7 +11,8 @@
       *ngFor="let c of conversations"
       class="chat-item"
       [class.active]="c.key === activeKey"
-      (click)="goToConversation(c.key)">
+      (click)="goToConversation(c.key)"
+      (contextmenu)="onRightClickConversation($event, c)">
 
       <div class="avatar">
         {{ (c.title || '?').charAt(0) }}
@@ -19,11 +20,11 @@
 
       <div class="chat-info">
         <div class="chat-title">{{ c.title }}</div>
-        <div class="chat-preview"></div>
+        <div class="chat-preview">{{ c.lastText || '—' }}</div>
       </div>
     </div>
 
-    <button class="new-chat-btn" (click)="toggleNewChat()">
+    <button class="new-chat-btn" type="button" (click)="toggleNewChat()">
       + Új beszélgetés
     </button>
 
@@ -39,14 +40,21 @@
   </div>
 
   <!-- CHAT AREA -->
-  <div class="chat-content">
+  <div class="chat-content" [class.hidden-mobile]="isMobile && mobileView !== 'chat'">
+
+    <!-- ✅ MOBILE TOPBAR -->
+    <div class="chat-topbar" *ngIf="isMobile">
+      <button class="back-btn" type="button" (click)="goBackToList()">←</button>
+      <div class="chat-top-title">{{ getActiveTitle() }}</div>
+    </div>
 
     <div class="messages-container">
 
       <div
         *ngFor="let m of messages"
         class="message"
-        [class.mine]="m.user_id === authUserId">
+        [class.mine]="m.user_id === authUserId"
+        (contextmenu)="onRightClickMessage($event, m)">
 
         <!-- EDIT MODE -->
         <ng-container *ngIf="editingMessageId === m.id; else normalMessage">
@@ -57,8 +65,8 @@
               (keyup.enter)="saveEdit()"
             />
             <div class="edit-actions">
-              <button (click)="saveEdit()">✔</button>
-              <button (click)="cancelEdit()">✖</button>
+              <button type="button" (click)="saveEdit()">✔</button>
+              <button type="button" (click)="cancelEdit()">✖</button>
             </div>
           </div>
 
@@ -79,6 +87,7 @@
               class="menu-wrapper">
 
               <button
+                type="button"
                 class="dots-btn"
                 (click)="toggleMenu(m.id, $event)">
                 ⋮
@@ -89,14 +98,11 @@
                 class="dropdown-menu"
                 (click)="$event.stopPropagation()">
 
-
-              <div class="dropdown-item"
-                     (click)="startEdit(m)">
+                <div class="dropdown-item" (click)="startEdit(m)">
                   ✏ Szerkesztés
                 </div>
 
-                <div class="dropdown-item danger"
-                     (click)="deleteMessage(m.id)">
+                <div class="dropdown-item danger" (click)="deleteMessage(m.id)">
                   🗑 Törlés
                 </div>
 
@@ -114,10 +120,11 @@
 
       </div>
 
-
       <div *ngIf="messages.length === 0" class="empty">
         Nincs üzenet
       </div>
+
+      <div #bottom></div>
 
     </div>
 
@@ -128,9 +135,34 @@
         placeholder="Írj üzenetet..."
         (keyup.enter)="sendMessage()"
       />
-      <button (click)="sendMessage()">Küldés</button>
+      <button type="button" (click)="sendMessage()">Küldés</button>
     </div>
 
+  </div>
+
+  <!-- ✅ Right-click context menu -->
+  <div
+    *ngIf="contextMenuOpen"
+    class="ctx-backdrop"
+    (click)="closeContextMenu()">
+  </div>
+
+  <div
+    *ngIf="contextMenuOpen"
+    class="ctx-menu"
+    [style.left.px]="contextMenuX"
+    [style.top.px]="contextMenuY"
+    (click)="$event.stopPropagation()">
+
+    <div class="ctx-item" (click)="ctxDetails()">Részletek</div>
+    <div class="ctx-sep"></div>
+
+    <div class="ctx-item" (click)="ctxMute()">Lenémítás</div>
+    <div class="ctx-item" (click)="ctxDisable()">Tiltás</div>
+    <div class="ctx-item" (click)="ctxBlock()">Blokkolás</div>
+
+    <div class="ctx-sep"></div>
+    <div class="ctx-item danger" (click)="ctxDelete()">Törlés</div>
   </div>
 
 </div>

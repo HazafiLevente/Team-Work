@@ -1,7 +1,7 @@
 <div class="setup-shell">
 
   <!-- BAL OLDAL: ez lesz a DRAG BOUNDARY -->
-  <div class="setup-workspace" #boundary>
+  <div class="setup-workspace" #boundary (contextmenu)="onBackgroundRightClick($event)">
 
     <app-dot-grid class="dot-bg" [dotSize]="5" [gap]="15" baseColor="#271E37" activeColor="#5227FF" [proximity]="100"
       [shockRadius]="250" [shockStrength]="5" [resistance]="750" [returnDuration]="1.5">
@@ -9,10 +9,6 @@
 
     <!-- ✅ felső gombsor -->
     <div class="toolbar">
-      @if (!viewingSetup && allowCreate) {
-      <button class="new-setup-btn" type="button" (click)="createNewSetup()">+ Új setup</button>
-      }
-
       @if (viewingSetup) {
       <button class="back-btn" type="button" (click)="backToSetups()">Vissza</button>
       }
@@ -31,14 +27,18 @@
         @for (conn of globalRoomConnections; track conn.id) {
         <path [attr.d]="getRoomLinePath(conn, lineRefreshTrigger)" class="connection-line" [class.cross]="true" />
         }
+        @if (pairingStage === 'PICK_TARGET_SETUP' || pairingStage === 'PICK_TARGET_ITEM') {
+        <path [attr.d]="getGhostLinePath()" class="connection-line ghost-line" />
+        }
       </svg>
 
       @if (!loading) {
       @for (setup of userSetups; track trackBySetup($index, setup)) {
       <app-setup-room [dataId]="'room:' + (setup.id || setup.setup_id)" [setup]="setup" [boundaryRef]="boundary"
-        [initialPosition]="{ x: setup.x || 0, y: setup.y || 0 }" (elementReady)="registerElement($event)"
-        (moved)="updateLines()" (dragEnded)="onRoomDragEnded(setup, $event)" (setupDblClick)="openSetupDetails($event)"
-        (setupRightClick)="openContextMenu($event)">
+        [dragDisabled]="pairingStage !== 'NONE'" [initialPosition]="{ x: setup.x || 0, y: setup.y || 0 }"
+        (elementReady)="registerElement($event)" (moved)="updateLines()" (dragEnded)="onRoomDragEnded(setup, $event)"
+        (setupClick)="onSetupClick($event)" (setupDblClick)="openSetupDetails($event)"
+        (setupRightClick)="onSetupRightClick($event)" (renamed)="onRoomRenamed($event)">
       </app-setup-room>
       }
       @empty {
@@ -70,15 +70,19 @@
       <!-- ✅ SVG réteg a vonalaknak -->
       <svg class="connections-svg">
         @for (conn of connections; track conn.id) {
+        @if (!viewingSetup || !conn.crossSetup) {
         <path [attr.d]="getLinePath(conn, lineRefreshTrigger)" class="connection-line"
           [class.cross]="conn.crossSetup" />
+        }
         }
       </svg>
 
       <!-- ✅ Eszközök -->
       @for (it of items; track trackByItem($index, it)) {
       <app-setup-room [dataId]="trackByItem($index, it)" [setup]="it" [boundaryRef]="boundary"
-        (elementReady)="registerElement($event)" (moved)="updateLines()" (setupDblClick)="onItemDblClick($event)">
+        [dragDisabled]="pairingStage !== 'NONE'" (elementReady)="registerElement($event)" (moved)="updateLines()"
+        (setupDblClick)="onItemDblClick(it)" (setupRightClick)="onItemRightClick($event)"
+        (renamed)="onRoomRenamed($event)">
       </app-setup-room>
       }
 
@@ -92,12 +96,13 @@
 
     </div>
 
-    <!-- ✅ Jobb klikk menü (csak LISTA nézetben) -->
-    @if (ctxOpen && !viewingSetup) {
+    <!-- ✅ Jobb klikk menü -->
+    @if (ctxOpen) {
     <div class="ctx-backdrop" (mousedown)="closeContextMenu()">
       <div class="ctx-menu" [style.left.px]="ctxX" [style.top.px]="ctxY" (mousedown)="$event.stopPropagation()">
 
-        <button class="ctx-item" type="button">Megnyitás</button>
+        @if (ctxSetup) {
+        <button class="ctx-item" type="button" (click)="openSetupDetails(ctxSetup)">Megnyitás</button>
         <button class="ctx-item" type="button" (click)="openToolsFromMenu()">Eszközök</button>
 
         @if (!isNetworkSetup(ctxSetup)) {
@@ -106,10 +111,36 @@
 
         <div class="ctx-sep"></div>
         <button class="ctx-item" type="button" (click)="openRenameFromMenu()">Átnevezés</button>
+        <button class="ctx-item" type="button" (click)="startConnectingFromMenu()">Összekötés...</button>
+        <button class="ctx-item" type="button" (click)="openConnectionsFromMenu()">Összekötések</button>
 
         <div class="ctx-sep"></div>
         <button class="ctx-item danger" type="button" (click)="deleteSetupFromMenu()">Törlés</button>
+        } @else if (ctxItem) {
+        <button class="ctx-item" type="button" (click)="openItemDetailsFromMenu()">Megnyitás</button>
+        <div class="ctx-sep"></div>
+        <button class="ctx-item" type="button" (click)="openRenameFromMenu()">Átnevezés</button>
+        <button class="ctx-item" type="button" (click)="startItemConnectingFromMenu()">Összekötés...</button>
+        <button class="ctx-item" type="button" (click)="openItemConnectionsFromMenu()">Összekötések</button>
 
+        <div class="ctx-sep"></div>
+        <button class="ctx-item danger" type="button" (click)="deleteItemFromMenu()">Törlés</button>
+        }
+
+      </div>
+    </div>
+    }
+
+    <!-- ✅ Background Context Menu (for creating new setups) -->
+    @if (bgCtxOpen && allowCreate) {
+    <div class="ctx-backdrop" (mousedown)="closeBackgroundContextMenu()">
+      <div class="ctx-menu bg-menu" [style.left.px]="bgCtxX" [style.top.px]="bgCtxY"
+        (mousedown)="$event.stopPropagation()">
+        @if (!viewingSetup) {
+        <button class="ctx-item" type="button" (click)="createNewSetupFromMenu()">+ Új setup</button>
+        } @else {
+        <button class="ctx-item" type="button" (click)="openToolsFromMenu()">+ Új eszköz</button>
+        }
       </div>
     </div>
     }
@@ -127,9 +158,50 @@
     </app-pc-drawer>
     }
 
-  </div>
+  </div> <!-- workspace -->
+</div> <!-- shell -->
 
+<!-- ✅ Összekötés választó modal (PICK_SOURCE vagy PICK_TARGET_ITEM) -->
+@if (pairingStage === 'PICK_SOURCE' || pairingStage === 'PICK_TARGET_ITEM') {
+<div class="overlay pairing-overlay" (click)="cancelConnecting()">
+  <div class="window pairing-window" (click)="$event.stopPropagation()">
+    <div class="titlebar">
+      <div class="caption">
+        <div class="big">{{ pairingStage === 'PICK_SOURCE' ? 'Forrás eszköz kiválasztása' : 'Cél eszköz kiválasztása' }}
+        </div>
+        <div class="small">{{ pairingStage === 'PICK_SOURCE' ? (connectSourceSetup?.setup_name || 'Setup') :
+          (connectTargetSetup?.setup_name || 'Setup') }}</div>
+      </div>
+      <button class="x" (click)="cancelConnecting()">×</button>
+    </div>
+    <div class="content pairing-list">
+      @for (item of pairingItemList; track trackByItem($index, item)) {
+      <button class="pairing-item"
+        (click)="pairingStage === 'PICK_SOURCE' ? selectSourceItem(item) : finalizeConnection(item)">
+        <span class="item-icon">{{ getDeviceType(item).toUpperCase() }}</span>
+        <span class="item-name">{{ item.display_name || item.name || 'Eszköz' }}</span>
+      </button>
+      } @empty {
+      <div class="no-data">Nincsenek eszközök ebben a setupban.</div>
+      }
+    </div>
+  </div>
 </div>
+}
+
+<!-- ✅ Floating Cancel gomb ha épp folyamatban van az összekötés -->
+@if (pairingStage !== 'NONE') {
+<div class="pairing-status">
+  <div class="status-box">
+    @if (pairingStage === 'PICK_TARGET_SETUP') {
+    <span>Válaszd ki a cél setup-ot!</span>
+    } @else if (pairingStage === 'PICK_TARGET_ITEM') {
+    <span>Válaszd ki a cél eszközt!</span>
+    }
+    <button class="cancel-btn" (click)="cancelConnecting()">Mégse</button>
+  </div>
+</div>
+}
 
 <!-- ✅ Eszközök modal -->
 @if (toolsOpen && toolsSetup) {
@@ -168,6 +240,44 @@
       </div>
     </div>
 
+  </div>
+</div>
+}
+
+@if (viewingConnsSetup) {
+<div class="overlay pairing-overlay" (click)="closeConnections()">
+  <div class="window pairing-window manager-window" (click)="$event.stopPropagation()">
+    <div class="titlebar">
+      <div class="caption">
+        <div class="big">Összekötések kezelése</div>
+        <div class="small">{{ viewingConnsSetup?.setup_name }}</div>
+      </div>
+      <button class="x" (click)="closeConnections()">×</button>
+    </div>
+    <div class="content pairing-list">
+      @if (loadingConns) {
+      <div class="loading-box">Betöltés...</div>
+      } @else if (setupConnectionsList.length === 0) {
+      <div class="empty-box">Nincsenek aktív összekötések ebben a szobában.</div>
+      } @else {
+      @for (conn of setupConnectionsList; track conn.id) {
+      <div class="conn-manage-item">
+        <div class="conn-info">
+          <div class="conn-endpoint">
+            <span class="setup-name">{{ conn.from_setup?.setup_name || '?' }}</span>
+            <span class="type-badge">{{ (conn.source?.category || '').replace('[Setup]', '') }}</span>
+          </div>
+          <span class="arrow">→</span>
+          <div class="conn-endpoint">
+            <span class="setup-name">{{ conn.to_setup?.setup_name || '?' }}</span>
+            <span class="type-badge">{{ (conn.target?.category || '').replace('[Setup]', '') }}</span>
+          </div>
+        </div>
+        <button class="delete-btn" (click)="deleteConnection(conn.id)">Törlés</button>
+      </div>
+      }
+      }
+    </div>
   </div>
 </div>
 }
