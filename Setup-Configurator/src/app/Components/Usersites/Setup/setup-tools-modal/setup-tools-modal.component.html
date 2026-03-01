@@ -14,6 +14,7 @@
       <button class="tab" [class.active]="tab==='items'" (click)="tab='items'">Eszközök</button>
       <button class="tab" [class.active]="tab==='pc'" (click)="tab='pc'">PC-k</button>
       <button class="tab" [class.active]="tab==='cars'" (click)="tab='cars'">Autók</button>
+      <button class="tab" [class.active]="tab==='ht'" (click)="tab='ht'">Házimozi</button>
     </div>
 
     <div class="content">
@@ -84,6 +85,124 @@
           }
         }
       }
+      <!-- ---------- HT TAB ---------- -->
+
+      @if (tab === 'ht') {
+
+        <div class="ht-section">
+
+          <!-- Layout választás -->
+          <div class="field">
+            <label>Layout</label>
+            <select [(ngModel)]="htLayout" (change)="generateHtInputs()">
+              <option value="">-- válassz layoutot --</option>
+              <option value="2.1">2.1</option>
+              <option value="5.1">5.1</option>
+              <option value="7.1">7.1</option>
+            </select>
+          </div>
+
+          @if (htLayout) {
+
+            <!-- Receiver -->
+            <div class="field">
+              <label>Receiver</label>
+
+            <div class="field">
+              <label>Build neve</label>
+              <input [(ngModel)]="htTitle" placeholder="pl. Nappali 5.1 mozi" />
+            </div>
+
+              <select [(ngModel)]="htForm.receiver">
+                <option value="">-- válassz receiver --</option>
+
+                @for (r of htCatalog.receivers; track r.id) {
+                  <option [ngValue]="r.id">
+                    {{ r.manufacturer }} {{ r.model }}
+                  </option>
+                }
+              </select>
+            </div>
+
+            <!-- Dinamikus hangszórók -->
+            @for (sp of htSpeakers; track sp.key) {
+
+              <div class="field">
+                <label>{{ sp.label }}</label>
+
+                <select [(ngModel)]="htForm[sp.key]">
+                  <option value="">-- válassz eszközt --</option>
+
+                  @if (sp.key.includes('sub')) {
+
+                    @for (s of htCatalog.subwoofers; track s.id) {
+                      <option [ngValue]="s.id" style="color:white;">
+                        {{ s.manufacturer }} {{ s.model }}
+                      </option>
+                    }
+
+                  } @else if (sp.key.includes('center')) {
+
+                    @for (s of htCatalog.centerSpeakers; track s.id) {
+                      <option [ngValue]="s.id" style="color:white;">
+                        {{ s.manufacturer }} {{ s.model }}
+                      </option>
+                    }
+
+                  } @else if (sp.key.includes('back')) {
+
+                    @for (s of htCatalog.backSpeakers; track s.id) {
+                      <option [ngValue]="s.id" style="color:white;">
+                        {{ s.manufacturer }} {{ s.model }}
+                      </option>
+                    }
+
+                  } @else if (sp.key.includes('surround')) {
+
+                    @for (s of htCatalog.sideSpeakers; track s.id) {
+                      <option [ngValue]="s.id" style="color:white;">
+                        {{ s.manufacturer }} {{ s.model }}
+                      </option>
+                    }
+
+                  } @else {
+
+                    @for (s of htCatalog.frontSpeakers; track s.id) {
+                      <option [ngValue]="s.id" style="color:white;">
+                        {{ s.manufacturer }} {{ s.model }}
+                      </option>
+                    }
+
+                  }
+
+                </select>
+              </div>
+            }
+
+            <button class="btn primary" (click)="saveHtConfig()">
+              Mentés
+            </button>
+            <button class="btn primary"
+                    [disabled]="htSaving"
+                    (click)="saveHtConfig()">
+
+              @if (htSaving) { Mentés... }
+              @else { Mentés }
+
+            </button>
+
+            @if (htSaveSuccess) {
+              <div class="success-msg">✔ Sikeresen elmentve</div>
+            }
+
+            @if (htSaveError) {
+              <div class="error">{{ htSaveError }}</div>
+            }
+
+          }
+
+        </div>
+      }
 
       <!-- ---------- CARS TAB ---------- -->
       @if (tab === 'cars') {
@@ -137,6 +256,7 @@
           }
         }
       }
+
 
     </div>
 

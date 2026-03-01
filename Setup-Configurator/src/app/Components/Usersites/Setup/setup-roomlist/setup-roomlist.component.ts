@@ -48,7 +48,8 @@ export class SetupRoomlistComponent implements OnInit {
   // -------------------------
   // RÉSZLETEK NÉZET (setup elemei)
   // -------------------------
-  viewingSetup: any = null;        // ha nem null -> details view
+  viewingSetup: any = null;
+  viewingConnsItem: any = null;// ha nem null -> details view
   loadingItems = false;
   items: SetupItem[] = [];
   itemsError = '';
@@ -152,7 +153,8 @@ export class SetupRoomlistComponent implements OnInit {
 
   // ✅ items track
   trackByItem(index: number, it: any): any {
-    return `${it?.category ?? 'x'}:${it?.id ?? index}`;
+    const cat = this.normalizeCategory(it?.category);
+    return `${cat || 'x'}:${it?.id ?? index}`;
   }
 
   isNetworkSetup(s: any): boolean {
@@ -317,14 +319,24 @@ export class SetupRoomlistComponent implements OnInit {
 
   registerElement(e: { id: string, el: HTMLElement }) {
     this.elementRegistry.set(e.id, e.el);
+    this.updateLines();
   }
   getLinePath(conn: any, _trigger?: any): string {
+    const sCat = this.normalizeCategory(conn?.source?.category);
+    const tCat = this.normalizeCategory(conn?.target?.category);
 
-    const sId = `${conn.source.category}:${conn.source.id}`;
-    const tId = `${conn.target.category}:${conn.target.id}`;
+    const sId = `${sCat}:${conn?.source?.id}`;
+    const tId = `${tCat}:${conn?.target?.id}`;
 
-    const sEl = this.elementRegistry.get(sId);
-    const tEl = this.elementRegistry.get(tId);
+    let sEl = this.elementRegistry.get(sId);
+    let tEl = this.elementRegistry.get(tId);
+
+    if (!sEl && tEl) {
+      // If the connection is reversed for the current view, flip endpoints
+      const tmp = sEl;
+      sEl = tEl;
+      tEl = tmp;
+    }
 
     if (!sEl) return '';
 
@@ -368,6 +380,14 @@ export class SetupRoomlistComponent implements OnInit {
     const y2 = tRect.top + tRect.height / 2 - rect.top;
 
     return `M ${x1} ${y1} L ${x2} ${y2}`;
+  }
+
+  // âś… Normalize category strings so connection endpoints match item IDs
+  private normalizeCategory(cat: any): string {
+    return String(cat || '')
+      .toLowerCase()
+      .replace('[setup]', '')
+      .trim();
   }
 
 
@@ -602,6 +622,7 @@ export class SetupRoomlistComponent implements OnInit {
 
   closeConnections(): void {
     this.viewingConnsSetup = null;
+    this.viewingConnsItem = null;   // 🔥 EZ IS
     this.setupConnectionsList = [];
   }
 
@@ -623,8 +644,28 @@ export class SetupRoomlistComponent implements OnInit {
   }
 
   openItemConnectionsFromMenu(): void {
-    if (!this.ctxItem || !this.viewingSetup) return;
-    this.openConnectionsFromMenu();
+    if (!this.ctxItem) return;
+
+    const deviceId = this.ctxItem.id;
+    const deviceType = this.getDeviceType(this.ctxItem);
+
+    this.closeContextMenu();
+    this.loadingConns = true;
+    this.viewingConnsSetup = this.viewingSetup;
+
+    this.http.get<any[]>(
+      `/api/setup/device-connections?deviceId=${deviceId}&deviceType=${deviceType}`,
+      { withCredentials: true }
+    ).subscribe({
+      next: (conns) => {
+        this.setupConnectionsList = conns || [];
+        this.loadingConns = false;
+      },
+      error: (err) => {
+        console.error('❌ Device connections error:', err);
+        this.loadingConns = false;
+      }
+    });
   }
 
   public getDeviceType(item: any): string {

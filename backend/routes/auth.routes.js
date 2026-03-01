@@ -10,7 +10,7 @@ router.post("/register/verify", ctrl.verifyRegisterCode);
 
 router.post("/password/request", ctrl.requestPasswordReset);
 router.post("/password/reset", ctrl.resetPassword);
-
+router.post("/google", ctrl.googleLogin);
 
 // 🔥 EZ KÖTELEZŐ
 router.get("/me", verifyUser, ctrl.me);

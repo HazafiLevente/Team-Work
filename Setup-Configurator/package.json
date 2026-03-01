@@ -12,6 +12,7 @@
     "start:proxy": "ng serve --port 80 --host 0.0.0.0 --proxy-config proxy.conf.json"
   },
   "dependencies": {
+    "@abacritt/angularx-social-login": "^2.5.1",
     "@angular/cdk": "^20.2.14",
     "@angular/common": "20.3.16",
     "@angular/compiler": "20.3.16",

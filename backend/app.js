@@ -44,9 +44,9 @@ app.use("/images", express.static(IMAGES_DIR));
 API ROUTES
 ---------------------------------- */
 // Alap kategóriák
-app.use("/api/hometheaters", require("./routes/hometheaters.routes"));
 app.use("/api/computers", require("./routes/computers.routes"));
 app.use("/api/cars", require("./routes/cars.routes"));
+app.use("/api/home-theater", require("./routes/homeTheaters.routes"));
 
 // ÚJ: Hangszerek és Kiegészítők útvonala
 app.use("/api/instruments", require("./routes/instruments.routes"));
@@ -72,7 +72,6 @@ app.use("/api/admin/products", require("./routes/admin.products.routes"));
  ---------------------------------- */
 app.use("/images", express.static(path.join(__dirname, "..", "datas", "images")));
 app.use("/api/meta", require("./routes/meta.routes"));
-
 
 /* ----------------------------------
 META

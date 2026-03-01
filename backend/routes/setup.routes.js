@@ -13,6 +13,8 @@ router.get("/car-setup/:carSetupId/details", verifyUser, ctrl.carSetupDetails);
 router.get("/", verifyUser, ctrl.list);
 router.get("/all-connections", verifyUser, ctrl.allConnections);
 
+router.get("/device-connections", verifyUser, ctrl.deviceConnections);
+
 // SETUP gyerekek
 router.get("/:id/children", verifyUser, ctrl.children);
 router.get("/:id/connections", verifyUser, ctrl.connections);

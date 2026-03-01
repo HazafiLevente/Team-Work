@@ -4,6 +4,8 @@ const { supabase } = require("../services/supabase");
 const { resolveRole } = require("../services/control");
 const { sendPasswordResetCode } = require("../services/mailer");
 const { sendRegisterCode } = require("../services/mailer");
+const { OAuth2Client } = require("google-auth-library");
+const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 const crypto = require("crypto"); // vagy maradhat Math.random is
 
 const JWT_SECRET = process.env.JWT_SECRET;
@@ -21,7 +23,92 @@ function setAuthCookie(res, token, rememberMe = false) {
 }
 
 
+exports.googleLogin = async (req, res) => {
+    try {
+        const { idToken } = req.body;
+        if (!idToken) return res.status(400).json({ error: "Missing token" });
 
+        const ticket = await googleClient.verifyIdToken({
+            idToken,
+            audience: process.env.GOOGLE_CLIENT_ID
+        });
+
+        const payload = ticket.getPayload();
+
+        const googleId = payload.sub;
+        const email = payload.email;
+        const name = payload.name;
+
+        let user = null;
+
+        // 1️⃣ Google ID alapján keresés
+        const { data: byGoogle } = await supabase
+            .from("user[Auth]")
+            .select("*")
+            .eq("google_id", googleId)
+            .single();
+
+        if (byGoogle) {
+            user = byGoogle;
+        }
+
+        // 2️⃣ Ha nincs google_id, email alapján keresés
+        if (!user) {
+            const { data: byEmail } = await supabase
+                .from("user[Auth]")
+                .select("*")
+                .eq("Email", email)
+                .single();
+
+            if (byEmail) {
+                // 🔗 linking
+                await supabase
+                    .from("user[Auth]")
+                    .update({ google_id: googleId })
+                    .eq("ID", byEmail.ID);
+
+                user = byEmail;
+            }
+        }
+
+        // 3️⃣ Ha semmi nincs → új user
+        if (!user) {
+            const { data: newUser } = await supabase
+                .from("user[Auth]")
+                .insert({
+                    Name: name,
+                    UserName: email.split("@")[0],
+                    Email: email,
+                    google_id: googleId,
+                    password: null
+                })
+                .select()
+                .single();
+
+            user = newUser;
+
+            await supabase
+                .from("user_more[Auth]")
+                .insert({ user_id: user.ID });
+        }
+
+        // 🎟 JWT generálás
+        const token = jwt.sign({
+            id: user.ID,
+            username: user.UserName,
+            email: user.Email,
+            role: resolveRole(user.ID, user.Role)
+        }, JWT_SECRET, { expiresIn: "12h" });
+
+        setAuthCookie(res, token);
+
+        res.json({ success: true });
+
+    } catch (err) {
+        console.error("Google login error:", err);
+        res.status(401).json({ error: "Google authentication failed" });
+    }
+};
 
 
 

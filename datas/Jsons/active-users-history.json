@@ -24,5 +24,19 @@
         "username": "Horbikám"
       }
     ]
+  },
+  "2026-03-01": {
+    "unique": 2,
+    "total_requests": 80,
+    "users": [
+      {
+        "id": 1,
+        "username": "HazafiLev"
+      },
+      {
+        "id": 2,
+        "username": "Typy"
+      }
+    ]
   }
 }

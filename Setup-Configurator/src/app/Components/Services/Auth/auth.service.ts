@@ -109,4 +109,14 @@ export class AuthService {
     return this.http.post('/api/auth/password/reset', { email, code, newPassword });
   }
 
+
+  googleLogin(idToken: string) {
+    return this.http.post(
+      '/api/auth/google',
+      { idToken },
+      { withCredentials: true }
+    ).pipe(
+      switchMap(() => this.check())
+    );
+  }
 }

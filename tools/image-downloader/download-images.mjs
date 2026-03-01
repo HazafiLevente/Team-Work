@@ -1,100 +1,157 @@
-import "dotenv/config";
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
+import crypto from "crypto";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const SERP_API_KEY = process.env.SERP_API_KEY;
-const API_BASE = process.env.API_BASE || "http://localhost:3000";
-
-if (!SERP_API_KEY) {
-    console.error("❌ SERP_API_KEY nincs beállítva");
-    process.exit(1);
-}
-
 const ROOT = path.resolve(__dirname, "..", "..");
+const API_BASE = "http://localhost:3000";
+
 const OUT_ROOT = path.join(ROOT, "datas", "images");
 
-const MAX_IMAGES = 6;
+const MAX_IMAGES = Number(process.env.MAX_IMAGES || 6);
+const START = Number(process.env.START || 0);
+const LIMIT = Number(process.env.LIMIT || 0);
 
-function ensureDir(p) {
-    fs.mkdirSync(p, { recursive: true });
+const DELAY_MS = 800;
+const MIN_BYTES = 20000;
+
+function sleep(ms) {
+  return new Promise(r => setTimeout(r, ms));
 }
 
-async function fetchJson(url) {
-    const r = await fetch(url);
-    if (!r.ok) throw new Error(`HTTP ${r.status}`);
-    return r.json();
+function ensureDir(p) {
+  fs.mkdirSync(p, { recursive: true });
+}
+
+function normalize(str) {
+  return String(str || "")
+      .replace(/\s+/g, " ")
+      .trim();
 }
 
 function buildQuery(p) {
-    return `${p.manufacturer || ""} ${p.model || ""} ${p.table_name || ""} product`.trim();
+  return `${normalize(p.manufacturer)} ${normalize(p.model)} product photo`;
 }
 
-async function serpImageSearch(query) {
-    const u = new URL("https://serpapi.com/search.json");
-    u.searchParams.set("engine", "google_images");
-    u.searchParams.set("q", query);
-    u.searchParams.set("api_key", SERP_API_KEY);
-    u.searchParams.set("num", String(MAX_IMAGES));
-
-    const r = await fetch(u);
-    if (!r.ok) throw new Error("SerpAPI error");
-    const data = await r.json();
-    return data.images_results || [];
+function sha1(buf) {
+  return crypto.createHash("sha1").update(buf).digest("hex");
 }
 
-async function downloadImage(url, outFile) {
-    const r = await fetch(url, { redirect: "follow" });
-    if (!r.ok) throw new Error("Image download failed");
-    const buf = Buffer.from(await r.arrayBuffer());
-    fs.writeFileSync(outFile, buf);
+async function fetchProducts() {
+  const r = await fetch(`${API_BASE}/api/products`);
+  if (!r.ok) throw new Error("Products API error");
+  const data = await r.json();
+  return data.items || data;
+}
+
+async function searchImages(query) {
+  const url = `https://www.bing.com/images/search?q=${encodeURIComponent(query)}&form=HDRSC2`;
+
+  const r = await fetch(url, {
+    headers: {
+      "User-Agent": "Mozilla/5.0"
+    }
+  });
+
+  if (!r.ok) throw new Error(`Bing HTML error ${r.status}`);
+
+  const html = await r.text();
+
+  // Bing HTML-ben murl mező tartalmazza a valódi képet
+  const regex = /"murl":"(.*?)"/g;
+  const results = [];
+
+  let match;
+  while ((match = regex.exec(html)) !== null) {
+    const imgUrl = match[1].replace(/\\u0026/g, "&");
+    if (!results.includes(imgUrl)) results.push(imgUrl);
+  }
+
+  return results;
+}
+
+async function downloadImage(url) {
+  const r = await fetch(url, {
+    headers: {
+      "User-Agent": "Mozilla/5.0"
+    }
+  });
+
+  if (!r.ok) throw new Error(`Image HTTP ${r.status}`);
+
+  const buf = Buffer.from(await r.arrayBuffer());
+  if (buf.length < MIN_BYTES) throw new Error("Too small");
+
+  return buf;
 }
 
 async function run() {
-    console.log("📦 Productok lekérése...");
-    const res = await fetchJson(`${API_BASE}/api/products`);
-    const products = res.items || res;
+  console.log("🔵 Bing HTML scraper indul...");
+  console.log("ROOT:", ROOT);
 
-    let ok = 0, fail = 0, skip = 0;
+  const productsAll = await fetchProducts();
+  const products = LIMIT > 0
+      ? productsAll.slice(START, START + LIMIT)
+      : productsAll.slice(START);
 
-    for (const p of products) {
-        if (!p.id) continue;
+  console.log(`Batch: ${products.length} / ${productsAll.length}`);
 
-        const table = p.table_name || p.table || "unknown";
-        const dir = path.join(OUT_ROOT, table, String(p.id));
-        ensureDir(dir);
+  let ok = 0, fail = 0, skip = 0;
 
-        const existing = fs.readdirSync(dir).length;
-        if (existing >= MAX_IMAGES) {
-            skip++;
-            continue;
-        }
+  for (const p of products) {
+    if (!p?.id) continue;
 
-        try {
-            const results = await serpImageSearch(buildQuery(p));
-            let index = 1;
+    const table = p.table_name || p.table || "unknown";
+    const dir = path.join(OUT_ROOT, table, String(p.id));
+    ensureDir(dir);
 
-            for (const img of results.slice(0, MAX_IMAGES)) {
-                const outFile = path.join(dir, `${index}.jpg`);
-                if (!fs.existsSync(outFile)) {
-                    await downloadImage(img.original, outFile);
-                }
-                index++;
-            }
+    const existing = fs.existsSync(dir)
+        ? fs.readdirSync(dir).length
+        : 0;
 
-            ok++;
-            console.log(`✅ ${table}/${p.id} (${index - 1} kép)`);
-
-        } catch (e) {
-            fail++;
-            console.log(`❌ ${table}/${p.id}`, e.message);
-        }
+    if (existing >= MAX_IMAGES) {
+      skip++;
+      continue;
     }
 
-    console.log("\n🏁 KÉSZ:", { ok, skip, fail });
+    const query = buildQuery(p);
+
+    try {
+      await sleep(DELAY_MS);
+
+      const results = await searchImages(query);
+
+      let saved = existing;
+      const hashes = new Set();
+
+      for (const imgUrl of results) {
+        if (saved >= MAX_IMAGES) break;
+
+        try {
+          const buf = await downloadImage(imgUrl);
+          const hash = sha1(buf);
+          if (hashes.has(hash)) continue;
+          hashes.add(hash);
+
+          const file = path.join(dir, `${saved + 1}.jpg`);
+          fs.writeFileSync(file, buf);
+          saved++;
+        } catch {}
+      }
+
+      console.log(`✅ ${table}/${p.id} (${saved} kép)`);
+      ok++;
+
+    } catch (e) {
+      console.log(`❌ ${table}/${p.id} - ${e.message}`);
+      fail++;
+    }
+  }
+
+  console.log("KÉSZ:", { ok, skip, fail });
 }
 
 run();

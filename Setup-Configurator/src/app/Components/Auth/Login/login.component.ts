@@ -1,11 +1,14 @@
-import { Component } from "@angular/core";
+import { Component, AfterViewInit } from "@angular/core";
 import { Router, RouterLink } from "@angular/router";
 import { FormsModule } from '@angular/forms';
-import { AuthService } from "../../Services/Auth/auth.service";
-import { take } from "rxjs/operators";
 import { CommonModule } from '@angular/common';
+import { take } from "rxjs/operators";
+
+import { AuthService } from "../../Services/Auth/auth.service";
 import { EmailVerifyComponent } from "./email-verify/email-verify.component";
 import { NewPasswordComponent } from "./new-password/new-password.component";
+
+declare const google: any;
 
 @Component({
   selector: 'app-login',
@@ -20,7 +23,7 @@ import { NewPasswordComponent } from "./new-password/new-password.component";
   templateUrl: './login.component.html',
   styleUrl: './login.component.css'
 })
-export class LoginComponent {
+export class LoginComponent implements AfterViewInit {
 
   email = "";
   password = "";
@@ -28,11 +31,39 @@ export class LoginComponent {
   errorMessage = "";
 
   mode: 'login' | 'emailVerify' | 'newPassword' = 'login';
+  resetEmail = "";
+  showPassword = false;
 
   constructor(
     private auth: AuthService,
     private router: Router
   ) {}
+
+  ngAfterViewInit(): void {
+    google.accounts.id.initialize({
+      client_id: '532912380153-m52bf55o6mh97thupt086j8ift2r4qro.apps.googleusercontent.com',
+      callback: (response: any) => this.handleGoogle(response)
+    });
+
+    google.accounts.id.renderButton(
+      document.getElementById("googleBtn"),
+      { theme: "outline", size: "large" }
+    );
+  }
+
+  handleGoogle(response: any) {
+    if (!response?.credential) {
+      this.errorMessage = "Google token hiba";
+      return;
+    }
+
+    this.auth.googleLogin(response.credential)
+      .pipe(take(1))
+      .subscribe({
+        next: () => this.router.navigateByUrl('/home'),
+        error: () => this.errorMessage = "Google login hiba"
+      });
+  }
 
   submit() {
     this.errorMessage = "";
@@ -51,24 +82,22 @@ export class LoginComponent {
           }
           this.router.navigateByUrl('/home');
         },
-        error: (err) => {
-          if (err.status === 401) {
-            this.errorMessage = "Hibás email vagy jelszó!";
-          } else {
-            this.errorMessage = "Szerver hiba. Próbáld újra.";
-          }
+        error: () => {
+          this.errorMessage = "Szerver hiba. Próbáld újra.";
         }
       });
+  }
+
+  togglePassword() {
+    this.showPassword = !this.showPassword;
   }
 
   showForgotPassword() {
     this.mode = 'emailVerify';
   }
 
-  resetEmail = "";
-
   handleCodeSent(email: string) {
-    this.resetEmail = email;     // ✅ itt eltesszük
+    this.resetEmail = email;
     this.mode = 'newPassword';
   }
 
@@ -77,11 +106,7 @@ export class LoginComponent {
     this.errorMessage = '';
     this.resetEmail = '';
   }
-  showPassword = false;
 
-  togglePassword() {
-    this.showPassword = !this.showPassword;
-  }
   afterResetFromLogin() {
     this.mode = 'login';
     this.router.navigateByUrl('/home');

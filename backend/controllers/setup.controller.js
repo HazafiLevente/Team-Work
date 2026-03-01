@@ -905,10 +905,15 @@ const typeToTableMap = {
 
 exports.connections = async (req, res) => {
     const setupId = req.params.id;
+    const userId = req.user.id;
+
     if (!setupId) return res.json([]);
 
     try {
-        // ✅ Bárki is legyen a forrás vagy a cél, ha érinti ezt a setup-ot, hozza le
+        // 🔥 HIÁNYZÓ OWNERSHIP CHECK
+        const ok = await assertSetupOwnedByUser(setupId, userId);
+        if (!ok) return res.json([]);
+
         const { data: rawConns, error: connErr } = await supabase
             .from("connections[Connects]")
             .select(`
@@ -921,26 +926,15 @@ exports.connections = async (req, res) => {
         if (connErr) throw connErr;
         if (!rawConns || rawConns.length === 0) return res.json([]);
 
-        // Lekérjük a setup gyerekeit, hogy az output formátum konzisztens legyen
-        const children = await exports.childrenInternal(setupId);
-
         const allConnections = rawConns.map(row => {
             const sourceTable = typeToTableMap[row.from_device_type] || `${row.from_device_type}[Setup]`;
             const targetTable = typeToTableMap[row.to_device_type] || `${row.to_device_type}[Setup]`;
-
-            // crossSetup: ha a két setup ID eltér
             const crossSetup = String(row.from_setup_id) !== String(row.to_setup_id);
 
             return {
                 id: row.id,
-                source: {
-                    category: sourceTable,
-                    id: row.from_device_id
-                },
-                target: {
-                    category: targetTable,
-                    id: row.to_device_id
-                },
+                source: { category: sourceTable, id: row.from_device_id },
+                target: { category: targetTable, id: row.to_device_id },
                 crossSetup,
                 from_setup_id: row.from_setup_id,
                 to_setup_id: row.to_setup_id,
@@ -1153,4 +1147,37 @@ exports.childrenInternal = async (setupId) => {
         }
     });
     return allItems;
+};
+
+
+exports.deviceConnections = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const { deviceId, deviceType } = req.query;
+
+        if (!deviceId || !deviceType) {
+            return res.json([]);
+        }
+
+        // 🔥 Lekérjük az összes olyan kapcsolatot,
+        // ahol ez az eszköz source VAGY target
+        const { data, error } = await supabase
+            .from("connections[Connects]")
+            .select(`
+                *,
+                from_setup:from_setup_id(setup_name),
+                to_setup:to_setup_id(setup_name)
+            `)
+            .or(
+                `and(from_device_type.eq.${deviceType},from_device_id.eq.${deviceId}),` +
+                `and(to_device_type.eq.${deviceType},to_device_id.eq.${deviceId})`
+            );
+
+        if (error) throw error;
+
+        return res.json(data || []);
+    } catch (err) {
+        console.error("❌ deviceConnections fatal:", err);
+        return res.json([]);
+    }
 };

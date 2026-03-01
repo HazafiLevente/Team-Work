@@ -249,8 +249,17 @@
   <div class="window pairing-window manager-window" (click)="$event.stopPropagation()">
     <div class="titlebar">
       <div class="caption">
-        <div class="big">Összekötések kezelése</div>
-        <div class="small">{{ viewingConnsSetup?.setup_name }}</div>
+        <div class="big">
+          Összekötések kezelése
+        </div>
+
+        <div class="small">
+          @if (viewingConnsItem) {
+            Eszköz: {{ viewingConnsItem.display_name }}
+          } @else {
+            Setup: {{ viewingConnsSetup?.setup_name }}
+          }
+        </div>
       </div>
       <button class="x" (click)="closeConnections()">×</button>
     </div>
