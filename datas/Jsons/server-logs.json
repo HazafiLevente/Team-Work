@@ -1,941 +1,5 @@
 [
   {
-    "id": "1772307109157b4lw",
-    "timestamp": "2026-02-28T19:31:49.157Z",
-    "level": "warn",
-    "message": "⚠️ allowlist is EMPTY -> table check skipped"
-  },
-  {
-    "id": "17723074794469qlu",
-    "timestamp": "2026-02-28T19:37:59.446Z",
-    "level": "log",
-    "message": "🖼 Serving images from: E:\\Projekt\\datas\\images"
-  },
-  {
-    "id": "1772307479449i2p9",
-    "timestamp": "2026-02-28T19:37:59.449Z",
-    "level": "log",
-    "message": "[dotenv@17.2.3] injecting env (15) from ..\\.env \u001b[2m-- tip: 🔑 add access controls to secrets: https://dotenvx.com/ops\u001b[0m"
-  },
-  {
-    "id": "1772307479496l95f",
-    "timestamp": "2026-02-28T19:37:59.496Z",
-    "level": "log",
-    "message": "[dotenv@17.2.3] injecting env (0) from .env \u001b[2m-- tip: ⚙️  suppress all logs with { quiet: true }\u001b[0m"
-  },
-  {
-    "id": "17723074795334gsi",
-    "timestamp": "2026-02-28T19:37:59.533Z",
-    "level": "log",
-    "message": "✅ products.controller keys: [\"list\",\"brands\"]"
-  },
-  {
-    "id": "17723074795349wvn",
-    "timestamp": "2026-02-28T19:37:59.534Z",
-    "level": "log",
-    "message": "✅ typeof ctrl.list: function"
-  },
-  {
-    "id": "1772307479534gsdt",
-    "timestamp": "2026-02-28T19:37:59.534Z",
-    "level": "log",
-    "message": "✅ typeof ctrl.brands: function"
-  },
-  {
-    "id": "177230747953568a0",
-    "timestamp": "2026-02-28T19:37:59.535Z",
-    "level": "log",
-    "message": "TABLES_FILE: E:\\Projekt\\backend\\datas\\Jsons\\tables.runtime.json"
-  },
-  {
-    "id": "1772307479535ril8",
-    "timestamp": "2026-02-28T19:37:59.535Z",
-    "level": "log",
-    "message": "ITEMS CTRL = {}"
-  },
-  {
-    "id": "1772307479536ly3v",
-    "timestamp": "2026-02-28T19:37:59.536Z",
-    "level": "log",
-    "message": "ITEMS CTRL LIST = "
-  },
-  {
-    "id": "1772307479555nxs8",
-    "timestamp": "2026-02-28T19:37:59.555Z",
-    "level": "log",
-    "message": "ENV CHECK: {\"SUPABASE_URL\":\"https://ecjufuhmmehhzusicghh.supabase.co\",\"HAS_KEY\":true,\"JWT\":true,\"DEEPSEEK\":false}"
-  },
-  {
-    "id": "17723074795574ij9",
-    "timestamp": "2026-02-28T19:37:59.557Z",
-    "level": "log",
-    "message": "🚀 Server running on http://localhost:3000"
-  },
-  {
-    "id": "17723074930103s3w",
-    "timestamp": "2026-02-28T19:38:13.010Z",
-    "level": "log",
-    "message": "🍪 COOKIES: {\"Webstorm-4a9b1ed1\":\"2cd47b33-d91f-4180-94e5-e3cd66fd6f7d\",\"Webstorm-4a9b1ed2\":\"4825e2dd-8848-40aa-82fa-6b6096e480a5\",\"Webstorm-4a9b1ed3\":\"4b21ec80-24ec-43df-ad72-310d7e663763\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJIYXphZmlMZXYiLCJlbWFpbCI6ImhhemFmaWxldkBnbWFpbC5jb20iLCJyb2xlIjoib3duZXIiLCJpYXQiOjE3NzE4NjQ2OTYsImV4cCI6MTc3NDAyNDY5Nn0.z9YDFi-lGAygrhWNw89CwelIqJCxTt9QOUUyClxwPNQ\"}"
-  },
-  {
-    "id": "17723074930417208",
-    "timestamp": "2026-02-28T19:38:13.041Z",
-    "level": "log",
-    "message": "🍪 COOKIES: {\"Webstorm-4a9b1ed1\":\"2cd47b33-d91f-4180-94e5-e3cd66fd6f7d\",\"Webstorm-4a9b1ed2\":\"4825e2dd-8848-40aa-82fa-6b6096e480a5\",\"Webstorm-4a9b1ed3\":\"4b21ec80-24ec-43df-ad72-310d7e663763\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJIYXphZmlMZXYiLCJlbWFpbCI6ImhhemFmaWxldkBnbWFpbC5jb20iLCJyb2xlIjoib3duZXIiLCJpYXQiOjE3NzE4NjQ2OTYsImV4cCI6MTc3NDAyNDY5Nn0.z9YDFi-lGAygrhWNw89CwelIqJCxTt9QOUUyClxwPNQ\"}"
-  },
-  {
-    "id": "17723074930954gox",
-    "timestamp": "2026-02-28T19:38:13.095Z",
-    "level": "log",
-    "message": "🍪 COOKIES: {\"Webstorm-4a9b1ed1\":\"2cd47b33-d91f-4180-94e5-e3cd66fd6f7d\",\"Webstorm-4a9b1ed2\":\"4825e2dd-8848-40aa-82fa-6b6096e480a5\",\"Webstorm-4a9b1ed3\":\"4b21ec80-24ec-43df-ad72-310d7e663763\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJIYXphZmlMZXYiLCJlbWFpbCI6ImhhemFmaWxldkBnbWFpbC5jb20iLCJyb2xlIjoib3duZXIiLCJpYXQiOjE3NzE4NjQ2OTYsImV4cCI6MTc3NDAyNDY5Nn0.z9YDFi-lGAygrhWNw89CwelIqJCxTt9QOUUyClxwPNQ\"}"
-  },
-  {
-    "id": "1772307493098uhqk",
-    "timestamp": "2026-02-28T19:38:13.098Z",
-    "level": "log",
-    "message": "🔥 HIT GET /api/ranks/me"
-  },
-  {
-    "id": "17723074930988cxj",
-    "timestamp": "2026-02-28T19:38:13.098Z",
-    "level": "log",
-    "message": "🍪 COOKIES: {\"Webstorm-4a9b1ed1\":\"2cd47b33-d91f-4180-94e5-e3cd66fd6f7d\",\"Webstorm-4a9b1ed2\":\"4825e2dd-8848-40aa-82fa-6b6096e480a5\",\"Webstorm-4a9b1ed3\":\"4b21ec80-24ec-43df-ad72-310d7e663763\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJIYXphZmlMZXYiLCJlbWFpbCI6ImhhemFmaWxldkBnbWFpbC5jb20iLCJyb2xlIjoib3duZXIiLCJpYXQiOjE3NzE4NjQ2OTYsImV4cCI6MTc3NDAyNDY5Nn0.z9YDFi-lGAygrhWNw89CwelIqJCxTt9QOUUyClxwPNQ\"}"
-  },
-  {
-    "id": "17723074933436rlf",
-    "timestamp": "2026-02-28T19:38:13.343Z",
-    "level": "log",
-    "message": "🍪 COOKIES: {\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NSwidXNlcm5hbWUiOiJIb3JiaWvDoW0iLCJlbWFpbCI6Im5vcmJlcnRrb3ZhY3MxMDFAZ21haWwuY29tIiwicm9sZSI6Im93bmVyIiwiaWF0IjoxNzcyMzAxNTYwLCJleHAiOjE3NzQ0NjE1NjB9.M4Y_muHJXNcWCpiV3JadHw-tBV11JFCoRX3HSSR1sAc\"}"
-  },
-  {
-    "id": "17723074933517oqh",
-    "timestamp": "2026-02-28T19:38:13.351Z",
-    "level": "log",
-    "message": "🍪 COOKIES: {\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NSwidXNlcm5hbWUiOiJIb3JiaWvDoW0iLCJlbWFpbCI6Im5vcmJlcnRrb3ZhY3MxMDFAZ21haWwuY29tIiwicm9sZSI6Im93bmVyIiwiaWF0IjoxNzcyMzAxNTYwLCJleHAiOjE3NzQ0NjE1NjB9.M4Y_muHJXNcWCpiV3JadHw-tBV11JFCoRX3HSSR1sAc\"}"
-  },
-  {
-    "id": "1772307493571o6eg",
-    "timestamp": "2026-02-28T19:38:13.571Z",
-    "level": "log",
-    "message": "🔥 HIT GET /api/ranks/me"
-  },
-  {
-    "id": "1772307493571hr6e",
-    "timestamp": "2026-02-28T19:38:13.571Z",
-    "level": "log",
-    "message": "🍪 COOKIES: {\"Webstorm-4a9b1ed1\":\"2cd47b33-d91f-4180-94e5-e3cd66fd6f7d\",\"Webstorm-4a9b1ed2\":\"4825e2dd-8848-40aa-82fa-6b6096e480a5\",\"Webstorm-4a9b1ed3\":\"4b21ec80-24ec-43df-ad72-310d7e663763\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJIYXphZmlMZXYiLCJlbWFpbCI6ImhhemFmaWxldkBnbWFpbC5jb20iLCJyb2xlIjoib3duZXIiLCJpYXQiOjE3NzE4NjQ2OTYsImV4cCI6MTc3NDAyNDY5Nn0.z9YDFi-lGAygrhWNw89CwelIqJCxTt9QOUUyClxwPNQ\"}"
-  },
-  {
-    "id": "1772307493835j3v6",
-    "timestamp": "2026-02-28T19:38:13.835Z",
-    "level": "log",
-    "message": "🔥 HIT GET /api/ranks/me"
-  },
-  {
-    "id": "1772307493835mdp7",
-    "timestamp": "2026-02-28T19:38:13.835Z",
-    "level": "log",
-    "message": "🍪 COOKIES: {\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NSwidXNlcm5hbWUiOiJIb3JiaWvDoW0iLCJlbWFpbCI6Im5vcmJlcnRrb3ZhY3MxMDFAZ21haWwuY29tIiwicm9sZSI6Im93bmVyIiwiaWF0IjoxNzcyMzAxNTYwLCJleHAiOjE3NzQ0NjE1NjB9.M4Y_muHJXNcWCpiV3JadHw-tBV11JFCoRX3HSSR1sAc\"}"
-  },
-  {
-    "id": "177236981041974li",
-    "timestamp": "2026-03-01T12:56:50.419Z",
-    "level": "log",
-    "message": "🖼 Serving images from: E:\\Projekt\\datas\\images"
-  },
-  {
-    "id": "1772369810452yx77",
-    "timestamp": "2026-03-01T12:56:50.452Z",
-    "level": "log",
-    "message": "[dotenv@17.2.3] injecting env (15) from ..\\.env \u001b[2m-- tip: 🔐 prevent building .env in docker: https://dotenvx.com/prebuild\u001b[0m"
-  },
-  {
-    "id": "177236981055859fu",
-    "timestamp": "2026-03-01T12:56:50.558Z",
-    "level": "log",
-    "message": "[dotenv@17.2.3] injecting env (0) from .env \u001b[2m-- tip: 🛠️  run anywhere with `dotenvx run -- yourcommand`\u001b[0m"
-  },
-  {
-    "id": "1772369811722v08y",
-    "timestamp": "2026-03-01T12:56:51.722Z",
-    "level": "log",
-    "message": "✅ products.controller keys: [\"list\",\"brands\"]"
-  },
-  {
-    "id": "1772369811723ahvy",
-    "timestamp": "2026-03-01T12:56:51.723Z",
-    "level": "log",
-    "message": "✅ typeof ctrl.list: function"
-  },
-  {
-    "id": "177236981172378yc",
-    "timestamp": "2026-03-01T12:56:51.723Z",
-    "level": "log",
-    "message": "✅ typeof ctrl.brands: function"
-  },
-  {
-    "id": "1772369811780sypm",
-    "timestamp": "2026-03-01T12:56:51.780Z",
-    "level": "log",
-    "message": "TABLES_FILE: E:\\Projekt\\backend\\datas\\Jsons\\tables.runtime.json"
-  },
-  {
-    "id": "1772369811781go13",
-    "timestamp": "2026-03-01T12:56:51.781Z",
-    "level": "log",
-    "message": "ITEMS CTRL = {}"
-  },
-  {
-    "id": "1772369811781u8re",
-    "timestamp": "2026-03-01T12:56:51.781Z",
-    "level": "log",
-    "message": "ITEMS CTRL LIST = "
-  },
-  {
-    "id": "1772369812457g6os",
-    "timestamp": "2026-03-01T12:56:52.457Z",
-    "level": "log",
-    "message": "ENV CHECK: {\"SUPABASE_URL\":\"https://ecjufuhmmehhzusicghh.supabase.co\",\"HAS_KEY\":true,\"JWT\":true,\"DEEPSEEK\":false}"
-  },
-  {
-    "id": "1772369812458y616",
-    "timestamp": "2026-03-01T12:56:52.458Z",
-    "level": "log",
-    "message": "🚀 Server running on http://localhost:3000"
-  },
-  {
-    "id": "1772369853550dc6g",
-    "timestamp": "2026-03-01T12:57:33.550Z",
-    "level": "log",
-    "message": "🍪 COOKIES: {\"Webstorm-4a9b1ed1\":\"2cd47b33-d91f-4180-94e5-e3cd66fd6f7d\",\"Webstorm-4a9b1ed2\":\"4825e2dd-8848-40aa-82fa-6b6096e480a5\",\"Webstorm-4a9b1ed3\":\"4b21ec80-24ec-43df-ad72-310d7e663763\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJIYXphZmlMZXYiLCJlbWFpbCI6ImhhemFmaWxldkBnbWFpbC5jb20iLCJyb2xlIjoib3duZXIiLCJpYXQiOjE3NzE4NjQ2OTYsImV4cCI6MTc3NDAyNDY5Nn0.z9YDFi-lGAygrhWNw89CwelIqJCxTt9QOUUyClxwPNQ\"}"
-  },
-  {
-    "id": "17723698535738hi4",
-    "timestamp": "2026-03-01T12:57:33.573Z",
-    "level": "log",
-    "message": "🍪 COOKIES: {\"Webstorm-4a9b1ed1\":\"2cd47b33-d91f-4180-94e5-e3cd66fd6f7d\",\"Webstorm-4a9b1ed2\":\"4825e2dd-8848-40aa-82fa-6b6096e480a5\",\"Webstorm-4a9b1ed3\":\"4b21ec80-24ec-43df-ad72-310d7e663763\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJIYXphZmlMZXYiLCJlbWFpbCI6ImhhemFmaWxldkBnbWFpbC5jb20iLCJyb2xlIjoib3duZXIiLCJpYXQiOjE3NzE4NjQ2OTYsImV4cCI6MTc3NDAyNDY5Nn0.z9YDFi-lGAygrhWNw89CwelIqJCxTt9QOUUyClxwPNQ\"}"
-  },
-  {
-    "id": "1772369855361ztqb",
-    "timestamp": "2026-03-01T12:57:35.361Z",
-    "level": "log",
-    "message": "🔥 HIT GET /api/ranks/me"
-  },
-  {
-    "id": "1772369855361y02t",
-    "timestamp": "2026-03-01T12:57:35.361Z",
-    "level": "log",
-    "message": "🍪 COOKIES: {\"Webstorm-4a9b1ed1\":\"2cd47b33-d91f-4180-94e5-e3cd66fd6f7d\",\"Webstorm-4a9b1ed2\":\"4825e2dd-8848-40aa-82fa-6b6096e480a5\",\"Webstorm-4a9b1ed3\":\"4b21ec80-24ec-43df-ad72-310d7e663763\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJIYXphZmlMZXYiLCJlbWFpbCI6ImhhemFmaWxldkBnbWFpbC5jb20iLCJyb2xlIjoib3duZXIiLCJpYXQiOjE3NzE4NjQ2OTYsImV4cCI6MTc3NDAyNDY5Nn0.z9YDFi-lGAygrhWNw89CwelIqJCxTt9QOUUyClxwPNQ\"}"
-  },
-  {
-    "id": "1772369978940410v",
-    "timestamp": "2026-03-01T12:59:38.940Z",
-    "level": "log",
-    "message": "🍪 COOKIES: {\"Webstorm-4a9b1ed1\":\"2cd47b33-d91f-4180-94e5-e3cd66fd6f7d\",\"Webstorm-4a9b1ed2\":\"4825e2dd-8848-40aa-82fa-6b6096e480a5\",\"Webstorm-4a9b1ed3\":\"4b21ec80-24ec-43df-ad72-310d7e663763\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJIYXphZmlMZXYiLCJlbWFpbCI6ImhhemFmaWxldkBnbWFpbC5jb20iLCJyb2xlIjoib3duZXIiLCJpYXQiOjE3NzE4NjQ2OTYsImV4cCI6MTc3NDAyNDY5Nn0.z9YDFi-lGAygrhWNw89CwelIqJCxTt9QOUUyClxwPNQ\"}"
-  },
-  {
-    "id": "1772369978943e4mw",
-    "timestamp": "2026-03-01T12:59:38.943Z",
-    "level": "log",
-    "message": "🍪 COOKIES: {\"Webstorm-4a9b1ed1\":\"2cd47b33-d91f-4180-94e5-e3cd66fd6f7d\",\"Webstorm-4a9b1ed2\":\"4825e2dd-8848-40aa-82fa-6b6096e480a5\",\"Webstorm-4a9b1ed3\":\"4b21ec80-24ec-43df-ad72-310d7e663763\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJIYXphZmlMZXYiLCJlbWFpbCI6ImhhemFmaWxldkBnbWFpbC5jb20iLCJyb2xlIjoib3duZXIiLCJpYXQiOjE3NzE4NjQ2OTYsImV4cCI6MTc3NDAyNDY5Nn0.z9YDFi-lGAygrhWNw89CwelIqJCxTt9QOUUyClxwPNQ\"}"
-  },
-  {
-    "id": "1772369983230roau",
-    "timestamp": "2026-03-01T12:59:43.230Z",
-    "level": "log",
-    "message": "🍪 COOKIES: {\"Webstorm-4a9b1ed1\":\"2cd47b33-d91f-4180-94e5-e3cd66fd6f7d\",\"Webstorm-4a9b1ed2\":\"4825e2dd-8848-40aa-82fa-6b6096e480a5\",\"Webstorm-4a9b1ed3\":\"4b21ec80-24ec-43df-ad72-310d7e663763\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJIYXphZmlMZXYiLCJlbWFpbCI6ImhhemFmaWxldkBnbWFpbC5jb20iLCJyb2xlIjoib3duZXIiLCJpYXQiOjE3NzE4NjQ2OTYsImV4cCI6MTc3NDAyNDY5Nn0.z9YDFi-lGAygrhWNw89CwelIqJCxTt9QOUUyClxwPNQ\"}"
-  },
-  {
-    "id": "1772369983232hm36",
-    "timestamp": "2026-03-01T12:59:43.232Z",
-    "level": "log",
-    "message": "🍪 COOKIES: {\"Webstorm-4a9b1ed1\":\"2cd47b33-d91f-4180-94e5-e3cd66fd6f7d\",\"Webstorm-4a9b1ed2\":\"4825e2dd-8848-40aa-82fa-6b6096e480a5\",\"Webstorm-4a9b1ed3\":\"4b21ec80-24ec-43df-ad72-310d7e663763\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJIYXphZmlMZXYiLCJlbWFpbCI6ImhhemFmaWxldkBnbWFpbC5jb20iLCJyb2xlIjoib3duZXIiLCJpYXQiOjE3NzE4NjQ2OTYsImV4cCI6MTc3NDAyNDY5Nn0.z9YDFi-lGAygrhWNw89CwelIqJCxTt9QOUUyClxwPNQ\"}"
-  },
-  {
-    "id": "1772369986912t92v",
-    "timestamp": "2026-03-01T12:59:46.912Z",
-    "level": "log",
-    "message": "🍪 COOKIES: {\"Webstorm-4a9b1ed1\":\"2cd47b33-d91f-4180-94e5-e3cd66fd6f7d\",\"Webstorm-4a9b1ed2\":\"4825e2dd-8848-40aa-82fa-6b6096e480a5\",\"Webstorm-4a9b1ed3\":\"4b21ec80-24ec-43df-ad72-310d7e663763\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJIYXphZmlMZXYiLCJlbWFpbCI6ImhhemFmaWxldkBnbWFpbC5jb20iLCJyb2xlIjoib3duZXIiLCJpYXQiOjE3NzE4NjQ2OTYsImV4cCI6MTc3NDAyNDY5Nn0.z9YDFi-lGAygrhWNw89CwelIqJCxTt9QOUUyClxwPNQ\"}"
-  },
-  {
-    "id": "1772369986914lw3c",
-    "timestamp": "2026-03-01T12:59:46.914Z",
-    "level": "log",
-    "message": "🍪 COOKIES: {\"Webstorm-4a9b1ed1\":\"2cd47b33-d91f-4180-94e5-e3cd66fd6f7d\",\"Webstorm-4a9b1ed2\":\"4825e2dd-8848-40aa-82fa-6b6096e480a5\",\"Webstorm-4a9b1ed3\":\"4b21ec80-24ec-43df-ad72-310d7e663763\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJIYXphZmlMZXYiLCJlbWFpbCI6ImhhemFmaWxldkBnbWFpbC5jb20iLCJyb2xlIjoib3duZXIiLCJpYXQiOjE3NzE4NjQ2OTYsImV4cCI6MTc3NDAyNDY5Nn0.z9YDFi-lGAygrhWNw89CwelIqJCxTt9QOUUyClxwPNQ\"}"
-  },
-  {
-    "id": "1772369989069mw6h",
-    "timestamp": "2026-03-01T12:59:49.069Z",
-    "level": "log",
-    "message": "🍪 COOKIES: {\"Webstorm-4a9b1ed1\":\"2cd47b33-d91f-4180-94e5-e3cd66fd6f7d\",\"Webstorm-4a9b1ed2\":\"4825e2dd-8848-40aa-82fa-6b6096e480a5\",\"Webstorm-4a9b1ed3\":\"4b21ec80-24ec-43df-ad72-310d7e663763\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJIYXphZmlMZXYiLCJlbWFpbCI6ImhhemFmaWxldkBnbWFpbC5jb20iLCJyb2xlIjoib3duZXIiLCJpYXQiOjE3NzE4NjQ2OTYsImV4cCI6MTc3NDAyNDY5Nn0.z9YDFi-lGAygrhWNw89CwelIqJCxTt9QOUUyClxwPNQ\"}"
-  },
-  {
-    "id": "1772369989669ubm1",
-    "timestamp": "2026-03-01T12:59:49.669Z",
-    "level": "log",
-    "message": "⚠️ mixer[Setup] skip: Could not find the table 'public.mixer[Setup]' in the schema cache"
-  },
-  {
-    "id": "1772369989977bnlo",
-    "timestamp": "2026-03-01T12:59:49.977Z",
-    "level": "log",
-    "message": "🍪 COOKIES: {\"Webstorm-4a9b1ed1\":\"2cd47b33-d91f-4180-94e5-e3cd66fd6f7d\",\"Webstorm-4a9b1ed2\":\"4825e2dd-8848-40aa-82fa-6b6096e480a5\",\"Webstorm-4a9b1ed3\":\"4b21ec80-24ec-43df-ad72-310d7e663763\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJIYXphZmlMZXYiLCJlbWFpbCI6ImhhemFmaWxldkBnbWFpbC5jb20iLCJyb2xlIjoib3duZXIiLCJpYXQiOjE3NzE4NjQ2OTYsImV4cCI6MTc3NDAyNDY5Nn0.z9YDFi-lGAygrhWNw89CwelIqJCxTt9QOUUyClxwPNQ\"}"
-  },
-  {
-    "id": "1772370009564915q",
-    "timestamp": "2026-03-01T13:00:09.564Z",
-    "level": "log",
-    "message": "🍪 COOKIES: {\"Webstorm-4a9b1ed1\":\"2cd47b33-d91f-4180-94e5-e3cd66fd6f7d\",\"Webstorm-4a9b1ed2\":\"4825e2dd-8848-40aa-82fa-6b6096e480a5\",\"Webstorm-4a9b1ed3\":\"4b21ec80-24ec-43df-ad72-310d7e663763\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJIYXphZmlMZXYiLCJlbWFpbCI6ImhhemFmaWxldkBnbWFpbC5jb20iLCJyb2xlIjoib3duZXIiLCJpYXQiOjE3NzE4NjQ2OTYsImV4cCI6MTc3NDAyNDY5Nn0.z9YDFi-lGAygrhWNw89CwelIqJCxTt9QOUUyClxwPNQ\"}"
-  },
-  {
-    "id": "1772370009869y3bo",
-    "timestamp": "2026-03-01T13:00:09.869Z",
-    "level": "log",
-    "message": "🍪 COOKIES: {\"Webstorm-4a9b1ed1\":\"2cd47b33-d91f-4180-94e5-e3cd66fd6f7d\",\"Webstorm-4a9b1ed2\":\"4825e2dd-8848-40aa-82fa-6b6096e480a5\",\"Webstorm-4a9b1ed3\":\"4b21ec80-24ec-43df-ad72-310d7e663763\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJIYXphZmlMZXYiLCJlbWFpbCI6ImhhemFmaWxldkBnbWFpbC5jb20iLCJyb2xlIjoib3duZXIiLCJpYXQiOjE3NzE4NjQ2OTYsImV4cCI6MTc3NDAyNDY5Nn0.z9YDFi-lGAygrhWNw89CwelIqJCxTt9QOUUyClxwPNQ\"}"
-  },
-  {
-    "id": "17723700133037kjx",
-    "timestamp": "2026-03-01T13:00:13.303Z",
-    "level": "log",
-    "message": "🍪 COOKIES: {\"Webstorm-4a9b1ed1\":\"2cd47b33-d91f-4180-94e5-e3cd66fd6f7d\",\"Webstorm-4a9b1ed2\":\"4825e2dd-8848-40aa-82fa-6b6096e480a5\",\"Webstorm-4a9b1ed3\":\"4b21ec80-24ec-43df-ad72-310d7e663763\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJIYXphZmlMZXYiLCJlbWFpbCI6ImhhemFmaWxldkBnbWFpbC5jb20iLCJyb2xlIjoib3duZXIiLCJpYXQiOjE3NzE4NjQ2OTYsImV4cCI6MTc3NDAyNDY5Nn0.z9YDFi-lGAygrhWNw89CwelIqJCxTt9QOUUyClxwPNQ\"}"
-  },
-  {
-    "id": "1772370013305hgxg",
-    "timestamp": "2026-03-01T13:00:13.305Z",
-    "level": "log",
-    "message": "🍪 COOKIES: {\"Webstorm-4a9b1ed1\":\"2cd47b33-d91f-4180-94e5-e3cd66fd6f7d\",\"Webstorm-4a9b1ed2\":\"4825e2dd-8848-40aa-82fa-6b6096e480a5\",\"Webstorm-4a9b1ed3\":\"4b21ec80-24ec-43df-ad72-310d7e663763\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJIYXphZmlMZXYiLCJlbWFpbCI6ImhhemFmaWxldkBnbWFpbC5jb20iLCJyb2xlIjoib3duZXIiLCJpYXQiOjE3NzE4NjQ2OTYsImV4cCI6MTc3NDAyNDY5Nn0.z9YDFi-lGAygrhWNw89CwelIqJCxTt9QOUUyClxwPNQ\"}"
-  },
-  {
-    "id": "1772370013307c1p9",
-    "timestamp": "2026-03-01T13:00:13.307Z",
-    "level": "log",
-    "message": "🍪 COOKIES: {\"Webstorm-4a9b1ed1\":\"2cd47b33-d91f-4180-94e5-e3cd66fd6f7d\",\"Webstorm-4a9b1ed2\":\"4825e2dd-8848-40aa-82fa-6b6096e480a5\",\"Webstorm-4a9b1ed3\":\"4b21ec80-24ec-43df-ad72-310d7e663763\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJIYXphZmlMZXYiLCJlbWFpbCI6ImhhemFmaWxldkBnbWFpbC5jb20iLCJyb2xlIjoib3duZXIiLCJpYXQiOjE3NzE4NjQ2OTYsImV4cCI6MTc3NDAyNDY5Nn0.z9YDFi-lGAygrhWNw89CwelIqJCxTt9QOUUyClxwPNQ\"}"
-  },
-  {
-    "id": "1772370015669tmz0",
-    "timestamp": "2026-03-01T13:00:15.669Z",
-    "level": "log",
-    "message": "🍪 COOKIES: {\"Webstorm-4a9b1ed1\":\"2cd47b33-d91f-4180-94e5-e3cd66fd6f7d\",\"Webstorm-4a9b1ed2\":\"4825e2dd-8848-40aa-82fa-6b6096e480a5\",\"Webstorm-4a9b1ed3\":\"4b21ec80-24ec-43df-ad72-310d7e663763\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJIYXphZmlMZXYiLCJlbWFpbCI6ImhhemFmaWxldkBnbWFpbC5jb20iLCJyb2xlIjoib3duZXIiLCJpYXQiOjE3NzE4NjQ2OTYsImV4cCI6MTc3NDAyNDY5Nn0.z9YDFi-lGAygrhWNw89CwelIqJCxTt9QOUUyClxwPNQ\"}"
-  },
-  {
-    "id": "1772370021777orvy",
-    "timestamp": "2026-03-01T13:00:21.777Z",
-    "level": "log",
-    "message": "🍪 COOKIES: {\"Webstorm-4a9b1ed1\":\"2cd47b33-d91f-4180-94e5-e3cd66fd6f7d\",\"Webstorm-4a9b1ed2\":\"4825e2dd-8848-40aa-82fa-6b6096e480a5\",\"Webstorm-4a9b1ed3\":\"4b21ec80-24ec-43df-ad72-310d7e663763\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJIYXphZmlMZXYiLCJlbWFpbCI6ImhhemFmaWxldkBnbWFpbC5jb20iLCJyb2xlIjoib3duZXIiLCJpYXQiOjE3NzE4NjQ2OTYsImV4cCI6MTc3NDAyNDY5Nn0.z9YDFi-lGAygrhWNw89CwelIqJCxTt9QOUUyClxwPNQ\"}"
-  },
-  {
-    "id": "17723700217790y1u",
-    "timestamp": "2026-03-01T13:00:21.779Z",
-    "level": "log",
-    "message": "🍪 COOKIES: {\"Webstorm-4a9b1ed1\":\"2cd47b33-d91f-4180-94e5-e3cd66fd6f7d\",\"Webstorm-4a9b1ed2\":\"4825e2dd-8848-40aa-82fa-6b6096e480a5\",\"Webstorm-4a9b1ed3\":\"4b21ec80-24ec-43df-ad72-310d7e663763\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJIYXphZmlMZXYiLCJlbWFpbCI6ImhhemFmaWxldkBnbWFpbC5jb20iLCJyb2xlIjoib3duZXIiLCJpYXQiOjE3NzE4NjQ2OTYsImV4cCI6MTc3NDAyNDY5Nn0.z9YDFi-lGAygrhWNw89CwelIqJCxTt9QOUUyClxwPNQ\"}"
-  },
-  {
-    "id": "1772370022041m6yi",
-    "timestamp": "2026-03-01T13:00:22.041Z",
-    "level": "log",
-    "message": "🍪 COOKIES: {\"Webstorm-4a9b1ed1\":\"2cd47b33-d91f-4180-94e5-e3cd66fd6f7d\",\"Webstorm-4a9b1ed2\":\"4825e2dd-8848-40aa-82fa-6b6096e480a5\",\"Webstorm-4a9b1ed3\":\"4b21ec80-24ec-43df-ad72-310d7e663763\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJIYXphZmlMZXYiLCJlbWFpbCI6ImhhemFmaWxldkBnbWFpbC5jb20iLCJyb2xlIjoib3duZXIiLCJpYXQiOjE3NzE4NjQ2OTYsImV4cCI6MTc3NDAyNDY5Nn0.z9YDFi-lGAygrhWNw89CwelIqJCxTt9QOUUyClxwPNQ\"}"
-  },
-  {
-    "id": "1772370022244sj49",
-    "timestamp": "2026-03-01T13:00:22.244Z",
-    "level": "log",
-    "message": "🔥 HIT GET /api/ranks/me"
-  },
-  {
-    "id": "1772370022244yvap",
-    "timestamp": "2026-03-01T13:00:22.244Z",
-    "level": "log",
-    "message": "🍪 COOKIES: {\"Webstorm-4a9b1ed1\":\"2cd47b33-d91f-4180-94e5-e3cd66fd6f7d\",\"Webstorm-4a9b1ed2\":\"4825e2dd-8848-40aa-82fa-6b6096e480a5\",\"Webstorm-4a9b1ed3\":\"4b21ec80-24ec-43df-ad72-310d7e663763\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJIYXphZmlMZXYiLCJlbWFpbCI6ImhhemFmaWxldkBnbWFpbC5jb20iLCJyb2xlIjoib3duZXIiLCJpYXQiOjE3NzE4NjQ2OTYsImV4cCI6MTc3NDAyNDY5Nn0.z9YDFi-lGAygrhWNw89CwelIqJCxTt9QOUUyClxwPNQ\"}"
-  },
-  {
-    "id": "1772370038251z2wn",
-    "timestamp": "2026-03-01T13:00:38.251Z",
-    "level": "log",
-    "message": "🍪 COOKIES: {\"Webstorm-4a9b1ed1\":\"2cd47b33-d91f-4180-94e5-e3cd66fd6f7d\",\"Webstorm-4a9b1ed2\":\"4825e2dd-8848-40aa-82fa-6b6096e480a5\",\"Webstorm-4a9b1ed3\":\"4b21ec80-24ec-43df-ad72-310d7e663763\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJIYXphZmlMZXYiLCJlbWFpbCI6ImhhemFmaWxldkBnbWFpbC5jb20iLCJyb2xlIjoib3duZXIiLCJpYXQiOjE3NzE4NjQ2OTYsImV4cCI6MTc3NDAyNDY5Nn0.z9YDFi-lGAygrhWNw89CwelIqJCxTt9QOUUyClxwPNQ\"}"
-  },
-  {
-    "id": "1772370038558lnwk",
-    "timestamp": "2026-03-01T13:00:38.558Z",
-    "level": "log",
-    "message": "🍪 COOKIES: {\"Webstorm-4a9b1ed1\":\"2cd47b33-d91f-4180-94e5-e3cd66fd6f7d\",\"Webstorm-4a9b1ed2\":\"4825e2dd-8848-40aa-82fa-6b6096e480a5\",\"Webstorm-4a9b1ed3\":\"4b21ec80-24ec-43df-ad72-310d7e663763\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJIYXphZmlMZXYiLCJlbWFpbCI6ImhhemFmaWxldkBnbWFpbC5jb20iLCJyb2xlIjoib3duZXIiLCJpYXQiOjE3NzE4NjQ2OTYsImV4cCI6MTc3NDAyNDY5Nn0.z9YDFi-lGAygrhWNw89CwelIqJCxTt9QOUUyClxwPNQ\"}"
-  },
-  {
-    "id": "1772370039195t6es",
-    "timestamp": "2026-03-01T13:00:39.195Z",
-    "level": "log",
-    "message": "🍪 COOKIES: {\"Webstorm-4a9b1ed1\":\"2cd47b33-d91f-4180-94e5-e3cd66fd6f7d\",\"Webstorm-4a9b1ed2\":\"4825e2dd-8848-40aa-82fa-6b6096e480a5\",\"Webstorm-4a9b1ed3\":\"4b21ec80-24ec-43df-ad72-310d7e663763\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJIYXphZmlMZXYiLCJlbWFpbCI6ImhhemFmaWxldkBnbWFpbC5jb20iLCJyb2xlIjoib3duZXIiLCJpYXQiOjE3NzE4NjQ2OTYsImV4cCI6MTc3NDAyNDY5Nn0.z9YDFi-lGAygrhWNw89CwelIqJCxTt9QOUUyClxwPNQ\"}"
-  },
-  {
-    "id": "1772370040154623g",
-    "timestamp": "2026-03-01T13:00:40.154Z",
-    "level": "log",
-    "message": "🍪 COOKIES: {\"Webstorm-4a9b1ed1\":\"2cd47b33-d91f-4180-94e5-e3cd66fd6f7d\",\"Webstorm-4a9b1ed2\":\"4825e2dd-8848-40aa-82fa-6b6096e480a5\",\"Webstorm-4a9b1ed3\":\"4b21ec80-24ec-43df-ad72-310d7e663763\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJIYXphZmlMZXYiLCJlbWFpbCI6ImhhemFmaWxldkBnbWFpbC5jb20iLCJyb2xlIjoib3duZXIiLCJpYXQiOjE3NzE4NjQ2OTYsImV4cCI6MTc3NDAyNDY5Nn0.z9YDFi-lGAygrhWNw89CwelIqJCxTt9QOUUyClxwPNQ\"}"
-  },
-  {
-    "id": "177237004967018j8",
-    "timestamp": "2026-03-01T13:00:49.670Z",
-    "level": "log",
-    "message": "🍪 COOKIES: {\"Webstorm-4a9b1ed1\":\"2cd47b33-d91f-4180-94e5-e3cd66fd6f7d\",\"Webstorm-4a9b1ed2\":\"4825e2dd-8848-40aa-82fa-6b6096e480a5\",\"Webstorm-4a9b1ed3\":\"4b21ec80-24ec-43df-ad72-310d7e663763\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJIYXphZmlMZXYiLCJlbWFpbCI6ImhhemFmaWxldkBnbWFpbC5jb20iLCJyb2xlIjoib3duZXIiLCJpYXQiOjE3NzE4NjQ2OTYsImV4cCI6MTc3NDAyNDY5Nn0.z9YDFi-lGAygrhWNw89CwelIqJCxTt9QOUUyClxwPNQ\"}"
-  },
-  {
-    "id": "17723700499339m1l",
-    "timestamp": "2026-03-01T13:00:49.933Z",
-    "level": "log",
-    "message": "🍪 COOKIES: {\"Webstorm-4a9b1ed1\":\"2cd47b33-d91f-4180-94e5-e3cd66fd6f7d\",\"Webstorm-4a9b1ed2\":\"4825e2dd-8848-40aa-82fa-6b6096e480a5\",\"Webstorm-4a9b1ed3\":\"4b21ec80-24ec-43df-ad72-310d7e663763\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJIYXphZmlMZXYiLCJlbWFpbCI6ImhhemFmaWxldkBnbWFpbC5jb20iLCJyb2xlIjoib3duZXIiLCJpYXQiOjE3NzE4NjQ2OTYsImV4cCI6MTc3NDAyNDY5Nn0.z9YDFi-lGAygrhWNw89CwelIqJCxTt9QOUUyClxwPNQ\"}"
-  },
-  {
-    "id": "1772370059363s1aw",
-    "timestamp": "2026-03-01T13:00:59.363Z",
-    "level": "log",
-    "message": "🍪 COOKIES: {\"Webstorm-4a9b1ed1\":\"2cd47b33-d91f-4180-94e5-e3cd66fd6f7d\",\"Webstorm-4a9b1ed2\":\"4825e2dd-8848-40aa-82fa-6b6096e480a5\",\"Webstorm-4a9b1ed3\":\"4b21ec80-24ec-43df-ad72-310d7e663763\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJIYXphZmlMZXYiLCJlbWFpbCI6ImhhemFmaWxldkBnbWFpbC5jb20iLCJyb2xlIjoib3duZXIiLCJpYXQiOjE3NzE4NjQ2OTYsImV4cCI6MTc3NDAyNDY5Nn0.z9YDFi-lGAygrhWNw89CwelIqJCxTt9QOUUyClxwPNQ\"}"
-  },
-  {
-    "id": "1772370059676o0j3",
-    "timestamp": "2026-03-01T13:00:59.676Z",
-    "level": "log",
-    "message": "🍪 COOKIES: {\"Webstorm-4a9b1ed1\":\"2cd47b33-d91f-4180-94e5-e3cd66fd6f7d\",\"Webstorm-4a9b1ed2\":\"4825e2dd-8848-40aa-82fa-6b6096e480a5\",\"Webstorm-4a9b1ed3\":\"4b21ec80-24ec-43df-ad72-310d7e663763\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJIYXphZmlMZXYiLCJlbWFpbCI6ImhhemFmaWxldkBnbWFpbC5jb20iLCJyb2xlIjoib3duZXIiLCJpYXQiOjE3NzE4NjQ2OTYsImV4cCI6MTc3NDAyNDY5Nn0.z9YDFi-lGAygrhWNw89CwelIqJCxTt9QOUUyClxwPNQ\"}"
-  },
-  {
-    "id": "1772370069360ava4",
-    "timestamp": "2026-03-01T13:01:09.360Z",
-    "level": "log",
-    "message": "🍪 COOKIES: {\"Webstorm-4a9b1ed1\":\"2cd47b33-d91f-4180-94e5-e3cd66fd6f7d\",\"Webstorm-4a9b1ed2\":\"4825e2dd-8848-40aa-82fa-6b6096e480a5\",\"Webstorm-4a9b1ed3\":\"4b21ec80-24ec-43df-ad72-310d7e663763\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJIYXphZmlMZXYiLCJlbWFpbCI6ImhhemFmaWxldkBnbWFpbC5jb20iLCJyb2xlIjoib3duZXIiLCJpYXQiOjE3NzE4NjQ2OTYsImV4cCI6MTc3NDAyNDY5Nn0.z9YDFi-lGAygrhWNw89CwelIqJCxTt9QOUUyClxwPNQ\"}"
-  },
-  {
-    "id": "1772370069684caxm",
-    "timestamp": "2026-03-01T13:01:09.684Z",
-    "level": "log",
-    "message": "🍪 COOKIES: {\"Webstorm-4a9b1ed1\":\"2cd47b33-d91f-4180-94e5-e3cd66fd6f7d\",\"Webstorm-4a9b1ed2\":\"4825e2dd-8848-40aa-82fa-6b6096e480a5\",\"Webstorm-4a9b1ed3\":\"4b21ec80-24ec-43df-ad72-310d7e663763\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJIYXphZmlMZXYiLCJlbWFpbCI6ImhhemFmaWxldkBnbWFpbC5jb20iLCJyb2xlIjoib3duZXIiLCJpYXQiOjE3NzE4NjQ2OTYsImV4cCI6MTc3NDAyNDY5Nn0.z9YDFi-lGAygrhWNw89CwelIqJCxTt9QOUUyClxwPNQ\"}"
-  },
-  {
-    "id": "1772370078894oexf",
-    "timestamp": "2026-03-01T13:01:18.894Z",
-    "level": "log",
-    "message": "🍪 COOKIES: {\"Webstorm-4a9b1ed1\":\"2cd47b33-d91f-4180-94e5-e3cd66fd6f7d\",\"Webstorm-4a9b1ed2\":\"4825e2dd-8848-40aa-82fa-6b6096e480a5\",\"Webstorm-4a9b1ed3\":\"4b21ec80-24ec-43df-ad72-310d7e663763\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJIYXphZmlMZXYiLCJlbWFpbCI6ImhhemFmaWxldkBnbWFpbC5jb20iLCJyb2xlIjoib3duZXIiLCJpYXQiOjE3NzE4NjQ2OTYsImV4cCI6MTc3NDAyNDY5Nn0.z9YDFi-lGAygrhWNw89CwelIqJCxTt9QOUUyClxwPNQ\"}"
-  },
-  {
-    "id": "1772370079209blgf",
-    "timestamp": "2026-03-01T13:01:19.209Z",
-    "level": "log",
-    "message": "🍪 COOKIES: {\"Webstorm-4a9b1ed1\":\"2cd47b33-d91f-4180-94e5-e3cd66fd6f7d\",\"Webstorm-4a9b1ed2\":\"4825e2dd-8848-40aa-82fa-6b6096e480a5\",\"Webstorm-4a9b1ed3\":\"4b21ec80-24ec-43df-ad72-310d7e663763\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJIYXphZmlMZXYiLCJlbWFpbCI6ImhhemFmaWxldkBnbWFpbC5jb20iLCJyb2xlIjoib3duZXIiLCJpYXQiOjE3NzE4NjQ2OTYsImV4cCI6MTc3NDAyNDY5Nn0.z9YDFi-lGAygrhWNw89CwelIqJCxTt9QOUUyClxwPNQ\"}"
-  },
-  {
-    "id": "1772370088894hefp",
-    "timestamp": "2026-03-01T13:01:28.894Z",
-    "level": "log",
-    "message": "🍪 COOKIES: {\"Webstorm-4a9b1ed1\":\"2cd47b33-d91f-4180-94e5-e3cd66fd6f7d\",\"Webstorm-4a9b1ed2\":\"4825e2dd-8848-40aa-82fa-6b6096e480a5\",\"Webstorm-4a9b1ed3\":\"4b21ec80-24ec-43df-ad72-310d7e663763\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJIYXphZmlMZXYiLCJlbWFpbCI6ImhhemFmaWxldkBnbWFpbC5jb20iLCJyb2xlIjoib3duZXIiLCJpYXQiOjE3NzE4NjQ2OTYsImV4cCI6MTc3NDAyNDY5Nn0.z9YDFi-lGAygrhWNw89CwelIqJCxTt9QOUUyClxwPNQ\"}"
-  },
-  {
-    "id": "17723700892065y50",
-    "timestamp": "2026-03-01T13:01:29.206Z",
-    "level": "log",
-    "message": "🍪 COOKIES: {\"Webstorm-4a9b1ed1\":\"2cd47b33-d91f-4180-94e5-e3cd66fd6f7d\",\"Webstorm-4a9b1ed2\":\"4825e2dd-8848-40aa-82fa-6b6096e480a5\",\"Webstorm-4a9b1ed3\":\"4b21ec80-24ec-43df-ad72-310d7e663763\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJIYXphZmlMZXYiLCJlbWFpbCI6ImhhemFmaWxldkBnbWFpbC5jb20iLCJyb2xlIjoib3duZXIiLCJpYXQiOjE3NzE4NjQ2OTYsImV4cCI6MTc3NDAyNDY5Nn0.z9YDFi-lGAygrhWNw89CwelIqJCxTt9QOUUyClxwPNQ\"}"
-  },
-  {
-    "id": "17723700988940d7o",
-    "timestamp": "2026-03-01T13:01:38.894Z",
-    "level": "log",
-    "message": "🍪 COOKIES: {\"Webstorm-4a9b1ed1\":\"2cd47b33-d91f-4180-94e5-e3cd66fd6f7d\",\"Webstorm-4a9b1ed2\":\"4825e2dd-8848-40aa-82fa-6b6096e480a5\",\"Webstorm-4a9b1ed3\":\"4b21ec80-24ec-43df-ad72-310d7e663763\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJIYXphZmlMZXYiLCJlbWFpbCI6ImhhemFmaWxldkBnbWFpbC5jb20iLCJyb2xlIjoib3duZXIiLCJpYXQiOjE3NzE4NjQ2OTYsImV4cCI6MTc3NDAyNDY5Nn0.z9YDFi-lGAygrhWNw89CwelIqJCxTt9QOUUyClxwPNQ\"}"
-  },
-  {
-    "id": "1772370106762d5jz",
-    "timestamp": "2026-03-01T13:01:46.762Z",
-    "level": "log",
-    "message": "🍪 COOKIES: {\"Webstorm-4a9b1ed1\":\"2cd47b33-d91f-4180-94e5-e3cd66fd6f7d\",\"Webstorm-4a9b1ed2\":\"4825e2dd-8848-40aa-82fa-6b6096e480a5\",\"Webstorm-4a9b1ed3\":\"4b21ec80-24ec-43df-ad72-310d7e663763\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJIYXphZmlMZXYiLCJlbWFpbCI6ImhhemFmaWxldkBnbWFpbC5jb20iLCJyb2xlIjoib3duZXIiLCJpYXQiOjE3NzE4NjQ2OTYsImV4cCI6MTc3NDAyNDY5Nn0.z9YDFi-lGAygrhWNw89CwelIqJCxTt9QOUUyClxwPNQ\"}"
-  },
-  {
-    "id": "1772370106764t1o9",
-    "timestamp": "2026-03-01T13:01:46.764Z",
-    "level": "log",
-    "message": "🍪 COOKIES: {\"Webstorm-4a9b1ed1\":\"2cd47b33-d91f-4180-94e5-e3cd66fd6f7d\",\"Webstorm-4a9b1ed2\":\"4825e2dd-8848-40aa-82fa-6b6096e480a5\",\"Webstorm-4a9b1ed3\":\"4b21ec80-24ec-43df-ad72-310d7e663763\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJIYXphZmlMZXYiLCJlbWFpbCI6ImhhemFmaWxldkBnbWFpbC5jb20iLCJyb2xlIjoib3duZXIiLCJpYXQiOjE3NzE4NjQ2OTYsImV4cCI6MTc3NDAyNDY5Nn0.z9YDFi-lGAygrhWNw89CwelIqJCxTt9QOUUyClxwPNQ\"}"
-  },
-  {
-    "id": "1772370154989afw1",
-    "timestamp": "2026-03-01T13:02:34.989Z",
-    "level": "log",
-    "message": "🖼 Serving images from: E:\\Projekt\\datas\\images"
-  },
-  {
-    "id": "1772370154991t371",
-    "timestamp": "2026-03-01T13:02:34.991Z",
-    "level": "log",
-    "message": "[dotenv@17.2.3] injecting env (15) from ..\\.env \u001b[2m-- tip: 🛠️  run anywhere with `dotenvx run -- yourcommand`\u001b[0m"
-  },
-  {
-    "id": "1772370155054h7a2",
-    "timestamp": "2026-03-01T13:02:35.054Z",
-    "level": "log",
-    "message": "[dotenv@17.2.3] injecting env (0) from .env \u001b[2m-- tip: 🗂️ backup and recover secrets: https://dotenvx.com/ops\u001b[0m"
-  },
-  {
-    "id": "1772370155093cnk5",
-    "timestamp": "2026-03-01T13:02:35.093Z",
-    "level": "log",
-    "message": "✅ products.controller keys: [\"list\",\"brands\"]"
-  },
-  {
-    "id": "1772370155094agv6",
-    "timestamp": "2026-03-01T13:02:35.094Z",
-    "level": "log",
-    "message": "✅ typeof ctrl.list: function"
-  },
-  {
-    "id": "17723701550944t19",
-    "timestamp": "2026-03-01T13:02:35.094Z",
-    "level": "log",
-    "message": "✅ typeof ctrl.brands: function"
-  },
-  {
-    "id": "1772370155095lh9u",
-    "timestamp": "2026-03-01T13:02:35.095Z",
-    "level": "log",
-    "message": "TABLES_FILE: E:\\Projekt\\backend\\datas\\Jsons\\tables.runtime.json"
-  },
-  {
-    "id": "1772370155095mn7d",
-    "timestamp": "2026-03-01T13:02:35.095Z",
-    "level": "log",
-    "message": "ITEMS CTRL = {}"
-  },
-  {
-    "id": "177237015509690pv",
-    "timestamp": "2026-03-01T13:02:35.096Z",
-    "level": "log",
-    "message": "ITEMS CTRL LIST = "
-  },
-  {
-    "id": "1772370155118cw4j",
-    "timestamp": "2026-03-01T13:02:35.118Z",
-    "level": "log",
-    "message": "ENV CHECK: {\"SUPABASE_URL\":\"https://ecjufuhmmehhzusicghh.supabase.co\",\"HAS_KEY\":true,\"JWT\":true,\"DEEPSEEK\":false}"
-  },
-  {
-    "id": "17723701551207r0k",
-    "timestamp": "2026-03-01T13:02:35.120Z",
-    "level": "log",
-    "message": "🚀 Server running on http://localhost:3000"
-  },
-  {
-    "id": "1772370161422hz8t",
-    "timestamp": "2026-03-01T13:02:41.422Z",
-    "level": "log",
-    "message": "🍪 COOKIES: {\"Webstorm-4a9b1ed1\":\"2cd47b33-d91f-4180-94e5-e3cd66fd6f7d\",\"Webstorm-4a9b1ed2\":\"4825e2dd-8848-40aa-82fa-6b6096e480a5\",\"Webstorm-4a9b1ed3\":\"4b21ec80-24ec-43df-ad72-310d7e663763\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJIYXphZmlMZXYiLCJlbWFpbCI6ImhhemFmaWxldkBnbWFpbC5jb20iLCJyb2xlIjoib3duZXIiLCJpYXQiOjE3NzE4NjQ2OTYsImV4cCI6MTc3NDAyNDY5Nn0.z9YDFi-lGAygrhWNw89CwelIqJCxTt9QOUUyClxwPNQ\"}"
-  },
-  {
-    "id": "1772370161457nnz1",
-    "timestamp": "2026-03-01T13:02:41.457Z",
-    "level": "log",
-    "message": "🍪 COOKIES: {\"Webstorm-4a9b1ed1\":\"2cd47b33-d91f-4180-94e5-e3cd66fd6f7d\",\"Webstorm-4a9b1ed2\":\"4825e2dd-8848-40aa-82fa-6b6096e480a5\",\"Webstorm-4a9b1ed3\":\"4b21ec80-24ec-43df-ad72-310d7e663763\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJIYXphZmlMZXYiLCJlbWFpbCI6ImhhemFmaWxldkBnbWFpbC5jb20iLCJyb2xlIjoib3duZXIiLCJpYXQiOjE3NzE4NjQ2OTYsImV4cCI6MTc3NDAyNDY5Nn0.z9YDFi-lGAygrhWNw89CwelIqJCxTt9QOUUyClxwPNQ\"}"
-  },
-  {
-    "id": "1772370161488vkh5",
-    "timestamp": "2026-03-01T13:02:41.488Z",
-    "level": "log",
-    "message": "🍪 COOKIES: {\"Webstorm-4a9b1ed1\":\"2cd47b33-d91f-4180-94e5-e3cd66fd6f7d\",\"Webstorm-4a9b1ed2\":\"4825e2dd-8848-40aa-82fa-6b6096e480a5\",\"Webstorm-4a9b1ed3\":\"4b21ec80-24ec-43df-ad72-310d7e663763\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJIYXphZmlMZXYiLCJlbWFpbCI6ImhhemFmaWxldkBnbWFpbC5jb20iLCJyb2xlIjoib3duZXIiLCJpYXQiOjE3NzE4NjQ2OTYsImV4cCI6MTc3NDAyNDY5Nn0.z9YDFi-lGAygrhWNw89CwelIqJCxTt9QOUUyClxwPNQ\"}"
-  },
-  {
-    "id": "1772370161587g0ww",
-    "timestamp": "2026-03-01T13:02:41.587Z",
-    "level": "log",
-    "message": "🍪 COOKIES: {\"Webstorm-4a9b1ed1\":\"2cd47b33-d91f-4180-94e5-e3cd66fd6f7d\",\"Webstorm-4a9b1ed2\":\"4825e2dd-8848-40aa-82fa-6b6096e480a5\",\"Webstorm-4a9b1ed3\":\"4b21ec80-24ec-43df-ad72-310d7e663763\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJIYXphZmlMZXYiLCJlbWFpbCI6ImhhemFmaWxldkBnbWFpbC5jb20iLCJyb2xlIjoib3duZXIiLCJpYXQiOjE3NzE4NjQ2OTYsImV4cCI6MTc3NDAyNDY5Nn0.z9YDFi-lGAygrhWNw89CwelIqJCxTt9QOUUyClxwPNQ\"}"
-  },
-  {
-    "id": "1772370161648pz7g",
-    "timestamp": "2026-03-01T13:02:41.649Z",
-    "level": "log",
-    "message": "🔥 HIT GET /api/ranks/me"
-  },
-  {
-    "id": "1772370161649g02i",
-    "timestamp": "2026-03-01T13:02:41.649Z",
-    "level": "log",
-    "message": "🍪 COOKIES: {\"Webstorm-4a9b1ed1\":\"2cd47b33-d91f-4180-94e5-e3cd66fd6f7d\",\"Webstorm-4a9b1ed2\":\"4825e2dd-8848-40aa-82fa-6b6096e480a5\",\"Webstorm-4a9b1ed3\":\"4b21ec80-24ec-43df-ad72-310d7e663763\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJIYXphZmlMZXYiLCJlbWFpbCI6ImhhemFmaWxldkBnbWFpbC5jb20iLCJyb2xlIjoib3duZXIiLCJpYXQiOjE3NzE4NjQ2OTYsImV4cCI6MTc3NDAyNDY5Nn0.z9YDFi-lGAygrhWNw89CwelIqJCxTt9QOUUyClxwPNQ\"}"
-  },
-  {
-    "id": "1772370162320dwel",
-    "timestamp": "2026-03-01T13:02:42.320Z",
-    "level": "log",
-    "message": "🍪 COOKIES: {\"Webstorm-4a9b1ed1\":\"2cd47b33-d91f-4180-94e5-e3cd66fd6f7d\",\"Webstorm-4a9b1ed2\":\"4825e2dd-8848-40aa-82fa-6b6096e480a5\",\"Webstorm-4a9b1ed3\":\"4b21ec80-24ec-43df-ad72-310d7e663763\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJIYXphZmlMZXYiLCJlbWFpbCI6ImhhemFmaWxldkBnbWFpbC5jb20iLCJyb2xlIjoib3duZXIiLCJpYXQiOjE3NzE4NjQ2OTYsImV4cCI6MTc3NDAyNDY5Nn0.z9YDFi-lGAygrhWNw89CwelIqJCxTt9QOUUyClxwPNQ\"}"
-  },
-  {
-    "id": "1772370163498nshf",
-    "timestamp": "2026-03-01T13:02:43.498Z",
-    "level": "log",
-    "message": "🍪 COOKIES: {\"Webstorm-4a9b1ed1\":\"2cd47b33-d91f-4180-94e5-e3cd66fd6f7d\",\"Webstorm-4a9b1ed2\":\"4825e2dd-8848-40aa-82fa-6b6096e480a5\",\"Webstorm-4a9b1ed3\":\"4b21ec80-24ec-43df-ad72-310d7e663763\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJIYXphZmlMZXYiLCJlbWFpbCI6ImhhemFmaWxldkBnbWFpbC5jb20iLCJyb2xlIjoib3duZXIiLCJpYXQiOjE3NzE4NjQ2OTYsImV4cCI6MTc3NDAyNDY5Nn0.z9YDFi-lGAygrhWNw89CwelIqJCxTt9QOUUyClxwPNQ\"}"
-  },
-  {
-    "id": "1772370165574wqwh",
-    "timestamp": "2026-03-01T13:02:45.574Z",
-    "level": "log",
-    "message": "🍪 COOKIES: {\"Webstorm-4a9b1ed1\":\"2cd47b33-d91f-4180-94e5-e3cd66fd6f7d\",\"Webstorm-4a9b1ed2\":\"4825e2dd-8848-40aa-82fa-6b6096e480a5\",\"Webstorm-4a9b1ed3\":\"4b21ec80-24ec-43df-ad72-310d7e663763\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJIYXphZmlMZXYiLCJlbWFpbCI6ImhhemFmaWxldkBnbWFpbC5jb20iLCJyb2xlIjoib3duZXIiLCJpYXQiOjE3NzE4NjQ2OTYsImV4cCI6MTc3NDAyNDY5Nn0.z9YDFi-lGAygrhWNw89CwelIqJCxTt9QOUUyClxwPNQ\"}"
-  },
-  {
-    "id": "177237016591852gk",
-    "timestamp": "2026-03-01T13:02:45.918Z",
-    "level": "log",
-    "message": "🍪 COOKIES: {\"Webstorm-4a9b1ed1\":\"2cd47b33-d91f-4180-94e5-e3cd66fd6f7d\",\"Webstorm-4a9b1ed2\":\"4825e2dd-8848-40aa-82fa-6b6096e480a5\",\"Webstorm-4a9b1ed3\":\"4b21ec80-24ec-43df-ad72-310d7e663763\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJIYXphZmlMZXYiLCJlbWFpbCI6ImhhemFmaWxldkBnbWFpbC5jb20iLCJyb2xlIjoib3duZXIiLCJpYXQiOjE3NzE4NjQ2OTYsImV4cCI6MTc3NDAyNDY5Nn0.z9YDFi-lGAygrhWNw89CwelIqJCxTt9QOUUyClxwPNQ\"}"
-  },
-  {
-    "id": "1772370172106r8nv",
-    "timestamp": "2026-03-01T13:02:52.106Z",
-    "level": "log",
-    "message": "🍪 COOKIES: {\"Webstorm-4a9b1ed1\":\"2cd47b33-d91f-4180-94e5-e3cd66fd6f7d\",\"Webstorm-4a9b1ed2\":\"4825e2dd-8848-40aa-82fa-6b6096e480a5\",\"Webstorm-4a9b1ed3\":\"4b21ec80-24ec-43df-ad72-310d7e663763\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJIYXphZmlMZXYiLCJlbWFpbCI6ImhhemFmaWxldkBnbWFpbC5jb20iLCJyb2xlIjoib3duZXIiLCJpYXQiOjE3NzE4NjQ2OTYsImV4cCI6MTc3NDAyNDY5Nn0.z9YDFi-lGAygrhWNw89CwelIqJCxTt9QOUUyClxwPNQ\"}"
-  },
-  {
-    "id": "1772370172350gygl",
-    "timestamp": "2026-03-01T13:02:52.350Z",
-    "level": "log",
-    "message": "🍪 COOKIES: {\"Webstorm-4a9b1ed1\":\"2cd47b33-d91f-4180-94e5-e3cd66fd6f7d\",\"Webstorm-4a9b1ed2\":\"4825e2dd-8848-40aa-82fa-6b6096e480a5\",\"Webstorm-4a9b1ed3\":\"4b21ec80-24ec-43df-ad72-310d7e663763\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJIYXphZmlMZXYiLCJlbWFpbCI6ImhhemFmaWxldkBnbWFpbC5jb20iLCJyb2xlIjoib3duZXIiLCJpYXQiOjE3NzE4NjQ2OTYsImV4cCI6MTc3NDAyNDY5Nn0.z9YDFi-lGAygrhWNw89CwelIqJCxTt9QOUUyClxwPNQ\"}"
-  },
-  {
-    "id": "1772370172630jqu8",
-    "timestamp": "2026-03-01T13:02:52.630Z",
-    "level": "log",
-    "message": "🍪 COOKIES: {\"Webstorm-4a9b1ed1\":\"2cd47b33-d91f-4180-94e5-e3cd66fd6f7d\",\"Webstorm-4a9b1ed2\":\"4825e2dd-8848-40aa-82fa-6b6096e480a5\",\"Webstorm-4a9b1ed3\":\"4b21ec80-24ec-43df-ad72-310d7e663763\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJIYXphZmlMZXYiLCJlbWFpbCI6ImhhemFmaWxldkBnbWFpbC5jb20iLCJyb2xlIjoib3duZXIiLCJpYXQiOjE3NzE4NjQ2OTYsImV4cCI6MTc3NDAyNDY5Nn0.z9YDFi-lGAygrhWNw89CwelIqJCxTt9QOUUyClxwPNQ\"}"
-  },
-  {
-    "id": "1772370179436adlu",
-    "timestamp": "2026-03-01T13:02:59.436Z",
-    "level": "log",
-    "message": "🍪 COOKIES: {\"Webstorm-4a9b1ed1\":\"2cd47b33-d91f-4180-94e5-e3cd66fd6f7d\",\"Webstorm-4a9b1ed2\":\"4825e2dd-8848-40aa-82fa-6b6096e480a5\",\"Webstorm-4a9b1ed3\":\"4b21ec80-24ec-43df-ad72-310d7e663763\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJIYXphZmlMZXYiLCJlbWFpbCI6ImhhemFmaWxldkBnbWFpbC5jb20iLCJyb2xlIjoib3duZXIiLCJpYXQiOjE3NzE4NjQ2OTYsImV4cCI6MTc3NDAyNDY5Nn0.z9YDFi-lGAygrhWNw89CwelIqJCxTt9QOUUyClxwPNQ\"}"
-  },
-  {
-    "id": "1772370179738rzov",
-    "timestamp": "2026-03-01T13:02:59.738Z",
-    "level": "log",
-    "message": "🍪 COOKIES: {\"Webstorm-4a9b1ed1\":\"2cd47b33-d91f-4180-94e5-e3cd66fd6f7d\",\"Webstorm-4a9b1ed2\":\"4825e2dd-8848-40aa-82fa-6b6096e480a5\",\"Webstorm-4a9b1ed3\":\"4b21ec80-24ec-43df-ad72-310d7e663763\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJIYXphZmlMZXYiLCJlbWFpbCI6ImhhemFmaWxldkBnbWFpbC5jb20iLCJyb2xlIjoib3duZXIiLCJpYXQiOjE3NzE4NjQ2OTYsImV4cCI6MTc3NDAyNDY5Nn0.z9YDFi-lGAygrhWNw89CwelIqJCxTt9QOUUyClxwPNQ\"}"
-  },
-  {
-    "id": "1772370181467yt7k",
-    "timestamp": "2026-03-01T13:03:01.467Z",
-    "level": "log",
-    "message": "🍪 COOKIES: {\"Webstorm-4a9b1ed1\":\"2cd47b33-d91f-4180-94e5-e3cd66fd6f7d\",\"Webstorm-4a9b1ed2\":\"4825e2dd-8848-40aa-82fa-6b6096e480a5\",\"Webstorm-4a9b1ed3\":\"4b21ec80-24ec-43df-ad72-310d7e663763\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJIYXphZmlMZXYiLCJlbWFpbCI6ImhhemFmaWxldkBnbWFpbC5jb20iLCJyb2xlIjoib3duZXIiLCJpYXQiOjE3NzE4NjQ2OTYsImV4cCI6MTc3NDAyNDY5Nn0.z9YDFi-lGAygrhWNw89CwelIqJCxTt9QOUUyClxwPNQ\"}"
-  },
-  {
-    "id": "1772370181469kxab",
-    "timestamp": "2026-03-01T13:03:01.469Z",
-    "level": "log",
-    "message": "🍪 COOKIES: {\"Webstorm-4a9b1ed1\":\"2cd47b33-d91f-4180-94e5-e3cd66fd6f7d\",\"Webstorm-4a9b1ed2\":\"4825e2dd-8848-40aa-82fa-6b6096e480a5\",\"Webstorm-4a9b1ed3\":\"4b21ec80-24ec-43df-ad72-310d7e663763\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJIYXphZmlMZXYiLCJlbWFpbCI6ImhhemFmaWxldkBnbWFpbC5jb20iLCJyb2xlIjoib3duZXIiLCJpYXQiOjE3NzE4NjQ2OTYsImV4cCI6MTc3NDAyNDY5Nn0.z9YDFi-lGAygrhWNw89CwelIqJCxTt9QOUUyClxwPNQ\"}"
-  },
-  {
-    "id": "17723701838900hg5",
-    "timestamp": "2026-03-01T13:03:03.890Z",
-    "level": "log",
-    "message": "🍪 COOKIES: {\"Webstorm-4a9b1ed1\":\"2cd47b33-d91f-4180-94e5-e3cd66fd6f7d\",\"Webstorm-4a9b1ed2\":\"4825e2dd-8848-40aa-82fa-6b6096e480a5\",\"Webstorm-4a9b1ed3\":\"4b21ec80-24ec-43df-ad72-310d7e663763\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJIYXphZmlMZXYiLCJlbWFpbCI6ImhhemFmaWxldkBnbWFpbC5jb20iLCJyb2xlIjoib3duZXIiLCJpYXQiOjE3NzE4NjQ2OTYsImV4cCI6MTc3NDAyNDY5Nn0.z9YDFi-lGAygrhWNw89CwelIqJCxTt9QOUUyClxwPNQ\"}"
-  },
-  {
-    "id": "1772370184195jasl",
-    "timestamp": "2026-03-01T13:03:04.195Z",
-    "level": "log",
-    "message": "🍪 COOKIES: {\"Webstorm-4a9b1ed1\":\"2cd47b33-d91f-4180-94e5-e3cd66fd6f7d\",\"Webstorm-4a9b1ed2\":\"4825e2dd-8848-40aa-82fa-6b6096e480a5\",\"Webstorm-4a9b1ed3\":\"4b21ec80-24ec-43df-ad72-310d7e663763\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJIYXphZmlMZXYiLCJlbWFpbCI6ImhhemFmaWxldkBnbWFpbC5jb20iLCJyb2xlIjoib3duZXIiLCJpYXQiOjE3NzE4NjQ2OTYsImV4cCI6MTc3NDAyNDY5Nn0.z9YDFi-lGAygrhWNw89CwelIqJCxTt9QOUUyClxwPNQ\"}"
-  },
-  {
-    "id": "1772370185024qx4j",
-    "timestamp": "2026-03-01T13:03:05.024Z",
-    "level": "log",
-    "message": "🍪 COOKIES: {\"Webstorm-4a9b1ed1\":\"2cd47b33-d91f-4180-94e5-e3cd66fd6f7d\",\"Webstorm-4a9b1ed2\":\"4825e2dd-8848-40aa-82fa-6b6096e480a5\",\"Webstorm-4a9b1ed3\":\"4b21ec80-24ec-43df-ad72-310d7e663763\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJIYXphZmlMZXYiLCJlbWFpbCI6ImhhemFmaWxldkBnbWFpbC5jb20iLCJyb2xlIjoib3duZXIiLCJpYXQiOjE3NzE4NjQ2OTYsImV4cCI6MTc3NDAyNDY5Nn0.z9YDFi-lGAygrhWNw89CwelIqJCxTt9QOUUyClxwPNQ\"}"
-  },
-  {
-    "id": "1772370185026le17",
-    "timestamp": "2026-03-01T13:03:05.026Z",
-    "level": "log",
-    "message": "🍪 COOKIES: {\"Webstorm-4a9b1ed1\":\"2cd47b33-d91f-4180-94e5-e3cd66fd6f7d\",\"Webstorm-4a9b1ed2\":\"4825e2dd-8848-40aa-82fa-6b6096e480a5\",\"Webstorm-4a9b1ed3\":\"4b21ec80-24ec-43df-ad72-310d7e663763\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJIYXphZmlMZXYiLCJlbWFpbCI6ImhhemFmaWxldkBnbWFpbC5jb20iLCJyb2xlIjoib3duZXIiLCJpYXQiOjE3NzE4NjQ2OTYsImV4cCI6MTc3NDAyNDY5Nn0.z9YDFi-lGAygrhWNw89CwelIqJCxTt9QOUUyClxwPNQ\"}"
-  },
-  {
-    "id": "177237018710736hg",
-    "timestamp": "2026-03-01T13:03:07.107Z",
-    "level": "log",
-    "message": "🍪 COOKIES: {\"Webstorm-4a9b1ed1\":\"2cd47b33-d91f-4180-94e5-e3cd66fd6f7d\",\"Webstorm-4a9b1ed2\":\"4825e2dd-8848-40aa-82fa-6b6096e480a5\",\"Webstorm-4a9b1ed3\":\"4b21ec80-24ec-43df-ad72-310d7e663763\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJIYXphZmlMZXYiLCJlbWFpbCI6ImhhemFmaWxldkBnbWFpbC5jb20iLCJyb2xlIjoib3duZXIiLCJpYXQiOjE3NzE4NjQ2OTYsImV4cCI6MTc3NDAyNDY5Nn0.z9YDFi-lGAygrhWNw89CwelIqJCxTt9QOUUyClxwPNQ\"}"
-  },
-  {
-    "id": "1772370187422tynx",
-    "timestamp": "2026-03-01T13:03:07.422Z",
-    "level": "log",
-    "message": "🍪 COOKIES: {\"Webstorm-4a9b1ed1\":\"2cd47b33-d91f-4180-94e5-e3cd66fd6f7d\",\"Webstorm-4a9b1ed2\":\"4825e2dd-8848-40aa-82fa-6b6096e480a5\",\"Webstorm-4a9b1ed3\":\"4b21ec80-24ec-43df-ad72-310d7e663763\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJIYXphZmlMZXYiLCJlbWFpbCI6ImhhemFmaWxldkBnbWFpbC5jb20iLCJyb2xlIjoib3duZXIiLCJpYXQiOjE3NzE4NjQ2OTYsImV4cCI6MTc3NDAyNDY5Nn0.z9YDFi-lGAygrhWNw89CwelIqJCxTt9QOUUyClxwPNQ\"}"
-  },
-  {
-    "id": "1772370187424dnrg",
-    "timestamp": "2026-03-01T13:03:07.424Z",
-    "level": "log",
-    "message": "🍪 COOKIES: {\"Webstorm-4a9b1ed1\":\"2cd47b33-d91f-4180-94e5-e3cd66fd6f7d\",\"Webstorm-4a9b1ed2\":\"4825e2dd-8848-40aa-82fa-6b6096e480a5\",\"Webstorm-4a9b1ed3\":\"4b21ec80-24ec-43df-ad72-310d7e663763\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJIYXphZmlMZXYiLCJlbWFpbCI6ImhhemFmaWxldkBnbWFpbC5jb20iLCJyb2xlIjoib3duZXIiLCJpYXQiOjE3NzE4NjQ2OTYsImV4cCI6MTc3NDAyNDY5Nn0.z9YDFi-lGAygrhWNw89CwelIqJCxTt9QOUUyClxwPNQ\"}"
-  },
-  {
-    "id": "1772370187426whzr",
-    "timestamp": "2026-03-01T13:03:07.426Z",
-    "level": "log",
-    "message": "🍪 COOKIES: {\"Webstorm-4a9b1ed1\":\"2cd47b33-d91f-4180-94e5-e3cd66fd6f7d\",\"Webstorm-4a9b1ed2\":\"4825e2dd-8848-40aa-82fa-6b6096e480a5\",\"Webstorm-4a9b1ed3\":\"4b21ec80-24ec-43df-ad72-310d7e663763\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJIYXphZmlMZXYiLCJlbWFpbCI6ImhhemFmaWxldkBnbWFpbC5jb20iLCJyb2xlIjoib3duZXIiLCJpYXQiOjE3NzE4NjQ2OTYsImV4cCI6MTc3NDAyNDY5Nn0.z9YDFi-lGAygrhWNw89CwelIqJCxTt9QOUUyClxwPNQ\"}"
-  },
-  {
-    "id": "17723701875508tsd",
-    "timestamp": "2026-03-01T13:03:07.550Z",
-    "level": "log",
-    "message": "⚠️ mixer[Setup] skip: Could not find the table 'public.mixer[Setup]' in the schema cache"
-  },
-  {
-    "id": "1772370249190qrw6",
-    "timestamp": "2026-03-01T13:04:09.190Z",
-    "level": "log",
-    "message": "🍪 COOKIES: {\"Webstorm-4a9b1ed1\":\"2cd47b33-d91f-4180-94e5-e3cd66fd6f7d\",\"Webstorm-4a9b1ed2\":\"4825e2dd-8848-40aa-82fa-6b6096e480a5\",\"Webstorm-4a9b1ed3\":\"4b21ec80-24ec-43df-ad72-310d7e663763\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJIYXphZmlMZXYiLCJlbWFpbCI6ImhhemFmaWxldkBnbWFpbC5jb20iLCJyb2xlIjoib3duZXIiLCJpYXQiOjE3NzE4NjQ2OTYsImV4cCI6MTc3NDAyNDY5Nn0.z9YDFi-lGAygrhWNw89CwelIqJCxTt9QOUUyClxwPNQ\"}"
-  },
-  {
-    "id": "177237024919274hr",
-    "timestamp": "2026-03-01T13:04:09.192Z",
-    "level": "log",
-    "message": "🍪 COOKIES: {\"Webstorm-4a9b1ed1\":\"2cd47b33-d91f-4180-94e5-e3cd66fd6f7d\",\"Webstorm-4a9b1ed2\":\"4825e2dd-8848-40aa-82fa-6b6096e480a5\",\"Webstorm-4a9b1ed3\":\"4b21ec80-24ec-43df-ad72-310d7e663763\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJIYXphZmlMZXYiLCJlbWFpbCI6ImhhemFmaWxldkBnbWFpbC5jb20iLCJyb2xlIjoib3duZXIiLCJpYXQiOjE3NzE4NjQ2OTYsImV4cCI6MTc3NDAyNDY5Nn0.z9YDFi-lGAygrhWNw89CwelIqJCxTt9QOUUyClxwPNQ\"}"
-  },
-  {
-    "id": "1772370250164od4h",
-    "timestamp": "2026-03-01T13:04:10.164Z",
-    "level": "log",
-    "message": "🍪 COOKIES: {\"Webstorm-4a9b1ed1\":\"2cd47b33-d91f-4180-94e5-e3cd66fd6f7d\",\"Webstorm-4a9b1ed2\":\"4825e2dd-8848-40aa-82fa-6b6096e480a5\",\"Webstorm-4a9b1ed3\":\"4b21ec80-24ec-43df-ad72-310d7e663763\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJIYXphZmlMZXYiLCJlbWFpbCI6ImhhemFmaWxldkBnbWFpbC5jb20iLCJyb2xlIjoib3duZXIiLCJpYXQiOjE3NzE4NjQ2OTYsImV4cCI6MTc3NDAyNDY5Nn0.z9YDFi-lGAygrhWNw89CwelIqJCxTt9QOUUyClxwPNQ\"}"
-  },
-  {
-    "id": "1772370250479zbr1",
-    "timestamp": "2026-03-01T13:04:10.479Z",
-    "level": "log",
-    "message": "🔥 HIT GET /api/ranks/me"
-  },
-  {
-    "id": "177237025048072wq",
-    "timestamp": "2026-03-01T13:04:10.480Z",
-    "level": "log",
-    "message": "🍪 COOKIES: {\"Webstorm-4a9b1ed1\":\"2cd47b33-d91f-4180-94e5-e3cd66fd6f7d\",\"Webstorm-4a9b1ed2\":\"4825e2dd-8848-40aa-82fa-6b6096e480a5\",\"Webstorm-4a9b1ed3\":\"4b21ec80-24ec-43df-ad72-310d7e663763\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJIYXphZmlMZXYiLCJlbWFpbCI6ImhhemFmaWxldkBnbWFpbC5jb20iLCJyb2xlIjoib3duZXIiLCJpYXQiOjE3NzE4NjQ2OTYsImV4cCI6MTc3NDAyNDY5Nn0.z9YDFi-lGAygrhWNw89CwelIqJCxTt9QOUUyClxwPNQ\"}"
-  },
-  {
-    "id": "17723703155132xjg",
-    "timestamp": "2026-03-01T13:05:15.513Z",
-    "level": "log",
-    "message": "🍪 COOKIES: {\"Webstorm-4a9b1ed1\":\"2cd47b33-d91f-4180-94e5-e3cd66fd6f7d\",\"Webstorm-4a9b1ed2\":\"4825e2dd-8848-40aa-82fa-6b6096e480a5\",\"Webstorm-4a9b1ed3\":\"4b21ec80-24ec-43df-ad72-310d7e663763\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJIYXphZmlMZXYiLCJlbWFpbCI6ImhhemFmaWxldkBnbWFpbC5jb20iLCJyb2xlIjoib3duZXIiLCJpYXQiOjE3NzE4NjQ2OTYsImV4cCI6MTc3NDAyNDY5Nn0.z9YDFi-lGAygrhWNw89CwelIqJCxTt9QOUUyClxwPNQ\"}"
-  },
-  {
-    "id": "1772370315515nqy9",
-    "timestamp": "2026-03-01T13:05:15.515Z",
-    "level": "log",
-    "message": "🍪 COOKIES: {\"Webstorm-4a9b1ed1\":\"2cd47b33-d91f-4180-94e5-e3cd66fd6f7d\",\"Webstorm-4a9b1ed2\":\"4825e2dd-8848-40aa-82fa-6b6096e480a5\",\"Webstorm-4a9b1ed3\":\"4b21ec80-24ec-43df-ad72-310d7e663763\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJIYXphZmlMZXYiLCJlbWFpbCI6ImhhemFmaWxldkBnbWFpbC5jb20iLCJyb2xlIjoib3duZXIiLCJpYXQiOjE3NzE4NjQ2OTYsImV4cCI6MTc3NDAyNDY5Nn0.z9YDFi-lGAygrhWNw89CwelIqJCxTt9QOUUyClxwPNQ\"}"
-  },
-  {
-    "id": "1772370315779us5e",
-    "timestamp": "2026-03-01T13:05:15.779Z",
-    "level": "log",
-    "message": "🍪 COOKIES: {\"Webstorm-4a9b1ed1\":\"2cd47b33-d91f-4180-94e5-e3cd66fd6f7d\",\"Webstorm-4a9b1ed2\":\"4825e2dd-8848-40aa-82fa-6b6096e480a5\",\"Webstorm-4a9b1ed3\":\"4b21ec80-24ec-43df-ad72-310d7e663763\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJIYXphZmlMZXYiLCJlbWFpbCI6ImhhemFmaWxldkBnbWFpbC5jb20iLCJyb2xlIjoib3duZXIiLCJpYXQiOjE3NzE4NjQ2OTYsImV4cCI6MTc3NDAyNDY5Nn0.z9YDFi-lGAygrhWNw89CwelIqJCxTt9QOUUyClxwPNQ\"}"
-  },
-  {
-    "id": "1772370316215brlw",
-    "timestamp": "2026-03-01T13:05:16.215Z",
-    "level": "log",
-    "message": "🍪 COOKIES: {\"Webstorm-4a9b1ed1\":\"2cd47b33-d91f-4180-94e5-e3cd66fd6f7d\",\"Webstorm-4a9b1ed2\":\"4825e2dd-8848-40aa-82fa-6b6096e480a5\",\"Webstorm-4a9b1ed3\":\"4b21ec80-24ec-43df-ad72-310d7e663763\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJIYXphZmlMZXYiLCJlbWFpbCI6ImhhemFmaWxldkBnbWFpbC5jb20iLCJyb2xlIjoib3duZXIiLCJpYXQiOjE3NzE4NjQ2OTYsImV4cCI6MTc3NDAyNDY5Nn0.z9YDFi-lGAygrhWNw89CwelIqJCxTt9QOUUyClxwPNQ\"}"
-  },
-  {
-    "id": "17723703171957n55",
-    "timestamp": "2026-03-01T13:05:17.195Z",
-    "level": "log",
-    "message": "🍪 COOKIES: {\"Webstorm-4a9b1ed1\":\"2cd47b33-d91f-4180-94e5-e3cd66fd6f7d\",\"Webstorm-4a9b1ed2\":\"4825e2dd-8848-40aa-82fa-6b6096e480a5\",\"Webstorm-4a9b1ed3\":\"4b21ec80-24ec-43df-ad72-310d7e663763\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJIYXphZmlMZXYiLCJlbWFpbCI6ImhhemFmaWxldkBnbWFpbC5jb20iLCJyb2xlIjoib3duZXIiLCJpYXQiOjE3NzE4NjQ2OTYsImV4cCI6MTc3NDAyNDY5Nn0.z9YDFi-lGAygrhWNw89CwelIqJCxTt9QOUUyClxwPNQ\"}"
-  },
-  {
-    "id": "1772370317197zkw8",
-    "timestamp": "2026-03-01T13:05:17.197Z",
-    "level": "log",
-    "message": "🍪 COOKIES: {\"Webstorm-4a9b1ed1\":\"2cd47b33-d91f-4180-94e5-e3cd66fd6f7d\",\"Webstorm-4a9b1ed2\":\"4825e2dd-8848-40aa-82fa-6b6096e480a5\",\"Webstorm-4a9b1ed3\":\"4b21ec80-24ec-43df-ad72-310d7e663763\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJIYXphZmlMZXYiLCJlbWFpbCI6ImhhemFmaWxldkBnbWFpbC5jb20iLCJyb2xlIjoib3duZXIiLCJpYXQiOjE3NzE4NjQ2OTYsImV4cCI6MTc3NDAyNDY5Nn0.z9YDFi-lGAygrhWNw89CwelIqJCxTt9QOUUyClxwPNQ\"}"
-  },
-  {
-    "id": "17723706536513wmp",
-    "timestamp": "2026-03-01T13:10:53.651Z",
-    "level": "log",
-    "message": "🖼 Serving images from: E:\\Projekt\\datas\\images"
-  },
-  {
-    "id": "1772370653655nk2x",
-    "timestamp": "2026-03-01T13:10:53.655Z",
-    "level": "log",
-    "message": "[dotenv@17.2.3] injecting env (15) from ..\\.env \u001b[2m-- tip: 🔐 prevent committing .env to code: https://dotenvx.com/precommit\u001b[0m"
-  },
-  {
-    "id": "1772370653858f43n",
-    "timestamp": "2026-03-01T13:10:53.858Z",
-    "level": "log",
-    "message": "[dotenv@17.2.3] injecting env (0) from .env \u001b[2m-- tip: 📡 add observability to secrets: https://dotenvx.com/ops\u001b[0m"
-  },
-  {
-    "id": "1772370653903d9jt",
-    "timestamp": "2026-03-01T13:10:53.903Z",
-    "level": "log",
-    "message": "✅ products.controller keys: [\"list\",\"brands\"]"
-  },
-  {
-    "id": "1772370653904qs5n",
-    "timestamp": "2026-03-01T13:10:53.904Z",
-    "level": "log",
-    "message": "✅ typeof ctrl.list: function"
-  },
-  {
-    "id": "1772370653904wx6t",
-    "timestamp": "2026-03-01T13:10:53.904Z",
-    "level": "log",
-    "message": "✅ typeof ctrl.brands: function"
-  },
-  {
-    "id": "1772370653905jruz",
-    "timestamp": "2026-03-01T13:10:53.905Z",
-    "level": "log",
-    "message": "TABLES_FILE: E:\\Projekt\\backend\\datas\\Jsons\\tables.runtime.json"
-  },
-  {
-    "id": "1772370653906rkl4",
-    "timestamp": "2026-03-01T13:10:53.906Z",
-    "level": "log",
-    "message": "ITEMS CTRL = {}"
-  },
-  {
-    "id": "1772370653906u9h6",
-    "timestamp": "2026-03-01T13:10:53.906Z",
-    "level": "log",
-    "message": "ITEMS CTRL LIST = "
-  },
-  {
-    "id": "17723706539308dn4",
-    "timestamp": "2026-03-01T13:10:53.930Z",
-    "level": "log",
-    "message": "ENV CHECK: {\"SUPABASE_URL\":\"https://ecjufuhmmehhzusicghh.supabase.co\",\"HAS_KEY\":true,\"JWT\":true,\"DEEPSEEK\":false}"
-  },
-  {
-    "id": "1772370653933fifn",
-    "timestamp": "2026-03-01T13:10:53.933Z",
-    "level": "log",
-    "message": "🚀 Server running on http://localhost:3000"
-  },
-  {
-    "id": "1772370658217q0fq",
-    "timestamp": "2026-03-01T13:10:58.217Z",
-    "level": "log",
-    "message": "🖼 Serving images from: E:\\Projekt\\datas\\images"
-  },
-  {
-    "id": "1772370658221xz9j",
-    "timestamp": "2026-03-01T13:10:58.221Z",
-    "level": "log",
-    "message": "[dotenv@17.2.3] injecting env (15) from ..\\.env \u001b[2m-- tip: 🔑 add access controls to secrets: https://dotenvx.com/ops\u001b[0m"
-  },
-  {
-    "id": "1772370658290p0k6",
-    "timestamp": "2026-03-01T13:10:58.290Z",
-    "level": "log",
-    "message": "[dotenv@17.2.3] injecting env (0) from .env \u001b[2m-- tip: 🔐 prevent committing .env to code: https://dotenvx.com/precommit\u001b[0m"
-  },
-  {
-    "id": "1772370658332a72c",
-    "timestamp": "2026-03-01T13:10:58.332Z",
-    "level": "log",
-    "message": "✅ products.controller keys: [\"list\",\"brands\"]"
-  },
-  {
-    "id": "1772370658333ffyu",
-    "timestamp": "2026-03-01T13:10:58.333Z",
-    "level": "log",
-    "message": "✅ typeof ctrl.list: function"
-  },
-  {
-    "id": "1772370658333jawh",
-    "timestamp": "2026-03-01T13:10:58.333Z",
-    "level": "log",
-    "message": "✅ typeof ctrl.brands: function"
-  },
-  {
-    "id": "1772370658334geh4",
-    "timestamp": "2026-03-01T13:10:58.334Z",
-    "level": "log",
-    "message": "TABLES_FILE: E:\\Projekt\\backend\\datas\\Jsons\\tables.runtime.json"
-  },
-  {
-    "id": "17723706583356cxq",
-    "timestamp": "2026-03-01T13:10:58.335Z",
-    "level": "log",
-    "message": "ITEMS CTRL = {}"
-  },
-  {
-    "id": "1772370658335or4u",
-    "timestamp": "2026-03-01T13:10:58.335Z",
-    "level": "log",
-    "message": "ITEMS CTRL LIST = "
-  },
-  {
-    "id": "1772370658360ncd0",
-    "timestamp": "2026-03-01T13:10:58.360Z",
-    "level": "log",
-    "message": "ENV CHECK: {\"SUPABASE_URL\":\"https://ecjufuhmmehhzusicghh.supabase.co\",\"HAS_KEY\":true,\"JWT\":true,\"DEEPSEEK\":false}"
-  },
-  {
-    "id": "1772370658362lv2y",
-    "timestamp": "2026-03-01T13:10:58.362Z",
-    "level": "log",
-    "message": "🚀 Server running on http://localhost:3000"
-  },
-  {
-    "id": "17723707022375pzs",
-    "timestamp": "2026-03-01T13:11:42.237Z",
-    "level": "log",
-    "message": "🍪 COOKIES: {\"Webstorm-4a9b1ed1\":\"2cd47b33-d91f-4180-94e5-e3cd66fd6f7d\",\"Webstorm-4a9b1ed2\":\"4825e2dd-8848-40aa-82fa-6b6096e480a5\",\"Webstorm-4a9b1ed3\":\"4b21ec80-24ec-43df-ad72-310d7e663763\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJIYXphZmlMZXYiLCJlbWFpbCI6ImhhemFmaWxldkBnbWFpbC5jb20iLCJyb2xlIjoib3duZXIiLCJpYXQiOjE3NzE4NjQ2OTYsImV4cCI6MTc3NDAyNDY5Nn0.z9YDFi-lGAygrhWNw89CwelIqJCxTt9QOUUyClxwPNQ\"}"
-  },
-  {
-    "id": "177237070226121m1",
-    "timestamp": "2026-03-01T13:11:42.261Z",
-    "level": "log",
-    "message": "🍪 COOKIES: {\"Webstorm-4a9b1ed1\":\"2cd47b33-d91f-4180-94e5-e3cd66fd6f7d\",\"Webstorm-4a9b1ed2\":\"4825e2dd-8848-40aa-82fa-6b6096e480a5\",\"Webstorm-4a9b1ed3\":\"4b21ec80-24ec-43df-ad72-310d7e663763\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJIYXphZmlMZXYiLCJlbWFpbCI6ImhhemFmaWxldkBnbWFpbC5jb20iLCJyb2xlIjoib3duZXIiLCJpYXQiOjE3NzE4NjQ2OTYsImV4cCI6MTc3NDAyNDY5Nn0.z9YDFi-lGAygrhWNw89CwelIqJCxTt9QOUUyClxwPNQ\"}"
-  },
-  {
-    "id": "1772370702314frlh",
-    "timestamp": "2026-03-01T13:11:42.314Z",
-    "level": "log",
-    "message": "🍪 COOKIES: {\"Webstorm-4a9b1ed1\":\"2cd47b33-d91f-4180-94e5-e3cd66fd6f7d\",\"Webstorm-4a9b1ed2\":\"4825e2dd-8848-40aa-82fa-6b6096e480a5\",\"Webstorm-4a9b1ed3\":\"4b21ec80-24ec-43df-ad72-310d7e663763\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJIYXphZmlMZXYiLCJlbWFpbCI6ImhhemFmaWxldkBnbWFpbC5jb20iLCJyb2xlIjoib3duZXIiLCJpYXQiOjE3NzE4NjQ2OTYsImV4cCI6MTc3NDAyNDY5Nn0.z9YDFi-lGAygrhWNw89CwelIqJCxTt9QOUUyClxwPNQ\"}"
-  },
-  {
-    "id": "1772370702407ewnv",
-    "timestamp": "2026-03-01T13:11:42.407Z",
-    "level": "log",
-    "message": "🍪 COOKIES: {\"Webstorm-4a9b1ed1\":\"2cd47b33-d91f-4180-94e5-e3cd66fd6f7d\",\"Webstorm-4a9b1ed2\":\"4825e2dd-8848-40aa-82fa-6b6096e480a5\",\"Webstorm-4a9b1ed3\":\"4b21ec80-24ec-43df-ad72-310d7e663763\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJIYXphZmlMZXYiLCJlbWFpbCI6ImhhemFmaWxldkBnbWFpbC5jb20iLCJyb2xlIjoib3duZXIiLCJpYXQiOjE3NzE4NjQ2OTYsImV4cCI6MTc3NDAyNDY5Nn0.z9YDFi-lGAygrhWNw89CwelIqJCxTt9QOUUyClxwPNQ\"}"
-  },
-  {
-    "id": "177237070250037nw",
-    "timestamp": "2026-03-01T13:11:42.500Z",
-    "level": "log",
-    "message": "🔥 HIT GET /api/ranks/me"
-  },
-  {
-    "id": "1772370702501kc7c",
-    "timestamp": "2026-03-01T13:11:42.501Z",
-    "level": "log",
-    "message": "🍪 COOKIES: {\"Webstorm-4a9b1ed1\":\"2cd47b33-d91f-4180-94e5-e3cd66fd6f7d\",\"Webstorm-4a9b1ed2\":\"4825e2dd-8848-40aa-82fa-6b6096e480a5\",\"Webstorm-4a9b1ed3\":\"4b21ec80-24ec-43df-ad72-310d7e663763\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJIYXphZmlMZXYiLCJlbWFpbCI6ImhhemFmaWxldkBnbWFpbC5jb20iLCJyb2xlIjoib3duZXIiLCJpYXQiOjE3NzE4NjQ2OTYsImV4cCI6MTc3NDAyNDY5Nn0.z9YDFi-lGAygrhWNw89CwelIqJCxTt9QOUUyClxwPNQ\"}"
-  },
-  {
-    "id": "1772372683764tt0h",
-    "timestamp": "2026-03-01T13:44:43.764Z",
-    "level": "log",
-    "message": "🍪 COOKIES: {\"Webstorm-4a9b1ed1\":\"2cd47b33-d91f-4180-94e5-e3cd66fd6f7d\",\"Webstorm-4a9b1ed2\":\"4825e2dd-8848-40aa-82fa-6b6096e480a5\",\"Webstorm-4a9b1ed3\":\"4b21ec80-24ec-43df-ad72-310d7e663763\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJIYXphZmlMZXYiLCJlbWFpbCI6ImhhemFmaWxldkBnbWFpbC5jb20iLCJyb2xlIjoib3duZXIiLCJpYXQiOjE3NzE4NjQ2OTYsImV4cCI6MTc3NDAyNDY5Nn0.z9YDFi-lGAygrhWNw89CwelIqJCxTt9QOUUyClxwPNQ\"}"
-  },
-  {
-    "id": "1772372683767ngrr",
-    "timestamp": "2026-03-01T13:44:43.767Z",
-    "level": "log",
-    "message": "🍪 COOKIES: {\"Webstorm-4a9b1ed1\":\"2cd47b33-d91f-4180-94e5-e3cd66fd6f7d\",\"Webstorm-4a9b1ed2\":\"4825e2dd-8848-40aa-82fa-6b6096e480a5\",\"Webstorm-4a9b1ed3\":\"4b21ec80-24ec-43df-ad72-310d7e663763\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJIYXphZmlMZXYiLCJlbWFpbCI6ImhhemFmaWxldkBnbWFpbC5jb20iLCJyb2xlIjoib3duZXIiLCJpYXQiOjE3NzE4NjQ2OTYsImV4cCI6MTc3NDAyNDY5Nn0.z9YDFi-lGAygrhWNw89CwelIqJCxTt9QOUUyClxwPNQ\"}"
-  },
-  {
-    "id": "177237268393744rl",
-    "timestamp": "2026-03-01T13:44:43.937Z",
-    "level": "log",
-    "message": "🍪 COOKIES: {\"Webstorm-4a9b1ed1\":\"2cd47b33-d91f-4180-94e5-e3cd66fd6f7d\",\"Webstorm-4a9b1ed2\":\"4825e2dd-8848-40aa-82fa-6b6096e480a5\",\"Webstorm-4a9b1ed3\":\"4b21ec80-24ec-43df-ad72-310d7e663763\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJIYXphZmlMZXYiLCJlbWFpbCI6ImhhemFmaWxldkBnbWFpbC5jb20iLCJyb2xlIjoib3duZXIiLCJpYXQiOjE3NzE4NjQ2OTYsImV4cCI6MTc3NDAyNDY5Nn0.z9YDFi-lGAygrhWNw89CwelIqJCxTt9QOUUyClxwPNQ\"}"
-  },
-  {
-    "id": "1772372684060gf3k",
-    "timestamp": "2026-03-01T13:44:44.060Z",
-    "level": "log",
-    "message": "🍪 COOKIES: {\"Webstorm-4a9b1ed1\":\"2cd47b33-d91f-4180-94e5-e3cd66fd6f7d\",\"Webstorm-4a9b1ed2\":\"4825e2dd-8848-40aa-82fa-6b6096e480a5\",\"Webstorm-4a9b1ed3\":\"4b21ec80-24ec-43df-ad72-310d7e663763\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJIYXphZmlMZXYiLCJlbWFpbCI6ImhhemFmaWxldkBnbWFpbC5jb20iLCJyb2xlIjoib3duZXIiLCJpYXQiOjE3NzE4NjQ2OTYsImV4cCI6MTc3NDAyNDY5Nn0.z9YDFi-lGAygrhWNw89CwelIqJCxTt9QOUUyClxwPNQ\"}"
-  },
-  {
-    "id": "1772372684140lbq7",
-    "timestamp": "2026-03-01T13:44:44.140Z",
-    "level": "log",
-    "message": "🔥 HIT GET /api/ranks/me"
-  },
-  {
     "id": "1772372684140dg5g",
     "timestamp": "2026-03-01T13:44:44.140Z",
     "level": "log",
@@ -11998,5 +11062,941 @@
     "timestamp": "2026-03-01T20:07:04.572Z",
     "level": "log",
     "message": "🍪 COOKIES: {\"g_state\":\"{\\\"i_l\\\":0,\\\"i_ll\\\":1772391191543,\\\"i_b\\\":\\\"QvZgyjWm37mTHWwgdSFk7rOOLcgKhp1goN6yolt591k\\\",\\\"i_e\\\":{\\\"enable_itp_optimization\\\":0}}\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwidXNlcm5hbWUiOiJUeXB5IiwiZW1haWwiOiJyb2xhbmRlZ3JpQGdtYWlsLmNvbSIsInJvbGUiOiJvd25lciIsImlhdCI6MTc3MjM5MTIxMiwiZXhwIjoxNzcyNDM0NDEyfQ.j-cBDK_LdPMfI_Ur0476tDbbOtDVKTdNScdYZyaS_qc\"}"
+  },
+  {
+    "id": "1772631052212i6vx",
+    "timestamp": "2026-03-04T13:30:52.213Z",
+    "level": "log",
+    "message": "🖼 Serving images from: C:\\Users\\Kovács Norbert\\WebstormProjects\\Team-Work\\datas\\images"
+  },
+  {
+    "id": "1772631052224th8p",
+    "timestamp": "2026-03-04T13:30:52.224Z",
+    "level": "log",
+    "message": "[dotenv@17.2.3] injecting env (18) from ..\\.env \u001b[2m-- tip: 🔐 prevent committing .env to code: https://dotenvx.com/precommit\u001b[0m"
+  },
+  {
+    "id": "1772631052435u25o",
+    "timestamp": "2026-03-04T13:30:52.435Z",
+    "level": "log",
+    "message": "[dotenv@17.2.3] injecting env (0) from .env \u001b[2m-- tip: 🔐 encrypt with Dotenvx: https://dotenvx.com\u001b[0m"
+  },
+  {
+    "id": "1772631052939r2xu",
+    "timestamp": "2026-03-04T13:30:52.939Z",
+    "level": "log",
+    "message": "✅ products.controller keys: [\"list\",\"brands\"]"
+  },
+  {
+    "id": "1772631052948315l",
+    "timestamp": "2026-03-04T13:30:52.948Z",
+    "level": "log",
+    "message": "✅ typeof ctrl.list: function"
+  },
+  {
+    "id": "1772631052948uoh4",
+    "timestamp": "2026-03-04T13:30:52.948Z",
+    "level": "log",
+    "message": "✅ typeof ctrl.brands: function"
+  },
+  {
+    "id": "1772631052954tz8q",
+    "timestamp": "2026-03-04T13:30:52.954Z",
+    "level": "log",
+    "message": "TABLES_FILE: C:\\Users\\Kovács Norbert\\WebstormProjects\\Team-Work\\backend\\datas\\Jsons\\tables.runtime.json"
+  },
+  {
+    "id": "1772631052960m5so",
+    "timestamp": "2026-03-04T13:30:52.960Z",
+    "level": "log",
+    "message": "ITEMS CTRL = {}"
+  },
+  {
+    "id": "1772631052962e14m",
+    "timestamp": "2026-03-04T13:30:52.962Z",
+    "level": "log",
+    "message": "ITEMS CTRL LIST = "
+  },
+  {
+    "id": "1772631053074vm5v",
+    "timestamp": "2026-03-04T13:30:53.074Z",
+    "level": "log",
+    "message": "ENV CHECK: {\"SUPABASE_URL\":\"https://ecjufuhmmehhzusicghh.supabase.co\",\"HAS_KEY\":true,\"JWT\":true,\"DEEPSEEK\":false}"
+  },
+  {
+    "id": "1772631053096jrs9",
+    "timestamp": "2026-03-04T13:30:53.096Z",
+    "level": "log",
+    "message": "🚀 Server running on http://localhost:3000"
+  },
+  {
+    "id": "1772631094962pw3k",
+    "timestamp": "2026-03-04T13:31:34.962Z",
+    "level": "log",
+    "message": "🍪 COOKIES: {\"Webstorm-817a862\":\"c02a10b3-6d06-451b-b28e-a3bc746d6127\",\"Pycharm-bae42109\":\"83e98add-8a30-4cb0-92f8-583ca00c2d86\"}"
+  },
+  {
+    "id": "17726310949999by3",
+    "timestamp": "2026-03-04T13:31:34.999Z",
+    "level": "log",
+    "message": "❌ NINCS auth_token"
+  },
+  {
+    "id": "17726310950964zcv",
+    "timestamp": "2026-03-04T13:31:35.096Z",
+    "level": "log",
+    "message": "🍪 COOKIES: {\"Webstorm-817a862\":\"c02a10b3-6d06-451b-b28e-a3bc746d6127\",\"Pycharm-bae42109\":\"83e98add-8a30-4cb0-92f8-583ca00c2d86\"}"
+  },
+  {
+    "id": "177263109510148zx",
+    "timestamp": "2026-03-04T13:31:35.101Z",
+    "level": "log",
+    "message": "❌ NINCS auth_token"
+  },
+  {
+    "id": "1772632003148dvhp",
+    "timestamp": "2026-03-04T13:46:43.148Z",
+    "level": "log",
+    "message": "🖼 Serving images from: C:\\Users\\Kovács Norbert\\WebstormProjects\\Team-Work\\datas\\images"
+  },
+  {
+    "id": "1772632003168zawh",
+    "timestamp": "2026-03-04T13:46:43.168Z",
+    "level": "log",
+    "message": "[dotenv@17.2.3] injecting env (18) from ..\\.env \u001b[2m-- tip: 🔐 prevent building .env in docker: https://dotenvx.com/prebuild\u001b[0m"
+  },
+  {
+    "id": "17726320034128w98",
+    "timestamp": "2026-03-04T13:46:43.412Z",
+    "level": "log",
+    "message": "[dotenv@17.2.3] injecting env (0) from .env \u001b[2m-- tip: ✅ audit secrets and track compliance: https://dotenvx.com/ops\u001b[0m"
+  },
+  {
+    "id": "1772632004038m5np",
+    "timestamp": "2026-03-04T13:46:44.038Z",
+    "level": "log",
+    "message": "✅ products.controller keys: [\"list\",\"brands\"]"
+  },
+  {
+    "id": "17726320040381xx6",
+    "timestamp": "2026-03-04T13:46:44.038Z",
+    "level": "log",
+    "message": "✅ typeof ctrl.list: function"
+  },
+  {
+    "id": "17726320040395iu8",
+    "timestamp": "2026-03-04T13:46:44.039Z",
+    "level": "log",
+    "message": "✅ typeof ctrl.brands: function"
+  },
+  {
+    "id": "1772632004043khlf",
+    "timestamp": "2026-03-04T13:46:44.043Z",
+    "level": "log",
+    "message": "TABLES_FILE: C:\\Users\\Kovács Norbert\\WebstormProjects\\Team-Work\\backend\\datas\\Jsons\\tables.runtime.json"
+  },
+  {
+    "id": "1772632004044yfdi",
+    "timestamp": "2026-03-04T13:46:44.045Z",
+    "level": "log",
+    "message": "ITEMS CTRL = {}"
+  },
+  {
+    "id": "1772632004045f9q8",
+    "timestamp": "2026-03-04T13:46:44.046Z",
+    "level": "log",
+    "message": "ITEMS CTRL LIST = "
+  },
+  {
+    "id": "1772632004142jv9i",
+    "timestamp": "2026-03-04T13:46:44.142Z",
+    "level": "log",
+    "message": "ENV CHECK: {\"SUPABASE_URL\":\"https://ecjufuhmmehhzusicghh.supabase.co\",\"HAS_KEY\":true,\"JWT\":true,\"DEEPSEEK\":false}"
+  },
+  {
+    "id": "17726320041594ohy",
+    "timestamp": "2026-03-04T13:46:44.159Z",
+    "level": "log",
+    "message": "🚀 Server running on http://localhost:3000"
+  },
+  {
+    "id": "1772632059445s8b5",
+    "timestamp": "2026-03-04T13:47:39.447Z",
+    "level": "log",
+    "message": "🍪 COOKIES: {\"Webstorm-817a862\":\"c02a10b3-6d06-451b-b28e-a3bc746d6127\",\"Pycharm-bae42109\":\"83e98add-8a30-4cb0-92f8-583ca00c2d86\"}"
+  },
+  {
+    "id": "1772632059475r8dw",
+    "timestamp": "2026-03-04T13:47:39.475Z",
+    "level": "log",
+    "message": "❌ NINCS auth_token"
+  },
+  {
+    "id": "1772632059552qtt4",
+    "timestamp": "2026-03-04T13:47:39.552Z",
+    "level": "log",
+    "message": "🍪 COOKIES: {\"Webstorm-817a862\":\"c02a10b3-6d06-451b-b28e-a3bc746d6127\",\"Pycharm-bae42109\":\"83e98add-8a30-4cb0-92f8-583ca00c2d86\"}"
+  },
+  {
+    "id": "1772632059555ff77",
+    "timestamp": "2026-03-04T13:47:39.555Z",
+    "level": "log",
+    "message": "❌ NINCS auth_token"
+  },
+  {
+    "id": "1772796511148kus4",
+    "timestamp": "2026-03-06T11:28:31.149Z",
+    "level": "log",
+    "message": "🖼 Serving images from: C:\\Users\\Kovács Norbert\\WebstormProjects\\Team-Work\\datas\\images"
+  },
+  {
+    "id": "17727965111928h7k",
+    "timestamp": "2026-03-06T11:28:31.192Z",
+    "level": "log",
+    "message": "[dotenv@17.2.3] injecting env (18) from ..\\.env \u001b[2m-- tip: 🔄 add secrets lifecycle management: https://dotenvx.com/ops\u001b[0m"
+  },
+  {
+    "id": "17727965113456fpz",
+    "timestamp": "2026-03-06T11:28:31.345Z",
+    "level": "log",
+    "message": "[dotenv@17.2.3] injecting env (0) from .env \u001b[2m-- tip: 🔐 encrypt with Dotenvx: https://dotenvx.com\u001b[0m"
+  },
+  {
+    "id": "177279651163629ni",
+    "timestamp": "2026-03-06T11:28:31.636Z",
+    "level": "log",
+    "message": "✅ products.controller keys: [\"list\",\"brands\"]"
+  },
+  {
+    "id": "1772796511636da4a",
+    "timestamp": "2026-03-06T11:28:31.636Z",
+    "level": "log",
+    "message": "✅ typeof ctrl.list: function"
+  },
+  {
+    "id": "1772796511637h34q",
+    "timestamp": "2026-03-06T11:28:31.637Z",
+    "level": "log",
+    "message": "✅ typeof ctrl.brands: function"
+  },
+  {
+    "id": "1772796511640sk95",
+    "timestamp": "2026-03-06T11:28:31.640Z",
+    "level": "log",
+    "message": "TABLES_FILE: C:\\Users\\Kovács Norbert\\WebstormProjects\\Team-Work\\backend\\datas\\Jsons\\tables.runtime.json"
+  },
+  {
+    "id": "1772796511642c3zi",
+    "timestamp": "2026-03-06T11:28:31.642Z",
+    "level": "log",
+    "message": "ITEMS CTRL = {}"
+  },
+  {
+    "id": "1772796511644vso1",
+    "timestamp": "2026-03-06T11:28:31.644Z",
+    "level": "log",
+    "message": "ITEMS CTRL LIST = "
+  },
+  {
+    "id": "1772796511709sgqg",
+    "timestamp": "2026-03-06T11:28:31.709Z",
+    "level": "log",
+    "message": "ENV CHECK: {\"SUPABASE_URL\":\"https://ecjufuhmmehhzusicghh.supabase.co\",\"HAS_KEY\":true,\"JWT\":true,\"DEEPSEEK\":false}"
+  },
+  {
+    "id": "1772796511719318u",
+    "timestamp": "2026-03-06T11:28:31.719Z",
+    "level": "log",
+    "message": "🚀 Server running on http://localhost:3000"
+  },
+  {
+    "id": "177279653646103qc",
+    "timestamp": "2026-03-06T11:28:56.478Z",
+    "level": "log",
+    "message": "🍪 COOKIES: {\"Webstorm-817a862\":\"c02a10b3-6d06-451b-b28e-a3bc746d6127\",\"Pycharm-bae42109\":\"83e98add-8a30-4cb0-92f8-583ca00c2d86\"}"
+  },
+  {
+    "id": "1772796536503v0ef",
+    "timestamp": "2026-03-06T11:28:56.503Z",
+    "level": "log",
+    "message": "❌ NINCS auth_token"
+  },
+  {
+    "id": "1772796536627ybsz",
+    "timestamp": "2026-03-06T11:28:56.627Z",
+    "level": "log",
+    "message": "🍪 COOKIES: {\"Webstorm-817a862\":\"c02a10b3-6d06-451b-b28e-a3bc746d6127\",\"Pycharm-bae42109\":\"83e98add-8a30-4cb0-92f8-583ca00c2d86\"}"
+  },
+  {
+    "id": "1772796536647m2ho",
+    "timestamp": "2026-03-06T11:28:56.647Z",
+    "level": "log",
+    "message": "❌ NINCS auth_token"
+  },
+  {
+    "id": "1772796765438egj7",
+    "timestamp": "2026-03-06T11:32:45.439Z",
+    "level": "log",
+    "message": "🍪 COOKIES: {\"Webstorm-817a862\":\"c02a10b3-6d06-451b-b28e-a3bc746d6127\",\"Pycharm-bae42109\":\"83e98add-8a30-4cb0-92f8-583ca00c2d86\",\"g_state\":\"{\\\"i_l\\\":0,\\\"i_ll\\\":1772796752006,\\\"i_b\\\":\\\"yhpzeKUJJWMoR8QxrkNPyf4x8XSkRuVZnEDNFsFEB/s\\\",\\\"i_e\\\":{\\\"enable_itp_optimization\\\":0}}\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NSwidXNlcm5hbWUiOiJIb3JiaWvDoW0iLCJlbWFpbCI6Im5vcmJlcnRrb3ZhY3MxMDFAZ21haWwuY29tIiwicm9sZSI6Im93bmVyIiwiaWF0IjoxNzcyNzk2NzY0LCJleHAiOjE3NzI4Mzk5NjR9.3RPJ7buHLd8nq833KnGncQXcNBzfnU5Va3A_yld6VSM\"}"
+  },
+  {
+    "id": "1772796766358szrd",
+    "timestamp": "2026-03-06T11:32:46.358Z",
+    "level": "log",
+    "message": "🔥 HIT GET /api/ranks/me"
+  },
+  {
+    "id": "1772796766360g1ay",
+    "timestamp": "2026-03-06T11:32:46.360Z",
+    "level": "log",
+    "message": "🍪 COOKIES: {\"Webstorm-817a862\":\"c02a10b3-6d06-451b-b28e-a3bc746d6127\",\"Pycharm-bae42109\":\"83e98add-8a30-4cb0-92f8-583ca00c2d86\",\"g_state\":\"{\\\"i_l\\\":0,\\\"i_ll\\\":1772796752006,\\\"i_b\\\":\\\"yhpzeKUJJWMoR8QxrkNPyf4x8XSkRuVZnEDNFsFEB/s\\\",\\\"i_e\\\":{\\\"enable_itp_optimization\\\":0}}\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NSwidXNlcm5hbWUiOiJIb3JiaWvDoW0iLCJlbWFpbCI6Im5vcmJlcnRrb3ZhY3MxMDFAZ21haWwuY29tIiwicm9sZSI6Im93bmVyIiwiaWF0IjoxNzcyNzk2NzY0LCJleHAiOjE3NzI4Mzk5NjR9.3RPJ7buHLd8nq833KnGncQXcNBzfnU5Va3A_yld6VSM\"}"
+  },
+  {
+    "id": "1772796869337pf43",
+    "timestamp": "2026-03-06T11:34:29.337Z",
+    "level": "log",
+    "message": "🍪 COOKIES: {\"Webstorm-817a862\":\"c02a10b3-6d06-451b-b28e-a3bc746d6127\",\"Pycharm-bae42109\":\"83e98add-8a30-4cb0-92f8-583ca00c2d86\",\"g_state\":\"{\\\"i_l\\\":0,\\\"i_ll\\\":1772796752006,\\\"i_b\\\":\\\"yhpzeKUJJWMoR8QxrkNPyf4x8XSkRuVZnEDNFsFEB/s\\\",\\\"i_e\\\":{\\\"enable_itp_optimization\\\":0}}\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NSwidXNlcm5hbWUiOiJIb3JiaWvDoW0iLCJlbWFpbCI6Im5vcmJlcnRrb3ZhY3MxMDFAZ21haWwuY29tIiwicm9sZSI6Im93bmVyIiwiaWF0IjoxNzcyNzk2NzY0LCJleHAiOjE3NzI4Mzk5NjR9.3RPJ7buHLd8nq833KnGncQXcNBzfnU5Va3A_yld6VSM\"}"
+  },
+  {
+    "id": "1772796959125bzae",
+    "timestamp": "2026-03-06T11:35:59.126Z",
+    "level": "log",
+    "message": "🍪 COOKIES: {\"Webstorm-817a862\":\"c02a10b3-6d06-451b-b28e-a3bc746d6127\",\"Pycharm-bae42109\":\"83e98add-8a30-4cb0-92f8-583ca00c2d86\",\"g_state\":\"{\\\"i_l\\\":0,\\\"i_ll\\\":1772796752006,\\\"i_b\\\":\\\"yhpzeKUJJWMoR8QxrkNPyf4x8XSkRuVZnEDNFsFEB/s\\\",\\\"i_e\\\":{\\\"enable_itp_optimization\\\":0}}\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NSwidXNlcm5hbWUiOiJIb3JiaWvDoW0iLCJlbWFpbCI6Im5vcmJlcnRrb3ZhY3MxMDFAZ21haWwuY29tIiwicm9sZSI6Im93bmVyIiwiaWF0IjoxNzcyNzk2NzY0LCJleHAiOjE3NzI4Mzk5NjR9.3RPJ7buHLd8nq833KnGncQXcNBzfnU5Va3A_yld6VSM\"}"
+  },
+  {
+    "id": "1772796959915bsa9",
+    "timestamp": "2026-03-06T11:35:59.915Z",
+    "level": "log",
+    "message": "🍪 COOKIES: {\"Webstorm-817a862\":\"c02a10b3-6d06-451b-b28e-a3bc746d6127\",\"Pycharm-bae42109\":\"83e98add-8a30-4cb0-92f8-583ca00c2d86\",\"g_state\":\"{\\\"i_l\\\":0,\\\"i_ll\\\":1772796752006,\\\"i_b\\\":\\\"yhpzeKUJJWMoR8QxrkNPyf4x8XSkRuVZnEDNFsFEB/s\\\",\\\"i_e\\\":{\\\"enable_itp_optimization\\\":0}}\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NSwidXNlcm5hbWUiOiJIb3JiaWvDoW0iLCJlbWFpbCI6Im5vcmJlcnRrb3ZhY3MxMDFAZ21haWwuY29tIiwicm9sZSI6Im93bmVyIiwiaWF0IjoxNzcyNzk2NzY0LCJleHAiOjE3NzI4Mzk5NjR9.3RPJ7buHLd8nq833KnGncQXcNBzfnU5Va3A_yld6VSM\"}"
+  },
+  {
+    "id": "1772797153884gg6a",
+    "timestamp": "2026-03-06T11:39:13.885Z",
+    "level": "log",
+    "message": "🍪 COOKIES: {\"Webstorm-817a862\":\"c02a10b3-6d06-451b-b28e-a3bc746d6127\",\"Pycharm-bae42109\":\"83e98add-8a30-4cb0-92f8-583ca00c2d86\",\"g_state\":\"{\\\"i_l\\\":0,\\\"i_ll\\\":1772796752006,\\\"i_b\\\":\\\"yhpzeKUJJWMoR8QxrkNPyf4x8XSkRuVZnEDNFsFEB/s\\\",\\\"i_e\\\":{\\\"enable_itp_optimization\\\":0}}\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NSwidXNlcm5hbWUiOiJIb3JiaWvDoW0iLCJlbWFpbCI6Im5vcmJlcnRrb3ZhY3MxMDFAZ21haWwuY29tIiwicm9sZSI6Im93bmVyIiwiaWF0IjoxNzcyNzk2NzY0LCJleHAiOjE3NzI4Mzk5NjR9.3RPJ7buHLd8nq833KnGncQXcNBzfnU5Va3A_yld6VSM\"}"
+  },
+  {
+    "id": "1772797154694uhbm",
+    "timestamp": "2026-03-06T11:39:14.694Z",
+    "level": "log",
+    "message": "🍪 COOKIES: {\"Webstorm-817a862\":\"c02a10b3-6d06-451b-b28e-a3bc746d6127\",\"Pycharm-bae42109\":\"83e98add-8a30-4cb0-92f8-583ca00c2d86\",\"g_state\":\"{\\\"i_l\\\":0,\\\"i_ll\\\":1772796752006,\\\"i_b\\\":\\\"yhpzeKUJJWMoR8QxrkNPyf4x8XSkRuVZnEDNFsFEB/s\\\",\\\"i_e\\\":{\\\"enable_itp_optimization\\\":0}}\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NSwidXNlcm5hbWUiOiJIb3JiaWvDoW0iLCJlbWFpbCI6Im5vcmJlcnRrb3ZhY3MxMDFAZ21haWwuY29tIiwicm9sZSI6Im93bmVyIiwiaWF0IjoxNzcyNzk2NzY0LCJleHAiOjE3NzI4Mzk5NjR9.3RPJ7buHLd8nq833KnGncQXcNBzfnU5Va3A_yld6VSM\"}"
+  },
+  {
+    "id": "17727971556351kh9",
+    "timestamp": "2026-03-06T11:39:15.635Z",
+    "level": "log",
+    "message": "🍪 COOKIES: {\"Webstorm-817a862\":\"c02a10b3-6d06-451b-b28e-a3bc746d6127\",\"Pycharm-bae42109\":\"83e98add-8a30-4cb0-92f8-583ca00c2d86\",\"g_state\":\"{\\\"i_l\\\":0,\\\"i_ll\\\":1772796752006,\\\"i_b\\\":\\\"yhpzeKUJJWMoR8QxrkNPyf4x8XSkRuVZnEDNFsFEB/s\\\",\\\"i_e\\\":{\\\"enable_itp_optimization\\\":0}}\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NSwidXNlcm5hbWUiOiJIb3JiaWvDoW0iLCJlbWFpbCI6Im5vcmJlcnRrb3ZhY3MxMDFAZ21haWwuY29tIiwicm9sZSI6Im93bmVyIiwiaWF0IjoxNzcyNzk2NzY0LCJleHAiOjE3NzI4Mzk5NjR9.3RPJ7buHLd8nq833KnGncQXcNBzfnU5Va3A_yld6VSM\"}"
+  },
+  {
+    "id": "1772797155956tveu",
+    "timestamp": "2026-03-06T11:39:15.956Z",
+    "level": "log",
+    "message": "🍪 COOKIES: {\"Webstorm-817a862\":\"c02a10b3-6d06-451b-b28e-a3bc746d6127\",\"Pycharm-bae42109\":\"83e98add-8a30-4cb0-92f8-583ca00c2d86\",\"g_state\":\"{\\\"i_l\\\":0,\\\"i_ll\\\":1772796752006,\\\"i_b\\\":\\\"yhpzeKUJJWMoR8QxrkNPyf4x8XSkRuVZnEDNFsFEB/s\\\",\\\"i_e\\\":{\\\"enable_itp_optimization\\\":0}}\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NSwidXNlcm5hbWUiOiJIb3JiaWvDoW0iLCJlbWFpbCI6Im5vcmJlcnRrb3ZhY3MxMDFAZ21haWwuY29tIiwicm9sZSI6Im93bmVyIiwiaWF0IjoxNzcyNzk2NzY0LCJleHAiOjE3NzI4Mzk5NjR9.3RPJ7buHLd8nq833KnGncQXcNBzfnU5Va3A_yld6VSM\"}"
+  },
+  {
+    "id": "1772797156773h9p7",
+    "timestamp": "2026-03-06T11:39:16.773Z",
+    "level": "log",
+    "message": "🍪 COOKIES: {\"Webstorm-817a862\":\"c02a10b3-6d06-451b-b28e-a3bc746d6127\",\"Pycharm-bae42109\":\"83e98add-8a30-4cb0-92f8-583ca00c2d86\",\"g_state\":\"{\\\"i_l\\\":0,\\\"i_ll\\\":1772796752006,\\\"i_b\\\":\\\"yhpzeKUJJWMoR8QxrkNPyf4x8XSkRuVZnEDNFsFEB/s\\\",\\\"i_e\\\":{\\\"enable_itp_optimization\\\":0}}\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NSwidXNlcm5hbWUiOiJIb3JiaWvDoW0iLCJlbWFpbCI6Im5vcmJlcnRrb3ZhY3MxMDFAZ21haWwuY29tIiwicm9sZSI6Im93bmVyIiwiaWF0IjoxNzcyNzk2NzY0LCJleHAiOjE3NzI4Mzk5NjR9.3RPJ7buHLd8nq833KnGncQXcNBzfnU5Va3A_yld6VSM\"}"
+  },
+  {
+    "id": "1772797156860bckx",
+    "timestamp": "2026-03-06T11:39:16.860Z",
+    "level": "log",
+    "message": "🔥 HIT GET /api/ranks/me"
+  },
+  {
+    "id": "1772797156888qmhc",
+    "timestamp": "2026-03-06T11:39:16.888Z",
+    "level": "log",
+    "message": "🍪 COOKIES: {\"Webstorm-817a862\":\"c02a10b3-6d06-451b-b28e-a3bc746d6127\",\"Pycharm-bae42109\":\"83e98add-8a30-4cb0-92f8-583ca00c2d86\",\"g_state\":\"{\\\"i_l\\\":0,\\\"i_ll\\\":1772796752006,\\\"i_b\\\":\\\"yhpzeKUJJWMoR8QxrkNPyf4x8XSkRuVZnEDNFsFEB/s\\\",\\\"i_e\\\":{\\\"enable_itp_optimization\\\":0}}\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NSwidXNlcm5hbWUiOiJIb3JiaWvDoW0iLCJlbWFpbCI6Im5vcmJlcnRrb3ZhY3MxMDFAZ21haWwuY29tIiwicm9sZSI6Im93bmVyIiwiaWF0IjoxNzcyNzk2NzY0LCJleHAiOjE3NzI4Mzk5NjR9.3RPJ7buHLd8nq833KnGncQXcNBzfnU5Va3A_yld6VSM\"}"
+  },
+  {
+    "id": "177279719615223kk",
+    "timestamp": "2026-03-06T11:39:56.152Z",
+    "level": "log",
+    "message": "🍪 COOKIES: {\"Webstorm-817a862\":\"c02a10b3-6d06-451b-b28e-a3bc746d6127\",\"Pycharm-bae42109\":\"83e98add-8a30-4cb0-92f8-583ca00c2d86\",\"g_state\":\"{\\\"i_l\\\":0,\\\"i_ll\\\":1772796752006,\\\"i_b\\\":\\\"yhpzeKUJJWMoR8QxrkNPyf4x8XSkRuVZnEDNFsFEB/s\\\",\\\"i_e\\\":{\\\"enable_itp_optimization\\\":0}}\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NSwidXNlcm5hbWUiOiJIb3JiaWvDoW0iLCJlbWFpbCI6Im5vcmJlcnRrb3ZhY3MxMDFAZ21haWwuY29tIiwicm9sZSI6Im93bmVyIiwiaWF0IjoxNzcyNzk2NzY0LCJleHAiOjE3NzI4Mzk5NjR9.3RPJ7buHLd8nq833KnGncQXcNBzfnU5Va3A_yld6VSM\"}"
+  },
+  {
+    "id": "1772797196466vv1u",
+    "timestamp": "2026-03-06T11:39:56.466Z",
+    "level": "log",
+    "message": "🍪 COOKIES: {\"Webstorm-817a862\":\"c02a10b3-6d06-451b-b28e-a3bc746d6127\",\"Pycharm-bae42109\":\"83e98add-8a30-4cb0-92f8-583ca00c2d86\",\"g_state\":\"{\\\"i_l\\\":0,\\\"i_ll\\\":1772796752006,\\\"i_b\\\":\\\"yhpzeKUJJWMoR8QxrkNPyf4x8XSkRuVZnEDNFsFEB/s\\\",\\\"i_e\\\":{\\\"enable_itp_optimization\\\":0}}\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NSwidXNlcm5hbWUiOiJIb3JiaWvDoW0iLCJlbWFpbCI6Im5vcmJlcnRrb3ZhY3MxMDFAZ21haWwuY29tIiwicm9sZSI6Im93bmVyIiwiaWF0IjoxNzcyNzk2NzY0LCJleHAiOjE3NzI4Mzk5NjR9.3RPJ7buHLd8nq833KnGncQXcNBzfnU5Va3A_yld6VSM\"}"
+  },
+  {
+    "id": "1772797206354jhhm",
+    "timestamp": "2026-03-06T11:40:06.354Z",
+    "level": "log",
+    "message": "🍪 COOKIES: {\"Webstorm-817a862\":\"c02a10b3-6d06-451b-b28e-a3bc746d6127\",\"Pycharm-bae42109\":\"83e98add-8a30-4cb0-92f8-583ca00c2d86\",\"g_state\":\"{\\\"i_l\\\":0,\\\"i_ll\\\":1772796752006,\\\"i_b\\\":\\\"yhpzeKUJJWMoR8QxrkNPyf4x8XSkRuVZnEDNFsFEB/s\\\",\\\"i_e\\\":{\\\"enable_itp_optimization\\\":0}}\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NSwidXNlcm5hbWUiOiJIb3JiaWvDoW0iLCJlbWFpbCI6Im5vcmJlcnRrb3ZhY3MxMDFAZ21haWwuY29tIiwicm9sZSI6Im93bmVyIiwiaWF0IjoxNzcyNzk2NzY0LCJleHAiOjE3NzI4Mzk5NjR9.3RPJ7buHLd8nq833KnGncQXcNBzfnU5Va3A_yld6VSM\"}"
+  },
+  {
+    "id": "17727972063771met",
+    "timestamp": "2026-03-06T11:40:06.377Z",
+    "level": "log",
+    "message": "🍪 COOKIES: {\"Webstorm-817a862\":\"c02a10b3-6d06-451b-b28e-a3bc746d6127\",\"Pycharm-bae42109\":\"83e98add-8a30-4cb0-92f8-583ca00c2d86\",\"g_state\":\"{\\\"i_l\\\":0,\\\"i_ll\\\":1772796752006,\\\"i_b\\\":\\\"yhpzeKUJJWMoR8QxrkNPyf4x8XSkRuVZnEDNFsFEB/s\\\",\\\"i_e\\\":{\\\"enable_itp_optimization\\\":0}}\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NSwidXNlcm5hbWUiOiJIb3JiaWvDoW0iLCJlbWFpbCI6Im5vcmJlcnRrb3ZhY3MxMDFAZ21haWwuY29tIiwicm9sZSI6Im93bmVyIiwiaWF0IjoxNzcyNzk2NzY0LCJleHAiOjE3NzI4Mzk5NjR9.3RPJ7buHLd8nq833KnGncQXcNBzfnU5Va3A_yld6VSM\"}"
+  },
+  {
+    "id": "1772797206639jupm",
+    "timestamp": "2026-03-06T11:40:06.639Z",
+    "level": "log",
+    "message": "🍪 COOKIES: {\"Webstorm-817a862\":\"c02a10b3-6d06-451b-b28e-a3bc746d6127\",\"Pycharm-bae42109\":\"83e98add-8a30-4cb0-92f8-583ca00c2d86\",\"g_state\":\"{\\\"i_l\\\":0,\\\"i_ll\\\":1772796752006,\\\"i_b\\\":\\\"yhpzeKUJJWMoR8QxrkNPyf4x8XSkRuVZnEDNFsFEB/s\\\",\\\"i_e\\\":{\\\"enable_itp_optimization\\\":0}}\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NSwidXNlcm5hbWUiOiJIb3JiaWvDoW0iLCJlbWFpbCI6Im5vcmJlcnRrb3ZhY3MxMDFAZ21haWwuY29tIiwicm9sZSI6Im93bmVyIiwiaWF0IjoxNzcyNzk2NzY0LCJleHAiOjE3NzI4Mzk5NjR9.3RPJ7buHLd8nq833KnGncQXcNBzfnU5Va3A_yld6VSM\"}"
+  },
+  {
+    "id": "1772797206859g5nr",
+    "timestamp": "2026-03-06T11:40:06.859Z",
+    "level": "log",
+    "message": "🔥 HIT GET /api/ranks/me"
+  },
+  {
+    "id": "1772797206862egbh",
+    "timestamp": "2026-03-06T11:40:06.862Z",
+    "level": "log",
+    "message": "🍪 COOKIES: {\"Webstorm-817a862\":\"c02a10b3-6d06-451b-b28e-a3bc746d6127\",\"Pycharm-bae42109\":\"83e98add-8a30-4cb0-92f8-583ca00c2d86\",\"g_state\":\"{\\\"i_l\\\":0,\\\"i_ll\\\":1772796752006,\\\"i_b\\\":\\\"yhpzeKUJJWMoR8QxrkNPyf4x8XSkRuVZnEDNFsFEB/s\\\",\\\"i_e\\\":{\\\"enable_itp_optimization\\\":0}}\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NSwidXNlcm5hbWUiOiJIb3JiaWvDoW0iLCJlbWFpbCI6Im5vcmJlcnRrb3ZhY3MxMDFAZ21haWwuY29tIiwicm9sZSI6Im93bmVyIiwiaWF0IjoxNzcyNzk2NzY0LCJleHAiOjE3NzI4Mzk5NjR9.3RPJ7buHLd8nq833KnGncQXcNBzfnU5Va3A_yld6VSM\"}"
+  },
+  {
+    "id": "1772797207479u7r4",
+    "timestamp": "2026-03-06T11:40:07.479Z",
+    "level": "log",
+    "message": "🍪 COOKIES: {\"Webstorm-817a862\":\"c02a10b3-6d06-451b-b28e-a3bc746d6127\",\"Pycharm-bae42109\":\"83e98add-8a30-4cb0-92f8-583ca00c2d86\",\"g_state\":\"{\\\"i_l\\\":0,\\\"i_ll\\\":1772796752006,\\\"i_b\\\":\\\"yhpzeKUJJWMoR8QxrkNPyf4x8XSkRuVZnEDNFsFEB/s\\\",\\\"i_e\\\":{\\\"enable_itp_optimization\\\":0}}\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NSwidXNlcm5hbWUiOiJIb3JiaWvDoW0iLCJlbWFpbCI6Im5vcmJlcnRrb3ZhY3MxMDFAZ21haWwuY29tIiwicm9sZSI6Im93bmVyIiwiaWF0IjoxNzcyNzk2NzY0LCJleHAiOjE3NzI4Mzk5NjR9.3RPJ7buHLd8nq833KnGncQXcNBzfnU5Va3A_yld6VSM\"}"
+  },
+  {
+    "id": "1772797207693caqs",
+    "timestamp": "2026-03-06T11:40:07.693Z",
+    "level": "log",
+    "message": "🍪 COOKIES: {\"Webstorm-817a862\":\"c02a10b3-6d06-451b-b28e-a3bc746d6127\",\"Pycharm-bae42109\":\"83e98add-8a30-4cb0-92f8-583ca00c2d86\",\"g_state\":\"{\\\"i_l\\\":0,\\\"i_ll\\\":1772796752006,\\\"i_b\\\":\\\"yhpzeKUJJWMoR8QxrkNPyf4x8XSkRuVZnEDNFsFEB/s\\\",\\\"i_e\\\":{\\\"enable_itp_optimization\\\":0}}\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NSwidXNlcm5hbWUiOiJIb3JiaWvDoW0iLCJlbWFpbCI6Im5vcmJlcnRrb3ZhY3MxMDFAZ21haWwuY29tIiwicm9sZSI6Im93bmVyIiwiaWF0IjoxNzcyNzk2NzY0LCJleHAiOjE3NzI4Mzk5NjR9.3RPJ7buHLd8nq833KnGncQXcNBzfnU5Va3A_yld6VSM\"}"
+  },
+  {
+    "id": "17727972083272uq2",
+    "timestamp": "2026-03-06T11:40:08.327Z",
+    "level": "log",
+    "message": "🍪 COOKIES: {\"Webstorm-817a862\":\"c02a10b3-6d06-451b-b28e-a3bc746d6127\",\"Pycharm-bae42109\":\"83e98add-8a30-4cb0-92f8-583ca00c2d86\",\"g_state\":\"{\\\"i_l\\\":0,\\\"i_ll\\\":1772796752006,\\\"i_b\\\":\\\"yhpzeKUJJWMoR8QxrkNPyf4x8XSkRuVZnEDNFsFEB/s\\\",\\\"i_e\\\":{\\\"enable_itp_optimization\\\":0}}\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NSwidXNlcm5hbWUiOiJIb3JiaWvDoW0iLCJlbWFpbCI6Im5vcmJlcnRrb3ZhY3MxMDFAZ21haWwuY29tIiwicm9sZSI6Im93bmVyIiwiaWF0IjoxNzcyNzk2NzY0LCJleHAiOjE3NzI4Mzk5NjR9.3RPJ7buHLd8nq833KnGncQXcNBzfnU5Va3A_yld6VSM\"}"
+  },
+  {
+    "id": "1772797208337qwlo",
+    "timestamp": "2026-03-06T11:40:08.337Z",
+    "level": "log",
+    "message": "🍪 COOKIES: {\"Webstorm-817a862\":\"c02a10b3-6d06-451b-b28e-a3bc746d6127\",\"Pycharm-bae42109\":\"83e98add-8a30-4cb0-92f8-583ca00c2d86\",\"g_state\":\"{\\\"i_l\\\":0,\\\"i_ll\\\":1772796752006,\\\"i_b\\\":\\\"yhpzeKUJJWMoR8QxrkNPyf4x8XSkRuVZnEDNFsFEB/s\\\",\\\"i_e\\\":{\\\"enable_itp_optimization\\\":0}}\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NSwidXNlcm5hbWUiOiJIb3JiaWvDoW0iLCJlbWFpbCI6Im5vcmJlcnRrb3ZhY3MxMDFAZ21haWwuY29tIiwicm9sZSI6Im93bmVyIiwiaWF0IjoxNzcyNzk2NzY0LCJleHAiOjE3NzI4Mzk5NjR9.3RPJ7buHLd8nq833KnGncQXcNBzfnU5Va3A_yld6VSM\"}"
+  },
+  {
+    "id": "1772797251358ac4g",
+    "timestamp": "2026-03-06T11:40:51.358Z",
+    "level": "log",
+    "message": "🍪 COOKIES: {\"Webstorm-817a862\":\"c02a10b3-6d06-451b-b28e-a3bc746d6127\",\"Pycharm-bae42109\":\"83e98add-8a30-4cb0-92f8-583ca00c2d86\",\"g_state\":\"{\\\"i_l\\\":0,\\\"i_ll\\\":1772796752006,\\\"i_b\\\":\\\"yhpzeKUJJWMoR8QxrkNPyf4x8XSkRuVZnEDNFsFEB/s\\\",\\\"i_e\\\":{\\\"enable_itp_optimization\\\":0}}\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NSwidXNlcm5hbWUiOiJIb3JiaWvDoW0iLCJlbWFpbCI6Im5vcmJlcnRrb3ZhY3MxMDFAZ21haWwuY29tIiwicm9sZSI6Im93bmVyIiwiaWF0IjoxNzcyNzk2NzY0LCJleHAiOjE3NzI4Mzk5NjR9.3RPJ7buHLd8nq833KnGncQXcNBzfnU5Va3A_yld6VSM\"}"
+  },
+  {
+    "id": "1772797251368m1dr",
+    "timestamp": "2026-03-06T11:40:51.368Z",
+    "level": "log",
+    "message": "🔥 HIT GET /api/ranks/me"
+  },
+  {
+    "id": "1772797251369w22m",
+    "timestamp": "2026-03-06T11:40:51.369Z",
+    "level": "log",
+    "message": "🍪 COOKIES: {\"Webstorm-817a862\":\"c02a10b3-6d06-451b-b28e-a3bc746d6127\",\"Pycharm-bae42109\":\"83e98add-8a30-4cb0-92f8-583ca00c2d86\",\"g_state\":\"{\\\"i_l\\\":0,\\\"i_ll\\\":1772796752006,\\\"i_b\\\":\\\"yhpzeKUJJWMoR8QxrkNPyf4x8XSkRuVZnEDNFsFEB/s\\\",\\\"i_e\\\":{\\\"enable_itp_optimization\\\":0}}\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NSwidXNlcm5hbWUiOiJIb3JiaWvDoW0iLCJlbWFpbCI6Im5vcmJlcnRrb3ZhY3MxMDFAZ21haWwuY29tIiwicm9sZSI6Im93bmVyIiwiaWF0IjoxNzcyNzk2NzY0LCJleHAiOjE3NzI4Mzk5NjR9.3RPJ7buHLd8nq833KnGncQXcNBzfnU5Va3A_yld6VSM\"}"
+  },
+  {
+    "id": "1772797388576ztxt",
+    "timestamp": "2026-03-06T11:43:08.576Z",
+    "level": "log",
+    "message": "🍪 COOKIES: {\"Webstorm-817a862\":\"c02a10b3-6d06-451b-b28e-a3bc746d6127\",\"Pycharm-bae42109\":\"83e98add-8a30-4cb0-92f8-583ca00c2d86\",\"g_state\":\"{\\\"i_l\\\":0,\\\"i_ll\\\":1772796752006,\\\"i_b\\\":\\\"yhpzeKUJJWMoR8QxrkNPyf4x8XSkRuVZnEDNFsFEB/s\\\",\\\"i_e\\\":{\\\"enable_itp_optimization\\\":0}}\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NSwidXNlcm5hbWUiOiJIb3JiaWvDoW0iLCJlbWFpbCI6Im5vcmJlcnRrb3ZhY3MxMDFAZ21haWwuY29tIiwicm9sZSI6Im93bmVyIiwiaWF0IjoxNzcyNzk2NzY0LCJleHAiOjE3NzI4Mzk5NjR9.3RPJ7buHLd8nq833KnGncQXcNBzfnU5Va3A_yld6VSM\"}"
+  },
+  {
+    "id": "1772797388614ppn4",
+    "timestamp": "2026-03-06T11:43:08.614Z",
+    "level": "log",
+    "message": "🍪 COOKIES: {\"Webstorm-817a862\":\"c02a10b3-6d06-451b-b28e-a3bc746d6127\",\"Pycharm-bae42109\":\"83e98add-8a30-4cb0-92f8-583ca00c2d86\",\"g_state\":\"{\\\"i_l\\\":0,\\\"i_ll\\\":1772796752006,\\\"i_b\\\":\\\"yhpzeKUJJWMoR8QxrkNPyf4x8XSkRuVZnEDNFsFEB/s\\\",\\\"i_e\\\":{\\\"enable_itp_optimization\\\":0}}\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NSwidXNlcm5hbWUiOiJIb3JiaWvDoW0iLCJlbWFpbCI6Im5vcmJlcnRrb3ZhY3MxMDFAZ21haWwuY29tIiwicm9sZSI6Im93bmVyIiwiaWF0IjoxNzcyNzk2NzY0LCJleHAiOjE3NzI4Mzk5NjR9.3RPJ7buHLd8nq833KnGncQXcNBzfnU5Va3A_yld6VSM\"}"
+  },
+  {
+    "id": "1772797391862bs32",
+    "timestamp": "2026-03-06T11:43:11.862Z",
+    "level": "log",
+    "message": "🍪 COOKIES: {\"Webstorm-817a862\":\"c02a10b3-6d06-451b-b28e-a3bc746d6127\",\"Pycharm-bae42109\":\"83e98add-8a30-4cb0-92f8-583ca00c2d86\",\"g_state\":\"{\\\"i_l\\\":0,\\\"i_ll\\\":1772796752006,\\\"i_b\\\":\\\"yhpzeKUJJWMoR8QxrkNPyf4x8XSkRuVZnEDNFsFEB/s\\\",\\\"i_e\\\":{\\\"enable_itp_optimization\\\":0}}\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NSwidXNlcm5hbWUiOiJIb3JiaWvDoW0iLCJlbWFpbCI6Im5vcmJlcnRrb3ZhY3MxMDFAZ21haWwuY29tIiwicm9sZSI6Im93bmVyIiwiaWF0IjoxNzcyNzk2NzY0LCJleHAiOjE3NzI4Mzk5NjR9.3RPJ7buHLd8nq833KnGncQXcNBzfnU5Va3A_yld6VSM\"}"
+  },
+  {
+    "id": "177279739215767st",
+    "timestamp": "2026-03-06T11:43:12.157Z",
+    "level": "log",
+    "message": "🍪 COOKIES: {\"Webstorm-817a862\":\"c02a10b3-6d06-451b-b28e-a3bc746d6127\",\"Pycharm-bae42109\":\"83e98add-8a30-4cb0-92f8-583ca00c2d86\",\"g_state\":\"{\\\"i_l\\\":0,\\\"i_ll\\\":1772796752006,\\\"i_b\\\":\\\"yhpzeKUJJWMoR8QxrkNPyf4x8XSkRuVZnEDNFsFEB/s\\\",\\\"i_e\\\":{\\\"enable_itp_optimization\\\":0}}\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NSwidXNlcm5hbWUiOiJIb3JiaWvDoW0iLCJlbWFpbCI6Im5vcmJlcnRrb3ZhY3MxMDFAZ21haWwuY29tIiwicm9sZSI6Im93bmVyIiwiaWF0IjoxNzcyNzk2NzY0LCJleHAiOjE3NzI4Mzk5NjR9.3RPJ7buHLd8nq833KnGncQXcNBzfnU5Va3A_yld6VSM\"}"
+  },
+  {
+    "id": "17727973921685kln",
+    "timestamp": "2026-03-06T11:43:12.168Z",
+    "level": "log",
+    "message": "🍪 COOKIES: {\"Webstorm-817a862\":\"c02a10b3-6d06-451b-b28e-a3bc746d6127\",\"Pycharm-bae42109\":\"83e98add-8a30-4cb0-92f8-583ca00c2d86\",\"g_state\":\"{\\\"i_l\\\":0,\\\"i_ll\\\":1772796752006,\\\"i_b\\\":\\\"yhpzeKUJJWMoR8QxrkNPyf4x8XSkRuVZnEDNFsFEB/s\\\",\\\"i_e\\\":{\\\"enable_itp_optimization\\\":0}}\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NSwidXNlcm5hbWUiOiJIb3JiaWvDoW0iLCJlbWFpbCI6Im5vcmJlcnRrb3ZhY3MxMDFAZ21haWwuY29tIiwicm9sZSI6Im93bmVyIiwiaWF0IjoxNzcyNzk2NzY0LCJleHAiOjE3NzI4Mzk5NjR9.3RPJ7buHLd8nq833KnGncQXcNBzfnU5Va3A_yld6VSM\"}"
+  },
+  {
+    "id": "17727973993315a68",
+    "timestamp": "2026-03-06T11:43:19.331Z",
+    "level": "log",
+    "message": "🍪 COOKIES: {\"Webstorm-817a862\":\"c02a10b3-6d06-451b-b28e-a3bc746d6127\",\"Pycharm-bae42109\":\"83e98add-8a30-4cb0-92f8-583ca00c2d86\",\"g_state\":\"{\\\"i_l\\\":0,\\\"i_ll\\\":1772796752006,\\\"i_b\\\":\\\"yhpzeKUJJWMoR8QxrkNPyf4x8XSkRuVZnEDNFsFEB/s\\\",\\\"i_e\\\":{\\\"enable_itp_optimization\\\":0}}\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NSwidXNlcm5hbWUiOiJIb3JiaWvDoW0iLCJlbWFpbCI6Im5vcmJlcnRrb3ZhY3MxMDFAZ21haWwuY29tIiwicm9sZSI6Im93bmVyIiwiaWF0IjoxNzcyNzk2NzY0LCJleHAiOjE3NzI4Mzk5NjR9.3RPJ7buHLd8nq833KnGncQXcNBzfnU5Va3A_yld6VSM\"}"
+  },
+  {
+    "id": "17727974002635it3",
+    "timestamp": "2026-03-06T11:43:20.263Z",
+    "level": "log",
+    "message": "🍪 COOKIES: {\"Webstorm-817a862\":\"c02a10b3-6d06-451b-b28e-a3bc746d6127\",\"Pycharm-bae42109\":\"83e98add-8a30-4cb0-92f8-583ca00c2d86\",\"g_state\":\"{\\\"i_l\\\":0,\\\"i_ll\\\":1772796752006,\\\"i_b\\\":\\\"yhpzeKUJJWMoR8QxrkNPyf4x8XSkRuVZnEDNFsFEB/s\\\",\\\"i_e\\\":{\\\"enable_itp_optimization\\\":0}}\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NSwidXNlcm5hbWUiOiJIb3JiaWvDoW0iLCJlbWFpbCI6Im5vcmJlcnRrb3ZhY3MxMDFAZ21haWwuY29tIiwicm9sZSI6Im93bmVyIiwiaWF0IjoxNzcyNzk2NzY0LCJleHAiOjE3NzI4Mzk5NjR9.3RPJ7buHLd8nq833KnGncQXcNBzfnU5Va3A_yld6VSM\"}"
+  },
+  {
+    "id": "177279740158596jb",
+    "timestamp": "2026-03-06T11:43:21.585Z",
+    "level": "log",
+    "message": "🍪 COOKIES: {\"Webstorm-817a862\":\"c02a10b3-6d06-451b-b28e-a3bc746d6127\",\"Pycharm-bae42109\":\"83e98add-8a30-4cb0-92f8-583ca00c2d86\",\"g_state\":\"{\\\"i_l\\\":0,\\\"i_ll\\\":1772796752006,\\\"i_b\\\":\\\"yhpzeKUJJWMoR8QxrkNPyf4x8XSkRuVZnEDNFsFEB/s\\\",\\\"i_e\\\":{\\\"enable_itp_optimization\\\":0}}\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NSwidXNlcm5hbWUiOiJIb3JiaWvDoW0iLCJlbWFpbCI6Im5vcmJlcnRrb3ZhY3MxMDFAZ21haWwuY29tIiwicm9sZSI6Im93bmVyIiwiaWF0IjoxNzcyNzk2NzY0LCJleHAiOjE3NzI4Mzk5NjR9.3RPJ7buHLd8nq833KnGncQXcNBzfnU5Va3A_yld6VSM\"}"
+  },
+  {
+    "id": "1772797402744212l",
+    "timestamp": "2026-03-06T11:43:22.744Z",
+    "level": "log",
+    "message": "🍪 COOKIES: {\"Webstorm-817a862\":\"c02a10b3-6d06-451b-b28e-a3bc746d6127\",\"Pycharm-bae42109\":\"83e98add-8a30-4cb0-92f8-583ca00c2d86\",\"g_state\":\"{\\\"i_l\\\":0,\\\"i_ll\\\":1772796752006,\\\"i_b\\\":\\\"yhpzeKUJJWMoR8QxrkNPyf4x8XSkRuVZnEDNFsFEB/s\\\",\\\"i_e\\\":{\\\"enable_itp_optimization\\\":0}}\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NSwidXNlcm5hbWUiOiJIb3JiaWvDoW0iLCJlbWFpbCI6Im5vcmJlcnRrb3ZhY3MxMDFAZ21haWwuY29tIiwicm9sZSI6Im93bmVyIiwiaWF0IjoxNzcyNzk2NzY0LCJleHAiOjE3NzI4Mzk5NjR9.3RPJ7buHLd8nq833KnGncQXcNBzfnU5Va3A_yld6VSM\"}"
+  },
+  {
+    "id": "1772797421225o1ew",
+    "timestamp": "2026-03-06T11:43:41.225Z",
+    "level": "log",
+    "message": "🍪 COOKIES: {\"Webstorm-817a862\":\"c02a10b3-6d06-451b-b28e-a3bc746d6127\",\"Pycharm-bae42109\":\"83e98add-8a30-4cb0-92f8-583ca00c2d86\",\"g_state\":\"{\\\"i_l\\\":0,\\\"i_ll\\\":1772796752006,\\\"i_b\\\":\\\"yhpzeKUJJWMoR8QxrkNPyf4x8XSkRuVZnEDNFsFEB/s\\\",\\\"i_e\\\":{\\\"enable_itp_optimization\\\":0}}\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NSwidXNlcm5hbWUiOiJIb3JiaWvDoW0iLCJlbWFpbCI6Im5vcmJlcnRrb3ZhY3MxMDFAZ21haWwuY29tIiwicm9sZSI6Im93bmVyIiwiaWF0IjoxNzcyNzk2NzY0LCJleHAiOjE3NzI4Mzk5NjR9.3RPJ7buHLd8nq833KnGncQXcNBzfnU5Va3A_yld6VSM\"}"
+  },
+  {
+    "id": "1772797426879noaa",
+    "timestamp": "2026-03-06T11:43:46.879Z",
+    "level": "log",
+    "message": "🍪 COOKIES: {\"Webstorm-817a862\":\"c02a10b3-6d06-451b-b28e-a3bc746d6127\",\"Pycharm-bae42109\":\"83e98add-8a30-4cb0-92f8-583ca00c2d86\",\"g_state\":\"{\\\"i_l\\\":0,\\\"i_ll\\\":1772796752006,\\\"i_b\\\":\\\"yhpzeKUJJWMoR8QxrkNPyf4x8XSkRuVZnEDNFsFEB/s\\\",\\\"i_e\\\":{\\\"enable_itp_optimization\\\":0}}\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NSwidXNlcm5hbWUiOiJIb3JiaWvDoW0iLCJlbWFpbCI6Im5vcmJlcnRrb3ZhY3MxMDFAZ21haWwuY29tIiwicm9sZSI6Im93bmVyIiwiaWF0IjoxNzcyNzk2NzY0LCJleHAiOjE3NzI4Mzk5NjR9.3RPJ7buHLd8nq833KnGncQXcNBzfnU5Va3A_yld6VSM\"}"
+  },
+  {
+    "id": "1772797428261r1qz",
+    "timestamp": "2026-03-06T11:43:48.261Z",
+    "level": "log",
+    "message": "🍪 COOKIES: {\"Webstorm-817a862\":\"c02a10b3-6d06-451b-b28e-a3bc746d6127\",\"Pycharm-bae42109\":\"83e98add-8a30-4cb0-92f8-583ca00c2d86\",\"g_state\":\"{\\\"i_l\\\":0,\\\"i_ll\\\":1772796752006,\\\"i_b\\\":\\\"yhpzeKUJJWMoR8QxrkNPyf4x8XSkRuVZnEDNFsFEB/s\\\",\\\"i_e\\\":{\\\"enable_itp_optimization\\\":0}}\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NSwidXNlcm5hbWUiOiJIb3JiaWvDoW0iLCJlbWFpbCI6Im5vcmJlcnRrb3ZhY3MxMDFAZ21haWwuY29tIiwicm9sZSI6Im93bmVyIiwiaWF0IjoxNzcyNzk2NzY0LCJleHAiOjE3NzI4Mzk5NjR9.3RPJ7buHLd8nq833KnGncQXcNBzfnU5Va3A_yld6VSM\"}"
+  },
+  {
+    "id": "1772797429535fl0p",
+    "timestamp": "2026-03-06T11:43:49.535Z",
+    "level": "log",
+    "message": "🍪 COOKIES: {\"Webstorm-817a862\":\"c02a10b3-6d06-451b-b28e-a3bc746d6127\",\"Pycharm-bae42109\":\"83e98add-8a30-4cb0-92f8-583ca00c2d86\",\"g_state\":\"{\\\"i_l\\\":0,\\\"i_ll\\\":1772796752006,\\\"i_b\\\":\\\"yhpzeKUJJWMoR8QxrkNPyf4x8XSkRuVZnEDNFsFEB/s\\\",\\\"i_e\\\":{\\\"enable_itp_optimization\\\":0}}\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NSwidXNlcm5hbWUiOiJIb3JiaWvDoW0iLCJlbWFpbCI6Im5vcmJlcnRrb3ZhY3MxMDFAZ21haWwuY29tIiwicm9sZSI6Im93bmVyIiwiaWF0IjoxNzcyNzk2NzY0LCJleHAiOjE3NzI4Mzk5NjR9.3RPJ7buHLd8nq833KnGncQXcNBzfnU5Va3A_yld6VSM\"}"
+  },
+  {
+    "id": "17727974304499leg",
+    "timestamp": "2026-03-06T11:43:50.449Z",
+    "level": "log",
+    "message": "🍪 COOKIES: {\"Webstorm-817a862\":\"c02a10b3-6d06-451b-b28e-a3bc746d6127\",\"Pycharm-bae42109\":\"83e98add-8a30-4cb0-92f8-583ca00c2d86\",\"g_state\":\"{\\\"i_l\\\":0,\\\"i_ll\\\":1772796752006,\\\"i_b\\\":\\\"yhpzeKUJJWMoR8QxrkNPyf4x8XSkRuVZnEDNFsFEB/s\\\",\\\"i_e\\\":{\\\"enable_itp_optimization\\\":0}}\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NSwidXNlcm5hbWUiOiJIb3JiaWvDoW0iLCJlbWFpbCI6Im5vcmJlcnRrb3ZhY3MxMDFAZ21haWwuY29tIiwicm9sZSI6Im93bmVyIiwiaWF0IjoxNzcyNzk2NzY0LCJleHAiOjE3NzI4Mzk5NjR9.3RPJ7buHLd8nq833KnGncQXcNBzfnU5Va3A_yld6VSM\"}"
+  },
+  {
+    "id": "1772797430972h85t",
+    "timestamp": "2026-03-06T11:43:50.972Z",
+    "level": "log",
+    "message": "🍪 COOKIES: {\"Webstorm-817a862\":\"c02a10b3-6d06-451b-b28e-a3bc746d6127\",\"Pycharm-bae42109\":\"83e98add-8a30-4cb0-92f8-583ca00c2d86\",\"g_state\":\"{\\\"i_l\\\":0,\\\"i_ll\\\":1772796752006,\\\"i_b\\\":\\\"yhpzeKUJJWMoR8QxrkNPyf4x8XSkRuVZnEDNFsFEB/s\\\",\\\"i_e\\\":{\\\"enable_itp_optimization\\\":0}}\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NSwidXNlcm5hbWUiOiJIb3JiaWvDoW0iLCJlbWFpbCI6Im5vcmJlcnRrb3ZhY3MxMDFAZ21haWwuY29tIiwicm9sZSI6Im93bmVyIiwiaWF0IjoxNzcyNzk2NzY0LCJleHAiOjE3NzI4Mzk5NjR9.3RPJ7buHLd8nq833KnGncQXcNBzfnU5Va3A_yld6VSM\"}"
+  },
+  {
+    "id": "17727974313420o17",
+    "timestamp": "2026-03-06T11:43:51.342Z",
+    "level": "log",
+    "message": "🍪 COOKIES: {\"Webstorm-817a862\":\"c02a10b3-6d06-451b-b28e-a3bc746d6127\",\"Pycharm-bae42109\":\"83e98add-8a30-4cb0-92f8-583ca00c2d86\",\"g_state\":\"{\\\"i_l\\\":0,\\\"i_ll\\\":1772796752006,\\\"i_b\\\":\\\"yhpzeKUJJWMoR8QxrkNPyf4x8XSkRuVZnEDNFsFEB/s\\\",\\\"i_e\\\":{\\\"enable_itp_optimization\\\":0}}\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NSwidXNlcm5hbWUiOiJIb3JiaWvDoW0iLCJlbWFpbCI6Im5vcmJlcnRrb3ZhY3MxMDFAZ21haWwuY29tIiwicm9sZSI6Im93bmVyIiwiaWF0IjoxNzcyNzk2NzY0LCJleHAiOjE3NzI4Mzk5NjR9.3RPJ7buHLd8nq833KnGncQXcNBzfnU5Va3A_yld6VSM\"}"
+  },
+  {
+    "id": "1772797817640zznp",
+    "timestamp": "2026-03-06T11:50:17.641Z",
+    "level": "log",
+    "message": "🍪 COOKIES: {\"Webstorm-817a862\":\"c02a10b3-6d06-451b-b28e-a3bc746d6127\",\"Pycharm-bae42109\":\"83e98add-8a30-4cb0-92f8-583ca00c2d86\",\"g_state\":\"{\\\"i_l\\\":0,\\\"i_ll\\\":1772796752006,\\\"i_b\\\":\\\"yhpzeKUJJWMoR8QxrkNPyf4x8XSkRuVZnEDNFsFEB/s\\\",\\\"i_e\\\":{\\\"enable_itp_optimization\\\":0}}\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NSwidXNlcm5hbWUiOiJIb3JiaWvDoW0iLCJlbWFpbCI6Im5vcmJlcnRrb3ZhY3MxMDFAZ21haWwuY29tIiwicm9sZSI6Im93bmVyIiwiaWF0IjoxNzcyNzk2NzY0LCJleHAiOjE3NzI4Mzk5NjR9.3RPJ7buHLd8nq833KnGncQXcNBzfnU5Va3A_yld6VSM\"}"
+  },
+  {
+    "id": "1772797817820axoi",
+    "timestamp": "2026-03-06T11:50:17.821Z",
+    "level": "log",
+    "message": "🔥 HIT GET /api/ranks/me"
+  },
+  {
+    "id": "177279781782287qp",
+    "timestamp": "2026-03-06T11:50:17.822Z",
+    "level": "log",
+    "message": "🍪 COOKIES: {\"Webstorm-817a862\":\"c02a10b3-6d06-451b-b28e-a3bc746d6127\",\"Pycharm-bae42109\":\"83e98add-8a30-4cb0-92f8-583ca00c2d86\",\"g_state\":\"{\\\"i_l\\\":0,\\\"i_ll\\\":1772796752006,\\\"i_b\\\":\\\"yhpzeKUJJWMoR8QxrkNPyf4x8XSkRuVZnEDNFsFEB/s\\\",\\\"i_e\\\":{\\\"enable_itp_optimization\\\":0}}\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NSwidXNlcm5hbWUiOiJIb3JiaWvDoW0iLCJlbWFpbCI6Im5vcmJlcnRrb3ZhY3MxMDFAZ21haWwuY29tIiwicm9sZSI6Im93bmVyIiwiaWF0IjoxNzcyNzk2NzY0LCJleHAiOjE3NzI4Mzk5NjR9.3RPJ7buHLd8nq833KnGncQXcNBzfnU5Va3A_yld6VSM\"}"
+  },
+  {
+    "id": "1772797817940dwxq",
+    "timestamp": "2026-03-06T11:50:17.940Z",
+    "level": "log",
+    "message": "🍪 COOKIES: {\"Webstorm-817a862\":\"c02a10b3-6d06-451b-b28e-a3bc746d6127\",\"Pycharm-bae42109\":\"83e98add-8a30-4cb0-92f8-583ca00c2d86\",\"g_state\":\"{\\\"i_l\\\":0,\\\"i_ll\\\":1772796752006,\\\"i_b\\\":\\\"yhpzeKUJJWMoR8QxrkNPyf4x8XSkRuVZnEDNFsFEB/s\\\",\\\"i_e\\\":{\\\"enable_itp_optimization\\\":0}}\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NSwidXNlcm5hbWUiOiJIb3JiaWvDoW0iLCJlbWFpbCI6Im5vcmJlcnRrb3ZhY3MxMDFAZ21haWwuY29tIiwicm9sZSI6Im93bmVyIiwiaWF0IjoxNzcyNzk2NzY0LCJleHAiOjE3NzI4Mzk5NjR9.3RPJ7buHLd8nq833KnGncQXcNBzfnU5Va3A_yld6VSM\"}"
+  },
+  {
+    "id": "17727978182596sf4",
+    "timestamp": "2026-03-06T11:50:18.259Z",
+    "level": "log",
+    "message": "🍪 COOKIES: {\"Webstorm-817a862\":\"c02a10b3-6d06-451b-b28e-a3bc746d6127\",\"Pycharm-bae42109\":\"83e98add-8a30-4cb0-92f8-583ca00c2d86\",\"g_state\":\"{\\\"i_l\\\":0,\\\"i_ll\\\":1772796752006,\\\"i_b\\\":\\\"yhpzeKUJJWMoR8QxrkNPyf4x8XSkRuVZnEDNFsFEB/s\\\",\\\"i_e\\\":{\\\"enable_itp_optimization\\\":0}}\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NSwidXNlcm5hbWUiOiJIb3JiaWvDoW0iLCJlbWFpbCI6Im5vcmJlcnRrb3ZhY3MxMDFAZ21haWwuY29tIiwicm9sZSI6Im93bmVyIiwiaWF0IjoxNzcyNzk2NzY0LCJleHAiOjE3NzI4Mzk5NjR9.3RPJ7buHLd8nq833KnGncQXcNBzfnU5Va3A_yld6VSM\"}"
+  },
+  {
+    "id": "17727978212650y66",
+    "timestamp": "2026-03-06T11:50:21.265Z",
+    "level": "log",
+    "message": "🍪 COOKIES: {\"Webstorm-817a862\":\"c02a10b3-6d06-451b-b28e-a3bc746d6127\",\"Pycharm-bae42109\":\"83e98add-8a30-4cb0-92f8-583ca00c2d86\",\"g_state\":\"{\\\"i_l\\\":0,\\\"i_ll\\\":1772796752006,\\\"i_b\\\":\\\"yhpzeKUJJWMoR8QxrkNPyf4x8XSkRuVZnEDNFsFEB/s\\\",\\\"i_e\\\":{\\\"enable_itp_optimization\\\":0}}\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NSwidXNlcm5hbWUiOiJIb3JiaWvDoW0iLCJlbWFpbCI6Im5vcmJlcnRrb3ZhY3MxMDFAZ21haWwuY29tIiwicm9sZSI6Im93bmVyIiwiaWF0IjoxNzcyNzk2NzY0LCJleHAiOjE3NzI4Mzk5NjR9.3RPJ7buHLd8nq833KnGncQXcNBzfnU5Va3A_yld6VSM\"}"
+  },
+  {
+    "id": "1772797821284zyfx",
+    "timestamp": "2026-03-06T11:50:21.284Z",
+    "level": "log",
+    "message": "🍪 COOKIES: {\"Webstorm-817a862\":\"c02a10b3-6d06-451b-b28e-a3bc746d6127\",\"Pycharm-bae42109\":\"83e98add-8a30-4cb0-92f8-583ca00c2d86\",\"g_state\":\"{\\\"i_l\\\":0,\\\"i_ll\\\":1772796752006,\\\"i_b\\\":\\\"yhpzeKUJJWMoR8QxrkNPyf4x8XSkRuVZnEDNFsFEB/s\\\",\\\"i_e\\\":{\\\"enable_itp_optimization\\\":0}}\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NSwidXNlcm5hbWUiOiJIb3JiaWvDoW0iLCJlbWFpbCI6Im5vcmJlcnRrb3ZhY3MxMDFAZ21haWwuY29tIiwicm9sZSI6Im93bmVyIiwiaWF0IjoxNzcyNzk2NzY0LCJleHAiOjE3NzI4Mzk5NjR9.3RPJ7buHLd8nq833KnGncQXcNBzfnU5Va3A_yld6VSM\"}"
+  },
+  {
+    "id": "1772797821288ucga",
+    "timestamp": "2026-03-06T11:50:21.288Z",
+    "level": "log",
+    "message": "🍪 COOKIES: {\"Webstorm-817a862\":\"c02a10b3-6d06-451b-b28e-a3bc746d6127\",\"Pycharm-bae42109\":\"83e98add-8a30-4cb0-92f8-583ca00c2d86\",\"g_state\":\"{\\\"i_l\\\":0,\\\"i_ll\\\":1772796752006,\\\"i_b\\\":\\\"yhpzeKUJJWMoR8QxrkNPyf4x8XSkRuVZnEDNFsFEB/s\\\",\\\"i_e\\\":{\\\"enable_itp_optimization\\\":0}}\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NSwidXNlcm5hbWUiOiJIb3JiaWvDoW0iLCJlbWFpbCI6Im5vcmJlcnRrb3ZhY3MxMDFAZ21haWwuY29tIiwicm9sZSI6Im93bmVyIiwiaWF0IjoxNzcyNzk2NzY0LCJleHAiOjE3NzI4Mzk5NjR9.3RPJ7buHLd8nq833KnGncQXcNBzfnU5Va3A_yld6VSM\"}"
+  },
+  {
+    "id": "1772797821302j81n",
+    "timestamp": "2026-03-06T11:50:21.302Z",
+    "level": "log",
+    "message": "🍪 COOKIES: {\"Webstorm-817a862\":\"c02a10b3-6d06-451b-b28e-a3bc746d6127\",\"Pycharm-bae42109\":\"83e98add-8a30-4cb0-92f8-583ca00c2d86\",\"g_state\":\"{\\\"i_l\\\":0,\\\"i_ll\\\":1772796752006,\\\"i_b\\\":\\\"yhpzeKUJJWMoR8QxrkNPyf4x8XSkRuVZnEDNFsFEB/s\\\",\\\"i_e\\\":{\\\"enable_itp_optimization\\\":0}}\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NSwidXNlcm5hbWUiOiJIb3JiaWvDoW0iLCJlbWFpbCI6Im5vcmJlcnRrb3ZhY3MxMDFAZ21haWwuY29tIiwicm9sZSI6Im93bmVyIiwiaWF0IjoxNzcyNzk2NzY0LCJleHAiOjE3NzI4Mzk5NjR9.3RPJ7buHLd8nq833KnGncQXcNBzfnU5Va3A_yld6VSM\"}"
+  },
+  {
+    "id": "17727978213092g7g",
+    "timestamp": "2026-03-06T11:50:21.309Z",
+    "level": "log",
+    "message": "🍪 COOKIES: {\"Webstorm-817a862\":\"c02a10b3-6d06-451b-b28e-a3bc746d6127\",\"Pycharm-bae42109\":\"83e98add-8a30-4cb0-92f8-583ca00c2d86\",\"g_state\":\"{\\\"i_l\\\":0,\\\"i_ll\\\":1772796752006,\\\"i_b\\\":\\\"yhpzeKUJJWMoR8QxrkNPyf4x8XSkRuVZnEDNFsFEB/s\\\",\\\"i_e\\\":{\\\"enable_itp_optimization\\\":0}}\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NSwidXNlcm5hbWUiOiJIb3JiaWvDoW0iLCJlbWFpbCI6Im5vcmJlcnRrb3ZhY3MxMDFAZ21haWwuY29tIiwicm9sZSI6Im93bmVyIiwiaWF0IjoxNzcyNzk2NzY0LCJleHAiOjE3NzI4Mzk5NjR9.3RPJ7buHLd8nq833KnGncQXcNBzfnU5Va3A_yld6VSM\"}"
+  },
+  {
+    "id": "1772797821731sr7t",
+    "timestamp": "2026-03-06T11:50:21.731Z",
+    "level": "log",
+    "message": "⚠️ mixer[Setup] skip: Could not find the table 'public.mixer[Setup]' in the schema cache"
+  },
+  {
+    "id": "1772797822800pb0g",
+    "timestamp": "2026-03-06T11:50:22.800Z",
+    "level": "error",
+    "message": "HT catalog error on audio_processor: Could not find the table 'public.audio_processor' in the schema cache"
+  },
+  {
+    "id": "1772797824132uqk0",
+    "timestamp": "2026-03-06T11:50:24.132Z",
+    "level": "log",
+    "message": "🍪 COOKIES: {\"Webstorm-817a862\":\"c02a10b3-6d06-451b-b28e-a3bc746d6127\",\"Pycharm-bae42109\":\"83e98add-8a30-4cb0-92f8-583ca00c2d86\",\"g_state\":\"{\\\"i_l\\\":0,\\\"i_ll\\\":1772796752006,\\\"i_b\\\":\\\"yhpzeKUJJWMoR8QxrkNPyf4x8XSkRuVZnEDNFsFEB/s\\\",\\\"i_e\\\":{\\\"enable_itp_optimization\\\":0}}\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NSwidXNlcm5hbWUiOiJIb3JiaWvDoW0iLCJlbWFpbCI6Im5vcmJlcnRrb3ZhY3MxMDFAZ21haWwuY29tIiwicm9sZSI6Im93bmVyIiwiaWF0IjoxNzcyNzk2NzY0LCJleHAiOjE3NzI4Mzk5NjR9.3RPJ7buHLd8nq833KnGncQXcNBzfnU5Va3A_yld6VSM\"}"
+  },
+  {
+    "id": "1772797824462m3pj",
+    "timestamp": "2026-03-06T11:50:24.462Z",
+    "level": "log",
+    "message": "🍪 COOKIES: {\"Webstorm-817a862\":\"c02a10b3-6d06-451b-b28e-a3bc746d6127\",\"Pycharm-bae42109\":\"83e98add-8a30-4cb0-92f8-583ca00c2d86\",\"g_state\":\"{\\\"i_l\\\":0,\\\"i_ll\\\":1772796752006,\\\"i_b\\\":\\\"yhpzeKUJJWMoR8QxrkNPyf4x8XSkRuVZnEDNFsFEB/s\\\",\\\"i_e\\\":{\\\"enable_itp_optimization\\\":0}}\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NSwidXNlcm5hbWUiOiJIb3JiaWvDoW0iLCJlbWFpbCI6Im5vcmJlcnRrb3ZhY3MxMDFAZ21haWwuY29tIiwicm9sZSI6Im93bmVyIiwiaWF0IjoxNzcyNzk2NzY0LCJleHAiOjE3NzI4Mzk5NjR9.3RPJ7buHLd8nq833KnGncQXcNBzfnU5Va3A_yld6VSM\"}"
+  },
+  {
+    "id": "1772797824470nxm0",
+    "timestamp": "2026-03-06T11:50:24.470Z",
+    "level": "log",
+    "message": "🍪 COOKIES: {\"Webstorm-817a862\":\"c02a10b3-6d06-451b-b28e-a3bc746d6127\",\"Pycharm-bae42109\":\"83e98add-8a30-4cb0-92f8-583ca00c2d86\",\"g_state\":\"{\\\"i_l\\\":0,\\\"i_ll\\\":1772796752006,\\\"i_b\\\":\\\"yhpzeKUJJWMoR8QxrkNPyf4x8XSkRuVZnEDNFsFEB/s\\\",\\\"i_e\\\":{\\\"enable_itp_optimization\\\":0}}\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NSwidXNlcm5hbWUiOiJIb3JiaWvDoW0iLCJlbWFpbCI6Im5vcmJlcnRrb3ZhY3MxMDFAZ21haWwuY29tIiwicm9sZSI6Im93bmVyIiwiaWF0IjoxNzcyNzk2NzY0LCJleHAiOjE3NzI4Mzk5NjR9.3RPJ7buHLd8nq833KnGncQXcNBzfnU5Va3A_yld6VSM\"}"
+  },
+  {
+    "id": "177279782448337a4",
+    "timestamp": "2026-03-06T11:50:24.483Z",
+    "level": "log",
+    "message": "🍪 COOKIES: {\"Webstorm-817a862\":\"c02a10b3-6d06-451b-b28e-a3bc746d6127\",\"Pycharm-bae42109\":\"83e98add-8a30-4cb0-92f8-583ca00c2d86\",\"g_state\":\"{\\\"i_l\\\":0,\\\"i_ll\\\":1772796752006,\\\"i_b\\\":\\\"yhpzeKUJJWMoR8QxrkNPyf4x8XSkRuVZnEDNFsFEB/s\\\",\\\"i_e\\\":{\\\"enable_itp_optimization\\\":0}}\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NSwidXNlcm5hbWUiOiJIb3JiaWvDoW0iLCJlbWFpbCI6Im5vcmJlcnRrb3ZhY3MxMDFAZ21haWwuY29tIiwicm9sZSI6Im93bmVyIiwiaWF0IjoxNzcyNzk2NzY0LCJleHAiOjE3NzI4Mzk5NjR9.3RPJ7buHLd8nq833KnGncQXcNBzfnU5Va3A_yld6VSM\"}"
+  },
+  {
+    "id": "1772797824491drlt",
+    "timestamp": "2026-03-06T11:50:24.492Z",
+    "level": "log",
+    "message": "🍪 COOKIES: {\"Webstorm-817a862\":\"c02a10b3-6d06-451b-b28e-a3bc746d6127\",\"Pycharm-bae42109\":\"83e98add-8a30-4cb0-92f8-583ca00c2d86\",\"g_state\":\"{\\\"i_l\\\":0,\\\"i_ll\\\":1772796752006,\\\"i_b\\\":\\\"yhpzeKUJJWMoR8QxrkNPyf4x8XSkRuVZnEDNFsFEB/s\\\",\\\"i_e\\\":{\\\"enable_itp_optimization\\\":0}}\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NSwidXNlcm5hbWUiOiJIb3JiaWvDoW0iLCJlbWFpbCI6Im5vcmJlcnRrb3ZhY3MxMDFAZ21haWwuY29tIiwicm9sZSI6Im93bmVyIiwiaWF0IjoxNzcyNzk2NzY0LCJleHAiOjE3NzI4Mzk5NjR9.3RPJ7buHLd8nq833KnGncQXcNBzfnU5Va3A_yld6VSM\"}"
+  },
+  {
+    "id": "1772797825943feny",
+    "timestamp": "2026-03-06T11:50:25.943Z",
+    "level": "error",
+    "message": "HT catalog error on audio_processor: Could not find the table 'public.audio_processor' in the schema cache"
+  },
+  {
+    "id": "1772797844515b6w9",
+    "timestamp": "2026-03-06T11:50:44.515Z",
+    "level": "log",
+    "message": "🍪 COOKIES: {\"Webstorm-817a862\":\"c02a10b3-6d06-451b-b28e-a3bc746d6127\",\"Pycharm-bae42109\":\"83e98add-8a30-4cb0-92f8-583ca00c2d86\",\"g_state\":\"{\\\"i_l\\\":0,\\\"i_ll\\\":1772796752006,\\\"i_b\\\":\\\"yhpzeKUJJWMoR8QxrkNPyf4x8XSkRuVZnEDNFsFEB/s\\\",\\\"i_e\\\":{\\\"enable_itp_optimization\\\":0}}\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NSwidXNlcm5hbWUiOiJIb3JiaWvDoW0iLCJlbWFpbCI6Im5vcmJlcnRrb3ZhY3MxMDFAZ21haWwuY29tIiwicm9sZSI6Im93bmVyIiwiaWF0IjoxNzcyNzk2NzY0LCJleHAiOjE3NzI4Mzk5NjR9.3RPJ7buHLd8nq833KnGncQXcNBzfnU5Va3A_yld6VSM\"}"
+  },
+  {
+    "id": "1772797844519ul23",
+    "timestamp": "2026-03-06T11:50:44.519Z",
+    "level": "log",
+    "message": "🍪 COOKIES: {\"Webstorm-817a862\":\"c02a10b3-6d06-451b-b28e-a3bc746d6127\",\"Pycharm-bae42109\":\"83e98add-8a30-4cb0-92f8-583ca00c2d86\",\"g_state\":\"{\\\"i_l\\\":0,\\\"i_ll\\\":1772796752006,\\\"i_b\\\":\\\"yhpzeKUJJWMoR8QxrkNPyf4x8XSkRuVZnEDNFsFEB/s\\\",\\\"i_e\\\":{\\\"enable_itp_optimization\\\":0}}\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NSwidXNlcm5hbWUiOiJIb3JiaWvDoW0iLCJlbWFpbCI6Im5vcmJlcnRrb3ZhY3MxMDFAZ21haWwuY29tIiwicm9sZSI6Im93bmVyIiwiaWF0IjoxNzcyNzk2NzY0LCJleHAiOjE3NzI4Mzk5NjR9.3RPJ7buHLd8nq833KnGncQXcNBzfnU5Va3A_yld6VSM\"}"
+  },
+  {
+    "id": "17727978445328prj",
+    "timestamp": "2026-03-06T11:50:44.532Z",
+    "level": "log",
+    "message": "🍪 COOKIES: {\"Webstorm-817a862\":\"c02a10b3-6d06-451b-b28e-a3bc746d6127\",\"Pycharm-bae42109\":\"83e98add-8a30-4cb0-92f8-583ca00c2d86\",\"g_state\":\"{\\\"i_l\\\":0,\\\"i_ll\\\":1772796752006,\\\"i_b\\\":\\\"yhpzeKUJJWMoR8QxrkNPyf4x8XSkRuVZnEDNFsFEB/s\\\",\\\"i_e\\\":{\\\"enable_itp_optimization\\\":0}}\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NSwidXNlcm5hbWUiOiJIb3JiaWvDoW0iLCJlbWFpbCI6Im5vcmJlcnRrb3ZhY3MxMDFAZ21haWwuY29tIiwicm9sZSI6Im93bmVyIiwiaWF0IjoxNzcyNzk2NzY0LCJleHAiOjE3NzI4Mzk5NjR9.3RPJ7buHLd8nq833KnGncQXcNBzfnU5Va3A_yld6VSM\"}"
+  },
+  {
+    "id": "1772797844537wv0f",
+    "timestamp": "2026-03-06T11:50:44.537Z",
+    "level": "log",
+    "message": "🍪 COOKIES: {\"Webstorm-817a862\":\"c02a10b3-6d06-451b-b28e-a3bc746d6127\",\"Pycharm-bae42109\":\"83e98add-8a30-4cb0-92f8-583ca00c2d86\",\"g_state\":\"{\\\"i_l\\\":0,\\\"i_ll\\\":1772796752006,\\\"i_b\\\":\\\"yhpzeKUJJWMoR8QxrkNPyf4x8XSkRuVZnEDNFsFEB/s\\\",\\\"i_e\\\":{\\\"enable_itp_optimization\\\":0}}\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NSwidXNlcm5hbWUiOiJIb3JiaWvDoW0iLCJlbWFpbCI6Im5vcmJlcnRrb3ZhY3MxMDFAZ21haWwuY29tIiwicm9sZSI6Im93bmVyIiwiaWF0IjoxNzcyNzk2NzY0LCJleHAiOjE3NzI4Mzk5NjR9.3RPJ7buHLd8nq833KnGncQXcNBzfnU5Va3A_yld6VSM\"}"
+  },
+  {
+    "id": "1772797844572yqb7",
+    "timestamp": "2026-03-06T11:50:44.572Z",
+    "level": "log",
+    "message": "🍪 COOKIES: {\"Webstorm-817a862\":\"c02a10b3-6d06-451b-b28e-a3bc746d6127\",\"Pycharm-bae42109\":\"83e98add-8a30-4cb0-92f8-583ca00c2d86\",\"g_state\":\"{\\\"i_l\\\":0,\\\"i_ll\\\":1772796752006,\\\"i_b\\\":\\\"yhpzeKUJJWMoR8QxrkNPyf4x8XSkRuVZnEDNFsFEB/s\\\",\\\"i_e\\\":{\\\"enable_itp_optimization\\\":0}}\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NSwidXNlcm5hbWUiOiJIb3JiaWvDoW0iLCJlbWFpbCI6Im5vcmJlcnRrb3ZhY3MxMDFAZ21haWwuY29tIiwicm9sZSI6Im93bmVyIiwiaWF0IjoxNzcyNzk2NzY0LCJleHAiOjE3NzI4Mzk5NjR9.3RPJ7buHLd8nq833KnGncQXcNBzfnU5Va3A_yld6VSM\"}"
+  },
+  {
+    "id": "17727978460250ebg",
+    "timestamp": "2026-03-06T11:50:46.025Z",
+    "level": "error",
+    "message": "HT catalog error on audio_processor: Could not find the table 'public.audio_processor' in the schema cache"
+  },
+  {
+    "id": "17727978706827m79",
+    "timestamp": "2026-03-06T11:51:10.682Z",
+    "level": "log",
+    "message": "🍪 COOKIES: {\"Webstorm-817a862\":\"c02a10b3-6d06-451b-b28e-a3bc746d6127\",\"Pycharm-bae42109\":\"83e98add-8a30-4cb0-92f8-583ca00c2d86\",\"g_state\":\"{\\\"i_l\\\":0,\\\"i_ll\\\":1772796752006,\\\"i_b\\\":\\\"yhpzeKUJJWMoR8QxrkNPyf4x8XSkRuVZnEDNFsFEB/s\\\",\\\"i_e\\\":{\\\"enable_itp_optimization\\\":0}}\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NSwidXNlcm5hbWUiOiJIb3JiaWvDoW0iLCJlbWFpbCI6Im5vcmJlcnRrb3ZhY3MxMDFAZ21haWwuY29tIiwicm9sZSI6Im93bmVyIiwiaWF0IjoxNzcyNzk2NzY0LCJleHAiOjE3NzI4Mzk5NjR9.3RPJ7buHLd8nq833KnGncQXcNBzfnU5Va3A_yld6VSM\"}"
+  },
+  {
+    "id": "1772797871012erkm",
+    "timestamp": "2026-03-06T11:51:11.012Z",
+    "level": "log",
+    "message": "🍪 COOKIES: {\"Webstorm-817a862\":\"c02a10b3-6d06-451b-b28e-a3bc746d6127\",\"Pycharm-bae42109\":\"83e98add-8a30-4cb0-92f8-583ca00c2d86\",\"g_state\":\"{\\\"i_l\\\":0,\\\"i_ll\\\":1772796752006,\\\"i_b\\\":\\\"yhpzeKUJJWMoR8QxrkNPyf4x8XSkRuVZnEDNFsFEB/s\\\",\\\"i_e\\\":{\\\"enable_itp_optimization\\\":0}}\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NSwidXNlcm5hbWUiOiJIb3JiaWvDoW0iLCJlbWFpbCI6Im5vcmJlcnRrb3ZhY3MxMDFAZ21haWwuY29tIiwicm9sZSI6Im93bmVyIiwiaWF0IjoxNzcyNzk2NzY0LCJleHAiOjE3NzI4Mzk5NjR9.3RPJ7buHLd8nq833KnGncQXcNBzfnU5Va3A_yld6VSM\"}"
+  },
+  {
+    "id": "177279800704091zd",
+    "timestamp": "2026-03-06T11:53:27.040Z",
+    "level": "log",
+    "message": "🍪 COOKIES: {\"Webstorm-817a862\":\"c02a10b3-6d06-451b-b28e-a3bc746d6127\",\"Pycharm-bae42109\":\"83e98add-8a30-4cb0-92f8-583ca00c2d86\",\"g_state\":\"{\\\"i_l\\\":0,\\\"i_ll\\\":1772796752006,\\\"i_b\\\":\\\"yhpzeKUJJWMoR8QxrkNPyf4x8XSkRuVZnEDNFsFEB/s\\\",\\\"i_e\\\":{\\\"enable_itp_optimization\\\":0}}\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NSwidXNlcm5hbWUiOiJIb3JiaWvDoW0iLCJlbWFpbCI6Im5vcmJlcnRrb3ZhY3MxMDFAZ21haWwuY29tIiwicm9sZSI6Im93bmVyIiwiaWF0IjoxNzcyNzk2NzY0LCJleHAiOjE3NzI4Mzk5NjR9.3RPJ7buHLd8nq833KnGncQXcNBzfnU5Va3A_yld6VSM\"}"
+  },
+  {
+    "id": "177279800705811ya",
+    "timestamp": "2026-03-06T11:53:27.058Z",
+    "level": "log",
+    "message": "🔥 HIT GET /api/ranks/me"
+  },
+  {
+    "id": "1772798007059pgvy",
+    "timestamp": "2026-03-06T11:53:27.059Z",
+    "level": "log",
+    "message": "🍪 COOKIES: {\"Webstorm-817a862\":\"c02a10b3-6d06-451b-b28e-a3bc746d6127\",\"Pycharm-bae42109\":\"83e98add-8a30-4cb0-92f8-583ca00c2d86\",\"g_state\":\"{\\\"i_l\\\":0,\\\"i_ll\\\":1772796752006,\\\"i_b\\\":\\\"yhpzeKUJJWMoR8QxrkNPyf4x8XSkRuVZnEDNFsFEB/s\\\",\\\"i_e\\\":{\\\"enable_itp_optimization\\\":0}}\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NSwidXNlcm5hbWUiOiJIb3JiaWvDoW0iLCJlbWFpbCI6Im5vcmJlcnRrb3ZhY3MxMDFAZ21haWwuY29tIiwicm9sZSI6Im93bmVyIiwiaWF0IjoxNzcyNzk2NzY0LCJleHAiOjE3NzI4Mzk5NjR9.3RPJ7buHLd8nq833KnGncQXcNBzfnU5Va3A_yld6VSM\"}"
+  },
+  {
+    "id": "17727980078386mw4",
+    "timestamp": "2026-03-06T11:53:27.838Z",
+    "level": "log",
+    "message": "🍪 COOKIES: {\"Webstorm-817a862\":\"c02a10b3-6d06-451b-b28e-a3bc746d6127\",\"Pycharm-bae42109\":\"83e98add-8a30-4cb0-92f8-583ca00c2d86\",\"g_state\":\"{\\\"i_l\\\":0,\\\"i_ll\\\":1772796752006,\\\"i_b\\\":\\\"yhpzeKUJJWMoR8QxrkNPyf4x8XSkRuVZnEDNFsFEB/s\\\",\\\"i_e\\\":{\\\"enable_itp_optimization\\\":0}}\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NSwidXNlcm5hbWUiOiJIb3JiaWvDoW0iLCJlbWFpbCI6Im5vcmJlcnRrb3ZhY3MxMDFAZ21haWwuY29tIiwicm9sZSI6Im93bmVyIiwiaWF0IjoxNzcyNzk2NzY0LCJleHAiOjE3NzI4Mzk5NjR9.3RPJ7buHLd8nq833KnGncQXcNBzfnU5Va3A_yld6VSM\"}"
+  },
+  {
+    "id": "17727980081674foy",
+    "timestamp": "2026-03-06T11:53:28.167Z",
+    "level": "log",
+    "message": "🍪 COOKIES: {\"Webstorm-817a862\":\"c02a10b3-6d06-451b-b28e-a3bc746d6127\",\"Pycharm-bae42109\":\"83e98add-8a30-4cb0-92f8-583ca00c2d86\",\"g_state\":\"{\\\"i_l\\\":0,\\\"i_ll\\\":1772796752006,\\\"i_b\\\":\\\"yhpzeKUJJWMoR8QxrkNPyf4x8XSkRuVZnEDNFsFEB/s\\\",\\\"i_e\\\":{\\\"enable_itp_optimization\\\":0}}\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NSwidXNlcm5hbWUiOiJIb3JiaWvDoW0iLCJlbWFpbCI6Im5vcmJlcnRrb3ZhY3MxMDFAZ21haWwuY29tIiwicm9sZSI6Im93bmVyIiwiaWF0IjoxNzcyNzk2NzY0LCJleHAiOjE3NzI4Mzk5NjR9.3RPJ7buHLd8nq833KnGncQXcNBzfnU5Va3A_yld6VSM\"}"
+  },
+  {
+    "id": "1772798010190fndf",
+    "timestamp": "2026-03-06T11:53:30.190Z",
+    "level": "log",
+    "message": "🍪 COOKIES: {\"Webstorm-817a862\":\"c02a10b3-6d06-451b-b28e-a3bc746d6127\",\"Pycharm-bae42109\":\"83e98add-8a30-4cb0-92f8-583ca00c2d86\",\"g_state\":\"{\\\"i_l\\\":0,\\\"i_ll\\\":1772796752006,\\\"i_b\\\":\\\"yhpzeKUJJWMoR8QxrkNPyf4x8XSkRuVZnEDNFsFEB/s\\\",\\\"i_e\\\":{\\\"enable_itp_optimization\\\":0}}\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NSwidXNlcm5hbWUiOiJIb3JiaWvDoW0iLCJlbWFpbCI6Im5vcmJlcnRrb3ZhY3MxMDFAZ21haWwuY29tIiwicm9sZSI6Im93bmVyIiwiaWF0IjoxNzcyNzk2NzY0LCJleHAiOjE3NzI4Mzk5NjR9.3RPJ7buHLd8nq833KnGncQXcNBzfnU5Va3A_yld6VSM\"}"
+  },
+  {
+    "id": "1772798010193vvpw",
+    "timestamp": "2026-03-06T11:53:30.193Z",
+    "level": "log",
+    "message": "🍪 COOKIES: {\"Webstorm-817a862\":\"c02a10b3-6d06-451b-b28e-a3bc746d6127\",\"Pycharm-bae42109\":\"83e98add-8a30-4cb0-92f8-583ca00c2d86\",\"g_state\":\"{\\\"i_l\\\":0,\\\"i_ll\\\":1772796752006,\\\"i_b\\\":\\\"yhpzeKUJJWMoR8QxrkNPyf4x8XSkRuVZnEDNFsFEB/s\\\",\\\"i_e\\\":{\\\"enable_itp_optimization\\\":0}}\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NSwidXNlcm5hbWUiOiJIb3JiaWvDoW0iLCJlbWFpbCI6Im5vcmJlcnRrb3ZhY3MxMDFAZ21haWwuY29tIiwicm9sZSI6Im93bmVyIiwiaWF0IjoxNzcyNzk2NzY0LCJleHAiOjE3NzI4Mzk5NjR9.3RPJ7buHLd8nq833KnGncQXcNBzfnU5Va3A_yld6VSM\"}"
+  },
+  {
+    "id": "1772798012934jkrt",
+    "timestamp": "2026-03-06T11:53:32.934Z",
+    "level": "log",
+    "message": "🍪 COOKIES: {\"Webstorm-817a862\":\"c02a10b3-6d06-451b-b28e-a3bc746d6127\",\"Pycharm-bae42109\":\"83e98add-8a30-4cb0-92f8-583ca00c2d86\",\"g_state\":\"{\\\"i_l\\\":0,\\\"i_ll\\\":1772796752006,\\\"i_b\\\":\\\"yhpzeKUJJWMoR8QxrkNPyf4x8XSkRuVZnEDNFsFEB/s\\\",\\\"i_e\\\":{\\\"enable_itp_optimization\\\":0}}\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NSwidXNlcm5hbWUiOiJIb3JiaWvDoW0iLCJlbWFpbCI6Im5vcmJlcnRrb3ZhY3MxMDFAZ21haWwuY29tIiwicm9sZSI6Im93bmVyIiwiaWF0IjoxNzcyNzk2NzY0LCJleHAiOjE3NzI4Mzk5NjR9.3RPJ7buHLd8nq833KnGncQXcNBzfnU5Va3A_yld6VSM\"}"
+  },
+  {
+    "id": "1772798013255yhz7",
+    "timestamp": "2026-03-06T11:53:33.255Z",
+    "level": "log",
+    "message": "🍪 COOKIES: {\"Webstorm-817a862\":\"c02a10b3-6d06-451b-b28e-a3bc746d6127\",\"Pycharm-bae42109\":\"83e98add-8a30-4cb0-92f8-583ca00c2d86\",\"g_state\":\"{\\\"i_l\\\":0,\\\"i_ll\\\":1772796752006,\\\"i_b\\\":\\\"yhpzeKUJJWMoR8QxrkNPyf4x8XSkRuVZnEDNFsFEB/s\\\",\\\"i_e\\\":{\\\"enable_itp_optimization\\\":0}}\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NSwidXNlcm5hbWUiOiJIb3JiaWvDoW0iLCJlbWFpbCI6Im5vcmJlcnRrb3ZhY3MxMDFAZ21haWwuY29tIiwicm9sZSI6Im93bmVyIiwiaWF0IjoxNzcyNzk2NzY0LCJleHAiOjE3NzI4Mzk5NjR9.3RPJ7buHLd8nq833KnGncQXcNBzfnU5Va3A_yld6VSM\"}"
+  },
+  {
+    "id": "17727983984654kcp",
+    "timestamp": "2026-03-06T11:59:58.466Z",
+    "level": "log",
+    "message": "🍪 COOKIES: {\"Webstorm-817a862\":\"c02a10b3-6d06-451b-b28e-a3bc746d6127\",\"Pycharm-bae42109\":\"83e98add-8a30-4cb0-92f8-583ca00c2d86\",\"g_state\":\"{\\\"i_l\\\":0,\\\"i_ll\\\":1772796752006,\\\"i_b\\\":\\\"yhpzeKUJJWMoR8QxrkNPyf4x8XSkRuVZnEDNFsFEB/s\\\",\\\"i_e\\\":{\\\"enable_itp_optimization\\\":0}}\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NSwidXNlcm5hbWUiOiJIb3JiaWvDoW0iLCJlbWFpbCI6Im5vcmJlcnRrb3ZhY3MxMDFAZ21haWwuY29tIiwicm9sZSI6Im93bmVyIiwiaWF0IjoxNzcyNzk2NzY0LCJleHAiOjE3NzI4Mzk5NjR9.3RPJ7buHLd8nq833KnGncQXcNBzfnU5Va3A_yld6VSM\"}"
+  },
+  {
+    "id": "1772798399675xc5i",
+    "timestamp": "2026-03-06T11:59:59.675Z",
+    "level": "log",
+    "message": "🍪 COOKIES: {\"Webstorm-817a862\":\"c02a10b3-6d06-451b-b28e-a3bc746d6127\",\"Pycharm-bae42109\":\"83e98add-8a30-4cb0-92f8-583ca00c2d86\",\"g_state\":\"{\\\"i_l\\\":0,\\\"i_ll\\\":1772796752006,\\\"i_b\\\":\\\"yhpzeKUJJWMoR8QxrkNPyf4x8XSkRuVZnEDNFsFEB/s\\\",\\\"i_e\\\":{\\\"enable_itp_optimization\\\":0}}\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NSwidXNlcm5hbWUiOiJIb3JiaWvDoW0iLCJlbWFpbCI6Im5vcmJlcnRrb3ZhY3MxMDFAZ21haWwuY29tIiwicm9sZSI6Im93bmVyIiwiaWF0IjoxNzcyNzk2NzY0LCJleHAiOjE3NzI4Mzk5NjR9.3RPJ7buHLd8nq833KnGncQXcNBzfnU5Va3A_yld6VSM\"}"
+  },
+  {
+    "id": "1772798399991gywp",
+    "timestamp": "2026-03-06T11:59:59.991Z",
+    "level": "log",
+    "message": "🍪 COOKIES: {\"Webstorm-817a862\":\"c02a10b3-6d06-451b-b28e-a3bc746d6127\",\"Pycharm-bae42109\":\"83e98add-8a30-4cb0-92f8-583ca00c2d86\",\"g_state\":\"{\\\"i_l\\\":0,\\\"i_ll\\\":1772796752006,\\\"i_b\\\":\\\"yhpzeKUJJWMoR8QxrkNPyf4x8XSkRuVZnEDNFsFEB/s\\\",\\\"i_e\\\":{\\\"enable_itp_optimization\\\":0}}\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NSwidXNlcm5hbWUiOiJIb3JiaWvDoW0iLCJlbWFpbCI6Im5vcmJlcnRrb3ZhY3MxMDFAZ21haWwuY29tIiwicm9sZSI6Im93bmVyIiwiaWF0IjoxNzcyNzk2NzY0LCJleHAiOjE3NzI4Mzk5NjR9.3RPJ7buHLd8nq833KnGncQXcNBzfnU5Va3A_yld6VSM\"}"
+  },
+  {
+    "id": "1772798400701iyln",
+    "timestamp": "2026-03-06T12:00:00.701Z",
+    "level": "log",
+    "message": "🍪 COOKIES: {\"Webstorm-817a862\":\"c02a10b3-6d06-451b-b28e-a3bc746d6127\",\"Pycharm-bae42109\":\"83e98add-8a30-4cb0-92f8-583ca00c2d86\",\"g_state\":\"{\\\"i_l\\\":0,\\\"i_ll\\\":1772796752006,\\\"i_b\\\":\\\"yhpzeKUJJWMoR8QxrkNPyf4x8XSkRuVZnEDNFsFEB/s\\\",\\\"i_e\\\":{\\\"enable_itp_optimization\\\":0}}\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NSwidXNlcm5hbWUiOiJIb3JiaWvDoW0iLCJlbWFpbCI6Im5vcmJlcnRrb3ZhY3MxMDFAZ21haWwuY29tIiwicm9sZSI6Im93bmVyIiwiaWF0IjoxNzcyNzk2NzY0LCJleHAiOjE3NzI4Mzk5NjR9.3RPJ7buHLd8nq833KnGncQXcNBzfnU5Va3A_yld6VSM\"}"
+  },
+  {
+    "id": "1772798400706h8i0",
+    "timestamp": "2026-03-06T12:00:00.706Z",
+    "level": "log",
+    "message": "🍪 COOKIES: {\"Webstorm-817a862\":\"c02a10b3-6d06-451b-b28e-a3bc746d6127\",\"Pycharm-bae42109\":\"83e98add-8a30-4cb0-92f8-583ca00c2d86\",\"g_state\":\"{\\\"i_l\\\":0,\\\"i_ll\\\":1772796752006,\\\"i_b\\\":\\\"yhpzeKUJJWMoR8QxrkNPyf4x8XSkRuVZnEDNFsFEB/s\\\",\\\"i_e\\\":{\\\"enable_itp_optimization\\\":0}}\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NSwidXNlcm5hbWUiOiJIb3JiaWvDoW0iLCJlbWFpbCI6Im5vcmJlcnRrb3ZhY3MxMDFAZ21haWwuY29tIiwicm9sZSI6Im93bmVyIiwiaWF0IjoxNzcyNzk2NzY0LCJleHAiOjE3NzI4Mzk5NjR9.3RPJ7buHLd8nq833KnGncQXcNBzfnU5Va3A_yld6VSM\"}"
+  },
+  {
+    "id": "1772798402120ws3x",
+    "timestamp": "2026-03-06T12:00:02.120Z",
+    "level": "log",
+    "message": "🍪 COOKIES: {\"Webstorm-817a862\":\"c02a10b3-6d06-451b-b28e-a3bc746d6127\",\"Pycharm-bae42109\":\"83e98add-8a30-4cb0-92f8-583ca00c2d86\",\"g_state\":\"{\\\"i_l\\\":0,\\\"i_ll\\\":1772796752006,\\\"i_b\\\":\\\"yhpzeKUJJWMoR8QxrkNPyf4x8XSkRuVZnEDNFsFEB/s\\\",\\\"i_e\\\":{\\\"enable_itp_optimization\\\":0}}\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NSwidXNlcm5hbWUiOiJIb3JiaWvDoW0iLCJlbWFpbCI6Im5vcmJlcnRrb3ZhY3MxMDFAZ21haWwuY29tIiwicm9sZSI6Im93bmVyIiwiaWF0IjoxNzcyNzk2NzY0LCJleHAiOjE3NzI4Mzk5NjR9.3RPJ7buHLd8nq833KnGncQXcNBzfnU5Va3A_yld6VSM\"}"
+  },
+  {
+    "id": "17727984021239blv",
+    "timestamp": "2026-03-06T12:00:02.123Z",
+    "level": "log",
+    "message": "🔥 HIT GET /api/ranks/me"
+  },
+  {
+    "id": "177279840212427vj",
+    "timestamp": "2026-03-06T12:00:02.124Z",
+    "level": "log",
+    "message": "🍪 COOKIES: {\"Webstorm-817a862\":\"c02a10b3-6d06-451b-b28e-a3bc746d6127\",\"Pycharm-bae42109\":\"83e98add-8a30-4cb0-92f8-583ca00c2d86\",\"g_state\":\"{\\\"i_l\\\":0,\\\"i_ll\\\":1772796752006,\\\"i_b\\\":\\\"yhpzeKUJJWMoR8QxrkNPyf4x8XSkRuVZnEDNFsFEB/s\\\",\\\"i_e\\\":{\\\"enable_itp_optimization\\\":0}}\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NSwidXNlcm5hbWUiOiJIb3JiaWvDoW0iLCJlbWFpbCI6Im5vcmJlcnRrb3ZhY3MxMDFAZ21haWwuY29tIiwicm9sZSI6Im93bmVyIiwiaWF0IjoxNzcyNzk2NzY0LCJleHAiOjE3NzI4Mzk5NjR9.3RPJ7buHLd8nq833KnGncQXcNBzfnU5Va3A_yld6VSM\"}"
+  },
+  {
+    "id": "1772798414032h3jx",
+    "timestamp": "2026-03-06T12:00:14.032Z",
+    "level": "warn",
+    "message": "⚠️ tables.runtime.json not readable, allowlist DISABLED"
+  },
+  {
+    "id": "1772798414067az4o",
+    "timestamp": "2026-03-06T12:00:14.067Z",
+    "level": "warn",
+    "message": "⚠️ allowlist is EMPTY -> table check skipped"
+  },
+  {
+    "id": "1772798414263lke5",
+    "timestamp": "2026-03-06T12:00:14.263Z",
+    "level": "warn",
+    "message": "⚠️ \"cabrio_cars\" has no \"id\" column, retry with \"ID\"..."
+  },
+  {
+    "id": "1772798418591r0an",
+    "timestamp": "2026-03-06T12:00:18.591Z",
+    "level": "log",
+    "message": "🍪 COOKIES: {\"Webstorm-817a862\":\"c02a10b3-6d06-451b-b28e-a3bc746d6127\",\"Pycharm-bae42109\":\"83e98add-8a30-4cb0-92f8-583ca00c2d86\",\"g_state\":\"{\\\"i_l\\\":0,\\\"i_ll\\\":1772796752006,\\\"i_b\\\":\\\"yhpzeKUJJWMoR8QxrkNPyf4x8XSkRuVZnEDNFsFEB/s\\\",\\\"i_e\\\":{\\\"enable_itp_optimization\\\":0}}\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NSwidXNlcm5hbWUiOiJIb3JiaWvDoW0iLCJlbWFpbCI6Im5vcmJlcnRrb3ZhY3MxMDFAZ21haWwuY29tIiwicm9sZSI6Im93bmVyIiwiaWF0IjoxNzcyNzk2NzY0LCJleHAiOjE3NzI4Mzk5NjR9.3RPJ7buHLd8nq833KnGncQXcNBzfnU5Va3A_yld6VSM\"}"
+  },
+  {
+    "id": "1772798418907nicf",
+    "timestamp": "2026-03-06T12:00:18.907Z",
+    "level": "warn",
+    "message": "⚠️ tables.runtime.json not readable, allowlist DISABLED"
+  },
+  {
+    "id": "1772798418911rifq",
+    "timestamp": "2026-03-06T12:00:18.911Z",
+    "level": "warn",
+    "message": "⚠️ allowlist is EMPTY -> table check skipped"
+  },
+  {
+    "id": "1772798419089banq",
+    "timestamp": "2026-03-06T12:00:19.089Z",
+    "level": "warn",
+    "message": "⚠️ \"cabrio_cars\" has no \"id\" column, retry with \"ID\"..."
+  },
+  {
+    "id": "1773061938297hg2y",
+    "timestamp": "2026-03-09T13:12:18.298Z",
+    "level": "log",
+    "message": "🖼 Serving images from: C:\\Users\\Kovács Norbert\\WebstormProjects\\Team-Work\\datas\\images"
+  },
+  {
+    "id": "17730619383060w8j",
+    "timestamp": "2026-03-09T13:12:18.306Z",
+    "level": "log",
+    "message": "[dotenv@17.2.3] injecting env (18) from ..\\.env \u001b[2m-- tip: 🔐 prevent building .env in docker: https://dotenvx.com/prebuild\u001b[0m"
+  },
+  {
+    "id": "1773061938464z6vg",
+    "timestamp": "2026-03-09T13:12:18.464Z",
+    "level": "log",
+    "message": "[dotenv@17.2.3] injecting env (0) from .env \u001b[2m-- tip: 📡 add observability to secrets: https://dotenvx.com/ops\u001b[0m"
+  },
+  {
+    "id": "17730619387543as6",
+    "timestamp": "2026-03-09T13:12:18.754Z",
+    "level": "log",
+    "message": "✅ products.controller keys: [\"list\",\"brands\"]"
+  },
+  {
+    "id": "1773061938755ginm",
+    "timestamp": "2026-03-09T13:12:18.755Z",
+    "level": "log",
+    "message": "✅ typeof ctrl.list: function"
+  },
+  {
+    "id": "1773061938755relw",
+    "timestamp": "2026-03-09T13:12:18.755Z",
+    "level": "log",
+    "message": "✅ typeof ctrl.brands: function"
+  },
+  {
+    "id": "17730619387583bfi",
+    "timestamp": "2026-03-09T13:12:18.758Z",
+    "level": "log",
+    "message": "TABLES_FILE: C:\\Users\\Kovács Norbert\\WebstormProjects\\Team-Work\\backend\\datas\\Jsons\\tables.runtime.json"
+  },
+  {
+    "id": "1773061938760a2c4",
+    "timestamp": "2026-03-09T13:12:18.760Z",
+    "level": "log",
+    "message": "ITEMS CTRL = {}"
+  },
+  {
+    "id": "17730619387615hn0",
+    "timestamp": "2026-03-09T13:12:18.761Z",
+    "level": "log",
+    "message": "ITEMS CTRL LIST = "
+  },
+  {
+    "id": "1773061938825r4wq",
+    "timestamp": "2026-03-09T13:12:18.825Z",
+    "level": "log",
+    "message": "ENV CHECK: {\"SUPABASE_URL\":\"https://ecjufuhmmehhzusicghh.supabase.co\",\"HAS_KEY\":true,\"JWT\":true,\"DEEPSEEK\":false}"
+  },
+  {
+    "id": "17730619388333973",
+    "timestamp": "2026-03-09T13:12:18.833Z",
+    "level": "log",
+    "message": "🚀 Server running on http://localhost:3000"
+  },
+  {
+    "id": "17730619655513fhm",
+    "timestamp": "2026-03-09T13:12:45.551Z",
+    "level": "log",
+    "message": "🍪 COOKIES: {\"Webstorm-817a862\":\"c02a10b3-6d06-451b-b28e-a3bc746d6127\",\"Pycharm-bae42109\":\"83e98add-8a30-4cb0-92f8-583ca00c2d86\",\"g_state\":\"{\\\"i_l\\\":0,\\\"i_ll\\\":1772796752006,\\\"i_b\\\":\\\"yhpzeKUJJWMoR8QxrkNPyf4x8XSkRuVZnEDNFsFEB/s\\\",\\\"i_e\\\":{\\\"enable_itp_optimization\\\":0}}\"}"
+  },
+  {
+    "id": "17730619657390ka5",
+    "timestamp": "2026-03-09T13:12:45.739Z",
+    "level": "log",
+    "message": "❌ NINCS auth_token"
+  },
+  {
+    "id": "17730619666024i78",
+    "timestamp": "2026-03-09T13:12:46.602Z",
+    "level": "log",
+    "message": "🍪 COOKIES: {\"Webstorm-817a862\":\"c02a10b3-6d06-451b-b28e-a3bc746d6127\",\"Pycharm-bae42109\":\"83e98add-8a30-4cb0-92f8-583ca00c2d86\",\"g_state\":\"{\\\"i_l\\\":0,\\\"i_ll\\\":1772796752006,\\\"i_b\\\":\\\"yhpzeKUJJWMoR8QxrkNPyf4x8XSkRuVZnEDNFsFEB/s\\\",\\\"i_e\\\":{\\\"enable_itp_optimization\\\":0}}\"}"
+  },
+  {
+    "id": "1773061966605ivb6",
+    "timestamp": "2026-03-09T13:12:46.605Z",
+    "level": "log",
+    "message": "❌ NINCS auth_token"
+  },
+  {
+    "id": "1773063132362uc7g",
+    "timestamp": "2026-03-09T13:32:12.366Z",
+    "level": "log",
+    "message": "🔥 HIT GET /api/ranks/me"
+  },
+  {
+    "id": "1773063132866lrd2",
+    "timestamp": "2026-03-09T13:32:12.866Z",
+    "level": "log",
+    "message": "🍪 COOKIES: {\"Webstorm-817a862\":\"c02a10b3-6d06-451b-b28e-a3bc746d6127\",\"Pycharm-bae42109\":\"83e98add-8a30-4cb0-92f8-583ca00c2d86\",\"g_state\":\"{\\\"i_l\\\":0,\\\"i_ll\\\":1772796752006,\\\"i_b\\\":\\\"yhpzeKUJJWMoR8QxrkNPyf4x8XSkRuVZnEDNFsFEB/s\\\",\\\"i_e\\\":{\\\"enable_itp_optimization\\\":0}}\"}"
+  },
+  {
+    "id": "1773063133317xk9r",
+    "timestamp": "2026-03-09T13:32:13.317Z",
+    "level": "log",
+    "message": "❌ NINCS auth_token"
   }
 ]
