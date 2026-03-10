@@ -1,71 +1,5 @@
 [
   {
-    "id": "1772372684140dg5g",
-    "timestamp": "2026-03-01T13:44:44.140Z",
-    "level": "log",
-    "message": "🍪 COOKIES: {\"Webstorm-4a9b1ed1\":\"2cd47b33-d91f-4180-94e5-e3cd66fd6f7d\",\"Webstorm-4a9b1ed2\":\"4825e2dd-8848-40aa-82fa-6b6096e480a5\",\"Webstorm-4a9b1ed3\":\"4b21ec80-24ec-43df-ad72-310d7e663763\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJIYXphZmlMZXYiLCJlbWFpbCI6ImhhemFmaWxldkBnbWFpbC5jb20iLCJyb2xlIjoib3duZXIiLCJpYXQiOjE3NzE4NjQ2OTYsImV4cCI6MTc3NDAyNDY5Nn0.z9YDFi-lGAygrhWNw89CwelIqJCxTt9QOUUyClxwPNQ\"}"
-  },
-  {
-    "id": "1772372861636o2lo",
-    "timestamp": "2026-03-01T13:47:41.636Z",
-    "level": "log",
-    "message": "🍪 COOKIES: {\"Webstorm-4a9b1ed1\":\"2cd47b33-d91f-4180-94e5-e3cd66fd6f7d\",\"Webstorm-4a9b1ed2\":\"4825e2dd-8848-40aa-82fa-6b6096e480a5\",\"Webstorm-4a9b1ed3\":\"4b21ec80-24ec-43df-ad72-310d7e663763\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJIYXphZmlMZXYiLCJlbWFpbCI6ImhhemFmaWxldkBnbWFpbC5jb20iLCJyb2xlIjoib3duZXIiLCJpYXQiOjE3NzE4NjQ2OTYsImV4cCI6MTc3NDAyNDY5Nn0.z9YDFi-lGAygrhWNw89CwelIqJCxTt9QOUUyClxwPNQ\"}"
-  },
-  {
-    "id": "1772372861639tl5t",
-    "timestamp": "2026-03-01T13:47:41.639Z",
-    "level": "log",
-    "message": "🍪 COOKIES: {\"Webstorm-4a9b1ed1\":\"2cd47b33-d91f-4180-94e5-e3cd66fd6f7d\",\"Webstorm-4a9b1ed2\":\"4825e2dd-8848-40aa-82fa-6b6096e480a5\",\"Webstorm-4a9b1ed3\":\"4b21ec80-24ec-43df-ad72-310d7e663763\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJIYXphZmlMZXYiLCJlbWFpbCI6ImhhemFmaWxldkBnbWFpbC5jb20iLCJyb2xlIjoib3duZXIiLCJpYXQiOjE3NzE4NjQ2OTYsImV4cCI6MTc3NDAyNDY5Nn0.z9YDFi-lGAygrhWNw89CwelIqJCxTt9QOUUyClxwPNQ\"}"
-  },
-  {
-    "id": "17723728617763h8n",
-    "timestamp": "2026-03-01T13:47:41.776Z",
-    "level": "log",
-    "message": "🍪 COOKIES: {\"Webstorm-4a9b1ed1\":\"2cd47b33-d91f-4180-94e5-e3cd66fd6f7d\",\"Webstorm-4a9b1ed2\":\"4825e2dd-8848-40aa-82fa-6b6096e480a5\",\"Webstorm-4a9b1ed3\":\"4b21ec80-24ec-43df-ad72-310d7e663763\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJIYXphZmlMZXYiLCJlbWFpbCI6ImhhemFmaWxldkBnbWFpbC5jb20iLCJyb2xlIjoib3duZXIiLCJpYXQiOjE3NzE4NjQ2OTYsImV4cCI6MTc3NDAyNDY5Nn0.z9YDFi-lGAygrhWNw89CwelIqJCxTt9QOUUyClxwPNQ\"}"
-  },
-  {
-    "id": "17723728619006kjk",
-    "timestamp": "2026-03-01T13:47:41.900Z",
-    "level": "log",
-    "message": "🍪 COOKIES: {\"Webstorm-4a9b1ed1\":\"2cd47b33-d91f-4180-94e5-e3cd66fd6f7d\",\"Webstorm-4a9b1ed2\":\"4825e2dd-8848-40aa-82fa-6b6096e480a5\",\"Webstorm-4a9b1ed3\":\"4b21ec80-24ec-43df-ad72-310d7e663763\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJIYXphZmlMZXYiLCJlbWFpbCI6ImhhemFmaWxldkBnbWFpbC5jb20iLCJyb2xlIjoib3duZXIiLCJpYXQiOjE3NzE4NjQ2OTYsImV4cCI6MTc3NDAyNDY5Nn0.z9YDFi-lGAygrhWNw89CwelIqJCxTt9QOUUyClxwPNQ\"}"
-  },
-  {
-    "id": "1772372861902aje7",
-    "timestamp": "2026-03-01T13:47:41.902Z",
-    "level": "log",
-    "message": "🔥 HIT GET /api/ranks/me"
-  },
-  {
-    "id": "1772372861903lhpo",
-    "timestamp": "2026-03-01T13:47:41.903Z",
-    "level": "log",
-    "message": "🍪 COOKIES: {\"Webstorm-4a9b1ed1\":\"2cd47b33-d91f-4180-94e5-e3cd66fd6f7d\",\"Webstorm-4a9b1ed2\":\"4825e2dd-8848-40aa-82fa-6b6096e480a5\",\"Webstorm-4a9b1ed3\":\"4b21ec80-24ec-43df-ad72-310d7e663763\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJIYXphZmlMZXYiLCJlbWFpbCI6ImhhemFmaWxldkBnbWFpbC5jb20iLCJyb2xlIjoib3duZXIiLCJpYXQiOjE3NzE4NjQ2OTYsImV4cCI6MTc3NDAyNDY5Nn0.z9YDFi-lGAygrhWNw89CwelIqJCxTt9QOUUyClxwPNQ\"}"
-  },
-  {
-    "id": "1772372862520faz3",
-    "timestamp": "2026-03-01T13:47:42.520Z",
-    "level": "log",
-    "message": "🍪 COOKIES: {\"Webstorm-4a9b1ed1\":\"2cd47b33-d91f-4180-94e5-e3cd66fd6f7d\",\"Webstorm-4a9b1ed2\":\"4825e2dd-8848-40aa-82fa-6b6096e480a5\",\"Webstorm-4a9b1ed3\":\"4b21ec80-24ec-43df-ad72-310d7e663763\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJIYXphZmlMZXYiLCJlbWFpbCI6ImhhemFmaWxldkBnbWFpbC5jb20iLCJyb2xlIjoib3duZXIiLCJpYXQiOjE3NzE4NjQ2OTYsImV4cCI6MTc3NDAyNDY5Nn0.z9YDFi-lGAygrhWNw89CwelIqJCxTt9QOUUyClxwPNQ\"}"
-  },
-  {
-    "id": "1772372862524iy9u",
-    "timestamp": "2026-03-01T13:47:42.524Z",
-    "level": "log",
-    "message": "🍪 COOKIES: {\"Webstorm-4a9b1ed1\":\"2cd47b33-d91f-4180-94e5-e3cd66fd6f7d\",\"Webstorm-4a9b1ed2\":\"4825e2dd-8848-40aa-82fa-6b6096e480a5\",\"Webstorm-4a9b1ed3\":\"4b21ec80-24ec-43df-ad72-310d7e663763\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJIYXphZmlMZXYiLCJlbWFpbCI6ImhhemFmaWxldkBnbWFpbC5jb20iLCJyb2xlIjoib3duZXIiLCJpYXQiOjE3NzE4NjQ2OTYsImV4cCI6MTc3NDAyNDY5Nn0.z9YDFi-lGAygrhWNw89CwelIqJCxTt9QOUUyClxwPNQ\"}"
-  },
-  {
-    "id": "1772372862706bexh",
-    "timestamp": "2026-03-01T13:47:42.706Z",
-    "level": "log",
-    "message": "🍪 COOKIES: {\"Webstorm-4a9b1ed1\":\"2cd47b33-d91f-4180-94e5-e3cd66fd6f7d\",\"Webstorm-4a9b1ed2\":\"4825e2dd-8848-40aa-82fa-6b6096e480a5\",\"Webstorm-4a9b1ed3\":\"4b21ec80-24ec-43df-ad72-310d7e663763\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJIYXphZmlMZXYiLCJlbWFpbCI6ImhhemFmaWxldkBnbWFpbC5jb20iLCJyb2xlIjoib3duZXIiLCJpYXQiOjE3NzE4NjQ2OTYsImV4cCI6MTc3NDAyNDY5Nn0.z9YDFi-lGAygrhWNw89CwelIqJCxTt9QOUUyClxwPNQ\"}"
-  },
-  {
-    "id": "1772372862721860v",
-    "timestamp": "2026-03-01T13:47:42.721Z",
-    "level": "log",
-    "message": "🍪 COOKIES: {\"Webstorm-4a9b1ed1\":\"2cd47b33-d91f-4180-94e5-e3cd66fd6f7d\",\"Webstorm-4a9b1ed2\":\"4825e2dd-8848-40aa-82fa-6b6096e480a5\",\"Webstorm-4a9b1ed3\":\"4b21ec80-24ec-43df-ad72-310d7e663763\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJIYXphZmlMZXYiLCJlbWFpbCI6ImhhemFmaWxldkBnbWFpbC5jb20iLCJyb2xlIjoib3duZXIiLCJpYXQiOjE3NzE4NjQ2OTYsImV4cCI6MTc3NDAyNDY5Nn0.z9YDFi-lGAygrhWNw89CwelIqJCxTt9QOUUyClxwPNQ\"}"
-  },
-  {
     "id": "1772372862741ditz",
     "timestamp": "2026-03-01T13:47:42.741Z",
     "level": "log",
@@ -11998,5 +11932,71 @@
     "timestamp": "2026-03-09T13:32:13.317Z",
     "level": "log",
     "message": "❌ NINCS auth_token"
+  },
+  {
+    "id": "1773149519568xoom",
+    "timestamp": "2026-03-10T13:31:59.569Z",
+    "level": "log",
+    "message": "🖼 Serving images from: C:\\Users\\Kovács Norbert\\WebstormProjects\\Team-Work\\datas\\images"
+  },
+  {
+    "id": "1773149519594honc",
+    "timestamp": "2026-03-10T13:31:59.594Z",
+    "level": "log",
+    "message": "[dotenv@17.2.3] injecting env (18) from ..\\.env \u001b[2m-- tip: ⚙️  override existing env vars with { override: true }\u001b[0m"
+  },
+  {
+    "id": "1773149519772xmit",
+    "timestamp": "2026-03-10T13:31:59.772Z",
+    "level": "log",
+    "message": "[dotenv@17.2.3] injecting env (0) from .env \u001b[2m-- tip: 👥 sync secrets across teammates & machines: https://dotenvx.com/ops\u001b[0m"
+  },
+  {
+    "id": "17731495201761hr0",
+    "timestamp": "2026-03-10T13:32:00.176Z",
+    "level": "log",
+    "message": "✅ products.controller keys: [\"list\",\"brands\"]"
+  },
+  {
+    "id": "1773149520178nhig",
+    "timestamp": "2026-03-10T13:32:00.178Z",
+    "level": "log",
+    "message": "✅ typeof ctrl.list: function"
+  },
+  {
+    "id": "1773149520179dp7f",
+    "timestamp": "2026-03-10T13:32:00.179Z",
+    "level": "log",
+    "message": "✅ typeof ctrl.brands: function"
+  },
+  {
+    "id": "1773149520184qv48",
+    "timestamp": "2026-03-10T13:32:00.184Z",
+    "level": "log",
+    "message": "TABLES_FILE: C:\\Users\\Kovács Norbert\\WebstormProjects\\Team-Work\\backend\\datas\\Jsons\\tables.runtime.json"
+  },
+  {
+    "id": "17731495201865pe6",
+    "timestamp": "2026-03-10T13:32:00.186Z",
+    "level": "log",
+    "message": "ITEMS CTRL = {}"
+  },
+  {
+    "id": "1773149520190rcc6",
+    "timestamp": "2026-03-10T13:32:00.190Z",
+    "level": "log",
+    "message": "ITEMS CTRL LIST = "
+  },
+  {
+    "id": "1773149520283ve2x",
+    "timestamp": "2026-03-10T13:32:00.283Z",
+    "level": "log",
+    "message": "ENV CHECK: {\"SUPABASE_URL\":\"https://ecjufuhmmehhzusicghh.supabase.co\",\"HAS_KEY\":true,\"JWT\":true,\"DEEPSEEK\":false}"
+  },
+  {
+    "id": "17731495203011mgv",
+    "timestamp": "2026-03-10T13:32:00.301Z",
+    "level": "log",
+    "message": "🚀 Server running on http://localhost:3000"
   }
 ]
