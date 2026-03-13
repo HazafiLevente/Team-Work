@@ -48,5 +48,15 @@
         "username": "Horbikám"
       }
     ]
+  },
+  "2026-03-13": {
+    "unique": 1,
+    "total_requests": 23,
+    "users": [
+      {
+        "id": 1,
+        "username": "HazafiLev"
+      }
+    ]
   }
 }
