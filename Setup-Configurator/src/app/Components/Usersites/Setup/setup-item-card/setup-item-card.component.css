@@ -36,32 +36,11 @@
     0 10px 24px rgba(0,0,0,0.35);
 }
 
-.drag-element.circle {
-  width: 70px;
-  height: 70px;
-  min-width: 70px;
-  border-radius: 50%;
-}
-
-.drag-element.circle::before {
-  display: none;
-}
-
 .setup-name {
   pointer-events: none;
   padding: 0 16px;
   text-align: center;
   line-height: 1.2;
-}
-
-.setup-edit-input {
-  width: 90%;
-  border: none;
-  outline: none;
-  background: transparent;
-  text-align: center;
-  font-weight: 600;
-  font-size: 14px;
 }
 
 .drag-element:active {

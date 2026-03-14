@@ -1,0 +1,18 @@
+<div
+  #root
+  class="drag-element item-element"
+  cdkDrag
+  [cdkDragDisabled]="dragDisabled"
+  [cdkDragFreeDragPosition]="dragPosition"
+  [cdkDragBoundary]="boundaryRef"
+  [attr.data-id]="dataId"
+  (cdkDragMoved)="onDragMoved()"
+  (cdkDragEnded)="onDragEnded($event)"
+  (click)="onClick()"
+  (dblclick)="onDblClick()"
+  (contextmenu)="onRightClick($event)"
+>
+  <span class="setup-name">
+    {{ displayName }}
+  </span>
+</div>

@@ -2,21 +2,54 @@
 
   <app-workspace
     [userSetups]="userSetups"
-    [viewingSetup]="viewingSetup"
     [items]="items"
-    (rename)="openRenameFromMenu($event)"
-    (roomRenamed)="saveRenamedRoom($event)"
-    (deleteSetup)="deleteSetupFromMenu($event)"
-    (createSetup)="createNewSetup($event.x,$event.y)"
+    [viewingSetup]="viewingSetup"
     [connections]="connections"
     [globalRoomConnections]="globalRoomConnections"
     [loading]="loading"
     [loadingItems]="loadingItems"
+    [lineRefreshTrigger]="lineRefreshTrigger"
+    [connectMousePos]="connectMousePos"
+    [connectSourceSetup]="connectSourceSetup"
+    [pairingStage]="pairingStage"
     (openSetup)="openSetupDetails($event)"
+    (itemOpen)="openItemOverlay($event)"
     (back)="backToSetups()"
-    (roomMoved)="onRoomDragEnded($event.setup,$event.pos)">
+    (roomMoved)="onRoomDragEnded($event.setup, $event.pos)"
+    (roomRenamed)="saveRenamedRoom($event)"
+    (createSetup)="createNewSetup($event.x, $event.y)"
+    (deleteSetup)="deleteSetupFromMenu($event)"
+    (openTools)="openToolsFromMenu()"
+    (rename)="openRenameFromMenu($event)"
+    (connect)="startConnectingFromMenu($event)">
   </app-workspace>
 
+  @if (selectedProduct) {
+    <app-product-details-panel
+      [product]="selectedProduct"
+      (closed)="closeProductOverlay()">
+    </app-product-details-panel>
+  }
+
+  @if (selectedCarItem) {
+    <app-setup-car-details-panel
+      [carItem]="selectedCarItem"
+      (close)="closeProductOverlay()">
+    </app-setup-car-details-panel>
+  }
+
+  @if (selectedPcItem) {
+    <app-setup-pc-details-panel
+      [pcItem]="selectedPcItem"
+      (close)="closeProductOverlay()">
+    </app-setup-pc-details-panel>
+  }
+  @if (selectedPcPartItem) {
+    <app-setup-pc-part-details-panel
+      [partItem]="selectedPcPartItem"
+      (close)="closeProductOverlay()">
+    </app-setup-pc-part-details-panel>
+  }
 
   <app-setup-dock
     [dockItems]="dockItems"
