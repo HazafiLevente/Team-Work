@@ -16,7 +16,7 @@ export class ProductComponent implements OnInit {
 
   imageUrl = 'https://via.placeholder.com/200?text=Loading';
 
-  constructor(private images: ImageService) { }
+  constructor(private images: ImageService) {}
 
   get displayPrice(): number | null {
     return this.product.price ?? null;
@@ -25,8 +25,15 @@ export class ProductComponent implements OnInit {
   async ngOnInit() {
     await this.images.load();
 
-    const table = this.product.table;
+    const table = (this.product as any).table_name || this.product.table;
     this.imageUrl = this.images.getImage(table, this.product);
+
+    console.log('🖼 CARD IMAGE', {
+      table,
+      id: (this.product as any).id,
+      imageUrl: this.imageUrl,
+      product: this.product
+    });
   }
 
   open(): void {

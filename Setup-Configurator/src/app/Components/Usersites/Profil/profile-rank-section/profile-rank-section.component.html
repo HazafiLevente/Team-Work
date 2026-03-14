@@ -1,8 +1,15 @@
 <section class="section">
   <div class="section-header">
-    <h3>Rang & Szint</h3>
-    <span class="section-sub">Haladás és pontok</span>
+    <div>
+      <h3>Rang & Szint</h3>
+      <span class="section-sub">Haladás és pontok</span>
+    </div>
+
+    <button class="leaderboard-btn" type="button" (click)="openLeaderboard()">
+      🏆 Ranglista
+    </button>
   </div>
+
   <div class="section-hr"></div>
 
   <app-rank-panel [embedded]="true"></app-rank-panel>

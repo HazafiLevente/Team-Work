@@ -5,7 +5,7 @@ import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { SetupPcBuilderModalComponent } from '../setup-pc-builder-modal/setup-pc-builder-modal.component';
 import { HomeTheaterBuilderComponent }
-  from '../home-theater-builder-modal/home-theater-builder.component';
+  from '../quick-builder/home-theater-builder-modal/home-theater-builder.component';
 type UiItem = {
   category: string;
   display_name: string;
@@ -40,6 +40,7 @@ export class SetupToolsModalComponent implements OnChanges {
   @Input() startTab: 'items' | 'pc' | 'cars' | 'ht' = 'items';
 
   @Output() close = new EventEmitter<void>();
+  @Output() openHtBuilder = new EventEmitter<void>();
 
   tab: 'items' | 'pc' | 'cars' | 'ht' = 'items';
 
@@ -373,6 +374,9 @@ export class SetupToolsModalComponent implements OnChanges {
       next: () => {
         this.htSaving = false;
         this.htSaveSuccess = true;
+
+        this.openHtBuilder.emit();
+        this.close.emit();
 
         // opcionális: 2 mp után eltűnik
         setTimeout(() => {

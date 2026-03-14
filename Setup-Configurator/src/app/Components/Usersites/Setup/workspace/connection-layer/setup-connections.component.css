@@ -1,0 +1,27 @@
+.connections-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.connection-line {
+  fill: none;
+  stroke: #7a5cff;
+  stroke-width: 3;
+  stroke-linecap: round;
+  opacity: 0.95;
+}
+
+.connection-line.cross {
+  stroke: #8b6dff;
+  stroke-width: 3.5;
+}
+
+.connection-line.ghost-line {
+  stroke-dasharray: 8 8;
+  opacity: 0.7;
+}

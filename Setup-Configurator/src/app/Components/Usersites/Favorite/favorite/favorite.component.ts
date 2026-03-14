@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { SetupRoomlistComponent } from '../../Setup/setup-roomlist/setup-roomlist.component';
 
+
 @Component({
   selector: 'app-favorite',
   standalone: true,

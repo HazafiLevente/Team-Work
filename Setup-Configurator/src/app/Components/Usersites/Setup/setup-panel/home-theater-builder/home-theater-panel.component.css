@@ -1,0 +1,98 @@
+.ht-panel{
+  position:absolute;
+  top:120px;
+  left:120px;
+
+  width:420px;
+  height:260px;
+
+  background:#0e0a1d;
+  border:1px solid #3a2f63;
+  border-radius:10px;
+
+  display:flex;
+  flex-direction:column;
+
+  box-shadow:0 20px 60px rgba(0,0,0,0.7);
+}
+
+.ht-panel{
+  position:absolute;
+  z-index:20;
+}
+.ht-header{
+  height:36px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+
+  padding:0 10px;
+
+  background:#15112a;
+  border-bottom:1px solid #2a2146;
+
+  cursor:move;
+}
+.ht-panel.maximized{
+
+  position:absolute;
+
+  top:10px;
+  left:10px;
+
+  width:calc(100% - 20px);
+  height:calc(100% - 20px);
+
+  z-index:9999;
+
+}
+
+.title{
+  font-weight:700;
+  font-size:13px;
+}
+
+.ht-controls{
+  display:flex;
+  gap:6px;
+}
+
+.ctrl-btn{
+  width:26px;
+  height:22px;
+
+  border:none;
+  border-radius:4px;
+
+  background:transparent;
+  color:#ccc;
+
+  cursor:pointer;
+}
+
+.ctrl-btn:hover{
+  background:#2a2146;
+}
+
+.ctrl-btn.close:hover{
+  background:#ff4b4b;
+  color:white;
+}
+
+.ht-body{
+  flex:1;
+  padding:10px;
+}
+
+/* workspace maximize */
+.ht-panel.maximized{
+
+  top:0 !important;
+  left:0 !important;
+
+  width:100% !important;
+  height:100% !important;
+
+  border-radius:0;
+
+}

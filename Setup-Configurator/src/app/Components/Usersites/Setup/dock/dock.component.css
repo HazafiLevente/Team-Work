@@ -1,0 +1,33 @@
+.dock{
+  position:absolute;
+
+  left:0;
+  right:0;
+  bottom:10px;   /* kicsi margó */
+
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  gap:10px;
+
+  height:60px;
+
+  z-index:5000;
+  pointer-events:auto;
+}
+
+.dock-inner{
+  background:rgba(10,10,20,0.85);
+  border:1px solid rgba(255,255,255,0.12);
+
+  backdrop-filter: blur(12px);
+
+  border-radius:16px;
+
+  padding:10px 16px;
+
+  display:flex;
+  gap:10px;
+
+  box-shadow:0 15px 40px rgba(0,0,0,0.6);
+}

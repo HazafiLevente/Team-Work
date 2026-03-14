@@ -1,6 +1,14 @@
+.device-selector{
+  position: fixed;
+  bottom: 120px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 99999;
+}
+
 :root {
   --header-h: 74px;
-  --grid-extra-h: 150px;
+  --grid-extra-h: 250px;
 }
 
 .setup-shell {
@@ -9,117 +17,10 @@
   display: grid;
 }
 
-/* BAL OLDAL: EZ A DRAG BOUNDARY */
-.setup-workspace {
-  position: relative;
-  height: 100%;
-  min-height: 0;
-  overflow: hidden;
 
-  border-radius: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.10);
 
-  /* ❌ FONTOS: backdrop-filter innen KIKERÜL, mert bugolja a position:fixed + CDK drag-ot */
-  /* backdrop-filter: blur(10px); */
 
-  /* a háttér/blend marad, de blur a ::before-ben lesz */
-  background: transparent;
 
-  box-shadow: 0 18px 60px rgba(0, 0, 0, 0.55);
-}
-
-/* ✅ Blur + háttér pseudo-elemen: így a fixed panelek nem ugranak */
-.setup-workspace::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: 16px;
-
-  background: rgba(10, 10, 10, 0.35);
-  backdrop-filter: blur(10px);
-
-  z-index: 0;
-  pointer-events: none;
-}
-
-/* ✅ felső gombsor: Új setup + Vissza */
-.toolbar {
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  z-index: 5;
-  display: flex;
-  gap: 10px;
-  pointer-events: none;
-}
-
-.new-setup-btn,
-.back-btn {
-  pointer-events: auto;
-
-  height: 38px;
-  padding: 0 14px;
-  border-radius: 12px;
-
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  background: rgba(255, 255, 255, 0.06);
-  color: rgba(255, 255, 255, 0.92);
-
-  cursor: pointer;
-  font-size: 13px;
-  font-weight: 800;
-
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
-  backdrop-filter: blur(10px);
-}
-
-.new-setup-btn:hover,
-.back-btn:hover {
-  background: rgba(82, 39, 255, 0.22);
-  border-color: rgba(82, 39, 255, 0.45);
-  color: #fff;
-}
-
-/* DotGrid háttér */
-.dot-bg {
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  /* ✅ 0->1, mert a ::before is 0 */
-  opacity: 0.85;
-  pointer-events: none;
-}
-
-/* kártyák tartója */
-.boundary-area {
-  position: relative;
-  z-index: 2;
-  /* ✅ 1->2 */
-
-  width: 100%;
-  min-height: 100%;
-  height: 100%;
-
-  padding: 18px;
-  padding-top: 62px;
-  padding-bottom: 200px;
-
-  display: flex;
-  flex-wrap: wrap;
-  align-content: flex-start;
-  gap: 15px;
-
-  background: radial-gradient(ellipse at center,
-      rgba(255, 255, 255, 0.03),
-      rgba(0, 0, 0, 0) 70%);
-}
-
-.no-data {
-  padding: 20px;
-  color: rgba(233, 238, 248, 0.75);
-  width: 100%;
-  text-align: center;
-}
 
 /* ✅ DETAIL VIEW item kártyák */
 .item-card {
@@ -215,32 +116,15 @@
 
 @media (max-width: 980px) {
   :root {
-    --grid-extra-h: 80px;
+    --grid-extra-h: 140px;
+  }
+
+  .boundary-area {
+    padding-bottom: 280px;
   }
 }
 
-.connections-svg {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  width: 100%;
-  height: 100%;
-  z-index: 2;
-  /* ✅ legyen a boundary-area rétegén */
-}
 
-.connection-line {
-  stroke: #8b5cf6;
-  stroke-width: 2;
-  fill: none;
-  stroke-dasharray: 6 6;
-}
-
-.connection-line.cross {
-  stroke: #a78bfa;
-  stroke-dasharray: 3 6;
-  opacity: 0.7;
-}
 
 @keyframes lineDash {
   to {
@@ -422,4 +306,121 @@
   text-align: center;
   color: #666;
   font-style: italic;
+}
+
+.dock{
+  position:absolute;
+  bottom:0;
+  left:0;
+  right:0;
+  height:60px;
+  background:#0f0f0f;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:10px;
+}
+
+.dock-item{
+  background:#333;
+  color:white;
+  padding:8px 14px;
+  border-radius:6px;
+  cursor:pointer;
+}
+
+.dock-item:hover{
+  background:#555;
+}
+
+.device-selector{
+  margin-top:8px;
+  padding:10px;
+  border-radius:10px;
+  background:rgba(20,20,30,0.9);
+  border:1px solid rgba(255,255,255,0.1);
+}
+
+.device-title{
+  display:block;
+  font-size:12px;
+  color:#aaa;
+  margin-bottom:6px;
+}
+
+.device-buttons{
+  display:flex;
+  gap:6px;
+  flex-wrap:wrap;
+}
+
+.device-btn{
+  padding:4px 8px;
+  border-radius:6px;
+  border:none;
+  background:#eee;
+  color:#000;
+  font-size:12px;
+  cursor:pointer;
+}
+
+.device-btn:hover{
+  background:#fff;
+}
+
+
+
+.has-submenu{
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.submenu-arrow{
+  margin-left: auto;
+  font-size: 12px;
+}
+
+.ctx-submenu{
+  position: absolute;
+  top: 0;
+  left: 100%;
+
+  background: #0e0a1d;
+  border: 1px solid #3a2f63;
+  border-radius: 6px;
+
+  min-width: 200px;
+
+  display: none;
+  flex-direction: column;
+
+  box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+}
+
+.has-submenu:hover .ctx-submenu{
+  display: flex;
+}
+
+
+.has-submenu{
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.ctx-submenu{
+  position: absolute;
+  top: 0;
+  left: 100%;
+  display: none;
+}
+
+.has-submenu:hover .ctx-submenu{
+  display: flex;
+}
+.setup-workspace{
+  position:relative;
 }

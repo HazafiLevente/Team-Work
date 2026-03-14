@@ -1,0 +1,15 @@
+<app-context-menu-base
+  [x]="x"
+  [y]="y"
+  (close)="close.emit()"
+>
+
+  <div class="menu-section">
+
+    <button class="menu-item create" (click)="emitAndClose()">
+      ➕ Új Setup létrehozása
+    </button>
+
+  </div>
+
+</app-context-menu-base>

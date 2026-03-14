@@ -1,0 +1,75 @@
+.menu-section{
+
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+
+}
+
+.menu-item{
+
+  padding:9px 14px;
+
+  border-radius:6px;
+
+  cursor:pointer;
+
+  display:flex;
+  align-items:center;
+
+  gap:10px;
+
+  font-size:13px;
+
+  color:#ddd;
+
+  background:transparent;
+  border:none;
+
+  text-align:left;
+
+  transition:background 0.15s, transform 0.05s;
+
+}
+
+.menu-item:hover{
+
+  background:#3d2fff;
+
+  color:white;
+
+}
+
+.menu-item:active{
+
+  transform:scale(0.96);
+
+}
+
+.menu-separator{
+
+  height:1px;
+
+  background:#2a2352;
+
+  margin:8px 4px;
+
+  opacity:0.8;
+
+}
+
+/* Danger rész */
+
+.menu-item.danger{
+
+  color:#ff7a7a;
+
+}
+
+.menu-item.danger:hover{
+
+  background:#ff3a3a;
+
+  color:white;
+
+}

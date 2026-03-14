@@ -1,0 +1,130 @@
+<div class="setup-workspace" #workspaceBoundary (contextmenu)="onBackgroundRightClick($event)">
+
+  <app-dot-grid
+    class="dot-bg"
+    [dotSize]="5"
+    [gap]="15"
+    baseColor="#271E37"
+    activeColor="#5227FF"
+    [proximity]="100"
+    [shockRadius]="250"
+    [shockStrength]="5"
+    [resistance]="750"
+    [returnDuration]="1.5">
+  </app-dot-grid>
+
+  <div class="toolbar">
+    @if (viewingSetup) {
+      <button class="back-btn" type="button" (click)="back.emit()">
+        ← Vissza
+      </button>
+    }
+  </div>
+
+  <div class="boundary-area" #boundary>
+
+    @if (!viewingSetup) {
+
+      <app-setup-connections
+        [connections]="connections"
+        [globalRoomConnections]="globalRoomConnections"
+        [lineRefreshTrigger]="lineRefreshTrigger"
+        [elementRegistry]="elementRegistry"
+        [boundaryEl]="boundaryEl!.nativeElement"
+        [connectMousePos]="connectMousePos"
+        [connectSourceSetup]="connectSourceSetup"
+        [pairingStage]="pairingStage"
+        [viewingSetup]="viewingSetup">
+      </app-setup-connections>
+
+      @if (!loading) {
+        @for (setup of userSetups; track setup.id || setup.setup_id || $index) {
+          <app-setup-room
+            [dataId]="'room:' + (setup.id || setup.setup_id)"
+            [setup]="setup"
+            [boundaryRef]="boundary"
+            [dragDisabled]="pairingStage !== 'NONE'"
+            [initialPosition]="{ x: setup.x ?? 50, y: setup.y ?? 50 }"
+            (elementReady)="registerElement($event)"
+            (moved)="updateLines()"
+            (dragEnded)="onRoomDragEnded(setup, $event)"
+            (setupClick)="onSetupClick($event)"
+            (setupDblClick)="openSetupDetails($event)"
+            (setupRightClick)="onSetupRightClick($event)"
+            (renamed)="onRoomRenamed($event)">
+          </app-setup-room>
+        }
+        @empty {
+          <div class="no-data">Nincs setup.</div>
+        }
+      } @else {
+        <div class="no-data">Betöltés...</div>
+      }
+
+    } @else {
+
+      @if (loadingItems) {
+        <div class="no-data">Betöltés...</div>
+      } @else if (!items || items.length === 0) {
+        <div class="no-data">Ez a setup üres.</div>
+      } @else {
+        <div class="no-data">Detail nézet készül...</div>
+      }
+
+    }
+
+  </div>
+
+  @if (ctxOpen) {
+    <app-context-menu-room
+      [x]="ctxX"
+      [y]="ctxY"
+      (close)="closeContextMenu()"
+      (openSetup)="openSetupDetails(ctxSetup)"
+      (openTools)="openTools.emit()"
+      (rename)="startRenameForContextSetup()"
+      (connect)="connectWindow()"
+      (connections)="openConnections.emit()"
+      (deleteSetup)="deleteSetup.emit(ctxSetup)">
+    </app-context-menu-room>
+  }
+
+  @if (ctxWorkspaceOpen) {
+    <app-context-menu-base
+      [x]="ctxWorkspaceX"
+      [y]="ctxWorkspaceY"
+      (close)="ctxWorkspaceOpen=false">
+
+      <div class="menu-section">
+        <button class="menu-item create" (click)="createSetupAtPosition()">
+          ➕ Új Setup létrehozása
+        </button>
+      </div>
+
+    </app-context-menu-base>
+  }
+  @for (w of windows; track $index) {
+    @if (!w.minimized) {
+
+      <app-setup-window
+        [id]="w.id"
+        [title]="w.title"
+        [instanceNo]="w.instanceNo"
+        [x]="w.x"
+        [y]="w.y"
+        [zIndex]="w.zIndex"
+        [maximized]="w.maximized"
+        [boundaryRef]="boundaryEl.nativeElement"
+
+        (closed)="closeWindow($event)"
+        (minimized)="minimizeWindow($event)"
+        (focused)="focusWindow($event)"
+        (maximizeToggled)="toggleMaximizeWindow($event)"
+      >
+      </app-setup-window>
+
+    }
+  }
+
+
+</div>

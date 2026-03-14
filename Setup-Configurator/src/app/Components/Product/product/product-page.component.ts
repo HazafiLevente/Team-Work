@@ -5,8 +5,7 @@ import { ProductService } from '../../Services/Home/ProductParts/product/product
 import { ProductGalleryComponent } from '../productgallery/product-gallery.component';
 import { HttpClient } from '@angular/common/http';
 
-
-type ImageMap = Record<string, Record<string, Record<string, string[]>>>;
+type ImageMap = Record<string, Record<string, string[]>>;
 
 @Component({
   selector: 'app-product-site-page',
@@ -35,7 +34,6 @@ export class ProductPageComponent implements OnInit {
   fields: Array<{ label: string; value: string }> = [];
   imageUrls: string[] = [];
 
-  // egyszer töltsük le a map-et (memóriában cache)
   private static imageMapCache: ImageMap | null = null;
 
   constructor(
@@ -103,8 +101,6 @@ export class ProductPageComponent implements OnInit {
           };
 
           this.fields = this.buildFields(this.item);
-
-          // képek: images.runtime.json map alapján
           this.loadImagesFromMap();
 
           this.loading = false;
@@ -117,7 +113,6 @@ export class ProductPageComponent implements OnInit {
     });
   }
 
-  // ✅ később: kedvenc
   onToggleFavorite() {
     console.log('⭐ később: kedvencbe rakás');
   }
@@ -132,73 +127,47 @@ export class ProductPageComponent implements OnInit {
   }
 
   private loadImagesFromMap() {
-    const manu = this.primary.manufacturer;
-    const model = this.primary.model;
+    const wantTable = this.normTable(this.table);
+    const wantId = String(this.id || '').trim();
 
-    if (!manu || !model) {
+    if (!wantTable || !wantId) {
       this.imageUrls = [];
       return;
     }
 
-    const wantTop = this.table;
-
-    // ha már van cache, abból dolgozunk
     if (ProductPageComponent.imageMapCache) {
-      this.imageUrls = this.pickImages(ProductPageComponent.imageMapCache, wantTop, manu, model);
+      this.imageUrls = this.pickImages(ProductPageComponent.imageMapCache, wantTable, wantId);
+      console.log('🖼 PAGE imageUrls from cache:', this.imageUrls);
       return;
     }
 
-    // különben letöltjük egyszer
-    this.http.get<any>('/api/images/map').subscribe({
+    this.http.get<ImageMap>('/api/images/map').subscribe({
       next: (mapRes) => {
-        ProductPageComponent.imageMapCache = (mapRes?.images ?? {}) as ImageMap;
-        this.imageUrls = this.pickImages(ProductPageComponent.imageMapCache!, wantTop, manu, model);
+        ProductPageComponent.imageMapCache = mapRes;
+        this.imageUrls = this.pickImages(ProductPageComponent.imageMapCache, wantTable, wantId);
+
+        console.log('🖼 PAGE map loaded:', ProductPageComponent.imageMapCache);
+        console.log('🖼 PAGE table:', wantTable, 'id:', wantId);
+        console.log('🖼 PAGE imageUrls:', this.imageUrls);
       },
-      error: () => {
+      error: (err) => {
+        console.error('❌ image map load error:', err);
         this.imageUrls = [];
       }
     });
   }
 
-  private pickImages(map: ImageMap, topFolderWanted: string, manuWanted: string, modelWanted: string): string[] {
-    const topKey = this.findKey(map, topFolderWanted);
-    if (!topKey) return [];
-
-    const manuMap = map[topKey] || {};
-    const manuKey = this.findKey(manuMap, manuWanted);
-    if (!manuKey) return [];
-
-    const modelMap = manuMap[manuKey] || {};
-    const modelKey = this.findKey(modelMap, modelWanted);
-    if (!modelKey) return [];
-
-    return modelMap[modelKey] || [];
+  private pickImages(map: ImageMap, tableWanted: string, idWanted: string): string[] {
+    if (!map?.[tableWanted]) return [];
+    return map[tableWanted][idWanted] || [];
   }
 
-  private findKey(obj: Record<string, any>, wanted: string): string | null {
-    const want = this.normKey(wanted);
-
-    // exact normalized match
-    for (const k of Object.keys(obj)) {
-      if (this.normKey(k) === want) return k;
-    }
-
-    // contains match
-    for (const k of Object.keys(obj)) {
-      const nk = this.normKey(k);
-      if (nk.includes(want) || want.includes(nk)) return k;
-    }
-
-    return null;
-  }
-
-  private normKey(s: string): string {
+  private normTable(s: string): string {
     return String(s ?? '')
       .trim()
       .toLowerCase()
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '')
-      .replace(/[_\s-]+/g, '');
+      .replace('public.', '')
+      .replace(/[_\s]+/g, '_');
   }
 
   private pick(obj: any, keys: string[]): string {
@@ -217,11 +186,11 @@ export class ProductPageComponent implements OnInit {
     const hidden = new Set(['id', 'ID', 'created_at', 'updated_at']);
 
     const skip = new Set([
-      'manufacturer','Manufacturer','brand','Brand',
-      'model','Model','name','Name','product_name','Product Name',
-      'category','Category','type','Type',
-      'description','Description','notes','Notes',
-      'price','Price'
+      'manufacturer', 'Manufacturer', 'brand', 'Brand',
+      'model', 'Model', 'name', 'Name', 'product_name', 'Product Name',
+      'category', 'Category', 'type', 'Type',
+      'description', 'Description', 'notes', 'Notes',
+      'price', 'Price'
     ]);
 
     return Object.keys(item)

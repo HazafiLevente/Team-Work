@@ -1,0 +1,12 @@
+<div class="ht-room">
+  <div
+    class="speaker"
+    *ngFor="let s of speakers"
+    cdkDrag
+    [style.left.px]="s.x"
+    [style.top.px]="s.y"
+    [style.transform]="'rotate(' + s.rotation + 'deg)'"
+    (dblclick)="rotate(s)">
+    {{s.name}}
+  </div>
+</div>

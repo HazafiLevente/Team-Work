@@ -1,0 +1,104 @@
+<div class="leaderboard-page">
+  <div class="hero">
+    <button class="back-btn" (click)="goBack()">← Vissza</button>
+    <h1>Ranglista</h1>
+    <p class="subtitle">Felhasználók pontszám alapján rendezve</p>
+  </div>
+
+  <div class="top-summary" *ngIf="!loading && !error && getCurrentUser() as me">
+    <div class="summary-card me-card">
+      <div class="summary-k">Te helyezésed</div>
+      <div class="summary-v">{{ getMedal(getPlace(me)) }}</div>
+      <div class="summary-sub">Helyezés: #{{ getPlace(me) }}</div>
+    </div>
+
+    <div class="summary-card">
+      <div class="summary-k">Jelenlegi rangod</div>
+      <div class="summary-v">{{ me.rank }}</div>
+      <div class="summary-sub">{{ me.points }} pont</div>
+    </div>
+
+    <div class="summary-card">
+      <div class="summary-k">Következő rang</div>
+      <div class="summary-v">{{ me.nextRank }}</div>
+      <div class="summary-sub">
+        {{ me.pointsToNextRank === 0 ? 'Max szint' : me.pointsToNextRank + ' pont kell még' }}
+      </div>
+    </div>
+  </div>
+
+  <div class="toolbar" *ngIf="!loading && !error">
+    <input
+      type="text"
+      class="search-input"
+      [(ngModel)]="searchTerm"
+      (input)="onSearch()"
+      placeholder="Keresés név vagy felhasználónév alapján..."
+    />
+  </div>
+
+  <div *ngIf="loading" class="state-card">
+    Betöltés...
+  </div>
+
+  <div *ngIf="error && !loading" class="state-card error">
+    {{ error }}
+  </div>
+
+  <div *ngIf="!loading && !error" class="board">
+    <div class="board-head">
+      <div>Helyezés</div>
+      <div>Felhasználó</div>
+      <div>Rang</div>
+      <div>Pont</div>
+      <div>Következő rang</div>
+      <div>Haladás</div>
+    </div>
+
+    <div
+      class="board-row"
+      *ngFor="let user of filteredUsers; trackBy: trackByUser"
+      [ngClass]="getRowClasses(user)"
+    >
+      <div class="place">{{ getMedal(getPlace(user)) }}</div>
+
+      <div class="user">
+        <div class="name">
+          {{ displayName(user) }}
+          <span class="me-badge" *ngIf="isCurrentUser(user)">Te</span>
+        </div>
+
+        <div class="username" *ngIf="user.username">
+          {{ '@' + user.username }}
+        </div>
+      </div>
+
+      <div class="rank">{{ user.rank }}</div>
+      <div class="points">{{ user.points }}</div>
+      <div class="next-rank">{{ user.nextRank }}</div>
+
+      <div class="progress-cell">
+        <div class="progress-top">
+          <span>{{ user.pointsToNextRank === 0 ? 'Max' : user.pointsToNextRank + ' pont kell még' }}</span>
+          <span>{{ getProgressLabel(user) }}</span>
+        </div>
+
+        <div class="progress-track">
+          <div
+            class="progress-fill"
+            [style.width.%]="getProgressPercent(user)">
+          </div>
+        </div>
+
+        <div class="progress-range">
+          <span>{{ user.currentMinPoints ?? 0 }}</span>
+          <span>{{ user.currentMaxPoints ?? user.points }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div *ngIf="filteredUsers.length === 0" class="state-card">
+      Nincs találat.
+    </div>
+  </div>
+</div>

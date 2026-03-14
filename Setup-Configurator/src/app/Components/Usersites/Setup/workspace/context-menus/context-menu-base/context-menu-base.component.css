@@ -1,0 +1,22 @@
+.context-menu{
+
+  position:absolute;
+
+  min-width:200px;
+
+  background:#0b0718;
+
+  border:1px solid #3d2fff;
+
+  border-radius:8px;
+
+  padding:6px;
+
+  box-shadow:
+    0 15px 40px rgba(0,0,0,0.6);
+
+  z-index:9999;
+
+  font-size:13px;
+
+}

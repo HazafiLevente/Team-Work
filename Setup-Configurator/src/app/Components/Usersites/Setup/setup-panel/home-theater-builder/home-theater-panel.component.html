@@ -1,0 +1,28 @@
+<div
+  class="ht-panel"
+  [class.maximized]="isMaximized"
+  cdkDrag
+  [cdkDragDisabled]="isMaximized"
+  [cdkDragBoundary]="boundaryRef"
+>
+  <div class="ht-header" cdkDragHandle>
+
+    Home Theater
+
+    <div class="window-buttons">
+
+      <button (click)="minimize()">🗕</button>
+
+      <button (click)="toggleMaximize()">🗖</button>
+
+      <button (click)="close()">✕</button>
+
+    </div>
+
+  </div>
+
+</div>
+
+  <div class="ht-body">
+    <!-- ide jön a tartalom -->
+  </div>

@@ -1,14 +1,40 @@
-<div #root class="drag-element" [class.circle]="isNetwork()" cdkDrag [cdkDragDisabled]="dragDisabled"
-  [cdkDragFreeDragPosition]="initialPosition" [attr.data-id]="dataId" [cdkDragBoundary]="boundaryRef"
-  (cdkDragStarted)="onDragStarted()" (cdkDragEnded)="onDragEnded($event)" (cdkDragMoved)="onDragMoved()"
-  (click)="onClick()" (contextmenu)="onRightClick($event)">
+<div
+  #root
+  class="drag-element"
+  [class.circle]="isNetwork()"
 
+  cdkDrag
+  [cdkDragDisabled]="dragDisabled"
+  [cdkDragFreeDragPosition]="dragPosition"
+  [cdkDragBoundary]="boundaryRef"
+
+  [attr.data-id]="dataId"
+
+  (cdkDragStarted)="onDragStarted()"
+  (cdkDragMoved)="onDragMoved()"
+  (cdkDragEnded)="onDragEnded($event)"
+
+  (click)="onClick()"
+  (dblclick)="onDblClick()"
+  (contextmenu)="onRightClick($event)"
+>
+
+  <!-- NORMAL NÉV -->
   <span class="setup-name" *ngIf="!editing">
     {{ setup?.display_name || setup?.setup_name || setup?.name || 'Névtelen setup' }}
   </span>
 
-  <input *ngIf="editing" class="setup-edit-input" [(ngModel)]="editName" (keydown.enter)="confirmRename()"
-    (keydown.escape)="cancelRename()" (blur)="confirmRename()" (mousedown)="$event.stopPropagation()"
-    (click)="$event.stopPropagation()" />
+  <!-- EDIT INPUT -->
+  <input
+    *ngIf="editing"
+    class="setup-edit-input"
+    [(ngModel)]="editName"
+    (keydown.enter)="confirmRename()"
+    (keydown.escape)="cancelRename()"
+    (blur)="confirmRename()"
+
+    (mousedown)="$event.stopPropagation()"
+    (click)="$event.stopPropagation()"
+  />
 
 </div>

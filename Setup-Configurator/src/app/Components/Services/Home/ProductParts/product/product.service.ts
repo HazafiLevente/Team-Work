@@ -1,6 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
 
 @Injectable({ providedIn: 'root' })
 export class ProductService {
@@ -31,7 +30,7 @@ export class ProductService {
 
   getHomeTheaters(limit = 2000) {
     return this.http.get<{ items: any[] }>(
-      `${this.API}/hometheaters`,
+      `${this.API}/home-theater`,
       { params: { limit: String(limit) }, withCredentials: true }
     );
   }

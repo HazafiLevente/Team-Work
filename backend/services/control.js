@@ -4,7 +4,7 @@ const { createClient } = require("@supabase/supabase-js");
 
 require("dotenv").config();
 
-const filler = require("../../datas/Jsons/filler.json");
+const filler = require("../../../Team-Work/datas/Jsons/filler.json");
 
 const OUT_FILE = path.join(__dirname, "../../datas", "Jsons", "tables.runtime.json");
 

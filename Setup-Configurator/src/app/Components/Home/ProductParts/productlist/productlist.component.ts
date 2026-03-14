@@ -7,7 +7,6 @@ import { Product } from '../../../../Models/Product/product.model';
 import { ProductComponent } from '../product/product.component';
 
 import { ProductFiltersService, CombinedFilters } from '../../../Services/Home/Shared/product-filters.service';
-import { normalizeProduct } from '../../../Services/Home/Shared/product-normalizer';
 import { normalizeList } from '../../../Services/Home/Shared/product-normalizer';
 
 type AnyProduct = Product & {
@@ -21,6 +20,16 @@ type AnyProduct = Product & {
   price?: any;
   id?: any;
   ID?: any;
+
+  // car top-level fallbackok
+  price_range?: any;
+  body_type?: any;
+  horsepower?: any;
+  acceleration?: any;
+  seats?: any;
+  fuel_type?: any;
+  year?: any;
+  transmission?: any;
 };
 
 @Component({
@@ -44,7 +53,6 @@ export class ProductlistComponent implements OnInit, OnDestroy {
 
   filteredProducts: AnyProduct[] = [];
 
-  // ✅ PAGINATION
   readonly PAGE_SIZE = 50;
   page = 1;
   totalPages = 1;
@@ -58,12 +66,20 @@ export class ProductlistComponent implements OnInit, OnDestroy {
   constructor(
     private productService: ProductService,
     private filtersService: ProductFiltersService
-  ) { }
+  ) {}
 
   ngOnInit(): void {
     this.sub = this.filtersService.filters$.subscribe(f => this.applyFilters(f));
 
-    // all products
+    this.productService.getHomeTheaters(this.PRODUCT_LIMIT).subscribe(res => {
+      console.log('HT RES:', res);
+      this.htProducts = normalizeList(res.items || []);
+      console.log('HT NORMALIZED:', this.htProducts);
+      this.emitStats();
+      this.applyFilters(this.filtersService.current);
+
+
+    });
     this.productService.getProducts(this.PRODUCT_LIMIT).subscribe(res => {
       this.allProducts = normalizeList(res.items || []);
       this.loading = false;
@@ -105,7 +121,7 @@ export class ProductlistComponent implements OnInit, OnDestroy {
   }
 
   /* -----------------------------
-     UTILS (always read from normalized fields)
+     UTILS
   ----------------------------- */
 
   private norm(v: any): string {
@@ -117,20 +133,46 @@ export class ProductlistComponent implements OnInit, OnDestroy {
   }
 
   private getId(p: AnyProduct): any {
-    return p.id;
+    return p.id ?? p.ID ?? p.data?.id ?? p.data?.ID;
   }
 
   private getManufacturer(p: AnyProduct): string {
-    return String(p.manufacturer ?? '').trim();
+    return String(
+      p.manufacturer ??
+      p.data?.manufacturer ??
+      p.data?.Manufacturer ??
+      p.data?.brand ??
+      p.data?.Brand ??
+      ''
+    ).trim();
   }
 
   private getModel(p: AnyProduct): string {
-    return String(p.model ?? '').trim();
+    return String(
+      p.model ??
+      p.data?.model ??
+      p.data?.Model ??
+      p.data?.name ??
+      p.data?.Name ??
+      ''
+    ).trim();
   }
 
   private getPrice(p: AnyProduct): number | null {
-    const n = p.price;
-    return typeof n === 'number' && Number.isFinite(n) ? n : null;
+    const raw = p.price ?? p.data?.price ?? p.data?.Price;
+    const n = Number(raw);
+    return Number.isFinite(n) ? n : null;
+  }
+
+  private field(p: AnyProduct, ...keys: string[]): any {
+    for (const key of keys) {
+      const top = (p as any)?.[key];
+      if (top !== undefined && top !== null && String(top) !== '') return top;
+
+      const nested = (p as any)?.data?.[key];
+      if (nested !== undefined && nested !== null && String(nested) !== '') return nested;
+    }
+    return null;
   }
 
   /* -----------------------------
@@ -214,7 +256,6 @@ export class ProductlistComponent implements OnInit, OnDestroy {
 
   /* -----------------------------
      DETAILED FILTERS
-     (meghagytam a te logikád nagy részét, de normalized adatokra támaszkodik)
   ----------------------------- */
 
   private applyDetailed(list: AnyProduct[], state: CombinedFilters): AnyProduct[] {
@@ -260,64 +301,76 @@ export class ProductlistComponent implements OnInit, OnDestroy {
     };
 
     // ---------------- CAR ----------------
+    // ---------------- CAR ----------------
     if (state.activeCategory === 'car') {
       const f: any = (state as any).car ?? {};
 
       const manF = norm(f.manufacturer);
       const modelF = norm(f.model);
 
-      const yearMin = toNum(f.yearMin);
-      const yearMax = toNum(f.yearMax);
+      const parseLooseRange = (value: any): { min: number; max: number } | null => {
+        const s = String(value ?? '').trim().replace(',', '.');
+        if (!s) return null;
 
-      const seatsMin = toNum(f.seatsMin);
-      const seatsMax = toNum(f.seatsMax);
+        const nums = (s.match(/-?\d+(\.\d+)?/g) || []).map(Number).filter(Number.isFinite);
+        if (!nums.length) return null;
 
-      const hpMin = toNum(f.hpMin);
-      const hpMax = toNum(f.hpMax);
+        if (nums.length === 1) return { min: nums[0], max: nums[0] };
 
-      const accMin = toNum(f.accelMin);
-      const accMax = toNum(f.accelMax);
+        return {
+          min: Math.min(...nums),
+          max: Math.max(...nums)
+        };
+      };
 
-      const fuel = norm(f.fuel);
-      const trans = norm(f.transmission);
-      const body = norm(f.bodyType);
+      const overlapsFilterRange = (value: any, minWanted: any, maxWanted: any) => {
+        const wantMin = toNum(minWanted);
+        const wantMax = toNum(maxWanted);
+
+        if (wantMin == null && wantMax == null) return true;
+
+        const r = parseLooseRange(value);
+        if (!r) return false;
+
+        if (wantMin != null && r.max < wantMin) return false;
+        if (wantMax != null && r.min > wantMax) return false;
+
+        return true;
+      };
 
       return list.filter(p => {
-        const d = (p as any).data ?? {};
-
-        const manu = norm(p.manufacturer);
-        const model = norm(p.model);
+        const manu = norm(this.getManufacturer(p));
+        const model = norm(this.getModel(p));
 
         if (manF && !manu.includes(manF)) return false;
         if (modelF && !model.includes(modelF)) return false;
 
-        const year = toNum(d.year ?? d.Year);
-        if (yearMin != null && (year == null || year < yearMin)) return false;
-        if (yearMax != null && (year == null || year > yearMax)) return false;
+        // ha az autóknál nincs rendes numeric price, ezt hagyhatod így vagy kikapcsolhatod
+        if (!matchRange(this.getPrice(p), f.priceMin, f.priceMax)) return false;
 
-        const seats = toNum(d.seats ?? d.Seats);
-        if (seatsMin != null && (seats == null || seats < seatsMin)) return false;
-        if (seatsMax != null && (seats == null || seats > seatsMax)) return false;
+        const year = this.field(p, 'year', 'Year');
+        if (!overlapsFilterRange(year, f.yearMin, f.yearMax)) return false;
 
-        const hp = toNum(d.horsepower ?? d.Horsepower);
-        if (hpMin != null && (hp == null || hp < hpMin)) return false;
-        if (hpMax != null && (hp == null || hp > hpMax)) return false;
+        const seats = this.field(p, 'seats', 'Seats');
+        if (!overlapsFilterRange(seats, f.seatsMin, f.seatsMax)) return false;
 
-        const acc = toNum(d.acceleration ?? d.Acceleration);
-        if (accMin != null && (acc == null || acc < accMin)) return false;
-        if (accMax != null && (acc == null || acc > accMax)) return false;
+        const hp = this.field(p, 'horsepower', 'Horsepower');
+        if (!overlapsFilterRange(hp, f.hpMin, f.hpMax)) return false;
 
-        const fuelVal = norm(d.fuel_type ?? d.FuelType ?? d.fuel);
-        if (fuel) {
+        const acc = this.field(p, 'acceleration', 'Acceleration', 'Acceleration (s)');
+        if (!overlapsFilterRange(acc, f.accelMin, f.accelMax)) return false;
+
+        const fuelVal = norm(this.field(p, 'fuel_type', 'FuelType', 'fuel', 'Fuel Type'));
+        if (f.fuel) {
           if (!fuelVal) return false;
-          if (!fuelVal.includes(fuel)) return false;
+          if (!fuelVal.includes(norm(f.fuel))) return false;
         }
 
-        const transVal = norm(d.transmission ?? d.Transmission);
-        if (trans && !transVal.includes(trans)) return false;
+        const transVal = norm(this.field(p, 'transmission', 'Transmission'));
+        if (f.transmission && !transVal.includes(norm(f.transmission))) return false;
 
-        const bodyVal = norm(d.body_type ?? d.BodyType ?? d.body);
-        if (body && !bodyVal.includes(body)) return false;
+        const bodyVal = norm(this.field(p, 'body_type', 'BodyType', 'body', 'Body Type'));
+        if (f.bodyType && !bodyVal.includes(norm(f.bodyType))) return false;
 
         return true;
       });
@@ -333,30 +386,25 @@ export class ProductlistComponent implements OnInit, OnDestroy {
       const hasV2 = ('dynamic' in f) || ('tableName' in f) || ('priceMin' in f);
 
       return list.filter(p => {
-        const d = (p as any).data ?? {};
-
-        const manu = norm(p.manufacturer);
-        const model = norm(p.model);
+        const manu = norm(this.getManufacturer(p));
+        const model = norm(this.getModel(p));
 
         if (manF && !manu.includes(manF)) return false;
         if (modelF && !model.includes(modelF)) return false;
 
-        // V2
         if (hasV2) {
           const tableName = norm(f.tableName);
           if (tableName) {
-            const t = norm(p.table_name);
+            const t = norm(p.table_name ?? p.table);
             if (t !== tableName) return false;
           }
 
-          // ár: már normalized, de a range filter a state-ből jön
-          if (!matchRange(p.price, f.priceMin, f.priceMax)) return false;
+          if (!matchRange(this.getPrice(p), f.priceMin, f.priceMax)) return false;
 
           const dyn = f.dynamic ?? {};
           for (const key of Object.keys(dyn)) {
             const v = dyn[key];
-
-            const field = (d as any)[key] ?? (p as any)[key];
+            const field = this.field(p, key);
 
             if (typeof v === 'boolean') {
               if (!matchBool(field, v)) return false;
@@ -370,62 +418,122 @@ export class ProductlistComponent implements OnInit, OnDestroy {
           return true;
         }
 
-        // régi HT
-        if (f.bluetooth === true && !matchBool(d.bluetooth ?? d.bt, true)) return false;
-        if (f.wifi === true && !matchBool(d.wifi ?? d.network ?? d.wlan, true)) return false;
-        if (f.earc === true && !matchBool(d.hdmi_earc ?? d.earc, true)) return false;
-
-        const powerVal = d.power_rms_w ?? d.power_max_w ?? d.power ?? d.watt;
-        if (!matchRange(powerVal, f.minPower, f.maxPower)) return false;
-
-        if (f.minChannels || f.maxChannels) {
-          if (!matchRange(d.channels, f.minChannels, f.maxChannels)) return false;
-        }
-
         return true;
       });
     }
 
     // ---------------- COMPUTER ----------------
+    // ---------------- COMPUTER ----------------
     if (state.activeCategory === 'computer') {
       const f: any = (state as any).computer ?? {};
 
+      const hasCpu = !!(f.cpuBrand || f.cpuModel);
+      const hasGpu = !!(f.gpuBrand || f.gpuModel);
+      const hasRam = !!(f.ramMin || f.ramMax || f.storageType); // memória típus a RAM-hoz is tartozzon
+      const hasStorage = !!(f.storageMin || f.storageMax);
+      const hasPsu = !!(f.psuMin || f.psuMax);
+
+      const hasAnyComputerFilter = hasCpu || hasGpu || hasRam || hasStorage || hasPsu;
+
       return list.filter(p => {
-        const table = norm(p.table_name);
-        const d = (p as any).data ?? {};
+        const table = norm(p.table_name ?? p.table);
+        const manufacturer = norm(this.getManufacturer(p));
+        const model = norm(this.getModel(p));
 
-        if (f.cpuBrand || f.cpuModel) {
-          if (table !== 'processors') return false;
-          if (f.cpuBrand && !norm(d.manufacturer).includes(norm(f.cpuBrand))) return false;
-          if (f.cpuModel && !norm(d.Model ?? d.model).includes(norm(f.cpuModel))) return false;
+        if (!hasAnyComputerFilter) return true;
+
+        let matchedAny = false;
+
+        // CPU
+        if (hasCpu && table === 'processors') {
+          let ok = true;
+
+          if (f.cpuBrand && !manufacturer.includes(norm(f.cpuBrand))) ok = false;
+          if (f.cpuModel && !model.includes(norm(f.cpuModel))) ok = false;
+
+          if (ok) matchedAny = true;
         }
 
-        if (f.gpuBrand || f.gpuModel) {
-          if (table !== 'video_cards') return false;
-          if (f.gpuBrand && !norm(d.manufacturer).includes(norm(f.gpuBrand))) return false;
-          if (f.gpuModel && !norm(d.model ?? d.Model).includes(norm(f.gpuModel))) return false;
+        // GPU
+        if (hasGpu && (table === 'video_cards' || table === 'gpus' || table === 'graphics_cards')) {
+          let ok = true;
+
+          if (f.gpuBrand && !manufacturer.includes(norm(f.gpuBrand))) ok = false;
+          if (f.gpuModel && !model.includes(norm(f.gpuModel))) ok = false;
+
+          if (ok) matchedAny = true;
         }
 
-        if (f.ramMin || f.ramMax) {
-          if (table !== 'ram') return false;
-          if (!matchRange(d.capacity_gb, f.ramMin, f.ramMax)) return false;
+        // RAM
+        if (hasRam && (table === 'ram' || table === 'memory')) {
+          let ok = true;
+
+          const ramValue = this.field(
+            p,
+            'capacity_gb',
+            'Capacity_GB',
+            'capacity',
+            'Capacity',
+            'memory_capacity'
+          );
+
+          if (!matchRange(ramValue, f.ramMin, f.ramMax)) ok = false;
+
+          // ✅ "Memória típus" itt a RAM memory_type legyen
+          if (f.storageType) {
+            const mt = norm(this.field(
+              p,
+              'memory_type',
+              'MemoryType',
+              'type',
+              'Type'
+            ));
+
+            if (!mt.includes(norm(f.storageType))) ok = false;
+          }
+
+          if (ok) matchedAny = true;
         }
 
-        if (f.storageType) {
-          const mt = norm(d.memory_type ?? '');
-          if (!mt.includes(norm(f.storageType))) return false;
+        // STORAGE
+        if (hasStorage && (
+          table === 'storage' ||
+          table === 'ssd' ||
+          table === 'hdd' ||
+          table === 'nvme' ||
+          table === 'storage_devices'
+        )) {
+          const storageValue = this.field(
+            p,
+            'capacity_gb',
+            'Capacity_GB',
+            'storage_gb',
+            'StorageGB',
+            'capacity',
+            'Capacity'
+          );
+
+          if (matchRange(storageValue, f.storageMin, f.storageMax)) {
+            matchedAny = true;
+          }
         }
 
-        if (f.storageMin || f.storageMax) {
-          if (!matchRange(d.capacity_gb, f.storageMin, f.storageMax)) return false;
+        // PSU
+        if (hasPsu && (table === 'psu' || table === 'power_supply' || table === 'power_supplies')) {
+          const wattValue = this.field(
+            p,
+            'wattage',
+            'Wattage',
+            'watt',
+            'Watt'
+          );
+
+          if (matchRange(wattValue, f.psuMin, f.psuMax)) {
+            matchedAny = true;
+          }
         }
 
-        if (f.psuMin || f.psuMax) {
-          if (table !== 'psu') return false;
-          if (!matchRange(d.wattage ?? d.watt, f.psuMin, f.psuMax)) return false;
-        }
-
-        return true;
+        return matchedAny;
       });
     }
 
@@ -433,13 +541,11 @@ export class ProductlistComponent implements OnInit, OnDestroy {
     if (state.activeCategory === 'instrument') {
       const f: any = (state as any).instrument ?? {};
       const wantTable = norm(f.tableName);
-      const wantType = norm(f.itemType); // instrument | accessory | all
+      const wantType = norm(f.itemType);
 
       return list.filter(p => {
-        const d = (p as any).data ?? {};
-
-        const table = norm(p.table_name);
-        const type = norm(p.type ?? d.type);
+        const table = norm(p.table_name ?? p.table);
+        const type = norm((p as any).type ?? this.field(p, 'type') ?? 'instrument');
 
         if (wantType && wantType !== 'all') {
           if (!type) return false;
@@ -448,13 +554,13 @@ export class ProductlistComponent implements OnInit, OnDestroy {
 
         if (wantTable && table !== wantTable) return false;
 
-        if (!matchText(p.manufacturer, f.manufacturer)) return false;
-        if (!matchText(p.model, f.model)) return false;
+        if (!matchText(this.getManufacturer(p), f.manufacturer)) return false;
+        if (!matchText(this.getModel(p), f.model)) return false;
 
-        if (!matchRange(p.price, f.minPrice, f.maxPrice)) return false;
+        if (!matchRange(this.getPrice(p), f.minPrice, f.maxPrice)) return false;
 
         if (f.isUsed === true) {
-          const cond = norm(d.condition ?? d.is_used);
+          const cond = norm(this.field(p, 'condition', 'is_used'));
           if (!(cond.includes('used') || cond === 'true' || cond === '1' || cond.includes('használt'))) return false;
         }
 
@@ -494,18 +600,12 @@ export class ProductlistComponent implements OnInit, OnDestroy {
   private applyFilters(state: CombinedFilters) {
     const source = this.getSourceByCategory(state);
 
-    // 1) searchbar
     let list = this.applySearch(source.filter(Boolean), state);
-
-    // 2) detailed
     list = this.applyDetailed(list, state);
-
-    // 3) sort
     list = this.applySort(list, state);
 
     this.filteredProducts = list;
 
-    // pagination reset
     this.page = 1;
     this.updatePaged();
 

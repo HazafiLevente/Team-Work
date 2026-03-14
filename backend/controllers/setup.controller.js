@@ -377,27 +377,44 @@ exports.create = async (req, res) => {
 
 exports.remove = async (req, res) => {
     try {
+
         const userId = req.user?.id;
         const setupId = req.params.id;
 
         if (!userId) return res.status(401).json({ error: "Unauthorized" });
-        if (!setupId) return res.status(400).json({ error: "Missing setup id" });
 
-        const { data, error } = await supabase.from(SETUP_TABLE).delete().eq("id", setupId).eq("user_id", userId).select("*").single();
+        // 1️⃣ kapcsolatok törlése
+        const { error: connErr } = await supabase
+            .from("connections[Connects]")
+            .delete()
+            .or(`from_setup_id.eq.${setupId},to_setup_id.eq.${setupId}`);
+
+        if (connErr) {
+            console.error("❌ connection delete error:", connErr);
+            return res.status(500).json({ error: connErr.message });
+        }
+
+        // 2️⃣ setup törlés
+        const { data, error } = await supabase
+            .from(SETUP_TABLE)
+            .delete()
+            .eq("id", setupId)
+            .eq("user_id", userId)
+            .select("*");
 
         if (error) {
             console.error("❌ Supabase delete error:", error);
-            return res.status(500).json({
-                error: error.message,
-                code: error.code,
-                details: error.details,
-                hint: error.hint,
-            });
+            return res.status(500).json({ error: error.message });
+        }
+
+        if (!data || data.length === 0) {
+            return res.status(404).json({ error: "Setup not found" });
         }
 
         childrenCache.delete(setupId);
 
-        return res.json({ ok: true, deleted: data });
+        return res.json({ ok: true });
+
     } catch (err) {
         console.error("❌ Setup delete hiba:", err);
         return res.status(500).json({ error: "Server error" });

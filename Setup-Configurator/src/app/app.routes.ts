@@ -10,6 +10,7 @@ import {FavoriteComponent} from './Components/Usersites/Favorite/favorite/favori
 import {SetupComponent} from './Components/Usersites/Setup/setup/setup.component';
 import {MessagesComponent} from './Components/Usersites/Messages/message.component';
 import { Routes } from '@angular/router';
+import { LeaderboardPageComponent } from './Components/Home/leaderboard-page/leaderboard-page.component';
 import { ProductPageComponent } from './Components/Product/product/product-page.component';
 import { ProfileComponent } from './Components/Usersites/Profil/profil/profile.component';
 import {UsersComponent} from './Components/Usersites/Admin/users/users.component';
@@ -21,6 +22,10 @@ import { NotificationsPageComponent } from './Components/Notifications/notificat
 
 
 export const routes: Routes = [
+  {
+    path: 'leaderboard',
+    component: LeaderboardPageComponent
+  },
   { path: '', redirectTo: 'home', pathMatch: 'full'},
   { path: 'home', component: HomeComponent }, //{, canActivate: [authGuard] },
   { path: 'product-site/:table/:id', component: ProductPageComponent },

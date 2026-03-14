@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 import { RankPanelComponent } from '../../../Rank-Panel/rank-panel.component';
 
 @Component({
@@ -7,6 +8,12 @@ import { RankPanelComponent } from '../../../Rank-Panel/rank-panel.component';
   standalone: true,
   imports: [CommonModule, RankPanelComponent],
   templateUrl: './profile-rank-section.component.html',
-  styleUrl: './profile-rank-section.component.css'
+  styleUrls: ['./profile-rank-section.component.css']
 })
-export class ProfileRankSectionComponent {}
+export class ProfileRankSectionComponent {
+  constructor(private router: Router) {}
+
+  openLeaderboard(): void {
+    this.router.navigate(['/leaderboard']);
+  }
+}

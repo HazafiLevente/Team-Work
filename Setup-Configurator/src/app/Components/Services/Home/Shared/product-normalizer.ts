@@ -61,8 +61,10 @@ export function normalizeProduct(raw: any): Product {
     model,
     price,
     table: table_name,
+    table_name: table_name,
     category: category || undefined,
     type: type || undefined,
+    data: d
   };
 }
 
