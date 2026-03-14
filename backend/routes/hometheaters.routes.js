@@ -9,7 +9,7 @@ router.get("/list", ctrl.list);
 // catalog
 router.get("/catalog", verifyUser, ctrl.getHtCatalog);
 
-// setup devices
+// setup device
 router.get("/:setupId/devices", verifyUser, ctrl.listDevices);
 router.post("/device", verifyUser, ctrl.createDevice);
 

@@ -10,15 +10,48 @@ const CAR_TABLES = [
     "wagon_cars",
 ];
 
+function parseAveragePrice(value) {
+    if (value == null) return null;
+
+    const s = String(value)
+        .trim()
+        .replace(/\s/g, "")
+        .replace(/,/g, ".");
+
+    if (!s) return null;
+
+    const nums = (s.match(/\d+(\.\d+)?/g) || [])
+        .map(Number)
+        .filter(Number.isFinite);
+
+    if (!nums.length) return null;
+
+    // pl. "500+" -> 500
+    if (nums.length === 1) return Math.round(nums[0]);
+
+    // pl. "100000-499999" -> átlag
+    const min = Math.min(...nums);
+    const max = Math.max(...nums);
+
+    return Math.round((min + max) / 2);
+}
+
 function mapCarRow(table, r) {
+    const priceRange = r["Price Range (Ft)"] ?? r.price_range ?? null;
+    const avgPrice = parseAveragePrice(priceRange);
+
     return {
         table_name: table,
         id: r.ID ?? r.id ?? null,
         manufacturer: r.Manufacturer ?? r.manufacturer ?? null,
         model: r.Model ?? r.model ?? null,
 
-        // ezek string range mezők lesznek, pl "100000-499999" vagy "500+"
-        price_range: r["Price Range (Ft)"] ?? r.price_range ?? null,
+        // ✅ frontend ezt fogja tudni használni
+        price: avgPrice,
+
+        // ✅ range is marad, ha később kell
+        price_range: priceRange,
+
         body_type: r["Body Type"] ?? r.body_type ?? null,
         horsepower: r.Horsepower ?? r.horsepower ?? null,
         acceleration: r["Acceleration (s)"] ?? r.acceleration ?? null,

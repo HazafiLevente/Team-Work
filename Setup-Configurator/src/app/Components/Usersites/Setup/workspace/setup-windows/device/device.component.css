@@ -1,0 +1,17 @@
+.device-row{
+  display:flex;
+  justify-content:space-between;
+  padding:6px 10px;
+  background:#181425;
+  border-radius:6px;
+  font-size:13px;
+}
+
+.device-type{
+  color:#8a7cff;
+  font-weight:600;
+}
+
+.device-name{
+  color:#ddd;
+}

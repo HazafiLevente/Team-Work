@@ -1,0 +1,19 @@
+<div class="devices-container">
+
+  @if (loading) {
+
+    <div class="loading">
+      Loading devices...
+    </div>
+
+  } @else {
+
+    @for (d of devices; track trackByDevice($index,d)) {
+
+      <app-device [device]="d"></app-device>
+
+    }
+
+  }
+
+</div>

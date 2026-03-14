@@ -37,39 +37,28 @@
         [viewingSetup]="viewingSetup">
       </app-setup-connections>
 
-      @if (!loading) {
-        @for (setup of userSetups; track setup.id || setup.setup_id || $index) {
-          <app-setup-room
-            [dataId]="'room:' + (setup.id || setup.setup_id)"
-            [setup]="setup"
-            [boundaryRef]="boundary"
-            [dragDisabled]="pairingStage !== 'NONE'"
-            [initialPosition]="{ x: setup.x ?? 50, y: setup.y ?? 50 }"
-            (elementReady)="registerElement($event)"
-            (moved)="updateLines()"
-            (dragEnded)="onRoomDragEnded(setup, $event)"
-            (setupClick)="onSetupClick($event)"
-            (setupDblClick)="openSetupDetails($event)"
-            (setupRightClick)="onSetupRightClick($event)"
-            (renamed)="onRoomRenamed($event)">
-          </app-setup-room>
-        }
-        @empty {
-          <div class="no-data">Nincs setup.</div>
-        }
-      } @else {
-        <div class="no-data">Betöltés...</div>
+      @for (setup of userSetups; track setup.id || setup.setup_id || $index) {
+        <app-setup-room
+          [dataId]="'room:' + (setup.id || setup.setup_id)"
+          [setup]="setup"
+          [boundaryRef]="boundary"
+          [initialPosition]="{ x: setup.x ?? 50, y: setup.y ?? 50 }"
+          (elementReady)="registerElement($event)"
+          (moved)="updateLines()"
+          (dragEnded)="onRoomDragEnded(setup, $event)"
+          (setupClick)="onSetupClick($event)"
+          (setupDblClick)="openSetupDetails($event)"
+          (setupRightClick)="onSetupRightClick($event)"
+          (renamed)="onRoomRenamed($event)">
+        </app-setup-room>
       }
 
     } @else {
 
-      @if (loadingItems) {
-        <div class="no-data">Betöltés...</div>
-      } @else if (!items || items.length === 0) {
-        <div class="no-data">Ez a setup üres.</div>
-      } @else {
-        <div class="no-data">Detail nézet készül...</div>
-      }
+      <app-devices-list
+        [setup]="viewingSetup"
+        (openItemWindow)="openItemDetailsWindow($event)">
+      </app-devices-list>
 
     }
 
@@ -81,8 +70,7 @@
       [y]="ctxY"
       (close)="closeContextMenu()"
       (openSetup)="openSetupDetails(ctxSetup)"
-      (openTools)="openTools.emit()"
-      (rename)="startRenameForContextSetup()"
+      (openTools)="openDevicesWindowFromMenu()"
       (connect)="connectWindow()"
       (connections)="openConnections.emit()"
       (deleteSetup)="deleteSetup.emit(ctxSetup)">
@@ -95,15 +83,14 @@
       [y]="ctxWorkspaceY"
       (close)="ctxWorkspaceOpen=false">
 
-      <div class="menu-section">
-        <button class="menu-item create" (click)="createSetupAtPosition()">
-          ➕ Új Setup létrehozása
-        </button>
-      </div>
+      <button (click)="createSetupAtPosition()">
+        ➕ Új Setup
+      </button>
 
     </app-context-menu-base>
   }
-  @for (w of windows; track $index) {
+
+  @for (w of windows; track w.id) {
     @if (!w.minimized) {
 
       <app-setup-window
@@ -115,16 +102,64 @@
         [zIndex]="w.zIndex"
         [maximized]="w.maximized"
         [boundaryRef]="boundaryEl.nativeElement"
-
         (closed)="closeWindow($event)"
         (minimized)="minimizeWindow($event)"
         (focused)="focusWindow($event)"
         (maximizeToggled)="toggleMaximizeWindow($event)"
       >
+
+        @if (w.kind === 'devices') {
+
+          <app-devices-menu
+            [setup]="w.payload.setup">
+          </app-devices-menu>
+
+        }
+
+        @if (w.kind === 'connections') {
+
+          <app-setup-connections
+            [connections]="connections"
+            [globalRoomConnections]="globalRoomConnections"
+            [lineRefreshTrigger]="lineRefreshTrigger"
+            [elementRegistry]="elementRegistry"
+            [boundaryEl]="boundaryEl!.nativeElement">
+          </app-setup-connections>
+
+        }
+
       </app-setup-window>
+
+
+      @if (w.kind === 'item-details') {
+          <div class="item-popup">
+            @if (w.payload.loading) {
+              <div class="item-popup-state">Betöltés...</div>
+            } @else if (w.payload.error) {
+              <div class="item-popup-state error">{{ w.payload.error }}</div>
+            } @else if (w.payload.children?.length) {
+              <div class="item-popup-list">
+                @for (child of w.payload.children; track trackByItem($index, child)) {
+                  <div class="item-popup-row">
+                    <div class="item-popup-row-type">{{ child.category || 'item' }}</div>
+                    <div class="item-popup-row-name">{{ child.display_name || child.name || 'Névtelen elem' }}</div>
+                  </div>
+                }
+              </div>
+            } @else {
+              <div class="item-popup-list">
+                @for (entry of w.payload.details || []; track entry.key) {
+                  <div class="item-popup-row">
+                    <div class="item-popup-row-type">{{ entry.key }}</div>
+                    <div class="item-popup-row-name">{{ entry.value }}</div>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        }
 
     }
   }
-
 
 </div>

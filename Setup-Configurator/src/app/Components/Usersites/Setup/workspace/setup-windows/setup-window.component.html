@@ -1,28 +1,31 @@
 <div
   class="window"
-  [class.maximized]="maximized"
-  [style.z-index]="zIndex"
   cdkDrag
   [cdkDragBoundary]="boundaryRef"
-  [cdkDragDisabled]="maximized"
   [cdkDragFreeDragPosition]="dragPosition"
-  (mousedown)="onFocus()"
+  (cdkDragStarted)="focus()"
+  [style.zIndex]="zIndex"
 >
 
   <div class="window-header" cdkDragHandle>
-    <span class="window-title">{{ titleText }}</span>
 
-    <div class="window-controls">
-      <button type="button" (click)="onMinimize($event)">—</button>
-      <button type="button" (click)="onToggleMaximize($event)">
-        {{ maximized ? '❐' : '□' }}
-      </button>
-      <button type="button" class="close-btn" (click)="onClose($event)">✕</button>
+    <span class="title">
+      {{title}} {{instanceNo}}
+    </span>
+
+    <div class="window-actions">
+      <button (click)="minimize()">—</button>
+      <button (click)="toggleMaximize()">□</button>
+      <button (click)="close()">✕</button>
     </div>
+
   </div>
 
   <div class="window-body">
+
+    <!-- IDE jön a tartalom -->
     <ng-content></ng-content>
+
   </div>
 
 </div>

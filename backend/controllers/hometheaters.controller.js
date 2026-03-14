@@ -7,6 +7,8 @@ async function getHtCatalog(req, res) {
                 ...row,
                 manufacturer: row.manufacturer ?? row.Manufacturer ?? "",
                 model: row.model ?? row.Model ?? ""
+
+
             };
         }
 
@@ -77,7 +79,7 @@ async function list(req, res) {
 
 /* ---------------------------------------------------
    2️⃣ Devices lekérése egy setuphoz
-   GET /api/home-theater/:setupId/devices
+   GET /api/home-theater/:setupId/device
 --------------------------------------------------- */
 async function listDevices(req, res) {
     try {

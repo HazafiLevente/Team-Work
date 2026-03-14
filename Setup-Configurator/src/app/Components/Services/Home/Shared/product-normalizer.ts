@@ -4,12 +4,62 @@ const str = (v: any) => String(v ?? '').trim();
 
 const toInt = (v: any): number | null => {
   if (v == null || v === '') return null;
+
+  if (typeof v === 'number') {
+    return Number.isFinite(v) ? Math.round(v) : null;
+  }
+
   const s = String(v).trim().replace(/\s+/g, '').replace(/,/g, '.');
-  const m = s.match(/-?\d+(\.\d+)?/);
-  if (!m) return null;
-  const n = Number(m[0]);
-  return Number.isFinite(n) ? n : null;
+  const nums = (s.match(/-?\d+(\.\d+)?/g) || []).map(Number).filter(Number.isFinite);
+
+  if (!nums.length) return null;
+  if (nums.length === 1) return Math.round(nums[0]);
+
+  const min = Math.min(...nums);
+  const max = Math.max(...nums);
+  return Math.round((min + max) / 2);
 };
+
+function findLoosePrice(obj: any): any {
+  if (!obj || typeof obj !== 'object') return null;
+
+  const preferredKeys = [
+    'price',
+    'Price',
+    'price_range',
+    'Price Range (Ft)',
+    'price_ft',
+    'price_huf',
+    'Price (Ft)',
+    'Price Ft',
+    'Unit Price',
+    'Current Price',
+    'Retail Price',
+    'Sale Price'
+  ];
+
+  for (const key of preferredKeys) {
+    if (obj[key] != null && obj[key] !== '') {
+      return obj[key];
+    }
+  }
+
+  for (const key of Object.keys(obj)) {
+    const k = key.toLowerCase();
+    if (
+      k.includes('price') ||
+      k.includes('ár') ||
+      k.includes('ar') ||
+      k.includes('ft') ||
+      k.includes('huf')
+    ) {
+      const value = obj[key];
+      if (value != null && value !== '') return value;
+    }
+  }
+
+  return null;
+}
 
 export function normalizeProduct(raw: any): Product {
   const d = raw?.data ?? raw ?? {};
@@ -49,8 +99,14 @@ export function normalizeProduct(raw: any): Product {
   const priceRaw =
     raw?.price ??
     raw?.Price ??
+    raw?.price_range ??
+    raw?.['Price Range (Ft)'] ??
     d?.price ??
-    d?.Price;
+    d?.Price ??
+    d?.price_range ??
+    d?.['Price Range (Ft)'] ??
+    findLoosePrice(raw) ??
+    findLoosePrice(d);
 
   const priceNum = toInt(priceRaw);
   const price = (priceNum != null && priceNum > 0) ? priceNum : null;

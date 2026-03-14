@@ -2,9 +2,9 @@ import {
   Component,
   Input,
   Output,
-  EventEmitter
+  EventEmitter,
+  HostBinding
 } from '@angular/core';
-
 import { CommonModule } from '@angular/common';
 import { DragDropModule } from '@angular/cdk/drag-drop';
 
@@ -16,48 +16,58 @@ import { DragDropModule } from '@angular/cdk/drag-drop';
   styleUrls: ['./setup-window.component.css']
 })
 export class SetupWindowComponent {
+  @Input() id!: string;
+  @Input() title = 'Window';
+  @Input() instanceNo = 1;
 
-  @Input() id = '';
-  @Input() title = '';
-  @Input() boundaryRef!: HTMLElement;
+  @Input() x = 200;
+  @Input() y = 200;
+  @Input() zIndex = 1000;
 
-  @Input() x = 120;
-  @Input() y = 100;
-  @Input() zIndex = 6000;
   @Input() maximized = false;
-  @Input() instanceNo: number | null = null;
+  @Input() boundaryRef!: HTMLElement;
 
   @Output() closed = new EventEmitter<string>();
   @Output() minimized = new EventEmitter<string>();
   @Output() focused = new EventEmitter<string>();
   @Output() maximizeToggled = new EventEmitter<string>();
 
-  get dragPosition() {
-    return { x: this.x, y: this.y };
+  @HostBinding('style.left.px') left = 0;
+  @HostBinding('style.top.px') top = 0;
+  @HostBinding('style.z-index') hostZIndex = 1;
+
+  dragPosition = { x: 0, y: 0 };
+
+  ngOnInit(): void {
+    this.dragPosition = { x: this.x, y: this.y };
+    this.left = this.x;
+    this.top = this.y;
+    this.hostZIndex = this.zIndex;
   }
 
-  get titleText(): string {
-    return this.instanceNo && this.instanceNo > 1
-      ? `${this.title} (${this.instanceNo})`
-      : this.title;
+  ngOnChanges(): void {
+    this.hostZIndex = this.zIndex;
+
+    if (!this.maximized) {
+      this.left = this.x;
+      this.top = this.y;
+      this.dragPosition = { x: this.x, y: this.y };
+    }
   }
 
-  onFocus(): void {
+  focus(): void {
     this.focused.emit(this.id);
   }
 
-  onClose(e?: MouseEvent): void {
-    e?.stopPropagation();
+  close(): void {
     this.closed.emit(this.id);
   }
 
-  onMinimize(e?: MouseEvent): void {
-    e?.stopPropagation();
+  minimize(): void {
     this.minimized.emit(this.id);
   }
 
-  onToggleMaximize(e?: MouseEvent): void {
-    e?.stopPropagation();
+  toggleMaximize(): void {
     this.maximizeToggled.emit(this.id);
   }
 }

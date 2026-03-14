@@ -99,11 +99,7 @@ export class ProductlistComponent implements OnInit, OnDestroy {
       this.applyFilters(this.filtersService.current);
     });
 
-    this.productService.getHomeTheaters(this.PRODUCT_LIMIT).subscribe(res => {
-      this.htProducts = normalizeList(res.items || []);
-      this.emitStats();
-      this.applyFilters(this.filtersService.current);
-    });
+
 
     this.productService.getInstruments(this.PRODUCT_LIMIT).subscribe(res => {
       this.allInstruments = normalizeList(res.items || []);
@@ -159,9 +155,35 @@ export class ProductlistComponent implements OnInit, OnDestroy {
   }
 
   private getPrice(p: AnyProduct): number | null {
-    const raw = p.price ?? p.data?.price ?? p.data?.Price;
-    const n = Number(raw);
-    return Number.isFinite(n) ? n : null;
+    const raw =
+      p.price ??
+      p.price_range ??
+      p.data?.price ??
+      p.data?.Price ??
+      p.data?.price_range ??
+      p.data?.["Price Range (Ft)"];
+
+    if (raw == null || raw === '') return null;
+
+    if (typeof raw === 'number') {
+      return Number.isFinite(raw) ? raw : null;
+    }
+
+    const s = String(raw)
+      .trim()
+      .replace(/\s/g, '')
+      .replace(/,/g, '.');
+
+    const nums = (s.match(/\d+(\.\d+)?/g) || [])
+      .map(Number)
+      .filter(Number.isFinite);
+
+    if (!nums.length) return null;
+    if (nums.length === 1) return Math.round(nums[0]);
+
+    const min = Math.min(...nums);
+    const max = Math.max(...nums);
+    return Math.round((min + max) / 2);
   }
 
   private field(p: AnyProduct, ...keys: string[]): any {

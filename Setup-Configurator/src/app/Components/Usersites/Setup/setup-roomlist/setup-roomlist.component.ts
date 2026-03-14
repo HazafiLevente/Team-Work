@@ -277,17 +277,20 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit {
   }
 
 
-  startConnectingFromMenu(): void {
-    if (!this.ctxSetup) return;
+  startConnectingFromMenu(setup:any): void {
 
-    this.connectSourceSetup = this.ctxSetup;
+    if (!setup) return;
+
+    this.connectSourceSetup = setup;
+
     this.pairingStage = 'PICK_SOURCE';
 
     const setupId =
-      this.connectSourceSetup.id ||
-      this.connectSourceSetup.setup_id;
+      setup.id ||
+      setup.setup_id;
 
     this.loadPairingItems(setupId);
+
   }
 
 

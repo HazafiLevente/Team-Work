@@ -19,7 +19,41 @@ export class ProductComponent implements OnInit {
   constructor(private images: ImageService) {}
 
   get displayPrice(): number | null {
-    return this.product.price ?? null;
+    const p: any = this.product;
+    if (!p) return null;
+
+    const raw =
+      p.price ??
+      p.Price ??
+      p.price_range ??
+      p['Price Range (Ft)'] ??
+      p?.data?.price ??
+      p?.data?.Price ??
+      p?.data?.price_range ??
+      p?.data?.['Price Range (Ft)'] ??
+      null;
+
+    return this.parsePrice(raw);
+  }
+
+  private parsePrice(raw: any): number | null {
+    if (raw == null || raw === '') return null;
+
+    if (typeof raw === 'number') {
+      return Number.isFinite(raw) ? raw : null;
+    }
+
+    const text = String(raw).trim();
+    if (!text) return null;
+
+    const nums = (text.match(/\d+(\.\d+)?/g) || [])
+      .map(Number)
+      .filter(n => Number.isFinite(n));
+
+    if (!nums.length) return null;
+    if (nums.length === 1) return Math.round(nums[0]);
+
+    return Math.round((Math.min(...nums) + Math.max(...nums)) / 2);
   }
 
   async ngOnInit() {
@@ -33,6 +67,11 @@ export class ProductComponent implements OnInit {
       id: (this.product as any).id,
       imageUrl: this.imageUrl,
       product: this.product
+    });
+
+    console.log('💰 CARD PRICE RAW', {
+      product: this.product,
+      displayPrice: this.displayPrice
     });
   }
 

@@ -1,66 +1,76 @@
-.window{
-  position:absolute;
-  width:380px;
-  height:240px;
-  background:#0f0f18;
-  border:1px solid rgba(255,255,255,0.1);
-  border-radius:10px;
-  box-shadow:0 20px 60px rgba(0,0,0,0.6);
-  overflow:hidden;
-  pointer-events:auto;
+.setup-window {
+  position: absolute;
+  width: 320px;
+  min-height: 200px;
+
+  background: #0f0b1a;
+  border: 1px solid #2e2e50;
+  border-radius: 10px;
+
+  box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+
+  overflow: hidden;
+
+  z-index: 9999;
+}
+:host {
+  position: absolute;
+  display: block;
+  width: 320px;
+  min-height: 200px;
+}
+.window {
+
+  position: absolute;
+
+  width: 320px;
+  height: 220px;
+
+  background: #0b0816;
+  border: 1px solid #3b2cff;
+
+  border-radius: 10px;
+
+  box-shadow: 0 12px 40px rgba(0,0,0,0.7);
+
 }
 
-.window.maximized{
-  inset:12px auto auto 12px;
-  width:calc(100% - 24px);
-  height:calc(100% - 24px);
-  border-radius:12px;
+.window-header {
+
+  height: 32px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  padding: 0 10px;
+
+  background: #140f2a;
+  border-bottom: 1px solid #2a1f5a;
+
+  cursor: move;
+
 }
 
-.window-header{
-  height:38px;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  padding:0 10px;
-  background:#181828;
-  border-bottom:1px solid rgba(255,255,255,0.08);
-  cursor:grab;
-  user-select:none;
+.title {
+  font-size: 13px;
+  color: white;
 }
 
-.window-title{
-  color:#fff;
-  font-size:13px;
-  font-weight:700;
+.window-actions button {
+
+  background: none;
+  border: none;
+  color: white;
+
+  cursor: pointer;
+  margin-left: 6px;
+
 }
 
-.window-controls{
-  display:flex;
-  align-items:center;
-  gap:6px;
-}
+.window-body {
 
-.window-controls button{
-  width:28px;
-  height:24px;
-  border:none;
-  background:none;
-  color:white;
-  cursor:pointer;
-  border-radius:6px;
-}
+  padding: 10px;
+  color: white;
 
-.window-controls button:hover{
-  background:rgba(255,255,255,0.08);
-}
-
-.window-controls .close-btn:hover{
-  background:#c93a3a;
-}
-
-.window-body{
-  height:calc(100% - 38px);
-  padding:12px;
-  color:white;
 }
