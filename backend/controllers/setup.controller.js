@@ -320,16 +320,19 @@ exports.update = async (req, res) => {
     try {
         const userId = req.user.id;
         const setupId = req.params.id;
-        const { setup_name } = req.body;
+        const { setup_name, setup_type } = req.body;
 
         if (!setupId) return res.status(400).json({ error: "Missing setup id" });
 
-        const name = (setup_name || "").trim();
-        if (!name) return res.status(400).json({ error: "setup_name is required" });
+        const updateData = {};
+        if (setup_name !== undefined) updateData.setup_name = (setup_name || "").trim();
+        if (setup_type !== undefined) updateData.setup_type = setup_type;
+
+        if (Object.keys(updateData).length === 0) return res.json({ error: "Nothing to update" });
 
         const { data, error } = await supabase
             .from(SETUP_TABLE)
-            .update({ setup_name: name })
+            .update(updateData)
             .eq("id", setupId)
             .eq("user_id", userId)
             .select("*")
@@ -354,9 +357,19 @@ exports.create = async (req, res) => {
         const setup_name = (req.body?.setup_name || "").trim();
         if (!setup_name) return res.status(400).json({ error: "setup_name required" });
 
+        const setup_type = req.body?.setup_type || 'other';
         const isFavorite = req.body?.isFavorite === true;
+        const x = req.body?.x || 0;
+        const y = req.body?.y || 0;
 
-        const { data, error } = await supabase.from(SETUP_TABLE).insert([{ setup_name, user_id: userId, isFavorite }]).select("*").single();
+        const { data, error } = await supabase.from(SETUP_TABLE).insert([{
+            setup_name,
+            user_id: userId,
+            isFavorite,
+            setup_type,
+            x,
+            y
+        }]).select("*").single();
 
         if (error) {
             console.error("❌ Supabase insert error:", error);
@@ -371,6 +384,73 @@ exports.create = async (req, res) => {
         return res.json({ setup: data });
     } catch (err) {
         console.error("❌ create setup error:", err);
+        return res.status(500).json({ error: "Server error" });
+    }
+};
+
+/* =========================================================
+   ADD GENERIC DEVICE TO A SETUP
+   POST /api/setup/:id/add-device
+   body: { product_id, source_table, display_name, manufacturer }
+   ========================================================= */
+exports.addDevice = async (req, res) => {
+    try {
+        const userId = req.user?.id;
+        const setupId = req.params.id;
+
+        if (!userId) return res.status(401).json({ error: "Unauthorized" });
+        if (!setupId) return res.status(400).json({ error: "Missing setupId" });
+
+        const { product_id, source_table, display_name, manufacturer } = req.body;
+
+        if (!product_id || !source_table) {
+            return res.status(400).json({ error: "product_id and source_table are required" });
+        }
+
+        // Check ownership
+        const ok = await assertSetupOwnedByUser(setupId, userId);
+        if (!ok) return res.status(403).json({ error: "Forbidden" });
+
+        // Map source_table to a real DB table name
+        const TABLE_MAP = {
+            speakers: "front_speaker[Setup]",
+            receivers: "reciever_setup[Setup]",
+            processors: "audio_processor[Setup]",
+            subwoofers: "subwoofer[Setup]",
+            televisions: "televisions[Setup]",
+            projectors: "projectors[Setup]",
+            routers: "router[Setup]",
+            switches: "switches[Setup]",
+            laptops: "laptops[Setup]",
+            desktop_pcs: "pc_details[Setup]",
+        };
+
+        const targetTable = TABLE_MAP[source_table] || source_table;
+
+        const insertPayload = {
+            setup_id: setupId,
+            product_id: Number(product_id),
+            display_name: display_name || "Eszköz",
+            manufacturer: manufacturer || "",
+        };
+
+        const { data, error } = await supabase
+            .from(targetTable)
+            .insert([insertPayload])
+            .select("*")
+            .single();
+
+        if (error) {
+            console.error("❌ addDevice insert error:", error);
+            return res.status(500).json({ error: error.message });
+        }
+
+        // Bust the children cache
+        childrenCache.delete(String(setupId));
+
+        return res.json({ ok: true, device: { ...data, category: targetTable, display_name } });
+    } catch (err) {
+        console.error("❌ addDevice fatal:", err);
         return res.status(500).json({ error: "Server error" });
     }
 };

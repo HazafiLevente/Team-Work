@@ -4,7 +4,10 @@ import {
   Output,
   EventEmitter,
   ViewChild,
-  ElementRef
+  ViewChildren,
+  QueryList,
+  ElementRef,
+  HostListener
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
@@ -15,6 +18,30 @@ import { SetupConnectionsComponent } from './connection-layer/setup-connections.
 import { ContextMenuRoomComponent } from './context-menus/context-menu-room/context-menu-room.component';
 import { ContextMenuBaseComponent } from './context-menus/context-menu-base/context-menu-base.component';
 import { ContextMenuItemComponent } from './context-menus/context-menu-item/context-menu-item.component';
+import { SetupWindowComponent } from './setup-windows/setup-window.component';
+import { SetupDockComponent } from '../dock/dock.component';
+import { DevicesMenuComponent } from './setup-windows/devices-menu/devices-menu.component';
+import { ConnectionsMenuComponent } from './setup-windows/connections-menu/connections-menu.component';
+import { SetupPairingModalComponent } from '../setup-pairing-modal/setup-pairing-modal.component';
+import { ContextMenuDockComponent } from './context-menus/context-menu-dock/context-menu-dock.component';
+import { ContextMenuWorkspaceComponent } from './context-menus/context-menu-workspace/context-menu-workspace.component';
+import { ContextMenuCategoryComponent } from './context-menus/context-menu-category/context-menu-category.component';
+import { HomeTheaterBuilderComponent } from './setup-windows/quick-builder/home-theater-builder/home-theater-builder.component';
+import { AddDeviceWindowComponent } from './setup-windows/add-device-window/add-device-window.component';
+
+export type WorkspaceWindow = {
+  id: string;
+  title: string;
+  kind: 'devices' | 'connections' | 'item-details' | 'pairing' | 'empty' | 'add-device';
+  payload?: any;
+  instanceNo: number;
+  x: number;
+  y: number;
+  zIndex: number;
+  minimized: boolean;
+  maximized: boolean;
+  width?: number;
+};
 
 @Component({
   selector: 'app-workspace',
@@ -29,13 +56,24 @@ import { ContextMenuItemComponent } from './context-menus/context-menu-item/cont
     SetupConnectionsComponent,
     ContextMenuRoomComponent,
     ContextMenuBaseComponent,
-    ContextMenuItemComponent
+    ContextMenuItemComponent,
+    SetupWindowComponent,
+    DevicesMenuComponent,
+    ConnectionsMenuComponent,
+    SetupPairingModalComponent,
+    SetupDockComponent,
+    ContextMenuDockComponent,
+    ContextMenuWorkspaceComponent,
+    ContextMenuCategoryComponent,
+    HomeTheaterBuilderComponent,
+    AddDeviceWindowComponent
   ]
 })
 export class WorkspaceComponent {
   @Input() lineRefreshTrigger = 0;
   @Input() connectMousePos: any = { x: 0, y: 0 };
   @Input() connectSourceSetup: any = null;
+  @Input() connectTargetSetup: any = null;
   @Input() pairingStage: 'NONE' | 'PICK_SOURCE' | 'PICK_TARGET_SETUP' | 'PICK_TARGET_ITEM' = 'NONE';
 
   @Input() userSetups: any[] = [];
@@ -46,7 +84,6 @@ export class WorkspaceComponent {
   @Input() loading = false;
   @Input() loadingItems = false;
 
-  @Output() openTools = new EventEmitter<any>();
   @Output() rename = new EventEmitter<any>();
   @Output() connect = new EventEmitter<any>();
   @Output() connections2 = new EventEmitter<void>();
@@ -59,6 +96,12 @@ export class WorkspaceComponent {
   @Output() roomRenamed = new EventEmitter<any>();
   @Output() setupClicked = new EventEmitter<any>();
   @Output() createSetup = new EventEmitter<{ x: number; y: number }>();
+  @Output() createItem = new EventEmitter<{ x: number; y: number }>();
+  @Output() categorySelected = new EventEmitter<any>();
+
+  @Output() cancelConnectingEvent = new EventEmitter<void>();
+  @Output() selectSourceEvent = new EventEmitter<any>();
+  @Output() finalizeConnectionEvent = new EventEmitter<any>();
 
   @Output() itemOpen = new EventEmitter<any>();
 
@@ -74,8 +117,41 @@ export class WorkspaceComponent {
   ctxWorkspaceX = 0;
   ctxWorkspaceY = 0;
 
+  ctxCategoryOpen = false;
+  ctxCategoryX = 0;
+  ctxCategoryY = 0;
+
+  ctxDockOpen = false;
+  ctxDockX = 0;
+  ctxDockY = 0;
+  ctxDockWindow: WorkspaceWindow | null = null;
+
+  windows: WorkspaceWindow[] = [];
+  private nextZIndex = 10000;
+
+  extWidth = 0;
+  extHeight = 0;
+  @HostListener('mousemove', ['$event'])
+  onMouseMove(event: MouseEvent): void {
+    if (this.rafId) return;
+    this.rafId = requestAnimationFrame(() => {
+      if (this.pairingStage !== 'NONE' && this.boundaryEl) {
+        const rect = this.boundaryEl.nativeElement.getBoundingClientRect();
+        this.connectMousePos = {
+          x: event.clientX - rect.left,
+          y: event.clientY - rect.top
+        };
+        this.updateLines();
+      }
+      this.rafId = null;
+    });
+  }
+
   @ViewChild('dragBoundary', { static: true })
   boundaryEl!: ElementRef<HTMLElement>;
+
+  @ViewChildren(SetupRoomComponent)
+  roomComponents!: QueryList<SetupRoomComponent>;
 
   elementRegistry = new Map<string, HTMLElement>();
 
@@ -94,12 +170,44 @@ export class WorkspaceComponent {
   }
 
   createSetupAtPosition(): void {
-    this.createSetup.emit({
+    const pos = {
       x: this.ctxWorkspaceX,
       y: this.ctxWorkspaceY
-    });
+    };
 
+    if (this.viewingSetup) {
+      // If we are inside a setup, "New" means adding an item
+      this.createItem.emit(pos);
+      this.ctxWorkspaceOpen = false;
+      return;
+    }
+
+    // Background right click in main workspace opens category menu
+    this.ctxCategoryX = this.ctxWorkspaceX;
+    this.ctxCategoryY = this.ctxWorkspaceY;
+    this.ctxCategoryOpen = true;
     this.ctxWorkspaceOpen = false;
+    this.ctxSetup = null; // Ensure we know it's a NEW setup being created
+  }
+
+  openCategoryMenuForRoom(setup: any): void {
+    const rect = this.boundaryEl.nativeElement.getBoundingClientRect();
+    this.ctxSetup = setup;
+    this.ctxCategoryX = this.ctxX; // Use existing context position
+    this.ctxCategoryY = this.ctxY;
+    this.ctxCategoryOpen = true;
+    this.closeContextMenu();
+  }
+
+  onCategorySelected(category: string): void {
+    const pos = { x: this.ctxCategoryX, y: this.ctxCategoryY };
+    this.categorySelected.emit({
+      category,
+      setup: this.ctxSetup,
+      pos: !this.ctxSetup ? pos : undefined
+    });
+    this.ctxCategoryOpen = false;
+    this.ctxSetup = null;
   }
 
   onBackgroundRightClick(event: MouseEvent): void {
@@ -146,6 +254,217 @@ export class WorkspaceComponent {
     this.ctxOpen = false;
     this.ctxSetup = null;
     this.ctxItem = null;
+    this.ctxWorkspaceOpen = false;
+    this.ctxCategoryOpen = false;
+    this.ctxDockOpen = false;
+    this.ctxDockWindow = null;
+  }
+
+  onDockItemRightClick(payload: { event: MouseEvent, window: any }): void {
+    const rect = this.boundaryEl.nativeElement.getBoundingClientRect();
+    this.ctxDockWindow = payload.window;
+    this.ctxDockX = payload.event.clientX - rect.left;
+    this.ctxDockY = payload.event.clientY - rect.top;
+
+    // Ensure menu doesn't go off bottom
+    if (this.ctxDockY > rect.height - 150) {
+      this.ctxDockY -= 150;
+    }
+
+    this.ctxDockOpen = true;
+    this.ctxOpen = false;
+    this.ctxWorkspaceOpen = false;
+  }
+
+  startRenameForContextSetup(): void {
+    if (!this.ctxSetup || !this.roomComponents) return;
+
+    const targetId =
+      this.ctxSetup?.id ??
+      this.ctxSetup?.setup_id ??
+      this.ctxSetup?.setupId;
+
+    const room = this.roomComponents.find(c => {
+      const cid =
+        c.setup?.id ??
+        c.setup?.setup_id ??
+        c.setup?.setupId;
+
+      return String(cid) === String(targetId);
+    });
+
+    room?.startRename();
+    this.closeContextMenu();
+  }
+
+  openDevicesWindow(setup: any): void {
+    const devicesCount = this.windows.filter(w => w.kind === 'devices').length + 1;
+    const offset = (devicesCount - 1) * 28;
+
+    const newWindow: WorkspaceWindow = {
+      id: 'win_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
+      kind: 'devices',
+      title: 'Eszközök',
+      payload: { setup },
+      instanceNo: devicesCount,
+      x: 100 + offset,
+      y: 100 + offset,
+      zIndex: ++this.nextZIndex,
+      minimized: false,
+      maximized: false
+    };
+
+    this.closeContextMenu();
+    this.windows = [...this.windows, newWindow];
+  }
+
+  openAddDeviceWindow(setup: any): void {
+    // "Új Eszköz" → open HT Builder immediately with sidebar (catalog) already open
+    const count = this.windows.filter(w => w.kind === 'empty').length + 1;
+    const offset = (count - 1) * 28;
+
+    const newWindow: WorkspaceWindow = {
+      id: 'win_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
+      kind: 'empty',
+      title: 'Házimozi',
+      payload: { setup, startWithSidebarOpen: true },
+      instanceNo: count,
+      x: 60 + offset,
+      y: 60 + offset,
+      width: 1100,
+      zIndex: ++this.nextZIndex,
+      minimized: false,
+      maximized: false
+    };
+
+    this.closeContextMenu();
+    this.windows = [...this.windows, newWindow];
+  }
+
+  openEmptyWindow(title: string, setup: any): void {
+    const emptyCount = this.windows.filter(w => w.kind === 'empty').length + 1;
+    const offset = (emptyCount - 1) * 28;
+
+    const newWindow: WorkspaceWindow = {
+      id: 'win_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
+      kind: 'empty',
+      title: title,
+      payload: { setup },
+      instanceNo: emptyCount,
+      x: 100 + offset,
+      y: 60 + offset,
+      width: title === 'Házimozi' ? 1100 : undefined,
+      zIndex: ++this.nextZIndex,
+      minimized: false,
+      maximized: false
+    };
+
+    this.closeContextMenu();
+    this.windows = [...this.windows, newWindow];
+  }
+
+  openConnectionsWindow(setup: any): void {
+    const connCount = this.windows.filter(w => w.kind === 'connections').length + 1;
+    const offset = (connCount - 1) * 28;
+
+    const newWindow: WorkspaceWindow = {
+      id: 'win_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
+      kind: 'connections',
+      title: 'Összekötések: ' + (setup.setup_name || ''),
+      payload: { setup },
+      instanceNo: connCount,
+      x: 100 + offset,
+      y: 100 + offset,
+      zIndex: ++this.nextZIndex,
+      minimized: false,
+      maximized: false
+    };
+
+    this.closeContextMenu();
+    this.windows = [...this.windows, newWindow];
+  }
+
+  openPairingWindow(setup: any, pairingStage: string, pairingItemList: any[]): void {
+    const isTarget = pairingStage === 'PICK_TARGET_ITEM';
+    const winId = isTarget ? 'pairing_target' : 'pairing_source';
+
+    // Remove any existing window with the same ID (to avoid duplicates if they re-click same setup)
+    this.windows = this.windows.filter(w => w.id !== winId);
+
+    const newWindow: WorkspaceWindow = {
+      id: winId,
+      kind: 'pairing',
+      title: pairingStage === 'PICK_SOURCE' ? 'Forrás: ' + setup.setup_name : 'Cél: ' + setup.setup_name,
+      payload: { setup, pairingStage, pairingItemList },
+      instanceNo: isTarget ? 2 : 1,
+      x: isTarget ? 450 : 100,
+      y: 100,
+      zIndex: ++this.nextZIndex,
+      minimized: false,
+      maximized: false
+    };
+
+    this.windows = [...this.windows, newWindow];
+  }
+
+  closePairingWindows(): void {
+    this.windows = this.windows.filter(w => w.kind !== 'pairing');
+  }
+
+  updateWindowPosition(id: string, pos: { x: number, y: number }): void {
+    const idx = this.windows.findIndex(w => w.id === id);
+    if (idx !== -1) {
+      this.windows[idx].x = pos.x;
+      this.windows[idx].y = pos.y;
+      this.calculateWorkspaceExtension();
+    }
+  }
+
+  private calculateWorkspaceExtension(): void {
+    if (!this.boundaryEl) return;
+
+    let maxX = 0;
+    let maxY = 0;
+
+    this.windows.forEach(w => {
+      if (w.minimized) return;
+      const width = w.width || 420;
+      const height = 500; // Estimated
+
+      const right = w.x + width;
+      const bottom = w.y + height;
+
+      if (right > maxX) maxX = right;
+      if (bottom > maxY) maxY = bottom;
+    });
+
+    const rect = this.boundaryEl.nativeElement.getBoundingClientRect();
+    const margin = 100;
+
+    this.extWidth = maxX > rect.width ? maxX + margin : 0;
+    this.extHeight = maxY > rect.height ? maxY + margin : 0;
+
+    this.updateLines();
+  }
+
+  closeWindow(id: string): void {
+    this.windows = this.windows.filter(w => w.id !== id);
+  }
+
+  minimizeWindow(id: string): void {
+    this.windows = this.windows.map(w => w.id === id ? { ...w, minimized: true } : w);
+  }
+
+  restoreWindow(id: string): void {
+    this.windows = this.windows.map(w => w.id === id ? { ...w, minimized: false, zIndex: ++this.nextZIndex } : w);
+  }
+
+  focusWindow(id: string): void {
+    this.windows = this.windows.map(w => w.id === id ? { ...w, zIndex: ++this.nextZIndex } : w);
+  }
+
+  toggleMaximizeWindow(id: string): void {
+    this.windows = this.windows.map(w => w.id === id ? { ...w, maximized: !w.maximized, minimized: false, zIndex: ++this.nextZIndex } : w);
   }
 
   onRoomDragEnded(setup: any, pos: any): void {

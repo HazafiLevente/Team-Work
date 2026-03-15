@@ -1,6 +1,5 @@
-<div class="overlay" (click)="close.emit()"></div>
-
 <div
+  #panelEl
   class="panel"
   [style.left.px]="panelX"
   [style.top.px]="panelY"
@@ -34,7 +33,7 @@
       </div>
 
       <div class="hint">
-        Húzható panel • Dupla katt az alkatrész elemre a megnyitáshoz
+        Húzható panel • Dupla katt a házimozi elemre a megnyitáshoz
       </div>
     }
   </div>

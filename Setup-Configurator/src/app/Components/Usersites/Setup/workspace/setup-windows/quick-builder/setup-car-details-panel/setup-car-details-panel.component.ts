@@ -1,7 +1,6 @@
-import { Component, EventEmitter, Input, Output, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, EventEmitter, Input, Output, OnChanges, SimpleChanges, ElementRef, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient, HttpClientModule, HttpErrorResponse } from '@angular/common/http';
-import { DragDropModule } from '@angular/cdk/drag-drop';
 
 type CarRow = {
   key: string;
@@ -12,20 +11,24 @@ type CarRow = {
 @Component({
   selector: 'app-setup-car-details-panel',
   standalone: true,
-  imports: [CommonModule, HttpClientModule, DragDropModule],
+  imports: [CommonModule, HttpClientModule],
   templateUrl: './setup-car-details-panel.component.html',
   styleUrls: ['./setup-car-details-panel.component.css']
 })
 export class SetupCarDetailsPanelComponent implements OnChanges {
-
   @Input() carItem: any = null;
-  @Input() boundaryRef: any;
-
   @Output() close = new EventEmitter<void>();
+  @ViewChild('panelEl', { static: false }) panelEl?: ElementRef<HTMLElement>;
 
   loading = false;
   errorMsg = '';
   rows: CarRow[] = [];
+
+  panelX = 24;
+  panelY = 110;
+  dragging = false;
+  private dragOffsetX = 0;
+  private dragOffsetY = 0;
 
   constructor(private http: HttpClient) {}
 
@@ -43,6 +46,61 @@ export class SetupCarDetailsPanelComponent implements OnChanges {
     e.stopPropagation();
   }
 
+  startDrag(event: MouseEvent): void {
+    const boundary = document.querySelector('.setup-workspace .boundary-area') as HTMLElement | null;
+    const boundaryRect = boundary?.getBoundingClientRect();
+
+    if (boundaryRect) {
+      const localMouseX = event.clientX - boundaryRect.left;
+      const localMouseY = event.clientY - boundaryRect.top;
+
+      this.dragOffsetX = localMouseX - this.panelX;
+      this.dragOffsetY = localMouseY - this.panelY;
+    } else {
+      this.dragOffsetX = event.clientX - this.panelX;
+      this.dragOffsetY = event.clientY - this.panelY;
+    }
+
+    this.dragging = true;
+    event.preventDefault();
+  }
+
+  onDrag(event: MouseEvent): void {
+    if (!this.dragging) return;
+
+    const boundary = document.querySelector('.setup-workspace .boundary-area') as HTMLElement | null;
+    const boundaryRect = boundary?.getBoundingClientRect();
+    const panelRect = this.panelEl?.nativeElement.getBoundingClientRect();
+
+    if (!boundaryRect) {
+      const nextX = event.clientX - this.dragOffsetX;
+      const nextY = event.clientY - this.dragOffsetY;
+
+      this.panelX = Math.max(0, nextX);
+      this.panelY = Math.max(0, nextY);
+      return;
+    }
+
+    const panelWidth = panelRect?.width ?? 360;
+    const panelHeight = panelRect?.height ?? 520;
+
+    const localMouseX = event.clientX - boundaryRect.left;
+    const localMouseY = event.clientY - boundaryRect.top;
+
+    const nextX = localMouseX - this.dragOffsetX;
+    const nextY = localMouseY - this.dragOffsetY;
+
+    const maxX = Math.max(0, boundaryRect.width - panelWidth - 8);
+    const maxY = Math.max(0, boundaryRect.height - panelHeight - 8);
+
+    this.panelX = Math.min(Math.max(0, nextX), maxX);
+    this.panelY = Math.min(Math.max(0, nextY), maxY);
+  }
+
+  stopDrag(): void {
+    this.dragging = false;
+  }
+
   title(): string {
     const it = this.carItem;
     return it?.display_name || it?.name || it?.car_name || it?.title || 'Autó';
@@ -53,8 +111,6 @@ export class SetupCarDetailsPanelComponent implements OnChanges {
     this.errorMsg = '';
     if (!this.carItem) return;
 
-    // ⚠️ A setup child id gyakran NEM egyezik a car táblák id-jével.
-    // Ezért listás endpointnál (items) display_name alapján is keresünk.
     const id =
       this.carItem?.id ??
       this.carItem?.car_id ??
@@ -69,7 +125,6 @@ export class SetupCarDetailsPanelComponent implements OnChanges {
 
     this.loading = true;
 
-    // ✅ előre a működőnek tűnő listás endpoint
     const urls = [
       `/api/cars?id=${id}`,
       `/api/car?id=${id}`,
@@ -129,11 +184,6 @@ export class SetupCarDetailsPanelComponent implements OnChanges {
     tryFetch(0);
   }
 
-  /**
-   * Normalizálja a backend választ.
-   * FONTOS: ha listát kapunk (items), akkor NEM szabad "első elemet" visszaadni,
-   * mert az random (nálad ezért lett PEUGEOT).
-   */
   private normalizeCarResponse(res: any): any {
     if (res == null) return res;
 
@@ -160,11 +210,9 @@ export class SetupCarDetailsPanelComponent implements OnChanges {
 
     const norm = (s: any) => String(s ?? '').trim().toLowerCase().replace(/\s+/g, ' ');
 
-    // ✅ LISTA: { items: [...] }
     if (Array.isArray(res?.items)) {
       const items = res.items;
 
-      // 1) tábla+id egyezés (ha van table_name a listában)
       let hit = items.find((x: any) => {
         const idOk = String(x?.id) === String(wantedId);
         if (!wantedTable) return idOk;
@@ -174,8 +222,6 @@ export class SetupCarDetailsPanelComponent implements OnChanges {
 
       if (hit) return hit;
 
-      // 2) display_name alapján egyezés:
-      //    - manufacturer + model == display_name (vagy tartalmazza)
       if (wantedTitle) {
         const wt = norm(wantedTitle);
 
@@ -191,18 +237,14 @@ export class SetupCarDetailsPanelComponent implements OnChanges {
         if (hit) return hit;
       }
 
-      // 3) nincs találat -> SOHA ne adjunk vissza random első elemet
       return this.carItem;
     }
 
-    // ha tömb, de nem wrapper: próbáljunk itt is okosan
     if (Array.isArray(res)) {
-      // próbálj id alapján találni
       const hit = res.find((x: any) => String(x?.id) === String(wantedId));
       return hit ?? this.carItem;
     }
 
-    // tipikus wrapper-ek
     let data =
       res?.car ??
       res?.data ??
@@ -221,9 +263,6 @@ export class SetupCarDetailsPanelComponent implements OnChanges {
     return data;
   }
 
-  /**
-   * Case-insensitive, "kulcsnormalizálós" getter
-   */
   private getAny(obj: any, keys: string[]): any {
     if (!obj) return undefined;
 
@@ -258,7 +297,6 @@ export class SetupCarDetailsPanelComponent implements OnChanges {
       'model', 'model_name', 'car_model', 'trim', 'variant', 'tipus', 'típus'
     ]);
 
-    // ✅ Price: először "sima" price, ha nincs akkor range
     const exactPrice = this.getAny(data, [
       'price', 'price_ft', 'priceFt', 'car_price', 'carPrice', 'unit_price', 'unitPrice',
       'amount', 'cost', 'ar', 'ár', 'price_value', 'priceValue'
@@ -269,7 +307,7 @@ export class SetupCarDetailsPanelComponent implements OnChanges {
       'pricerange', 'price range', 'price range (ft)'
     ]);
 
-    const price = (exactPrice ?? priceRange);
+    const price = exactPrice ?? priceRange;
 
     const bodyType = this.getAny(data, [
       'body_type', 'bodyType', 'body', 'type', 'karosszeria', 'karosszéria'
@@ -294,7 +332,7 @@ export class SetupCarDetailsPanelComponent implements OnChanges {
       { key: 'body', label: 'Body Type', value: bodyType },
       { key: 'hp', label: 'Horsepower', value: hp },
       { key: 'fuel', label: 'Fuel', value: fuel },
-      { key: 'year', label: 'Year', value: year },
+      { key: 'year', label: 'Year', value: year }
     ];
 
     return candidates.filter(r => r.value !== undefined && r.value !== null && String(r.value).trim() !== '');

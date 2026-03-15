@@ -12,6 +12,7 @@ export class ContextMenuWorkspaceComponent {
 
   @Input() x = 0;
   @Input() y = 0;
+  @Input() isInsideSetup = false;
 
   @Output() close = new EventEmitter<void>();
   @Output() createSetup = new EventEmitter<void>();

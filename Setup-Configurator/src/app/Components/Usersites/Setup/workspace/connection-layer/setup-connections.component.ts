@@ -100,7 +100,7 @@ export class SetupConnectionsComponent {
   }
 
   getGhostLinePath(): string {
-    if (!this.boundaryEl || !this.connectSourceSetup || !this.elementRegistry) return '';
+    if (!this.boundaryEl || !this.connectSourceSetup || !this.elementRegistry || !this.connectMousePos) return '';
 
     const sid = 'room:' + (this.connectSourceSetup.id || this.connectSourceSetup.setup_id);
     const sourceEl = this.elementRegistry.get(sid);
@@ -111,8 +111,8 @@ export class SetupConnectionsComponent {
 
     const x1 = rect.left + rect.width / 2 - parentRect.left;
     const y1 = rect.top + rect.height / 2 - parentRect.top;
-    const x2 = this.connectMousePos.x;
-    const y2 = this.connectMousePos.y;
+    const x2 = this.connectMousePos.x || 0;
+    const y2 = this.connectMousePos.y || 0;
 
     return `M ${x1} ${y1} L ${x2} ${y2}`;
   }

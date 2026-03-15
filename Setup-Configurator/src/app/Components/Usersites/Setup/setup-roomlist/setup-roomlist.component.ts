@@ -5,10 +5,12 @@ import { FormsModule } from '@angular/forms';
 import { SetupDockComponent } from '../dock/dock.component';
 import { WorkspaceComponent } from '../workspace/workspace.component';
 import { SetupConnectionsComponent } from '../workspace/connection-layer/setup-connections.component';
-import { SetupCarDetailsPanelComponent } from '../quick-builder/setup-car-details-panel/setup-car-details-panel.component';
-import { SetupPcDetailsPanelComponent } from '../quick-builder/setup-pc-details-panel/setup-pc-details-panel.component';
-import { SetupPcPartDetailsPanelComponent } from '../quick-builder/setup-pc-part-details-panel/setup-pc-part-details-panel.component';
+import { SetupCarDetailsPanelComponent } from '../workspace/setup-windows/quick-builder/setup-car-details-panel/setup-car-details-panel.component';
+import { SetupPcDetailsPanelComponent } from '../workspace/setup-windows/quick-builder/setup-pc-details-panel/setup-pc-details-panel.component';
+import { SetupPcPartDetailsPanelComponent } from '../workspace/setup-windows/quick-builder/setup-pc-part-details-panel/setup-pc-part-details-panel.component';
 import { ProductDetailsPanelComponent } from '../../../Panels/Product/product-details-panel.component';
+import { SetupHtDetailsPanelComponent } from '../workspace/setup-windows/quick-builder/setup-ht-details-panel/setup-ht-details-panel.component';
+import { SetupPairingModalComponent } from '../setup-pairing-modal/setup-pairing-modal.component';
 
 type SetupItem = any;
 
@@ -32,7 +34,9 @@ type PcPart = {
     SetupCarDetailsPanelComponent,
     SetupPcDetailsPanelComponent,
     SetupPcPartDetailsPanelComponent,
-    ProductDetailsPanelComponent
+    ProductDetailsPanelComponent,
+    SetupHtDetailsPanelComponent,
+    SetupPairingModalComponent
   ],
   templateUrl: './setup-roomlist.component.html',
   styleUrls: ['./setup-roomlist.component.css']
@@ -66,6 +70,10 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit {
   @Input() connectSourceSetup: any;
   @Input() pairingStage: 'NONE' | 'PICK_SOURCE' | 'PICK_TARGET_SETUP' | 'PICK_TARGET_ITEM' = 'NONE';
 
+  connectSourceItem: any = null;
+  connectTargetSetup: any = null;
+  pairingItemList: any[] = [];
+
   loading = false;
   loadingItems = false;
 
@@ -75,24 +83,24 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit {
   @ViewChild('boundary', { static: false })
   boundaryEl!: ElementRef<HTMLElement>;
 
+  @ViewChild(WorkspaceComponent)
+  workspaceComp!: WorkspaceComponent;
+
   // context menu state
   ctxSetup: any = null;
   ctxPayload: any = null;
-
-  // tools modal state
-  toolsOpen = false;
-  toolsSetup: any = null;
-  toolsStartTab: 'items' | 'pc' | 'cars' = 'items';
 
   // overlay product panel
   selectedProduct: any = null;
   selectedCarItem: any = null;
   selectedPcItem: any = null;
   selectedPcPartItem: any = null;
+  selectedHtItem: any = null;
+  private isBusy = false;
 
   dockItems: { id: string; title: string }[] = [];
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   private buildListUrl(): string {
     const fav = this.favoriteMode ? 'true' : 'false';
@@ -125,12 +133,111 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit {
     this.http.get<any>(`/api/setup/${setupId}/children`, { withCredentials: true })
       .subscribe({
         next: res => {
-          console.log('Pairing items:', res);
+          this.pairingItemList = res || [];
+          if (this.workspaceComp) {
+            const setupObj = this.pairingStage === 'PICK_SOURCE' ? this.connectSourceSetup : this.connectTargetSetup;
+            this.workspaceComp.openPairingWindow(setupObj, this.pairingStage, this.pairingItemList);
+          }
         },
         error: err => {
           console.error('❌ Pairing items loading error:', err);
+          this.cancelConnecting();
         }
       });
+  }
+
+  cancelConnecting(): void {
+    this.pairingStage = 'NONE';
+    this.connectSourceItem = null;
+    this.connectSourceSetup = null;
+    this.connectTargetSetup = null;
+    this.pairingItemList = [];
+    if (this.workspaceComp) {
+      this.workspaceComp.closePairingWindows();
+    }
+  }
+
+  selectSourceItem(item: any): void {
+    this.connectSourceItem = item;
+    this.pairingStage = 'PICK_TARGET_SETUP';
+    this.pairingItemList = [];
+    console.log('🔌 Source item picked. Select target setup.');
+  }
+
+  onSetupClick(setup: any): void {
+    if (this.pairingStage === 'PICK_TARGET_SETUP') {
+      this.selectTargetSetup(setup);
+    }
+  }
+
+  selectTargetSetup(setup: any): void {
+    if (this.pairingStage !== 'PICK_TARGET_SETUP') return;
+
+    this.connectTargetSetup = setup;
+    this.pairingStage = 'PICK_TARGET_ITEM';
+    const setupId = setup.id || setup.setup_id;
+
+    this.http.get<any>(`/api/setup/${setupId}/children`, { withCredentials: true })
+      .subscribe({
+        next: res => {
+          this.pairingItemList = res || [];
+          console.log('🔌 Target items loaded for setup:', setupId);
+          if (this.workspaceComp) {
+            this.workspaceComp.openPairingWindow(this.connectTargetSetup, this.pairingStage, this.pairingItemList);
+          }
+        },
+        error: err => {
+          console.error('❌ Target items loading error:', err);
+          this.cancelConnecting();
+        }
+      });
+  }
+
+  finalizeConnection(targetItem: any): void {
+    const sId = this.connectSourceItem.id || this.connectSourceItem.setup_id;
+    const tId = targetItem.id || targetItem.setup_id;
+
+    if (String(this.connectSourceItem.category) === String(targetItem.category) && String(sId) === String(tId)) {
+      alert('Saját magával nem kötheted össze az eszközt.');
+      this.cancelConnecting();
+      return;
+    }
+
+    const payload = {
+      from_setup_id: this.connectSourceSetup.id || this.connectSourceSetup.setup_id,
+      to_setup_id: this.connectTargetSetup.id || this.connectTargetSetup.setup_id,
+      from_device_type: this.getDeviceType(this.connectSourceItem),
+      from_device_id: sId,
+      to_device_type: this.getDeviceType(targetItem),
+      to_device_id: tId,
+      utp_id: 1
+    };
+
+    this.http.post('/api/setup/connections', payload, { withCredentials: true })
+      .subscribe({
+        next: () => {
+          console.log('✅ Connection created');
+          this.cancelConnecting();
+          // ToDo: load connections propertly for details view if needed
+          this.loadGlobalConnections();
+        },
+        error: (err) => {
+          console.error('❌ Connection error:', err);
+          alert('Hiba történt az összekötés során.');
+          this.cancelConnecting();
+        }
+      });
+  }
+
+  public getDeviceType(item: any): string {
+    const cat = String(item.category || '').toLowerCase();
+    if (cat.includes('pc')) return 'pc';
+    if (cat.includes('switch')) return 'switch';
+    if (cat.includes('router')) return 'router';
+    if (cat.includes('modem')) return 'modem';
+    if (cat.includes('home_theater')) return 'ht';
+    if (cat.includes('setup')) return 'setup';
+    return 'other';
   }
 
   loadGlobalConnections(): void {
@@ -243,6 +350,7 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit {
     this.selectedCarItem = null;
     this.selectedPcItem = null;
     this.selectedPcPartItem = null;
+    this.selectedHtItem = null;
     this.loadingItems = true;
 
     const setupId = setup?.id ?? setup?.setup_id ?? setup?.setupId;
@@ -288,6 +396,7 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit {
     ).trim();
 
     const normalizedTable = rawTable.toLowerCase().replace(/\s+/g, '_');
+    const viewingSetupType = String(this.viewingSetup?.setup_type ?? '').toLowerCase().trim();
 
     const isFullPcSetup =
       item?.processor_id != null ||
@@ -305,11 +414,18 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit {
       normalizedTable.includes('car[setup]') ||
       normalizedTable.includes('carsetup');
 
-    const viewingSetupType = String(this.viewingSetup?.setup_type ?? '').toLowerCase().trim();
+    const isFullHtSetup =
+      viewingSetupType === 'home theater' ||
+      viewingSetupType === 'home_theater' ||
+      viewingSetupType === 'hometheater' ||
+      normalizedTable.includes('home_theater_setups') ||
+      normalizedTable.includes('home theater') ||
+      normalizedTable.includes('hometheater');
 
     const isPcPart =
       !isFullPcSetup &&
       !isFullCarSetup &&
+      !isFullHtSetup &&
       (
         !!item?.slot ||
         viewingSetupType === 'pc' ||
@@ -326,6 +442,7 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit {
       this.selectedProduct = null;
       this.selectedPcItem = null;
       this.selectedPcPartItem = null;
+      this.selectedHtItem = null;
       this.selectedCarItem = item;
       return;
     }
@@ -334,7 +451,17 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit {
       this.selectedProduct = null;
       this.selectedCarItem = null;
       this.selectedPcPartItem = null;
+      this.selectedHtItem = null;
       this.selectedPcItem = item;
+      return;
+    }
+
+    if (isFullHtSetup) {
+      this.selectedProduct = null;
+      this.selectedCarItem = null;
+      this.selectedPcItem = null;
+      this.selectedPcPartItem = null;
+      this.selectedHtItem = item;
       return;
     }
 
@@ -342,6 +469,7 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit {
       this.selectedProduct = null;
       this.selectedCarItem = null;
       this.selectedPcItem = null;
+      this.selectedHtItem = null;
       this.selectedPcPartItem = item;
       return;
     }
@@ -367,6 +495,7 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit {
     this.selectedCarItem = null;
     this.selectedPcItem = null;
     this.selectedPcPartItem = null;
+    this.selectedHtItem = null;
     this.selectedProduct = {
       id,
       table,
@@ -388,6 +517,7 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit {
     this.selectedCarItem = null;
     this.selectedPcItem = null;
     this.selectedPcPartItem = null;
+    this.selectedHtItem = null;
   }
 
   onRoomDragEnded(setup: any, pos: { x: number; y: number }): void {
@@ -422,18 +552,11 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit {
     this.selectedCarItem = null;
     this.selectedPcItem = null;
     this.selectedPcPartItem = null;
+    this.selectedHtItem = null;
   }
 
   openDockItem(item: any) {
     console.log('Dock item:', item);
-  }
-
-  openToolsFromMenu(): void {
-    if (!this.ctxSetup) return;
-
-    this.toolsStartTab = 'items';
-    this.toolsSetup = this.ctxSetup;
-    this.toolsOpen = true;
   }
 
   startConnectingFromMenu(setup: any): void {
@@ -451,34 +574,14 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit {
 
   createNewSetup(customX?: number, customY?: number): void {
     if (!this.allowCreate) return;
-
-    const setup_name = 'Új setup';
-
-    this.http.post<any>(
-      '/api/setup/create',
-      {
-        setup_name,
-        x: customX ?? 50,
-        y: customY ?? 50,
-        isFavorite: this.favoriteMode
-      },
-      { withCredentials: true }
-    )
-      .subscribe({
-        next: (res) => {
-          const created = res?.setup;
-          if (!created) return;
-          if (this.viewingSetup) return;
-          this.userSetups = [created, ...this.userSetups];
-        },
-        error: (err) => {
-          console.error('❌ Setup létrehozási hiba:', err);
-        }
-      });
+    this.handleCategorySelected({
+      category: 'Számítógép', // Default name
+      pos: { x: customX ?? 50, y: customY ?? 50 }
+    });
   }
 
   deleteSetupFromMenu(setup: any): void {
-    if (!setup) return;
+    if (!setup || this.isBusy) return;
 
     const setupId =
       setup?.id ??
@@ -493,9 +596,11 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit {
     const ok = window.confirm(`Biztos törlöd?\n\n${name}`);
     if (!ok) return;
 
+    this.isBusy = true;
     this.http.delete<any>(`/api/setup/${setupId}`, { withCredentials: true })
       .subscribe({
         next: () => {
+          this.isBusy = false;
           this.userSetups = this.userSetups.filter(s => {
             const sid = s?.id ?? s?.setup_id ?? s?.setupId;
             return String(sid) !== String(setupId);
@@ -511,6 +616,7 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit {
           }
         },
         error: (err) => {
+          this.isBusy = false;
           console.error('❌ Setup törlés hiba:', err);
           alert('Törlés sikertelen.');
         }
@@ -581,5 +687,102 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit {
         alert('Átnevezés sikertelen.');
       }
     });
+  }
+
+  openDevicesWindowForCurrentSetup(pos?: { x: number, y: number }): void {
+    if (this.viewingSetup && this.workspaceComp) {
+      this.workspaceComp.closeContextMenu();
+      this.workspaceComp.openAddDeviceWindow(this.viewingSetup);
+    }
+  }
+
+  handleCategorySelected(event: any): void {
+    if (!event) return;
+
+    // Support both direct string and object payloads
+    const category = typeof event === 'string' ? event : event.category;
+    const setup = event.setup;
+    const pos = event.pos;
+
+    const catName = String(category || '').trim();
+    const catNorm = catName.toLowerCase()
+      .replace(/\u0151/g, 'o').replace(/\u0171/g, 'u').replace(/\u00e1/g, 'a')
+      .replace(/\u00e9/g, 'e').replace(/\u00ed/g, 'i').replace(/\u00f3/g, 'o')
+      .replace(/\u00f6/g, 'o').replace(/\u00fa/g, 'u').replace(/\u00fc/g, 'u');
+
+    let type: string;
+    if (catName === 'Házimozi' || catNorm.includes('hazimozi') || catNorm.includes('hazi')) {
+      type = 'home_theater';
+    } else if (catName === 'Számítógép' || catNorm.includes('szamitogep') || catNorm.includes('szam')) {
+      type = 'pc';
+    } else if (catName === 'Autók' || catNorm.includes('autok') || catNorm.includes('auto')) {
+      type = 'car';
+    } else {
+      type = 'other';
+    }
+
+    console.log(`🔧 Category: "${catName}" → Type: "${type}"`);
+
+    if (setup) {
+      // Transformation
+      const setupId = setup.id || setup.setup_id || setup.setupId;
+      this.http.patch<any>(`/api/setup/${setupId}`, {
+        setup_type: type,
+        setup_name: catName
+      }, { withCredentials: true })
+        .subscribe({
+          next: (res) => {
+            const updated = res.setup || { ...setup, setup_type: type, setup_name: catName };
+            this.userSetups = this.userSetups.map(s => {
+              const sid = s.id || s.setup_id || s.setupId;
+              return String(sid) === String(setupId) ? { ...s, ...updated } : s;
+            });
+            console.log('✅ Setup transformed to:', type);
+            if (type === 'home_theater') {
+              this.openEmptyWindowForCategory('Házimozi', updated);
+            }
+          },
+          error: (err) => console.error('❌ Setup type update hiba:', err)
+        });
+    } else if (pos) {
+      // Creation
+      this.http.post<any>('/api/setup/create', {
+        setup_name: catName || 'Új Setup',
+        x: pos.x,
+        y: pos.y,
+        setup_type: type,
+        isFavorite: this.favoriteMode
+      }, { withCredentials: true }).subscribe({
+        next: (res) => {
+          if (res.setup) {
+            this.userSetups = [res.setup, ...this.userSetups];
+            console.log('✅ Setup created at:', pos);
+            if (type === 'home_theater') {
+              setTimeout(() => this.openEmptyWindowForCategory('Házimozi', res.setup), 100);
+            }
+          }
+        },
+        error: (err) => console.error('❌ Setup creation hiba:', err)
+      });
+    }
+  }
+
+  openEmptyWindowForCategory(title: any, setup?: any): void {
+    // FORCE title to be a string
+    let finalTitle = 'Setup';
+    if (typeof title === 'string') {
+      finalTitle = title;
+    } else if (title && typeof title === 'object' && title.category) {
+      finalTitle = String(title.category);
+    } else if (title) {
+      finalTitle = String(title);
+    }
+
+    const target = setup || this.viewingSetup;
+
+    if (this.workspaceComp) {
+      this.workspaceComp.closeContextMenu();
+      this.workspaceComp.openEmptyWindow(finalTitle, target);
+    }
   }
 }

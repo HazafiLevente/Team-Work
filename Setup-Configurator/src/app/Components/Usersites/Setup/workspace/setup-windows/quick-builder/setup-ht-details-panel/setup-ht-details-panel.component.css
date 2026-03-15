@@ -1,15 +1,12 @@
 .overlay{
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.35);
-  z-index: 9998;
+  display: none;
 }
 
 .panel{
-  position: fixed;
+  position: absolute;
 
   width: 360px;
-  max-width: calc(100vw - 48px);
+  max-width: calc(100% - 24px);
 
   border-radius: 16px;
   border: 1px solid rgba(255,255,255,0.12);
@@ -17,7 +14,7 @@
   box-shadow: 0 30px 120px rgba(0,0,0,0.6);
   overflow: hidden;
 
-  z-index: 9999;
+  z-index: 2;
   pointer-events: auto;
 }
 

@@ -1,59 +1,47 @@
 <div class="setup-shell">
 
-  <app-workspace
-    [userSetups]="userSetups"
-    [items]="items"
-    [viewingSetup]="viewingSetup"
-    [connections]="connections"
-    [globalRoomConnections]="globalRoomConnections"
-    [loading]="loading"
-    [loadingItems]="loadingItems"
-    [lineRefreshTrigger]="lineRefreshTrigger"
-    [connectMousePos]="connectMousePos"
-    [connectSourceSetup]="connectSourceSetup"
-    [pairingStage]="pairingStage"
-    (openSetup)="openSetupDetails($event)"
-    (itemOpen)="openItemOverlay($event)"
-    (back)="backToSetups()"
-    (roomMoved)="onRoomDragEnded($event.setup, $event.pos)"
-    (roomRenamed)="saveRenamedRoom($event)"
-    (createSetup)="createNewSetup($event.x, $event.y)"
-    (deleteSetup)="deleteSetupFromMenu($event)"
-    (openTools)="openToolsFromMenu()"
-    (rename)="openRenameFromMenu($event)"
-    (connect)="startConnectingFromMenu($event)">
-  </app-workspace>
 
-  @if (selectedProduct) {
-    <app-product-details-panel
-      [product]="selectedProduct"
+    <app-workspace [userSetups]="userSetups" [items]="items" [viewingSetup]="viewingSetup" [connections]="connections"
+      [globalRoomConnections]="globalRoomConnections" [loading]="loading" [loadingItems]="loadingItems"
+      [lineRefreshTrigger]="lineRefreshTrigger" [connectMousePos]="connectMousePos"
+      [connectSourceSetup]="connectSourceSetup" [pairingStage]="pairingStage" (openSetup)="openSetupDetails($event)"
+      (itemOpen)="openItemOverlay($event)" (back)="backToSetups()"
+      (roomMoved)="onRoomDragEnded($event.setup, $event.pos)" (roomRenamed)="saveRenamedRoom($event)"
+      (createSetup)="createNewSetup($event.x, $event.y)" (createItem)="openDevicesWindowForCurrentSetup($event)"
+      (categorySelected)="handleCategorySelected($event)" (deleteSetup)="deleteSetupFromMenu($event)"
+      (rename)="openRenameFromMenu($event)" (connect)="startConnectingFromMenu($event)"
+      (setupClicked)="onSetupClick($event)" (cancelConnectingEvent)="cancelConnecting()"
+      (selectSourceEvent)="selectSourceItem($event)" (finalizeConnectionEvent)="finalizeConnection($event)">
+    </app-workspace>
+
+    @if (selectedProduct) {
+    <app-product-details-panel class="workspace-floating-panel" [product]="selectedProduct"
       (closed)="closeProductOverlay()">
     </app-product-details-panel>
-  }
+    }
 
-  @if (selectedCarItem) {
-    <app-setup-car-details-panel
-      [carItem]="selectedCarItem"
+    @if (selectedCarItem) {
+    <app-setup-car-details-panel class="workspace-floating-panel" [carItem]="selectedCarItem"
       (close)="closeProductOverlay()">
     </app-setup-car-details-panel>
-  }
+    }
 
-  @if (selectedPcItem) {
-    <app-setup-pc-details-panel
-      [pcItem]="selectedPcItem"
+    @if (selectedPcItem) {
+    <app-setup-pc-details-panel class="workspace-floating-panel" [pcItem]="selectedPcItem"
       (close)="closeProductOverlay()">
     </app-setup-pc-details-panel>
-  }
-  @if (selectedPcPartItem) {
-    <app-setup-pc-part-details-panel
-      [partItem]="selectedPcPartItem"
+    }
+
+    @if (selectedPcPartItem) {
+    <app-setup-pc-part-details-panel class="workspace-floating-panel" [partItem]="selectedPcPartItem"
       (close)="closeProductOverlay()">
     </app-setup-pc-part-details-panel>
-  }
+    }
 
-  <app-setup-dock
-    [dockItems]="dockItems"
-    (open)="openDockItem($event)">
-  </app-setup-dock>
+    @if (selectedHtItem) {
+    <app-setup-ht-details-panel class="workspace-floating-panel" [htItem]="selectedHtItem"
+      (close)="closeProductOverlay()">
+    </app-setup-ht-details-panel>
+    }
 
-</div>
+</div>

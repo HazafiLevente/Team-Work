@@ -9,7 +9,7 @@
   border-radius: 12px;
   box-shadow:
     inset 6px 0 0 #3b82f6,
-    0 6px 18px rgba(0,0,0,0.35);
+    0 6px 18px rgba(0, 0, 0, 0.35);
   font-weight: 600;
   color: #2b2b2b;
   z-index: 10;
@@ -33,7 +33,7 @@
   transform: translateY(-1px);
   box-shadow:
     inset 6px 0 0 #2563eb,
-    0 10px 24px rgba(0,0,0,0.35);
+    0 10px 24px rgba(0, 0, 0, 0.35);
 }
 
 .drag-element.circle {
@@ -66,4 +66,20 @@
 
 .drag-element:active {
   cursor: grabbing;
+}
+
+.ht-icon {
+  margin-right: 8px;
+  font-size: 1.2em;
+}
+
+/* HT Setup variation */
+.drag-element.is-ht {
+  box-shadow:
+    inset 6px 0 0 #f59e0b,
+    0 6px 18px rgba(0, 0, 0, 0.35);
+}
+
+.drag-element.is-ht::before {
+  background: #f59e0b;
 }

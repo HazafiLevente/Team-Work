@@ -14,18 +14,16 @@ async function getHtCatalog(req, res) {
 
         // 🔥 Itt csak hozzáadsz ha új HT device típus jön
         const HT_TABLES = [
-            { key: "receivers", table: "home_theater" },
-
-            { key: "frontSpeakers", table: "front_speaker" },
-            { key: "backSpeakers", table: "back_speaker" },
-            { key: "sideSpeakers", table: "side_speaker" },
-            { key: "ceilingSpeakers", table: "ceiling_speakers" },
-            { key: "floorSpeakers", table: "floor_speakers" },
-            { key: "centerSpeakers", table: "center_speakers" },
-
-            { key: "subwoofers", table: "subwoofer" },
-            { key: "audioProcessors", table: "audio_processor" },
-            { key: "bassAmplifiers", table: "bass_amplifier" }
+            { key: "receivers", table: "reciever_setup[Setup]" },
+            { key: "frontSpeakers", table: "front_speaker[Setup]" },
+            { key: "backSpeakers", table: "back_speaker[Setup]" },
+            { key: "sideSpeakers", table: "side_speaker[Setup]" },
+            { key: "ceilingSpeakers", table: "ceiling_speaker[Setup]" },
+            { key: "floorSpeakers", table: "floor_speaker[Setup]" },
+            { key: "centerSpeakers", table: "center_speaker[Setup]" },
+            { key: "subwoofers", table: "subwoofer[Setup]" },
+            { key: "audioProcessors", table: "audio_processor[Setup]" },
+            { key: "bassAmplifiers", table: "bass_amplifier[Setup]" }
         ];
 
         const result = {};
@@ -348,10 +346,35 @@ async function saveHtBuild(req, res) {
         res.status(500).json({ error: err.message });
     }
 }
+async function getHtBuild(req, res) {
+    try {
+        const { setupId } = req.params;
+        const userId = req.user.id;
+
+        const ok = await assertSetupOwnedByUser(setupId, userId);
+        if (!ok) return res.status(403).json({ error: "Forbidden" });
+
+        const { data: build, error: buildErr } = await supabase
+            .from("home_theater_setups[Setup]")
+            .select("*")
+            .eq("setup_id", setupId)
+            .maybeSingle();
+
+        if (buildErr) throw buildErr;
+
+        res.json(build || { setup_id: setupId, layout: "[]", setup_name: "Új Házimozi" });
+
+    } catch (err) {
+        console.error("HT GET BUILD ERROR:", err);
+        res.status(500).json({ error: err.message });
+    }
+}
+
 module.exports = {
     saveHtBuild,
     saveHtConfig,
     getHtCatalog,
+    getHtBuild,
     list,
     listDevices,
     createDevice,

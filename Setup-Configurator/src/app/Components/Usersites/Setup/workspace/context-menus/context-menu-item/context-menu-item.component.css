@@ -1,3 +1,7 @@
+/* Styles are inherited from parent's context-menu-base design usually, 
+   but we ensure specific item hover consistency here */
 .menu-item:hover {
-  background: rgba(82,39,255,0.18);
+  background: rgba(82, 39, 255, 0.2);
+  color: #fff;
+  transform: translateX(4px);
 }

@@ -10,7 +10,7 @@ import {
 
 import { CommonModule } from '@angular/common';
 import { DragDropModule } from '@angular/cdk/drag-drop';
-import {FormsModule} from '@angular/forms';
+import { FormsModule } from '@angular/forms';
 
 export type SetupRightClickPayload = {
   setup: any;
@@ -35,9 +35,9 @@ export class SetupRoomComponent implements AfterViewInit {
 
   @Input() initialPosition: { x: number, y: number } = { x: 0, y: 0 };
 
-  @Output() elementReady = new EventEmitter<{id:string, el:HTMLElement}>();
+  @Output() elementReady = new EventEmitter<{ id: string, el: HTMLElement }>();
   @Output() moved = new EventEmitter<void>();
-  @Output() dragEnded = new EventEmitter<{x:number,y:number}>();
+  @Output() dragEnded = new EventEmitter<{ x: number, y: number }>();
 
   @Output() setupClick = new EventEmitter<any>();
   @Output() setupDblClick = new EventEmitter<any>();
@@ -50,22 +50,26 @@ export class SetupRoomComponent implements AfterViewInit {
   editing = false;
   editName = '';
 
-  @ViewChild('root',{static:true}) root!:ElementRef;
+  @ViewChild('root', { static: true }) root!: ElementRef;
 
-  ngAfterViewInit(){
+  ngAfterViewInit() {
     this.elementReady.emit({
-      id:this.dataId,
-      el:this.root.nativeElement
+      id: this.dataId,
+      el: this.root.nativeElement
     });
   }
-  ngOnInit(){
-    if(this.initialPosition){
-      this.dragPosition = {...this.initialPosition};
+  ngOnInit() {
+    if (this.initialPosition) {
+      this.dragPosition = { ...this.initialPosition };
     }
   }
 
   isNetwork(): boolean {
     return String(this.setup?.isNetwork).toLowerCase() === 'true' || this.setup?.isNetwork === true;
+  }
+  isHT(): boolean {
+    const type = String(this.setup?.setup_type || '').toLowerCase();
+    return type === 'home_theater' || type === 'hometheater' || type === 'home theater';
   }
   startRename(): void {
 
@@ -108,11 +112,11 @@ export class SetupRoomComponent implements AfterViewInit {
     }
   }
 
-  onDragMoved(){
+  onDragMoved() {
     this.moved.emit();
   }
 
-  onDragEnded(e:any){
+  onDragEnded(e: any) {
 
     const pos = e.source.getFreeDragPosition();
 

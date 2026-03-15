@@ -1,33 +1,61 @@
-.dock{
-  position:absolute;
-
-  left:0;
-  right:0;
-  bottom:10px;   /* kicsi margó */
-
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  gap:10px;
-
-  height:60px;
-
-  z-index:5000;
-  pointer-events:auto;
+.dock {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0px;
+  height: 60px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10001;
+  pointer-events: none;
 }
 
-.dock-inner{
-  background:rgba(10,10,20,0.85);
-  border:1px solid rgba(255,255,255,0.12);
+.dock-inner {
+  pointer-events: auto;
+  background: rgba(15, 11, 26, 0.85);
+  backdrop-filter: blur(24px) saturate(160%);
+  border: 1px solid rgba(82, 39, 255, 0.4);
+  border-bottom: none;
+  border-radius: 16px 16px 0 0;
+  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.6);
+  min-width: 100px;
+  transition: all 0.3s ease;
+}
 
-  backdrop-filter: blur(12px);
+.start-btn {
+  width: 36px;
+  height: 36px;
+  background: rgba(82, 39, 255, 0.2);
+  border: 1px solid rgba(82, 39, 255, 0.4);
+  border-radius: 10px;
+  color: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
 
-  border-radius:16px;
+.start-btn:hover,
+.start-btn.active {
+  background: rgba(82, 39, 255, 0.4);
+  transform: scale(1.1);
+  box-shadow: 0 0 15px rgba(82, 39, 255, 0.3);
+}
 
-  padding:10px 16px;
+.start-icon {
+  font-size: 18px;
+  filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.3));
+}
 
-  display:flex;
-  gap:10px;
-
-  box-shadow:0 15px 40px rgba(0,0,0,0.6);
+.divider {
+  width: 1px;
+  height: 24px;
+  background: rgba(255, 255, 255, 0.1);
+  margin: 0 4px;
 }

@@ -1,4 +1,13 @@
-import { Component, EventEmitter, Input, Output, OnChanges, SimpleChanges } from '@angular/core';
+import {
+  Component,
+  EventEmitter,
+  Input,
+  Output,
+  OnChanges,
+  SimpleChanges,
+  ElementRef,
+  ViewChild
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 
@@ -12,6 +21,8 @@ import { HttpClient, HttpClientModule } from '@angular/common/http';
 export class SetupPcPartDetailsPanelComponent implements OnChanges {
   @Input() partItem: any;
   @Output() close = new EventEmitter<void>();
+
+  @ViewChild('panelEl', { static: false }) panelEl?: ElementRef<HTMLElement>;
 
   loading = false;
   error = '';
@@ -58,7 +69,6 @@ export class SetupPcPartDetailsPanelComponent implements OnChanges {
       return;
     }
 
-    // Ha setup-szintű gyűjtő tábla neve jön, ne próbáljunk hibás fetch-et.
     if (
       !table ||
       normalizedTable === 'pc_details' ||
@@ -223,20 +233,46 @@ export class SetupPcPartDetailsPanelComponent implements OnChanges {
   }
 
   startDrag(event: MouseEvent): void {
+    const boundary = document.querySelector('.setup-workspace .boundary-area') as HTMLElement | null;
+    const boundaryRect = boundary?.getBoundingClientRect();
+
+    if (boundaryRect) {
+      const localMouseX = event.clientX - boundaryRect.left;
+      const localMouseY = event.clientY - boundaryRect.top;
+      this.dragOffsetX = localMouseX - this.panelX;
+      this.dragOffsetY = localMouseY - this.panelY;
+    } else {
+      this.dragOffsetX = event.clientX - this.panelX;
+      this.dragOffsetY = event.clientY - this.panelY;
+    }
+
     this.dragging = true;
-    this.dragOffsetX = event.clientX - this.panelX;
-    this.dragOffsetY = event.clientY - this.panelY;
     event.preventDefault();
   }
 
   onDrag(event: MouseEvent): void {
     if (!this.dragging) return;
 
-    this.panelX = event.clientX - this.dragOffsetX;
-    this.panelY = event.clientY - this.dragOffsetY;
+    const boundary = document.querySelector('.setup-workspace .boundary-area') as HTMLElement | null;
+    const boundaryRect = boundary?.getBoundingClientRect();
+    const panelRect = this.panelEl?.nativeElement.getBoundingClientRect();
 
-    if (this.panelX < 0) this.panelX = 0;
-    if (this.panelY < 0) this.panelY = 0;
+    if (!boundaryRect) return;
+
+    const panelWidth = panelRect?.width ?? 360;
+    const panelHeight = panelRect?.height ?? 520;
+
+    const localMouseX = event.clientX - boundaryRect.left;
+    const localMouseY = event.clientY - boundaryRect.top;
+
+    const nextX = localMouseX - this.dragOffsetX;
+    const nextY = localMouseY - this.dragOffsetY;
+
+    const maxX = Math.max(0, boundaryRect.width - panelWidth - 8);
+    const maxY = Math.max(0, boundaryRect.height - panelHeight - 8);
+
+    this.panelX = Math.min(Math.max(0, nextX), maxX);
+    this.panelY = Math.min(Math.max(0, nextY), maxY);
   }
 
   stopDrag(): void {

@@ -1,16 +1,10 @@
-<div
-  class="window"
-  cdkDrag
-  [cdkDragBoundary]="boundaryRef"
-  [cdkDragFreeDragPosition]="dragPosition"
-  (cdkDragStarted)="focus()"
-  [style.zIndex]="zIndex"
->
+<div class="window" cdkDrag [cdkDragBoundary]="boundaryRef" [cdkDragFreeDragPosition]="dragPosition"
+  (cdkDragStarted)="focus()" (cdkDragEnded)="onDragEnded($event)" [style.z-index]="zIndex" [style.width.px]="width">
 
   <div class="window-header" cdkDragHandle>
 
     <span class="title">
-      {{title}} {{instanceNo}}
+      {{title}}
     </span>
 
     <div class="window-actions">

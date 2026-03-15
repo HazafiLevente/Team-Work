@@ -3,10 +3,12 @@ import {
   Input,
   Output,
   EventEmitter,
-  HostBinding
+  HostBinding,
+  OnInit,
+  OnChanges
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { DragDropModule } from '@angular/cdk/drag-drop';
+import { DragDropModule, CdkDragEnd } from '@angular/cdk/drag-drop';
 
 @Component({
   selector: 'app-setup-window',
@@ -19,6 +21,7 @@ export class SetupWindowComponent {
   @Input() id!: string;
   @Input() title = 'Window';
   @Input() instanceNo = 1;
+  @Input() width = 420;
 
   @Input() x = 200;
   @Input() y = 200;
@@ -31,17 +34,14 @@ export class SetupWindowComponent {
   @Output() minimized = new EventEmitter<string>();
   @Output() focused = new EventEmitter<string>();
   @Output() maximizeToggled = new EventEmitter<string>();
+  @Output() moved = new EventEmitter<{ x: number, y: number }>();
 
-  @HostBinding('style.left.px') left = 0;
-  @HostBinding('style.top.px') top = 0;
   @HostBinding('style.z-index') hostZIndex = 1;
 
   dragPosition = { x: 0, y: 0 };
 
   ngOnInit(): void {
     this.dragPosition = { x: this.x, y: this.y };
-    this.left = this.x;
-    this.top = this.y;
     this.hostZIndex = this.zIndex;
   }
 
@@ -49,9 +49,11 @@ export class SetupWindowComponent {
     this.hostZIndex = this.zIndex;
 
     if (!this.maximized) {
-      this.left = this.x;
-      this.top = this.y;
-      this.dragPosition = { x: this.x, y: this.y };
+      // Csak akkor frissítjük a pozíciót fentről, ha tényleg változott az x/y
+      // (megelőzve a végtelen ciklust visszacsatolásnál)
+      if (Math.abs(this.dragPosition.x - this.x) > 1 || Math.abs(this.dragPosition.y - this.y) > 1) {
+        this.dragPosition = { x: this.x, y: this.y };
+      }
     }
   }
 
@@ -69,5 +71,10 @@ export class SetupWindowComponent {
 
   toggleMaximize(): void {
     this.maximizeToggled.emit(this.id);
+  }
+
+  onDragEnded(event: CdkDragEnd): void {
+    const pos = event.source.getFreeDragPosition();
+    this.moved.emit({ x: pos.x, y: pos.y });
   }
 }

@@ -5,7 +5,7 @@ import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { SetupPcBuilderModalComponent } from '../setup-pc-builder-modal/setup-pc-builder-modal.component';
 import { HomeTheaterBuilderComponent }
-  from '../quick-builder/home-theater-builder-modal/home-theater-builder.component';
+  from '../workspace/setup-windows/quick-builder/home-theater-builder-modal/home-theater-builder.component';
 type UiItem = {
   category: string;
   display_name: string;
@@ -28,7 +28,7 @@ type CarSetupRow = any;
 @Component({
   selector: 'app-setup-tools-modal',
   standalone: true,
-  imports: [CommonModule, HttpClientModule, FormsModule, SetupPcBuilderModalComponent,HomeTheaterBuilderComponent],
+  imports: [CommonModule, HttpClientModule, FormsModule, SetupPcBuilderModalComponent, HomeTheaterBuilderComponent],
   templateUrl: './setup-tools-modal.component.html',
   styleUrls: ['./setup-tools-modal.component.css']
 })
@@ -75,7 +75,7 @@ export class SetupToolsModalComponent implements OnChanges {
   pcBuilderOpen = false;
   pcBuilderRow: any = null;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (!changes['setup']) return;

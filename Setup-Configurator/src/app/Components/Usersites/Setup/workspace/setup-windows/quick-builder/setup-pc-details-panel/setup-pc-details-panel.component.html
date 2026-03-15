@@ -1,6 +1,5 @@
-<div class="overlay" (click)="close.emit()"></div>
-
 <div
+  #panelEl
   class="panel"
   [style.left.px]="panelX"
   [style.top.px]="panelY"
@@ -15,7 +14,7 @@
       <div class="small">PC adatok</div>
     </div>
 
-    <button class="x" type="button" (click)="close.emit()">✕</button>
+    <button class="x" type="button" (click)="close.emit()">×</button>
   </div>
 
   <div class="content">

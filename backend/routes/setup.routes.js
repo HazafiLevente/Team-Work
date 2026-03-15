@@ -34,6 +34,9 @@ router.patch("/rooms/:setupId/position", verifyUser, ctrl.upsertRoomPosition);
 router.get("/:id/cars", verifyUser, ctrl.carsList);
 router.post("/:id/cars", verifyUser, ctrl.carsAdd);
 
+// ✅ Generic device add to any setup
+router.post("/:id/add-device", verifyUser, ctrl.addDevice);
+
 
 // ✅ CONNECTIONS
 router.post("/connections", verifyUser, ctrl.connectionsCreate);

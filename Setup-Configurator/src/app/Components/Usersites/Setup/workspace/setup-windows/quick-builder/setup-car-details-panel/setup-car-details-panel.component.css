@@ -1,15 +1,12 @@
 .overlay{
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.35);
-  z-index: 9998;
+  display: none;
 }
 
 .panel{
-  position: fixed;
+  position: absolute;
 
   width: 360px;
-  max-width: calc(100vw - 48px);
+  max-width: calc(100% - 24px);
 
   border-radius: 16px;
   border: 1px solid rgba(255,255,255,0.12);
@@ -17,7 +14,7 @@
   box-shadow: 0 30px 120px rgba(0,0,0,0.6);
   overflow: hidden;
 
-  z-index: 9999;
+  z-index: 2;
   pointer-events: auto;
 }
 
@@ -35,6 +32,8 @@
 .titlebar:active{
   cursor: grabbing;
 }
+
+
 
 .caption .big{
   font-weight: 900;
@@ -70,47 +69,54 @@
   padding: 12px;
 }
 
-.state{
-  color: rgba(233,238,248,0.78);
-  font-size: 14px;
-  padding: 10px 2px;
+.hint{
+  color: rgba(233,238,248,0.72);
+  font-size: 13px;
+  padding: 10px;
 }
 
-.state.error{
-  color: #ff8b8b;
+.error{
+  color: rgba(255,120,120,0.95);
+  font-size: 13px;
+  padding: 10px;
 }
 
-.list{
-  display: flex;
-  flex-direction: column;
+.rows{
+  display: grid;
   gap: 10px;
 }
 
 .row{
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 16px;
+  display: grid;
+  grid-template-columns: 150px 1fr;
+  gap: 12px;
+  align-items: start;
 
-  padding: 14px 16px;
+  padding: 10px 12px;
   border-radius: 14px;
-  border: 1px solid rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.10);
   background: rgba(255,255,255,0.03);
 }
 
-.label{
-  color: rgba(233,238,248,0.72);
-  font-size: 14px;
+.k{
+  font-size: 12px;
+  opacity: .78;
+  color: rgba(233,238,248,0.9);
 }
 
-.value{
-  text-align: right;
+.v{
+  font-size: 12px;
   font-weight: 800;
-  color: rgba(255,255,255,0.95);
+  color: rgba(255,255,255,0.92);
+  text-align: right;
+  word-break: break-word;
 }
 
-.hint{
-  margin-top: 12px;
-  color: rgba(233,238,248,0.72);
-  font-size: 13px;
+.foot{
+  margin-top: 10px;
+  font-size: 12px;
+  opacity: .65;
+  color: rgba(233,238,248,0.8);
+  padding: 4px 2px;
 }
+

@@ -20,6 +20,7 @@ router.delete("/connection/:id", verifyUser, ctrl.deleteConnection);
 
 // save
 router.post("/config", verifyUser, ctrl.saveHtConfig);
+router.get("/:setupId/build", verifyUser, ctrl.getHtBuild);
 router.post("/build", verifyUser, ctrl.saveHtBuild);
 
 module.exports = router;

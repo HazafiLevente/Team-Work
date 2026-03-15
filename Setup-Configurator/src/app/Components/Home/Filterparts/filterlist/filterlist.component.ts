@@ -38,13 +38,13 @@ export class FilterlistComponent {
     const cur = this.filtersService.current.activeCategory;
     const next: CategoryKey = (cur === key) ? 'all' : key;
 
-    // reset UI state
+
     this.active.car = false;
     this.active.computer = false;
     this.active.ht = false;
     this.active.instrument = false;
 
-    // set UI state
+
     if (next === 'car') this.active.car = true;
     if (next === 'computer') this.active.computer = true;
     if (next === 'ht') this.active.ht = true;

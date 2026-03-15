@@ -4,15 +4,15 @@ import { ContextMenuBaseComponent } from '../context-menu-base/context-menu-base
 
 @Component({
   selector: 'app-context-menu-room',
-  standalone:true,
-  imports:[CommonModule,ContextMenuBaseComponent],
-  templateUrl:'./context-menu-room.component.html',
-  styleUrl:'./context-menu-room.component.css'
+  standalone: true,
+  imports: [CommonModule, ContextMenuBaseComponent],
+  templateUrl: './context-menu-room.component.html',
+  styleUrl: './context-menu-room.component.css'
 })
-export class ContextMenuRoomComponent{
+export class ContextMenuRoomComponent {
 
-  @Input() x=0;
-  @Input() y=0;
+  @Input() x = 0;
+  @Input() y = 0;
 
   @Output() close = new EventEmitter<void>();
 
@@ -21,6 +21,7 @@ export class ContextMenuRoomComponent{
   @Output() rename = new EventEmitter<void>();
   @Output() connect = new EventEmitter<void>();
   @Output() connections = new EventEmitter<void>();
+  @Output() categoryMenu = new EventEmitter<void>();
   @Output() deleteSetup = new EventEmitter<void>();
 
   emitAndClose(emitter: EventEmitter<void>) {

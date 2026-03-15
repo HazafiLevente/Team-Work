@@ -80,8 +80,6 @@ export class SearchbarComponent implements OnInit {
     console.log('SEARCHBAR -> setFilters()', filters);
 
     this.filtersService.setSearch(filters as SearchFilters);
-
-
   }
 
 

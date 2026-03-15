@@ -1,21 +1,21 @@
-<app-context-menu-base
-  [x]="x"
-  [y]="y"
-  (close)="close.emit()"
->
+<app-context-menu-base [x]="x" [y]="y" (close)="close.emit()">
 
   <div class="menu-section">
 
-    <button class="menu-item" (click)="emitAndClose(openSetup)">
+    <button class="menu-item" (click)="$event.stopPropagation(); emitAndClose(openSetup)">
       📂 Megnyitás
     </button>
 
-    <button class="menu-item" (click)="emitAndClose(openTools)">
+    <button class="menu-item" (click)="$event.stopPropagation(); emitAndClose(openTools)">
       🧰 Eszközök
     </button>
 
-    <button class="menu-item" (click)="emitAndClose(rename)">
+    <button class="menu-item" (click)="$event.stopPropagation(); emitAndClose(rename)">
       ✏️ Átnevezés
+    </button>
+
+    <button class="menu-item" (click)="$event.stopPropagation(); emitAndClose(categoryMenu)">
+      🏷️ Típus választása
     </button>
 
   </div>
@@ -24,14 +24,11 @@
 
   <div class="menu-section">
 
-    <button
-      class="menu-item"
-      (click)="connect.emit(); close.emit()"
-    >
+    <button class="menu-item" (click)="$event.stopPropagation(); connect.emit(); close.emit()">
       Összekötés
     </button>
 
-    <button class="menu-item" (click)="emitAndClose(connections)">
+    <button class="menu-item" (click)="$event.stopPropagation(); emitAndClose(connections)">
       📡 Kapcsolatok
     </button>
 
@@ -41,9 +38,9 @@
 
   <div class="menu-section">
 
-    <div class="menu-item danger" (click)="emitAndClose(deleteSetup)">
+    <button class="menu-item danger" (click)="$event.stopPropagation(); emitAndClose(deleteSetup)">
       🗑 Törlés
-    </div>
+    </button>
 
   </div>
 

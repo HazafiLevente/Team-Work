@@ -1,10 +1,14 @@
 <div
+  #panelEl
   class="panel"
-  cdkDrag
-  [cdkDragBoundary]="'body'"
-  (mousedown)="stop($event)"
+  [style.left.px]="panelX"
+  [style.top.px]="panelY"
+  (click)="stop($event)"
+  (mousemove)="onDrag($event)"
+  (mouseup)="stopDrag()"
+  (mouseleave)="stopDrag()"
 >
-  <div class="titlebar" cdkDragHandle>
+  <div class="titlebar" (mousedown)="startDrag($event)">
     <div class="caption">
       <div class="big">{{ title() }}</div>
       <div class="small">Autó adatok</div>
