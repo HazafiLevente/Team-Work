@@ -21,13 +21,13 @@ import { ContextMenuItemComponent } from './context-menus/context-menu-item/cont
 import { SetupWindowComponent } from './setup-windows/setup-window.component';
 import { SetupDockComponent } from '../dock/dock.component';
 import { DevicesMenuComponent } from './setup-windows/devices-menu/devices-menu.component';
-import { ConnectionsMenuComponent } from './setup-windows/connections-menu/connections-menu.component';
-import { SetupPairingModalComponent } from '../setup-pairing-modal/setup-pairing-modal.component';
-import { ContextMenuDockComponent } from './context-menus/context-menu-dock/context-menu-dock.component';
+// import { ConnectionsMenuComponent } from '../setup-windows/connections-menu/connections-menu.component';
+//import { SetupPairingModalComponent } from '../setup-pairing-modal/setup-pairing-modal.component';
+// import { ContextMenuDockComponent } from '../context-menus/context-menu-dock/context-menu-dock.component';
 import { ContextMenuWorkspaceComponent } from './context-menus/context-menu-workspace/context-menu-workspace.component';
-import { ContextMenuCategoryComponent } from './context-menus/context-menu-category/context-menu-category.component';
+//import { ContextMenuCategoryComponent } from './context-menus/context-menu-category/context-menu-category.component';
 import { HomeTheaterBuilderComponent } from './setup-windows/quick-builder/home-theater-builder/home-theater-builder.component';
-import { AddDeviceWindowComponent } from './setup-windows/add-device-window/add-device-window.component';
+//import { AddDeviceWindowComponent } from './setup-windows/add-device-window/add-device-window.component';
 
 export type WorkspaceWindow = {
   id: string;
@@ -55,18 +55,18 @@ export type WorkspaceWindow = {
     DotGridComponent,
     SetupConnectionsComponent,
     ContextMenuRoomComponent,
-    ContextMenuBaseComponent,
+    //ContextMenuBaseComponent,
     ContextMenuItemComponent,
     SetupWindowComponent,
     DevicesMenuComponent,
-    ConnectionsMenuComponent,
-    SetupPairingModalComponent,
+    // ConnectionsMenuComponent,
+    //SetupPairingModalComponent,
     SetupDockComponent,
-    ContextMenuDockComponent,
+    // ContextMenuDockComponent,
     ContextMenuWorkspaceComponent,
-    ContextMenuCategoryComponent,
+    //ContextMenuCategoryComponent,
     HomeTheaterBuilderComponent,
-    AddDeviceWindowComponent
+    //AddDeviceWindowComponent
   ]
 })
 export class WorkspaceComponent {

@@ -81,9 +81,6 @@
   }
 
   @if (ctxCategoryOpen) {
-  <app-context-menu-category [x]="ctxCategoryX" [y]="ctxCategoryY" (close)="ctxCategoryOpen=false"
-    (categorySelected)="onCategorySelected($event)">
-  </app-context-menu-category>
   }
 
   @for (w of windows; track w.id) {
@@ -96,14 +93,12 @@
     <app-devices-menu [setup]="w.payload.setup"></app-devices-menu>
     }
     @if (w.kind === 'connections') {
-    <app-connections-menu [setup]="w.payload.setup"></app-connections-menu>
+    <!-- <app-connections-menu [setup]="w.payload.setup"></app-connections-menu> -->
+    <div class="empty-window-content">
+      <p>Hamarosan: Kapcsolatok...</p>
+    </div>
     }
     @if (w.kind === 'pairing') {
-    <app-setup-pairing-modal [pairingStage]="w.payload.pairingStage" [pairingItemList]="w.payload.pairingItemList"
-      [connectSourceSetup]="connectSourceSetup" [connectTargetSetup]="connectTargetSetup"
-      (cancel)="cancelConnectingEvent.emit()" (selectSource)="selectSourceEvent.emit($event)"
-      (finalize)="finalizeConnectionEvent.emit($event)">
-    </app-setup-pairing-modal>
     }
     @if (w.kind === 'empty') {
     @if (w.title === 'Házimozi') {
@@ -118,10 +113,6 @@
     }
     }
     @if (w.kind === 'add-device') {
-    <app-add-device-window
-      [setup]="w.payload.setup"
-      (openBuilder)="openEmptyWindow('Házimozi', w.payload.setup); closeWindow(w.id)">
-    </app-add-device-window>
     }
   </app-setup-window>
   }
@@ -134,10 +125,10 @@
   }
 
   @if (ctxDockOpen && ctxDockWindow) {
-  <app-context-menu-dock [x]="ctxDockX" [y]="ctxDockY" (close)="closeContextMenu()"
+  <!-- <app-context-menu-dock [x]="ctxDockX" [y]="ctxDockY" (close)="closeContextMenu()"
     (restore)="restoreWindow(ctxDockWindow.id)" (maximize)="toggleMaximizeWindow(ctxDockWindow.id)"
     (terminate)="closeWindow(ctxDockWindow.id)">
-  </app-context-menu-dock>
+  </app-context-menu-dock> -->
   }
 
 

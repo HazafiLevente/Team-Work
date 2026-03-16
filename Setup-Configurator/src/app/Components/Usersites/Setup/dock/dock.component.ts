@@ -1,12 +1,13 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { DockItemComponent } from './dock-item.component';
-import { DockManagementModalComponent } from './dock-management-modal.component';
+//import { DockItemComponent } from './dock-item.component';
+//import { DockManagementModalComponent } from './dock-management-modal.component';
 
 @Component({
   selector: 'app-setup-dock',
   standalone: true,
-  imports: [CommonModule, DockItemComponent, DockManagementModalComponent],
+  imports: [CommonModule, //DockItemComponent, DockManagementModalComponent
+  ],
   templateUrl: './dock.component.html',
   styleUrls: ['./dock.component.css']
 })
