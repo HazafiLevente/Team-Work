@@ -21,7 +21,8 @@ function buildSearchCandidates(message) {
     const stop = new Set([
         "és", "vagy", "a", "az", "egy", "mennyi", "mennyibe", "kerül", "ára", "ár", "price",
         "van", "vannak", "listázd", "sorold", "mutasd", "kérlek", "legyen", "mond", "meg",
-        "ilyen", "olyan", "ez", "azt", "itt", "ott", "nekem", "szeretnék"
+        "ilyen", "olyan", "ez", "azt", "itt", "ott", "nekem", "szeretnék",
+        "építs", "összeállítás", "konfiguráció", "gép", "pc", "számítógép", "budget"
     ]);
 
     const tokens = cleaned
@@ -48,6 +49,12 @@ function buildSearchCandidates(message) {
     // 4) ryzen/intel/rtx/gtx stb esetén első 3 token
     if (tokens.length >= 3) cands.push(tokens.slice(0, 3).join(" "));
 
+    // 5) Kompatibilitási kulcsszavak: socketek, chipsetek
+    const compatibilityKeywords = cleaned.match(/\b(am4|am5|lga1200|lga1700|b550|b650|z790|h470|h610|ddr4|ddr5)\b/g);
+    if (compatibilityKeywords?.length) {
+        for (const k of compatibilityKeywords) cands.push(k);
+    }
+
     // egyediek, üresek nélkül
     return [...new Set(cands)].filter(Boolean);
 }
@@ -57,15 +64,10 @@ function buildSearchCandidates(message) {
 ===================================================== */
 async function searchProducts(message) {
 
-    const words = message
-        .toLowerCase()
-        .replace(/[^\w\s-]/g, " ") // Meghagyjuk a kötőjelet ideiglenesen
-        .split(/\s+/)
-        .filter(w => w.length >= 2);
-
+    const candidates = buildSearchCandidates(message);
     let allResults = [];
 
-    for (const word of words) {
+    for (const word of candidates) {
         const { data, error } = await supabase.rpc("products_home", {
             q: word
         });
@@ -92,12 +94,19 @@ async function searchProducts(message) {
 /* =====================================================
    AI VÁLASZ
 ===================================================== */
-async function generateAnswer(message, products) {
+async function generateAnswer(message, products, history = []) {
+
+    const historyPrompt = history.length > 0 
+        ? `KORÁBBI BESZÉLGETÉS ELŐZMÉNYEI:
+${history.map(h => `${h.role === 'user' ? 'Felhasználó' : 'AI'}: ${h.text}`).join('\n')}
+` : "";
 
     const prompt = `
-Te a SetupConfigurator webshop prémium asszisztense vagy. A feladatod, hogy segíts a felhasználóknak termékeket találni az adatbázisunk alapján, vagy válaszolj az üdvözlésükre.
+Te a SetupConfigurator konfigurációs weboldal prémium asszisztense vagy. A feladatod, hogy segíts a felhasználóknak termékeket találni az adatbázisunk alapján, vagy válaszolj az üdvözlésükre.
 
-A felhasználó üzenete:
+${historyPrompt}
+
+A felhasználó aktuális üzenete:
 "${message}"
 
 ADATBÁZIS TALÁLATOK (KIZÁRÓLAG ezekre támaszkodhatsz, ha termékeket mutatsz be):
@@ -116,6 +125,10 @@ STÍLUS ÉS TARTALMI SZABÁLYOK:
    - Ne használj technikai kódrészleteket, JSON-t vagy reguláris kifejezéseket a válaszban.
 5. LISTÁZÁS: Ha több terméket sorolsz fel, használj strukturált, de barátságos listát. Minden termék után hagyj egy üres sort.
 6. NYELV: A válasz nyelve minden esetben MAGYAR.
+7. REFLEXIÓ ÉS KOMPATIBILITÁS: 
+   - Ha a felhasználó korábbi üzenetekre utal, használd az előzményeket.
+   - FIGYELEM: Mindig ellenőrizd a kiválasztott alkatrészek kompatibilitását (pl. processzor foglalat és alaplap egyezése, RAM típusa). Ha a felhasználó olyat kér, ami nem összeillő (pl. Intel CPU AMD alaplapba), figyelmeztesd rá szakmailag, de barátságosan!
+   - Ha a keresett kategóriában (pl. budget) nincs találat az adatbázisban, ne csak közöld, hanem adj szakmai tanácsot, hogy milyen specifikációjú (pl. milyen socket-ű) terméket keressen nálunk később, ami passzol a már meglévő alkatrészeihez.
 
 Kérlek, válaszolj a felhasználónak a fenti szabályok és a profi, de barátságos dizájn elvek alapján!
 `;
@@ -131,6 +144,7 @@ Kérlek, válaszolj a felhasználónak a fenti szabályok és a profi, de barát
 exports.askAi = async (req, res) => {
     try {
         const message = req.body?.message;
+        const history = req.body?.history || [];
         if (!message) return res.status(400).json({ error: "Missing message" });
 
         const products = await searchProducts(message);
@@ -138,8 +152,9 @@ exports.askAi = async (req, res) => {
         // debug (ha akarod)
         console.log("AI search candidates:", buildSearchCandidates(message));
         console.log("AI products count:", products.length);
+        console.log("AI history length:", history.length);
 
-        const answer = await generateAnswer(message, products);
+        const answer = await generateAnswer(message, products, history);
         return res.json({ answer });
 
     } catch (err) {

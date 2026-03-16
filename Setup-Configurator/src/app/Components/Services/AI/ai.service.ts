@@ -15,10 +15,10 @@ export class AiService {
 
   constructor(private http: HttpClient) {}
 
-  ask(message: string) {
+  ask(message: string, history: any[] = []) {
     return this.http.post<any>(
       '/api/ai/ask',
-      { message },
+      { message, history },
       { withCredentials: true }   // 🔥 EZ KELL
     );
   }
