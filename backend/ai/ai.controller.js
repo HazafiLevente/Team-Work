@@ -94,53 +94,30 @@ async function searchProducts(message) {
 ===================================================== */
 async function generateAnswer(message, products) {
 
-    if (!products.length) {
-        return `
-━━━━━━━━━━━━━━━━━━
-❌ Nincs találat
-━━━━━━━━━━━━━━━━━━
-
-Sajnos nem találtam releváns terméket az adatbázisban.
-`;
-    }
-
     const prompt = `
-Te a SetupConfigurator webshop prémium asszisztense vagy.
+Te a SetupConfigurator webshop prémium asszisztense vagy. A feladatod, hogy segíts a felhasználóknak termékeket találni az adatbázisunk alapján, vagy válaszolj az üdvözlésükre.
 
-A felhasználó kérdése:
+A felhasználó üzenete:
 "${message}"
 
-KIZÁRÓLAG az alábbi adatbázis rekordokra támaszkodhatsz:
+ADATBÁZIS TALÁLATOK (KIZÁRÓLAG ezekre támaszkodhatsz, ha termékeket mutatsz be):
 ${JSON.stringify(products, null, 2)}
 
-FORMÁZÁSI SZABÁLYOK (kötelező):
+STÍLUS ÉS TARTALMI SZABÁLYOK:
 
-- A válasz legyen tagolt.
-- Használj üres sorokat.
-- Használj elválasztó vonalat:  ━━━━━━━━━━━━━━━━━━
-- Minden termék külön blokkban szerepeljen.
-- Az ár külön sorban legyen.
-- Az ár így jelenjen meg: 💰 Ár: 195 000 Ft
-- A termék neve legyen félkövér markdown stílusban: **AMD Ryzen 7 9800X3D**
-- Ne jeleníts meg JSON-t.
-- Ne találj ki adatot.
-- Az összes terméket jelenítse meg ha listáról van szó.
+1. TERMÉSZETES NYELV: Beszélj emberi módon, mintha egy profi eladó lennél egy szaküzletben. Saját szavaiddal mutasd be a találatokat, ne csak egy listát dobj a felhasználó elé.
+2. ÜDVÖZLÉS ÉS SEGÍTSÉGKÉRÉS: Ha a felhasználó köszön (pl. Szia, Üdv, Jó napot), köszönj vissza barátságosan. Ha csak érdeklődik, légy segítőkész.
+3. NINCS TALÁLAT: Ha az adatbázis lista üres ÉS a felhasználó konkrét terméket keresett, barátságosan jelezd, hogy jelenleg nem találtál ilyet, de ajánld fel a segítségedet másban.
+4. FORMÁZÁS ÉS DIZÁJN: 
+   - Használj bekezdéseket és listajeleket (pl. emojikat vagy pontokat) a jobb olvashatóság érdekében.
+   - A termékek nevét emeld ki félkövérrel: **Termék neve**.
+   - Az árakat emeld ki emoji-val: 💰 [összeg] Ft.
+   - Használj vizuális elválasztókat (pl. vékony vonal: ──── vagy díszesebb: ✧─────✧), ha több terméket mutatsz be.
+   - Ne használj technikai kódrészleteket, JSON-t vagy reguláris kifejezéseket a válaszban.
+5. LISTÁZÁS: Ha több terméket sorolsz fel, használj strukturált, de barátságos listát. Minden termék után hagyj egy üres sort.
+6. NYELV: A válasz nyelve minden esetben MAGYAR.
 
-MINTA STRUKTÚRA:
-
-━━━━━━━━━━━━━━━━━━
-🔎 Találatok
-━━━━━━━━━━━━━━━━━━
-
-**Termék neve**
-
-Gyártó: ...
-Modell: ...
-💰 Ár: ... Ft
-
-━━━━━━━━━━━━━━━━━━
-
-Magyarul, természetesen, profi webshop stílusban válaszolj.
+Kérlek, válaszolj a felhasználónak a fenti szabályok és a profi, de barátságos dizájn elvek alapján!
 `;
 
     const result = await model.generateContent(prompt);
