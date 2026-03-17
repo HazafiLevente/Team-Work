@@ -7,14 +7,11 @@
     <div class="divider"></div>
 
     @for (w of windows; track w.id) {
-    <app-dock-item [window]="w" (restore)="onRestore($event)"
-      (rightClick)="dockItemRightClick.emit($event)"></app-dock-item>
+
     }
   </div>
 
   @if (isManagerOpen) {
-  <app-dock-management-modal [windows]="windows" (close)="isManagerOpen = false" (restore)="onRestore($event)"
-    (maximize)="maximize.emit($event)" (terminate)="terminate.emit($event)">
-  </app-dock-management-modal>
+
   }
 </div>

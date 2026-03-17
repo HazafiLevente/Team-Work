@@ -75,7 +75,14 @@ export class MessagesPanelComponent implements OnInit, OnDestroy {
 
     this.messages.push(loadingMsg);
 
-    this.ai.ask(userText).subscribe({
+    const history = this.messages
+      .filter(m => !m.loading && m.sender !== 'system')
+      .map(m => ({
+        role: m.sender === 'me' ? 'user' : 'model',
+        text: m.text || (m.products ? `Termékek: ${m.products.map(p => p.name).join(', ')}` : '')
+      }));
+
+    this.ai.ask(userText, history).subscribe({
       next: (res: any) => {
         const result = res?.data;
 
