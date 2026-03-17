@@ -1,0 +1,232 @@
+<!doctype html>
+
+<html lang="ru">
+
+<head>
+
+<meta charset="utf-8">
+
+<title>Аккаунт призупинено</title>
+
+<meta name=viewport content="width=1050">
+
+<meta name="keywords" content="доменне ім'я, домен безкоштовно, безкоштовний домен, зареєструвати домен безкоштовно, безкоштовний домен в Україні">
+
+<meta name="description" content="Domen-Hosting.net – простий і швидкий спосіб отримати безкоштовний домен в Україні. Замовте будь-який домен хостингу або VDS/VPS сервера безкоштовно">
+
+<meta property="og:title" content="Безкоштовний SSL. Отримати безкоштовно SSL - Domen-Hosting.net" /><meta property="og:type" content="website" /><meta property="og:url" content="https://domen-hosting.net" /><meta property="og:site_name" content="Domen-hosting.net" /><meta property="og:description" content="Domen-Hosting.net – простий і швидкий спосіб отримати безкоштовний домен в Україні. Замовити будь-який хостинг або домен VDS/VPS безкоштовно" /><meta property="og:image" content="https://domen-hosting.net/images/logo_dh.png" />
+
+<meta property="og:image:width" content="200" />
+<meta property="og:image:height" content="200" />
+
+<link href="https://domen-hosting.net/images/favicon.ico" rel="shortcut icon" type="image/vnd.microsoft.icon" />
+
+<link rel="stylesheet" href="https://domen-hosting.net/css/style.css">
+
+<link rel="stylesheet" href="https://domen-hosting.net/css/fancySelect.css" property='stylesheet'/>
+
+<link href='//fonts.googleapis.com/css?family=Open+Sans:400,300,300italic,400italic,600,600italic,700,700italic,800,800italic&amp;subset=latin,cyrillic,cyrillic-ext,latin-ext' rel='stylesheet' type='text/css' property='stylesheet'/>
+
+</head>
+
+<body>
+
+<div class="wrap">
+
+<header>
+<div class="wrapper"><a href="https://domen-hosting.net/" class="logo" rel="nofollow"> 
+
+</a> 
+<ul id="personal" class="menu"> 
+<li><a href="https://billing.domen-hosting.net/submitticket.php" rel="nofollow"><span class='sprites sprite1'></span>Відкрити тикет</a></li> 
+<li><a href="https://billing.domen-hosting.net/clientarea.php" rel="nofollow"><span class='sprites sprite2'></span>Вхід у біллінг</a></li> 
+<li><a href="https://domen-hosting.net/company.html" rel="nofollow"><span class='sprites sprite3'></span>Про компанію</a></li> 
+<li><a href="https://domen-hosting.net/support.html" rel="nofollow"><span class='sprites sprite4'></span>Техподдержка</a></li> 
+</ul> 
+<ul class="socials menu">
+<li><a href="https://domen-hosting.net/www.facebook.com/domen.hosting" rel="nofollow"><img src="https://domen-hosting.net//images/fb_icon.jpg" alt="Ми у Facebook" width="43px" height="43px"></a></li>
+<li><a href="https://domen-hosting.net/twitter.com/domenhost" rel="nofollow"><img src="https://domen-hosting.net//images/twitter_icon.jpg" alt="Наш Twitter" width="43px" height="43px"></a></li>
+<li><a href="https://domen-hosting.net/plus.google.com/+Domen-hostingNet/posts" rel="nofollow"><img src="https://domen-hosting.net//images/gplus_icon.jpg" alt="Ми у Google+" width="43px" height="43px"></a></li>
+</ul>
+<div class="topcontacts">
+<div class="phone"><span>(067)</span> 376-25-28</div>
+<div class="phone_life"><span>(093)</span> 950-77-38</div>
+</header>
+
+<div style='min-height:50px;'>
+<nav class='main_navigation'>
+<ul class="mainmenu menu">
+<li><a href="https://domen-hosting.net/domain.html" class="withsubmenu" rel="nofollow">Домени</a>
+<ul class="submenu">
+<li><a href="https://domen-hosting.net/domain.html" rel="nofollow">Ціни на домени<span>більше 60 доменних зон<br><br>
+</span></a></li>
+<li><a href="https://domen-hosting.net/domain-free.html" rel="nofollow">Безплатні домени<span>домен в подарок<br> 
+при покупці хостингу/ VPS</span></a></li> 
+</ul></li> 
+<li><a href="https://domen-hosting.net/hosting.html" class="withsubmenu" rel="nofollow">Хостинг</a> 
+<ul class="submenu"> 
+<li><a href="https://domen-hosting.net/hosting.html" rel="nofollow">Хостинг<span>віртуальний хостинг<br> 
+<br></span></a></li> 
+<li><a href="https://domen-hosting.net/reselling.html" rel="nofollow">Реселлінг<span>перепродажу хостинга<br> 
+<br></span></a></li> 
+<li><a href="https://domen-hosting.net/backups.html" rel="nofollow">Бэкап хостинг<span>місце для резервного<br> 
+копування</span></a></li> 
+</ul> 
+</li>
+<li><a href="https://domen-hosting.net/vps.html" class="withsubmenu" rel="nofollow">VDS/VPS</a> 
+<ul class="submenu"> 
+<li><a href="https://domen-hosting.net/vps.html" rel="nofollow">Бюджетні VPS<span>дешевые VPS</span></a></li> 
+<li><a href="https://domen-hosting.net/ssd-vps.html" rel="nofollow">SSD VPS<span>професійні VPS</span></a></li> 
+<li><a href="https://domen-hosting.net/kvm-vps.html" rel="nofollow"> KVM/XEN SSD VPS<span>з гарантією виділення ресурсів</span></a></li> 
+</ul> 
+</li> 
+<li><a href="https://domen-hosting.net/dedicated_all.html" class="withsubmenu" rel="nofollow">Виделенные сервера</a> 
+<ul class="submenu"> 
+<li><a href=https://domen-hosting.net/dedicated_all.html" rel="nofollow">Все сервера<span>все предложения<br> 
+виділених серверів</span></a></li> 
+<!-- <li><a href="https://domen-hosting.net/dedicated_gb.html" rel="nofollow">Англія<span>виделені сервери<br> 
+в Англії</span></a></li> --> 
+<li><a href="https://domen-hosting.net/dedicated_de.html" rel="nofollow">Німеччина<span>виделені сервери<br> 
+в Германії</span></a></li> 
+<li><a href="https://domen-hosting.net/dedicated_nl.html" rel="nofollow">Голландія<span>виделені сервери<br> 
+в Голландії</span></a></li> 
+<li><a href="https://domen-hosting.net/dedicated_ca.html" rel="nofollow">Канада<span>виделені сервери<br> 
+в Канаде</span></a></li> 
+<li><a href="https://domen-hosting.net/dedicated_storage.html" rel="nofollow">Збереження даних<span>сервер для зберігання даних<br> 
+і резервного копіювання</span></a></li> 
+<!-- <li><a href="https://domen-hosting.net/administration.html" rel="nofollow">Адміністрування<span>предложений по<br> 
+адміністрування серверів</span></a></li> --> 
+</ul></li> 
+<li><a https://domen-hosting.netssl.html" class="withsubmenu" rel="nofollow">SSL</a> 
+<ul class="submenu"> 
+<li><a href="https://domen-hosting.net/ssl.html" rel="nofollow">Сертифікати безпеки<span>захист сайту 
+</span></a></li> 
+</ul></li> 
+</ul> 
+<div id="submenuspacer"></div> 
+</nav>
+<nav class='float'> 
+<ul class="mainmenu menu"> 
+<li><a href="https://domen-hosting.net/domain.html" rel="nofollow">Домени</a></li> 
+<li><a href="https://domen-hosting.net/hosting.html" rel="nofollow">Хостинг</a></li> 
+<li><a href="https://domen-hosting.net/vps.html" rel="nofollow">VDS/VPS</a></li>
+<li><a href="https://domen-hosting.net/dedicated_all.html" rel="nofollow">Виділені сервери</a></li>
+<li><a href="https://domen-hosting.net/ssl.html" rel="nofollow">SSL</a></li>
+</ul>
+</nav>
+</div>
+<section id="suspended_page" class="mb50 clear">
+<div class="wrapper"> 
+<div class="title" style="margin-left:10px;">
+<h2>Здрастуйте, Ви зайшли на сайт <script type="text/javascript"> 
+try { 
+document.write(window.location.host); 
+} catch (ex) {} 
+</script>, який розміщується на хостинг-платформі компанії <a href="https://domen-hosting.net/">DOMEN-HOSTING.NET</a>. На жаль, у цей момент доступ до сайту тимчасово обмежений. </h2>
+<h1>Можливі причини:</h1> 
+<div class="text2"> 
+&#10004; неоплачений рахунок<br/> 
+&#10004; перевищення лімітів<br/> 
+&#10004; порушення правил використання хостинга<br/> 
+</div>
+<h2>Власнику сайту <script type="text/javascript"> 
+try { 
+document.write(window.location.host); 
+} catch (ex) {} 
+</script>:</h2>
+
+<h1>Для активації облікового запису зверніться до служби підтримки</h1>
+&#10004; <a href="https://billing.domen-hosting.net/submitticket.php?step=2&amp;deptid=1" style="font-weight: bold; color: #0098b3; text-decoration: none;" rel="nofollow">Написати в підтримку</a><br/>
+&#10004; <a class="iconSmallChat" href="https://tawk.to/chat/623c8b9a0bfe3f4a876f88bd/1fuu82lcc" style="font-weight: bold; color: #0098b3; text-decoration: none;" rel="nofollow">Звернутися в он-лайн чат</a><br/>
+&#10004; <a href="https://billing.domen-hosting.net/clientarea.php" target="_blank" style="font-weight: bold; color: #0098b3; text-decoration: none;" rel="nofollow">Перейти в біллінгову панель</a><br/> 
+
+
+
+</div>
+</div> 
+</section>
+</div>
+</section>
+
+<div class="empty"><!-- --></div>
+</div>
+<footer>
+<div class="wrapper"> <img style="margin-top: 30px;" src="https://domen-hosting.net/images/logo_m.png" alt="logo" ширина="77px" висота="76px">
+<ul class="socials menu">
+<li><a href="https://domen-hosting.net//www.facebook.com/domen.hosting" rel="nofollow"><img src="https://domen-hosting.net//images/fb_icon.jpg" alt="Ми у facebook" ширина="43px" висота="43px"></a></li>
+<li><a href="https://domen-hosting.net//twitter.com/domenhost" rel="nofollow"><img src="https://domen-hosting.net//images/twitter_icon.jpg" alt="Ми у twitter" ширина="43px" висота="43px"></a></li>
+<li><a href="https://domen-hosting.net//plus.google.com/+Domen-hostingNet/posts" rel="nofollow"><img src="https://domen-hosting.net//images/gplus_icon.jpg" alt="Ми в google plus" width="43px" height="43px"></a></li> 
+</ul> 
+
+<div class="support"> Технічна підтримка: 
+support@domen-hosting.net 
+</div> 
+
+<div class="copyright">(с) Домен-хостинг <script>document.write(new Date().getFullYear())</script> рік</div> 
+
+<div id="footermenus" class="mt50 clear"> 
+<ul class="menu"> 
+<li class="title">ПІДТРИМКА</li> 
+<li><a href="https://domen-hosting.net/support.html" rel="nofollow">Техпідтримка</a></li> 
+<li><a href="https://domen-hosting.net//billing.domen-hosting.net/submitticket.php" rel="nofollow">Відкрити тикет</a></li>
+<li><a href="https://domen-hosting.net//billing.domen-hosting.net/clientarea.php" rel="nofollow">Зайти в білінг</a></li>
+<li><a href="https://tawk.to/chat/623c8b9a0bfe3f4a876f88bd/1fuu82lcc" rel="nofollow">Онлайн-чат</a></li>
+<li><a href="https://domen-hosting.net/help/" rel="nofollow">База знань</a></li>
+
+</ul>
+<ul class="menu">
+<li class="title">ПОСЛУГИ</li>
+<li><a href="https://domen-hosting.net/domain.html" rel="nofollow">Домени</a></li>
+<li><a href="https://domen-hosting.net/hosting.html" rel="nofollow">Хостинг</a></li>
+<li><a href="https://domen-hosting.net/vps.html" rel="nofollow">VPS/VDS</a></li>
+<li><a href="https://domen-hosting.net/dedicated_all.html" rel="nofollow">Виделенные серверы</a></li>
+<li><a href="https://domen-hosting.net/reselling.html" rel="nofollow">Реселлінг</a></li>
+<li><a href="https://domen-hosting.net/backups.html" rel="nofollow">Бекап хостинг</a></li>
+<li><a href="https://domen-hosting.net/administration.html" rel="nofollow">Адміністрування</a></li>
+
+</ul> 
+<ul class="menu"> 
+<li class="title">КОМПАНІЯ</li> 
+<li><a href="https://domen-hosting.net/contacts.html" rel="nofollow">Контакти</a></li> 
+<li><a href="https://domen-hosting.net/company.html" rel="nofollow">Про компанію</a></li> 
+<li><a href="https://domen-hosting.net/partners.html" rel="nofollow">Партнерська програма</a></li> 
+<li><a href="https://domen-hosting.net/payments.html" rel="nofollow">Оплата</a></li> 
+<li><a href="https://domen-hosting.net/terms.html" rel="nofollow">Договор оферты</a></li> 
+<li><a href="https://domen-hosting.net/rules.html" rel="nofollow">Правила користування</a></li> 
+<li><a href="https://domen-hosting.net/privacy.html" rel="nofollow">Соглашение о конфиденциальности</a></li> 
+
+
+
+</ul> 
+<ul class="menu" > 
+<li class="title">МЕДІА</li> 
+<li><a href="https://domen-hosting.net/news/" rel="nofollow">Блог</a></li>
+<li><a href="https://domen-hosting.net/reviews.html" rel="nofollow">Відповіді</a></li>
+<li><a href="https://domen-hosting.net/sitemap.html" rel="nofollow">Карта сайту</a></li> 
+
+
+
+</ul> 
+</div> </div>
+</footer>
+
+<script type='text/javascript' src="https://domen-hosting.net/js/jquery.min.js"></script>
+
+<script type='text/javascript' src='https://domen-hosting.net/js/jquery-ui.min.js'></script>
+
+<script type='text/javascript' src="https://domen-hosting.net/js/jquery.cookie.js"></script>
+
+<script type="text/javascript" src="https://billing.domen-hosting.net/price/price.js"></script>
+<script type="text/javascript" src="https://domen-hosting.net/js/fancySelect.js"></script>
+
+<script type='text/javascript' src='https://domen-hosting.net/js/grayscale.js'></script>
+
+<script type='text/javascript' src="https://domen-hosting.net/js/functions.js"></script>
+
+<script type="text/javascript" src="https://domen-hosting.net/js/app.js"></script>
+
+<script type="text/javascript" src="https://domen-hosting.net/js/slideDown.js"></script>
+
+</body>
+</html>
+
