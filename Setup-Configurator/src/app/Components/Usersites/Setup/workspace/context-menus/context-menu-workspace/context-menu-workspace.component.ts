@@ -16,9 +16,15 @@ export class ContextMenuWorkspaceComponent {
 
   @Output() close = new EventEmitter<void>();
   @Output() createSetup = new EventEmitter<void>();
+  @Output() categorySelected = new EventEmitter<string>();
 
   emitAndClose() {
     this.createSetup.emit();
+    this.close.emit();
+  }
+
+  selectCategory(category: string) {
+    this.categorySelected.emit(category);
     this.close.emit();
   }
 

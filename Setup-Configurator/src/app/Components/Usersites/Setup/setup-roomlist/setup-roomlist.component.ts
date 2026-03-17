@@ -10,7 +10,7 @@ import { SetupPcDetailsPanelComponent } from '../workspace/setup-windows/quick-b
 import { SetupPcPartDetailsPanelComponent } from '../workspace/setup-windows/quick-builder/setup-pc-part-details-panel/setup-pc-part-details-panel.component';
 import { ProductDetailsPanelComponent } from '../../../Panels/Product/product-details-panel.component';
 import { SetupHtDetailsPanelComponent } from '../workspace/setup-windows/quick-builder/setup-ht-details-panel/setup-ht-details-panel.component';
-//import { SetupPairingModalComponent } from '../setup-pairing-modal/setup-pairing-modal.component';
+import { SetupPairingModalComponent } from '../setup-pairing-modal/setup-pairing-modal.component';
 
 type SetupItem = any;
 
@@ -36,7 +36,7 @@ type PcPart = {
     SetupPcPartDetailsPanelComponent,
     ProductDetailsPanelComponent,
     SetupHtDetailsPanelComponent,
-    //SetupPairingModalComponent
+    SetupPairingModalComponent
   ],
   templateUrl: './setup-roomlist.component.html',
   styleUrls: ['./setup-roomlist.component.css']
@@ -692,7 +692,7 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit {
   openDevicesWindowForCurrentSetup(pos?: { x: number, y: number }): void {
     if (this.viewingSetup && this.workspaceComp) {
       this.workspaceComp.closeContextMenu();
-      this.workspaceComp.openAddDeviceWindow(this.viewingSetup);
+      this.workspaceComp.openDevicesWindow(this.viewingSetup);
     }
   }
 

@@ -21,18 +21,17 @@ import { ContextMenuItemComponent } from './context-menus/context-menu-item/cont
 import { SetupWindowComponent } from './setup-windows/setup-window.component';
 import { SetupDockComponent } from '../dock/dock.component';
 import { DevicesMenuComponent } from './setup-windows/devices-menu/devices-menu.component';
-// import { ConnectionsMenuComponent } from '../setup-windows/connections-menu/connections-menu.component';
-//import { SetupPairingModalComponent } from '../setup-pairing-modal/setup-pairing-modal.component';
-// import { ContextMenuDockComponent } from '../context-menus/context-menu-dock/context-menu-dock.component';
+import { ConnectionsMenuComponent } from './setup-windows/connections-menu/connections-menu.component';
+import { SetupPairingModalComponent } from '../setup-pairing-modal/setup-pairing-modal.component';
+import { ContextMenuDockComponent } from './context-menus/context-menu-dock/context-menu-dock.component';
 import { ContextMenuWorkspaceComponent } from './context-menus/context-menu-workspace/context-menu-workspace.component';
-//import { ContextMenuCategoryComponent } from './context-menus/context-menu-category/context-menu-category.component';
+import { ContextMenuCategoryComponent } from './context-menus/context-menu-category/context-menu-category.component';
 import { HomeTheaterBuilderComponent } from './setup-windows/quick-builder/home-theater-builder/home-theater-builder.component';
-//import { AddDeviceWindowComponent } from './setup-windows/add-device-window/add-device-window.component';
 
 export type WorkspaceWindow = {
   id: string;
   title: string;
-  kind: 'devices' | 'connections' | 'item-details' | 'pairing' | 'empty' | 'add-device';
+  kind: 'devices' | 'connections' | 'item-details' | 'pairing' | 'empty';
   payload?: any;
   instanceNo: number;
   x: number;
@@ -55,18 +54,17 @@ export type WorkspaceWindow = {
     DotGridComponent,
     SetupConnectionsComponent,
     ContextMenuRoomComponent,
-    //ContextMenuBaseComponent,
+    ContextMenuBaseComponent,
     ContextMenuItemComponent,
     SetupWindowComponent,
     DevicesMenuComponent,
-    // ConnectionsMenuComponent,
-    //SetupPairingModalComponent,
+    ConnectionsMenuComponent,
+    SetupPairingModalComponent,
     SetupDockComponent,
-    // ContextMenuDockComponent,
+    ContextMenuDockComponent,
     ContextMenuWorkspaceComponent,
-    //ContextMenuCategoryComponent,
-    HomeTheaterBuilderComponent,
-    //AddDeviceWindowComponent
+    ContextMenuCategoryComponent,
+    HomeTheaterBuilderComponent
   ]
 })
 export class WorkspaceComponent {
@@ -191,12 +189,14 @@ export class WorkspaceComponent {
   }
 
   openCategoryMenuForRoom(setup: any): void {
-    const rect = this.boundaryEl.nativeElement.getBoundingClientRect();
-    this.ctxSetup = setup;
-    this.ctxCategoryX = this.ctxX; // Use existing context position
-    this.ctxCategoryY = this.ctxY;
-    this.ctxCategoryOpen = true;
-    this.closeContextMenu();
+    const setupObj = setup.setup || setup;
+    this.ctxSetup = setupObj;
+
+    // Use workspace context menu instead, as it now contains the categories
+    this.ctxWorkspaceX = this.ctxX;
+    this.ctxWorkspaceY = this.ctxY;
+    this.ctxWorkspaceOpen = true;
+    this.ctxOpen = false;
   }
 
   onCategorySelected(category: string): void {
@@ -298,6 +298,7 @@ export class WorkspaceComponent {
   }
 
   openDevicesWindow(setup: any): void {
+    const setupObj = setup.setup || setup;
     const devicesCount = this.windows.filter(w => w.kind === 'devices').length + 1;
     const offset = (devicesCount - 1) * 28;
 
@@ -305,7 +306,7 @@ export class WorkspaceComponent {
       id: 'win_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
       kind: 'devices',
       title: 'Eszközök',
-      payload: { setup },
+      payload: { setup: setupObj },
       instanceNo: devicesCount,
       x: 100 + offset,
       y: 100 + offset,
@@ -318,30 +319,59 @@ export class WorkspaceComponent {
     this.windows = [...this.windows, newWindow];
   }
 
-  openAddDeviceWindow(setup: any): void {
-    // "Új Eszköz" → open HT Builder immediately with sidebar (catalog) already open
-    const count = this.windows.filter(w => w.kind === 'empty').length + 1;
-    const offset = (count - 1) * 28;
 
-    const newWindow: WorkspaceWindow = {
-      id: 'win_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
+  onDeviceCategorySelected(category: string): void {
+    const targetSetup = this.ctxSetup || this.viewingSetup;
+    if (!targetSetup) return;
+
+    switch (category) {
+      case 'HT':
+        this.openHTBuilder(targetSetup, true);
+        break;
+      case 'PC':
+        this.openEmptyWindow('Számítógép', targetSetup);
+        break;
+      case 'AUTO':
+        this.openEmptyWindow('Autó', targetSetup);
+        break;
+      case 'INST':
+        this.openEmptyWindow('Hangszerek', targetSetup);
+        break;
+      case 'OTHER':
+        this.openEmptyWindow('Egyéb', targetSetup);
+        break;
+    }
+  }
+
+  openHTBuilder(setup: any, isNew: boolean = false): void {
+    const setupObj = setup.setup || setup;
+    const windowId = 'ht-builder-' + Date.now() + '-' + Math.floor(Math.random() * 1000);
+
+    const w: WorkspaceWindow = {
+      id: windowId,
+      title: isNew ? 'Új Házimozi' : 'Házimozi',
       kind: 'empty',
-      title: 'Házimozi',
-      payload: { setup, startWithSidebarOpen: true },
-      instanceNo: count,
-      x: 60 + offset,
-      y: 60 + offset,
+      payload: {
+        setup: setupObj,
+        startWithSidebarOpen: true,
+        isNewBuild: isNew
+      },
+      instanceNo: this.windows.length + 1,
+      x: 50 + (this.windows.length * 30),
+      y: 50 + (this.windows.length * 30),
       width: 1100,
       zIndex: ++this.nextZIndex,
       minimized: false,
       maximized: false
     };
 
-    this.closeContextMenu();
-    this.windows = [...this.windows, newWindow];
+    this.windows = [...this.windows, w];
+    this.calculateWorkspaceExtension();
   }
 
+
   openEmptyWindow(title: string, setup: any): void {
+    const setupObj = setup.setup || setup;
     const emptyCount = this.windows.filter(w => w.kind === 'empty').length + 1;
     const offset = (emptyCount - 1) * 28;
 
@@ -349,7 +379,7 @@ export class WorkspaceComponent {
       id: 'win_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
       kind: 'empty',
       title: title,
-      payload: { setup },
+      payload: { setup: setupObj },
       instanceNo: emptyCount,
       x: 100 + offset,
       y: 60 + offset,
@@ -364,14 +394,15 @@ export class WorkspaceComponent {
   }
 
   openConnectionsWindow(setup: any): void {
+    const setupObj = setup.setup || setup;
     const connCount = this.windows.filter(w => w.kind === 'connections').length + 1;
     const offset = (connCount - 1) * 28;
 
     const newWindow: WorkspaceWindow = {
       id: 'win_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
       kind: 'connections',
-      title: 'Összekötések: ' + (setup.setup_name || ''),
-      payload: { setup },
+      title: 'Összekötések: ' + (setupObj.setup_name || ''),
+      payload: { setup: setupObj },
       instanceNo: connCount,
       x: 100 + offset,
       y: 100 + offset,
@@ -385,6 +416,7 @@ export class WorkspaceComponent {
   }
 
   openPairingWindow(setup: any, pairingStage: string, pairingItemList: any[]): void {
+    const setupObj = setup.setup || setup;
     const isTarget = pairingStage === 'PICK_TARGET_ITEM';
     const winId = isTarget ? 'pairing_target' : 'pairing_source';
 
@@ -394,8 +426,8 @@ export class WorkspaceComponent {
     const newWindow: WorkspaceWindow = {
       id: winId,
       kind: 'pairing',
-      title: pairingStage === 'PICK_SOURCE' ? 'Forrás: ' + setup.setup_name : 'Cél: ' + setup.setup_name,
-      payload: { setup, pairingStage, pairingItemList },
+      title: pairingStage === 'PICK_SOURCE' ? 'Forrás: ' + setupObj.setup_name : 'Cél: ' + setupObj.setup_name,
+      payload: { setup: setupObj, pairingStage, pairingItemList },
       instanceNo: isTarget ? 2 : 1,
       x: isTarget ? 450 : 100,
       y: 100,

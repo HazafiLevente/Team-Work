@@ -76,7 +76,9 @@
 
   @if (ctxWorkspaceOpen) {
   <app-context-menu-workspace [x]="ctxWorkspaceX" [y]="ctxWorkspaceY" [isInsideSetup]="!!viewingSetup"
-    (close)="ctxWorkspaceOpen=false" (createSetup)="createSetupAtPosition()">
+    (close)="ctxWorkspaceOpen=false"
+    (createSetup)="createSetupAtPosition()"
+    (categorySelected)="onDeviceCategorySelected($event)">
   </app-context-menu-workspace>
   }
 
@@ -101,18 +103,17 @@
     @if (w.kind === 'pairing') {
     }
     @if (w.kind === 'empty') {
-    @if (w.title === 'Házimozi') {
+    @if (w.title === 'Házimozi' || w.title === 'Új Házimozi') {
     <app-home-theater-builder
       [setup]="w.payload.setup"
-      [startWithSidebarOpen]="w.payload.startWithSidebarOpen ?? false">
+      [startWithSidebarOpen]="w.payload.startWithSidebarOpen ?? false"
+      [isNewBuild]="w.payload.isNewBuild ?? false">
     </app-home-theater-builder>
     } @else {
     <div class="empty-window-content">
       <p>Hamarosan: {{ w.title }} tartalom...</p>
     </div>
     }
-    }
-    @if (w.kind === 'add-device') {
     }
   </app-setup-window>
   }
