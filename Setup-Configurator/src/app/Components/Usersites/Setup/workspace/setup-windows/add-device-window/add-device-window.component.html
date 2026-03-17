@@ -1,0 +1,68 @@
+<div class="add-device-container">
+
+  <!-- CATEGORY PICKER -->
+  @if (!selectedCategory) {
+  <div class="picker-header">
+    <h3>Milyen eszközt szeretnél hozzáadni?</h3>
+  </div>
+  <div class="category-grid">
+    @for (cat of categories; track cat.key) {
+    <button class="cat-btn" (click)="selectCategory(cat)">
+      <span class="cat-icon">{{ cat.icon }}</span>
+      <span class="cat-label">{{ cat.label }}</span>
+    </button>
+    }
+  </div>
+  }
+
+  <!-- PRODUCT LIST -->
+  @if (selectedCategory) {
+  <div class="product-header">
+    <button class="back-btn" (click)="goBack()">← Vissza</button>
+    <span class="cat-title">{{ selectedCategory.icon }} {{ selectedCategory.label }}</span>
+  </div>
+
+  <div class="search-bar">
+    <input
+      type="text"
+      [(ngModel)]="searchQuery"
+      (ngModelChange)="filterProducts()"
+      placeholder="Keresés..."
+      class="search-input"
+    />
+  </div>
+
+  @if (loadingProducts) {
+  <div class="status-msg">⏳ Betöltés...</div>
+  } @else if (filteredProducts.length === 0) {
+  <div class="status-msg">Nincs találat.</div>
+  } @else {
+  <div class="product-list">
+    @for (p of filteredProducts; track p.id) {
+    <div class="product-row">
+      <div class="product-info">
+        <span class="product-name">{{ getProductName(p) }}</span>
+        @if (p.price) {
+        <span class="product-price">{{ p.price | number }} Ft</span>
+        }
+      </div>
+      <button
+        class="add-btn"
+        [class.success]="addSuccess === p.id"
+        [disabled]="addingId === p.id"
+        (click)="addToSetup(p)">
+        @if (addingId === p.id) { ⏳ }
+        @else if (addSuccess === p.id) { ✅ }
+        @else { ➕ Hozzáad }
+      </button>
+    </div>
+    }
+  </div>
+  }
+
+  @if (addError) {
+  <div class="error-msg">{{ addError }}</div>
+  }
+  }
+
+</div>
