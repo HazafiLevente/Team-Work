@@ -76,9 +76,7 @@
 
   @if (ctxWorkspaceOpen) {
   <app-context-menu-workspace [x]="ctxWorkspaceX" [y]="ctxWorkspaceY" [isInsideSetup]="!!viewingSetup"
-    (close)="ctxWorkspaceOpen=false"
-    (createSetup)="createSetupAtPosition()"
-    (categorySelected)="onDeviceCategorySelected($event)">
+    (close)="ctxWorkspaceOpen=false" (createSetup)="createSetupAtPosition()">
   </app-context-menu-workspace>
   }
 
@@ -95,7 +93,7 @@
     <app-devices-menu [setup]="w.payload.setup"></app-devices-menu>
     }
     @if (w.kind === 'connections') {
-    <!-- <app-connections-menu [setup]="w.payload.setup"></app-connections-menu> -->
+    <app-connections-menu [setup]="w.payload.setup"></app-connections-menu>
     <div class="empty-window-content">
       <p>Hamarosan: Kapcsolatok...</p>
     </div>
@@ -103,17 +101,18 @@
     @if (w.kind === 'pairing') {
     }
     @if (w.kind === 'empty') {
-    @if (w.title === 'Házimozi' || w.title === 'Új Házimozi') {
+    @if (w.title === 'Házimozi') {
     <app-home-theater-builder
       [setup]="w.payload.setup"
-      [startWithSidebarOpen]="w.payload.startWithSidebarOpen ?? false"
-      [isNewBuild]="w.payload.isNewBuild ?? false">
+      [startWithSidebarOpen]="w.payload.startWithSidebarOpen ?? false">
     </app-home-theater-builder>
     } @else {
     <div class="empty-window-content">
       <p>Hamarosan: {{ w.title }} tartalom...</p>
     </div>
     }
+    }
+    @if (w.kind === 'add-device') {
     }
   </app-setup-window>
   }
@@ -126,10 +125,10 @@
   }
 
   @if (ctxDockOpen && ctxDockWindow) {
-  <!-- <app-context-menu-dock [x]="ctxDockX" [y]="ctxDockY" (close)="closeContextMenu()"
+  <app-context-menu-dock [x]="ctxDockX" [y]="ctxDockY" (close)="closeContextMenu()"
     (restore)="restoreWindow(ctxDockWindow.id)" (maximize)="toggleMaximizeWindow(ctxDockWindow.id)"
     (terminate)="closeWindow(ctxDockWindow.id)">
-  </app-context-menu-dock> -->
+  </app-context-menu-dock>
   }
 
 
@@ -146,4 +145,12 @@
   </div>
   }
 
+  @if (ctxCategoryOpen) {
+    <app-context-menu-category
+      [x]="ctxCategoryX"
+      [y]="ctxCategoryY"
+      (close)="ctxCategoryOpen=false"
+      (categorySelected)="onCategorySelected($event)">
+    </app-context-menu-category>
+  }
 </div>

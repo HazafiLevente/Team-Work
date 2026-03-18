@@ -1,30 +1,11 @@
 <app-context-menu-base [x]="x" [y]="y" (close)="close.emit()">
-
   <div class="menu-section">
-
-    @if (isInsideSetup) {
-      <div class="menu-label">Új eszköz hozzáadása</div>
-      <button class="menu-item" (click)="$event.stopPropagation(); selectCategory('PC')">
-        💻 Számítógép
-      </button>
-      <button class="menu-item" (click)="$event.stopPropagation(); selectCategory('AUTO')">
-        🚗 Autó
-      </button>
-      <button class="menu-item" (click)="$event.stopPropagation(); selectCategory('HT')">
-        🏠 Házimozi
-      </button>
-      <button class="menu-item" (click)="$event.stopPropagation(); selectCategory('INST')">
-        🎸 Hangszerek
-      </button>
-      <button class="menu-item" (click)="$event.stopPropagation(); selectCategory('OTHER')">
-        📦 Egyéb
-      </button>
-    } @else {
-      <button class="menu-item create" (click)="$event.stopPropagation(); emitAndClose()">
+    <button class="menu-item create" (click)="$event.stopPropagation(); emitAndClose()">
+      @if (isInsideSetup) {
+        ➕ Új Eszköz hozzáadása
+      } @else {
         ➕ Új Setup létrehozása
-      </button>
-    }
-
+      }
+    </button>
   </div>
-
 </app-context-menu-base>

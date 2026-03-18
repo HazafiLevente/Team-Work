@@ -63,7 +63,7 @@ export class DevicesListComponent implements OnChanges {
     this.ctxOpen = false;
     this.ctxDevice = null;
 
-    this.http.get<any[]>(`/api/setup/${itemId}/children`, { withCredentials: true })
+    this.http.get<any[]>(`/api/setup/${itemId}/get-children`, { withCredentials: true })
       .subscribe({
         next: (res) => {
           const rawDevices = Array.isArray(res) ? res : [];

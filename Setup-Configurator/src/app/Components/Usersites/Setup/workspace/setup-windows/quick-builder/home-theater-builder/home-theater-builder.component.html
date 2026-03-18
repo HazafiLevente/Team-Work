@@ -4,8 +4,6 @@
         <div class="build-info">
             <input type="text" [(ngModel)]="buildTitle" placeholder="Házimozi neve..." class="title-input">
             <span class="setup-hint" *ngIf="setup">Setup: {{ setup.setup_name }}</span>
-            <span class="build-id-hint" *ngIf="currentBuildId">ID: #{{ currentBuildId }}</span>
-            <span class="layout-label" *ngIf="layoutLabel">{{ layoutLabel }} elrendezés</span>
         </div>
         <div class="actions">
             <button class="btn-secondary" (click)="toggleSidebar()">
@@ -99,7 +97,7 @@
                 @for (cat of getCategoryKeys(); track cat) {
                 @if (getFilteredCatalog()[cat]?.length > 0) {
                 <div class="category-section">
-                    <h4>{{ categoryLabels[cat] || cat }}</h4>
+                    <h4>{{ cat }}</h4>
                     <div class="product-list">
                         @for (prod of getFilteredCatalog()[cat]; track prod.id) {
                         <div class="product-item" (click)="addItem(prod, cat)">

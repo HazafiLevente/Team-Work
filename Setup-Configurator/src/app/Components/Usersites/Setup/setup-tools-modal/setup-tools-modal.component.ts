@@ -1,4 +1,3 @@
-
 import { Component, EventEmitter, Input, Output, OnChanges, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
@@ -6,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { SetupPcBuilderModalComponent } from '../setup-pc-builder-modal/setup-pc-builder-modal.component';
 import { HomeTheaterBuilderComponent }
   from '../workspace/setup-windows/quick-builder/home-theater-builder-modal/home-theater-builder.component';
+
 type UiItem = {
   category: string;
   display_name: string;
@@ -35,8 +35,6 @@ type CarSetupRow = any;
 export class SetupToolsModalComponent implements OnChanges {
 
   @Input() setup: any;
-
-  // opcionális: ha a jobbklikk menüből a PC/Cars füllel akarod nyitni
   @Input() startTab: 'items' | 'pc' | 'cars' | 'ht' = 'items';
 
   @Output() close = new EventEmitter<void>();
@@ -44,12 +42,10 @@ export class SetupToolsModalComponent implements OnChanges {
 
   tab: 'items' | 'pc' | 'cars' | 'ht' = 'items';
 
-  // items
   loading = false;
   items: UiItem[] = [];
   errorMsg = '';
 
-  // pc builds
   pcLoading = false;
   pcs: PcBuildRow[] = [];
   pcError = '';
@@ -58,12 +54,11 @@ export class SetupToolsModalComponent implements OnChanges {
   pcCreateSaving = false;
   pcCreateError = '';
 
-  // ✅ cars
   carOptionsLoading = false;
   carOptions: CarOption[] = [];
   carOptionsError = '';
 
-  selectedCarKey = ''; // `${source_table}:${id}`
+  selectedCarKey = '';
   carCreateSaving = false;
   carCreateError = '';
 
@@ -71,7 +66,6 @@ export class SetupToolsModalComponent implements OnChanges {
   cars: CarSetupRow[] = [];
   carError = '';
 
-  // pc builder modal
   pcBuilderOpen = false;
   pcBuilderRow: any = null;
 
@@ -85,12 +79,8 @@ export class SetupToolsModalComponent implements OnChanges {
 
     this.loadItems();
     this.loadPcBuilds();
-
-    // cars
     this.loadCarOptions();
     this.loadCars();
-
-
     this.loadHtCatalog();
   }
 
@@ -106,7 +96,7 @@ export class SetupToolsModalComponent implements OnChanges {
     this.items = [];
     this.errorMsg = '';
 
-    this.http.get<UiItem[]>(`/api/setup/${setupId}/children`, { withCredentials: true })
+    this.http.get<UiItem[]>(`/api/setup/${setupId}/get-children`, { withCredentials: true })
       .subscribe({
         next: (items) => {
           this.items = Array.isArray(items) ? items : [];
@@ -129,7 +119,7 @@ export class SetupToolsModalComponent implements OnChanges {
     this.pcs = [];
     this.pcError = '';
 
-    this.http.get<any>(`/api/setup/${setupId}/pcbuilds`, { withCredentials: true })
+    this.http.get<any>(`/api/setup/${setupId}/get-pcbuilds`, { withCredentials: true })
       .subscribe({
         next: (res) => {
           const list = res?.pcs;
@@ -145,7 +135,6 @@ export class SetupToolsModalComponent implements OnChanges {
       });
   }
 
-  // ---------- Cars ----------
   private loadCarOptions(): void {
     this.carOptionsLoading = true;
     this.carOptions = [];
@@ -175,7 +164,7 @@ export class SetupToolsModalComponent implements OnChanges {
     this.cars = [];
     this.carError = '';
 
-    this.http.get<any>(`/api/setup/${setupId}/cars`, { withCredentials: true })
+    this.http.get<any>(`/api/setup/${setupId}/get-cars`, { withCredentials: true })
       .subscribe({
         next: (res) => {
           const list = res?.cars;
@@ -211,7 +200,7 @@ export class SetupToolsModalComponent implements OnChanges {
     this.carCreateError = '';
 
     this.http.post<any>(
-      `/api/setup/${setupId}/cars`,
+      `/api/setup/${setupId}/add-car`,
       { source_table, car_id },
       { withCredentials: true }
     ).subscribe({
@@ -220,9 +209,6 @@ export class SetupToolsModalComponent implements OnChanges {
         if (created) this.cars = [created, ...this.cars];
         this.selectedCarKey = '';
         this.carCreateSaving = false;
-
-        // ha az items tabon nézed, frissítsük lazán (opcionális)
-        // this.loadItems();
       },
       error: (err) => {
         console.error('❌ car create hiba:', err);
@@ -232,7 +218,6 @@ export class SetupToolsModalComponent implements OnChanges {
     });
   }
 
-  // ---------- UI helpers ----------
   title(): string {
     return this.setup?.setup_name ?? this.setup?.name ?? 'Névtelen setup';
   }
@@ -245,7 +230,6 @@ export class SetupToolsModalComponent implements OnChanges {
     e.stopPropagation();
   }
 
-  // ---------- PC create ----------
   createPc(): void {
     const setupId = this.setupId();
     if (!setupId) return;
@@ -259,7 +243,7 @@ export class SetupToolsModalComponent implements OnChanges {
     this.pcCreateSaving = true;
     this.pcCreateError = '';
 
-    this.http.post<any>(`/api/setup/${setupId}/pcbuilds`, { pc_name }, { withCredentials: true })
+    this.http.post<any>(`/api/setup/${setupId}/save-pcbuild`, { pc_name }, { withCredentials: true })
       .subscribe({
         next: (res) => {
           const created = res?.pc;
@@ -292,12 +276,7 @@ export class SetupToolsModalComponent implements OnChanges {
     this.pcs = this.pcs.map(p => (p?.id === id ? { ...p, ...updatedPc } : p));
   }
 
-
-
-  // ---- HT FORM ----
-
   htLayout: '' | '2.1' | '5.1' | '7.1' = '';
-
   htSpeakers: { key: string, label: string }[] = [];
 
   htForm: any = {
@@ -305,7 +284,6 @@ export class SetupToolsModalComponent implements OnChanges {
   };
 
   generateHtInputs(): void {
-
     this.htSpeakers = [];
     this.htForm = { receiver: '' };
 
@@ -341,7 +319,6 @@ export class SetupToolsModalComponent implements OnChanges {
       ];
     }
 
-    // form inicializálás
     this.htSpeakers.forEach(sp => {
       this.htForm[sp.key] = '';
     });
@@ -353,7 +330,6 @@ export class SetupToolsModalComponent implements OnChanges {
   htSaveError = '';
 
   saveHtConfig(): void {
-
     const setupId = this.setupId();
     if (!setupId) return;
 
@@ -378,7 +354,6 @@ export class SetupToolsModalComponent implements OnChanges {
         this.openHtBuilder.emit();
         this.close.emit();
 
-        // opcionális: 2 mp után eltűnik
         setTimeout(() => {
           this.htSaveSuccess = false;
         }, 2000);
@@ -390,9 +365,6 @@ export class SetupToolsModalComponent implements OnChanges {
       }
     });
   }
-
-
-  // ---- HT CATALOG ----
 
   htCatalogLoading = false;
 
@@ -406,7 +378,6 @@ export class SetupToolsModalComponent implements OnChanges {
   };
 
   private loadHtCatalog(): void {
-
     this.htCatalogLoading = true;
 
     this.http.get<any>('/api/home-theater/catalog', { withCredentials: true })

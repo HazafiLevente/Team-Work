@@ -2,25 +2,28 @@ const router = require("express").Router();
 const ctrl = require("../controllers/hometheaters.controller");
 const verifyUser = require("../middlewares/verifyUser");
 
-// ✅ LISTA A FILTERHEZ
+// LIST
 router.get("/", ctrl.list);
 router.get("/list", ctrl.list);
 
-// catalog
-router.get("/catalog", verifyUser, ctrl.getHtCatalog);
+// CATALOG
+router.get("/get-catalog", verifyUser, ctrl.getHtCatalog);
 
-// setup device
-router.get("/:setupId/devices", verifyUser, ctrl.listDevices);
-router.post("/device", verifyUser, ctrl.createDevice);
+// DEVICES
+router.get("/:setupId/get-devices", verifyUser, ctrl.listDevices);
+router.post("/save-device", verifyUser, ctrl.createDevice);
 
-// connections
-router.get("/:setupId/connections", verifyUser, ctrl.listConnections);
-router.post("/connection", verifyUser, ctrl.createConnection);
-router.delete("/connection/:id", verifyUser, ctrl.deleteConnection);
+// CONNECTIONS
+router.get("/:setupId/get-connections", verifyUser, ctrl.listConnections);
+router.post("/save-connection", verifyUser, ctrl.createConnection);
+router.delete("/remove-connection/:id", verifyUser, ctrl.deleteConnection);
 
-// save
-router.post("/config", verifyUser, ctrl.saveHtConfig);
-router.get("/:setupId/build", verifyUser, ctrl.getHtBuild);
-router.post("/build", verifyUser, ctrl.saveHtBuild);
+// BUILD
+router.get("/:setupId/get-build", verifyUser, ctrl.getHtBuild);
+router.post("/save-build", verifyUser, ctrl.saveHtBuild);
+
+// 🔥 ÚJ ROUTE-OK
+router.patch("/update-build/:id", verifyUser, ctrl.updateHtBuild);
+router.delete("/delete-build/:id", verifyUser, ctrl.deleteHtBuild);
 
 module.exports = router;

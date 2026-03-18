@@ -35,7 +35,7 @@ export class DevicesMenuComponent implements OnInit {
     this.loading = true;
 
     this.http
-      .get<any[]>(`/api/setup/${setupId}/children`, { withCredentials: true })
+      .get<any[]>(`/api/setup/${setupId}/get-children`, { withCredentials: true })
       .subscribe({
         next: (res) => {
 

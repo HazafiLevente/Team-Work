@@ -12,17 +12,18 @@ async function getHtCatalog(req, res) {
             };
         }
 
+        // 🔥 Itt csak hozzáadsz ha új HT device típus jön
         const HT_TABLES = [
-            { key: "receivers", table: "home_theater" },
-            { key: "frontSpeakers", table: "front_speaker" },
-            { key: "backSpeakers", table: "back_speaker" },
-            { key: "sideSpeakers", table: "side_speaker" },
-            { key: "ceilingSpeakers", table: "ceiling_speakers" },
-            { key: "floorSpeakers", table: "floor_speakers" },
-            { key: "centerSpeakers", table: "center_speakers" },
-            { key: "subwoofers", table: "subwoofer" },
-            { key: "audioProcessors", table: "audio_processors" },
-            { key: "bassAmplifiers", table: "bass_amplifier" }
+            { key: "receivers", table: "reciever_setup[Setup]" },
+            { key: "frontSpeakers", table: "front_speaker[Setup]" },
+            { key: "backSpeakers", table: "back_speaker[Setup]" },
+            { key: "sideSpeakers", table: "side_speaker[Setup]" },
+            { key: "ceilingSpeakers", table: "ceiling_speaker[Setup]" },
+            { key: "floorSpeakers", table: "floor_speaker[Setup]" },
+            { key: "centerSpeakers", table: "center_speaker[Setup]" },
+            { key: "subwoofers", table: "subwoofer[Setup]" },
+            { key: "audioProcessors", table: "audio_processor[Setup]" },
+            { key: "bassAmplifiers", table: "bass_amplifier[Setup]" }
         ];
 
         const result = {};
@@ -87,7 +88,7 @@ async function listDevices(req, res) {
         if (!ok) return res.status(403).json([]);
 
         const { data, error } = await supabase
-            .from("home_theater_devices[Setup]")
+            .from("home_theater_devices")
             .select("*")
             .eq("home_setup_id", setupId);
 
@@ -117,7 +118,7 @@ async function createDevice(req, res) {
         if (!ok) return res.status(403).json({ error: "Forbidden" });
 
         const { data, error } = await supabase
-            .from("home_theater_devices[Setup]")
+            .from("home_theater_devices")
             .insert([{
                 home_setup_id,
                 device_type,
@@ -148,7 +149,7 @@ async function listConnections(req, res) {
         if (!ok) return res.status(403).json([]);
 
         const { data, error } = await supabase
-            .from("home_theater_connections[Setup]")
+            .from("home_theater_connections")
             .select("*")
             .eq("home_setup_id", setupId);
 
@@ -185,7 +186,7 @@ async function createConnection(req, res) {
         if (!ok) return res.status(403).json({ error: "Forbidden" });
 
         const { data, error } = await supabase
-            .from("home_theater_connections[Setup]")
+            .from("home_theater_connections")
             .insert([{
                 home_setup_id,
                 from_device_id,
@@ -214,7 +215,7 @@ async function deleteConnection(req, res) {
         const { id } = req.params;
 
         const { error } = await supabase
-            .from("home_theater_connections[Setup]")
+            .from("home_theater_connections")
             .delete()
             .eq("id", id);
 
@@ -237,12 +238,12 @@ async function saveHtConfig(req, res) {
 
         // régi config törlés
         await supabase
-            .from("home_theater_config[Setup]")
+            .from("home_theater_config")
             .delete()
             .eq("home_setup_id", home_setup_id);
 
         const { error } = await supabase
-            .from("home_theater_config[Setup]")
+            .from("home_theater_config")
             .insert([{
                 home_setup_id,
                 layout,
@@ -261,104 +262,84 @@ async function saveHtConfig(req, res) {
 
 async function saveHtBuild(req, res) {
     try {
-        const { setup_id, id: buildId, layout, title, devices } = req.body;
+        const { setup_id, layout, title, devices } = req.body;
         const userId = req.user.id;
-
-        console.log('--- saveHtBuild ---');
-        console.log('Body:', JSON.stringify(req.body));
-        console.log('User ID:', userId);
-
-        if (!setup_id) {
-            console.log('Missing setup_id in request body');
-            return res.status(400).json({ error: "setup_id is required" });
-        }
 
         // 🔐 ownership check
         const ok = await assertSetupOwnedByUser(setup_id, userId);
-        if (!ok) {
-            console.log('Ownership check failed for setup_id:', setup_id);
-            return res.status(403).json({ error: "Forbidden" });
-        }
+        if (!ok) return res.status(403).json({ error: "Forbidden" });
+
+        // 🔍 Megnézzük létezik-e már build
+        const { data: existing, error: findError } = await supabase
+            .from("home_theater_setups[Setup]")
+            .select("*")
+            .eq("setup_id", setup_id)
+            .maybeSingle();
+
+        if (findError) throw findError;
 
         let build;
 
-        if (buildId) {
-            // ✏️ UPDATE meglévő build esetén
-            console.log('Updating existing build:', buildId);
+        if (existing) {
+            // ✏️ UPDATE
             const { data, error } = await supabase
                 .from("home_theater_setups[Setup]")
                 .update({
                     layout,
                     setup_name: title
                 })
-                .eq("id", buildId)
+                .eq("id", existing.id)
                 .select()
                 .single();
 
-            if (error) {
-                console.error('Update error:', error);
-                throw error;
-            }
+            if (error) throw error;
             build = data;
+
         } else {
-            // ➕ INSERT új build esetén
-            console.log('Inserting new build for setup_id:', setup_id);
+            // ➕ INSERT
             const { data, error } = await supabase
                 .from("home_theater_setups[Setup]")
                 .insert([{
-                    setup_id: setup_id,
-                    layout: layout,
+                    setup_id,
+                    layout,
                     setup_name: title,
                     setup_type: "home_theater"
                 }])
                 .select()
                 .single();
 
-            if (error) {
-                console.error('Insert error:', error);
-                throw error;
-            }
+            if (error) throw error;
             build = data;
         }
 
         // 🧹 Régi device-ok törlése
-        if (build && build.id) {
-            console.log('Cleaning up old devices for build.id:', build.id);
-            const { error: deleteError } = await supabase
+        const { error: deleteError } = await supabase
+            .from("home_theater_devices[Setup]")
+            .delete()
+            .eq("home_setup_id", build.id);
+
+        if (deleteError) throw deleteError;
+
+        // ➕ Új device-ok beszúrása
+        const deviceEntries = Object.entries(devices || {})
+            .filter(([_, value]) => value);
+
+        if (deviceEntries.length > 0) {
+
+            const inserts = deviceEntries.map(([type, refId]) => ({
+                home_setup_id: build.id,
+                device_type: type,
+                device_ref_id: refId
+            }));
+
+            const { error: insertError } = await supabase
                 .from("home_theater_devices[Setup]")
-                .delete()
-                .eq("home_setup_id", build.id);
+                .insert(inserts);
 
-            if (deleteError) {
-                console.error('Delete old devices error:', deleteError);
-                // Nem dobunk hibát, ha nincs mit törölni, de Supabase-nél ez nem is hiba általában
-            }
-
-            // ➕ Új device-ok beszúrása
-            const deviceEntries = Object.entries(devices || {})
-                .filter(([_, value]) => value);
-
-            console.log('Inserting new devices count:', deviceEntries.length);
-
-            if (deviceEntries.length > 0) {
-                const inserts = deviceEntries.map(([type, refId]) => ({
-                    home_setup_id: build.id,
-                    device_type: type,
-                    device_ref_id: refId
-                }));
-
-                const { error: insertError } = await supabase
-                    .from("home_theater_devices[Setup]")
-                    .insert(inserts);
-
-                if (insertError) {
-                    console.error('Insert devices error:', insertError);
-                    throw insertError;
-                }
-            }
+            if (insertError) throw insertError;
         }
 
-        res.json({ success: true, build });
+        res.json({ success: true });
 
     } catch (err) {
         console.error("HT BUILD SAVE ERROR:", err);
@@ -368,30 +349,18 @@ async function saveHtBuild(req, res) {
 async function getHtBuild(req, res) {
     try {
         const { setupId } = req.params;
-        const buildId = req.query.id; // Lehetővé tesszük konkrét build lekérését is
         const userId = req.user.id;
 
         const ok = await assertSetupOwnedByUser(setupId, userId);
         if (!ok) return res.status(403).json({ error: "Forbidden" });
 
-        let query = supabase
+        const { data: build, error: buildErr } = await supabase
             .from("home_theater_setups[Setup]")
             .select("*")
-            .eq("setup_id", setupId);
-
-        if (buildId) {
-            query = query.eq("id", buildId);
-        } else {
-            // Ha nincs ID, alapértelmezetten a legutóbbit adjuk vissza,
-            // vagy egy üres sablont az újhoz.
-            query = query.order('id', { ascending: false }).limit(1);
-        }
-
-        const { data: builds, error: buildErr } = await query;
+            .eq("setup_id", setupId)
+            .maybeSingle();
 
         if (buildErr) throw buildErr;
-
-        const build = builds && builds.length > 0 ? builds[0] : null;
 
         res.json(build || { setup_id: setupId, layout: "[]", setup_name: "Új Házimozi" });
 
@@ -399,6 +368,67 @@ async function getHtBuild(req, res) {
         console.error("HT GET BUILD ERROR:", err);
         res.status(500).json({ error: err.message });
     }
+}
+
+
+async function updateHtBuild(req, res) {
+
+    try {
+
+        const { id } = req.params;
+        const { layout, title } = req.body;
+
+        const { data, error } = await supabase
+            .from("home_theater_setups[Setup]")
+            .update({
+                layout,
+                setup_name: title
+            })
+            .eq("id", id)
+            .select()
+            .single();
+
+        if (error) throw error;
+
+        res.json(data);
+
+    } catch (err) {
+
+        console.error("HT UPDATE ERROR:", err);
+        res.status(500).json({ error: "Update failed" });
+
+    }
+
+}
+async function deleteHtBuild(req, res) {
+
+    try {
+
+        const { id } = req.params;
+
+        // devices törlés
+        await supabase
+            .from("home_theater_devices[Setup]")
+            .delete()
+            .eq("home_setup_id", id);
+
+        // build törlés
+        const { error } = await supabase
+            .from("home_theater_setups[Setup]")
+            .delete()
+            .eq("id", id);
+
+        if (error) throw error;
+
+        res.json({ success: true });
+
+    } catch (err) {
+
+        console.error("HT DELETE ERROR:", err);
+        res.status(500).json({ error: "Delete failed" });
+
+    }
+
 }
 
 module.exports = {
@@ -411,5 +441,7 @@ module.exports = {
     createDevice,
     listConnections,
     createConnection,
-    deleteConnection
+    deleteConnection,
+    updateHtBuild,
+    deleteHtBuild
 };

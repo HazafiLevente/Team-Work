@@ -101,7 +101,7 @@ export class SetupPropertiesModalComponent {
 
     this.http
       .patch<any>(
-        `/api/setup/${setupId}`,
+        `/api/setup/${setupId}/update-setup`,
         { setup_name: name },
         { withCredentials: true }
       )

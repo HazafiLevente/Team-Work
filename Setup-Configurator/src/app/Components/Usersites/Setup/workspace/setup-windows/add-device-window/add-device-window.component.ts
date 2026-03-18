@@ -7,7 +7,7 @@ type ProductCategory = {
   key: string;
   label: string;
   icon: string;
-  catalogKey: string; // key in /api/home-theater/catalog response
+  catalogKey: string;
 };
 
 const CATEGORIES: ProductCategory[] = [
@@ -23,7 +23,6 @@ const CATEGORIES: ProductCategory[] = [
   { key: 'bassAmplifiers',  label: 'Bass Erősítő',        icon: '🎚️', catalogKey: 'bassAmplifiers' },
 ];
 
-// Map catalog key to source_table for backend
 const CATALOG_KEY_TO_TABLE: Record<string, string> = {
   frontSpeakers:   'front_speaker[Setup]',
   backSpeakers:    'back_speaker[Setup]',
@@ -66,7 +65,6 @@ export class AddDeviceWindowComponent implements OnInit {
   constructor(private http: HttpClient) {}
 
   ngOnInit(): void {
-    // Preload catalog so navigation is fast
     this.http.get<any>('/api/home-theater/catalog', { withCredentials: true }).subscribe({
       next: (res) => { this.catalogCache = res || {}; },
       error: (err) => console.error('❌ Catalog preload error:', err)
@@ -138,18 +136,17 @@ export class AddDeviceWindowComponent implements OnInit {
 
     const payload = {
       product_id: product.id,
-      source_table: this.selectedCategory.key,
+      source_table: sourceTable,
       display_name: [product.manufacturer, product.model].filter(Boolean).join(' ') || 'Eszköz',
       manufacturer: product.manufacturer ?? ''
     };
 
-    this.http.post<any>(`/api/setup/${sid}/add-device`, payload, { withCredentials: true })
+    this.http.post<any>(`/api/setup/${sid}/save-device`, payload, { withCredentials: true })
       .subscribe({
         next: (res) => {
           this.addingId = null;
           this.addSuccess = product.id;
           this.deviceAdded.emit(res);
-          // After adding, open the HT Builder so user can see & move the item
           setTimeout(() => this.openBuilder.emit(), 300);
         },
         error: (err) => {

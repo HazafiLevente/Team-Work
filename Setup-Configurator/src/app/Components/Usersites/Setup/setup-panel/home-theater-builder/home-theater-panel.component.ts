@@ -1,12 +1,13 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CdkDrag } from '@angular/cdk/drag-drop';
+import {HomeTheaterBuilderComponent} from './ht-builder/home-theater-builder.component';
 
 @Component({
   selector: 'app-home-theater-panel',
   standalone: true,
   templateUrl: './home-theater-panel.component.html',
   styleUrls: ['./home-theater-panel.component.css'],
-  imports: [CdkDrag]
+  imports: [CdkDrag, HomeTheaterBuilderComponent]
 })
 export class HomeTheaterPanelComponent {
 

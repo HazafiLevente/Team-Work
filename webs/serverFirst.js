@@ -788,7 +788,7 @@ app.get("/api/items/pc-list", verifyUser, async (req, res) => {
 /* ======================================================
    3. AL-ELEMEK LISTÁZÁSA (EZ HIÁNYZIK NÁLAD!)
 ====================================================== */
-app.get("/api/setup/:id/children", verifyUser, async (req, res) => {
+app.get("/api/setup/:id/get-children", verifyUser, async (req, res) => {
     // Kicsit biztosabbá tesszük az ID kezelést
     const setupId = req.params.id;
     console.log(`--- SETUP ELEMEK LEKÉRÉSE: ID ${setupId} ---`);
@@ -836,7 +836,7 @@ app.get("/api/setup/:id/children", verifyUser, async (req, res) => {
 /* ======================================================
    ÚJ CHILD LÉTREHOZÁSA (POST) - JAVÍTOTT PC LOGIKA
 ====================================================== */
-app.post("/api/setup/:id/child", verifyUser, async (req, res) => {
+app.post("/api/setup/:id/add-child", verifyUser, async (req, res) => {
     const setupId = Number(req.params.id);
     // Fontos: a frontendnek küldenie kell az 'itemId'-t és a 'category'-t is!
     const { type, name, itemId, category } = req.body;
@@ -914,7 +914,7 @@ app.post("/api/setup/:id/child", verifyUser, async (req, res) => {
 // ==========================================
 // 2. MENTÉS (POST) - PC ID KEZELÉSSEL
 // ==========================================
-app.post("/api/setup/:id/child", verifyUser, async (req, res) => {
+app.post("/api/setup/:id/save-child-legacy", verifyUser, async (req, res) => {
     const setupId = req.params.id;
     const { type, name, itemId, category } = req.body;
 
@@ -942,7 +942,7 @@ app.post("/api/setup/:id/child", verifyUser, async (req, res) => {
 /* ======================================================
    CHILD TÖRLÉSE (DELETE)
 ====================================================== */
-app.delete("/api/child/:type/:id", verifyUser, async (req, res) => {
+app.delete("/api/remove-child/:type/:id", verifyUser, async (req, res) => {
     const { type, id } = req.params;
 
     let tableName = "";

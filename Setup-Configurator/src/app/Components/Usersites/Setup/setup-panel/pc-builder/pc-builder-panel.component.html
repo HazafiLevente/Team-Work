@@ -1,0 +1,161 @@
+<div class="pc-builder-shell">
+  <div class="pc-builder-body">
+    @if (loading) {
+      <div class="state">Loading parts...</div>
+    } @else {
+      @if (error) {
+        <div class="state error">{{ error }}</div>
+      }
+
+      @if (success) {
+        <div class="state success">{{ success }}</div>
+      }
+
+      <div class="grid">
+        <div class="field-card">
+          <label class="field-label">Processor</label>
+          <select
+            class="select"
+            [(ngModel)]="selectedProcessorId"
+            (ngModelChange)="onProcessorChange()"
+          >
+            <option [ngValue]="null">-- choose processor --</option>
+
+            @for (cpu of processors; track getId(cpu)) {
+              <option [ngValue]="getId(cpu)">
+                {{ getProcessorLabel(cpu) }}
+              </option>
+            }
+          </select>
+        </div>
+
+        <div class="field-card">
+          <label class="field-label">Motherboard</label>
+          <select
+            class="select"
+            [(ngModel)]="selectedMotherboardId"
+            (ngModelChange)="onMotherboardChange()"
+            [disabled]="!canSelectMotherboard()"
+          >
+            <option [ngValue]="null">
+              @if (!canSelectMotherboard()) {
+                -- choose processor first --
+              } @else {
+                -- choose motherboard --
+              }
+            </option>
+
+            @for (mb of getCompatibleMotherboards(); track getId(mb)) {
+              <option [ngValue]="getId(mb)">
+                {{ getMotherboardLabel(mb) }}
+              </option>
+            }
+          </select>
+        </div>
+
+        <div class="field-card">
+          <label class="field-label">RAM</label>
+          <select
+            class="select"
+            [(ngModel)]="selectedRamId"
+            [disabled]="!canSelectRam()"
+          >
+            <option [ngValue]="null">
+              @if (!canSelectRam()) {
+                -- choose compatible motherboard first --
+              } @else {
+                -- choose RAM --
+              }
+            </option>
+
+            @for (ram of getCompatibleRams(); track getId(ram)) {
+              <option [ngValue]="getId(ram)">
+                {{ getRamLabel(ram) }}
+              </option>
+            }
+          </select>
+        </div>
+
+        <div class="field-card">
+          <label class="field-label">Videocard</label>
+          <select
+            class="select"
+            [(ngModel)]="selectedGpuId"
+          >
+            <option [ngValue]="null">-- optional videocard --</option>
+
+            @for (gpu of gpus; track getId(gpu)) {
+              <option [ngValue]="getId(gpu)">
+                {{ getGpuLabel(gpu) }}
+              </option>
+            }
+          </select>
+        </div>
+
+        <div class="field-card">
+          <label class="field-label">Power supply</label>
+          <select
+            class="select"
+            [(ngModel)]="selectedPsuId"
+          >
+            <option [ngValue]="null">-- optional power supply --</option>
+
+            @for (psu of psus; track getId(psu)) {
+              <option [ngValue]="getId(psu)">
+                {{ getPsuLabel(psu) }}
+              </option>
+            }
+          </select>
+        </div>
+      </div>
+
+      <div class="compatibility-box">
+        <div class="compatibility-title">Compatibility rules</div>
+
+        <div class="compatibility-row">
+          <span class="compat-label">CPU socket:</span>
+          <span class="compat-value">
+            {{ getSelectedProcessor() ? getSocket(getSelectedProcessor()) : 'not selected' }}
+          </span>
+        </div>
+
+        <div class="compatibility-row">
+          <span class="compat-label">Allowed motherboards:</span>
+          <span class="compat-value">
+            @if (getSelectedProcessor()) {
+              {{ getCompatibleMotherboards().length }}
+            } @else {
+              0
+            }
+          </span>
+        </div>
+
+        <div class="compatibility-row">
+          <span class="compat-label">Allowed RAM:</span>
+          <span class="compat-value">
+            @if (getSelectedMotherboard()) {
+              {{ getCompatibleRams().length }}
+            } @else {
+              0
+            }
+          </span>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button
+          type="button"
+          class="save-btn"
+          (click)="saveBuild()"
+          [disabled]="saving"
+        >
+          @if (saving) {
+            Saving...
+          } @else {
+            Save PC build
+          }
+        </button>
+      </div>
+    }
+  </div>
+</div>

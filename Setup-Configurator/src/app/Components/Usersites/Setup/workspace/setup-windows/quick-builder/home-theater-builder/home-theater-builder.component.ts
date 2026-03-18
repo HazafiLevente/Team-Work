@@ -28,56 +28,10 @@ interface HTItem {
 export class HomeTheaterBuilderComponent implements OnInit, OnChanges {
     @Input() setup: any;
     @Input() startWithSidebarOpen = false;
-    @Input() isNewBuild = false;
-
-    get layoutLabel(): string {
-        let speakers = 0;
-        let subwoofers = 0;
-        let atmos = 0;
-
-        this.placedItems.forEach(item => {
-            const cat = (item.category || '').toLowerCase();
-            const role = (item.role || '').toLowerCase();
-
-            // Speaker types
-            const isSpeaker = cat.includes('speaker') || cat.includes('hangszoro');
-            const isSub = cat.includes('subwoofer') || cat.includes('melynyomo') || role === 'subwoofer';
-            const isAtmos = cat.includes('ceiling') || role === 'atmos' || cat.includes('mennyezeti');
-
-            if (isSub) {
-                subwoofers++;
-            } else if (isAtmos) {
-                atmos++;
-            } else if (isSpeaker) {
-                speakers++;
-            }
-        });
-
-        if (speakers === 0 && subwoofers === 0 && atmos === 0) return '';
-
-        let label = `${speakers}.${subwoofers}`;
-        if (atmos > 0) {
-            label += `.${atmos}`;
-        }
-        return label;
-    }
 
     catalog: any = {};
-    categoryLabels: Record<string, string> = {
-        audioProcessors: 'Audio Processzorok',
-        receivers: 'Erősítők / Receivers',
-        frontSpeakers: 'Front Hangszórók',
-        centerSpeakers: 'Center Hangszórók',
-        backSpeakers: 'Hátsó Hangszórók',
-        sideSpeakers: 'Oldalsó Hangszórók',
-        ceilingSpeakers: 'Mennyezeti / Atmos',
-        floorSpeakers: 'Padló Hangszórók',
-        subwoofers: 'Mélynyomók / Subwoofers',
-        bassAmplifiers: 'Bass Erősítők'
-    };
     placedItems: HTItem[] = [];
     buildTitle: string = '';
-    currentBuildId: number | null = null;
 
     sidebarOpen = false;
     searchQuery = '';
@@ -94,18 +48,10 @@ export class HomeTheaterBuilderComponent implements OnInit, OnChanges {
         if (this.startWithSidebarOpen) {
             this.sidebarOpen = true;
         }
-
-        // Ha kifejezetten ÚJ buildet akarunk, akkor ne töltsük be a régit
-        if (this.isNewBuild) {
-            this.placedItems = [];
-            this.currentBuildId = null;
-            this.buildTitle = 'Új Házimozi';
-        }
     }
 
     ngOnChanges(changes: SimpleChanges): void {
-        console.log('HT Builder ngOnChanges:', changes);
-        if (changes['setup'] && this.setup && !this.isNewBuild) {
+        if (changes['setup'] && this.setup) {
             this.loadBuild();
         }
     }
@@ -127,14 +73,10 @@ export class HomeTheaterBuilderComponent implements OnInit, OnChanges {
         if (!id) return;
 
         this.loading = true;
-        // Ha már tudunk egy konkrét build ID-t, kérjük le azt
-        const url = this.currentBuildId ? `/api/home-theater/${id}/build?id=${this.currentBuildId}` : `/api/home-theater/${id}/build`;
-
-        this.http.get<any>(url, { withCredentials: true })
+        this.http.get<any>(`/api/home-theater/${id}/build`, { withCredentials: true })
             .subscribe({
                 next: (build) => {
                     this.loading = false;
-                    this.currentBuildId = build?.id || null;
                     this.buildTitle = build?.setup_name || this.setup?.setup_name || 'Új Házimozi';
 
                     if (build?.layout) {
@@ -175,23 +117,16 @@ export class HomeTheaterBuilderComponent implements OnInit, OnChanges {
 
         const payload = {
             setup_id: id,
-            id: this.currentBuildId, // Küldjük el az ID-t a meglévő build frissítéséhez
             title: this.buildTitle || 'Házimozi Build',
             layout: JSON.stringify(this.placedItems),
             devices: devices
         };
 
-        console.log('Sending HT Build payload:', payload);
-
-        this.http.post<any>('/api/home-theater/build', payload, { withCredentials: true })
+        this.http.post('/api/home-theater/build', payload, { withCredentials: true })
             .subscribe({
-                next: (res) => {
+                next: () => {
                     this.saving = false;
-                    console.log('HT Build save response:', res);
-                    // Ha új build jött létre, jegyezzük meg az ID-t a további mentésekhez
-                    if (res?.build?.id) {
-                        this.currentBuildId = res.build.id;
-                    }
+                    // Proactive: Notification instead of alert if possible, but alert is fine for now
                 },
                 error: (err) => {
                     console.error('HT Build save error:', err);
@@ -292,27 +227,7 @@ export class HomeTheaterBuilderComponent implements OnInit, OnChanges {
     }
 
     getCategoryKeys() {
-        const order = [
-            'audioProcessors',
-            'receivers',
-            'frontSpeakers',
-            'centerSpeakers',
-            'backSpeakers',
-            'sideSpeakers',
-            'ceilingSpeakers',
-            'floorSpeakers',
-            'subwoofers',
-            'bassAmplifiers'
-        ];
-
-        return Object.keys(this.catalog).sort((a, b) => {
-            const indexA = order.indexOf(a);
-            const indexB = order.indexOf(b);
-            if (indexA === -1 && indexB === -1) return a.localeCompare(b);
-            if (indexA === -1) return 1;
-            if (indexB === -1) return -1;
-            return indexA - indexB;
-        });
+        return Object.keys(this.catalog);
     }
 
     // Helper for SVG lines

@@ -34,7 +34,6 @@ export class SetupPcBuilderModalComponent implements OnChanges {
   saving = false;
   errorMsg = '';
 
-  // selected ids (1-1)
   cpuId: number | null = null;
   gpuId: number | null = null;
   motherboardId: number | null = null;
@@ -46,14 +45,12 @@ export class SetupPcBuilderModalComponent implements OnChanges {
   ngOnChanges(changes: SimpleChanges): void {
     if (!this.setup || !this.pc) return;
 
-    // init selections from pc row
     this.cpuId = this.pc?.processor_id ?? null;
     this.gpuId = this.pc?.videocard_id ?? null;
     this.motherboardId = this.pc?.motherboard_id ?? null;
     this.ramId = this.pc?.ram_id ?? null;
     this.psuId = this.pc?.psu_id ?? null;
 
-    // load parts once when setup/pc changes
     if (changes['setup'] || changes['pc']) {
       this.loadParts();
     }
@@ -67,9 +64,9 @@ export class SetupPcBuilderModalComponent implements OnChanges {
     this.partsError = '';
     this.parts = [];
 
-    this.http.get<any>(`/api/setup/${setupId}/pcparts`, { withCredentials: true }).subscribe({
+    this.http.get<any>(`/api/setup/${setupId}/get-pcparts`, { withCredentials: true }).subscribe({
       next: (res) => {
-        const list = res?.parts;
+        const list = Array.isArray(res) ? res : (Array.isArray(res?.parts) ? res.parts : []);
         this.parts = Array.isArray(list) ? list : [];
         this.loadingParts = false;
       },
@@ -113,7 +110,7 @@ export class SetupPcBuilderModalComponent implements OnChanges {
       psu_id: this.psuId
     };
 
-    this.http.patch<any>(`/api/setup/pcbuilds/${pcId}`, payload, { withCredentials: true })
+    this.http.patch<any>(`/api/setup/save-pcbuild/${pcId}`, payload, { withCredentials: true })
       .subscribe({
         next: (res) => {
           const updated = res?.pc ?? { ...this.pc, ...payload };

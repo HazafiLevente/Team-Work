@@ -86,11 +86,9 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit {
   @ViewChild(WorkspaceComponent)
   workspaceComp!: WorkspaceComponent;
 
-  // context menu state
   ctxSetup: any = null;
   ctxPayload: any = null;
 
-  // overlay product panel
   selectedProduct: any = null;
   selectedCarItem: any = null;
   selectedPcItem: any = null;
@@ -130,7 +128,7 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit {
   }
 
   loadPairingItems(setupId: any): void {
-    this.http.get<any>(`/api/setup/${setupId}/children`, { withCredentials: true })
+    this.http.get<any>(`/api/setup/${setupId}/get-children`, { withCredentials: true })
       .subscribe({
         next: res => {
           this.pairingItemList = res || [];
@@ -177,7 +175,7 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit {
     this.pairingStage = 'PICK_TARGET_ITEM';
     const setupId = setup.id || setup.setup_id;
 
-    this.http.get<any>(`/api/setup/${setupId}/children`, { withCredentials: true })
+    this.http.get<any>(`/api/setup/${setupId}/get-children`, { withCredentials: true })
       .subscribe({
         next: res => {
           this.pairingItemList = res || [];
@@ -213,12 +211,11 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit {
       utp_id: 1
     };
 
-    this.http.post('/api/setup/connections', payload, { withCredentials: true })
+    this.http.post('/api/setup/save-connection', payload, { withCredentials: true })
       .subscribe({
         next: () => {
           console.log('✅ Connection created');
           this.cancelConnecting();
-          // ToDo: load connections propertly for details view if needed
           this.loadGlobalConnections();
         },
         error: (err) => {
@@ -325,7 +322,7 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit {
   }
 
   private loadSetupChildrenFallback(setupId: any): void {
-    this.http.get<any[]>(`/api/setup/${setupId}/children`, { withCredentials: true })
+    this.http.get<any[]>(`/api/setup/${setupId}/get-children`, { withCredentials: true })
       .subscribe({
         next: (items) => {
           const arr = Array.isArray(items) ? items : [];
@@ -361,9 +358,8 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit {
 
     const setupType = String(setup?.setup_type ?? '').toLowerCase().trim();
 
-    // PC setupnál először próbáljuk a pcparts endpointot
     if (setupType === 'pc') {
-      this.http.get<any>(`/api/setup/${setupId}/pcparts`, { withCredentials: true })
+      this.http.get<any>(`/api/setup/${setupId}/get-pcparts`, { withCredentials: true })
         .subscribe({
           next: (res) => {
             const rawParts = Array.isArray(res) ? res : (Array.isArray(res?.parts) ? res.parts : []);
@@ -380,7 +376,6 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit {
       return;
     }
 
-    // egyéb setupoknál marad a children
     this.loadSetupChildrenFallback(setupId);
   }
 
@@ -534,7 +529,7 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit {
         : s;
     });
 
-    this.http.patch(`/api/setup/rooms/${setupId}/position`, { x: pos.x, y: pos.y }, { withCredentials: true })
+    this.http.patch(`/api/setup/rooms/${setupId}/update-position`, { x: pos.x, y: pos.y }, { withCredentials: true })
       .subscribe({
         next: () => {
           console.log(`✅ Room ${setupId} pozíció mentve`, pos);
@@ -575,7 +570,7 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit {
   createNewSetup(customX?: number, customY?: number): void {
     if (!this.allowCreate) return;
     this.handleCategorySelected({
-      category: 'Számítógép', // Default name
+      category: 'Számítógép',
       pos: { x: customX ?? 50, y: customY ?? 50 }
     });
   }
@@ -597,7 +592,7 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit {
     if (!ok) return;
 
     this.isBusy = true;
-    this.http.delete<any>(`/api/setup/${setupId}`, { withCredentials: true })
+    this.http.delete<any>(`/api/setup/${setupId}/remove-setup`, { withCredentials: true })
       .subscribe({
         next: () => {
           this.isBusy = false;
@@ -653,7 +648,7 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit {
     if (!setupId || !newName) return;
 
     this.http.patch<any>(
-      `/api/setup/${setupId}`,
+      `/api/setup/${setupId}/update-setup`,
       { setup_name: newName },
       { withCredentials: true }
     ).subscribe({
@@ -699,7 +694,6 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit {
   handleCategorySelected(event: any): void {
     if (!event) return;
 
-    // Support both direct string and object payloads
     const category = typeof event === 'string' ? event : event.category;
     const setup = event.setup;
     const pos = event.pos;
@@ -724,28 +718,33 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit {
     console.log(`🔧 Category: "${catName}" → Type: "${type}"`);
 
     if (setup) {
-      // Transformation
+
       const setupId = setup.id || setup.setup_id || setup.setupId;
-      this.http.patch<any>(`/api/setup/${setupId}`, {
-        setup_type: type,
-        setup_name: catName
-      }, { withCredentials: true })
-        .subscribe({
-          next: (res) => {
-            const updated = res.setup || { ...setup, setup_type: type, setup_name: catName };
-            this.userSetups = this.userSetups.map(s => {
-              const sid = s.id || s.setup_id || s.setupId;
-              return String(sid) === String(setupId) ? { ...s, ...updated } : s;
-            });
-            console.log('✅ Setup transformed to:', type);
-            if (type === 'home_theater') {
-              this.openEmptyWindowForCategory('Házimozi', updated);
-            }
-          },
-          error: (err) => console.error('❌ Setup type update hiba:', err)
-        });
+
+      this.http.post('/api/home-theater/save-build', {
+
+        device_type: type,
+        device_name: catName,
+        x: 200,
+        y: 200
+
+      }, { withCredentials: true }).subscribe({
+
+        next: (res) => {
+
+          console.log("✅ Device created:", res);
+
+          if (type === "home_theater") {
+            this.openEmptyWindowForCategory("Házimozi", res);
+          }
+
+        },
+
+        error: (err) => console.error("❌ Device save error:", err)
+
+      });
+
     } else if (pos) {
-      // Creation
       this.http.post<any>('/api/setup/create', {
         setup_name: catName || 'Új Setup',
         x: pos.x,
@@ -768,7 +767,6 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit {
   }
 
   openEmptyWindowForCategory(title: any, setup?: any): void {
-    // FORCE title to be a string
     let finalTitle = 'Setup';
     if (typeof title === 'string') {
       finalTitle = title;

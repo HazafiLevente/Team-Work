@@ -82,7 +82,7 @@ export class SetupPcDetailsPanelComponent implements OnChanges {
     this.parts = [];
     this.map = {};
 
-    this.http.get<any>(`/api/setup/${setupId}/pcparts`, { withCredentials: true }).subscribe({
+    this.http.get<any>(`/api/setup/${setupId}/get-pcparts`, { withCredentials: true }).subscribe({
       next: (res) => {
         const list = Array.isArray(res) ? res : (Array.isArray(res?.parts) ? res.parts : []);
         this.parts = Array.isArray(list) ? list : [];
