@@ -320,15 +320,22 @@ exports.update = async (req, res) => {
     try {
         const userId = req.user.id;
         const setupId = req.params.id;
-        const { setup_name, setup_type } = req.body;
+        const { setup_name } = req.body;
 
-        if (!setupId) return res.status(400).json({ error: "Missing setup id" });
+        if (!setupId) {
+            return res.status(400).json({ error: "Missing setup id" });
+        }
 
         const updateData = {};
-        if (setup_name !== undefined) updateData.setup_name = (setup_name || "").trim();
-        if (setup_type !== undefined) updateData.setup_type = setup_type;
 
-        if (Object.keys(updateData).length === 0) return res.json({ error: "Nothing to update" });
+        if (setup_name !== undefined) {
+            const trimmedName = String(setup_name || "").trim();
+            updateData.setup_name = trimmedName;
+        }
+
+        if (Object.keys(updateData).length === 0) {
+            return res.status(400).json({ error: "Nothing to update" });
+        }
 
         const { data, error } = await supabase
             .from(SETUP_TABLE)
@@ -338,14 +345,32 @@ exports.update = async (req, res) => {
             .select("*")
             .single();
 
-        if (error) throw error;
+        if (error) {
+            console.error("❌ Supabase setup update error:", error);
+            return res.status(500).json({
+                error: "Update failed",
+                details: error.message,
+            });
+        }
 
-        childrenCache.delete(setupId);
+        if (!data) {
+            return res.status(404).json({ error: "Setup not found" });
+        }
 
-        res.json({ setup: { ...data, setup_name: data.setup_name ?? name } });
+        childrenCache.delete(String(setupId));
+
+        return res.json({
+            setup: {
+                ...data,
+                setup_name: data.setup_name ?? data.name ?? "Névtelen setup",
+            },
+        });
     } catch (err) {
         console.error("❌ Setup update hiba:", err);
-        res.status(500).json({ error: "Update failed" });
+        return res.status(500).json({
+            error: "Update failed",
+            details: err.message,
+        });
     }
 };
 
