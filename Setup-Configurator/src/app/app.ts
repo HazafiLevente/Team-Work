@@ -1,15 +1,10 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Router, RouterOutlet } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { Subscription } from 'rxjs';
-import { map } from 'rxjs/operators';
-import { Observable } from 'rxjs';
+import { Subscription, Observable } from 'rxjs';
 
 import { AuthService } from './Components/Services/Auth/auth.service';
-import { UiSettingsService } from './Components/Services/SettingService/ui-settings.service';
-
-
-
+import { UiSettingsService, UiThemeKey } from './Components/Services/SettingService/ui-settings.service';
 
 import { HeaderComponent } from './Components/header/header.component';
 import { DarkVeilBgComponent } from './Components/Shared/Background/dark-veil-bg.component';
@@ -34,36 +29,42 @@ import { MessagesPanelComponent } from './Components/Shared/Messages/messages-pa
   templateUrl: './app.html'
 })
 export class App implements OnInit, OnDestroy {
-
   open = false;
 
   private sub?: Subscription;
+  private userSub?: Subscription;
+
+  user$!: Observable<any | null>;
+  dockItems: DockItemData[] = [];
 
   constructor(
     private auth: AuthService,
     private router: Router,
     private ui: UiSettingsService
   ) {
-    // ✅ SETTINGS APPLY (globál)
-    this.sub = this.ui.state$.subscribe((s: any) => {
+    this.sub = this.ui.state$.subscribe((s) => {
       document.body.classList.toggle('dark', !!s.darkMode);
       document.body.classList.toggle('compact', !!s.compactLayout);
 
-      // ha később akarsz accentet is:
-      // document.documentElement.dataset['accent'] = s.accent || 'purple';
+      document.body.classList.remove(
+        'theme-clean-cyan',
+        'theme-purple-premium',
+        'theme-glass-slate',
+        'theme-soft-light'
+      );
+
+      document.body.classList.add(`theme-${s.theme}`);
+
+      this.applyTheme(s.theme);
     });
   }
-
-  user$!: Observable<any | null>;
-  dockItems: DockItemData[] = [];
 
   ngOnInit(): void {
     this.auth.check();
 
     this.user$ = this.auth.user$;
 
-    this.user$.subscribe(user => {
-
+    this.userSub = this.user$.subscribe(user => {
       if (!user) {
         this.dockItems = [];
         return;
@@ -102,7 +103,6 @@ export class App implements OnInit, OnDestroy {
         }
       ];
 
-      // 🔥 Admin csak jogosultsággal
       if (['admin', 'admin+', 'owner'].includes(user.role)) {
         items.push({
           icon: '🛡',
@@ -117,13 +117,62 @@ export class App implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.sub?.unsubscribe();
+    this.userSub?.unsubscribe();
   }
 
-  /* -----------------------------
-     DOCK
-  ----------------------------- */
+  private applyTheme(theme: UiThemeKey) {
+    const root = document.documentElement;
 
-  private scrollHomeTop(): void {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    root.setAttribute('data-theme', theme);
+
+    switch (theme) {
+      case 'clean-cyan':
+        root.style.setProperty('--page-accent', '#67e8f9');
+        root.style.setProperty('--page-accent-2', '#38bdf8');
+        root.style.setProperty('--surface', 'rgba(8, 16, 24, 0.72)');
+        root.style.setProperty('--glass-alpha', 'rgba(255,255,255,0.04)');
+        root.style.setProperty('--glass-border', 'rgba(255,255,255,0.10)');
+        root.style.setProperty('--text', '#f4f8ff');
+        root.style.setProperty('--muted', 'rgba(244,248,255,0.68)');
+        root.style.setProperty('--accent-purple', '#38bdf8');
+        root.style.setProperty('--accent-cyan', '#67e8f9');
+        break;
+
+      case 'purple-premium':
+        root.style.setProperty('--page-accent', '#c084fc');
+        root.style.setProperty('--page-accent-2', '#8b5cf6');
+        root.style.setProperty('--surface', 'rgba(18, 10, 30, 0.74)');
+        root.style.setProperty('--glass-alpha', 'rgba(255,255,255,0.04)');
+        root.style.setProperty('--glass-border', 'rgba(255,255,255,0.10)');
+        root.style.setProperty('--text', '#f7f2ff');
+        root.style.setProperty('--muted', 'rgba(247,242,255,0.66)');
+        root.style.setProperty('--accent-purple', '#c084fc');
+        root.style.setProperty('--accent-cyan', '#8b5cf6');
+        break;
+
+      case 'glass-slate':
+        root.style.setProperty('--page-accent', '#34d399');
+        root.style.setProperty('--page-accent-2', '#14b8a6');
+        root.style.setProperty('--surface', 'rgba(12, 20, 24, 0.62)');
+        root.style.setProperty('--glass-alpha', 'rgba(255,255,255,0.05)');
+        root.style.setProperty('--glass-border', 'rgba(255,255,255,0.10)');
+        root.style.setProperty('--text', '#f3fbf8');
+        root.style.setProperty('--muted', 'rgba(243,251,248,0.66)');
+        root.style.setProperty('--accent-purple', '#14b8a6');
+        root.style.setProperty('--accent-cyan', '#34d399');
+        break;
+
+      case 'soft-light':
+        root.style.setProperty('--page-accent', '#818cf8');
+        root.style.setProperty('--page-accent-2', '#38bdf8');
+        root.style.setProperty('--surface', 'rgba(20, 24, 36, 0.78)');
+        root.style.setProperty('--glass-alpha', 'rgba(255,255,255,0.06)');
+        root.style.setProperty('--glass-border', 'rgba(255,255,255,0.12)');
+        root.style.setProperty('--text', '#eef4ff');
+        root.style.setProperty('--muted', 'rgba(238,244,255,0.70)');
+        root.style.setProperty('--accent-purple', '#818cf8');
+        root.style.setProperty('--accent-cyan', '#38bdf8');
+        break;
+    }
   }
 }

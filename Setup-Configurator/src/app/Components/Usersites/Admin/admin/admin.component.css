@@ -1,17 +1,22 @@
 .admin-page {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 22px;
   padding-bottom: 250px;
 }
 
+.admin-header {
+  padding: 4px 2px 2px;
+}
+
 .admin-header h1 {
-  font-size: 26px;
+  font-size: 30px;
+  margin: 0;
 }
 
 .admin-stats {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
   gap: 16px;
 }
 
@@ -19,16 +24,19 @@
   display: flex;
   align-items: center;
   gap: 14px;
-  padding: 16px 18px;
-  border-radius: 16px;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  transition: all 0.2s ease;
+  padding: 18px;
+  border-radius: 18px;
+  background: rgba(10, 14, 22, 0.62);
+  border: 1px solid rgba(255,255,255,0.08);
+  box-shadow: 0 14px 36px rgba(0,0,0,0.22);
+  backdrop-filter: blur(12px);
+  transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
 }
 
 .stat-card:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 8px 20px rgba(0, 255, 255, 0.15);
+  transform: translateY(-2px);
+  border-color: color-mix(in srgb, var(--page-accent, #fb923c) 24%, transparent);
+  box-shadow: 0 16px 34px color-mix(in srgb, var(--page-accent, #fb923c) 14%, transparent);
 }
 
 .stat-card .icon {
@@ -37,85 +45,83 @@
 
 .stat-card .value {
   font-size: 20px;
-  font-weight: 700;
+  font-weight: 800;
 }
 
 .stat-card .label {
   font-size: 12px;
-  opacity: 0.6;
+  opacity: 0.65;
 }
 
-/* =====================
-   ADMIN ACTION BAR
-   ===================== */
 .admin-actions-bar {
   display: flex;
   gap: 12px;
-  margin-top: 20px;
+  margin-top: 4px;
   flex-wrap: wrap;
 }
 
 .admin-btn {
   padding: 10px 16px;
   border-radius: 14px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
   color: var(--text);
   cursor: pointer;
   font-size: 14px;
-  transition: all 0.2s ease;
+  font-weight: 700;
+  transition: transform 0.18s ease, background 0.18s ease, border-color 0.18s ease;
 }
 
 .admin-btn:hover {
-  background: linear-gradient(135deg,
-      rgba(0, 255, 255, 0.25),
-      rgba(138, 43, 226, 0.25));
-  box-shadow: 0 8px 22px rgba(0, 255, 255, 0.25);
+  transform: translateY(-1px);
+  background: color-mix(in srgb, var(--page-accent, #fb923c) 12%, transparent);
+  border-color: color-mix(in srgb, var(--page-accent, #fb923c) 28%, transparent);
 }
 
 .admin-btn.danger:hover {
-  background: linear-gradient(135deg,
-      rgba(255, 80, 80, 0.35),
-      rgba(255, 140, 0, 0.35));
+  background: linear-gradient(
+    135deg,
+    rgba(255, 80, 80, 0.20),
+    rgba(255, 140, 0, 0.18)
+  );
 }
 
 .admin-btn.active {
-  background: linear-gradient(135deg,
-      rgba(0, 255, 255, 0.35),
-      rgba(138, 43, 226, 0.35));
-  box-shadow: 0 8px 22px rgba(0, 255, 255, 0.35);
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--page-accent, #fb923c) 20%, transparent),
+    color-mix(in srgb, var(--page-accent-2, #f59e0b) 16%, transparent)
+  );
+  border-color: color-mix(in srgb, var(--page-accent, #fb923c) 34%, transparent);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--page-accent, #fb923c) 16%, transparent);
 }
 
 .admin-content {
-  margin-top: 24px;
+  margin-top: 6px;
   display: flex;
   flex-direction: column;
   gap: 20px;
 }
 
-/* =====================
-   CLICKABLE STAT CARD
-   ===================== */
 .stat-card.clickable {
   cursor: pointer;
-  border: 1px solid rgba(0, 255, 100, 0.12);
+  border: 1px solid rgba(74, 222, 128, 0.14);
 }
 
 .stat-card.clickable:hover {
-  box-shadow: 0 8px 20px rgba(0, 255, 100, 0.2);
-  border-color: rgba(0, 255, 100, 0.3);
+  border-color: rgba(74, 222, 128, 0.28);
+  box-shadow: 0 14px 30px rgba(74, 222, 128, 0.12);
 }
 
-/* =====================
-   DAILY STATS PANEL
-   ===================== */
 .daily-panel {
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  border-radius: 18px;
-  padding: 24px 28px;
-  margin-top: 8px;
+  background: rgba(10, 14, 22, 0.62);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 22px;
+  padding: 24px 26px;
+  margin-top: 6px;
   animation: slideDown 0.25s ease;
+  box-shadow: 0 14px 36px rgba(0,0,0,0.20);
+  backdrop-filter: blur(12px);
 }
 
 @keyframes slideDown {
@@ -123,7 +129,6 @@
     opacity: 0;
     transform: translateY(-10px);
   }
-
   to {
     opacity: 1;
     transform: translateY(0);
@@ -131,14 +136,14 @@
 }
 
 .daily-panel h3 {
-  font-size: 17px;
+  font-size: 18px;
   margin-bottom: 16px;
 }
 
 .daily-panel h4 {
   font-size: 14px;
   margin-bottom: 10px;
-  opacity: 0.7;
+  opacity: 0.72;
 }
 
 .online-section {
@@ -148,17 +153,17 @@
 .online-list {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: 8px;
 }
 
 .online-badge {
-  padding: 4px 12px;
-  border-radius: 8px;
-  background: rgba(0, 255, 100, 0.1);
-  color: #4ade80;
+  padding: 5px 12px;
+  border-radius: 999px;
+  background: rgba(74, 222, 128, 0.10);
+  color: #86efac;
   font-size: 12px;
-  border: 1px solid rgba(0, 255, 100, 0.15);
-  transition: all 0.2s ease;
+  border: 1px solid rgba(74, 222, 128, 0.18);
+  transition: transform 0.18s ease, background 0.18s ease;
 }
 
 .online-badge.clickable {
@@ -166,57 +171,62 @@
 }
 
 .online-badge.clickable:hover {
-  background: rgba(0, 255, 100, 0.2);
-  transform: scale(1.05);
+  background: rgba(74, 222, 128, 0.16);
+  transform: translateY(-1px);
 }
 
 .bar-chart {
   display: flex;
   align-items: flex-end;
-  gap: 4px;
-  height: 160px;
+  gap: 6px;
+  height: 170px;
   padding: 10px 0;
   overflow-x: auto;
 }
 
 .bar-col {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
   flex: 1;
-  min-width: 28px;
+  min-width: 30px;
   height: 100%;
   justify-content: flex-end;
 }
 
 .bar-fill {
-  width: 80%;
+  width: 82%;
   max-width: 24px;
-  border-radius: 4px 4px 0 0;
-  background: linear-gradient(180deg, rgba(0, 255, 255, 0.5), rgba(138, 43, 226, 0.4));
+  border-radius: 6px 6px 0 0;
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--page-accent, #fb923c) 58%, white),
+    color-mix(in srgb, var(--page-accent-2, #f59e0b) 45%, transparent)
+  );
   transition: height 0.3s ease;
   min-height: 2px;
 }
 
 .bar-col:hover .bar-fill {
-  background: linear-gradient(180deg, rgba(0, 255, 255, 0.8), rgba(138, 43, 226, 0.7));
+  filter: brightness(1.12);
 }
 
 .bar-val {
   font-size: 9px;
-  margin-top: 3px;
-  opacity: 0.6;
+  margin-top: 4px;
+  opacity: 0.65;
 }
 
 .bar-label {
   font-size: 8px;
-  opacity: 0.35;
+  opacity: 0.40;
   margin-top: 2px;
   white-space: nowrap;
 }
 
 .muted {
-  opacity: 0.4;
+  opacity: 0.48;
   font-size: 13px;
 }
 
@@ -225,18 +235,14 @@
   bottom: 110%;
   left: 50%;
   transform: translateX(-50%);
-  background: #1a1a2e;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(12, 16, 24, 0.96);
+  border: 1px solid rgba(255,255,255,0.10);
   padding: 8px;
-  border-radius: 10px;
+  border-radius: 12px;
   display: none;
   z-index: 100;
-  min-width: 100px;
+  min-width: 120px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-}
-
-.bar-col {
-  position: relative;
 }
 
 .bar-col:hover .day-users-list {
@@ -247,12 +253,21 @@
   font-size: 11px;
   color: var(--text);
   padding: 4px 8px;
-  border-radius: 4px;
+  border-radius: 8px;
   cursor: pointer;
   white-space: nowrap;
 }
 
 .day-user-item:hover {
-  background: rgba(0, 255, 255, 0.1);
-  color: var(--primary);
+  background: color-mix(in srgb, var(--page-accent, #fb923c) 10%, transparent);
+}
+
+@media (max-width: 768px) {
+  .admin-header h1 {
+    font-size: 26px;
+  }
+
+  .daily-panel {
+    padding: 18px 16px;
+  }
 }

@@ -1,4 +1,4 @@
-import { Component, HostListener, OnInit, ViewChild, ElementRef } from '@angular/core';
+import { Component, HostListener, OnInit, ViewChild, ElementRef, OnDestroy } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -11,16 +11,16 @@ import { ActivatedRoute, Router } from '@angular/router';
   templateUrl: './message.component.html',
   styleUrls: ['./message.component.css']
 })
-export class MessagesComponent implements OnInit {
+export class MessagesComponent implements OnInit, OnDestroy {
 
   users: any[] = [];
   conversations: any[] = [];
   messages: any[] = [];
-  newMessage: string = '';
+  newMessage = '';
 
   openMenuId: number | null = null;
   editingMessageId: number | null = null;
-  editText: string = '';
+  editText = '';
 
   showNewChat = false;
   activeKey: string | null = null;
@@ -28,11 +28,9 @@ export class MessagesComponent implements OnInit {
 
   @ViewChild('bottom') bottom!: ElementRef<HTMLDivElement>;
 
-  // ✅ Mobile view
   isMobile = false;
   mobileView: 'list' | 'chat' = 'list';
 
-  // ✅ Context menu state
   contextMenuOpen = false;
   contextMenuX = 0;
   contextMenuY = 0;
@@ -46,39 +44,37 @@ export class MessagesComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    this.onResize(); // ✅ initial
+    document.body.setAttribute('data-page', 'messages');
 
+    this.onResize();
     this.loadAuth();
     this.loadConversations();
 
-    // route figyelés
     this.route.paramMap.subscribe(p => {
       const key = p.get('key');
+
       if (key) {
         this.activeKey = key;
         this.openConversation(key);
       } else {
-        // /user/messages (nincs active chat)
         if (this.isMobile) this.mobileView = 'list';
       }
     });
   }
 
-  /* ----------------------------
-     Responsive (mobile)
-  ---------------------------- */
+  ngOnDestroy(): void {
+    document.body.removeAttribute('data-page');
+  }
 
   @HostListener('window:resize')
   onResize() {
     this.isMobile = window.innerWidth <= 820;
 
     if (!this.isMobile) {
-      // desktop: egyszerre látszik minden, de legyen "chat" logikailag
       this.mobileView = 'chat';
       return;
     }
 
-    // mobil: ha nincs kiválasztva chat -> lista
     if (this.isMobile && !this.activeKey) {
       this.mobileView = 'list';
     }
@@ -95,10 +91,6 @@ export class MessagesComponent implements OnInit {
     const c = this.conversations.find(x => String(x.key) === String(this.activeKey));
     return c?.title || 'Chat';
   }
-
-  /* ----------------------------
-     GLOBAL LISTENERS (close menus)
-  ---------------------------- */
 
   @HostListener('document:click')
   onDocClick() {
@@ -121,10 +113,6 @@ export class MessagesComponent implements OnInit {
       this.closeContextMenu();
     }
   }
-
-  /* ----------------------------
-     RIGHT CLICK OPEN
-  ---------------------------- */
 
   onRightClickConversation(event: MouseEvent, conv: any) {
     event.preventDefault();
@@ -160,11 +148,6 @@ export class MessagesComponent implements OnInit {
     this.contextMenuOpen = false;
     this.contextTarget = null;
   }
-
-  /* ----------------------------
-     Context menu actions (stubs)
-     (Törlés már működik, a többi opcionális)
-  ---------------------------- */
 
   ctxDetails() {
     const t = this.contextTarget;
@@ -225,13 +208,9 @@ export class MessagesComponent implements OnInit {
     this.closeContextMenu();
   }
 
-  /* ----------------------------
-     UI helpers (3-dot menu)
-  ---------------------------- */
-
   toggleMenu(id: number, event: MouseEvent) {
     event.stopPropagation();
-    this.openMenuId = (this.openMenuId === id) ? null : id;
+    this.openMenuId = this.openMenuId === id ? null : id;
   }
 
   scrollToBottom(smooth = true) {
@@ -241,10 +220,6 @@ export class MessagesComponent implements OnInit {
       block: 'end'
     });
   }
-
-  /* ----------------------------
-     Edit / Delete message (3-dot)
-  ---------------------------- */
 
   startEdit(message: any) {
     this.editingMessageId = message.id;
@@ -283,18 +258,10 @@ export class MessagesComponent implements OnInit {
       });
   }
 
-  /* ----------------------------
-     Navigation
-  ---------------------------- */
-
   goToConversation(key: string) {
     this.router.navigate(['/user/messages', key]);
     if (this.isMobile) this.mobileView = 'chat';
   }
-
-  /* ----------------------------
-     Data loading
-  ---------------------------- */
 
   loadAuth() {
     this.http.get<any>('/api/auth/me', { withCredentials: true })
@@ -333,15 +300,11 @@ export class MessagesComponent implements OnInit {
       .get<any>(`/api/messages/conversation/${key}`, { withCredentials: true })
       .subscribe(res => {
         this.messages = res?.items || [];
-
         setTimeout(() => this.scrollToBottom(false), 0);
+
         if (this.isMobile) this.mobileView = 'chat';
       });
   }
-
-  /* ----------------------------
-     New chat
-  ---------------------------- */
 
   toggleNewChat() {
     this.showNewChat = !this.showNewChat;
@@ -356,17 +319,12 @@ export class MessagesComponent implements OnInit {
         const panelId = String(res.panelId);
 
         this.showNewChat = false;
-
         this.router.navigate(['/user/messages', panelId]);
         this.loadConversations();
 
         if (this.isMobile) this.mobileView = 'chat';
       });
   }
-
-  /* ----------------------------
-     Send
-  ---------------------------- */
 
   sendMessage() {
     if (!this.newMessage.trim() || !this.activeKey) return;
@@ -395,10 +353,6 @@ export class MessagesComponent implements OnInit {
     if (!panel) return null;
     return panel.otherUserId ?? null;
   }
-
-  /* ----------------------------
-     Utils
-  ---------------------------- */
 
   timeAgo(date: string): string {
     const diff = Math.floor((Date.now() - new Date(date).getTime()) / 1000);

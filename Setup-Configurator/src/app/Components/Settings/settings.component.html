@@ -1,12 +1,58 @@
 <form class="settings-page" [formGroup]="form">
 
+  <section class="card hero-card">
+    <div>
+      <h2>Megjelenés és beállítások</h2>
+      <p class="muted">
+        Itt tudod kiválasztani, melyik stílust szeretnéd használni az oldalon.
+      </p>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="section-head">
+      <div>
+        <h3>Megjelenés</h3>
+        <p class="muted">4 előre elkészített stílus közül választhatsz.</p>
+      </div>
+      <div class="theme-badge">
+        Aktív: {{ activeThemeTitle }}
+      </div>
+    </div>
+
+    <div class="theme-grid">
+      <button
+        type="button"
+        *ngFor="let t of themeOptions"
+        class="theme-card"
+        [class.active]="isThemeActive(t.key)"
+        (click)="selectTheme(t.key)">
+
+        <div class="theme-preview" [ngClass]="t.previewClass">
+          <div class="mini-sidebar"></div>
+          <div class="mini-content">
+            <div class="mini-top"></div>
+            <div class="mini-cards">
+              <span></span><span></span><span></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="theme-meta">
+          <div class="theme-title-row">
+            <div class="theme-title">{{ t.title }}</div>
+            <div class="active-pill" *ngIf="isThemeActive(t.key)">Aktív</div>
+          </div>
+          <div class="theme-sub">{{ t.sub }}</div>
+        </div>
+      </button>
+    </div>
+  </section>
+
   <section class="card">
     <h3>Nyelv</h3>
 
-    <!-- Google Translate ide -->
-    <app-google-translate>
-    <div id="google_translate_element"></div>
-    </app-google-translate>
+    <app-google-translate></app-google-translate>
 
     <p class="muted">
       Itt tudod átállítani az oldal nyelvét.
@@ -17,17 +63,26 @@
     <h3>Viselkedés</h3>
 
     <label class="row">
-      <span>Setup mode</span>
+      <div>
+        <span>Setup mode</span>
+        <small class="row-help">Speciális nézet a setup builderhez.</small>
+      </div>
       <input type="checkbox" formControlName="setupMode">
     </label>
 
     <label class="row">
-      <span>Compact layout</span>
+      <div>
+        <span>Compact layout</span>
+        <small class="row-help">Tömörebb elrendezés a listákhoz.</small>
+      </div>
       <input type="checkbox" formControlName="compactLayout">
     </label>
 
     <label class="row">
-      <span>Auto-open product</span>
+      <div>
+        <span>Auto-open product</span>
+        <small class="row-help">Termék kiválasztásnál panel automatikus nyitás.</small>
+      </div>
       <input type="checkbox" formControlName="autoOpenProduct">
     </label>
   </section>
@@ -36,12 +91,18 @@
     <h3>Felhasználói élmény</h3>
 
     <label class="row">
-      <span>Public profile</span>
+      <div>
+        <span>Public profile</span>
+        <small class="row-help">A profil látható legyen másoknak is.</small>
+      </div>
       <input type="checkbox" formControlName="publicProfile">
     </label>
 
     <label class="row">
-      <span>Remember filters</span>
+      <div>
+        <span>Remember filters</span>
+        <small class="row-help">Megjegyzi az előző keresési szűrőket.</small>
+      </div>
       <input type="checkbox" formControlName="rememberFilters">
     </label>
   </section>

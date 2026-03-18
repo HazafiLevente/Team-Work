@@ -1,22 +1,14 @@
 import {
   Component,
-  OnDestroy,
-  AfterViewInit
+  OnDestroy
 } from '@angular/core';
 
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
 
-import { UiSettingsService } from '../Services/SettingService/ui-settings.service';
-import {GoogleTranslateComponent} from '../Shared/GoogleTranslate/google-translate.component';
-
-declare global {
-  interface Window {
-    googleTranslateElementInit?: () => void;
-    google?: any;
-  }
-}
+import { UiSettingsService, UiThemeKey } from '../Services/SettingService/ui-settings.service';
+import { GoogleTranslateComponent } from '../Shared/GoogleTranslate/google-translate.component';
 
 @Component({
   selector: 'app-settings',
@@ -25,10 +17,41 @@ declare global {
   templateUrl: './settings.component.html',
   styleUrls: ['./settings.component.css']
 })
-export class SettingsComponent implements OnDestroy, AfterViewInit {
-
+export class SettingsComponent implements OnDestroy {
   form!: FormGroup;
   private sub?: Subscription;
+
+  themeOptions: {
+    key: UiThemeKey;
+    title: string;
+    sub: string;
+    previewClass: string;
+  }[] = [
+    {
+      key: 'clean-cyan',
+      title: 'Clean Cyan',
+      sub: 'Letisztult, modern, kékes-cyan',
+      previewClass: 'theme-clean-cyan'
+    },
+    {
+      key: 'purple-premium',
+      title: 'Purple Premium',
+      sub: 'Elegáns lila prémium hangulat',
+      previewClass: 'theme-purple-premium'
+    },
+    {
+      key: 'glass-slate',
+      title: 'Glass Slate',
+      sub: 'Üvegesebb, modernebb app-hatás',
+      previewClass: 'theme-glass-slate'
+    },
+    {
+      key: 'soft-light',
+      title: 'Soft Light',
+      sub: 'Lágyabb, világosabb kontraszt',
+      previewClass: 'theme-soft-light'
+    }
+  ];
 
   constructor(
     private fb: FormBuilder,
@@ -40,7 +63,7 @@ export class SettingsComponent implements OnDestroy, AfterViewInit {
       compactLayout: [false],
       autoOpenProduct: [true],
       language: ['hu'],
-      accent: ['purple'],
+      theme: ['glass-slate'],
       publicProfile: [true],
       rememberFilters: [true],
     });
@@ -52,54 +75,16 @@ export class SettingsComponent implements OnDestroy, AfterViewInit {
     });
   }
 
-  ngAfterViewInit(): void {
-    this.loadGoogleTranslate();
+  get activeThemeTitle(): string {
+    return this.themeOptions.find(t => t.key === this.form.value.theme)?.title ?? 'Ismeretlen';
   }
 
-  private loadGoogleTranslate() {
-
-    // Ha már létezik a google objektum → csak init
-    if (window.google?.translate?.TranslateElement) {
-      this.initTranslate();
-      return;
-    }
-
-    // Globális callback (a Google script ezt hívja)
-    window.googleTranslateElementInit = () => {
-      this.initTranslate();
-    };
-
-    // Ha már be van töltve a script, ne adjuk hozzá újra
-    const existingScript = document.querySelector(
-      'script[src*="translate.google.com/translate_a/element.js"]'
-    );
-
-    if (existingScript) return;
-
-    const script = document.createElement('script');
-    script.type = 'text/javascript';
-    script.src =
-      'https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit';
-    script.async = true;
-
-    document.body.appendChild(script);
+  isThemeActive(key: UiThemeKey): boolean {
+    return this.form.value.theme === key;
   }
 
-  private initTranslate() {
-    const host = document.getElementById('google_translate_element');
-
-    if (!host) return;
-
-    // töröljük az előzőt (route váltás miatt)
-    host.innerHTML = '';
-
-    new window.google.translate.TranslateElement(
-      {
-        pageLanguage: 'hu',
-        layout: window.google.translate.TranslateElement.InlineLayout.SIMPLE
-      },
-      'google_translate_element'
-    );
+  selectTheme(key: UiThemeKey) {
+    this.form.patchValue({ theme: key });
   }
 
   save() {

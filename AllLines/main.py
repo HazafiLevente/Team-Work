@@ -2,9 +2,9 @@ import json
 import os
 from pathlib import Path
 
-PROJECT_PATH3 = Path(r"E:\Projekt\Setup-Configurator")
+PROJECT_PATH = Path(r"C:\Users\norbe\WebstormProjects\Team-WorkFASZOMRENDES\Setup-Configurator")
 
-PROJECT_PATH = Path(r"E:\Projekt\Setup-Configurator\src\app\Components\Usersites\Setup")
+PROJECT_PATH3 = Path(r"E:\Projekt\Setup-Configurator\src\app\Components\Usersites\Setup")
 PROJECT_PATH1 = Path(r"E:\Projekt\backend")
 PROJECT_PATH2 = Path(r"E:\Projekt\Setup-Configurator\src\app\Components\Usersites\Setup\setup-tools-modal")
 
