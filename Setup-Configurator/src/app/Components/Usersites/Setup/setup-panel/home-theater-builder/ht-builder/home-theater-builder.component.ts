@@ -234,6 +234,22 @@ export class HomeTheaterBuilderComponent implements OnInit, OnChanges {
         return Object.keys(this.catalog);
     }
 
+    getCategoryName(key: string): string {
+        const names: any = {
+            receivers: 'Erősítők / Receiverek',
+            frontSpeakers: 'Front Hangszórók',
+            backSpeakers: 'Hátulsó Hangszórók',
+            sideSpeakers: 'Oldalsó Hangszórók',
+            ceilingSpeakers: 'Mennyezeti Hangszórók',
+            floorSpeakers: 'Álló Hangszórók',
+            centerSpeakers: 'Center Hangszórók',
+            subwoofers: 'Mélysugárzók',
+            audioProcessors: 'Audio Processzorok',
+            bassAmplifiers: 'Basszus Erősítők'
+        };
+        return names[key] || key;
+    }
+
     // Helper for SVG lines
     getItemCenter(item: HTItem) {
         // Approximate center of the card

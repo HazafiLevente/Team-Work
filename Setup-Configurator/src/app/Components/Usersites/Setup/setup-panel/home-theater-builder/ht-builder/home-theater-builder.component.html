@@ -97,7 +97,7 @@
                 @for (cat of getCategoryKeys(); track cat) {
                 @if (getFilteredCatalog()[cat]?.length > 0) {
                 <div class="category-section">
-                    <h4>{{ cat }}</h4>
+                    <h4>{{ getCategoryName(cat) }}</h4>
                     <div class="product-list">
                         @for (prod of getFilteredCatalog()[cat]; track prod.id) {
                         <div class="product-item" (click)="addItem(prod, cat)">

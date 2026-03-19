@@ -173,6 +173,48 @@ async function runWithConcurrency(items, limit, worker) {
     await Promise.all(runners);
 }
 
+async function fetchItemWithSetup(tableName, itemId) {
+    let query = await supabase
+        .from(tableName)
+        .select("*")
+        .eq("id", itemId)
+        .single();
+
+    if (!query.error && query.data) {
+        return { data: query.data, idColumn: "id" };
+    }
+
+    query = await supabase
+        .from(tableName)
+        .select("*")
+        .eq("ID", itemId)
+        .single();
+
+    if (!query.error && query.data) {
+        return { data: query.data, idColumn: "ID" };
+    }
+
+    return { data: null, idColumn: null };
+}
+
+function resolveRenameColumn(item) {
+    const candidates = [
+        "display_name",
+        "setup_name",
+        "product_name",
+        "name",
+        "model"
+    ];
+
+    for (const key of candidates) {
+        if (Object.prototype.hasOwnProperty.call(item || {}, key)) {
+            return key;
+        }
+    }
+
+    return null;
+}
+
 /* =========================================================
    SETUP LISTA
    - ✅ query param: ?favorite=true/false (ha nincs -> mind)
@@ -191,8 +233,7 @@ exports.list = async (req, res) => {
         const { data: setupData, error: setupErr } = await q;
         if (setupErr) throw setupErr;
 
-        // ✅ Lekérjük a szobák pozícióit is
-        const { data: posData, error: posErr } = await supabase
+        const { data: posData } = await supabase
             .from("setup_rooms[Coordinates]")
             .select("setup_id, x, y");
 
@@ -221,11 +262,9 @@ exports.upsertRoomPosition = async (req, res) => {
 
         if (!setupId) return res.status(400).json({ error: "Missing setupId" });
 
-        // Ellenőrizzük a jogosultságot
         const ok = await assertSetupOwnedByUser(setupId, userId);
         if (!ok) return res.status(403).json({ error: "Forbidden" });
 
-        // Megkeressük, létezik-e már
         const { data: existing } = await supabase
             .from("setup_rooms[Coordinates]")
             .select("id")
@@ -275,8 +314,6 @@ exports.children = async (req, res) => {
 
         await runWithConcurrency(tablesToScan, CONCURRENCY, async (tableName) => {
             if (allItems.length >= TOTAL_CAP) return;
-
-            // ✅ biztosan nincs setup_id -> skip (nem lesz error)
             if (NO_SETUPID_TABLES.has(tableName)) return;
 
             const { data, error } = await supabase.from(tableName).select("*").eq("setup_id", setupId).limit(PER_TABLE_LIMIT);
@@ -284,7 +321,6 @@ exports.children = async (req, res) => {
             if (error) {
                 const msg = String(error.message || "");
 
-                // ✅ ha mégis belefutunk: azonnal blacklist
                 if (msg.includes("setup_id") && msg.includes("does not exist")) {
                     NO_SETUPID_TABLES.add(tableName);
                     console.log(`🚫 blacklist: ${tableName} (no setup_id)`);
@@ -432,11 +468,9 @@ exports.addDevice = async (req, res) => {
             return res.status(400).json({ error: "product_id and source_table are required" });
         }
 
-        // Check ownership
         const ok = await assertSetupOwnedByUser(setupId, userId);
         if (!ok) return res.status(403).json({ error: "Forbidden" });
 
-        // Map source_table to a real DB table name
         const TABLE_MAP = {
             speakers: "front_speaker[Setup]",
             receivers: "reciever_setup[Setup]",
@@ -470,7 +504,6 @@ exports.addDevice = async (req, res) => {
             return res.status(500).json({ error: error.message });
         }
 
-        // Bust the children cache
         childrenCache.delete(String(setupId));
 
         return res.json({ ok: true, device: { ...data, category: targetTable, display_name } });
@@ -482,13 +515,11 @@ exports.addDevice = async (req, res) => {
 
 exports.remove = async (req, res) => {
     try {
-
         const userId = req.user?.id;
         const setupId = req.params.id;
 
         if (!userId) return res.status(401).json({ error: "Unauthorized" });
 
-        // 1️⃣ kapcsolatok törlése
         const { error: connErr } = await supabase
             .from("connections[Connects]")
             .delete()
@@ -499,7 +530,6 @@ exports.remove = async (req, res) => {
             return res.status(500).json({ error: connErr.message });
         }
 
-        // 2️⃣ setup törlés
         const { data, error } = await supabase
             .from(SETUP_TABLE)
             .delete()
@@ -519,7 +549,6 @@ exports.remove = async (req, res) => {
         childrenCache.delete(setupId);
 
         return res.json({ ok: true });
-
     } catch (err) {
         console.error("❌ Setup delete hiba:", err);
         return res.status(500).json({ error: "Server error" });
@@ -527,10 +556,8 @@ exports.remove = async (req, res) => {
 };
 
 /* =========================================================
-   PC BUILDER   ✅ (ITT SEMMI NEM VÁLTOZOTT)
+   PC BUILDER
    ========================================================= */
-
-// GET /api/setup/:id/pcbuilds
 exports.pcBuildsList = async (req, res) => {
     try {
         const userId = req.user.id;
@@ -560,7 +587,6 @@ exports.pcBuildsList = async (req, res) => {
     }
 };
 
-// POST /api/setup/:id/pcbuilds
 exports.pcBuildsCreate = async (req, res) => {
     try {
         const userId = req.user.id;
@@ -593,7 +619,6 @@ exports.pcBuildsCreate = async (req, res) => {
     }
 };
 
-// PATCH /api/setup/pcbuilds/:pcId
 exports.pcBuildsUpdate = async (req, res) => {
     try {
         const userId = req.user.id;
@@ -625,7 +650,6 @@ exports.pcBuildsUpdate = async (req, res) => {
     }
 };
 
-// GET /api/setup/:id/pcparts
 exports.pcParts = async (req, res) => {
     try {
         const cacheKey = "pcparts:v1";
@@ -734,9 +758,8 @@ exports.pcParts = async (req, res) => {
 };
 
 /* =========================================================
-   ✅ CARS (dropdown + hozzáadás mint PC, de 1 dropdown)
+   ✅ CARS
    ========================================================= */
-
 const CAR_SOURCES = [
     { table: "cabrio_cars", fk: "cabrio_id" },
     { table: "coupe_cars", fk: "coupe_id" },
@@ -747,7 +770,6 @@ const CAR_SOURCES = [
     { table: "wagon_cars", fk: "wagon_id" },
 ];
 
-// GET /api/setup/car-options
 exports.carOptions = async (req, res) => {
     try {
         const cacheKey = "car-options:v1";
@@ -794,7 +816,6 @@ exports.carOptions = async (req, res) => {
     }
 };
 
-// GET /api/setup/:id/cars  -> Car_setup[Setup] rows
 exports.carsList = async (req, res) => {
     try {
         const userId = req.user.id;
@@ -824,7 +845,6 @@ exports.carsList = async (req, res) => {
     }
 };
 
-// POST /api/setup/:id/cars  body: { source_table, car_id }
 exports.carsAdd = async (req, res) => {
     try {
         const userId = req.user.id;
@@ -844,7 +864,6 @@ exports.carsAdd = async (req, res) => {
         const src = CAR_SOURCES.find((s) => s.table === source_table);
         if (!src) return res.status(400).json({ error: "Ismeretlen car source_table" });
 
-        // megpróbáljuk lekérni a nevet a setup_name mezőhöz
         const { data: carRow } = await supabase.from(source_table).select("ID, Manufacturer, Model").eq("ID", car_id).single();
 
         const manufacturer = (carRow?.Manufacturer ?? "").toString().trim();
@@ -867,7 +886,6 @@ exports.carsAdd = async (req, res) => {
         const { data, error } = await supabase.from(CAR_SETUP_TABLE).insert([payload]).select("*").single();
         if (error) throw error;
 
-        // children cache invalidálás (ha detail view-ben vagy)
         childrenCache.delete(setupId);
 
         return res.json({ car: data });
@@ -914,7 +932,6 @@ exports.carSetupDetails = async (req, res) => {
         const cached = cacheGet(carDetailsCache, String(carSetupId));
         if (cached) return res.json(cached);
 
-        // 1) Car_setup row
         const { data: carSetupRow, error: csErr } = await supabase
             .from(CAR_SETUP_TABLE)
             .select("*")
@@ -925,14 +942,11 @@ exports.carSetupDetails = async (req, res) => {
             return res.status(404).json({ error: "Car setup row not found" });
         }
 
-        // 2) ownership check
         const ok = await assertSetupOwnedByUser(carSetupRow.setup_id, userId);
         if (!ok) return res.status(403).json({ error: "Forbidden" });
 
-        // 3) melyik fk van kitöltve?
         const link = pickFirstCarLink(carSetupRow);
 
-        // alap response shape (amit a frontend vár)
         const base = {
             car_setup_id: Number(carSetupId),
             setup_id: Number(carSetupRow.setup_id),
@@ -959,7 +973,6 @@ exports.carSetupDetails = async (req, res) => {
             return res.json(base);
         }
 
-        // 4) car rekord betöltés - toleráns (különböző táblák/mezők miatt)
         const { data: carRow, error: carErr } = await supabase
             .from(link.table)
             .select("*")
@@ -971,7 +984,6 @@ exports.carSetupDetails = async (req, res) => {
             return res.json(base);
         }
 
-        // 5) mezők kinyerése többféle kulcsnévvel
         const manufacturer = pick(carRow, ["Manufacturer", "manufacturer", "Brand", "brand"]) ?? "—";
         const model = pick(carRow, ["Model", "model"]) ?? "—";
         const price = pick(carRow, ["Price", "price"]) ?? "—";
@@ -1004,7 +1016,6 @@ exports.carSetupDetails = async (req, res) => {
 
         cacheSet(carDetailsCache, String(carSetupId), response, CARDETAILS_TTL_MS);
         return res.json(response);
-
     } catch (err) {
         console.error("❌ carSetupDetails hiba:", err);
         return res.status(500).json({ error: "Server error" });
@@ -1012,8 +1023,7 @@ exports.carSetupDetails = async (req, res) => {
 };
 
 /* =========================================================
-   ✅ CONNECTIONS (Network device links)
-   - A korábbi kategória-specifikus táblák helyett a közös "connections[Connects]" táblát használjuk.
+   ✅ CONNECTIONS
    ========================================================= */
 const typeToTableMap = {
     "pc": "pc_details[Setup]",
@@ -1032,7 +1042,6 @@ exports.connections = async (req, res) => {
     if (!setupId) return res.json([]);
 
     try {
-        // 🔥 HIÁNYZÓ OWNERSHIP CHECK
         const ok = await assertSetupOwnedByUser(setupId, userId);
         if (!ok) return res.json([]);
 
@@ -1085,7 +1094,6 @@ exports.connectionsCreate = async (req, res) => {
             utp_id
         } = req.body;
 
-        // 1. Ownership checks
         const okFrom = await assertSetupOwnedByUser(from_setup_id, userId);
         const okTo = await assertSetupOwnedByUser(to_setup_id, userId);
 
@@ -1093,7 +1101,6 @@ exports.connectionsCreate = async (req, res) => {
             return res.status(403).json({ error: "Forbidden: You don't own one of these setups" });
         }
 
-        // 2. Insert connection
         const payload = {
             from_setup_id,
             to_setup_id,
@@ -1101,7 +1108,7 @@ exports.connectionsCreate = async (req, res) => {
             from_device_id,
             to_device_type,
             to_device_id,
-            utp_id: utp_id || 1 // Fallback to basic UTP if not provided
+            utp_id: utp_id || 1
         };
 
         const { data, error } = await supabase
@@ -1112,7 +1119,6 @@ exports.connectionsCreate = async (req, res) => {
 
         if (error) throw error;
 
-        // 3. Clear relevant caches
         childrenCache.delete(String(from_setup_id));
         if (from_setup_id !== to_setup_id) {
             childrenCache.delete(String(to_setup_id));
@@ -1130,7 +1136,6 @@ exports.connectionsRemove = async (req, res) => {
         const userId = req.user.id;
         const connId = req.params.id;
 
-        // 1. Find connection to check ownership
         const { data: conn, error: findErr } = await supabase
             .from("connections[Connects]")
             .select("from_setup_id")
@@ -1139,11 +1144,9 @@ exports.connectionsRemove = async (req, res) => {
 
         if (findErr || !conn) return res.status(404).json({ error: "Connection not found" });
 
-        // 2. Ownership check
         const ok = await assertSetupOwnedByUser(conn.from_setup_id, userId);
         if (!ok) return res.status(403).json({ error: "Forbidden" });
 
-        // 3. Delete
         const { error: delErr } = await supabase
             .from("connections[Connects]")
             .delete()
@@ -1151,13 +1154,61 @@ exports.connectionsRemove = async (req, res) => {
 
         if (delErr) throw delErr;
 
-        // 4. Clear cache
         childrenCache.delete(String(conn.from_setup_id));
 
         res.json({ success: true });
     } catch (err) {
         console.error("❌ connectionsRemove fatal:", err);
         res.status(500).json({ error: "Failed to remove connection" });
+    }
+};
+
+exports.renameItem = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const { itemId, tableName, newName } = req.body;
+
+        if (!itemId || !tableName || !String(newName || "").trim()) {
+            return res.status(400).json({ error: "Missing itemId, tableName or newName" });
+        }
+
+        const { data: item, idColumn } = await fetchItemWithSetup(tableName, itemId);
+
+        if (!item || !idColumn) {
+            return res.status(404).json({ error: "Item not found" });
+        }
+
+        const ok = await assertSetupOwnedByUser(item.setup_id, userId);
+        if (!ok) return res.status(403).json({ error: "Forbidden" });
+
+        const renameColumn = resolveRenameColumn(item);
+        if (!renameColumn) {
+            return res.status(400).json({ error: "This item cannot be renamed" });
+        }
+
+        const value = String(newName).trim();
+
+        const { data, error } = await supabase
+            .from(tableName)
+            .update({ [renameColumn]: value })
+            .eq(idColumn, itemId)
+            .select("*")
+            .single();
+
+        if (error) {
+            console.error("❌ renameItem update error:", error);
+            return res.status(500).json({ error: "Rename failed", details: error.message });
+        }
+
+        childrenCache.delete(String(item.setup_id));
+
+        return res.json({
+            success: true,
+            item: mapDisplay(data, tableName)
+        });
+    } catch (err) {
+        console.error("❌ renameItem fatal:", err);
+        return res.status(500).json({ error: "Rename failed" });
     }
 };
 
@@ -1170,30 +1221,22 @@ exports.removeItem = async (req, res) => {
             return res.status(400).json({ error: "Missing itemId or tableName" });
         }
 
-        // 1. Check if item exists and find its setup_id
-        const { data: item, error: findErr } = await supabase
-            .from(tableName)
-            .select("setup_id")
-            .eq("id", itemId)
-            .single();
+        const { data: item, idColumn } = await fetchItemWithSetup(tableName, itemId);
 
-        if (findErr || !item) {
+        if (!item || !idColumn) {
             return res.status(404).json({ error: "Item not found" });
         }
 
-        // 2. Check ownership of the parent setup
         const ok = await assertSetupOwnedByUser(item.setup_id, userId);
         if (!ok) return res.status(403).json({ error: "Forbidden" });
 
-        // 3. Delete
         const { error: delErr } = await supabase
             .from(tableName)
             .delete()
-            .eq("id", itemId);
+            .eq(idColumn, itemId);
 
         if (delErr) throw delErr;
 
-        // 4. Clear cache
         childrenCache.delete(String(item.setup_id));
 
         res.json({ success: true });
@@ -1207,7 +1250,6 @@ exports.allConnections = async (req, res) => {
     try {
         const userId = req.user.id;
 
-        // 1) Felhasználó összes setup ID-ja
         const { data: setups, error: setupErr } = await supabase
             .from(SETUP_TABLE)
             .select("id")
@@ -1217,7 +1259,6 @@ exports.allConnections = async (req, res) => {
         const setupIds = setups.map(s => s.id);
         if (setupIds.length === 0) return res.json([]);
 
-        // 2) Összes kapcsolat, ami érinti ezeket a setup-okat
         const { data: rawConns, error: connErr } = await supabase
             .from("connections[Connects]")
             .select(`
@@ -1271,18 +1312,14 @@ exports.childrenInternal = async (setupId) => {
     return allItems;
 };
 
-
 exports.deviceConnections = async (req, res) => {
     try {
-        const userId = req.user.id;
         const { deviceId, deviceType } = req.query;
 
         if (!deviceId || !deviceType) {
             return res.json([]);
         }
 
-        // 🔥 Lekérjük az összes olyan kapcsolatot,
-        // ahol ez az eszköz source VAGY target
         const { data, error } = await supabase
             .from("connections[Connects]")
             .select(`

@@ -10,6 +10,7 @@ import {
   HostListener
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
 
 import { SetupRoomComponent } from '../setup-room/setup-room.component';
 import { SetupItemCardComponent } from '../setup-item-card/setup-item-card.component';
@@ -55,7 +56,6 @@ export type WorkspaceWindow = {
     CommonModule,
     SetupRoomComponent,
     SetupItemCardComponent,
-    DotGridComponent,
     SetupConnectionsComponent,
     ContextMenuRoomComponent,
     ContextMenuBaseComponent,
@@ -68,6 +68,7 @@ export type WorkspaceWindow = {
     ContextMenuDockComponent,
     ContextMenuWorkspaceComponent,
     ContextMenuCategoryComponent,
+    DotGridComponent,
 
     AddDeviceWindowComponent,
     HomeTheaterBuilderComponent
@@ -136,8 +137,52 @@ export class WorkspaceComponent {
 
   extWidth = 0;
   extHeight = 0;
-  @HostListener('mousemove', ['$event'])
+
+  @ViewChild('workspaceRoot', { static: true })
+  workspaceRoot!: ElementRef<HTMLElement>;
+
+  // --- Panning State ---
+  isPanning = false;
+  startX = 0;
+  startY = 0;
+  panX = 0;
+  panY = 0;
+  startPanX = 0;
+  startPanY = 0;
+
+  constructor(private http: HttpClient) {}
+
+  onMouseDown(event: MouseEvent): void {
+    // Only allow pan on background or dot grid
+    const target = event.target as HTMLElement;
+    const isBackground = target.classList.contains('setup-workspace') ||
+                         target.classList.contains('boundary-area') ||
+                         target.classList.contains('pan-wrapper') ||
+                         target.tagName.toLowerCase() === 'app-dot-grid';
+
+    if (!isBackground) return;
+
+    this.isPanning = true;
+    this.startX = event.clientX;
+    this.startY = event.clientY;
+    this.startPanX = this.panX;
+    this.startPanY = this.panY;
+  }
+
+  @HostListener('window:mouseup')
+  onMouseUp(): void {
+    this.isPanning = false;
+  }
+
+  @HostListener('window:mousemove', ['$event'])
   onMouseMove(event: MouseEvent): void {
+    if (this.isPanning) {
+      const dx = event.clientX - this.startX;
+      const dy = event.clientY - this.startY;
+      this.panX = this.startPanX + dx;
+      this.panY = this.startPanY + dy;
+    }
+
     if (this.rafId) return;
     this.rafId = requestAnimationFrame(() => {
       if (this.pairingStage !== 'NONE' && this.boundaryEl) {
@@ -158,9 +203,13 @@ export class WorkspaceComponent {
   @ViewChildren(SetupRoomComponent)
   roomComponents!: QueryList<SetupRoomComponent>;
 
+  @ViewChildren(SetupItemCardComponent)
+  itemComponents!: QueryList<SetupItemCardComponent>;
+
   elementRegistry = new Map<string, HTMLElement>();
 
   registerElement(e: { id: string; el: HTMLElement }) {
+    console.log(`📝 [Workspace] Registering element: ${e.id}`, !!e.el);
     this.elementRegistry.set(e.id, e.el);
     this.updateLines();
   }
@@ -192,10 +241,10 @@ export class WorkspaceComponent {
     this.createSetup.emit(pos);
     this.ctxWorkspaceOpen = false;
   }
+
   openCategoryMenuForRoom(setup: any): void {
-    const rect = this.boundaryEl.nativeElement.getBoundingClientRect();
     this.ctxSetup = setup;
-    this.ctxCategoryX = this.ctxX; // Use existing context position
+    this.ctxCategoryX = this.ctxX;
     this.ctxCategoryY = this.ctxY;
     this.ctxCategoryOpen = true;
     this.closeContextMenu();
@@ -219,8 +268,9 @@ export class WorkspaceComponent {
 
     const rect = this.boundaryEl.nativeElement.getBoundingClientRect();
 
-    this.ctxWorkspaceX = event.clientX - rect.left;
-    this.ctxWorkspaceY = event.clientY - rect.top;
+    // Adjust for pan offsets
+    this.ctxWorkspaceX = event.clientX - rect.left - this.panX;
+    this.ctxWorkspaceY = event.clientY - rect.top - this.panY;
 
     this.ctxWorkspaceOpen = true;
     this.ctxOpen = false;
@@ -234,8 +284,9 @@ export class WorkspaceComponent {
     this.ctxSetup = payload.setup;
     this.ctxItem = null;
 
-    this.ctxX = payload.x - rect.left;
-    this.ctxY = payload.y - rect.top;
+    // Adjust for pan offsets
+    this.ctxX = payload.x - rect.left - this.panX;
+    this.ctxY = payload.y - rect.top - this.panY;
 
     this.ctxOpen = true;
     this.ctxWorkspaceOpen = false;
@@ -247,8 +298,9 @@ export class WorkspaceComponent {
     this.ctxItem = payload.item;
     this.ctxSetup = null;
 
-    this.ctxX = payload.x - rect.left;
-    this.ctxY = payload.y - rect.top;
+    // Adjust for pan offsets
+    this.ctxX = payload.x - rect.left - this.panX;
+    this.ctxY = payload.y - rect.top - this.panY;
 
     this.ctxOpen = true;
     this.ctxWorkspaceOpen = false;
@@ -270,7 +322,6 @@ export class WorkspaceComponent {
     this.ctxDockX = payload.event.clientX - rect.left;
     this.ctxDockY = payload.event.clientY - rect.top;
 
-    // Ensure menu doesn't go off bottom
     if (this.ctxDockY > rect.height - 150) {
       this.ctxDockY -= 150;
     }
@@ -301,6 +352,201 @@ export class WorkspaceComponent {
     this.closeContextMenu();
   }
 
+  private getContextItemKey(item: any): string {
+    const source =
+      item?.source_table ??
+      item?.table_name ??
+      item?.table ??
+      item?.category ??
+      'unknown';
+
+    const slot = item?.slot ?? 'noslot';
+
+    const id =
+      item?.id ??
+      item?.part_id ??
+      item?.item_id ??
+      item?.product_id ??
+      'unknown';
+
+    return `${source}::${slot}::${id}`;
+  }
+
+  private getContextItemTableName(item: any): string {
+    return (
+      item?.category ??
+      item?.source_table ??
+      item?.table_name ??
+      item?.table ??
+      ''
+    );
+  }
+
+  startRenameForContextItem(): void {
+    if (!this.ctxItem || !this.itemComponents) return;
+
+    const targetKey = this.getContextItemKey(this.ctxItem);
+
+    const itemComp = this.itemComponents.find(c => {
+      const item = (c as any).item;
+      const compKey = this.getContextItemKey(item);
+      return compKey === targetKey;
+    });
+
+    (itemComp as any)?.startRename?.();
+    this.closeContextMenu();
+  }
+
+  private tryDeleteContextItem(
+    urls: string[],
+    body: { itemId: any; tableName: string },
+    onSuccess: () => void,
+    index = 0
+  ): void {
+    if (index >= urls.length) {
+      console.error('❌ Item törlés hiba: egyik endpoint sem működött.', urls);
+      alert('Törlés sikertelen.');
+      return;
+    }
+
+    const url = urls[index];
+
+    this.http.request<any>('delete', url, {
+      body,
+      withCredentials: true
+    }).subscribe({
+      next: () => {
+        onSuccess();
+      },
+      error: (err) => {
+        const status = Number(err?.status ?? 0);
+
+        if (status === 404) {
+          console.warn(`⚠️ ${url} 404, következő delete fallback jön.`);
+          this.tryDeleteContextItem(urls, body, onSuccess, index + 1);
+          return;
+        }
+
+        console.error('❌ Item törlés hiba:', err);
+        alert('Törlés sikertelen.');
+      }
+    });
+  }
+
+  deleteContextItem(): void {
+    if (!this.ctxItem) return;
+
+    const itemId = this.ctxItem?.id ?? this.ctxItem?.ID ?? this.ctxItem?.item_id;
+    const tableName = this.getContextItemTableName(this.ctxItem);
+
+    if (!itemId || !tableName) {
+      console.error('❌ Hiányzó itemId vagy tableName törléshez:', this.ctxItem);
+      return;
+    }
+
+    const displayName =
+      this.ctxItem?.display_name ??
+      this.ctxItem?.setup_name ??
+      this.ctxItem?.name ??
+      this.ctxItem?.model ??
+      'Elem';
+
+    const ok = window.confirm(`Biztos törlöd?\n\n${displayName}`);
+    if (!ok) return;
+
+    const targetKey = this.getContextItemKey(this.ctxItem);
+    const dataId = this.getItemDataId(this.ctxItem);
+
+    this.tryDeleteContextItem(
+      ['/api/setup/remove-item', '/api/remove-item'],
+      { itemId, tableName },
+      () => {
+        this.items = this.items.filter(it => this.getContextItemKey(it) !== targetKey);
+        this.elementRegistry.delete(dataId);
+        this.closeContextMenu();
+        this.updateLines();
+      }
+    );
+  }
+
+  private tryRenameContextItem(
+    urls: string[],
+    body: { itemId: any; tableName: string; newName: string },
+    onSuccess: (updatedItem: any) => void,
+    index = 0
+  ): void {
+    if (index >= urls.length) {
+      console.error('❌ Item átnevezés hiba: egyik endpoint sem működött.', urls);
+      alert('Átnevezés sikertelen.');
+      return;
+    }
+
+    const url = urls[index];
+
+    this.http.patch<any>(url, body, {
+      withCredentials: true
+    }).subscribe({
+      next: (res) => {
+        onSuccess(res?.item ?? null);
+      },
+      error: (err) => {
+        const status = Number(err?.status ?? 0);
+
+        if (status === 404) {
+          console.warn(`⚠️ ${url} 404, következő rename fallback jön.`);
+          this.tryRenameContextItem(urls, body, onSuccess, index + 1);
+          return;
+        }
+
+        console.error('❌ Item átnevezés hiba:', err);
+        alert('Átnevezés sikertelen.');
+      }
+    });
+  }
+
+  onItemRenamed(payload: any): void {
+    const item = payload?.item;
+    const newName = String(payload?.newName || '').trim();
+
+    if (!item || !newName) return;
+
+    const itemId = item?.id ?? item?.ID ?? item?.item_id;
+    const tableName = this.getContextItemTableName(item);
+
+    if (!itemId || !tableName) {
+      console.error('❌ Hiányzó itemId vagy tableName átnevezéshez:', item);
+      return;
+    }
+
+    const currentKey = this.getContextItemKey(item);
+
+    this.tryRenameContextItem(
+      ['/api/setup/rename-item', '/api/rename-item'],
+      { itemId, tableName, newName },
+      (updatedItem) => {
+        this.items = this.items.map(it => {
+          const same = this.getContextItemKey(it) === currentKey;
+          if (!same) return it;
+
+          if (updatedItem) {
+            return {
+              ...it,
+              ...updatedItem,
+              category: it?.category ?? updatedItem?.category ?? tableName
+            };
+          }
+
+          return {
+            ...it,
+            display_name: newName
+          };
+        });
+
+        this.updateLines();
+      }
+    );
+  }
+
   openDevicesWindow(setup: any): void {
     const devicesCount = this.windows.filter(w => w.kind === 'devices').length + 1;
     const offset = (devicesCount - 1) * 28;
@@ -323,7 +569,6 @@ export class WorkspaceComponent {
   }
 
   openAddDeviceWindow(setup: any): void {
-    // "Új Eszköz" → open HT Builder immediately with sidebar (catalog) already open
     const count = this.windows.filter(w => w.kind === 'empty').length + 1;
     const offset = (count - 1) * 28;
 
@@ -392,7 +637,6 @@ export class WorkspaceComponent {
     const isTarget = pairingStage === 'PICK_TARGET_ITEM';
     const winId = isTarget ? 'pairing_target' : 'pairing_source';
 
-    // Remove any existing window with the same ID (to avoid duplicates if they re-click same setup)
     this.windows = this.windows.filter(w => w.id !== winId);
 
     const newWindow: WorkspaceWindow = {
@@ -433,7 +677,7 @@ export class WorkspaceComponent {
     this.windows.forEach(w => {
       if (w.minimized) return;
       const width = w.width || 420;
-      const height = 500; // Estimated
+      const height = 500;
 
       const right = w.x + width;
       const bottom = w.y + height;
@@ -449,6 +693,14 @@ export class WorkspaceComponent {
     this.extHeight = maxY > rect.height ? maxY + margin : 0;
 
     this.updateLines();
+  }
+
+  onWindowClosed(id: string): void {
+    const win = this.windows.find(w => w.id === id);
+    if (win?.kind === 'pairing') {
+      this.cancelConnectingEvent.emit();
+    }
+    this.closeWindow(id);
   }
 
   closeWindow(id: string): void {
@@ -491,6 +743,49 @@ export class WorkspaceComponent {
     this.itemOpen.emit(item);
   }
 
+  onItemModify(item: any): void {
+    this.closeContextMenu();
+    if (!item) return;
+
+    // Csak a home_theater(házimozi) setups-okra nyitunk buildert jelenleg
+    const isHT = String(item.setup_type || '').toLowerCase().includes('home_theater') ||
+                 String(item.category || '').toLowerCase().includes('home_theater');
+
+    if (isHT) {
+      this.openHtBuilderWindow(item);
+    } else {
+      console.log('Modify not supported for this item type:', item);
+    }
+  }
+
+  private openHtBuilderWindow(item: any): void {
+    const buildId = item.id || item.setup_id || item.ID;
+    const winId = 'ht_builder_' + buildId;
+
+    // Ha már nyitva van, fókuszáljuk
+    const existing = this.windows.find(w => w.id === winId);
+    if (existing) {
+      this.focusWindow(winId);
+      return;
+    }
+
+    const newWindow: WorkspaceWindow = {
+      id: winId,
+      kind: 'empty',
+      title: 'Házimozi',
+      payload: { setup: this.viewingSetup, buildId: buildId },
+      instanceNo: this.windows.length + 1,
+      x: 150,
+      y: 100,
+      width: 900,
+      zIndex: ++this.nextZIndex,
+      minimized: false,
+      maximized: false
+    };
+
+    this.windows = [...this.windows, newWindow];
+  }
+
   onItemDragEnded(item: any, pos: { x: number; y: number }): void {
     const currentKey = this.getItemTrackKey(item, 0);
 
@@ -516,6 +811,7 @@ export class WorkspaceComponent {
       item?.source_table ??
       item?.table_name ??
       item?.table ??
+      item?.category ??
       'unknown';
 
     const slot = item?.slot ?? 'noslot';
@@ -530,8 +826,13 @@ export class WorkspaceComponent {
     return `${source}::${slot}::${id}::${index}`;
   }
 
-  getItemDataId(item: any, index: number): string {
-    return `item:${this.getItemTrackKey(item, index)}`;
+  getItemDataId(item: any): string {
+    const cat = String(item?.category || item?.source_table || item?.table_name || '')
+      .toLowerCase()
+      .replace('[setup]', '')
+      .trim();
+    const id = item?.id ?? item?.ID ?? item?.item_id;
+    return `${cat}:${id}`;
   }
 
   getItemPosition(item: any, index: number): { x: number; y: number } {

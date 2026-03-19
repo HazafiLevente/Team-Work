@@ -37,13 +37,7 @@
             (ngModelChange)="onMotherboardChange()"
             [disabled]="!canSelectMotherboard()"
           >
-            <option [ngValue]="null">
-              @if (!canSelectMotherboard()) {
-                -- choose processor first --
-              } @else {
-                -- choose motherboard --
-              }
-            </option>
+            <option [ngValue]="null">-- choose motherboard --</option>
 
             @for (mb of getCompatibleMotherboards(); track getId(mb)) {
               <option [ngValue]="getId(mb)">
@@ -60,13 +54,7 @@
             [(ngModel)]="selectedRamId"
             [disabled]="!canSelectRam()"
           >
-            <option [ngValue]="null">
-              @if (!canSelectRam()) {
-                -- choose compatible motherboard first --
-              } @else {
-                -- choose RAM --
-              }
-            </option>
+            <option [ngValue]="null">-- choose RAM --</option>
 
             @for (ram of getCompatibleRams(); track getId(ram)) {
               <option [ngValue]="getId(ram)">
@@ -90,6 +78,17 @@
               </option>
             }
           </select>
+        </div>
+
+        <div class="field-card">
+          <label class="field-label">PC elnevezése *</label>
+          <input
+            type="text"
+            class="text-input"
+            [(ngModel)]="buildName"
+            maxlength="80"
+            placeholder="pl. Gamer PC / Munkaállomás / Streamer gép"
+          />
         </div>
 
         <div class="field-card">
@@ -147,7 +146,7 @@
           type="button"
           class="save-btn"
           (click)="saveBuild()"
-          [disabled]="saving"
+          [disabled]="saving || loading"
         >
           @if (saving) {
             Saving...

@@ -17,6 +17,7 @@ export class SetupDockComponent {
   @Output() restore = new EventEmitter<string>();
   @Output() maximize = new EventEmitter<string>();
   @Output() terminate = new EventEmitter<string>();
+  @Output() showDesktop = new EventEmitter<void>();
   @Output() dockItemRightClick = new EventEmitter<{ event: MouseEvent, window: any }>();
 
   isManagerOpen = false;
@@ -29,5 +30,9 @@ export class SetupDockComponent {
   onRestore(id: string) {
     this.restore.emit(id);
     this.isManagerOpen = false;
+  }
+
+  onShowDesktop() {
+    this.showDesktop.emit();
   }
 }

@@ -37,10 +37,12 @@ router.post("/:id/add-car", verifyUser, ctrl.carsAdd);
 // ✅ Generic device add to any setup
 router.post("/:id/save-device", verifyUser, ctrl.addDevice);
 
+// ✅ ITEM ACTIONS
+router.patch("/rename-item", verifyUser, ctrl.renameItem);
+router.delete("/remove-item", verifyUser, ctrl.removeItem);
 
 // ✅ CONNECTIONS
 router.post("/save-connection", verifyUser, ctrl.connectionsCreate);
 router.delete("/remove-connection/:id", verifyUser, ctrl.connectionsRemove);
-router.delete("/remove-item", verifyUser, ctrl.removeItem);
 
 module.exports = router;

@@ -14,7 +14,11 @@ export class ContextMenuItemComponent {
   @Input() y = 0;
 
   @Output() close = new EventEmitter<void>();
+
   @Output() openItem = new EventEmitter<void>();
+  @Output() rename = new EventEmitter<void>();
+  @Output() modify = new EventEmitter<void>();
+  @Output() deleteItem = new EventEmitter<void>();
 
   emitAndClose(emitter: EventEmitter<void>) {
     emitter.emit();

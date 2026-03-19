@@ -127,8 +127,7 @@ exports.saveBuild = async (req, res) => {
         const buildData = {
             setup_id,
             layout: typeof layout === 'string' ? layout : JSON.stringify(layout),
-            setup_name: title || "Házimozi",
-            setup_type: "home_theater"
+            setup_name: title || "Házimozi"
         };
 
         if (id) {

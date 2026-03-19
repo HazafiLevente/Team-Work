@@ -7,11 +7,43 @@
     <div class="divider"></div>
 
     @for (w of windows; track w.id) {
-
+      <div class="dock-item" [class.minimized]="w.minimized" [class.maximized]="w.maximized"
+           (click)="onRestore(w.id)" 
+           (contextmenu)="$event.preventDefault(); dockItemRightClick.emit({event: $event, window: w})">
+        <div class="dock-icon">
+          @if (w.kind === 'devices') { 📱 }
+          @else if (w.kind === 'connections') { 🔗 }
+          @else if (w.kind === 'pairing') { 🤝 }
+          @else if (w.kind === 'empty') { 🎥 }
+          @else { 📦 }
+        </div>
+        <span class="dock-title">{{ w.title }}</span>
+        <div class="active-indicator"></div>
+      </div>
     }
+
+    <div class="divider"></div>
+    <div class="show-desktop" (click)="onShowDesktop()" title="Asztal mutatása"></div>
   </div>
 
   @if (isManagerOpen) {
-
+  <div class="dock-manager-overlay">
+    <div class="manager-header">
+      <span>Ablak Kezelő</span>
+      <button class="close-manager-btn" (click)="isManagerOpen = false">×</button>
+    </div>
+    <div class="manager-content">
+      @for (w of windows; track w.id) {
+      <div class="manager-item" (click)="onRestore(w.id)">
+        <span class="manager-icon">📦</span>
+        <span class="manager-title">{{ w.title }}</span>
+        @if (w.minimized) { <span class="manager-status">Rejtve</span> }
+      </div>
+      }
+      @if (windows.length === 0) {
+      <div class="manager-empty">Nincs nyitott ablak</div>
+      }
+    </div>
+  </div>
   }
 </div>

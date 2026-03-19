@@ -58,6 +58,7 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit {
 
   connections: any[] = [];
   globalRoomConnections: any[] = [];
+  rawGlobalConnections: any[] = [];
 
   selectedProduct: any = null;
   selectedCarItem: any = null;
@@ -107,8 +108,10 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit {
   }
 
   private normalizeSetup(setup: any): any {
+    const id = setup?.id ?? setup?.setup_id ?? setup?.setupId;
     return {
       ...setup,
+      id: id,
       setup_name: setup?.setup_name ?? setup?.name ?? 'Névtelen setup'
     };
   }
@@ -123,6 +126,7 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit {
           ? res.setups.map((s: any) => this.normalizeSetup(s))
           : [];
         this.loading = false;
+        this.processGlobalConnections(this.rawGlobalConnections);
         this.updateLines();
       },
       error: (err) => {
@@ -136,8 +140,8 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit {
   loadGlobalConnections(): void {
     this.http.get<any[]>(`/api/setup/all-connections`, { withCredentials: true }).subscribe({
       next: (res) => {
-        this.globalRoomConnections = Array.isArray(res) ? res : [];
-        this.updateLines();
+        this.rawGlobalConnections = Array.isArray(res) ? res : [];
+        this.processGlobalConnections(this.rawGlobalConnections);
       },
       error: (err) => {
         console.error('❌ Global connections hiba:', err);
@@ -146,8 +150,41 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit {
     });
   }
 
+  processGlobalConnections(allConns: any[]): void {
+    if (!allConns || !allConns.length || !this.userSetups.length) {
+      this.globalRoomConnections = [];
+      return;
+    }
+
+    const aggregated = new Map<string, any>();
+
+    allConns.forEach(conn => {
+      const sId = String(conn.from_setup_id);
+      const tId = String(conn.to_setup_id);
+
+      if (sId !== tId) {
+        const key = [sId, tId].sort().join('-');
+
+        if (!aggregated.has(key)) {
+          aggregated.set(key, {
+            id: `global-${key}`,
+            source: { category: 'setup[Setup]', id: sId },
+            target: { category: 'setup[Setup]', id: tId }
+          });
+        }
+      }
+    });
+
+    this.globalRoomConnections = Array.from(aggregated.values());
+    console.log('🔄 Global connections processed:', this.globalRoomConnections.length);
+    this.updateLines();
+  }
+
   updateLines(): void {
     this.lineRefreshTrigger++;
+    setTimeout(() => {
+        this.workspaceComp?.updateLines?.();
+    });
   }
 
   getSetupTitle(setup: any): string {
@@ -155,8 +192,9 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit {
   }
 
   onSetupClick(setup: any): void {
-    if (!setup) return;
-    this.openSetupDetails(setup);
+    if (this.pairingStage === 'PICK_TARGET_SETUP') {
+      this.selectTargetSetup(setup);
+    }
   }
 
   onSetupDetails(setup: any): void {
@@ -195,9 +233,8 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit {
   loadConnections(setupId: number | string): void {
     this.http.get<any[]>(`/api/setup/${setupId}/get-connections`, { withCredentials: true }).subscribe({
       next: (res) => {
-        this.connections = Array.isArray(res) ? res : [];
+        this.processConnections(res || []);
         this.loadingItems = false;
-        this.updateLines();
       },
       error: (err) => {
         console.error('❌ Setup connections hiba:', err);
@@ -207,10 +244,49 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit {
     });
   }
 
+  processConnections(raw: any[]): void {
+    if (!raw.length) {
+      this.connections = [];
+      return;
+    }
+
+    this.connections = raw.map(c => {
+      return {
+        ...c,
+        source: {
+          category: this.mapTypeToCategory(c.from_device_type),
+          id: c.from_device_id
+        },
+        target: {
+          category: this.mapTypeToCategory(c.to_device_type),
+          id: c.to_device_id
+        }
+      };
+    });
+    this.updateLines();
+  }
+
+  private mapTypeToCategory(type: string): string {
+    const t = String(type || '').toLowerCase();
+    if (t === 'pc') return 'pc_details[Setup]';
+    if (t === 'switch') return 'switches[Setup]';
+    if (t === 'router') return 'router[Setup]';
+    if (t === 'modem') return 'modem[Setup]';
+    if (t === 'ht' || t === 'home_theater') return 'home_theater_setups[Setup]';
+    if (t === 'audiop') return 'audio_processor[Setup]';
+    if (t === 'mixer') return 'mixer[Setup]';
+
+    if (!t.includes('[setup]')) return `${t}[Setup]`;
+    return t;
+  }
+
   loadPairingItems(setupId: number | string): void {
     this.http.get<any[]>(`/api/setup/${setupId}/get-children`, { withCredentials: true }).subscribe({
       next: (res) => {
         this.pairingItems = Array.isArray(res) ? res : [];
+        if (this.pairingStage === 'PICK_SOURCE') {
+          this.workspaceComp?.openPairingWindow(this.connectSourceSetup, 'PICK_SOURCE', this.pairingItems);
+        }
       },
       error: (err) => {
         console.error('❌ Pairing source items hiba:', err);
@@ -223,6 +299,9 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit {
     this.http.get<any[]>(`/api/setup/${setupId}/get-children`, { withCredentials: true }).subscribe({
       next: (res) => {
         this.pairingTargetItems = Array.isArray(res) ? res : [];
+        if (this.pairingStage === 'PICK_TARGET_ITEM') {
+          this.workspaceComp?.openPairingWindow(this.connectTargetSetup, 'PICK_TARGET_ITEM', this.pairingTargetItems);
+        }
       },
       error: (err) => {
         console.error('❌ Pairing target items hiba:', err);
@@ -254,11 +333,13 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit {
     this.pairingTargetItems = [];
     this.pairingConnections = [];
     this.pairingStage = 'NONE';
+    this.workspaceComp?.closePairingWindows();
   }
 
   startConnectingFromMenu(setup: any): void {
     if (!setup) return;
 
+    this.cancelConnecting();
     this.connectSourceSetup = setup;
     this.connectSourceItem = null;
     this.connectTargetSetup = null;
@@ -274,6 +355,7 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit {
   selectSourceItem(item: any): void {
     this.connectSourceItem = item;
     this.pairingStage = 'PICK_TARGET_SETUP';
+    this.workspaceComp?.closeWindow('pairing_source');
   }
 
   selectTargetSetup(setup: any): void {
@@ -316,6 +398,7 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit {
       next: () => {
         this.cancelConnecting();
         this.loadGlobalConnections();
+        this.workspaceComp?.closeWindow('pairing_target');
 
         if (this.viewingSetup) {
           this.openSetupDetails(this.viewingSetup);
@@ -475,6 +558,7 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit {
     this.selectedPcPartItem = null;
     this.selectedHtItem = null;
     this.cancelConnecting();
+    this.processGlobalConnections(this.rawGlobalConnections);
     this.updateLines();
   }
 
@@ -598,6 +682,44 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit {
       },
       error: (err) => {
         console.error('❌ Setup átnevezés hiba:', err);
+        alert('Átnevezés sikertelen.');
+      }
+    });
+  }
+
+  saveRenamedItem(data: any): void {
+    if (!data) return;
+
+    const itemId = data?.id ?? data?.ID ?? data?.item_id;
+    const tableName = data?.category ?? data?.source_table ?? data?.table_name;
+    const newName = data?.renamed_name;
+
+    if (!itemId || !tableName || !newName) return;
+
+    this.http.patch<any>(
+      `/api/setup/update-item`,
+      { itemId, tableName, newName },
+      { withCredentials: true }
+    ).subscribe({
+      next: () => {
+        // Update local items array
+        this.items = this.items.map(it => {
+          const itId = it?.id ?? it?.ID ?? it?.item_id;
+          const itTab = it?.category ?? it?.source_table ?? it?.table_name;
+
+          if (String(itId) === String(itemId) && itTab === tableName) {
+            return {
+              ...it,
+              display_name: newName,
+              setup_name: newName,
+              name: newName
+            };
+          }
+          return it;
+        });
+      },
+      error: (err) => {
+        console.error('❌ Item átnevezés hiba:', err);
         alert('Átnevezés sikertelen.');
       }
     });

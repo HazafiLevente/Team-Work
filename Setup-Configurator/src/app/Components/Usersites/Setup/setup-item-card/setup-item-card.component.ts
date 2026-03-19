@@ -38,10 +38,15 @@ export class SetupItemCardComponent implements OnInit, AfterViewInit {
   @Output() itemClick = new EventEmitter<any>();
   @Output() itemDblClick = new EventEmitter<any>();
   @Output() itemRightClick = new EventEmitter<SetupItemRightClickPayload>();
+  @Output() renamed = new EventEmitter<any>();
 
   dragPosition = { x: 0, y: 0 };
 
+  isRenaming = false;
+  renameValue = '';
+
   @ViewChild('root', { static: true }) root!: ElementRef<HTMLElement>;
+  @ViewChild('renameInput') renameInput?: ElementRef<HTMLInputElement>;
 
   ngOnInit(): void {
     if (this.initialPosition) {
@@ -67,11 +72,61 @@ export class SetupItemCardComponent implements OnInit, AfterViewInit {
     );
   }
 
+  startRename(): void {
+    this.isRenaming = true;
+    this.renameValue = this.displayName;
+
+    setTimeout(() => {
+      const input = this.renameInput?.nativeElement;
+      if (!input) return;
+      input.focus();
+      input.select();
+    });
+  }
+
+  onRenameInput(event: Event): void {
+    const value = (event.target as HTMLInputElement)?.value ?? '';
+    this.renameValue = value;
+  }
+
+  cancelRename(): void {
+    this.isRenaming = false;
+    this.renameValue = '';
+  }
+
+  confirmRename(): void {
+    if (!this.isRenaming) return;
+
+    const newName = String(this.renameValue || '').trim();
+    const oldName = String(this.displayName || '').trim();
+
+    if (!newName) {
+      this.cancelRename();
+      return;
+    }
+
+    if (newName === oldName) {
+      this.cancelRename();
+      return;
+    }
+
+    this.renamed.emit({
+      item: this.item,
+      newName
+    });
+
+    this.isRenaming = false;
+    this.renameValue = '';
+  }
+
   onDragMoved(): void {
+    if (this.isRenaming) return;
     this.moved.emit();
   }
 
   onDragEnded(e: any): void {
+    if (this.isRenaming) return;
+
     const pos = e.source.getFreeDragPosition();
     this.dragPosition = pos;
 
@@ -82,14 +137,18 @@ export class SetupItemCardComponent implements OnInit, AfterViewInit {
   }
 
   onClick(): void {
+    if (this.isRenaming) return;
     this.itemClick.emit(this.item);
   }
 
   onDblClick(): void {
+    if (this.isRenaming) return;
     this.itemDblClick.emit(this.item);
   }
 
   onRightClick(e: MouseEvent): void {
+    if (this.isRenaming) return;
+
     e.preventDefault();
     e.stopPropagation();
 

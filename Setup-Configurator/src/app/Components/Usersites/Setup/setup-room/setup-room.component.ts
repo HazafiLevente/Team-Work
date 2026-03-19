@@ -129,11 +129,21 @@ export class SetupRoomComponent implements AfterViewInit {
 
   }
 
+  private lastClickTime = 0;
   onClick(): void {
+    const now = Date.now();
+    if (now - this.lastClickTime < 450) {
+      console.log('🏁 Manual double-click (450ms) detected on:', this.setup?.setup_name);
+      this.onDblClick();
+      this.lastClickTime = 0;
+      return;
+    }
+    this.lastClickTime = now;
     this.setupClick.emit(this.setup);
   }
 
   onDblClick(): void {
+    console.log('🔥 Final dblclick event emitted for:', this.setup?.setup_name);
     this.setupDblClick.emit(this.setup);
   }
 

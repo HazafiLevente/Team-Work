@@ -37,8 +37,15 @@ export class SetupConnectionsComponent {
     const sId = `${sCat}:${conn?.source?.id}`;
     const tId = `${tCat}:${conn?.target?.id}`;
 
-    let sEl = this.elementRegistry.get(sId);
-    let tEl = this.elementRegistry.get(tId);
+    let sEl = this.elementRegistry?.get(sId);
+    let tEl = this.elementRegistry?.get(tId);
+
+    console.log('🔗 [Connections] Drawing item line:', {
+      sId,
+      tId,
+      foundS: !!sEl,
+      foundT: !!tEl
+    });
 
     if (!sEl && tEl) {
       const tmp = sEl;
@@ -76,13 +83,12 @@ export class SetupConnectionsComponent {
     const sEl = this.elementRegistry.get(sId);
     const tEl = this.elementRegistry.get(tId);
 
-    /*console.log('draw room line', {
-      conn,
+    /*console.log('🔗 [Connections] Drawing room line:', {
       sId,
       tId,
-      sEl,
-      tEl,
-      registryKeys: Array.from(this.elementRegistry.keys())
+      foundS: !!sEl,
+      foundT: !!tEl,
+      registrySize: this.elementRegistry?.size
     });*/
 
     if (!sEl || !tEl) return '';

@@ -18,9 +18,12 @@
 
 /* --- HEADER --- */
 .canvas-header {
-    height: 70px;
-    padding: 0 24px;
+    min-height: 70px;
+    height: auto;
+    padding: 12px 24px;
     display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
     align-items: center;
     justify-content: space-between;
     background: rgba(255, 255, 255, 0.03);
@@ -64,6 +67,7 @@
 
 .actions {
     display: flex;
+    flex-wrap: wrap;
     gap: 12px;
 }
 
