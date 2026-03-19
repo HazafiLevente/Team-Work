@@ -1,12 +1,118 @@
-<div class="ht-room">
-  <div
-    class="speaker"
-    *ngFor="let s of speakers"
-    cdkDrag
-    [style.left.px]="s.x"
-    [style.top.px]="s.y"
-    [style.transform]="'rotate(' + s.rotation + 'deg)'"
-    (dblclick)="rotate(s)">
-    {{s.name}}
-  </div>
+<div class="ht-container" [class.sidebar-open]="sidebarOpen">
+    <!-- Header with Title Input and Actions -->
+    <div class="canvas-header">
+        <div class="build-info">
+            <input type="text" [(ngModel)]="buildTitle" placeholder="Házimozi neve..." class="title-input">
+            <span class="setup-hint" *ngIf="setup">Setup: {{ setup.setup_name }}</span>
+        </div>
+        <div class="actions">
+            <button class="btn-secondary" (click)="toggleSidebar()">
+                {{ sidebarOpen ? 'Sáv Bezárása' : 'Eszközök Hozzáadása' }}
+            </button>
+            <button class="btn-primary" (click)="saveBuild()" [disabled]="saving">
+                {{ saving ? 'Mentés...' : 'Elrendezés Mentése' }}
+            </button>
+        </div>
+    </div>
+
+    <div class="main-layout">
+        <!-- Canvas Area -->
+        <div class="canvas-area">
+            <div class="room-boundary" #boundary>
+
+                <!-- Connection Lines Layer -->
+                <svg class="connections-layer">
+                    <defs>
+                        <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+                            <feGaussianBlur stdDeviation="2" result="blur" />
+                            <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                        </filter>
+                    </defs>
+                    @for (line of getConnections(); track $index) {
+                    <line [attr.x1]="line.x1" [attr.y1]="line.y1" [attr.x2]="line.x2" [attr.y2]="line.y2"
+                        class="connection-line" />
+                    }
+                </svg>
+
+                @for (item of placedItems; track item.id) {
+                <div class="item-on-canvas" [style.left.px]="item.x" [style.top.px]="item.y"
+                    [style.transform]="'rotate(' + item.rotation + 'deg)'"
+                    [class.connecting-source]="connectingFrom === item.id" cdkDrag [cdkDragBoundary]="boundary"
+                    (cdkDragEnded)="onDragEnded($event, item)">
+
+                    <div class="item-card">
+                        <div class="card-header">
+                            <span class="item-type">{{ item.role || item.type }}</span>
+                            <div class="card-actions">
+                                <button class="icon-btn" (click)="startConnection(item.id); $event.stopPropagation()"
+                                    title="Összekötés">
+                                    🔗
+                                </button>
+                                <button class="icon-btn" (click)="rotateItem(item); $event.stopPropagation()"
+                                    title="Forgatás">
+                                    ↻
+                                </button>
+                                <button class="icon-btn danger" (click)="removeItem(item.id); $event.stopPropagation()"
+                                    title="Törlés">
+                                    ✕
+                                </button>
+                            </div>
+                        </div>
+                        <div class="card-body" (click)="connectingFrom ? toggleConnection(item.id) : null">
+                            <div class="item-manufacturer">{{ item.manufacturer }}</div>
+                            <div class="item-name">{{ item.name }}</div>
+                        </div>
+                        <div class="card-footer" *ngIf="item.category === 'Speakers'">
+                            <select class="role-select" [(ngModel)]="item.role"
+                                (change)="updateItemRole(item, item.role!)" (click)="$event.stopPropagation()">
+                                <option value="Front">Front</option>
+                                <option value="Center">Center</option>
+                                <option value="Surround">Surround</option>
+                                <option value="Atmos">Atmos</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                }
+
+                @if (placedItems.length === 0) {
+                <div class="empty-state">
+                    <div class="icon">🎬</div>
+                    <p>A házimozi üres. Adj hozzá eszközöket az oldalsávból!</p>
+                </div>
+                }
+            </div>
+        </div>
+
+        <!-- Product Sidebar -->
+        <div class="product-sidebar" [class.open]="sidebarOpen">
+            <div class="sidebar-header">
+                <h3>Katalógus</h3>
+                <div class="search-box">
+                    <input type="text" [(ngModel)]="searchQuery" placeholder="Keresés...">
+                </div>
+            </div>
+
+            <div class="sidebar-content">
+                @for (cat of getCategoryKeys(); track cat) {
+                @if (getFilteredCatalog()[cat]?.length > 0) {
+                <div class="category-section">
+                    <h4>{{ cat }}</h4>
+                    <div class="product-list">
+                        @for (prod of getFilteredCatalog()[cat]; track prod.id) {
+                        <div class="product-item" (click)="addItem(prod, cat)">
+                            <div class="prod-info">
+                                <span class="prod-brand">{{ prod.manufacturer }}</span>
+                                <span class="prod-model">{{ prod.model }}</span>
+                            </div>
+                            <button class="add-btn">+</button>
+                        </div>
+                        }
+                    </div>
+                </div>
+                }
+                }
+            </div>
+        </div>
+    </div>
 </div>

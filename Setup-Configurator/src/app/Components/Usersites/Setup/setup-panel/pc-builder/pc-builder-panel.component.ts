@@ -1,4 +1,4 @@
-import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
@@ -12,6 +12,8 @@ import { HttpClient, HttpClientModule } from '@angular/common/http';
 })
 export class PcBuilderPanelComponent implements OnChanges {
   @Input() setup: any;
+  @Output() close = new EventEmitter<void>();
+  @Output() saved = new EventEmitter<void>();
 
   loading = false;
   saving = false;
@@ -34,8 +36,8 @@ export class PcBuilderPanelComponent implements OnChanges {
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['setup'] && this.setup) {
-      this.loadAllParts();
       this.resetSelections();
+      this.loadAllParts();
     }
   }
 
@@ -55,38 +57,132 @@ export class PcBuilderPanelComponent implements OnChanges {
   }
 
   private loadAllParts(): void {
+    const sid = this.setupId();
+    if (!sid) {
+      this.error = 'Missing setup id.';
+      return;
+    }
+
     this.loading = true;
     this.error = '';
     this.success = '';
 
-    Promise.all([
-      this.http.get<any[]>('/api/processors', { withCredentials: true }).toPromise(),
-      this.http.get<any[]>('/api/motherboards', { withCredentials: true }).toPromise(),
-      this.http.get<any[]>('/api/rams', { withCredentials: true }).toPromise(),
-      this.http.get<any[]>('/api/videocards', { withCredentials: true }).toPromise(),
-      this.http.get<any[]>('/api/psus', { withCredentials: true }).toPromise()
-    ])
-      .then(([processors, motherboards, rams, gpus, psus]) => {
-        this.processors = this.unwrapArray(processors);
-        this.motherboards = this.unwrapArray(motherboards);
-        this.rams = this.unwrapArray(rams);
-        this.gpus = this.unwrapArray(gpus);
-        this.psus = this.unwrapArray(psus);
+    this.http.get<any>(`/api/setup/${sid}/get-pcparts`, { withCredentials: true }).subscribe({
+      next: (res) => {
+        const parts = this.unwrapParts(res);
+
+        this.processors = parts.filter((part) => part.slot === 'cpu');
+        this.motherboards = parts.filter((part) => part.slot === 'motherboard');
+        this.rams = parts.filter((part) => part.slot === 'ram');
+        this.gpus = parts.filter((part) => part.slot === 'gpu');
+        this.psus = parts.filter((part) => part.slot === 'psu');
+
         this.loading = false;
-      })
-      .catch((err) => {
+      },
+      error: (err) => {
         console.error('PC builder load error:', err);
         this.error = 'Failed to load PC parts.';
         this.loading = false;
-      });
+      }
+    });
   }
 
-  private unwrapArray(res: any): any[] {
+  private unwrapParts(res: any): any[] {
     if (Array.isArray(res)) return res;
+    if (Array.isArray(res?.parts)) return res.parts;
     if (Array.isArray(res?.items)) return res.items;
     if (Array.isArray(res?.data)) return res.data;
     if (Array.isArray(res?.rows)) return res.rows;
     return [];
+  }
+
+  private findExistingPcBuild(setupId: number): void {
+    this.http.get<any>(`/api/setup/${setupId}/get-pcbuilds`, { withCredentials: true }).subscribe({
+      next: (res) => {
+        const builds = Array.isArray(res?.pcs) ? res.pcs : [];
+        const existing = builds[0] ?? null;
+
+        if (existing?.id != null) {
+          this.fillSelectionsFromExistingBuild(existing);
+          this.updatePcBuild(Number(existing.id));
+          return;
+        }
+
+        this.createPcBuild(setupId);
+      },
+      error: (err) => {
+        console.error('PC build list load error:', err);
+        this.saving = false;
+        this.error = 'Failed to load existing PC builds.';
+      }
+    });
+  }
+
+  private createPcBuild(setupId: number): void {
+    const setupName = String(
+      this.setup?.setup_name ??
+      this.setup?.name ??
+      this.setup?.display_name ??
+      'PC Build'
+    ).trim() || 'PC Build';
+
+    this.http.post<any>(`/api/setup/${setupId}/save-pcbuild`, {
+      pc_name: setupName
+    }, { withCredentials: true }).subscribe({
+      next: (res) => {
+        const pcId = res?.pc?.id;
+        if (pcId == null) {
+          this.saving = false;
+          this.error = 'PC build was created, but its id is missing.';
+          return;
+        }
+
+        this.updatePcBuild(Number(pcId));
+      },
+      error: (err) => {
+        console.error('PC build create error:', err);
+        this.saving = false;
+        this.error = 'Failed to create PC build.';
+      }
+    });
+  }
+
+  private updatePcBuild(pcId: number): void {
+    const payload = {
+      processor_id: this.selectedProcessorId,
+      motherboard_id: this.selectedMotherboardId,
+      ram_id: this.selectedRamId,
+      videocard_id: this.selectedGpuId,
+      psu_id: this.selectedPsuId
+    };
+
+    this.http.patch(`/api/setup-update/save-pcbuild/${pcId}`, payload, { withCredentials: true }).subscribe({
+      next: () => {
+        this.saving = false;
+        this.success = 'PC build saved successfully.';
+        this.saved.emit();
+      },
+      error: (err) => {
+        console.error('PC build update error:', err);
+        this.saving = false;
+        this.error = 'Failed to save PC build.';
+      }
+    });
+  }
+
+  private fillSelectionsFromExistingBuild(pc: any): void {
+    this.selectedProcessorId = this.toNullableNumber(pc?.processor_id);
+    this.selectedMotherboardId = this.toNullableNumber(pc?.motherboard_id);
+    this.selectedRamId = this.toNullableNumber(pc?.ram_id);
+    this.selectedGpuId = this.toNullableNumber(pc?.videocard_id);
+    this.selectedPsuId = this.toNullableNumber(pc?.psu_id);
+  }
+
+  private toNullableNumber(value: any): number | null {
+    if (value === null || value === undefined || value === '') return null;
+
+    const num = Number(value);
+    return Number.isNaN(num) ? null : num;
   }
 
   getId(row: any): number | null {
@@ -95,7 +191,12 @@ export class PcBuilderPanelComponent implements OnChanges {
   }
 
   private getModel(row: any): string {
-    return String(row?.model ?? row?.Model ?? '').trim();
+    return String(
+      row?.display_name ??
+      row?.model ??
+      row?.Model ??
+      ''
+    ).trim();
   }
 
   private getManufacturer(row: any): string {
@@ -149,7 +250,8 @@ export class PcBuilderPanelComponent implements OnChanges {
     const cpuSocket = this.getSocket(cpu);
     if (!cpuSocket) return [];
 
-    return this.motherboards.filter(mb => this.getSocket(mb) === cpuSocket);
+    const exactMatches = this.motherboards.filter(mb => this.getSocket(mb) === cpuSocket);
+    return exactMatches.length > 0 ? exactMatches : this.motherboards;
   }
 
   getCompatibleRams(): any[] {
@@ -162,15 +264,24 @@ export class PcBuilderPanelComponent implements OnChanges {
     const mbSocket = this.getSocket(mb);
     const mbRamType = this.getRamType(mb);
 
-    if (!cpuSocket || !mbSocket || cpuSocket !== mbSocket) {
+    if (cpuSocket && mbSocket && cpuSocket !== mbSocket) {
       return [];
     }
 
-    return this.rams.filter(ram => this.isRamCompatible(cpuSocket, mbRamType, this.getRamType(ram)));
+    if (!mbRamType) {
+      return this.rams;
+    }
+
+    const compatible = this.rams.filter(ram => this.isRamCompatible(cpuSocket, mbRamType, this.getRamType(ram)));
+    return compatible.length > 0 ? compatible : this.rams;
   }
 
   private isRamCompatible(cpuSocket: string, motherboardRamType: string, ramType: string): boolean {
-    if (!cpuSocket || !motherboardRamType || !ramType) return false;
+    if (!motherboardRamType || !ramType) return false;
+
+    if (!cpuSocket) {
+      return ramType === motherboardRamType;
+    }
 
     if (cpuSocket === 'AM4') {
       return motherboardRamType === 'DDR4' && ramType === 'DDR4';
@@ -217,6 +328,9 @@ export class PcBuilderPanelComponent implements OnChanges {
   }
 
   getProcessorLabel(cpu: any): string {
+    const displayName = String(cpu?.display_name ?? '').trim();
+    if (displayName) return displayName;
+
     const manufacturer = this.getManufacturer(cpu);
     const model = this.getModel(cpu);
     const socket = this.getSocket(cpu);
@@ -224,6 +338,9 @@ export class PcBuilderPanelComponent implements OnChanges {
   }
 
   getMotherboardLabel(mb: any): string {
+    const displayName = String(mb?.display_name ?? '').trim();
+    if (displayName) return displayName;
+
     const manufacturer = this.getManufacturer(mb);
     const model = this.getModel(mb);
     const socket = this.getSocket(mb);
@@ -234,6 +351,9 @@ export class PcBuilderPanelComponent implements OnChanges {
   }
 
   getRamLabel(ram: any): string {
+    const displayName = String(ram?.display_name ?? '').trim();
+    if (displayName) return displayName;
+
     const manufacturer = this.getManufacturer(ram);
     const model = this.getModel(ram);
     const ramType = this.getRamType(ram);
@@ -241,6 +361,9 @@ export class PcBuilderPanelComponent implements OnChanges {
   }
 
   getGpuLabel(gpu: any): string {
+    const displayName = String(gpu?.display_name ?? '').trim();
+    if (displayName) return displayName;
+
     const manufacturer = this.getManufacturer(gpu);
     const model = this.getModel(gpu);
     const price = this.getPrice(gpu);
@@ -248,6 +371,9 @@ export class PcBuilderPanelComponent implements OnChanges {
   }
 
   getPsuLabel(psu: any): string {
+    const displayName = String(psu?.display_name ?? '').trim();
+    if (displayName) return displayName;
+
     const manufacturer = this.getManufacturer(psu);
     const model = this.getModel(psu);
     const wattage = this.getWattage(psu);
@@ -280,24 +406,6 @@ export class PcBuilderPanelComponent implements OnChanges {
     this.error = '';
     this.success = '';
 
-    const payload = {
-      processor_id: this.selectedProcessorId,
-      motherboard_id: this.selectedMotherboardId,
-      ram_id: this.selectedRamId,
-      videocard_id: this.selectedGpuId,
-      psu_id: this.selectedPsuId
-    };
-
-    this.http.post(`/api/setup/${sid}/save-pcbuild`, payload, { withCredentials: true }).subscribe({
-      next: () => {
-        this.saving = false;
-        this.success = 'PC build saved successfully.';
-      },
-      error: (err) => {
-        console.error('PC build save error:', err);
-        this.saving = false;
-        this.error = 'Failed to save PC build.';
-      }
-    });
+    this.findExistingPcBuild(sid);
   }
 }

@@ -4,7 +4,7 @@ import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 
 @Component({
-  selector: 'app-home-theater-builder',
+  selector: 'app-home-theater-builder-modal',
   standalone: true,
   imports: [CommonModule, HttpClientModule, FormsModule],
   templateUrl: './home-theater-builder.component.html',

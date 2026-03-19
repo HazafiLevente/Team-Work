@@ -2,28 +2,35 @@ const router = require("express").Router();
 const ctrl = require("../controllers/hometheaters.controller");
 const verifyUser = require("../middlewares/verifyUser");
 
-// LIST
-router.get("/", ctrl.list);
-router.get("/list", ctrl.list);
+/**
+ * hometheaters.routes.js
+ * 
+ * Defines expressive, RESTful routes for Home Theater management.
+ */
 
-// CATALOG
-router.get("/get-catalog", verifyUser, ctrl.getHtCatalog);
+// --- CATALOG & GEAR ---
+router.get("/catalog", verifyUser, ctrl.getHtCatalog);
 
-// DEVICES
-router.get("/:setupId/get-devices", verifyUser, ctrl.listDevices);
-router.post("/save-device", verifyUser, ctrl.createDevice);
+// --- BUILD MANAGEMENT ---
+// List all builds for a setup
+router.get("/setup/:setupId", verifyUser, ctrl.listBuildsForSetup);
 
-// CONNECTIONS
-router.get("/:setupId/get-connections", verifyUser, ctrl.listConnections);
-router.post("/save-connection", verifyUser, ctrl.createConnection);
-router.delete("/remove-connection/:id", verifyUser, ctrl.deleteConnection);
+// Get a specific build by its primary ID
+router.get("/build/:id", verifyUser, ctrl.getBuildById);
 
-// BUILD
-router.get("/:setupId/get-build", verifyUser, ctrl.getHtBuild);
-router.post("/save-build", verifyUser, ctrl.saveHtBuild);
+// Create or Update a build
+// [POST] /build - if payload includes { id }, it updates; otherwise inserts new.
+router.post("/build", verifyUser, ctrl.saveBuild);
 
-// 🔥 ÚJ ROUTE-OK
-router.patch("/update-build/:id", verifyUser, ctrl.updateHtBuild);
-router.delete("/delete-build/:id", verifyUser, ctrl.deleteHtBuild);
+// Delete a build
+router.delete("/build/:id", verifyUser, ctrl.deleteBuild);
+
+
+// --- LEGACY COMPATIBILITY ---
+// These are kept to ensure no breaking changes for existing un-refactored calls
+router.get("/:setupId/build", verifyUser, ctrl.getHtBuild);
+router.get("/build-by-id/:id", verifyUser, ctrl.getHtBuildById);
+router.post("/save-build", verifyUser, ctrl.saveBuild);
+router.get("/list", verifyUser, ctrl.list);
 
 module.exports = router;

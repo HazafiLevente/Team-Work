@@ -104,7 +104,9 @@
     @if (w.title === 'Házimozi') {
     <app-home-theater-builder
       [setup]="w.payload.setup"
-      [startWithSidebarOpen]="w.payload.startWithSidebarOpen ?? false">
+      [buildId]="w.payload.buildId"
+      [startWithSidebarOpen]="w.payload.startWithSidebarOpen ?? false"
+      (saved)="onHtSaved()">
     </app-home-theater-builder>
     } @else {
     <div class="empty-window-content">

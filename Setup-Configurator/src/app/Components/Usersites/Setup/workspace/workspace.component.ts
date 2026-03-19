@@ -26,8 +26,11 @@ import { SetupPairingModalComponent } from '../setup-pairing-modal/setup-pairing
 import { ContextMenuDockComponent } from './context-menus/context-menu-dock/context-menu-dock.component';
 import { ContextMenuWorkspaceComponent } from './context-menus/context-menu-workspace/context-menu-workspace.component';
 import { ContextMenuCategoryComponent } from './context-menus/context-menu-category/context-menu-category.component';
-import { HomeTheaterBuilderComponent } from './setup-windows/quick-builder/home-theater-builder/home-theater-builder.component';
+
 import { AddDeviceWindowComponent } from './setup-windows/add-device-window/add-device-window.component';
+import {
+  HomeTheaterBuilderComponent
+} from '../setup-panel/home-theater-builder/ht-builder/home-theater-builder.component';
 
 export type WorkspaceWindow = {
   id: string;
@@ -65,8 +68,9 @@ export type WorkspaceWindow = {
     ContextMenuDockComponent,
     ContextMenuWorkspaceComponent,
     ContextMenuCategoryComponent,
-    HomeTheaterBuilderComponent,
-    AddDeviceWindowComponent
+
+    AddDeviceWindowComponent,
+    HomeTheaterBuilderComponent
   ]
 })
 export class WorkspaceComponent {
@@ -104,6 +108,7 @@ export class WorkspaceComponent {
   @Output() finalizeConnectionEvent = new EventEmitter<any>();
 
   @Output() itemOpen = new EventEmitter<any>();
+  @Output() htSaved = new EventEmitter<void>();
 
   private rafId: number | null = null;
 
@@ -340,7 +345,7 @@ export class WorkspaceComponent {
     this.windows = [...this.windows, newWindow];
   }
 
-  openEmptyWindow(title: string, setup: any): void {
+  openEmptyWindow(title: string, setup: any, extraPayload: any = {}): void {
     const emptyCount = this.windows.filter(w => w.kind === 'empty').length + 1;
     const offset = (emptyCount - 1) * 28;
 
@@ -348,7 +353,7 @@ export class WorkspaceComponent {
       id: 'win_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
       kind: 'empty',
       title: title,
-      payload: { setup },
+      payload: { setup, ...extraPayload },
       instanceNo: emptyCount,
       x: 100 + offset,
       y: 60 + offset,
@@ -534,5 +539,9 @@ export class WorkspaceComponent {
       x: item?.x ?? 40 + (index % 4) * 210,
       y: item?.y ?? 40 + Math.floor(index / 4) * 110
     };
+  }
+
+  onHtSaved(): void {
+    this.htSaved.emit();
   }
 }

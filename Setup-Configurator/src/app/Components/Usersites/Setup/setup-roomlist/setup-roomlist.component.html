@@ -11,7 +11,8 @@
       (categorySelected)="handleCategorySelected($event)" (deleteSetup)="deleteSetupFromMenu($event)"
       (rename)="openRenameFromMenu($event)" (connect)="startConnectingFromMenu($event)"
       (setupClicked)="onSetupClick($event)" (cancelConnectingEvent)="cancelConnecting()"
-      (selectSourceEvent)="selectSourceItem($event)" (finalizeConnectionEvent)="finalizeConnection($event)">
+      (selectSourceEvent)="selectSourceItem($event)" (finalizeConnectionEvent)="finalizeConnection($event)"
+      (htSaved)="openSetupDetails(viewingSetup)">
     </app-workspace>
 
     @if (selectedProduct) {
@@ -44,4 +45,4 @@
     </app-setup-ht-details-panel>
     }
 
-</div>
+</div>

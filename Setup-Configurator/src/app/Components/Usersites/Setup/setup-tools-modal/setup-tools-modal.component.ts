@@ -3,8 +3,7 @@ import { CommonModule } from '@angular/common';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { SetupPcBuilderModalComponent } from '../setup-pc-builder-modal/setup-pc-builder-modal.component';
-import { HomeTheaterBuilderComponent }
-  from '../workspace/setup-windows/quick-builder/home-theater-builder-modal/home-theater-builder.component';
+import { HomeTheaterBuilderComponent } from '../setup-panel/home-theater-builder/ht-builder/home-theater-builder.component';
 
 type UiItem = {
   category: string;

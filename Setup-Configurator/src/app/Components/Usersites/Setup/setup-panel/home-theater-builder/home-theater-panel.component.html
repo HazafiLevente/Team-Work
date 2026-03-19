@@ -6,25 +6,16 @@
   [cdkDragBoundary]="boundaryRef"
 >
   <div class="ht-header" cdkDragHandle>
+    <span class="title">Home Theater</span>
 
-    Home Theater
-
-    <div class="window-buttons">
-
-      <button (click)="minimize()">🗕</button>
-
-      <button (click)="toggleMaximize()">🗖</button>
-
-      <button (click)="close()">✕</button>
-
+    <div class="ht-controls">
+      <button class="ctrl-btn" (click)="minimize()">🗕</button>
+      <button class="ctrl-btn" (click)="toggleMaximize()">🗖</button>
+      <button class="ctrl-btn close" (click)="close()">✕</button>
     </div>
-
   </div>
 
-</div>
-
-<div class="ht-body">
-
-  <app-home-theater-builder></app-home-theater-builder>
-
+  <div class="ht-body">
+    <app-home-theater-builder></app-home-theater-builder>
+  </div>
 </div>
