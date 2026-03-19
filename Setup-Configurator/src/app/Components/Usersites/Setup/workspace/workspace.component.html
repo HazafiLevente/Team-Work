@@ -5,63 +5,63 @@
                   [shockRadius]="250" [shockStrength]="5" [resistance]="750" [returnDuration]="1.5">
     </app-dot-grid>
 
-  <div class="toolbar">
-    @if (viewingSetup) {
-      <button class="back-btn" type="button" (click)="back.emit()">
-        ← Vissza
-      </button>
-    }
+    <div class="toolbar">
+      @if (viewingSetup) {
+        <button class="back-btn" type="button" (click)="back.emit()">
+          ← Vissza
+        </button>
+      }
+    </div>
+
+    <div class="boundary-area" #dragBoundary [style.min-width.px]="extWidth" [style.min-height.px]="extHeight">
+
+      @if (!viewingSetup) {
+
+        @if (!loading) {
+          @for (setup of userSetups; track setup.id || setup.setup_id || $index) {
+            <app-setup-room [dataId]="'room:' + (setup.id || setup.setup_id || $index)" [setup]="setup"
+                            [boundaryRef]="boundaryEl.nativeElement" [dragDisabled]="pairingStage !== 'NONE'" [initialPosition]="{
+                x: setup.x ?? 50,
+                y: setup.y ?? 50
+              }" (elementReady)="registerElement($event)" (moved)="updateLines()"
+                            (dragEnded)="onRoomDragEnded(setup, $event)" (setupClick)="onSetupClick($event)"
+                            (setupDblClick)="openSetupDetails($event)" (setupRightClick)="onSetupRightClick($event)"
+                            (renamed)="onRoomRenamed($event)">
+            </app-setup-room>
+          }
+          @empty {
+            <div class="no-data">Nincs setup.</div>
+          }
+        } @else {
+          <div class="no-data">Betöltés...</div>
+        }
+
+      } @else {
+
+        @if (loadingItems) {
+          <div class="no-data">Betöltés...</div>
+        } @else if (!items || items.length === 0) {
+          <div class="no-data">Ez a setup üres.</div>
+        } @else {
+          @for (item of items; track getItemTrackKey(item, $index)) {
+            <app-setup-item-card [item]="item" [dataId]="getItemDataId(item)" [boundaryRef]="boundaryEl.nativeElement"
+                                 [dragDisabled]="false" [initialPosition]="getItemPosition(item, $index)" (elementReady)="registerElement($event)"
+                                 (moved)="updateLines()" (dragEnded)="onItemDragEnded(item, $event)" (itemDblClick)="openItemDetails($event)"
+                                 (itemRightClick)="onItemRightClick($event)" (renamed)="onItemRenamed($event)">
+            </app-setup-item-card>
+          }
+        }
+
+      }
+
+      <app-setup-connections [connections]="connections" [globalRoomConnections]="globalRoomConnections"
+                             [lineRefreshTrigger]="lineRefreshTrigger" [elementRegistry]="elementRegistry"
+                             [boundaryEl]="boundaryEl.nativeElement" [connectMousePos]="connectMousePos"
+                             [connectSourceSetup]="connectSourceSetup" [pairingStage]="pairingStage" [viewingSetup]="viewingSetup">
+      </app-setup-connections>
+
+    </div>
   </div>
-
-  <div class="boundary-area" #dragBoundary [style.min-width.px]="extWidth" [style.min-height.px]="extHeight">
-
-    @if (!viewingSetup) {
-
-      @if (!loading) {
-        @for (setup of userSetups; track setup.id || setup.setup_id || $index) {
-          <app-setup-room [dataId]="'room:' + (setup.id || setup.setup_id || $index)" [setup]="setup"
-                          [boundaryRef]="boundaryEl.nativeElement" [dragDisabled]="pairingStage !== 'NONE'" [initialPosition]="{
-              x: setup.x ?? 50,
-              y: setup.y ?? 50
-            }" (elementReady)="registerElement($event)" (moved)="updateLines()"
-                          (dragEnded)="onRoomDragEnded(setup, $event)" (setupClick)="onSetupClick($event)"
-                          (setupDblClick)="openSetupDetails($event)" (setupRightClick)="onSetupRightClick($event)"
-                          (renamed)="onRoomRenamed($event)">
-          </app-setup-room>
-        }
-        @empty {
-          <div class="no-data">Nincs setup.</div>
-        }
-      } @else {
-        <div class="no-data">Betöltés...</div>
-      }
-
-    } @else {
-
-      @if (loadingItems) {
-        <div class="no-data">Betöltés...</div>
-      } @else if (!items || items.length === 0) {
-        <div class="no-data">Ez a setup üres.</div>
-      } @else {
-        @for (item of items; track getItemTrackKey(item, $index)) {
-          <app-setup-item-card [item]="item" [dataId]="getItemDataId(item)" [boundaryRef]="boundaryEl.nativeElement"
-                               [dragDisabled]="false" [initialPosition]="getItemPosition(item, $index)" (elementReady)="registerElement($event)"
-                               (moved)="updateLines()" (dragEnded)="onItemDragEnded(item, $event)" (itemDblClick)="openItemDetails($event)"
-                               (itemRightClick)="onItemRightClick($event)" (renamed)="onItemRenamed($event)">
-          </app-setup-item-card>
-        }
-      }
-
-    }
-
-    <app-setup-connections [connections]="connections" [globalRoomConnections]="globalRoomConnections"
-                           [lineRefreshTrigger]="lineRefreshTrigger" [elementRegistry]="elementRegistry"
-                           [boundaryEl]="boundaryEl.nativeElement" [connectMousePos]="connectMousePos"
-                           [connectSourceSetup]="connectSourceSetup" [pairingStage]="pairingStage" [viewingSetup]="viewingSetup">
-    </app-setup-connections>
-
-  </div> <!-- End boundary-area -->
-  </div> <!-- End pan-wrapper -->
 
   @if (ctxOpen && ctxSetup) {
     <app-context-menu-room [x]="ctxX" [y]="ctxY" (close)="closeContextMenu()" (openSetup)="openSetupDetails(ctxSetup)"
@@ -101,18 +101,21 @@
         @if (w.kind === 'devices') {
           <app-devices-menu [setup]="w.payload.setup"></app-devices-menu>
         }
+
         @if (w.kind === 'connections') {
           <app-connections-menu [setup]="w.payload.setup"></app-connections-menu>
           <div class="empty-window-content">
             <p>Hamarosan: Kapcsolatok...</p>
           </div>
         }
+
         @if (w.kind === 'pairing') {
           <app-setup-pairing-modal [pairingStage]="w.payload.pairingStage" [pairingItemList]="w.payload.pairingItemList"
                                    [connectSourceSetup]="w.payload.setup" [connectTargetSetup]="connectTargetSetup" (cancel)="closeWindow(w.id)"
                                    (selectSource)="selectSourceEvent.emit($event)" (finalize)="finalizeConnectionEvent.emit({setup: w.payload.setup, item: $event})">
           </app-setup-pairing-modal>
         }
+
         @if (w.kind === 'empty') {
           @if (w.title === 'Házimozi') {
             <app-home-theater-builder
@@ -120,12 +123,18 @@
               [buildId]="w.payload.buildId"
               (saved)="onHtSaved()">
             </app-home-theater-builder>
+          } @else if (w.title === 'Autók') {
+            <app-car-builder-panel
+              [setup]="w.payload.setup"
+              (saved)="onHtSaved()">
+            </app-car-builder-panel>
           } @else {
             <div class="empty-window-content">
               <p>Hamarosan: {{ w.title }} tartalom...</p>
             </div>
           }
         }
+
         @if (w.kind === 'add-device') {
         }
       </app-setup-window>

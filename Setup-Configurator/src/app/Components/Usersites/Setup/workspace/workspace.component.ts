@@ -32,6 +32,7 @@ import { AddDeviceWindowComponent } from './setup-windows/add-device-window/add-
 import {
   HomeTheaterBuilderComponent
 } from '../setup-panel/home-theater-builder/ht-builder/home-theater-builder.component';
+import { CarBuilderPanelComponent } from '../setup-panel/car-builder/car-builder-panel.component';
 
 export type WorkspaceWindow = {
   id: string;
@@ -69,9 +70,9 @@ export type WorkspaceWindow = {
     ContextMenuWorkspaceComponent,
     ContextMenuCategoryComponent,
     DotGridComponent,
-
     AddDeviceWindowComponent,
-    HomeTheaterBuilderComponent
+    HomeTheaterBuilderComponent,
+    CarBuilderPanelComponent
   ]
 })
 export class WorkspaceComponent {
@@ -141,7 +142,6 @@ export class WorkspaceComponent {
   @ViewChild('workspaceRoot', { static: true })
   workspaceRoot!: ElementRef<HTMLElement>;
 
-  // --- Panning State ---
   isPanning = false;
   startX = 0;
   startY = 0;
@@ -153,12 +153,11 @@ export class WorkspaceComponent {
   constructor(private http: HttpClient) {}
 
   onMouseDown(event: MouseEvent): void {
-    // Only allow pan on background or dot grid
     const target = event.target as HTMLElement;
     const isBackground = target.classList.contains('setup-workspace') ||
-                         target.classList.contains('boundary-area') ||
-                         target.classList.contains('pan-wrapper') ||
-                         target.tagName.toLowerCase() === 'app-dot-grid';
+      target.classList.contains('boundary-area') ||
+      target.classList.contains('pan-wrapper') ||
+      target.tagName.toLowerCase() === 'app-dot-grid';
 
     if (!isBackground) return;
 
@@ -251,6 +250,15 @@ export class WorkspaceComponent {
   }
 
   onCategorySelected(category: string): void {
+    const normalized = String(category || '').trim().toLowerCase();
+
+    if (this.ctxSetup && (normalized === 'autók' || normalized === 'autok' || normalized === 'auto' || normalized === 'autó')) {
+      this.openCarBuilderWindow(this.ctxSetup);
+      this.ctxCategoryOpen = false;
+      this.ctxSetup = null;
+      return;
+    }
+
     const pos = { x: this.ctxCategoryX, y: this.ctxCategoryY };
 
     this.categorySelected.emit({
@@ -268,7 +276,6 @@ export class WorkspaceComponent {
 
     const rect = this.boundaryEl.nativeElement.getBoundingClientRect();
 
-    // Adjust for pan offsets
     this.ctxWorkspaceX = event.clientX - rect.left - this.panX;
     this.ctxWorkspaceY = event.clientY - rect.top - this.panY;
 
@@ -284,7 +291,6 @@ export class WorkspaceComponent {
     this.ctxSetup = payload.setup;
     this.ctxItem = null;
 
-    // Adjust for pan offsets
     this.ctxX = payload.x - rect.left - this.panX;
     this.ctxY = payload.y - rect.top - this.panY;
 
@@ -298,7 +304,6 @@ export class WorkspaceComponent {
     this.ctxItem = payload.item;
     this.ctxSetup = null;
 
-    // Adjust for pan offsets
     this.ctxX = payload.x - rect.left - this.panX;
     this.ctxY = payload.y - rect.top - this.panY;
 
@@ -602,7 +607,35 @@ export class WorkspaceComponent {
       instanceNo: emptyCount,
       x: 100 + offset,
       y: 60 + offset,
-      width: title === 'Házimozi' ? 1100 : undefined,
+      width: title === 'Házimozi' || title === 'Autók' ? 1100 : undefined,
+      zIndex: ++this.nextZIndex,
+      minimized: false,
+      maximized: false
+    };
+
+    this.closeContextMenu();
+    this.windows = [...this.windows, newWindow];
+  }
+
+  private openCarBuilderWindow(setup: any): void {
+    const setupId = setup?.id ?? setup?.setup_id ?? setup?.setupId ?? Date.now();
+    const winId = 'car_builder_' + setupId;
+
+    const existing = this.windows.find(w => w.id === winId);
+    if (existing) {
+      this.focusWindow(winId);
+      return;
+    }
+
+    const newWindow: WorkspaceWindow = {
+      id: winId,
+      kind: 'empty',
+      title: 'Autók',
+      payload: { setup },
+      instanceNo: this.windows.length + 1,
+      x: 160,
+      y: 90,
+      width: 900,
       zIndex: ++this.nextZIndex,
       minimized: false,
       maximized: false
@@ -747,9 +780,8 @@ export class WorkspaceComponent {
     this.closeContextMenu();
     if (!item) return;
 
-    // Csak a home_theater(házimozi) setups-okra nyitunk buildert jelenleg
     const isHT = String(item.setup_type || '').toLowerCase().includes('home_theater') ||
-                 String(item.category || '').toLowerCase().includes('home_theater');
+      String(item.category || '').toLowerCase().includes('home_theater');
 
     if (isHT) {
       this.openHtBuilderWindow(item);
@@ -762,7 +794,6 @@ export class WorkspaceComponent {
     const buildId = item.id || item.setup_id || item.ID;
     const winId = 'ht_builder_' + buildId;
 
-    // Ha már nyitva van, fókuszáljuk
     const existing = this.windows.find(w => w.id === winId);
     if (existing) {
       this.focusWindow(winId);
