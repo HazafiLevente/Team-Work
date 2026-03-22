@@ -3,6 +3,20 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 
+type PcPart = {
+  id: number;
+  slot: 'cpu' | 'gpu' | 'motherboard' | 'ram' | 'psu' | 'other';
+  source_table: string;
+  display_name: string;
+  manufacturer?: string;
+  model?: string;
+  socket?: string;
+  ram_type?: string;
+  wattage?: string;
+  efficiency?: string;
+  price?: number | string;
+};
+
 @Component({
   selector: 'app-pc-builder-panel',
   standalone: true,
@@ -20,11 +34,11 @@ export class PcBuilderPanelComponent implements OnChanges {
   error = '';
   success = '';
 
-  processors: any[] = [];
-  motherboards: any[] = [];
-  rams: any[] = [];
-  gpus: any[] = [];
-  psus: any[] = [];
+  processors: PcPart[] = [];
+  motherboards: PcPart[] = [];
+  rams: PcPart[] = [];
+  gpus: PcPart[] = [];
+  psus: PcPart[] = [];
 
   selectedProcessorId: number | null = null;
   selectedMotherboardId: number | null = null;
@@ -59,13 +73,37 @@ export class PcBuilderPanelComponent implements OnChanges {
     return id == null ? null : Number(id);
   }
 
-  private unwrapParts(res: any): any[] {
+  private unwrapParts(res: any): PcPart[] {
     if (Array.isArray(res)) return res;
     if (Array.isArray(res?.parts)) return res.parts;
     if (Array.isArray(res?.items)) return res.items;
     if (Array.isArray(res?.data)) return res.data;
     if (Array.isArray(res?.rows)) return res.rows;
     return [];
+  }
+
+  private normalizeSocket(value: any): string {
+    const v = String(value ?? '').trim().toUpperCase();
+    if (!v) return '';
+    return v.replace(/\s+/g, '').replace(/SOCKET/g, '');
+  }
+
+  private normalizeRamType(value: any): string {
+    const v = String(value ?? '').trim().toUpperCase();
+    if (!v) return '';
+    if (v.includes('DDR5')) return 'DDR5';
+    if (v.includes('DDR4')) return 'DDR4';
+    if (v.includes('DDR3')) return 'DDR3';
+    return v;
+  }
+
+  private normalizePart(part: any): PcPart {
+    return {
+      ...part,
+      id: Number(part?.id ?? part?.ID ?? 0),
+      socket: this.normalizeSocket(part?.socket),
+      ram_type: this.normalizeRamType(part?.ram_type)
+    };
   }
 
   private loadAllParts(): void {
@@ -81,13 +119,13 @@ export class PcBuilderPanelComponent implements OnChanges {
 
     this.http.get<any>(`/api/setup/${sid}/get-pcparts`, { withCredentials: true }).subscribe({
       next: (res) => {
-        const parts = this.unwrapParts(res);
+        const parts = this.unwrapParts(res).map(p => this.normalizePart(p));
 
-        this.processors = parts.filter((part: any) => part.slot === 'cpu');
-        this.motherboards = parts.filter((part: any) => part.slot === 'motherboard');
-        this.rams = parts.filter((part: any) => part.slot === 'ram');
-        this.gpus = parts.filter((part: any) => part.slot === 'gpu');
-        this.psus = parts.filter((part: any) => part.slot === 'psu');
+        this.processors = parts.filter((part: PcPart) => part.slot === 'cpu');
+        this.motherboards = parts.filter((part: PcPart) => part.slot === 'motherboard');
+        this.rams = parts.filter((part: PcPart) => part.slot === 'ram');
+        this.gpus = parts.filter((part: PcPart) => part.slot === 'gpu');
+        this.psus = parts.filter((part: PcPart) => part.slot === 'psu');
 
         this.loading = false;
       },
@@ -183,13 +221,6 @@ export class PcBuilderPanelComponent implements OnChanges {
     );
   }
 
-  private toNullableNumber(value: any): number | null {
-    if (value === null || value === undefined || value === '') return null;
-
-    const num = Number(value);
-    return Number.isNaN(num) ? null : num;
-  }
-
   getId(row: any): number | null {
     const id = row?.id ?? row?.ID ?? null;
     return id == null ? null : Number(id);
@@ -197,9 +228,9 @@ export class PcBuilderPanelComponent implements OnChanges {
 
   private getModel(row: any): string {
     return String(
-      row?.display_name ??
       row?.model ??
       row?.Model ??
+      row?.display_name ??
       ''
     ).trim();
   }
@@ -209,17 +240,11 @@ export class PcBuilderPanelComponent implements OnChanges {
   }
 
   getSocket(row: any): string {
-    return String(row?.socket ?? row?.Socket ?? '').trim().toUpperCase();
+    return this.normalizeSocket(row?.socket);
   }
 
   getRamType(row: any): string {
-    return String(
-      row?.ram_type ??
-      row?.ramtype ??
-      row?.RamType ??
-      row?.RAMType ??
-      ''
-    ).trim().toUpperCase();
+    return this.normalizeRamType(row?.ram_type);
   }
 
   getPrice(row: any): number | null {
@@ -235,11 +260,11 @@ export class PcBuilderPanelComponent implements OnChanges {
     return String(value).trim();
   }
 
-  getSelectedProcessor(): any | null {
+  getSelectedProcessor(): PcPart | null {
     return this.processors.find(p => this.getId(p) === this.selectedProcessorId) ?? null;
   }
 
-  getSelectedMotherboard(): any | null {
+  getSelectedMotherboard(): PcPart | null {
     return this.motherboards.find(m => this.getId(m) === this.selectedMotherboardId) ?? null;
   }
 
@@ -251,18 +276,20 @@ export class PcBuilderPanelComponent implements OnChanges {
     return !!this.getSelectedProcessor() && !!this.getSelectedMotherboard();
   }
 
-  getCompatibleMotherboards(): any[] {
+  getCompatibleMotherboards(): PcPart[] {
     const cpu = this.getSelectedProcessor();
     if (!cpu) return [];
 
     const cpuSocket = this.getSocket(cpu);
-    if (!cpuSocket) return this.motherboards;
+    if (!cpuSocket) return [];
 
-    const exactMatches = this.motherboards.filter(mb => this.getSocket(mb) === cpuSocket);
-    return exactMatches.length > 0 ? exactMatches : this.motherboards;
+    return this.motherboards.filter(mb => {
+      const mbSocket = this.getSocket(mb);
+      return !!mbSocket && mbSocket === cpuSocket;
+    });
   }
 
-  getCompatibleRams(): any[] {
+  getCompatibleRams(): PcPart[] {
     const cpu = this.getSelectedProcessor();
     const mb = this.getSelectedMotherboard();
 
@@ -272,42 +299,43 @@ export class PcBuilderPanelComponent implements OnChanges {
     const mbSocket = this.getSocket(mb);
     const mbRamType = this.getRamType(mb);
 
-    if (cpuSocket && mbSocket && cpuSocket !== mbSocket) {
+    if (!cpuSocket || !mbSocket || cpuSocket !== mbSocket) {
       return [];
     }
 
     if (!mbRamType) {
-      return this.rams;
+      return [];
     }
 
-    const compatible = this.rams.filter(ram => this.isRamCompatible(cpuSocket, mbRamType, this.getRamType(ram)));
-    return compatible.length > 0 ? compatible : this.rams;
+    return this.rams.filter(ram =>
+      this.isRamCompatible(cpuSocket, mbRamType, this.getRamType(ram))
+    );
   }
 
   private isRamCompatible(cpuSocket: string, motherboardRamType: string, ramType: string): boolean {
     if (!motherboardRamType || !ramType) return false;
 
-    if (!cpuSocket) {
-      return ramType === motherboardRamType;
+    const cpu = String(cpuSocket || '').toUpperCase();
+    const boardRam = String(motherboardRamType || '').toUpperCase();
+    const ram = String(ramType || '').toUpperCase();
+
+    if (cpu === 'AM4') {
+      return boardRam === 'DDR4' && ram === 'DDR4';
     }
 
-    if (cpuSocket === 'AM4') {
-      return motherboardRamType === 'DDR4' && ramType === 'DDR4';
+    if (cpu === 'AM5') {
+      return boardRam === 'DDR5' && ram === 'DDR5';
     }
 
-    if (cpuSocket === 'AM5') {
-      return motherboardRamType === 'DDR5' && ramType === 'DDR5';
+    if (cpu === 'LGA1200') {
+      return boardRam === 'DDR4' && ram === 'DDR4';
     }
 
-    if (cpuSocket === 'LGA1200') {
-      return motherboardRamType === 'DDR4' && ramType === 'DDR4';
+    if (cpu === 'LGA1700') {
+      return ram === boardRam && (ram === 'DDR4' || ram === 'DDR5');
     }
 
-    if (cpuSocket === 'LGA1700') {
-      return ramType === motherboardRamType && (ramType === 'DDR4' || ramType === 'DDR5');
-    }
-
-    return ramType === motherboardRamType;
+    return ram === boardRam;
   }
 
   onProcessorChange(): void {
@@ -332,7 +360,7 @@ export class PcBuilderPanelComponent implements OnChanges {
     this.error = '';
   }
 
-  getProcessorLabel(cpu: any): string {
+  getProcessorLabel(cpu: PcPart): string {
     const displayName = String(cpu?.display_name ?? '').trim();
     if (displayName) return displayName;
 
@@ -342,7 +370,7 @@ export class PcBuilderPanelComponent implements OnChanges {
     return [manufacturer, model, socket ? `(${socket})` : ''].filter(Boolean).join(' ');
   }
 
-  getMotherboardLabel(mb: any): string {
+  getMotherboardLabel(mb: PcPart): string {
     const displayName = String(mb?.display_name ?? '').trim();
     if (displayName) return displayName;
 
@@ -355,7 +383,7 @@ export class PcBuilderPanelComponent implements OnChanges {
       .join(' ');
   }
 
-  getRamLabel(ram: any): string {
+  getRamLabel(ram: PcPart): string {
     const displayName = String(ram?.display_name ?? '').trim();
     if (displayName) return displayName;
 
@@ -365,7 +393,7 @@ export class PcBuilderPanelComponent implements OnChanges {
     return [manufacturer, model, ramType ? `(${ramType})` : ''].filter(Boolean).join(' ');
   }
 
-  getGpuLabel(gpu: any): string {
+  getGpuLabel(gpu: PcPart): string {
     const displayName = String(gpu?.display_name ?? '').trim();
     if (displayName) return displayName;
 
@@ -375,7 +403,7 @@ export class PcBuilderPanelComponent implements OnChanges {
     return [manufacturer, model, price != null ? `- ${price} Ft` : ''].filter(Boolean).join(' ');
   }
 
-  getPsuLabel(psu: any): string {
+  getPsuLabel(psu: PcPart): string {
     const displayName = String(psu?.display_name ?? '').trim();
     if (displayName) return displayName;
 

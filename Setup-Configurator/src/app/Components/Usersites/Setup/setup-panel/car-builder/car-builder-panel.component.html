@@ -16,13 +16,13 @@
           <label class="field-label">Autó kiválasztása</label>
           <select
             class="select"
-            [(ngModel)]="selectedCarId"
+            [(ngModel)]="selectedCarKey"
             (ngModelChange)="onCarChange()"
           >
-            <option [ngValue]="null">-- válassz autót --</option>
+            <option value="">-- válassz autót --</option>
 
-            @for (car of cars; track car.id) {
-              <option [ngValue]="car.id">
+            @for (car of cars; track trackCar($index, car)) {
+              <option [value]="car.__carKey">
                 {{ getCarLabel(car) }}
               </option>
             }

@@ -1,7 +1,7 @@
 <div class="pc-builder-shell">
   <div class="pc-builder-body">
     @if (loading) {
-      <div class="state">Loading parts...</div>
+      <div class="state">Loading PC parts...</div>
     } @else {
       @if (error) {
         <div class="state error">{{ error }}</div>
@@ -37,7 +37,13 @@
             (ngModelChange)="onMotherboardChange()"
             [disabled]="!canSelectMotherboard()"
           >
-            <option [ngValue]="null">-- choose motherboard --</option>
+            <option [ngValue]="null">
+              @if (!canSelectMotherboard()) {
+                -- choose processor first --
+              } @else {
+                -- choose motherboard --
+              }
+            </option>
 
             @for (mb of getCompatibleMotherboards(); track getId(mb)) {
               <option [ngValue]="getId(mb)">
@@ -54,7 +60,13 @@
             [(ngModel)]="selectedRamId"
             [disabled]="!canSelectRam()"
           >
-            <option [ngValue]="null">-- choose RAM --</option>
+            <option [ngValue]="null">
+              @if (!canSelectRam()) {
+                -- choose compatible motherboard first --
+              } @else {
+                -- choose RAM --
+              }
+            </option>
 
             @for (ram of getCompatibleRams(); track getId(ram)) {
               <option [ngValue]="getId(ram)">
@@ -142,6 +154,15 @@
       </div>
 
       <div class="actions">
+        <button
+          type="button"
+          class="exit-btn"
+          (click)="close.emit()"
+          [disabled]="saving"
+        >
+          Kilépés
+        </button>
+
         <button
           type="button"
           class="save-btn"

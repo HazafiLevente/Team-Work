@@ -567,21 +567,12 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit {
   }
 
   private createSetupRequest(payload: any, onSuccess?: (res: any) => void): void {
-    this.http.post<any>('/api/setup/create', payload, { withCredentials: true }).subscribe({
+    this.http.post<any>('/api/setup/save-setup', payload, { withCredentials: true }).subscribe({
       next: (res) => {
         onSuccess?.(res);
       },
-      error: (primaryErr) => {
-        console.warn('⚠️ /api/setup/create failed, fallback to /api/setup-create/create', primaryErr);
-
-        this.http.post<any>('/api/setup-create/create', payload, { withCredentials: true }).subscribe({
-          next: (res) => {
-            onSuccess?.(res);
-          },
-          error: (fallbackErr) => {
-            console.error('❌ Setup creation hiba:', fallbackErr);
-          }
-        });
+      error: (err) => {
+        console.error('❌ Setup creation hiba:', err);
       }
     });
   }
@@ -599,7 +590,7 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit {
 
     this.createSetupRequest(payload, (res) => {
       if (res?.setup) {
-        this.userSetups = [this.normalizeSetup(res.setup), ...this.userSetups];
+        this.userSetups = [res.setup, ...this.userSetups];
         this.updateLines();
       }
     });

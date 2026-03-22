@@ -418,19 +418,22 @@ exports.create = async (req, res) => {
         const setup_name = (req.body?.setup_name || "").trim();
         if (!setup_name) return res.status(400).json({ error: "setup_name required" });
 
-        const setup_type = req.body?.setup_type || 'other';
         const isFavorite = req.body?.isFavorite === true;
-        const x = req.body?.x || 0;
-        const y = req.body?.y || 0;
+        const x = Number(req.body?.x ?? 0);
+        const y = Number(req.body?.y ?? 0);
 
-        const { data, error } = await supabase.from(SETUP_TABLE).insert([{
+        // ✅ FONTOS: a setup[Setup] táblába csak létező oszlopokat írunk
+        const insertPayload = {
             setup_name,
             user_id: userId,
-            isFavorite,
-            setup_type,
-            x,
-            y
-        }]).select("*").single();
+            isFavorite
+        };
+
+        const { data, error } = await supabase
+            .from(SETUP_TABLE)
+            .insert([insertPayload])
+            .select("*")
+            .single();
 
         if (error) {
             console.error("❌ Supabase insert error:", error);
@@ -442,7 +445,28 @@ exports.create = async (req, res) => {
             });
         }
 
-        return res.json({ setup: data });
+        // ✅ pozíció külön táblába megy
+        const { error: posErr } = await supabase
+            .from("setup_rooms[Coordinates]")
+            .insert([{
+                setup_id: data.id,
+                x,
+                y
+            }]);
+
+        if (posErr) {
+            console.error("⚠️ setup position insert error:", posErr);
+            // a setup létrejött, ezért itt nem dobjuk el az egészet
+        }
+
+        return res.json({
+            setup: {
+                ...data,
+                setup_name: data.setup_name ?? data.name ?? "Névtelen setup",
+                x,
+                y
+            }
+        });
     } catch (err) {
         console.error("❌ create setup error:", err);
         return res.status(500).json({ error: "Server error" });
@@ -652,89 +676,149 @@ exports.pcBuildsUpdate = async (req, res) => {
 
 exports.pcParts = async (req, res) => {
     try {
-        const cacheKey = "pcparts:v1";
+        const cacheKey = "pcparts:v2";
         const cached = cacheGet(pcPartsCache, cacheKey);
         if (cached) return res.json({ parts: cached });
 
-        const safeSelect = async (table, select) => {
-            const { data, error } = await supabase.from(table).select(select);
-            if (error) return [];
+        const safeSelect = async (table) => {
+            const { data, error } = await supabase.from(table).select("*");
+            if (error) {
+                console.error(`❌ pcParts select error in ${table}:`, error.message);
+                return [];
+            }
             return Array.isArray(data) ? data : [];
         };
 
         const toStr = (v) => (v === null || v === undefined ? "" : String(v).trim());
+
+        const normalizeSocket = (value) => {
+            const v = toStr(value).toUpperCase();
+            if (!v) return "";
+            return v.replace(/\s+/g, "").replace(/SOCKET/g, "");
+        };
+
+        const normalizeRamType = (value) => {
+            const v = toStr(value).toUpperCase();
+            if (!v) return "";
+            if (v.includes("DDR5")) return "DDR5";
+            if (v.includes("DDR4")) return "DDR4";
+            if (v.includes("DDR3")) return "DDR3";
+            return v;
+        };
+
+        const pickFirst = (obj, keys) => {
+            for (const key of keys) {
+                if (obj && obj[key] !== undefined && obj[key] !== null && String(obj[key]).trim() !== "") {
+                    return obj[key];
+                }
+            }
+            return null;
+        };
+
         const parts = [];
 
-        const cpus = await safeSelect("processors", "ID, manufacturer, Model");
+        const cpus = await safeSelect("processors");
         for (const r of cpus) {
             const id = r.ID ?? r.id;
             if (id == null) continue;
-            const manufacturer = toStr(r.manufacturer);
-            const model = toStr(r.Model ?? r.model);
+
+            const manufacturer = toStr(pickFirst(r, ["manufacturer", "Manufacturer", "brand", "Brand"]));
+            const model = toStr(pickFirst(r, ["Model", "model", "name", "Name"]));
+            const socket = normalizeSocket(
+                pickFirst(r, ["socket", "Socket", "cpu_socket", "CPU_Socket", "platform", "Platform"])
+            );
+
             parts.push({
                 id: Number(id),
                 slot: "cpu",
                 source_table: "processors",
+                manufacturer,
+                model,
+                socket,
                 display_name: manufacturer && model ? `${manufacturer} ${model}` : model || manufacturer || `CPU #${id}`,
             });
         }
 
-        const gpus = await safeSelect("video_cards", "ID, manufacturer, model, series, variant");
+        const gpus = await safeSelect("video_cards");
         for (const r of gpus) {
             const id = r.ID ?? r.id;
             if (id == null) continue;
-            const manufacturer = toStr(r.manufacturer);
-            const main = toStr(r.model) || toStr(r.series) || toStr(r.variant);
+
+            const manufacturer = toStr(pickFirst(r, ["manufacturer", "Manufacturer", "brand", "Brand"]));
+            const main = toStr(pickFirst(r, ["model", "Model", "series", "Series", "variant", "Variant", "name", "Name"]));
+
             parts.push({
                 id: Number(id),
                 slot: "gpu",
                 source_table: "video_cards",
+                manufacturer,
+                model: main,
                 display_name: manufacturer && main ? `${manufacturer} ${main}` : main || manufacturer || `GPU #${id}`,
             });
         }
 
-        const mobs = await safeSelect("motherboard", "ID, manufacturer, Model");
+        const mobs = await safeSelect("motherboard");
         for (const r of mobs) {
             const id = r.ID ?? r.id;
             if (id == null) continue;
-            const manufacturer = toStr(r.manufacturer);
-            const model = toStr(r.Model ?? r.model);
+
+            const manufacturer = toStr(pickFirst(r, ["manufacturer", "Manufacturer", "brand", "Brand"]));
+            const model = toStr(pickFirst(r, ["Model", "model", "name", "Name"]));
+            const socket = normalizeSocket(
+                pickFirst(r, ["socket", "Socket", "cpu_socket", "CPU_Socket", "platform", "Platform"])
+            );
+            const ram_type = normalizeRamType(
+                pickFirst(r, ["ram_type", "RAMType", "RamType", "memory_type", "MemoryType", "ddr_type", "DDRType"])
+            );
+
             parts.push({
                 id: Number(id),
                 slot: "motherboard",
                 source_table: "motherboard",
+                manufacturer,
+                model,
+                socket,
+                ram_type,
                 display_name: manufacturer && model ? `${manufacturer} ${model}` : model || manufacturer || `Motherboard #${id}`,
             });
         }
 
-        const rams = await safeSelect("ram", "ID, manufacturer, model, capacity_gb, sticks, speed_mhz");
+        const rams = await safeSelect("ram");
         for (const r of rams) {
             const id = r.ID ?? r.id;
             if (id == null) continue;
-            const manufacturer = toStr(r.manufacturer);
-            const model = toStr(r.model);
+
+            const manufacturer = toStr(pickFirst(r, ["manufacturer", "Manufacturer", "brand", "Brand"]));
+            const model = toStr(pickFirst(r, ["model", "Model", "name", "Name"]));
             const cap = r.capacity_gb != null ? `${r.capacity_gb}GB` : "";
             const sticks = r.sticks != null ? `${r.sticks}x` : "";
             const speed = r.speed_mhz != null ? `${r.speed_mhz}MHz` : "";
             const extra = [sticks && cap ? `${sticks}${cap}` : cap, speed].filter(Boolean).join(" ");
             const base = manufacturer && model ? `${manufacturer} ${model}` : model || manufacturer;
+            const ram_type = normalizeRamType(
+                pickFirst(r, ["ram_type", "RAMType", "RamType", "memory_type", "MemoryType", "ddr_type", "DDRType"])
+            );
 
             parts.push({
                 id: Number(id),
                 slot: "ram",
                 source_table: "ram",
+                manufacturer,
+                model,
+                ram_type,
                 display_name: base && extra ? `${base} (${extra})` : base || (extra ? `RAM (${extra})` : `RAM #${id}`),
             });
         }
 
-        const psus = await safeSelect("psu", "ID, manufacturer, model, wattage, efficiency");
+        const psus = await safeSelect("psu");
         for (const r of psus) {
             const id = r.ID ?? r.id;
             if (id == null) continue;
-            const manufacturer = toStr(r.manufacturer);
-            const model = toStr(r.model);
-            const watt = r.wattage != null ? `${r.wattage}W` : "";
-            const eff = toStr(r.efficiency);
+
+            const manufacturer = toStr(pickFirst(r, ["manufacturer", "Manufacturer", "brand", "Brand"]));
+            const model = toStr(pickFirst(r, ["model", "Model", "name", "Name"]));
+            const watt = pickFirst(r, ["wattage", "Wattage"]) != null ? `${pickFirst(r, ["wattage", "Wattage"])}W` : "";
+            const eff = toStr(pickFirst(r, ["efficiency", "Efficiency"]));
             const extra = [watt, eff].filter(Boolean).join(" ");
             const base = manufacturer && model ? `${manufacturer} ${model}` : model || manufacturer;
 
@@ -742,6 +826,10 @@ exports.pcParts = async (req, res) => {
                 id: Number(id),
                 slot: "psu",
                 source_table: "psu",
+                manufacturer,
+                model,
+                wattage: toStr(pickFirst(r, ["wattage", "Wattage"])),
+                efficiency: eff,
                 display_name: base && extra ? `${base} (${extra})` : base || (extra ? `PSU (${extra})` : `PSU #${id}`),
             });
         }
@@ -909,9 +997,14 @@ function pickFirstCarLink(row) {
     ];
 
     for (const m of map) {
-        const id = row[m.fk];
-        if (id !== null && id !== undefined) return { table: m.table, id: Number(id) };
+        const raw = row[m.fk];
+        const id = raw == null ? null : Number(raw);
+
+        if (id != null && !Number.isNaN(id) && id > 0) {
+            return { table: m.table, id };
+        }
     }
+
     return null;
 }
 
