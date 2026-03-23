@@ -1,4 +1,5 @@
 const { supabase } = require("../services/supabase");
+const { listProducts, clampLimit } = require("../services/products/productCatalog.service");
 
 /**
  * hometheaters.controller.js
@@ -16,35 +17,26 @@ const { supabase } = require("../services/supabase");
  */
 exports.getHtCatalog = async (req, res) => {
     try {
-        const GEAR_TABLES = [
-            { key: "receivers", table: "home_theater" },
-            { key: "frontSpeakers", table: "front_speaker" },
-            { key: "backSpeakers", table: "back_speaker" },
-            { key: "sideSpeakers", table: "side_speaker" },
-            { key: "ceilingSpeakers", table: "ceiling_speakers" },
-            { key: "floorSpeakers", table: "floor_speakers" },
-            { key: "centerSpeakers", table: "center_speakers" },
-            { key: "subwoofers", table: "subwoofer" },
-            { key: "audioProcessors", table: "audio_processors" },
-            { key: "bassAmplifiers", table: "bass_amplifier" }
-        ];
+        const items = await listProducts({ limit: 5000, category: "ht" });
+        const byTable = {
+            receivers: "home_theater",
+            frontSpeakers: "front_speaker",
+            backSpeakers: "back_speaker",
+            sideSpeakers: "side_speaker",
+            ceilingSpeakers: "ceiling_speakers",
+            floorSpeakers: "floor_speakers",
+            centerSpeakers: "center_speakers",
+            subwoofers: "subwoofer",
+            audioProcessors: "audio_processors",
+            bassAmplifiers: "bass_amplifier",
+        };
 
-        const normalize = (row) => ({
-            ...row,
-            manufacturer: row.manufacturer ?? row.Manufacturer ?? row.brand ?? "",
-            model: row.model ?? row.Model ?? row.product_model ?? ""
-        });
-
-        const catalog = {};
-        for (const entry of GEAR_TABLES) {
-            const { data, error } = await supabase.from(entry.table).select("*");
-            if (error) {
-                console.error(`Error fetching ${entry.table}:`, error.message);
-                catalog[entry.key] = [];
-            } else {
-                catalog[entry.key] = (data || []).map(normalize);
-            }
-        }
+        const catalog = Object.fromEntries(
+            Object.entries(byTable).map(([key, tableName]) => [
+                key,
+                items.filter((item) => String(item?.table_name ?? item?.table ?? "").trim() === tableName),
+            ])
+        );
 
         res.json(catalog);
     } catch (err) {
@@ -238,9 +230,15 @@ exports.updateHtBuild = (req, res) => { req.params.id = req.body.id; return expo
 exports.deleteHtBuild = exports.deleteBuild;
 exports.getHtBuildById = exports.getBuildById;
 exports.list = async (req, res) => {
-    const { data, error } = await supabase.from("ht_items_view").select("*");
-    if (error) return res.status(500).json({ error: error.message });
-    res.json({ items: data || [] });
+    const limit = clampLimit(req.query.limit, 200, 2000);
+
+    try {
+        const items = await listProducts({ limit, category: "ht" });
+
+        res.json({ items });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
 };
 exports.listDevices = async (req, res) => { /* Dummy */ res.json([]); };
 exports.createDevice = async (req, res) => { /* Dummy */ res.json({}); };

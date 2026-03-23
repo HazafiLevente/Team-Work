@@ -1,18 +1,15 @@
-const { supabase } = require("../services/supabase");
+const { listProducts, clampLimit } = require("../services/products/productCatalog.service");
 
 async function list(req, res) {
-    // A korábban létrehozott SQL View-ból kérdezzük le az adatokat
-    const { data, error } = await supabase
-        .from("instrument_items_view_v2")
+    const limit = clampLimit(req.query.limit, 200, 2000);
 
-        .select("*");
+    try {
+        const items = await listProducts({ limit, category: "instrument" });
 
-    if (error) {
-        return res.status(500).json({ error: error.message });
+        res.json({ items });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
     }
-
-    // A többi kontrolleredhez hasonlóan "items" kulcs alatt küldjük vissza
-    res.json({ items: data || [] });
 }
 
 module.exports = { list };

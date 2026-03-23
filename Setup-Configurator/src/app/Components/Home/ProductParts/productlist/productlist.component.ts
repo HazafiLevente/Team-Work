@@ -71,40 +71,22 @@ export class ProductlistComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.sub = this.filtersService.filters$.subscribe(f => this.applyFilters(f));
 
-    this.productService.getHomeTheaters(this.PRODUCT_LIMIT).subscribe(res => {
-      console.log('HT RES:', res);
-      this.htProducts = normalizeList(res.items || []);
-      console.log('HT NORMALIZED:', this.htProducts);
-      this.emitStats();
-      this.applyFilters(this.filtersService.current);
-
-
-    });
-    this.productService.getProducts(this.PRODUCT_LIMIT).subscribe(res => {
-      this.allProducts = normalizeList(res.items || []);
-      this.loading = false;
-      this.emitStats();
-      this.applyFilters(this.filtersService.current);
-    });
-
-    this.productService.getCars(this.PRODUCT_LIMIT).subscribe(res => {
-      this.carProducts = normalizeList(res.items || []);
-      this.emitStats();
-      this.applyFilters(this.filtersService.current);
-    });
-
-    this.productService.getComputers(this.PRODUCT_LIMIT).subscribe(res => {
-      this.computerProducts = normalizeList(res.items || []);
-      this.emitStats();
-      this.applyFilters(this.filtersService.current);
-    });
-
-
-
-    this.productService.getInstruments(this.PRODUCT_LIMIT).subscribe(res => {
-      this.allInstruments = normalizeList(res.items || []);
-      this.emitStats();
-      this.applyFilters(this.filtersService.current);
+    this.productService.getProducts(this.PRODUCT_LIMIT).subscribe({
+      next: (res) => {
+        this.allProducts = normalizeList(res.items || []);
+        this.rebuildCategoryBuckets();
+        this.loading = false;
+        this.emitStats();
+        this.applyFilters(this.filtersService.current);
+      },
+      error: (err) => {
+        console.error('Product load error:', err);
+        this.allProducts = [];
+        this.rebuildCategoryBuckets();
+        this.loading = false;
+        this.emitStats();
+        this.applyFilters(this.filtersService.current);
+      }
     });
   }
 
@@ -195,6 +177,89 @@ export class ProductlistComponent implements OnInit, OnDestroy {
       if (nested !== undefined && nested !== null && String(nested) !== '') return nested;
     }
     return null;
+  }
+
+  private containsAny(value: any, needles: string[]): boolean {
+    const hay = this.norm(value);
+    if (!hay) return false;
+    return needles.some(needle => hay.includes(this.norm(needle)));
+  }
+
+  private isCarProduct(p: AnyProduct): boolean {
+    return (
+      this.containsAny(p.category, ['car']) ||
+      this.containsAny(p.type, ['car']) ||
+      this.containsAny(this.getTable(p), [
+        'car',
+        'cabrio_cars',
+        'coupe_cars',
+        'crossover_cars',
+        'hatchback_cars',
+        'mpv_cars',
+        'pickup_cars',
+        'wagon_cars'
+      ])
+    );
+  }
+
+  private isComputerProduct(p: AnyProduct): boolean {
+    return (
+      this.containsAny(p.category, ['computer', 'pc']) ||
+      this.containsAny(p.type, ['computer', 'pc']) ||
+      this.containsAny(this.getTable(p), [
+        'computer',
+        'pc',
+        'processors',
+        'video_cards',
+        'gpus',
+        'graphics_cards',
+        'ram',
+        'memory',
+        'storage',
+        'ssd',
+        'hdd',
+        'nvme',
+        'storage_devices',
+        'psu',
+        'power_supply',
+        'power_supplies'
+      ])
+    );
+  }
+
+  private isHtProduct(p: AnyProduct): boolean {
+    return (
+      this.containsAny(p.category, ['home theater', 'home_theater', 'ht']) ||
+      this.containsAny(p.type, ['home theater', 'home_theater', 'ht']) ||
+      this.containsAny(this.getTable(p), [
+        'home_theater',
+        'home-theater',
+        'ht',
+        'receiver',
+        'receivers',
+        'speaker',
+        'speakers',
+        'subwoofer',
+        'audio_processor'
+      ])
+    );
+  }
+
+  private isInstrumentProduct(p: AnyProduct): boolean {
+    return (
+      this.containsAny(p.category, ['instrument']) ||
+      this.containsAny(p.type, ['instrument']) ||
+      this.containsAny(this.getTable(p), ['instrument'])
+    );
+  }
+
+  private rebuildCategoryBuckets(): void {
+    const merged = this.getAllMerged();
+
+    this.carProducts = merged.filter(p => this.isCarProduct(p));
+    this.computerProducts = merged.filter(p => this.isComputerProduct(p));
+    this.htProducts = merged.filter(p => this.isHtProduct(p));
+    this.allInstruments = merged.filter(p => this.isInstrumentProduct(p));
   }
 
   /* -----------------------------
@@ -462,12 +527,12 @@ export class ProductlistComponent implements OnInit, OnDestroy {
         const manufacturer = norm(this.getManufacturer(p));
         const model = norm(this.getModel(p));
 
-        if (!hasAnyComputerFilter) return true;
+        if (!hasAnyComputerFilter) return this.isComputerProduct(p);
 
         let matchedAny = false;
 
         // CPU
-        if (hasCpu && table === 'processors') {
+        if (hasCpu && (table === 'processors' || this.containsAny(this.field(p, 'type', 'category', 'component_type'), ['cpu', 'processor']))) {
           let ok = true;
 
           if (f.cpuBrand && !manufacturer.includes(norm(f.cpuBrand))) ok = false;
@@ -477,7 +542,12 @@ export class ProductlistComponent implements OnInit, OnDestroy {
         }
 
         // GPU
-        if (hasGpu && (table === 'video_cards' || table === 'gpus' || table === 'graphics_cards')) {
+        if (hasGpu && (
+          table === 'video_cards' ||
+          table === 'gpus' ||
+          table === 'graphics_cards' ||
+          this.containsAny(this.field(p, 'type', 'category', 'component_type'), ['gpu', 'graphics'])
+        )) {
           let ok = true;
 
           if (f.gpuBrand && !manufacturer.includes(norm(f.gpuBrand))) ok = false;
@@ -487,7 +557,11 @@ export class ProductlistComponent implements OnInit, OnDestroy {
         }
 
         // RAM
-        if (hasRam && (table === 'ram' || table === 'memory')) {
+        if (hasRam && (
+          table === 'ram' ||
+          table === 'memory' ||
+          this.containsAny(this.field(p, 'type', 'category', 'component_type'), ['ram', 'memory'])
+        )) {
           let ok = true;
 
           const ramValue = this.field(
@@ -523,7 +597,8 @@ export class ProductlistComponent implements OnInit, OnDestroy {
           table === 'ssd' ||
           table === 'hdd' ||
           table === 'nvme' ||
-          table === 'storage_devices'
+          table === 'storage_devices' ||
+          this.containsAny(this.field(p, 'type', 'category', 'component_type'), ['storage', 'ssd', 'hdd', 'nvme'])
         )) {
           const storageValue = this.field(
             p,
@@ -541,7 +616,12 @@ export class ProductlistComponent implements OnInit, OnDestroy {
         }
 
         // PSU
-        if (hasPsu && (table === 'psu' || table === 'power_supply' || table === 'power_supplies')) {
+        if (hasPsu && (
+          table === 'psu' ||
+          table === 'power_supply' ||
+          table === 'power_supplies' ||
+          this.containsAny(this.field(p, 'type', 'category', 'component_type'), ['psu', 'power supply'])
+        )) {
           const wattValue = this.field(
             p,
             'wattage',
@@ -663,13 +743,7 @@ export class ProductlistComponent implements OnInit, OnDestroy {
   ----------------------------- */
 
   private emitStats() {
-    const merged = [
-      ...this.allProducts,
-      ...this.carProducts,
-      ...this.computerProducts,
-      ...this.htProducts,
-      ...this.allInstruments
-    ];
+    const merged = this.getAllMerged();
 
     const map = new Map<string, AnyProduct>();
     for (const p of merged) {

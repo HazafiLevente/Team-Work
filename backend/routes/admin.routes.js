@@ -7,6 +7,7 @@ const { resolveRole, updateUserEnvRole, isBanned, updateUserBanStatus } = requir
 const localDb = require("../services/localDb");
 const { shouldExclude } = require("../services/tableFilter");
 const activeUsersTracker = require("../services/activeUsers");
+const { getCatalogStats } = require("../services/products/productCatalog.service");
 
 
 router.get("/stats", verifyAdmin, async (req, res) => {
@@ -14,19 +15,6 @@ router.get("/stats", verifyAdmin, async (req, res) => {
 
 
     // 📦 tables.runtime.json (for Product Tables & Products calculation)
-    const file = path.join(
-        __dirname,
-        "../../datas/Jsons/tables.runtime.json"
-    );
-
-    const json = JSON.parse(fs.readFileSync(file, "utf8"));
-    const runtimeTableNames = Object.keys(json.tables || {});
-
-    // Filter product-site tables from runtime config
-    const productTables = runtimeTableNames.filter(
-        t => !shouldExclude(t)
-    );
-
     // 🗂 ÖSSZES TÁBLA (Local DB Count)
     const allTables = localDb.db.prepare("SELECT name FROM sqlite_master WHERE type='table'").all();
     const realTableCount = allTables.filter(t => !shouldExclude(t.name)).length;
@@ -35,17 +23,14 @@ router.get("/stats", verifyAdmin, async (req, res) => {
     const usersCount = localDb.countAll("user[Auth]");
 
     // 📦 Összes termék (Local Counts)
-    let totalProducts = 0;
-    for (const table of productTables) {
-        totalProducts += localDb.countAll(table);
-    }
+    const catalogStats = await getCatalogStats();
 
     // ... existing stats logic ...
     res.json({
         users: usersCount || 0,
         tables: realTableCount,           // Local Cache DB count
-        productTables: productTables.length, // Runtime Filtered Config count
-        products: totalProducts,          // Sum of rows from locally cached product-site tables
+        productTables: catalogStats.categoriesAll.length,
+        products: catalogStats.totalAll,
         onlineUsers: activeUsersTracker.getActiveCount()
     });
 });

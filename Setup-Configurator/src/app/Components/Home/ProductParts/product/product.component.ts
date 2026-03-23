@@ -18,6 +18,18 @@ export class ProductComponent implements OnInit {
 
   constructor(private images: ImageService) {}
 
+  get displayName(): string {
+    const p: any = this.product;
+    return String(
+      p?.name ??
+      p?.data?.name ??
+      p?.model ??
+      p?.data?.model ??
+      p?.data?.Model ??
+      ''
+    ).trim();
+  }
+
   get displayPrice(): number | null {
     const p: any = this.product;
     if (!p) return null;

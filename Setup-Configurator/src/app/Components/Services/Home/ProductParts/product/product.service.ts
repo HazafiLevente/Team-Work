@@ -14,6 +14,13 @@ export class ProductService {
     );
   }
 
+  getBrands() {
+    return this.http.get<{ brands: string[] }>(
+      `${this.API}/products/brands`,
+      { withCredentials: true }
+    );
+  }
+
   getProductDetails(table: string, id: string) {
     return this.http.get<{ item: any }>(
       `${this.API}/items/${encodeURIComponent(table)}/${encodeURIComponent(id)}`,

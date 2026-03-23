@@ -1,15 +1,17 @@
 const { supabase } = require("../services/supabase");
+const { listProducts, clampLimit } = require("../services/products/productCatalog.service");
 
 async function list(req, res) {
-    const q = (req.query.q ?? "").trim() || null;
+    const q = (req.query.q ?? "").trim();
+    const limit = clampLimit(req.query.limit, 500, 5000);
 
-    const { data, error } = await supabase.rpc("products_home", { q });
+    try {
+        const products = await listProducts({ q, limit, category: "all" });
 
-    if (error) {
+        res.json({ products });
+    } catch (error) {
         return res.status(500).json({ error: error.message });
     }
-
-    res.json({ products: data || [] });
 }
 
 async function getOne(req, res) {

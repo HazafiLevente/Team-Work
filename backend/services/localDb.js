@@ -33,11 +33,34 @@ function selectAll(table, limit = 2000) {
 
 function selectWhereEquals(table, col, value, limit = 2000) {
     if (!tableExists(table)) return [];
-    return db
-        .prepare(
-            `SELECT * FROM "${table}" WHERE "${col}" = ? LIMIT ?`
-        )
-        .all(value, limit);
+    try {
+        return db
+            .prepare(
+                `SELECT * FROM "${table}" WHERE "${col}" = ? LIMIT ?`
+            )
+            .all(value, limit);
+    } catch {
+        return [];
+    }
+}
+
+function selectWhereIn(table, col, values, limit = 5000) {
+    if (!tableExists(table) || !Array.isArray(values) || !values.length) return [];
+
+    const uniqueValues = Array.from(
+        new Set(values.filter((value) => value !== null && value !== undefined))
+    );
+
+    if (!uniqueValues.length) return [];
+
+    const placeholders = uniqueValues.map(() => "?").join(", ");
+    const sql = `SELECT * FROM "${table}" WHERE "${col}" IN (${placeholders}) LIMIT ?`;
+
+    try {
+        return db.prepare(sql).all(...uniqueValues, limit);
+    } catch {
+        return [];
+    }
 }
 
 function countAll(table) {
@@ -53,5 +76,6 @@ module.exports = {
     tableExists,
     selectAll,
     selectWhereEquals,
+    selectWhereIn,
     countAll
 };

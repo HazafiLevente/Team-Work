@@ -1,13 +1,15 @@
-const { supabase } = require("../services/supabase");
+const { listProducts, clampLimit } = require("../services/products/productCatalog.service");
 
 async function list(req, res) {
-    // ha kell q, később ráteszünk ILIKE szűrést RPC-ben, de most egyszerű:
-    const { data, error } = await supabase
-        .from("pc_items_view")
-        .select("*");
+    const limit = clampLimit(req.query.limit, 200, 2000);
 
-    if (error) return res.status(500).json({ error: error.message });
-    res.json({ items: data || [] });
+    try {
+        const items = await listProducts({ limit, category: "computer" });
+
+        res.json({ items });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
 }
 
 module.exports = { list };
