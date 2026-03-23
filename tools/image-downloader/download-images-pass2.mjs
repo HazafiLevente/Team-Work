@@ -7,12 +7,13 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const ROOT = path.resolve(__dirname, "..", "..");
-const API_BASE = "http://localhost:3000";
+const API_BASE = process.env.API_BASE || "http://localhost:3000";
 const OUT_ROOT = path.join(ROOT, "datas", "images");
 
 const TARGET = Number(process.env.MAX_IMAGES || 6);
 const START = Number(process.env.START || 0);
 const LIMIT = Number(process.env.LIMIT || 0);
+const API_LIMIT = Number(process.env.API_LIMIT || 5000);
 
 const SEARCH_DELAY_MS = Number(process.env.SEARCH_DELAY_MS || 900);
 const DL_DELAY_MS = Number(process.env.DL_DELAY_MS || 250);
@@ -37,7 +38,7 @@ function existingImageCount(dir) {
 }
 
 async function fetchProducts() {
-    const r = await fetch(`${API_BASE}/api/products`);
+    const r = await fetch(`${API_BASE}/api/products?limit=${API_LIMIT}`);
     if (!r.ok) throw new Error(`Products API error HTTP ${r.status}`);
     const data = await r.json();
     return data.items || data;
@@ -46,8 +47,9 @@ async function fetchProducts() {
 function makeQueries(p) {
     const man = normalize(p.manufacturer);
     const model = normalize(p.model);
+    const displayName = normalize(p.name || p?.data?.name);
 
-    const base = `${man} ${model}`.trim();
+    const base = displayName || `${man} ${model}`.trim();
 
     // Ha nincs elég adat, legalább valami
     const q1 = `${base} product photo`.trim();

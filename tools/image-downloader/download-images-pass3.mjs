@@ -15,6 +15,7 @@ const DEBUG_DIR = path.join(ROOT, "datas", "Jsons", "bing_debug");
 const TARGET = Number(process.env.MAX_IMAGES || 4);
 const START = Number(process.env.START || 0);
 const LIMIT = Number(process.env.LIMIT || 0);
+const API_LIMIT = Number(process.env.API_LIMIT || 5000);
 
 const SEARCH_DELAY_MS = Number(process.env.SEARCH_DELAY_MS || 2000);
 const DL_DELAY_MS = Number(process.env.DL_DELAY_MS || 600);
@@ -35,7 +36,7 @@ function existingImageCount(dir) {
 }
 
 async function fetchProducts() {
-    const r = await fetch(`${API_BASE}/api/products`);
+    const r = await fetch(`${API_BASE}/api/products?limit=${API_LIMIT}`);
     if (!r.ok) throw new Error(`Products API error HTTP ${r.status}`);
     const data = await r.json();
     return data.items || data;
@@ -56,12 +57,13 @@ function pickFromData(dataObj) {
 function makeQueries(p) {
     const man = normalize(p.manufacturer);
     const model = normalize(p.model);
+    const displayName = normalize(p.name || p?.data?.name);
     const hint = normalize(p.table_name || p.category || p.type || "");
 
     let dataName = "";
     try { if (p.data && typeof p.data === "object") dataName = pickFromData(p.data); } catch {}
 
-    const base = normalize(`${man} ${model}`) || normalize(dataName) || hint || `${p.table_name || ""} ${p.id}`.trim();
+    const base = displayName || normalize(`${man} ${model}`) || normalize(dataName) || hint || `${p.table_name || ""} ${p.id}`.trim();
 
     // 5 query elég, gyorsabb és kevésbé triggereli a robot-check-et
     return [

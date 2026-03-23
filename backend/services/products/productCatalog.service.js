@@ -15,7 +15,7 @@ const {
 
 const CATALOG_TTL_MS = 60_000;
 const PAGE_SIZE = 1000;
-const VALUES_PAGE_SIZE = 5000;
+const VALUES_PAGE_SIZE = 1000;
 
 let detectedUnifiedTablePromise = null;
 let catalogCache = {

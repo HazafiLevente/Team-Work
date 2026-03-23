@@ -26,7 +26,7 @@
   <ng-container *ngIf="current as p">
     <div class="meta">
       <div class="manu">{{ p.manufacturer || '—' }}</div>
-      <div class="model">{{ p.model || '—' }}</div>
+      <div class="model">{{ p.name || p.model || '—' }}</div>
       <div class="price">{{ formatPrice(p.price) }}</div>
 
       <div class="mini">

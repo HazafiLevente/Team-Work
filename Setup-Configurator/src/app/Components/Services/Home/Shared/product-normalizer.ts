@@ -71,6 +71,12 @@ export function normalizeProduct(raw: any): Product {
     toInt(d?.ID) ??
     0;
 
+  const name =
+    str(raw?.name) ||
+    str(raw?.Name) ||
+    str(d?.name) ||
+    str(d?.Name);
+
   const manufacturer =
     str(raw?.manufacturer) ||
     str(raw?.Manufacturer) ||
@@ -113,6 +119,7 @@ export function normalizeProduct(raw: any): Product {
 
   return {
     id,
+    name: name || model,
     manufacturer,
     model,
     price,

@@ -17,7 +17,7 @@
 
     <div *ngIf="!loading && details">
       <div class="price">
-        Ár: <strong>{{ details.price ? (details.price | number:'1.0-0') + ' Ft' : 'N/A' }}</strong>
+        Ár: <strong>{{ details.price !== null && details.price !== undefined && details.price !== '' ? (details.price | number:'1.0-0') + ' Ft' : 'N/A' }}</strong>
       </div>
 
       <div class="kv">

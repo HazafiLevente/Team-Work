@@ -98,9 +98,23 @@ export class FeaturedSpotlightComponent implements OnChanges {
   }
 
   formatPrice(v: any): string {
-    const n = Number(v);
-    if (!Number.isFinite(n)) return 'N/A';
+    const n = this.parsePrice(v);
+    if (n == null) return 'N/A';
     return new Intl.NumberFormat('hu-HU').format(n) + ' Ft';
+  }
+
+  private parsePrice(v: any): number | null {
+    if (v == null || v === '') return null;
+    if (typeof v === 'number') return Number.isFinite(v) ? Math.round(v) : null;
+
+    const nums = (String(v).match(/\d+(\.\d+)?/g) || [])
+      .map(Number)
+      .filter(Number.isFinite);
+
+    if (!nums.length) return null;
+    if (nums.length === 1) return Math.round(nums[0]);
+
+    return Math.round((Math.min(...nums) + Math.max(...nums)) / 2);
   }
 
   specs(p: AnyProduct): Array<{ k: string; v: any }> {
