@@ -1,89 +1,158 @@
 <div class="chat-layout">
-
-  <!-- SIDEBAR -->
   <div class="chat-sidebar" [class.hidden-mobile]="isMobile && mobileView !== 'list'">
-
     <div class="sidebar-header">
-      <span>Beszélgetések</span>
+      <div class="sidebar-title">Beszelgetesek</div>
+
+      <label class="mode-toggle" [class.ai-active]="mode === 'ai'">
+        <input
+          class="toggle-input"
+          type="checkbox"
+          [checked]="mode === 'ai'"
+          (change)="onToggleMode($any($event.target).checked)" />
+
+        <span class="toggle-track"></span>
+        <span class="toggle-thumb"></span>
+        <span class="toggle-option toggle-option-left" [class.active]="mode === 'messages'">Messages</span>
+        <span class="toggle-option toggle-option-right" [class.active]="mode === 'ai'">AI</span>
+      </label>
     </div>
 
-    <div
-      *ngFor="let c of conversations"
-      class="chat-item"
-      [class.active]="c.key === activeKey"
-      (click)="goToConversation(c.key)"
-      (contextmenu)="onRightClickConversation($event, c)">
-
-      <div class="avatar">
-        {{ (c.title || '?').charAt(0) }}
-      </div>
-
-      <div class="chat-info">
-        <div class="chat-title">{{ c.title }}</div>
-        <div class="chat-preview">{{ c.lastText || '—' }}</div>
-      </div>
-    </div>
-
-    <button class="new-chat-btn" type="button" (click)="toggleNewChat()">
-      + Új beszélgetés
-    </button>
-
-    <div *ngIf="showNewChat" class="user-list">
+    <ng-container *ngIf="mode === 'messages'; else aiSidebar">
       <div
-        *ngFor="let u of users"
-        class="user-row"
-        (click)="startConversation(u)">
-        {{ u.username }}
-      </div>
-    </div>
+        *ngFor="let c of conversations"
+        class="chat-item"
+        [class.active]="c.key === activeKey"
+        (click)="goToConversation(c.key)"
+        (contextmenu)="onRightClickConversation($event, c)">
 
+        <div class="avatar">{{ (c.title || '?').charAt(0) }}</div>
+
+        <div class="chat-info">
+          <div class="chat-title">{{ c.title }}</div>
+          <div class="chat-preview">{{ c.lastText || '-' }}</div>
+        </div>
+      </div>
+
+      <button class="new-chat-btn" type="button" (click)="toggleNewChat()">
+        + Uj beszelgetes
+      </button>
+
+      <div *ngIf="showNewChat" class="user-list">
+        <div
+          *ngFor="let u of users"
+          class="user-row"
+          (click)="startConversation(u)">
+          {{ u.username }}
+        </div>
+      </div>
+    </ng-container>
+
+    <ng-template #aiSidebar>
+      <div
+        *ngFor="let c of aiConversations"
+        class="chat-item ai-item"
+        [class.active]="c.key === activeAiKey"
+        (click)="goToAiConversation(c.key)"
+        (contextmenu)="onRightClickAiConversation($event, c)">
+
+        <div class="avatar ai-avatar">AI</div>
+
+        <div class="chat-info">
+          <div class="chat-title">{{ c.title }}</div>
+          <div class="chat-preview">{{ c.lastText || 'Uj AI beszelgetes' }}</div>
+        </div>
+      </div>
+
+      <button class="new-chat-btn ai-btn" type="button" (click)="toggleNewChat()">
+        + Uj AI beszelgetes
+      </button>
+    </ng-template>
   </div>
 
-  <!-- CHAT AREA -->
   <div class="chat-content" [class.hidden-mobile]="isMobile && mobileView !== 'chat'">
-
-    <!-- ✅ MOBILE TOPBAR -->
     <div class="chat-topbar" *ngIf="isMobile">
       <button class="back-btn" type="button" (click)="goBackToList()">←</button>
       <div class="chat-top-title">{{ getActiveTitle() }}</div>
     </div>
 
-    <div class="messages-container">
+    <div class="chat-main">
+      <div class="messages-container">
+        <div
+          *ngFor="let m of displayedMessages"
+          class="message"
+          [class.mine]="m.user_id === authUserId || m.sender === 'me'"
+          [class.ai-message]="m.sender === 'ai' || m.sender === 'system'"
+          [class.product-wrapper]="m.sender === 'product'"
+          [class.hidden-message]="m.sender === 'product'"
+          (contextmenu)="onRightClickMessage($event, m)">
 
-      <div
-        *ngFor="let m of messages"
-        class="message"
-        [class.mine]="m.user_id === authUserId"
-        (contextmenu)="onRightClickMessage($event, m)">
-
-        <!-- EDIT MODE -->
-        <ng-container *ngIf="editingMessageId === m.id; else normalMessage">
-
+        <ng-container *ngIf="editingMessageId === m.id && mode === 'messages'; else normalMessage">
           <div class="edit-box">
-            <input
-              [(ngModel)]="editText"
-              (keyup.enter)="saveEdit()"
-            />
+            <input [(ngModel)]="editText" (keyup.enter)="saveEdit()" />
             <div class="edit-actions">
-              <button type="button" (click)="saveEdit()">✔</button>
-              <button type="button" (click)="cancelEdit()">✖</button>
+              <button type="button" (click)="saveEdit()">OK</button>
+              <button type="button" (click)="cancelEdit()">Megse</button>
             </div>
           </div>
-
         </ng-container>
 
-        <!-- NORMAL MODE -->
         <ng-template #normalMessage>
+          <div class="bubble-wrapper" *ngIf="m.sender !== 'product'">
+            <div class="bubble" [class.ai-bubble]="m.sender === 'ai' && !m.loading">
+              <ng-container *ngIf="m.sender === 'ai' && !m.loading; else plainBubble">
+                <div class="ai-badge-row">
+                  <span class="ai-badge">AI Valasz</span>
+                  <span class="ai-badge-glow"></span>
+                </div>
 
-          <div class="bubble-wrapper">
+                <div class="ai-rich-text">
+                  <div
+                    *ngFor="let block of formatAiText(m.context || m.text, m.products || [])"
+                    class="ai-line"
+                    [class.ai-line-heading]="block.type === 'heading'"
+                    [class.ai-line-bullet]="block.type === 'bullet'"
+                    [class.ai-line-paragraph]="block.type === 'paragraph'">
+                    <ng-container *ngIf="block.mention; else plainAiLine">
+                      <button
+                        class="ai-mention-card inline"
+                        type="button"
+                        [attr.data-table]="block.product?.table_name || block.product?.source_table || block.product?.table || null"
+                        [attr.data-id]="block.product?.id || block.product?.data?.id || null"
+                        [attr.data-mention]="block.mention"
+                        (click)="openAiMentionBlock(block, m.products || []); $event.preventDefault(); $event.stopPropagation()">
+                        <span class="ai-mention-label">Eszkoz</span>
+                        <span class="ai-mention-name">{{ block.mention }}</span>
+                        <ng-container *ngIf="block.product">
+                          <span class="ai-mention-meta" *ngIf="aiInlineDetails(block.product)?.manufacturer">
+                            {{ aiInlineDetails(block.product)?.manufacturer }}
+                          </span>
+                          <span class="ai-mention-price" *ngIf="aiInlineDetails(block.product)?.price != null">
+                            {{ aiInlineDetails(block.product)?.price | number:'1.0-0':'hu-HU' }} Ft
+                          </span>
+                          <div class="ai-mention-specs" *ngIf="aiInlineVisibleKeys(block.product).length">
+                            <span class="ai-mention-spec" *ngFor="let key of aiInlineVisibleKeys(block.product)">
+                              <strong>{{ key }}:</strong> {{ aiInlineDetails(block.product)?.[key] }}
+                            </span>
+                          </div>
+                        </ng-container>
+                      </button>
+                    </ng-container>
 
-            <div class="bubble">
-              {{ m.context }}
+                    <ng-template #plainAiLine>
+                      <span *ngIf="block.type === 'bullet'" class="ai-line-dot"></span>
+                      <span>{{ block.text }}</span>
+                    </ng-template>
+                  </div>
+                </div>
+              </ng-container>
+
+              <ng-template #plainBubble>
+                {{ m.context || m.text }}
+              </ng-template>
             </div>
 
-            <!-- 3 DOT MENU -->
             <div
-              *ngIf="m.user_id === authUserId"
+              *ngIf="mode === 'messages' && m.user_id === authUserId"
               class="menu-wrapper">
 
               <button
@@ -99,48 +168,70 @@
                 (click)="$event.stopPropagation()">
 
                 <div class="dropdown-item" (click)="startEdit(m)">
-                  ✏ Szerkesztés
+                  Szerkesztes
                 </div>
 
                 <div class="dropdown-item danger" (click)="deleteMessage(m.id)">
-                  🗑 Törlés
+                  Torles
                 </div>
-
               </div>
-
             </div>
-
           </div>
 
           <div class="time">
             {{ timeAgo(m.created_at) }}
           </div>
-
         </ng-template>
-
       </div>
 
-      <div *ngIf="messages.length === 0" class="empty">
-        Nincs üzenet
+        <div *ngIf="displayedMessages.length === 0" class="empty">
+          {{ mode === 'ai' ? 'Nincs meg AI beszelgetes' : 'Nincs uzenet' }}
+        </div>
+
+        <div #bottom></div>
       </div>
 
-      <div #bottom></div>
+      <aside class="product-side-panel" *ngIf="mode === 'ai'">
+        <div class="product-side-empty" *ngIf="!selectedAiProduct && !selectedAiProductLoading">
+          Valassz egy eszkozt az AI valaszban, es itt megjelennek a reszletei.
+        </div>
 
+        <div class="product-side-card" *ngIf="selectedAiProduct || selectedAiProductLoading">
+          <button class="product-side-close" type="button" (click)="closeSelectedAiProduct()">×</button>
+
+          <div class="product-side-head">
+            <div class="product-side-label">Kivalasztott termek</div>
+            <div class="product-side-title">{{ selectedAiDisplayName() || 'N/A' }}</div>
+            <div class="product-side-sub">{{ selectedAiDisplayManufacturer() || 'N/A' }}</div>
+          </div>
+
+          <div class="product-side-price">Ar: {{ selectedAiDisplayPrice() }}</div>
+
+          <div class="product-side-loading" *ngIf="selectedAiProductLoading">Betoltes...</div>
+          <div class="product-side-error" *ngIf="!selectedAiProductLoading && selectedAiProductError">{{ selectedAiProductError }}</div>
+
+          <div class="product-side-details" *ngIf="!selectedAiProductLoading && selectedAiProductDetails">
+            <div class="product-side-row" *ngFor="let key of selectedAiVisibleKeys()">
+              <div class="product-side-key">{{ key }}</div>
+              <div class="product-side-value">{{ selectedAiProductDetails[key] }}</div>
+            </div>
+          </div>
+        </div>
+      </aside>
     </div>
 
-    <!-- INPUT -->
-    <div *ngIf="activeKey" class="chat-input">
+    <div *ngIf="activeSelectionKey" class="chat-input">
       <input
         [(ngModel)]="newMessage"
-        placeholder="Írj üzenetet..."
+        [placeholder]="mode === 'ai' ? 'Irj az AI-nak...' : 'Irj uzenetet...'"
         (keyup.enter)="sendMessage()"
       />
-      <button type="button" (click)="sendMessage()">Küldés</button>
+      <button type="button" (click)="sendMessage()">
+        {{ mode === 'ai' ? 'Kerdezes' : 'Kuldes' }}
+      </button>
     </div>
-
   </div>
 
-  <!-- ✅ Right-click context menu -->
   <div
     *ngIf="contextMenuOpen"
     class="ctx-backdrop"
@@ -154,15 +245,14 @@
     [style.top.px]="contextMenuY"
     (click)="$event.stopPropagation()">
 
-    <div class="ctx-item" (click)="ctxDetails()">Részletek</div>
+    <div class="ctx-item" (click)="ctxDetails()">Reszletek</div>
     <div class="ctx-sep"></div>
 
-    <div class="ctx-item" (click)="ctxMute()">Lenémítás</div>
-    <div class="ctx-item" (click)="ctxDisable()">Tiltás</div>
-    <div class="ctx-item" (click)="ctxBlock()">Blokkolás</div>
+    <div *ngIf="mode === 'messages'" class="ctx-item" (click)="ctxMute()">Lenemitas</div>
+    <div *ngIf="mode === 'messages'" class="ctx-item" (click)="ctxDisable()">Tiltas</div>
+    <div *ngIf="mode === 'messages'" class="ctx-item" (click)="ctxBlock()">Blokkolas</div>
+    <div *ngIf="mode === 'messages'" class="ctx-sep"></div>
 
-    <div class="ctx-sep"></div>
-    <div class="ctx-item danger" (click)="ctxDelete()">Törlés</div>
+    <div class="ctx-item danger" (click)="ctxDelete()">Torles</div>
   </div>
-
 </div>

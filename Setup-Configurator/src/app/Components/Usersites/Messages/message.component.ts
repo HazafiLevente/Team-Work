@@ -1,8 +1,17 @@
-import { Component, HostListener, OnInit, ViewChild, ElementRef } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
+import { Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
+import { AiService } from '../../Services/AI/ai.service';
+import { ProductService } from '../../Services/Home/ProductParts/product/product.service';
+import {
+  AiConversationMessage,
+  AiConversationRecord,
+  AiConversationStoreService
+} from '../../Services/AI/ai-conversation-store.service';
+
+type ChatMode = 'messages' | 'ai';
 
 @Component({
   standalone: true,
@@ -11,16 +20,50 @@ import { ActivatedRoute, Router } from '@angular/router';
   templateUrl: './message.component.html',
   styleUrls: ['./message.component.css']
 })
-export class MessagesComponent implements OnInit {
+export class MessagesComponent implements OnInit, OnDestroy {
+  private readonly aiTypeToTable: Record<string, string> = {
+    cpu_desktop: 'processors',
+    gpu: 'video_cards',
+    motherboard: 'motherboard',
+    ram: 'ram',
+    psu: 'psu',
+    cpu_cooler: 'cpu_coolers',
+    soundcard: 'soundcards',
+    receiver: 'home_theater',
+    audio_processor: 'audio_processors',
+    portable_speaker: 'portable_speakers',
+    front_speaker: 'front_speaker',
+    back_speaker: 'back_speaker',
+    side_speaker: 'side_speaker',
+    center_speaker: 'center_speakers',
+    floor_speaker: 'floor_speakers',
+    ceiling_speaker: 'ceiling_speakers',
+    subwoofer: 'subwoofer',
+    bass_amplifier: 'bass_amplifier',
+    bass_shaker: 'bass_shaker',
+    studio_monitor: 'studio_monitor_speakers',
+    acoustic_drums: 'acoustic_drums',
+    acoustic_guitar: 'acoustic_guitars',
+    trumpet: 'c_trumpets',
+    saxophone: 'alt_saxophone',
+    network_switch: 'switches',
+    server_desktop: 'storages',
+    soundbar: 'home_theater'
+  };
 
   users: any[] = [];
   conversations: any[] = [];
   messages: any[] = [];
-  newMessage: string = '';
+  newMessage = '';
+
+  aiConversations: AiConversationRecord[] = [];
+  aiMessages: AiConversationMessage[] = [];
+  activeAiKey: string | null = null;
+  mode: ChatMode = 'messages';
 
   openMenuId: number | null = null;
   editingMessageId: number | null = null;
-  editText: string = '';
+  editText = '';
 
   showNewChat = false;
   activeKey: string | null = null;
@@ -28,77 +71,72 @@ export class MessagesComponent implements OnInit {
 
   @ViewChild('bottom') bottom!: ElementRef<HTMLDivElement>;
 
-  // ✅ Mobile view
   isMobile = false;
   mobileView: 'list' | 'chat' = 'list';
+  private nowMs = Date.now();
+  private nowTimer: ReturnType<typeof setInterval> | null = null;
+  selectedAiProduct: any = null;
+  selectedAiProductDetails: any = null;
+  selectedAiProductKeys: string[] = [];
+  selectedAiProductLoading = false;
+  selectedAiProductError: string | null = null;
 
-  // ✅ Context menu state
   contextMenuOpen = false;
   contextMenuX = 0;
   contextMenuY = 0;
-
-  contextTarget: { type: 'conversation' | 'message', data: any } | null = null;
+  contextTarget: { type: 'conversation' | 'message' | 'aiConversation', data: any } | null = null;
 
   constructor(
     private http: HttpClient,
     private route: ActivatedRoute,
-    private router: Router
+    private router: Router,
+    private ai: AiService,
+    private aiStore: AiConversationStoreService,
+    private productService: ProductService
   ) {}
 
   ngOnInit() {
-    this.onResize(); // ✅ initial
+    const savedMode = localStorage.getItem('messagesMode');
+    this.mode = savedMode === 'ai' ? 'ai' : 'messages';
+    this.onResize();
 
     this.loadAuth();
     this.loadConversations();
 
-    // route figyelés
-    this.route.paramMap.subscribe(p => {
-      const key = p.get('key');
-      if (key) {
+    this.route.paramMap.subscribe((params) => {
+      const key = params.get('key');
+
+      if (this.mode === 'messages' && key) {
         this.activeKey = key;
         this.openConversation(key);
-      } else {
-        // /user/messages (nincs active chat)
-        if (this.isMobile) this.mobileView = 'list';
+      } else if (this.isMobile) {
+        this.mobileView = this.activeSelectionKey ? 'chat' : 'list';
       }
     });
+
+    this.nowTimer = setInterval(() => {
+      this.nowMs = Date.now();
+    }, 1000);
   }
 
-  /* ----------------------------
-     Responsive (mobile)
-  ---------------------------- */
+  ngOnDestroy() {
+    if (this.nowTimer) {
+      clearInterval(this.nowTimer);
+      this.nowTimer = null;
+    }
+  }
 
   @HostListener('window:resize')
   onResize() {
     this.isMobile = window.innerWidth <= 820;
 
     if (!this.isMobile) {
-      // desktop: egyszerre látszik minden, de legyen "chat" logikailag
       this.mobileView = 'chat';
       return;
     }
 
-    // mobil: ha nincs kiválasztva chat -> lista
-    if (this.isMobile && !this.activeKey) {
-      this.mobileView = 'list';
-    }
+    this.mobileView = this.activeSelectionKey ? 'chat' : 'list';
   }
-
-  goBackToList() {
-    this.mobileView = 'list';
-    this.activeKey = null;
-    this.messages = [];
-    this.router.navigate(['/user/messages']);
-  }
-
-  getActiveTitle(): string {
-    const c = this.conversations.find(x => String(x.key) === String(this.activeKey));
-    return c?.title || 'Chat';
-  }
-
-  /* ----------------------------
-     GLOBAL LISTENERS (close menus)
-  ---------------------------- */
 
   @HostListener('document:click')
   onDocClick() {
@@ -113,8 +151,8 @@ export class MessagesComponent implements OnInit {
 
   @HostListener('document:contextmenu', ['$event'])
   onDocRightClick(event: MouseEvent) {
-    const el = event.target as HTMLElement;
-    if (el?.closest?.('.ctx-menu')) return;
+    const element = event.target as HTMLElement;
+    if (element?.closest?.('.ctx-menu')) return;
 
     if (this.contextMenuOpen) {
       event.preventDefault();
@@ -122,37 +160,93 @@ export class MessagesComponent implements OnInit {
     }
   }
 
-  /* ----------------------------
-     RIGHT CLICK OPEN
-  ---------------------------- */
+  get activeSelectionKey(): string | null {
+    if (this.mode === 'ai') return this.activeAiKey || '__ai_draft__';
+    return this.activeKey;
+  }
 
-  onRightClickConversation(event: MouseEvent, conv: any) {
+  get displayedMessages(): any[] {
+    return this.mode === 'ai' ? this.aiMessages : this.messages;
+  }
+
+  getActiveTitle(): string {
+    if (this.mode === 'ai') {
+      return this.aiConversations.find((conversation) => conversation.key === this.activeAiKey)?.title || 'AI beszelgetes';
+    }
+
+    return this.conversations.find((conversation) => String(conversation.key) === String(this.activeKey))?.title || 'Chat';
+  }
+
+  setMode(mode: ChatMode) {
+    if (this.mode === mode) return;
+
+    this.mode = mode;
+    this.showNewChat = false;
+    localStorage.setItem('messagesMode', mode);
+
+    if (mode === 'ai') {
+      this.loadAiConversations(() => {
+        if (!this.activeAiKey) {
+          if (this.aiConversations.length) this.openAiConversation(this.aiConversations[0].key);
+          else this.aiMessages = [this.buildSystemMessage()];
+        }
+      });
+    } else {
+      if (this.isMobile) {
+        this.mobileView = this.activeKey ? 'chat' : 'list';
+      }
+    }
+  }
+
+  onToggleMode(checked: boolean) {
+    this.setMode(checked ? 'ai' : 'messages');
+  }
+
+  goBackToList() {
+    this.mobileView = 'list';
+
+    if (this.mode === 'ai') {
+      this.activeAiKey = null;
+      this.aiMessages = [];
+      this.aiStore.setActiveConversationKey(null).subscribe();
+      return;
+    }
+
+    this.activeKey = null;
+    this.messages = [];
+    this.router.navigate(['/user/messages']);
+  }
+
+  onRightClickConversation(event: MouseEvent, conversation: any) {
     event.preventDefault();
     event.stopPropagation();
-
-    this.contextTarget = { type: 'conversation', data: conv };
+    this.contextTarget = { type: 'conversation', data: conversation };
     this.openContextMenu(event.clientX, event.clientY);
   }
 
-  onRightClickMessage(event: MouseEvent, msg: any) {
+  onRightClickAiConversation(event: MouseEvent, conversation: AiConversationRecord) {
     event.preventDefault();
     event.stopPropagation();
+    this.contextTarget = { type: 'aiConversation', data: conversation };
+    this.openContextMenu(event.clientX, event.clientY);
+  }
 
-    this.contextTarget = { type: 'message', data: msg };
+  onRightClickMessage(event: MouseEvent, message: any) {
+    if (this.mode === 'ai') return;
+
+    event.preventDefault();
+    event.stopPropagation();
+    this.contextTarget = { type: 'message', data: message };
     this.openContextMenu(event.clientX, event.clientY);
   }
 
   openContextMenu(x: number, y: number) {
-    const menuW = 220;
-    const menuH = 240;
-    const pad = 10;
+    const menuWidth = 220;
+    const menuHeight = 240;
+    const padding = 10;
 
-    const maxX = window.innerWidth - menuW - pad;
-    const maxY = window.innerHeight - menuH - pad;
-
-    this.contextMenuX = Math.max(pad, Math.min(x, maxX));
-    this.contextMenuY = Math.max(pad, Math.min(y, maxY));
-
+    this.contextMenuX = Math.max(padding, Math.min(x, window.innerWidth - menuWidth - padding));
+    this.contextMenuY = Math.max(padding, Math.min(y, window.innerHeight - menuHeight - padding));
     this.contextMenuOpen = true;
   }
 
@@ -161,77 +255,68 @@ export class MessagesComponent implements OnInit {
     this.contextTarget = null;
   }
 
-  /* ----------------------------
-     Context menu actions (stubs)
-     (Törlés már működik, a többi opcionális)
-  ---------------------------- */
-
   ctxDetails() {
-    const t = this.contextTarget;
-    if (!t) return;
-    console.log('Részletek:', t);
     this.closeContextMenu();
   }
 
   ctxDelete() {
-    const t = this.contextTarget;
-    if (!t) return;
+    const target = this.contextTarget;
+    if (!target) return;
 
-    if (t.type === 'message') {
-      this.deleteMessage(t.data.id);
+    if (target.type === 'message') {
+      this.deleteMessage(target.data.id);
       this.closeContextMenu();
       return;
     }
 
-    const key = t.data?.key;
+    if (target.type === 'aiConversation') {
+      this.deleteAiConversation(target.data.key);
+      this.closeContextMenu();
+      return;
+    }
+
+    const key = target.data?.key;
     if (!key) {
       this.closeContextMenu();
       return;
     }
 
-    if (!confirm('Biztos törlöd ezt a beszélgetést?')) {
+    if (!confirm('Biztos torlod ezt a beszelgetest?')) {
       this.closeContextMenu();
       return;
     }
 
-    this.http.delete(`/api/messages/conversation/${key}`, { withCredentials: true })
-      .subscribe({
-        next: () => {
-          if (String(this.activeKey) === String(key)) {
-            this.goBackToList();
-          }
-          this.loadConversations();
-          this.closeContextMenu();
-        },
-        error: (err) => {
-          console.error('Conversation delete failed:', err);
-          this.closeContextMenu();
+    this.http.delete(`/api/messages/conversation/${key}`, { withCredentials: true }).subscribe({
+      next: () => {
+        if (String(this.activeKey) === String(key)) {
+          this.goBackToList();
         }
-      });
+        this.loadConversations();
+        this.closeContextMenu();
+      },
+      error: (error) => {
+        console.error('Conversation delete failed:', error);
+        this.closeContextMenu();
+      }
+    });
   }
 
   ctxMute() {
-    console.log('Lenémítás (TODO)');
     this.closeContextMenu();
   }
 
   ctxDisable() {
-    console.log('Tiltás (TODO)');
     this.closeContextMenu();
   }
 
   ctxBlock() {
-    console.log('Blokkolás (TODO)');
     this.closeContextMenu();
   }
 
-  /* ----------------------------
-     UI helpers (3-dot menu)
-  ---------------------------- */
-
   toggleMenu(id: number, event: MouseEvent) {
+    if (this.mode === 'ai') return;
     event.stopPropagation();
-    this.openMenuId = (this.openMenuId === id) ? null : id;
+    this.openMenuId = this.openMenuId === id ? null : id;
   }
 
   scrollToBottom(smooth = true) {
@@ -242,11 +327,8 @@ export class MessagesComponent implements OnInit {
     });
   }
 
-  /* ----------------------------
-     Edit / Delete message (3-dot)
-  ---------------------------- */
-
   startEdit(message: any) {
+    if (this.mode === 'ai') return;
     this.editingMessageId = message.id;
     this.editText = message.context;
     this.openMenuId = null;
@@ -258,118 +340,187 @@ export class MessagesComponent implements OnInit {
   }
 
   saveEdit() {
+    if (this.mode === 'ai') return;
     if (!this.editText.trim() || !this.editingMessageId) return;
 
     this.http.patch(`/api/messages/${this.editingMessageId}`, {
       context: this.editText
-    }, { withCredentials: true })
-      .subscribe(() => {
-        this.editingMessageId = null;
-        this.editText = '';
-        if (this.activeKey) this.openConversation(this.activeKey);
-        this.loadConversations();
-      });
+    }, { withCredentials: true }).subscribe(() => {
+      this.editingMessageId = null;
+      this.editText = '';
+      if (this.activeKey) this.openConversation(this.activeKey);
+      this.loadConversations();
+    });
   }
 
   deleteMessage(id: number) {
+    if (this.mode === 'ai') return;
+
     this.openMenuId = null;
+    if (!confirm('Biztos torlod az uzenetet?')) return;
 
-    if (!confirm('Biztos törlöd az üzenetet?')) return;
-
-    this.http.delete(`/api/messages/${id}`, { withCredentials: true })
-      .subscribe(() => {
-        if (this.activeKey) this.openConversation(this.activeKey);
-        this.loadConversations();
-      });
+    this.http.delete(`/api/messages/${id}`, { withCredentials: true }).subscribe(() => {
+      if (this.activeKey) this.openConversation(this.activeKey);
+      this.loadConversations();
+    });
   }
 
-  /* ----------------------------
-     Navigation
-  ---------------------------- */
-
   goToConversation(key: string) {
+    this.setMode('messages');
     this.router.navigate(['/user/messages', key]);
     if (this.isMobile) this.mobileView = 'chat';
   }
 
-  /* ----------------------------
-     Data loading
-  ---------------------------- */
+  goToAiConversation(key: string) {
+    this.setMode('ai');
+    this.openAiConversation(key);
+  }
+
+  openAiProduct(product: any) {
+    const table = this.resolveProductTable(product);
+    const id = this.resolveProductId(product);
+
+    if (table && id !== undefined && id !== null) {
+      this.router.navigate(['/product-site', table, id]);
+      return;
+    }
+
+    this.openAiProductByLookup(product);
+  }
+
+  handleAiProductClick(event: MouseEvent, product: any) {
+    event.preventDefault();
+    event.stopPropagation();
+    this.openAiProduct(product);
+  }
+
+  openAiMentionByName(name: string, preferredProducts: any[] = []) {
+    const q = String(name || '').trim();
+    if (!q) return;
+
+    this.selectedAiProduct = { name: q, model: q };
+    this.selectedAiProductDetails = null;
+    this.selectedAiProductKeys = [];
+    this.selectedAiProductError = null;
+    this.selectedAiProductLoading = true;
+
+    const localProducts = [
+      ...(Array.isArray(preferredProducts) ? preferredProducts : []),
+      ...this.displayedMessages
+      .filter((message) => Array.isArray((message as any)?.products))
+      .flatMap((message: any) => message.products || [])
+    ];
+
+    const localTarget = this.pickBestMentionMatch(localProducts, q);
+    if (localTarget) {
+      this.selectAiProduct(localTarget);
+      return;
+    }
+
+    this.http.get<any>('/api/products', {
+      params: { q, limit: '12' },
+      withCredentials: true
+    }).subscribe({
+      next: (response) => {
+        const items = Array.isArray(response)
+          ? response
+          : (Array.isArray(response?.items) ? response.items : []);
+        const target = this.pickBestMentionMatch(items, q);
+        if (!target) {
+          this.selectedAiProductError = 'Nem talaltam ehhez a blokkhoz termekadatot.';
+          this.selectedAiProductLoading = false;
+          return;
+        }
+        this.selectAiProduct(target);
+      },
+      error: () => {
+        this.selectedAiProductError = 'Nem sikerult betolteni a termekadatokat.';
+        this.selectedAiProductLoading = false;
+      }
+    });
+  }
 
   loadAuth() {
-    this.http.get<any>('/api/auth/me', { withCredentials: true })
-      .subscribe(res => {
-        this.authUserId = res?.user?.id ?? null;
+    this.http.get<any>('/api/auth/me', { withCredentials: true }).subscribe((response) => {
+      this.authUserId = response?.user?.id ?? null;
+
+      this.aiStore.getActiveConversationKey().subscribe((savedKey) => {
+        this.activeAiKey = savedKey;
+
+        this.loadAiConversations(() => {
+          if (this.mode === 'ai' && !this.activeAiKey) {
+            if (this.aiConversations.length) this.openAiConversation(this.aiConversations[0].key);
+            else this.aiMessages = [this.buildSystemMessage()];
+          }
+        });
       });
+    });
   }
 
   loadConversations() {
-    this.http.get<any[]>('/api/messages/conversations', { withCredentials: true })
-      .subscribe(res => {
-        this.conversations = res || [];
-      });
+    this.http.get<any[]>('/api/messages/conversations', { withCredentials: true }).subscribe((response) => {
+      this.conversations = response || [];
+    });
   }
 
   loadUsers() {
-    this.http.get<any[]>('/api/users', { withCredentials: true })
-      .subscribe(res => {
-        const allUsers = res || [];
+    this.http.get<any[]>('/api/users', { withCredentials: true }).subscribe((response) => {
+      const allUsers = response || [];
+      const existingUserIds = (this.conversations || [])
+        .map((conversation) => conversation?.otherUserId)
+        .filter((value: any) => typeof value === 'number');
 
-        const existingUserIds = (this.conversations || [])
-          .map(c => c?.otherUserId)
-          .filter((x: any) => typeof x === 'number');
-
-        this.users = allUsers.filter(u =>
-          u.id !== this.authUserId &&
-          !existingUserIds.includes(u.id)
-        );
-      });
+      this.users = allUsers.filter((user) =>
+        user.id !== this.authUserId &&
+        !existingUserIds.includes(user.id)
+      );
+    });
   }
 
   openConversation(key: string) {
     this.activeKey = key;
 
-    this.http
-      .get<any>(`/api/messages/conversation/${key}`, { withCredentials: true })
-      .subscribe(res => {
-        this.messages = res?.items || [];
-
-        setTimeout(() => this.scrollToBottom(false), 0);
-        if (this.isMobile) this.mobileView = 'chat';
-      });
+    this.http.get<any>(`/api/messages/conversation/${key}`, { withCredentials: true }).subscribe((response) => {
+      this.messages = response?.items || [];
+      setTimeout(() => this.scrollToBottom(false), 0);
+      if (this.isMobile) this.mobileView = 'chat';
+    });
   }
-
-  /* ----------------------------
-     New chat
-  ---------------------------- */
 
   toggleNewChat() {
     this.showNewChat = !this.showNewChat;
-    if (this.showNewChat) this.loadUsers();
+    if (!this.showNewChat) return;
+
+    if (this.mode === 'ai') {
+      this.activeAiKey = null;
+      this.aiMessages = [this.buildSystemMessage()];
+      if (this.isMobile) this.mobileView = 'chat';
+      this.showNewChat = false;
+      return;
+    }
+
+    this.loadUsers();
   }
 
   startConversation(user: any) {
     this.http.post<any>('/api/messages/start', {
       user2_id: user.id
-    }, { withCredentials: true })
-      .subscribe(res => {
-        const panelId = String(res.panelId);
-
-        this.showNewChat = false;
-
-        this.router.navigate(['/user/messages', panelId]);
-        this.loadConversations();
-
-        if (this.isMobile) this.mobileView = 'chat';
-      });
+    }, { withCredentials: true }).subscribe((response) => {
+      const panelId = String(response.panelId);
+      this.showNewChat = false;
+      this.router.navigate(['/user/messages', panelId]);
+      this.loadConversations();
+      if (this.isMobile) this.mobileView = 'chat';
+    });
   }
 
-  /* ----------------------------
-     Send
-  ---------------------------- */
-
   sendMessage() {
-    if (!this.newMessage.trim() || !this.activeKey) return;
+    if (!this.newMessage.trim() || !this.activeSelectionKey) return;
+
+    if (this.mode === 'ai') {
+      this.sendAiMessage();
+      return;
+    }
 
     const otherId = this.getOtherUserId();
     if (!otherId) return;
@@ -377,34 +528,563 @@ export class MessagesComponent implements OnInit {
     this.http.post('/api/messages/send', {
       user2_id: otherId,
       context: this.newMessage
-    }, { withCredentials: true })
-      .subscribe({
-        next: () => {
-          this.newMessage = '';
-          this.openConversation(this.activeKey!);
-          this.loadConversations();
-        },
-        error: () => {
-          alert('Hiba üzenetküldésnél.');
-        }
+    }, { withCredentials: true }).subscribe({
+      next: () => {
+        this.newMessage = '';
+        this.openConversation(this.activeKey!);
+        this.loadConversations();
+      },
+      error: () => {
+        alert('Hiba uzenetkuldesnel.');
+      }
+    });
+  }
+
+  sendAiMessage() {
+    const text = this.newMessage.trim();
+    if (!text) return;
+
+    if (!this.activeAiKey) {
+      this.aiStore.createConversation().subscribe((conversation) => {
+        this.activeAiKey = conversation.key;
+        this.aiConversations = [
+          conversation,
+          ...this.aiConversations.filter((item) => item.key !== conversation.key)
+        ];
+        this.sendAiMessage();
       });
+      return;
+    }
+
+    const baseMessages = [...this.aiMessages];
+    const userMessage: AiConversationMessage = {
+      id: Date.now(),
+      sender: 'me',
+      text,
+      created_at: new Date().toISOString()
+    };
+
+    const loadingMessage: AiConversationMessage = {
+      id: Date.now() + 1,
+      sender: 'ai',
+      text: 'AI gondolkodik...',
+      created_at: new Date().toISOString(),
+      loading: true
+    };
+
+    this.aiMessages = [...baseMessages, userMessage, loadingMessage];
+    this.newMessage = '';
+    this.saveCurrentAiConversation(this.aiMessages, text);
+    setTimeout(() => this.scrollToBottom(), 0);
+
+    const history = baseMessages
+      .filter((message) => message.sender !== 'system')
+      .map((message) => ({
+        role: message.sender === 'me' ? 'user' : 'model',
+        text: message.text || (
+          Array.isArray(message.products)
+            ? `Termekek: ${message.products.map((product) => product?.name || product?.model || 'ismeretlen').join(', ')}`
+            : ''
+        )
+      }));
+
+    this.ai.ask(text, history, this.activeAiKey).subscribe({
+      next: (response: any) => {
+        const result = response?.data;
+        const responseConversationKey = String(response?.messages_id || '').trim();
+        if (responseConversationKey) {
+          this.activeAiKey = responseConversationKey;
+        }
+
+        const cleanMessages = this.aiMessages.filter((message) => !message.loading);
+        const answerText = String(response?.answer || '').trim();
+        const attachedProducts =
+          result?.mode === 'list' && Array.isArray(result?.list) ? result.list :
+          result?.mode === 'product' && Array.isArray(result?.exact) ? result.exact :
+          [];
+
+        if (answerText) {
+          cleanMessages.push({
+            id: Date.now() + 1,
+            sender: 'ai',
+            text: answerText,
+            created_at: new Date().toISOString(),
+            products: attachedProducts.length ? attachedProducts : undefined
+          });
+        }
+
+        const aiMessage: AiConversationMessage = answerText
+          ? cleanMessages[cleanMessages.length - 1]
+          : {
+              id: Date.now() + 2,
+              sender: 'ai',
+              text: 'Nincs valasz.',
+              created_at: new Date().toISOString(),
+              products: attachedProducts.length ? attachedProducts : undefined
+            };
+
+        this.aiMessages = answerText ? [...cleanMessages] : [...cleanMessages, aiMessage];
+        this.saveCurrentAiConversation(this.aiMessages, (answerText || aiMessage.text || ''));
+        this.loadAiConversations();
+        setTimeout(() => this.scrollToBottom(), 0);
+      },
+      error: () => {
+        const cleanMessages = this.aiMessages.filter((message) => !message.loading);
+        const aiMessage: AiConversationMessage = {
+          id: Date.now() + 3,
+          sender: 'ai',
+          text: 'Hiba tortent az AI valasz soran.',
+          created_at: new Date().toISOString()
+        };
+
+        this.aiMessages = [...cleanMessages, aiMessage];
+        this.saveCurrentAiConversation(this.aiMessages, aiMessage.text || '');
+        this.loadAiConversations();
+        setTimeout(() => this.scrollToBottom(), 0);
+      }
+    });
   }
 
   getOtherUserId(): number | null {
-    const panel = this.conversations.find(c => String(c.key) === String(this.activeKey));
+    const panel = this.conversations.find((conversation) => String(conversation.key) === String(this.activeKey));
     if (!panel) return null;
     return panel.otherUserId ?? null;
   }
 
-  /* ----------------------------
-     Utils
-  ---------------------------- */
+  private createAiConversation(afterCreate?: () => void) {
+    this.aiStore.createConversation().subscribe((conversation) => {
+      this.aiConversations = [conversation, ...this.aiConversations.filter((item) => item.key !== conversation.key)];
+      this.aiStore.setActiveConversationKey(conversation.key).subscribe();
+      this.openAiConversation(conversation.key);
+      if (afterCreate) afterCreate();
+    });
+  }
 
-  timeAgo(date: string): string {
-    const diff = Math.floor((Date.now() - new Date(date).getTime()) / 1000);
+  private openAiConversation(key: string) {
+    this.activeAiKey = key;
+    this.aiStore.setActiveConversationKey(key).subscribe();
+
+    this.aiStore.getConversation(key).subscribe((conversation) => {
+      if (conversation?.messages?.length) {
+        this.aiMessages = [...conversation.messages];
+      } else if (!this.aiMessages.length || this.activeAiKey !== key) {
+        this.aiMessages = [this.buildSystemMessage()];
+      }
+
+      if (this.isMobile) this.mobileView = 'chat';
+      setTimeout(() => this.scrollToBottom(false), 0);
+    });
+  }
+
+  private deleteAiConversation(key: string) {
+    if (!confirm('Biztos torlod ezt az AI beszelgetest?')) return;
+
+    this.aiStore.deleteConversation(key).subscribe((conversations) => {
+      this.aiConversations = conversations;
+
+      if (this.activeAiKey === key) {
+        if (this.aiConversations.length) this.openAiConversation(this.aiConversations[0].key);
+        else {
+          this.activeAiKey = null;
+          this.aiMessages = [];
+          this.aiStore.setActiveConversationKey(null).subscribe();
+          if (this.isMobile) this.mobileView = 'list';
+        }
+      }
+    });
+  }
+
+  private saveCurrentAiConversation(messages: AiConversationMessage[], lastText: string) {
+    if (!this.activeAiKey) return;
+
+    const firstUserMessage = messages.find((message) => message.sender === 'me')?.text || '';
+    const conversation: AiConversationRecord = {
+      key: this.activeAiKey,
+      title: this.aiStore.buildTitle(firstUserMessage),
+      lastText,
+      updatedAt: new Date().toISOString(),
+      messages: messages.filter((message) => !message.loading)
+    };
+
+    this.aiStore.saveConversation(conversation).subscribe((conversations) => {
+      this.aiConversations = conversations;
+    });
+  }
+
+  private loadAiConversations(afterLoad?: () => void) {
+    this.aiStore.getConversations().subscribe((conversations) => {
+      this.aiConversations = conversations;
+      const isLoading = this.aiMessages.some((message) => message.loading);
+      const activeStillExists = !!this.activeAiKey && this.aiConversations.some((item) => item.key === this.activeAiKey);
+
+      if (!activeStillExists) {
+        this.activeAiKey = this.aiConversations[0]?.key || null;
+        this.aiStore.setActiveConversationKey(this.activeAiKey).subscribe();
+      }
+
+      if (this.activeAiKey && !isLoading) {
+        this.aiStore.getConversation(this.activeAiKey).subscribe((conversation) => {
+          if (conversation?.messages?.length) {
+            this.aiMessages = [...conversation.messages];
+            setTimeout(() => this.scrollToBottom(false), 0);
+          } else if (!this.aiMessages.length) {
+            this.aiMessages = [this.buildSystemMessage()];
+          }
+        });
+      }
+
+      if (afterLoad) afterLoad();
+    });
+  }
+
+  timeAgo(date: string | number): string {
+    const diff = Math.floor((this.nowMs - new Date(date).getTime()) / 1000);
     if (diff < 60) return `${diff}s`;
     if (diff < 3600) return `${Math.floor(diff / 60)}m`;
     if (diff < 86400) return `${Math.floor(diff / 3600)}h`;
     return `${Math.floor(diff / 86400)}d`;
+  }
+
+  formatAiText(text: string, products: any[] = []): Array<{ type: 'heading' | 'bullet' | 'paragraph', text: string, mention?: string | null, product?: any | null }> {
+    return String(text || '')
+      .split('\n')
+      .map((line) => line.trim())
+      .filter(Boolean)
+      .map((line) => {
+        const clean = line.replace(/^#{1,6}\s*/, '').replace(/\*\*/g, '').trim();
+        const mention = this.extractMentionFromLine(line);
+        const product = mention ? this.pickBestMentionMatch(products, mention) : null;
+        if (/^#{1,6}\s*/.test(line)) {
+          return { type: 'heading' as const, text: clean, mention: null, product: null };
+        }
+
+        if (/^[-*•]\s+/.test(line)) {
+          const bulletText = clean.replace(/^[-*•]\s+/, '');
+          return {
+            type: 'bullet' as const,
+            text: bulletText,
+            mention,
+            product
+          };
+        }
+
+        return {
+          type: 'paragraph' as const,
+          text: clean,
+          mention,
+          product
+        };
+      });
+  }
+
+  private resolveProductTable(product: any): string {
+    const direct =
+      product?.table_name ??
+      product?.source_table ??
+      product?.table ??
+      product?.product_table ??
+      product?.data?.table_name ??
+      product?.data?.source_table ??
+      product?.data?.table ??
+      product?.data?.product_table;
+
+    if (String(direct ?? '').trim()) {
+      return String(direct).trim();
+    }
+
+    const type = String(
+      product?.type ??
+      product?.category ??
+      product?.data?.type ??
+      product?.data?.category ??
+      ''
+    ).trim().toLowerCase();
+
+    return this.aiTypeToTable[type] || '';
+  }
+
+  private resolveProductId(product: any): number | string | null {
+    const rawId =
+      product?.id ??
+      product?.product_id ??
+      product?.products_id ??
+      product?.data?.id ??
+      product?.data?.product_id ??
+      product?.data?.products_id;
+
+    if (rawId === undefined || rawId === null || rawId === '') {
+      return null;
+    }
+
+    return rawId;
+  }
+
+  buildAiProductPath(product: any): string | null {
+    const table = this.resolveProductTable(product);
+    const id = this.resolveProductId(product);
+    if (!table || id === undefined || id === null) return null;
+    return `/product-site/${table}/${id}`;
+  }
+
+  buildMentionOpenPath(name: string | null | undefined): string {
+    return `/product-open/${encodeURIComponent(String(name || '').trim())}`;
+  }
+
+  openAiMentionBlock(block: { mention?: string | null, product?: any | null }, products: any[] = []) {
+    const product = block?.product;
+
+    if (product) {
+      this.selectAiProduct(product);
+      return;
+    }
+
+    this.openAiMentionByName(String(block?.mention || ''), products);
+  }
+
+  private openAiMentionByPayload(product: any) {
+    this.selectAiProduct(product);
+  }
+
+  private selectAiProduct(product: any) {
+    const table = this.resolveProductTable(product);
+    const id = this.resolveProductId(product);
+
+    this.selectedAiProduct = product;
+    this.selectedAiProductDetails = null;
+    this.selectedAiProductKeys = [];
+    this.selectedAiProductError = null;
+
+    if (!table || id === undefined || id === null) {
+      this.selectedAiProductError = 'Nem sikerult beazonositani a termeket.';
+      return;
+    }
+
+    this.selectedAiProductLoading = true;
+    this.productService.getProductDetails(String(table), String(id)).subscribe({
+      next: (res: any) => {
+        const item = this.normalizeAiDetails(res?.item ?? res, product, table, id);
+        this.selectedAiProductDetails = item;
+        this.selectedAiProductKeys = Object.keys(item || {});
+        this.selectedAiProductLoading = false;
+      },
+      error: () => {
+        this.selectedAiProductDetails = this.normalizeAiDetails(product?.data ?? product, product, table, id);
+        this.selectedAiProductKeys = Object.keys(this.selectedAiProductDetails || {});
+        this.selectedAiProductError = null;
+        this.selectedAiProductLoading = false;
+      }
+    });
+  }
+
+  closeSelectedAiProduct() {
+    this.selectedAiProduct = null;
+    this.selectedAiProductDetails = null;
+    this.selectedAiProductKeys = [];
+    this.selectedAiProductError = null;
+    this.selectedAiProductLoading = false;
+  }
+
+  private openAiProductByLookup(product: any) {
+    const query = String(
+      product?.name ??
+      product?.model ??
+      product?.data?.name ??
+      product?.data?.model ??
+      ''
+    ).trim();
+
+    if (!query) return;
+
+    this.http.get<any>('/api/products', {
+      params: { q: query, limit: '12' },
+      withCredentials: true
+    }).subscribe({
+      next: (response) => {
+        const items = Array.isArray(response)
+          ? response
+          : (Array.isArray(response?.items) ? response.items : []);
+        const target = this.pickBestMentionMatch(items, query);
+        if (!target) return;
+
+        const table = this.resolveProductTable(target);
+        const id = this.resolveProductId(target);
+        if (!table || id === undefined || id === null) return;
+
+        this.selectAiProduct(target);
+      },
+      error: () => {}
+    });
+  }
+
+  private pickBestMentionMatch(items: any[], name: string): any | null {
+    const normalizedTarget = this.normalizeMention(name);
+    if (!items.length || !normalizedTarget) return null;
+
+    const exact = items.find((item) => this.normalizeMention(item?.name || item?.model) === normalizedTarget);
+    if (exact) return exact;
+
+    const contains = items.find((item) => {
+      const candidate = this.normalizeMention(item?.name || item?.model);
+      return candidate.includes(normalizedTarget) || normalizedTarget.includes(candidate);
+    });
+
+    return contains || items[0] || null;
+  }
+
+  private normalizeMention(value: any): string {
+    return String(value || '')
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9]+/g, ' ')
+      .trim();
+  }
+
+  private extractMentionFromLine(line: string): string | null {
+    const cleanedLine = String(line || '').replace(/\*\*/g, '').trim();
+    if (!cleanedLine) return null;
+    if (/^#{1,6}\s*/.test(cleanedLine)) return null;
+
+    const match = cleanedLine.match(/^[-*•]?\s*([A-Z0-9][A-Za-z0-9+/.()' -]{2,90}?)(?:\s+[–-]\s+|:\s*$|\s+\d[\d\s,.]*\s*(ft|forint)\s*$)/i);
+    if (!match) return null;
+
+    const candidate = String(match[1] || '').trim().replace(/[.:;,]+$/, '');
+    if (!candidate || candidate.length < 4) return null;
+    if (/^(hazimozi|hangfalak|talalt termekek|melyik tipus|ezek az eszkozok|kivalo kiegeszitok|talaltam nehany relevans termeket|professzionalis megoldasok|aktiv hangfalak|szamitogepes alkatreszek)/i.test(candidate)) {
+      return null;
+    }
+
+    return candidate;
+  }
+
+  selectedAiDisplayName(): string {
+    const source = this.selectedAiProductDetails || this.selectedAiProduct || {};
+    return String(
+      source?.name ??
+      source?.model ??
+      source?.Model ??
+      source?.data?.name ??
+      source?.data?.model ??
+      ''
+    ).trim();
+  }
+
+  selectedAiDisplayManufacturer(): string {
+    const source = this.selectedAiProductDetails || this.selectedAiProduct || {};
+    return String(
+      source?.manufacturer ??
+      source?.Manufacturer ??
+      source?.brand ??
+      source?.data?.manufacturer ??
+      ''
+    ).trim();
+  }
+
+  selectedAiDisplayPrice(): string {
+    const source = this.selectedAiProductDetails || this.selectedAiProduct || {};
+    const raw =
+      source?.price ??
+      source?.Price ??
+      source?.price_range ??
+      source?.['Price Range (Ft)'] ??
+      source?.data?.price ??
+      source?.data?.Price ??
+      null;
+
+    const parsed = this.parseAiPrice(raw);
+    return parsed == null ? 'N/A' : `${parsed.toLocaleString('hu-HU')} Ft`;
+  }
+
+  selectedAiVisibleKeys(): string[] {
+    return (this.selectedAiProductKeys || []).filter((key) => !this.isHiddenAiKey(key));
+  }
+
+  aiInlineDetails(product: any): any {
+    if (!product) return null;
+    const table = this.resolveProductTable(product);
+    const id = this.resolveProductId(product);
+    return this.normalizeAiDetails(product?.data ?? product, product, table, id);
+  }
+
+  aiInlineVisibleKeys(product: any): string[] {
+    const details = this.aiInlineDetails(product);
+    return Object.keys(details || {})
+      .filter((key) => !this.isHiddenAiKey(key))
+      .slice(0, 4);
+  }
+
+  private isHiddenAiKey(key: string): boolean {
+    const normalized = String(key || '').toLowerCase();
+    return [
+      'id',
+      'created_at',
+      'updated_at',
+      'price',
+      'manufacturer',
+      'model',
+      'name',
+      'table_name',
+      'source_table',
+      'product_table',
+      'table',
+      'category',
+      'type',
+      'products',
+      'data'
+    ].includes(normalized);
+  }
+
+  private normalizeAiDetails(item: any, fallbackProduct: any, table: any, id: any): any {
+    const source = item && typeof item === 'object' ? item : {};
+    return {
+      ...source,
+      table_name: source?.table_name ?? table,
+      id: source?.id ?? id,
+      manufacturer:
+        source?.manufacturer ??
+        source?.Manufacturer ??
+        fallbackProduct?.manufacturer ??
+        fallbackProduct?.data?.manufacturer ??
+        '',
+      model:
+        source?.model ??
+        source?.Model ??
+        source?.name ??
+        fallbackProduct?.name ??
+        fallbackProduct?.model ??
+        fallbackProduct?.data?.model ??
+        '',
+      price: this.parseAiPrice(
+        source?.price ??
+        source?.Price ??
+        source?.price_range ??
+        source?.['Price Range (Ft)'] ??
+        fallbackProduct?.price ??
+        fallbackProduct?.data?.price ??
+        null
+      )
+    };
+  }
+
+  private parseAiPrice(raw: any): number | null {
+    if (raw == null || raw === '') return null;
+    if (typeof raw === 'number') return Number.isFinite(raw) ? Math.round(raw) : null;
+
+    const nums = (String(raw).match(/\d+(\.\d+)?/g) || [])
+      .map(Number)
+      .filter(Number.isFinite);
+
+    if (!nums.length) return null;
+    if (nums.length === 1) return Math.round(nums[0]);
+    return Math.round((Math.min(...nums) + Math.max(...nums)) / 2);
+  }
+
+  private buildSystemMessage(): AiConversationMessage {
+    return {
+      id: Date.now(),
+      sender: 'system',
+      text: 'Kerdezz barmit, es az elso uzenetnel letrejon az uj AI beszelgetes.',
+      created_at: new Date().toISOString()
+    };
   }
 }

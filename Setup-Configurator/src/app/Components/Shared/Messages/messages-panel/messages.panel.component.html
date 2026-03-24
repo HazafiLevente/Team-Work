@@ -1,60 +1,65 @@
 <div class="overlay" (click)="close.emit()"></div>
 
 <div class="panel" (click)="$event.stopPropagation()">
-
   <div class="panel-header">
     Setup AI
-    <span class="close-btn" (click)="close.emit()">✖</span>
+    <span class="close-btn" (click)="close.emit()">×</span>
   </div>
 
   <div class="panel-body">
-
     <div
       *ngFor="let m of messages"
       class="message"
       [class.me]="m.sender === 'me'"
       [class.ai]="m.sender === 'ai'"
       [class.system]="m.sender === 'system'"
-      [class.product-wrapper]="m.sender === 'product'">
+      [class.product-wrapper]="m.sender === 'product'"
+      [class.hidden-message]="m.sender === 'product'">
 
-      <!-- sima text -->
       <ng-container *ngIf="m.text">
-        {{ m.text }}
+        <ng-container *ngIf="m.sender === 'ai' && !m.loading; else plainPanelText">
+          <div class="ai-badge-row">
+            <span class="ai-badge">AI Valasz</span>
+            <span class="ai-badge-orb"></span>
+          </div>
+
+          <div class="ai-rich-text">
+            <div
+              *ngFor="let block of formatAiText(m.text, m.products || [])"
+              class="ai-line"
+              [class.ai-line-heading]="block.type === 'heading'"
+              [class.ai-line-bullet]="block.type === 'bullet'"
+              [class.ai-line-paragraph]="block.type === 'paragraph'">
+              <ng-container *ngIf="block.mention; else plainPanelAiLine">
+                <a
+                  class="ai-mention-card inline"
+                  [attr.href]="buildProductPath(block.product) || buildMentionOpenPath(block.mention)">
+                  <span class="ai-mention-label">Eszkoz</span>
+                  <span class="ai-mention-name">{{ block.mention }}</span>
+                </a>
+              </ng-container>
+
+              <ng-template #plainPanelAiLine>
+                <span *ngIf="block.type === 'bullet'" class="ai-line-dot"></span>
+                <span>{{ block.text }}</span>
+              </ng-template>
+            </div>
+          </div>
+        </ng-container>
+
+        <ng-template #plainPanelText>
+          {{ m.text }}
+        </ng-template>
       </ng-container>
-
-      <!-- product-site lista -->
-      <div *ngIf="m.products" class="product-list">
-        <div
-          *ngFor="let p of m.products"
-          class="product-card"
-          (click)="openProduct(p)">
-
-          <div class="product-title">
-            {{ p.manufacturer }} {{ p.model }}
-          </div>
-
-          <div class="product-price" *ngIf="p.price">
-            {{ p.price | number:'1.0-0' }} Ft
-          </div>
-
-          <div class="product-price" *ngIf="!p.price">
-            Ár nem elérhető
-          </div>
-
-        </div>
-      </div>
-
     </div>
-
   </div>
 
   <div class="panel-input">
     <input
       [(ngModel)]="newMessage"
       (keyup.enter)="send()"
-      placeholder="Írj kérdést a termékekről..."
+      placeholder="Irj kerdest a termekekrol..."
     />
-    <button (click)="send()">Küldés</button>
+    <button (click)="send()">Kuldes</button>
   </div>
-
 </div>

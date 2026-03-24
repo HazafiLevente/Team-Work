@@ -12,6 +12,7 @@ import {MessagesComponent} from './Components/Usersites/Messages/message.compone
 import { Routes } from '@angular/router';
 import { LeaderboardPageComponent } from './Components/Home/leaderboard-page/leaderboard-page.component';
 import { ProductPageComponent } from './Components/Product/product/product-page.component';
+import { ProductOpenComponent } from './Components/Product/product-open/product-open.component';
 import { ProfileComponent } from './Components/Usersites/Profil/profil/profile.component';
 import {UsersComponent} from './Components/Usersites/Admin/users/users.component';
 import { SettingsComponent } from './Components/Settings/settings.component';
@@ -28,6 +29,7 @@ export const routes: Routes = [
   },
   { path: '', redirectTo: 'home', pathMatch: 'full'},
   { path: 'home', component: HomeComponent }, //{, canActivate: [authGuard] },
+  { path: 'product-open/:name', component: ProductOpenComponent },
   { path: 'product-site/:table/:id', component: ProductPageComponent },
   { path: 'settings', component: SettingsComponent },
 

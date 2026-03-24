@@ -219,6 +219,52 @@ async function getCatalogStats() {
     };
 }
 
+async function getCatalogOverview() {
+    const snapshot = await getCatalogSnapshot();
+    const rows = snapshot?.rows ?? [];
+
+    const byType = new Map();
+    const byTable = new Map();
+    const byManufacturer = new Map();
+
+    for (const row of rows) {
+        const typeKey = norm(row?.type || row?.category || "unknown");
+        const tableKey = String(row?.table_name || row?.table || "products").trim() || "products";
+        const manufacturerKey = String(
+            pickCaseInsensitive(row, ["manufacturer", "brand", "maker"]) || "ismeretlen"
+        ).trim() || "ismeretlen";
+
+        if (!byType.has(typeKey)) {
+            byType.set(typeKey, { type: typeKey, count: 0, samples: [] });
+        }
+        const typeEntry = byType.get(typeKey);
+        typeEntry.count += 1;
+        if (typeEntry.samples.length < 5) {
+            typeEntry.samples.push({
+                id: row?.id ?? null,
+                name: row?.name || row?.model || "",
+                manufacturer: row?.manufacturer || "",
+                table_name: row?.table_name || row?.table || "",
+                type: row?.type || row?.category || ""
+            });
+        }
+
+        byTable.set(tableKey, (byTable.get(tableKey) || 0) + 1);
+        byManufacturer.set(manufacturerKey, (byManufacturer.get(manufacturerKey) || 0) + 1);
+    }
+
+    return {
+        totalProducts: rows.length,
+        typeCounts: Array.from(byType.values()).sort((a, b) => b.count - a.count),
+        tableCounts: Array.from(byTable.entries())
+            .map(([table, count]) => ({ table, count }))
+            .sort((a, b) => b.count - a.count),
+        manufacturerCounts: Array.from(byManufacturer.entries())
+            .map(([manufacturer, count]) => ({ manufacturer, count }))
+            .sort((a, b) => b.count - a.count),
+    };
+}
+
 async function getProductByRoute(tableName, id) {
     const unifiedTable = await detectUnifiedProductTable();
     if (!unifiedTable) return null;
@@ -272,6 +318,7 @@ module.exports = {
     listProducts,
     listBrands,
     getCatalogStats,
+    getCatalogOverview,
     clampLimit,
     normalizeProductRow,
     getProductByRoute,

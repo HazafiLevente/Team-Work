@@ -1,6 +1,184 @@
 // controllers/messages.controller.js
 const { supabase } = require("../services/supabase");
 
+const AI_MESSAGES_TABLES = ["ai_messages[Messages]", "ai_messages"];
+const AI_PANEL_TABLES = ["ai_panel[Messages]", "ai_panel"];
+const AI_TEXTS_TABLES = ["ai_texts[Messages]", "ai_texts"];
+
+function pickField(row, keys) {
+    if (!row || typeof row !== "object") return null;
+
+    for (const key of keys) {
+        const foundKey = Object.keys(row).find((candidate) => candidate.toLowerCase() === key.toLowerCase());
+        if (!foundKey) continue;
+
+        const value = row[foundKey];
+        if (value !== undefined && value !== null) {
+            return value;
+        }
+    }
+
+    return null;
+}
+
+function mapAiPanel(row) {
+    return {
+        id: Number(pickField(row, ["id", "ID"])),
+        user_id: Number(pickField(row, ["user_id", "owner_id", "user1_id", "userid"])),
+        title: String(pickField(row, ["title", "name", "label", "title_user1"]) || "Uj AI beszelgetes"),
+        created_at: String(pickField(row, ["created_at", "createdAt"]) || new Date().toISOString())
+    };
+}
+
+function mapAiText(row) {
+    return {
+        id: Number(pickField(row, ["id", "ID"])),
+        panel_id: Number(pickField(row, ["panel_id", "ai_panel_id", "panelid"])),
+        ai_text: String(pickField(row, ["ai_text", "answer", "assistant_text", "context_ai"]) || ""),
+        user_text: String(pickField(row, ["user_text", "question", "prompt", "context_user"]) || ""),
+        created_at: String(pickField(row, ["created_at", "createdAt"]) || new Date().toISOString())
+    };
+}
+
+function mapAiPanelRow(row) {
+    return {
+        id: Number(pickField(row, ["id", "ID"])),
+        messages_id: Number(pickField(row, ["messages_id", "ai_messages_id", "message_id"])),
+        created_at: String(pickField(row, ["created_at", "createdAt"]) || new Date().toISOString())
+    };
+}
+
+function mapAiText(row) {
+    return {
+        id: Number(pickField(row, ["id", "ID"])),
+        messages_id: Number(pickField(row, ["messages_id", "ai_messages_id", "message_id", "panel_id"])),
+        ai_text: String(pickField(row, ["ai_text", "answer", "assistant_text", "context_ai"]) || ""),
+        user_text: String(pickField(row, ["user_text", "question", "prompt", "context_user"]) || ""),
+        time: Number(pickField(row, ["time", "duration", "seconds"]) || 0),
+        created_at: String(pickField(row, ["created_at", "createdAt"]) || new Date().toISOString())
+    };
+}
+
+async function selectFromFirstAvailable(tableNames, queryFactory) {
+    let lastError = null;
+
+    for (const tableName of tableNames) {
+        try {
+            const result = await queryFactory(tableName);
+            if (!result?.error) {
+                return { ...result, tableName };
+            }
+            lastError = result.error;
+        } catch (error) {
+            lastError = error;
+        }
+    }
+
+    if (lastError) throw lastError;
+    throw new Error("No matching AI table found");
+}
+
+async function insertIntoFirstAvailable(tableNames, payloadFactory) {
+    let lastError = null;
+
+    for (const tableName of tableNames) {
+        const payload = payloadFactory(tableName);
+        try {
+            const result = await supabase.from(tableName).insert(payload).select("*").single();
+            if (!result?.error) {
+                return { ...result, tableName };
+            }
+            lastError = result.error;
+        } catch (error) {
+            lastError = error;
+        }
+    }
+
+    if (lastError) throw lastError;
+    throw new Error("Insert failed for all AI tables");
+}
+
+async function updateFirstAvailable(tableNames, payload, id) {
+    let lastError = null;
+
+    for (const tableName of tableNames) {
+        for (const idColumn of ["id", "ID"]) {
+            try {
+                const result = await supabase.from(tableName).update(payload).eq(idColumn, id).select("*").maybeSingle();
+                if (!result?.error) {
+                    return result;
+                }
+                lastError = result.error;
+            } catch (error) {
+                lastError = error;
+            }
+        }
+    }
+
+    if (lastError) throw lastError;
+    throw new Error("Update failed for all AI tables");
+}
+
+async function deleteFromFirstAvailable(tableNames, idColumnCandidates, id) {
+    let lastError = null;
+
+    for (const tableName of tableNames) {
+        for (const column of idColumnCandidates) {
+            try {
+                const result = await supabase.from(tableName).delete().eq(column, id);
+                if (!result?.error) {
+                    return result;
+                }
+                lastError = result.error;
+            } catch (error) {
+                lastError = error;
+            }
+        }
+    }
+
+    if (lastError) throw lastError;
+    throw new Error("Delete failed for all AI tables");
+}
+
+async function getAiPanel(panelId, userId) {
+    const root = await getOrCreateAiMessagesRoot(userId);
+
+    const { data } = await selectFromFirstAvailable(AI_PANEL_TABLES, (tableName) =>
+        supabase.from(tableName).select("*").eq("id", panelId).eq("messages_id", root.id).maybeSingle()
+    );
+
+    return data ? mapAiPanelRow(data) : null;
+}
+
+async function getOrCreateAiMessagesRoot(userId) {
+    const { data } = await selectFromFirstAvailable(AI_MESSAGES_TABLES, (tableName) =>
+        supabase.from(tableName).select("*").eq("user_id", userId).order("created_at", { ascending: false }).limit(1).maybeSingle()
+    );
+
+    if (data) return mapAiPanel(data);
+
+    const now = new Date().toISOString();
+    const created = await insertIntoFirstAvailable(AI_MESSAGES_TABLES, () => ([
+        { user_id: userId, created_at: now }
+    ]));
+
+    return mapAiPanel(created.data);
+}
+
+async function createAiPanel(userId) {
+    const root = await getOrCreateAiMessagesRoot(userId);
+    const now = new Date().toISOString();
+    const { data } = await insertIntoFirstAvailable(AI_PANEL_TABLES, () => ([
+        { messages_id: root.id, created_at: now }
+    ]));
+
+    return mapAiPanelRow(data);
+}
+
+function getAiPanelTitle(panel) {
+    return String(panel?.title || panel?.name || panel?.label || "Uj AI beszelgetes");
+}
+
 exports.createPanelAndMessage = async (req, res) => {
     try {
         const user1 = Number(req.user.id);
@@ -453,5 +631,163 @@ exports.setBlock = async (req, res) => {
         res.json({ ok: true, relation: data });
     } catch (e) {
         res.status(500).json({ error: e.message });
+    }
+};
+
+exports.aiCreateConversation = async (req, res) => {
+    try {
+        const userId = Number(req.user.id);
+        const data = await createAiPanel(userId);
+
+        return res.json({
+            key: String(data.id),
+            title: "Uj AI beszelgetes",
+            lastText: "",
+            updatedAt: data.created_at,
+            messages: [
+                {
+                    id: Date.now(),
+                    sender: "system",
+                    text: "Kerdezz barmit, es itt folytathatod a korabbi AI beszelgeteseidet is.",
+                    created_at: data.created_at
+                }
+            ]
+        });
+    } catch (e) {
+        return res.status(500).json({ error: e.message });
+    }
+};
+
+exports.aiConversations = async (req, res) => {
+    try {
+        const userId = Number(req.user.id);
+        const root = await getOrCreateAiMessagesRoot(userId);
+
+        const { data: rawPanels } = await selectFromFirstAvailable(AI_PANEL_TABLES, (tableName) =>
+            supabase.from(tableName).select("*").eq("messages_id", root.id).order("created_at", { ascending: false })
+        );
+
+        const panels = (rawPanels || []).map(mapAiPanelRow);
+
+        const items = [];
+
+        for (const panel of panels || []) {
+            const { data: rawRows } = await selectFromFirstAvailable(AI_TEXTS_TABLES, (tableName) =>
+                supabase.from(tableName).select("*").eq("panel_id", panel.id).order("created_at", { ascending: true })
+            );
+
+            const rows = (rawRows || []).map(mapAiText);
+
+            const latest = (rows || []).length ? rows[rows.length - 1] : null;
+            const firstQuestion = rows.find((row) => row.user_text)?.user_text || "";
+
+            items.push({
+                key: String(panel.id),
+                title: firstQuestion ? (firstQuestion.length > 34 ? `${firstQuestion.slice(0, 34)}...` : firstQuestion) : "Uj AI beszelgetes",
+                lastText: latest?.ai_text || latest?.user_text || "",
+                updatedAt: latest?.created_at || panel.created_at,
+            });
+        }
+
+        return res.json(items.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()));
+    } catch (e) {
+        return res.status(500).json({ error: e.message });
+    }
+};
+
+exports.aiConversation = async (req, res) => {
+    try {
+        const userId = Number(req.user.id);
+        const panelId = Number(req.params.key);
+
+        const panel = await getAiPanel(panelId, userId);
+        if (!panel) {
+            return res.status(404).json({ error: "AI conversation not found" });
+        }
+
+        const { data: rawRows } = await selectFromFirstAvailable(AI_TEXTS_TABLES, (tableName) =>
+            supabase.from(tableName).select("*").eq("panel_id", panelId).order("created_at", { ascending: true })
+        );
+
+        const rows = (rawRows || []).map(mapAiText);
+
+        const items = [
+            {
+                id: panelId * 1000000,
+                sender: "system",
+                text: "Kerdezz barmit, es itt folytathatod a korabbi AI beszelgeteseidet is.",
+                created_at: panel.created_at
+            }
+        ];
+
+        for (const row of rows || []) {
+            if (row.user_text) {
+                items.push({
+                    id: row.id * 2,
+                    sender: "me",
+                    text: row.user_text,
+                    created_at: row.created_at
+                });
+            }
+
+            if (row.ai_text) {
+                items.push({
+                    id: row.id * 2 + 1,
+                    sender: "ai",
+                    text: row.ai_text,
+                    created_at: row.created_at
+                });
+            }
+        }
+
+        return res.json({
+            key: String(panel.id),
+            title: rows.find((row) => row.user_text)?.user_text || "Uj AI beszelgetes",
+            items
+        });
+    } catch (e) {
+        return res.status(500).json({ error: e.message });
+    }
+};
+
+exports.aiDeleteConversation = async (req, res) => {
+    try {
+        const userId = Number(req.user.id);
+        const panelId = Number(req.params.key);
+
+        const panel = await getAiPanel(panelId, userId);
+        if (!panel) {
+            return res.status(404).json({ error: "AI conversation not found" });
+        }
+
+        try {
+            await deleteFromFirstAvailable(AI_TEXTS_TABLES, ["panel_id", "ai_panel_id", "panelid"], panelId);
+            await deleteFromFirstAvailable(AI_PANEL_TABLES, ["id", "ID"], panelId);
+        } catch (error) {
+            return res.status(500).json({ error: error.message });
+        }
+
+        return res.json({ ok: true });
+    } catch (e) {
+        return res.status(500).json({ error: e.message });
+    }
+};
+
+exports.aiRenameConversation = async (req, res) => {
+    try {
+        const userId = Number(req.user.id);
+        const panelId = Number(req.params.key);
+        const title = String(req.body.title || "").trim();
+
+        if (!title) return res.status(400).json({ error: "Missing title" });
+
+        const panel = await getAiPanel(panelId, userId);
+        if (!panel) {
+            return res.status(404).json({ error: "AI conversation not found" });
+        }
+
+        return res.json({ ok: true, skipped: true });
+    } catch (e) {
+        return res.status(500).json({ error: e.message });
     }
 };

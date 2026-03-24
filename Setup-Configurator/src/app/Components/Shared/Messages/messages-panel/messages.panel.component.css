@@ -52,7 +52,10 @@
 
 .message.ai {
   align-self: flex-start;
-  background: rgba(255,255,255,0.06);
+  background:
+    radial-gradient(circle at top left, rgba(250, 204, 21, 0.12), transparent 35%),
+    rgba(255,255,255,0.06);
+  border: 1px solid rgba(250, 204, 21, 0.16);
 }
 
 .message.system {
@@ -64,24 +67,171 @@
   align-self: stretch;
 }
 
+.hidden-message {
+  display: none !important;
+}
+
 .product-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 10px;
+}
+
+.ai-badge-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.ai-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #fef08a;
+  background:
+    linear-gradient(135deg, rgba(250, 204, 21, 0.24), rgba(249, 115, 22, 0.18)),
+    rgba(15, 23, 42, 0.86);
+  border: 1px solid rgba(250, 204, 21, 0.24);
+}
+
+.ai-badge-orb {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: #facc15;
+  box-shadow: 0 0 14px rgba(250, 204, 21, 0.85);
+}
+
+.ai-rich-text {
   display: flex;
   flex-direction: column;
   gap: 10px;
 }
 
+.ai-mentions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 6px;
+}
+
+.ai-mention-card {
+  appearance: none;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 150px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+  background:
+    radial-gradient(circle at top right, rgba(250, 204, 21, 0.12), transparent 42%),
+    linear-gradient(180deg, rgba(19, 24, 41, 0.96), rgba(13, 18, 31, 0.98));
+  border: 1px solid rgba(250, 204, 21, 0.22);
+  transition: transform 0.18s, border-color 0.18s, box-shadow 0.18s;
+}
+
+.ai-mention-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(177, 158, 239, 0.42);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.24);
+}
+
+.ai-mention-card.inline {
+  width: min(100%, 320px);
+}
+
+.ai-mention-label {
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(250, 204, 21, 0.8);
+}
+
+.ai-mention-name {
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.35;
+  color: #fff;
+}
+
+.ai-line {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  line-height: 1.55;
+}
+
+.ai-line-heading {
+  font-size: 15px;
+  font-weight: 800;
+  color: #fff7c2;
+}
+
+.ai-line-paragraph,
+.ai-line-bullet {
+  color: rgba(255, 255, 255, 0.94);
+}
+
+.ai-line-dot {
+  margin-top: 8px;
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #facc15, #f97316);
+  flex-shrink: 0;
+  box-shadow: 0 0 12px rgba(250, 204, 21, 0.5);
+}
+
+.ai-products-shell {
+  width: 100%;
+}
+
+.ai-products-title {
+  margin-bottom: 4px;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #fef08a;
+}
+
+.ai-products-subtitle {
+  margin-bottom: 12px;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.66);
+}
+
 .product-card {
+  display: block;
   padding: 14px;
   border-radius: 14px;
-  background: rgba(255,255,255,0.05);
-  border: 1px solid rgba(138,43,226,0.4);
+  background:
+    radial-gradient(circle at top right, rgba(250, 204, 21, 0.08), transparent 40%),
+    rgba(255,255,255,0.05);
+  border: 1px solid rgba(250, 204, 21, 0.22);
   cursor: pointer;
-  transition: 0.2s;
+  transition: transform 0.2s, background 0.2s, border-color 0.2s, box-shadow 0.2s;
+  color: #fff;
+  text-align: left;
+  text-decoration: none;
 }
 
 .product-card:hover {
-  background: rgba(138,43,226,0.15);
-  transform: scale(1.02);
+  background:
+    radial-gradient(circle at top right, rgba(250, 204, 21, 0.15), transparent 45%),
+    rgba(138,43,226,0.14);
+  transform: translateY(-2px) scale(1.01);
+  box-shadow: 0 14px 26px rgba(0, 0, 0, 0.25);
 }
 
 .product-title {
