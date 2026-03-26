@@ -254,6 +254,11 @@
   border-color: rgba(250, 204, 21, 0.16);
 }
 
+.message.ai-selected {
+  border-color: rgba(34, 211, 238, 0.4);
+  box-shadow: 0 0 0 1px rgba(34, 211, 238, 0.12), 0 14px 30px rgba(8, 12, 24, 0.32);
+}
+
 .message.product-wrapper {
   max-width: 880px;
   width: min(100%, 880px);
@@ -508,6 +513,94 @@
 .product-side-error {
   margin-bottom: 12px;
   color: rgba(226, 232, 240, 0.76);
+}
+
+.product-side-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.product-side-item {
+  padding: 14px;
+  border-radius: 16px;
+  background:
+    radial-gradient(circle at top right, rgba(34, 211, 238, 0.08), transparent 42%),
+    linear-gradient(180deg, rgba(15, 23, 42, 0.9), rgba(10, 15, 28, 0.96));
+  border: 1px solid rgba(148, 163, 184, 0.14);
+  cursor: default;
+}
+
+.product-side-item-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.product-side-item-title {
+  font-size: 16px;
+  font-weight: 800;
+  color: #f8fafc;
+  line-height: 1.25;
+}
+
+.product-side-item-sub {
+  margin-top: 4px;
+  font-size: 12px;
+  color: rgba(226, 232, 240, 0.76);
+}
+
+.product-side-item-price {
+  white-space: nowrap;
+  color: #22d3ee;
+  font-weight: 800;
+  font-size: 13px;
+}
+
+.product-side-mini-specs {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.product-side-mini-row {
+  display: grid;
+  grid-template-columns: 96px minmax(0, 1fr);
+  gap: 10px;
+}
+
+.product-side-mini-key {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: rgba(148, 163, 184, 0.82);
+}
+
+.product-side-mini-value {
+  font-size: 12px;
+  color: #f8fafc;
+  word-break: break-word;
+}
+
+.product-side-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 12px;
+}
+
+.product-side-more {
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(34, 211, 238, 0.22);
+  background: rgba(8, 145, 178, 0.14);
+  color: #67e8f9;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.product-side-more:hover {
+  background: rgba(8, 145, 178, 0.2);
 }
 
 .product-side-details {

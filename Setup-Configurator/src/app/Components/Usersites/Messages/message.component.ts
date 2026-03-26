@@ -75,6 +75,8 @@ export class MessagesComponent implements OnInit, OnDestroy {
   mobileView: 'list' | 'chat' = 'list';
   private nowMs = Date.now();
   private nowTimer: ReturnType<typeof setInterval> | null = null;
+  selectedAiResponseMessageId: number | null = null;
+  selectedAiResponseProducts: any[] = [];
   selectedAiProduct: any = null;
   selectedAiProductDetails: any = null;
   selectedAiProductKeys: string[] = [];
@@ -388,6 +390,15 @@ export class MessagesComponent implements OnInit, OnDestroy {
     this.openAiProductByLookup(product);
   }
 
+  selectAiResponseMessage(message: AiConversationMessage | any) {
+    if (message?.sender !== 'ai' || message?.loading) return;
+
+    this.selectedAiResponseMessageId = Number(message?.id) || null;
+    this.selectedAiResponseProducts = this.dedupeAiProducts(
+      Array.isArray(message?.products) ? message.products : []
+    );
+  }
+
   handleAiProductClick(event: MouseEvent, product: any) {
     event.preventDefault();
     event.stopPropagation();
@@ -624,6 +635,7 @@ export class MessagesComponent implements OnInit, OnDestroy {
             };
 
         this.aiMessages = answerText ? [...cleanMessages] : [...cleanMessages, aiMessage];
+        this.syncSelectedAiResponse();
         this.saveCurrentAiConversation(this.aiMessages, (answerText || aiMessage.text || ''));
         this.loadAiConversations();
         setTimeout(() => this.scrollToBottom(), 0);
@@ -638,6 +650,7 @@ export class MessagesComponent implements OnInit, OnDestroy {
         };
 
         this.aiMessages = [...cleanMessages, aiMessage];
+        this.syncSelectedAiResponse();
         this.saveCurrentAiConversation(this.aiMessages, aiMessage.text || '');
         this.loadAiConversations();
         setTimeout(() => this.scrollToBottom(), 0);
@@ -667,8 +680,11 @@ export class MessagesComponent implements OnInit, OnDestroy {
     this.aiStore.getConversation(key).subscribe((conversation) => {
       if (conversation?.messages?.length) {
         this.aiMessages = [...conversation.messages];
+        this.syncSelectedAiResponse();
       } else if (!this.aiMessages.length || this.activeAiKey !== key) {
         this.aiMessages = [this.buildSystemMessage()];
+        this.selectedAiResponseMessageId = null;
+        this.selectedAiResponseProducts = [];
       }
 
       if (this.isMobile) this.mobileView = 'chat';
@@ -726,9 +742,12 @@ export class MessagesComponent implements OnInit, OnDestroy {
         this.aiStore.getConversation(this.activeAiKey).subscribe((conversation) => {
           if (conversation?.messages?.length) {
             this.aiMessages = [...conversation.messages];
+            this.syncSelectedAiResponse();
             setTimeout(() => this.scrollToBottom(false), 0);
           } else if (!this.aiMessages.length) {
             this.aiMessages = [this.buildSystemMessage()];
+            this.selectedAiResponseMessageId = null;
+            this.selectedAiResponseProducts = [];
           }
         });
       }
@@ -882,6 +901,42 @@ export class MessagesComponent implements OnInit, OnDestroy {
     this.selectedAiProductKeys = [];
     this.selectedAiProductError = null;
     this.selectedAiProductLoading = false;
+  }
+
+  openAiResponseProduct(event: MouseEvent, product: any) {
+    event.preventDefault();
+    event.stopPropagation();
+    this.openAiProduct(product);
+  }
+
+  aiResponsePreview(product: any): any {
+    if (!product) return null;
+    const table = this.resolveProductTable(product);
+    const id = this.resolveProductId(product);
+    return this.normalizeAiDetails(product?.data ?? product, product, table, id);
+  }
+
+  aiResponsePreviewKeys(product: any): string[] {
+    const details = this.aiResponsePreview(product);
+    return Object.keys(details || {})
+      .filter((key) => !this.isHiddenAiKey(key))
+      .slice(0, 3);
+  }
+
+  aiResponseDisplayName(product: any): string {
+    const details = this.aiResponsePreview(product);
+    return String(details?.model || details?.name || product?.name || product?.model || 'N/A').trim();
+  }
+
+  aiResponseDisplayManufacturer(product: any): string {
+    const details = this.aiResponsePreview(product);
+    return String(details?.manufacturer || product?.manufacturer || '').trim();
+  }
+
+  aiResponseDisplayPrice(product: any): string {
+    const details = this.aiResponsePreview(product);
+    const parsed = this.parseAiPrice(details?.price);
+    return parsed == null ? 'N/A' : `${parsed.toLocaleString('hu-HU')} Ft`;
   }
 
   private openAiProductByLookup(product: any) {
@@ -1086,5 +1141,44 @@ export class MessagesComponent implements OnInit, OnDestroy {
       text: 'Kerdezz barmit, es az elso uzenetnel letrejon az uj AI beszelgetes.',
       created_at: new Date().toISOString()
     };
+  }
+
+  private dedupeAiProducts(products: any[]): any[] {
+    const seen = new Set<string>();
+    return (products || []).filter((product) => {
+      const key = [
+        this.resolveProductTable(product),
+        this.resolveProductId(product),
+        this.normalizeMention(product?.name || product?.model || product?.data?.name || product?.data?.model)
+      ].join('|');
+
+      if (!key.replace(/\|/g, '').trim() || seen.has(key)) {
+        return false;
+      }
+
+      seen.add(key);
+      return true;
+    });
+  }
+
+  private syncSelectedAiResponse() {
+    const selected = this.aiMessages.find((message: any) => message?.id === this.selectedAiResponseMessageId);
+    if (selected && Array.isArray((selected as any)?.products) && (selected as any).products.length) {
+      this.selectedAiResponseProducts = this.dedupeAiProducts((selected as any).products || []);
+      return;
+    }
+
+    const latest = [...this.aiMessages]
+      .reverse()
+      .find((message: any) => message?.sender === 'ai' && Array.isArray(message?.products) && message.products.length);
+
+    if (latest) {
+      this.selectedAiResponseMessageId = Number((latest as any).id) || null;
+      this.selectedAiResponseProducts = this.dedupeAiProducts((latest as any).products || []);
+      return;
+    }
+
+    this.selectedAiResponseMessageId = null;
+    this.selectedAiResponseProducts = [];
   }
 }

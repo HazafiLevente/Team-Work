@@ -82,8 +82,10 @@
           class="message"
           [class.mine]="m.user_id === authUserId || m.sender === 'me'"
           [class.ai-message]="m.sender === 'ai' || m.sender === 'system'"
+          [class.ai-selected]="mode === 'ai' && m.sender === 'ai' && selectedAiResponseMessageId === m.id"
           [class.product-wrapper]="m.sender === 'product'"
           [class.hidden-message]="m.sender === 'product'"
+          (click)="mode === 'ai' ? selectAiResponseMessage(m) : null"
           (contextmenu)="onRightClickMessage($event, m)">
 
         <ng-container *ngIf="editingMessageId === m.id && mode === 'messages'; else normalMessage">
@@ -192,28 +194,44 @@
       </div>
 
       <aside class="product-side-panel" *ngIf="mode === 'ai'">
-        <div class="product-side-empty" *ngIf="!selectedAiProduct && !selectedAiProductLoading">
-          Valassz egy eszkozt az AI valaszban, es itt megjelennek a reszletei.
+        <div class="product-side-empty" *ngIf="!selectedAiResponseProducts.length">
+          Kattints egy AI valaszra, es itt megjelennek az abban szereplo eszkozok.
         </div>
 
-        <div class="product-side-card" *ngIf="selectedAiProduct || selectedAiProductLoading">
-          <button class="product-side-close" type="button" (click)="closeSelectedAiProduct()">×</button>
+        <div class="product-side-card" *ngIf="selectedAiResponseProducts.length">
+          <button class="product-side-close" type="button" (click)="selectedAiResponseProducts = []; selectedAiResponseMessageId = null">×</button>
 
           <div class="product-side-head">
-            <div class="product-side-label">Kivalasztott termek</div>
-            <div class="product-side-title">{{ selectedAiDisplayName() || 'N/A' }}</div>
-            <div class="product-side-sub">{{ selectedAiDisplayManufacturer() || 'N/A' }}</div>
+            <div class="product-side-label">AI eszkozlista</div>
+            <div class="product-side-title">{{ selectedAiResponseProducts.length }} eszkoz</div>
+            <div class="product-side-sub">Rovid adatok a kijelolt AI valaszbol</div>
           </div>
 
-          <div class="product-side-price">Ar: {{ selectedAiDisplayPrice() }}</div>
+          <div class="product-side-list">
+            <div
+              class="product-side-item"
+              *ngFor="let product of selectedAiResponseProducts"
+              (dblclick)="openAiProduct(product)">
+              <div class="product-side-item-head">
+                <div>
+                  <div class="product-side-item-title">{{ aiResponseDisplayName(product) }}</div>
+                  <div class="product-side-item-sub">{{ aiResponseDisplayManufacturer(product) || 'Ismeretlen gyarto' }}</div>
+                </div>
+                <div class="product-side-item-price">{{ aiResponseDisplayPrice(product) }}</div>
+              </div>
 
-          <div class="product-side-loading" *ngIf="selectedAiProductLoading">Betoltes...</div>
-          <div class="product-side-error" *ngIf="!selectedAiProductLoading && selectedAiProductError">{{ selectedAiProductError }}</div>
+              <div class="product-side-mini-specs" *ngIf="aiResponsePreviewKeys(product).length">
+                <div class="product-side-mini-row" *ngFor="let key of aiResponsePreviewKeys(product)">
+                  <span class="product-side-mini-key">{{ key }}</span>
+                  <span class="product-side-mini-value">{{ aiResponsePreview(product)?.[key] }}</span>
+                </div>
+              </div>
 
-          <div class="product-side-details" *ngIf="!selectedAiProductLoading && selectedAiProductDetails">
-            <div class="product-side-row" *ngFor="let key of selectedAiVisibleKeys()">
-              <div class="product-side-key">{{ key }}</div>
-              <div class="product-side-value">{{ selectedAiProductDetails[key] }}</div>
+              <div class="product-side-actions">
+                <button type="button" class="product-side-more" (click)="openAiResponseProduct($event, product)">
+                  Tobb
+                </button>
+              </div>
             </div>
           </div>
         </div>
