@@ -6,6 +6,7 @@ export type BellItem = {
   source_table: string;
   id: number;
   type: string;
+  category?: string;
   title: string;
   message: string;
   created_at: string;

@@ -172,9 +172,17 @@ export class HeaderComponent implements OnInit, AfterViewInit {
 
     this.router.navigate(['/notifications'], {
       queryParams: {
-        tab: n.type   // 'system' | 'news' | 'register'
+        tab: n.category || n.type
       }
     });
+  }
+
+  bellTypeLabel(item: BellItem): string {
+    const value = String(item.category || item.type || '').toLowerCase();
+    if (value === 'news') return 'News';
+    if (value === 'register') return 'Register';
+    if (value === 'system') return 'System';
+    return value ? value.charAt(0).toUpperCase() + value.slice(1) : 'System';
   }
 
   logout() {

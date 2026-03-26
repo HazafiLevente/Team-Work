@@ -1,20 +1,25 @@
 <div class="system-page">
 
-    <!-- ============================
-       ÚJ ÜZENET KÜLDÉS
-       ============================ -->
     <div class="send-card">
-        <h2>📢 Új rendszerüzenet</h2>
+        <h2>Uj ertesites</h2>
 
         <div class="form-grid">
-
             <div class="field">
-                <label>Cím</label>
-                <input type="text" [(ngModel)]="newTitle" placeholder="pl. Karbantartás holnap 18:00-tól" />
+                <label>Cim</label>
+                <input type="text" [(ngModel)]="newTitle" placeholder="pl. Karbantartas holnap 18:00-tol" />
             </div>
 
             <div class="field">
-                <label>Címzett</label>
+                <label>Kategoria</label>
+                <select [(ngModel)]="newCategory">
+                    @for (opt of CATEGORY_OPTIONS; track opt.value) {
+                    <option [value]="opt.value">{{ opt.label }}</option>
+                    }
+                </select>
+            </div>
+
+            <div class="field">
+                <label>Cimzett</label>
                 <select [(ngModel)]="newTarget">
                     @for (opt of TARGET_OPTIONS; track opt.value) {
                     <option [value]="opt.value">{{ opt.label }}</option>
@@ -24,16 +29,15 @@
 
             @if (newTarget === 'custom') {
             <div class="field">
-                <label>Felhasználó ID</label>
+                <label>Felhasznalo ID</label>
                 <input type="text" [(ngModel)]="customTarget" placeholder="pl. 42" />
             </div>
             }
 
             <div class="field full">
-                <label>Üzenet</label>
-                <textarea [(ngModel)]="newMessage" rows="4" placeholder="Az üzenet szövege..."></textarea>
+                <label>Uzenet</label>
+                <textarea [(ngModel)]="newMessage" rows="4" placeholder="Az uzenet szovege..."></textarea>
             </div>
-
         </div>
 
         @if (sendError) {
@@ -44,31 +48,37 @@
         }
 
         <button class="send-btn" (click)="send()" [disabled]="sending">
-            @if (sending) { ⏳ Küldés... } @else { 📨 Küldés }
+            @if (sending) { Kuldes... } @else { Kuldes }
         </button>
     </div>
 
-    <!-- ============================
-       KORÁBBI ÜZENETEK
-       ============================ -->
     <div class="history-card">
-        <h2>📋 Korábbi üzenetek</h2>
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;">
+            <h2>Korabbi ertesitesek</h2>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                <button class="send-btn" [class.active-filter]="activeCategoryFilter === 'all'" (click)="setCategoryFilter('all')">Mind</button>
+                @for (opt of CATEGORY_OPTIONS; track opt.value) {
+                <button class="send-btn" [class.active-filter]="activeCategoryFilter === opt.value" (click)="setCategoryFilter(opt.value)">{{ opt.label }}</button>
+                }
+            </div>
+        </div>
 
         @if (loading) {
-        <div class="muted">Betöltés...</div>
+        <div class="muted">Betoltes...</div>
         } @else if (messages.length === 0) {
-        <div class="muted">Még nincs rendszerüzenet.</div>
+        <div class="muted">Meg nincs ertesites ebben a kategoriaban.</div>
         } @else {
         <div class="msg-list">
             @for (msg of messages; track msg.id) {
             <div class="msg-row">
                 <div class="msg-meta">
+                    <span class="msg-target">{{ categoryLabel(msg.category) }}</span>
                     <span class="msg-target">{{ targetLabel(msg.target) }}</span>
                     <span class="msg-date">{{ formatDate(msg.created_at) }}</span>
                 </div>
                 <div class="msg-title">{{ msg.title }}</div>
                 <div class="msg-body">{{ msg.message }}</div>
-                <button class="delete-btn" (click)="deleteMessage(msg.id)">🗑 Törlés</button>
+                <button class="delete-btn" (click)="deleteMessage(msg.id)">Torles</button>
             </div>
             }
         </div>

@@ -8,6 +8,7 @@ const localDb = require("../services/localDb");
 const { shouldExclude } = require("../services/tableFilter");
 const activeUsersTracker = require("../services/activeUsers");
 const { getCatalogStats } = require("../services/products/productCatalog.service");
+const { listNotifications, createNotification, deleteNotification, normalizeCategory } = require("../services/notificationStore");
 
 
 router.get("/stats", verifyAdmin, async (req, res) => {
@@ -284,13 +285,9 @@ router.get("/users/:id/setups", verifyAdmin, async (req, res) => {
  */
 router.get("/system-messages", verifyAdmin, async (req, res) => {
     try {
-        const { data, error } = await supabase
-            .from("system_message[System]")
-            .select("*")
-            .order("created_at", { ascending: false });
-
-        if (error) throw error;
-        res.json({ messages: data || [] });
+        const category = req.query.category ? normalizeCategory(req.query.category) : undefined;
+        const messages = await listNotifications({ category });
+        res.json({ messages });
     } catch (e) {
         console.error("❌ system-messages list:", e);
         res.status(500).json({ error: e.message, messages: [] });
@@ -304,28 +301,22 @@ router.get("/system-messages", verifyAdmin, async (req, res) => {
  */
 router.post("/system-message", verifyAdmin, async (req, res) => {
     try {
-        const { title, message, target } = req.body;
+        const { title, message, target, category } = req.body;
 
         if (!title || !message || !target) {
             return res.status(400).json({ error: "Missing title, message, or target" });
         }
 
         const senderId = Number(req.user.id);
+        const created = await createNotification({
+            title,
+            message,
+            target,
+            sender: senderId,
+            category: category || "system"
+        });
 
-        const { data, error } = await supabase
-            .from("system_message[System]")
-            .insert({
-                title: String(title).trim(),
-                message: String(message).trim(),
-                target: String(target).trim().toLowerCase(),
-                sender: senderId,
-                created_at: new Date().toISOString()
-            })
-            .select()
-            .single();
-
-        if (error) throw error;
-        res.json({ success: true, message: data });
+        res.json({ success: true, message: created });
     } catch (e) {
         console.error("❌ system-message create:", e);
         res.status(500).json({ error: e.message });
@@ -338,12 +329,7 @@ router.post("/system-message", verifyAdmin, async (req, res) => {
 router.delete("/system-message/:id", verifyAdmin, async (req, res) => {
     try {
         const { id } = req.params;
-        const { error } = await supabase
-            .from("system_message[System]")
-            .delete()
-            .eq("id", Number(id));
-
-        if (error) throw error;
+        await deleteNotification(id);
         res.json({ success: true });
     } catch (e) {
         console.error("❌ system-message delete:", e);

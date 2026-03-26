@@ -1,5 +1,6 @@
 const { selectWithFallback } = require("../services/dataProvider");
 const { supabase } = require("../services/supabase");
+const { listNotifications } = require("../services/notificationStore");
 
 /**
  * GET /api/bell
@@ -9,30 +10,7 @@ exports.list = async (req, res) => {
     try {
         const userId = Number(req.user.id);
         const userRole = req.user.role;
-
-        // -------- SYSTEM MESSAGES --------
-        const { data: system } = await supabase
-            .from('system_message[System]')
-            .select('*')
-            .order('created_at', { ascending: false });
-
-        // -------- NEWS MESSAGES --------
-        const { data: news } = await supabase
-            .from('news_message[System]')
-            .select('*')
-            .order('created_at', { ascending: false });
-
-        // -------- REGISTER MESSAGES --------
-        const { data: register } = await supabase
-            .from('register_message[System]')
-            .select('*')
-            .order('created_at', { ascending: false });
-
-        const all = [
-            ...(system || []).map(m => ({ ...m, type: 'system' })),
-            ...(news || []).map(m => ({ ...m, type: 'news' })),
-            ...(register || []).map(m => ({ ...m, type: 'register' }))
-        ];
+        const all = await listNotifications();
 
         // 🔥 TARGET SZŰRÉS
         const filtered = all.filter(m => {

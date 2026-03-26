@@ -42,7 +42,7 @@
           (click)="openMessage(n, $event)">
 
           <div class="bell-title">
-            {{ n.type === 'system' ? 'System' : n.type === 'news' ? 'News' : 'Register' }}
+            {{ bellTypeLabel(n) }}
           </div>
 
           <div class="bell-message">
