@@ -1,4 +1,4 @@
-<div #root class="drag-element" [class.circle]="isNetwork()" [class.is-ht]="isHT()" cdkDrag
+<div #root class="drag-element" [class.circle]="isCircularNetworkType()" [class.is-ht]="isHT()" cdkDrag
   [cdkDragDisabled]="dragDisabled" [cdkDragFreeDragPosition]="dragPosition" [cdkDragBoundary]="boundaryRef"
   [attr.data-id]="dataId" (cdkDragStarted)="onDragStarted()" (cdkDragMoved)="onDragMoved()"
   (cdkDragEnded)="onDragEnded($event)" (click)="onClick()" (dblclick)="onDblClick()"

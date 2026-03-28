@@ -4,7 +4,6 @@ const { supabase } = require("../services/supabase");
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 const model = genAI.getGenerativeModel({ model: "gemini-3-flash-preview" });
-const AI_MESSAGES_TABLES = ["ai_messages[Messages]", "ai_messages"];
 const AI_PANEL_TABLES = ["ai_panel[Messages]", "ai_panel"];
 const AI_TEXTS_TABLES = ["ai_texts[Messages]", "ai_texts"];
 
@@ -36,7 +35,7 @@ function mapAiPanel(row) {
 function mapAiPanelRow(row) {
     return {
         id: Number(pickField(row, ["id", "ID"])),
-        messages_id: Number(pickField(row, ["messages_id", "ai_messages_id", "message_id"])),
+        user_id: Number(pickField(row, ["user_id", "owner_id", "user1_id", "userid"])),
         created_at: String(pickField(row, ["created_at", "createdAt"]) || new Date().toISOString())
     };
 }
@@ -134,13 +133,12 @@ async function updateFirstAvailable(tableNames, payload, id) {
     throw new Error("Update failed for all AI tables");
 }
 
-async function ensureAiPanel(userId, messagesId) {
-    const root = await getOrCreateAiMessagesRoot(userId);
-    const numericId = Number(messagesId);
+async function ensureAiPanel(userId, panelId) {
+    const numericId = Number(panelId);
 
     if (Number.isFinite(numericId) && numericId > 0) {
         const { data } = await selectFromFirstAvailable(AI_PANEL_TABLES, (tableName) =>
-            supabase.from(tableName).select("*").eq("id", numericId).eq("messages_id", root.id).maybeSingle()
+            supabase.from(tableName).select("*").eq("id", numericId).eq("user_id", userId).maybeSingle()
         );
 
         if (data) return mapAiPanelRow(data);
@@ -148,25 +146,10 @@ async function ensureAiPanel(userId, messagesId) {
 
     const now = new Date().toISOString();
     const { data: created } = await insertIntoFirstAvailable(AI_PANEL_TABLES, () => ([
-        { messages_id: root.id, created_at: now }
-    ]));
-
-    return mapAiPanelRow(created);
-}
-
-async function getOrCreateAiMessagesRoot(userId) {
-    const { data } = await selectFromFirstAvailable(AI_MESSAGES_TABLES, (tableName) =>
-        supabase.from(tableName).select("*").eq("user_id", userId).order("created_at", { ascending: false }).limit(1).maybeSingle()
-    );
-
-    if (data) return mapAiPanel(data);
-
-    const now = new Date().toISOString();
-    const created = await insertIntoFirstAvailable(AI_MESSAGES_TABLES, () => ([
         { user_id: userId, created_at: now }
     ]));
 
-    return mapAiPanel(created.data);
+    return mapAiPanelRow(created);
 }
 
 function normalize(value = "") {
@@ -1085,44 +1068,61 @@ function buildFallbackAnswer(message, products, overviewSummary = null, aiData =
     return "Most nem talaltam eleg adatot a biztos valaszhoz, de ujra meg tudom probalni pontosabb kerdesre.";
 }
 
+async function runAiPrompt({ message, history = [], panelId = null, userId = null, persist = true }) {
+    const startedAt = Date.now();
+
+    if (!message) {
+        throw new Error("Missing message");
+    }
+
+    const aiData = await searchProducts(message);
+    let overviewSummary = null;
+
+    try {
+        const overview = await getCatalogOverview();
+        overviewSummary = summarizeOverviewForQuestion(overview, message);
+    } catch (error) {
+        overviewSummary = null;
+    }
+
+    const promptProducts =
+        aiData.mode === "list" ? aiData.list :
+        aiData.mode === "product" ? aiData.exact :
+        [];
+
+    const answer = await generateAnswer(message, promptProducts, history, overviewSummary, aiData);
+    const elapsedSeconds = Math.max(0, Math.ceil((Date.now() - startedAt) / 1000));
+
+    let resolvedPanelId = null;
+
+    if (persist && Number.isFinite(Number(userId)) && Number(userId) > 0) {
+        const panel = await ensureAiPanel(Number(userId), panelId);
+        await insertAiTextWithDuration(panel.id, answer, message, elapsedSeconds);
+        resolvedPanelId = String(panel.id);
+    }
+
+    return {
+        answer,
+        data: aiData,
+        panel_id: resolvedPanelId,
+        messages_id: resolvedPanelId,
+        time: elapsedSeconds,
+    };
+}
+
+exports.runAiPrompt = runAiPrompt;
+
 exports.askAi = async (req, res) => {
     try {
-        const startedAt = Date.now();
-        const message = req.body?.message;
-        const history = Array.isArray(req.body?.history) ? req.body.history : [];
-        const messagesId = req.body?.messages_id;
-        const userId = Number(req.user?.id);
-
-        if (!message) {
-            return res.status(400).json({ error: "Missing message" });
-        }
-
-        const aiData = await searchProducts(message);
-        let overviewSummary = null;
-
-        try {
-            const overview = await getCatalogOverview();
-            overviewSummary = summarizeOverviewForQuestion(overview, message);
-        } catch (error) {
-            overviewSummary = null;
-        }
-        const promptProducts =
-            aiData.mode === "list" ? aiData.list :
-            aiData.mode === "product" ? aiData.exact :
-            [];
-
-        const panel = await ensureAiPanel(userId, messagesId);
-        const answer = await generateAnswer(message, promptProducts, history, overviewSummary, aiData);
-        const elapsedSeconds = Math.max(0, Math.ceil((Date.now() - startedAt) / 1000));
-
-        await insertAiTextWithDuration(panel.id, answer, message, elapsedSeconds);
-
-        return res.json({
-            answer,
-            data: aiData,
-            messages_id: String(panel.id),
-            time: elapsedSeconds,
+        const result = await runAiPrompt({
+            message: req.body?.message,
+            history: Array.isArray(req.body?.history) ? req.body.history : [],
+            panelId: req.body?.panel_id ?? req.body?.messages_id,
+            userId: Number(req.user?.id),
+            persist: true
         });
+
+        return res.json(result);
     } catch (error) {
         console.error("AI ERROR:", error);
         return res.status(500).json({ error: "AI service error" });

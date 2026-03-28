@@ -819,6 +819,8 @@ export class WorkspaceComponent {
 
   onItemDragEnded(item: any, pos: { x: number; y: number }): void {
     const currentKey = this.getItemTrackKey(item, 0);
+    const itemId = item?.id ?? item?.ID ?? item?.item_id;
+    const tableName = item?.category ?? item?.source_table ?? item?.table_name ?? item?.table;
 
     this.items = this.items.map((it, index) => {
       const key = this.getItemTrackKey(it, index);
@@ -835,6 +837,21 @@ export class WorkspaceComponent {
     });
 
     this.updateLines();
+
+    const normalizedTable = String(tableName || '').toLowerCase();
+    if (!itemId || (normalizedTable !== 'setups[setup]' && normalizedTable !== 'setup[setup]' && normalizedTable !== 'setup' && normalizedTable !== 'setups')) {
+      return;
+    }
+
+    this.http.patch(
+      '/api/setup/update-item-position',
+      { itemId, tableName, x: pos.x, y: pos.y },
+      { withCredentials: true }
+    ).subscribe({
+      error: (err) => {
+        console.error('Item pozicio mentes hiba:', err);
+      }
+    });
   }
 
   getItemTrackKey(item: any, index: number): string {

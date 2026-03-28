@@ -1,20 +1,30 @@
-const { supabase } = require("../services/supabase");
+﻿const { supabase } = require("../services/supabase");
 
 /**
  * Stabil children scan:
- * - amiben nincs setup_id, azt nem kérdezzük le (előre blacklist + auto blacklist)
- * - cache + limit + concurrency -> nem terheli túl a Supabase-t
- * - PC builder működik (pcbuilds + pcparts)
- * - ✅ Cars: car-options + cars list + cars add (Car_setup[Setup])
- * - ✅ NEW: Car_setup details (egy Car_setup sorhoz tartozó autó adatok)
+ * - amiben nincs setup_id, azt nem kĂ©rdezzĂĽk le (elĹ‘re blacklist + auto blacklist)
+ * - cache + limit + concurrency -> nem terheli tĂşl a Supabase-t
+ * - PC builder mĹ±kĂ¶dik (pcbuilds + pcparts)
+ * - âś… Cars: car-options + cars list + cars add (Car_setup[Setup])
+ * - âś… NEW: Car_setup details (egy Car_setup sorhoz tartozĂł autĂł adatok)
  */
 
-const SETUP_TABLE = "setup[Setup]";
+const ROOMS_TABLE = "setup_room";
+const SETUPS_TABLE = "setups";
+const SETUP_DEVICES_TABLE = "setup_devices";
+const SETUP_CONNECTIONS_TABLE = "setup_connections";
+const SETUP_DEVICE_PORTS_TABLE = "setup_device_ports";
+const PORT_TYPES_TABLE = "port_types";
+const CABLES_TABLE = "cables_info[Cables]";
+const SETUP_TABLE = SETUPS_TABLE;
+const CHILD_SETUPS_TABLE = SETUPS_TABLE;
+const SETUP_VALUES_TABLE = "setup_values";
+const SETUP_PROPERTIES_TABLE = "setup_properties";
 const PC_BUILDS_TABLE = "pc_details[Setup]";
 const CAR_SETUP_TABLE = "Car_setup[Setup]";
 
 /* =========================================================
-   ✅ FIX: előre blacklisteljük az összes eddig logolt táblát,
+   âś… FIX: elĹ‘re blacklisteljĂĽk az Ă¶sszes eddig logolt tĂˇblĂˇt,
    amiben biztosan nincs setup_id
    ========================================================= */
 const NO_SETUPID_TABLES = new Set([
@@ -53,8 +63,8 @@ const NO_SETUPID_TABLES = new Set([
 ]);
 
 /**
- * Teljes táblalista maradhat, mert a children úgyis skippeli a NO_SETUPID_TABLES-t.
- * FONTOS: "setup[Setup]" nem children tábla, ezért nincs itt.
+ * Teljes tĂˇblalista maradhat, mert a children Ăşgyis skippeli a NO_SETUPID_TABLES-t.
+ * FONTOS: "setup[Setup]" nem children tĂˇbla, ezĂ©rt nincs itt.
  */
 const tablesToScan = [
     "acoustic_keyboards[Setup]",
@@ -104,12 +114,12 @@ const tablesToScan = [
 const childrenCache = new Map(); // setupId -> { exp, value }
 const pcPartsCache = new Map(); // global -> { exp, value }
 const carOptionsCache = new Map(); // global -> { exp, value }
-const carDetailsCache = new Map(); // carSetupId -> { exp, value }  ✅ NEW
+const carDetailsCache = new Map(); // carSetupId -> { exp, value }  âś… NEW
 
 const CHILDREN_TTL_MS = 30_000;
 const PCPARTS_TTL_MS = 10 * 60_000;
 const CAROPTIONS_TTL_MS = 10 * 60_000;
-const CARDETAILS_TTL_MS = 30_000; // ✅ NEW (kicsi TTL, de védi a Supabase-t)
+const CARDETAILS_TTL_MS = 30_000; // âś… NEW (kicsi TTL, de vĂ©di a Supabase-t)
 
 function cacheGet(map, key) {
     const hit = map.get(key);
@@ -124,18 +134,196 @@ function cacheSet(map, key, value, ttlMs) {
     map.set(key, { value, exp: Date.now() + ttlMs });
 }
 
+let setupPropertyCache = null;
+
+async function getSetupProperties() {
+    if (setupPropertyCache) return setupPropertyCache;
+
+    const { data, error } = await supabase
+        .from(SETUP_PROPERTIES_TABLE)
+        .select("*");
+
+    if (error) throw error;
+
+    const rows = Array.isArray(data) ? data : [];
+    const byKey = new Map();
+
+    for (const row of rows) {
+        const property = String(row?.property || "").trim();
+        const type = String(row?.type || "").trim().toLowerCase();
+        if (!property) continue;
+
+        byKey.set(`${type}:${property}`, Number(row.id));
+        byKey.set(`:${property}`, Number(row.id));
+    }
+
+    setupPropertyCache = { rows, byKey };
+    return setupPropertyCache;
+}
+
+async function getPropertyId(property, type = "") {
+    const props = await getSetupProperties();
+    return props.byKey.get(`${String(type || "").toLowerCase()}:${property}`) ?? props.byKey.get(`:${property}`) ?? null;
+}
+
+async function getValuesForSetupIds(setupIds) {
+    const ids = (setupIds || []).map(Number).filter((id) => Number.isFinite(id));
+    if (!ids.length) return [];
+
+    const { data, error } = await supabase
+        .from(SETUP_VALUES_TABLE)
+        .select("*")
+        .in("setup_id", ids);
+
+    if (error) throw error;
+    return Array.isArray(data) ? data : [];
+}
+
+function groupValuesBySetupId(rows) {
+    const map = new Map();
+
+    for (const row of rows || []) {
+        const key = String(row?.setup_id ?? "");
+        if (!map.has(key)) map.set(key, []);
+        map.get(key).push(row);
+    }
+
+    return map;
+}
+
+function pickValue(rows, propertyId, fallback = null) {
+    if (!propertyId) return fallback;
+    const row = (rows || []).find((item) => Number(item?.property_id) === Number(propertyId));
+    return row?.value ?? fallback;
+}
+
+function pickAllValues(rows, propertyId) {
+    if (!propertyId) return [];
+    return (rows || [])
+        .filter((item) => Number(item?.property_id) === Number(propertyId))
+        .map((item) => item?.value)
+        .filter((value) => value !== undefined && value !== null && String(value) !== "");
+}
+
+async function upsertSetupValue(setupId, propertyId, value) {
+    if (!propertyId) return;
+
+    const { data: existing, error: existingError } = await supabase
+        .from(SETUP_VALUES_TABLE)
+        .select("id")
+        .eq("setup_id", setupId)
+        .eq("property_id", propertyId)
+        .limit(1)
+        .maybeSingle();
+
+    if (existingError) throw existingError;
+
+    const payload = {
+        setup_id: Number(setupId),
+        property_id: Number(propertyId),
+        value: value == null ? null : String(value)
+    };
+
+    if (existing?.id) {
+        const { error } = await supabase
+            .from(SETUP_VALUES_TABLE)
+            .update({ value: payload.value })
+            .eq("id", existing.id);
+
+        if (error) throw error;
+        return;
+    }
+
+    const { error } = await supabase
+        .from(SETUP_VALUES_TABLE)
+        .insert([payload]);
+
+    if (error) throw error;
+}
+
 /* -----------------------------
    Helpers
    ----------------------------- */
-async function assertSetupOwnedByUser(setupId, userId) {
+async function assertRoomOwnedByUser(roomId, userId) {
     const { data, error } = await supabase
-        .from(SETUP_TABLE)
-        .select("id,user_id")
-        .eq("id", setupId)
-        .single();
+        .from(ROOMS_TABLE)
+        .select("user_id")
+        .eq("id", roomId)
+        .limit(1)
+        .maybeSingle();
 
     if (error || !data) return false;
     return String(data.user_id) === String(userId);
+}
+
+async function findSetupById(setupId) {
+    const { data, error } = await supabase
+        .from(SETUPS_TABLE)
+        .select("*")
+        .eq("id", setupId)
+        .limit(1)
+        .maybeSingle();
+
+    if (error) throw error;
+    return data || null;
+}
+
+async function findDeviceById(deviceId) {
+    const { data, error } = await supabase
+        .from(SETUP_DEVICES_TABLE)
+        .select("*")
+        .eq("id", deviceId)
+        .limit(1)
+        .maybeSingle();
+
+    if (error) throw error;
+    return data || null;
+}
+
+async function assertSetupOwnedByUser(setupId, userId) {
+    if (await assertRoomOwnedByUser(setupId, userId)) return true;
+
+    const setup = await findSetupById(setupId);
+    if (!setup?.room_id) return false;
+    return assertRoomOwnedByUser(setup.room_id, userId);
+}
+
+async function assertDeviceOwnedByUser(deviceId, userId) {
+    const device = await findDeviceById(deviceId);
+    if (!device?.setup_id) return false;
+    return assertSetupOwnedByUser(device.setup_id, userId);
+}
+
+async function countPortConnections(portId) {
+    const { count, error } = await supabase
+        .from(SETUP_CONNECTIONS_TABLE)
+        .select("*", { count: "exact", head: true })
+        .or(`from_setup_device_port_id.eq.${portId},to_setup_device_port_id.eq.${portId}`);
+
+    if (error) throw error;
+    return Number(count || 0);
+}
+
+async function validatePortCapacity(portId) {
+    const { data: port, error } = await supabase
+        .from(SETUP_DEVICE_PORTS_TABLE)
+        .select("*")
+        .eq("id", portId)
+        .limit(1)
+        .maybeSingle();
+
+    if (error || !port) {
+        return { ok: false, error: "Port not found", port: null };
+    }
+
+    const currentCount = await countPortConnections(portId);
+    const maxConnections = Number(port.max_connections ?? 1);
+
+    if (currentCount >= maxConnections) {
+        return { ok: false, error: "Port capacity exceeded", port };
+    }
+
+    return { ok: true, port };
 }
 
 function mapDisplay(item, tableName) {
@@ -144,20 +332,25 @@ function mapDisplay(item, tableName) {
     const name = item.product_name || item.setup_name || item.name || item.Name || item.title || "";
 
     const isNetwork = tableName === "router[Setup]" || tableName === "switches[Setup]" || tableName === "modem[Setup]";
+    const childSetupLabel = tableName === CHILD_SETUPS_TABLE
+        ? (item.name || item.title || item.setup_name || item.product_name || "")
+        : "";
     return {
         ...item,
         category: tableName,
         isNetwork,
         display_name:
-            manufacturer && model
-                ? `${manufacturer} ${model}`
-                : manufacturer && name
-                    ? `${manufacturer} ${name}`
-                    : model
-                        ? model
+            childSetupLabel
+                ? childSetupLabel
+                : manufacturer && model
+                    ? `${manufacturer} ${model}`
+                    : manufacturer && name
+                        ? `${manufacturer} ${name}`
                         : name
                             ? name
-                            : `Ismeretlen termék (#${item.id ?? "?"})`,
+                            : model
+                                ? model
+                                : `Ismeretlen termek (#${item.id ?? "?"})`,
         manufacturer,
     };
 }
@@ -181,7 +374,20 @@ async function fetchItemWithSetup(tableName, itemId) {
         .single();
 
     if (!query.error && query.data) {
-        return { data: query.data, idColumn: "id" };
+        const data = query.data;
+        if (String(tableName).toLowerCase() === String(SETUPS_TABLE).toLowerCase()) {
+            data.setup_id = Number(data.room_id ?? 0);
+            data.x = Number(data.pos_x ?? 0);
+            data.y = Number(data.pos_y ?? 0);
+            data.type = String(data.type ?? "");
+        } else if (String(tableName).toLowerCase() === String(SETUP_DEVICES_TABLE).toLowerCase()) {
+            data.setup_id = Number(data.setup_id ?? 0);
+            data.x = Number(data.pos_x ?? 0);
+            data.y = Number(data.pos_y ?? 0);
+            data.type = String(data.role ?? data.type ?? "device");
+        }
+
+        return { data, idColumn: "id" };
     }
 
     query = await supabase
@@ -191,10 +397,31 @@ async function fetchItemWithSetup(tableName, itemId) {
         .single();
 
     if (!query.error && query.data) {
-        return { data: query.data, idColumn: "ID" };
+        const data = query.data;
+        if (String(tableName).toLowerCase() === String(SETUPS_TABLE).toLowerCase()) {
+            data.setup_id = Number(data.room_id ?? 0);
+            data.x = Number(data.pos_x ?? 0);
+            data.y = Number(data.pos_y ?? 0);
+            data.type = String(data.type ?? "");
+        } else if (String(tableName).toLowerCase() === String(SETUP_DEVICES_TABLE).toLowerCase()) {
+            data.setup_id = Number(data.setup_id ?? 0);
+            data.x = Number(data.pos_x ?? 0);
+            data.y = Number(data.pos_y ?? 0);
+            data.type = String(data.role ?? data.type ?? "device");
+        }
+
+        return { data, idColumn: "ID" };
     }
 
     return { data: null, idColumn: null };
+}
+
+function isChildSetupTable(tableName) {
+    const normalized = String(tableName || "").toLowerCase();
+    return normalized === String(CHILD_SETUPS_TABLE).toLowerCase()
+        || normalized === String(SETUP_DEVICES_TABLE).toLowerCase()
+        || normalized === "setups[setup]"
+        || normalized === "setup[setup]";
 }
 
 function resolveRenameColumn(item) {
@@ -217,7 +444,7 @@ function resolveRenameColumn(item) {
 
 /* =========================================================
    SETUP LISTA
-   - ✅ query param: ?favorite=true/false (ha nincs -> mind)
+   - âś… query param: ?favorite=true/false (ha nincs -> mind)
    ========================================================= */
 exports.list = async (req, res) => {
     try {
@@ -227,29 +454,27 @@ exports.list = async (req, res) => {
         const hasFav = favoriteParam === "true" || favoriteParam === "false";
         const favBool = favoriteParam === "true";
 
-        let q = supabase.from(SETUP_TABLE).select("*").eq("user_id", userId);
-        if (hasFav) q = q.eq("isFavorite", favBool);
-
-        const { data: setupData, error: setupErr } = await q;
+        const { data: setupData, error: setupErr } = await supabase
+            .from(ROOMS_TABLE)
+            .select("*");
         if (setupErr) throw setupErr;
 
-        const { data: posData } = await supabase
-            .from("setup_rooms[Coordinates]")
-            .select("setup_id, x, y");
-
-        const normalized = (setupData || []).map((s) => {
-            const pos = (posData || []).find(p => String(p.setup_id) === String(s.id));
-            return {
+        const normalized = (setupData || [])
+            .map((s) => ({
                 ...s,
-                setup_name: s.setup_name ?? s.name ?? "Névtelen setup",
-                x: pos?.x ?? null,
-                y: pos?.y ?? null,
-            };
-        });
+                setup_name: s.name ?? "Nevtelen setup",
+                x: Number(s.pos_x ?? 0),
+                y: Number(s.pos_y ?? 0),
+                isFavorite: Boolean(s.is_favorite),
+                user_id: s.user_id == null ? null : Number(s.user_id),
+                type: "room"
+            }))
+            .filter((room) => String(room.user_id) === String(userId))
+            .filter((room) => !hasFav || room.isFavorite === favBool);
 
         res.json({ setups: normalized });
     } catch (err) {
-        console.error("❌ Setup list hiba:", err);
+        console.error("Setup list hiba:", err);
         res.json({ setups: [] });
     }
 };
@@ -265,32 +490,16 @@ exports.upsertRoomPosition = async (req, res) => {
         const ok = await assertSetupOwnedByUser(setupId, userId);
         if (!ok) return res.status(403).json({ error: "Forbidden" });
 
-        const { data: existing } = await supabase
-            .from("setup_rooms[Coordinates]")
-            .select("id")
-            .eq("setup_id", setupId)
-            .single();
+        const { error } = await supabase
+            .from(ROOMS_TABLE)
+            .update({ pos_x: Number(x), pos_y: Number(y) })
+            .eq("id", setupId);
 
-        let result;
-        if (existing) {
-            result = await supabase
-                .from("setup_rooms[Coordinates]")
-                .update({ x: Number(x), y: Number(y) })
-                .eq("id", existing.id);
-        } else {
-            result = await supabase
-                .from("setup_rooms[Coordinates]")
-                .insert({
-                    setup_id: setupId,
-                    x: Number(x),
-                    y: Number(y)
-                });
-        }
+        if (error) throw error;
 
-        if (result.error) throw result.error;
         res.json({ success: true });
     } catch (err) {
-        console.error("❌ upsertRoomPosition fatal:", err);
+        console.error("upsertRoomPosition fatal:", err);
         res.status(500).json({ error: "Update failed" });
     }
 };
@@ -306,45 +515,56 @@ exports.children = async (req, res) => {
     if (cached) return res.json(cached);
 
     try {
+        const { data: roomRow } = await supabase
+            .from(ROOMS_TABLE)
+            .select("id")
+            .eq("id", setupId)
+            .limit(1)
+            .maybeSingle();
+
         let allItems = [];
 
-        const PER_TABLE_LIMIT = 200;
-        const TOTAL_CAP = 1500;
-        const CONCURRENCY = 4;
+        if (roomRow?.id) {
+            const { data, error } = await supabase
+                .from(SETUPS_TABLE)
+                .select("*")
+                .eq("room_id", setupId)
+                .order("id", { ascending: true });
 
-        await runWithConcurrency(tablesToScan, CONCURRENCY, async (tableName) => {
-            if (allItems.length >= TOTAL_CAP) return;
-            if (NO_SETUPID_TABLES.has(tableName)) return;
+            if (error) throw error;
 
-            const { data, error } = await supabase.from(tableName).select("*").eq("setup_id", setupId).limit(PER_TABLE_LIMIT);
+            allItems = (data || []).map((item) => mapDisplay({
+                ...item,
+                setup_id: Number(item.room_id ?? 0),
+                setup_name: item.name ?? "Nevtelen setup",
+                setup_type: item.type ?? "setup",
+                x: Number(item.pos_x ?? 0),
+                y: Number(item.pos_y ?? 0)
+            }, SETUPS_TABLE));
+        } else {
+            const { data, error } = await supabase
+                .from(SETUP_DEVICES_TABLE)
+                .select("*")
+                .eq("setup_id", setupId)
+                .order("id", { ascending: true });
 
-            if (error) {
-                const msg = String(error.message || "");
+            if (error) throw error;
 
-                if (msg.includes("setup_id") && msg.includes("does not exist")) {
-                    NO_SETUPID_TABLES.add(tableName);
-                    console.log(`🚫 blacklist: ${tableName} (no setup_id)`);
-                    return;
-                }
-
-                console.log(`⚠️ ${tableName} skip:`, msg);
-                return;
-            }
-
-            if (Array.isArray(data) && data.length > 0) {
-                const mapped = data.map((item) => mapDisplay(item, tableName));
-                allItems.push(...mapped);
-
-                if (allItems.length > TOTAL_CAP) {
-                    allItems = allItems.slice(0, TOTAL_CAP);
-                }
-            }
-        });
+            allItems = (data || []).map((item) => mapDisplay({
+                ...item,
+                type: item.role ?? "device",
+                setup_type: item.role ?? "device",
+                product_id: Number(item.device_id ?? 0),
+                x: Number(item.pos_x ?? 0),
+                y: Number(item.pos_y ?? 0),
+                rotation: Number(item.rotation ?? 0)
+            }, SETUP_DEVICES_TABLE));
+        }
 
         cacheSet(childrenCache, setupId, allItems, CHILDREN_TTL_MS);
         return res.json(allItems);
     } catch (err) {
-        console.error("❌ children fatal:", err);
+        console.error("children fatal:", err);
         return res.json([]);
     }
 };
@@ -356,7 +576,7 @@ exports.update = async (req, res) => {
     try {
         const userId = req.user.id;
         const setupId = req.params.id;
-        const { setup_name } = req.body;
+        const setup_name = req.body?.setup_name ?? req.body?.name;
 
         if (!setupId) {
             return res.status(400).json({ error: "Missing setup id" });
@@ -366,23 +586,25 @@ exports.update = async (req, res) => {
 
         if (setup_name !== undefined) {
             const trimmedName = String(setup_name || "").trim();
-            updateData.setup_name = trimmedName;
+            updateData.name = trimmedName;
         }
 
         if (Object.keys(updateData).length === 0) {
             return res.status(400).json({ error: "Nothing to update" });
         }
 
+        const ok = await assertSetupOwnedByUser(setupId, userId);
+        if (!ok) return res.status(403).json({ error: "Forbidden" });
+
         const { data, error } = await supabase
-            .from(SETUP_TABLE)
+            .from(ROOMS_TABLE)
             .update(updateData)
             .eq("id", setupId)
-            .eq("user_id", userId)
             .select("*")
             .single();
 
         if (error) {
-            console.error("❌ Supabase setup update error:", error);
+            console.error("âťŚ Supabase setup update error:", error);
             return res.status(500).json({
                 error: "Update failed",
                 details: error.message,
@@ -398,11 +620,12 @@ exports.update = async (req, res) => {
         return res.json({
             setup: {
                 ...data,
-                setup_name: data.setup_name ?? data.name ?? "Névtelen setup",
+                setup_name: data.name ?? "Nevtelen setup",
+                name: data.name ?? setup_name,
             },
         });
     } catch (err) {
-        console.error("❌ Setup update hiba:", err);
+        console.error("âťŚ Setup update hiba:", err);
         return res.status(500).json({
             error: "Update failed",
             details: err.message,
@@ -415,28 +638,27 @@ exports.create = async (req, res) => {
         const userId = req.user?.id ?? req.user?.user_id ?? req.userId;
         if (!userId) return res.status(401).json({ error: "Unauthorized" });
 
-        const setup_name = (req.body?.setup_name || "").trim();
+        const setup_name = String(req.body?.setup_name ?? req.body?.name ?? "").trim();
         if (!setup_name) return res.status(400).json({ error: "setup_name required" });
 
         const isFavorite = req.body?.isFavorite === true;
         const x = Number(req.body?.x ?? 0);
         const y = Number(req.body?.y ?? 0);
 
-        // ✅ FONTOS: a setup[Setup] táblába csak létező oszlopokat írunk
-        const insertPayload = {
-            setup_name,
-            user_id: userId,
-            isFavorite
-        };
-
         const { data, error } = await supabase
-            .from(SETUP_TABLE)
-            .insert([insertPayload])
+            .from(ROOMS_TABLE)
+            .insert([{
+                user_id: Number(userId),
+                name: setup_name,
+                pos_x: x,
+                pos_y: y,
+                is_favorite: isFavorite
+            }])
             .select("*")
             .single();
 
         if (error) {
-            console.error("❌ Supabase insert error:", error);
+            console.error("Create room error:", error);
             return res.status(500).json({
                 error: error.message,
                 code: error.code,
@@ -445,30 +667,21 @@ exports.create = async (req, res) => {
             });
         }
 
-        // ✅ pozíció külön táblába megy
-        const { error: posErr } = await supabase
-            .from("setup_rooms[Coordinates]")
-            .insert([{
-                setup_id: data.id,
-                x,
-                y
-            }]);
-
-        if (posErr) {
-            console.error("⚠️ setup position insert error:", posErr);
-            // a setup létrejött, ezért itt nem dobjuk el az egészet
-        }
-
         return res.json({
             setup: {
                 ...data,
-                setup_name: data.setup_name ?? data.name ?? "Névtelen setup",
-                x,
-                y
+                setup_name: data.name ?? setup_name,
+                name: data.name ?? setup_name,
+                setup_type: "room",
+                type: "room",
+                x: Number(data.pos_x ?? x),
+                y: Number(data.pos_y ?? y),
+                isFavorite: Boolean(data.is_favorite),
+                user_id: Number(data.user_id ?? userId)
             }
         });
     } catch (err) {
-        console.error("❌ create setup error:", err);
+        console.error("Create setup error:", err);
         return res.status(500).json({ error: "Server error" });
     }
 };
@@ -495,48 +708,60 @@ exports.addDevice = async (req, res) => {
         const ok = await assertSetupOwnedByUser(setupId, userId);
         if (!ok) return res.status(403).json({ error: "Forbidden" });
 
-        const TABLE_MAP = {
-            speakers: "front_speaker[Setup]",
-            receivers: "reciever_setup[Setup]",
-            processors: "audio_processor[Setup]",
-            subwoofers: "subwoofer[Setup]",
-            televisions: "televisions[Setup]",
-            projectors: "projectors[Setup]",
-            routers: "router[Setup]",
-            switches: "switches[Setup]",
-            laptops: "laptops[Setup]",
-            desktop_pcs: "pc_details[Setup]",
+        const normalizeType = (value) => {
+            const raw = String(value || "").toLowerCase();
+            if (raw.includes("router")) return "router";
+            if (raw.includes("switch")) return "switch";
+            if (raw.includes("modem")) return "modem";
+            if (raw.includes("home_theater")) return "home_theater";
+            if (raw.includes("audio_processor")) return "audiop";
+            if (raw.includes("subwoofer")) return "subwoofer";
+            if (raw.includes("speaker")) return "speaker";
+            if (raw.includes("projector")) return "projector";
+            if (raw.includes("television")) return "television";
+            return raw.replace("[setup]", "").trim() || "device";
         };
 
-        const targetTable = TABLE_MAP[source_table] || source_table;
-
-        const insertPayload = {
-            setup_id: setupId,
-            product_id: Number(product_id),
-            display_name: display_name || "Eszköz",
-            manufacturer: manufacturer || "",
-        };
+        const itemName = String(display_name || manufacturer || "Eszkoz").trim() || "Eszkoz";
+        const itemType = normalizeType(source_table);
 
         const { data, error } = await supabase
-            .from(targetTable)
-            .insert([insertPayload])
+            .from(SETUP_DEVICES_TABLE)
+            .insert([{
+                setup_id: Number(setupId),
+                device_id: Number(product_id),
+                role: itemType,
+                pos_x: 0,
+                pos_y: 0,
+                rotation: 0
+            }])
             .select("*")
             .single();
 
         if (error) {
-            console.error("❌ addDevice insert error:", error);
+            console.error("addDevice insert error:", error);
             return res.status(500).json({ error: error.message });
         }
 
         childrenCache.delete(String(setupId));
 
-        return res.json({ ok: true, device: { ...data, category: targetTable, display_name } });
+        return res.json({
+            ok: true,
+            device: mapDisplay({
+                ...data,
+                name: itemName,
+                type: itemType,
+                setup_type: itemType,
+                product_id: Number(product_id),
+                x: Number(data.pos_x ?? 0),
+                y: Number(data.pos_y ?? 0)
+            }, SETUP_DEVICES_TABLE)
+        });
     } catch (err) {
-        console.error("❌ addDevice fatal:", err);
+        console.error("addDevice fatal:", err);
         return res.status(500).json({ error: "Server error" });
     }
 };
-
 exports.remove = async (req, res) => {
     try {
         const userId = req.user?.id;
@@ -544,25 +769,48 @@ exports.remove = async (req, res) => {
 
         if (!userId) return res.status(401).json({ error: "Unauthorized" });
 
-        const { error: connErr } = await supabase
-            .from("connections[Connects]")
-            .delete()
-            .or(`from_setup_id.eq.${setupId},to_setup_id.eq.${setupId}`);
+        const ok = await assertSetupOwnedByUser(setupId, userId);
+        if (!ok) return res.status(403).json({ error: "Forbidden" });
 
-        if (connErr) {
-            console.error("❌ connection delete error:", connErr);
-            return res.status(500).json({ error: connErr.message });
+        const { data: roomSetups, error: setupsErr } = await supabase
+            .from(SETUPS_TABLE)
+            .select("id")
+            .eq("room_id", setupId);
+
+        if (setupsErr) {
+            return res.status(500).json({ error: setupsErr.message });
+        }
+
+        const setupIds = (roomSetups || []).map((row) => Number(row.id)).filter(Number.isFinite);
+
+        if (setupIds.length) {
+            const { error: deviceConnErr } = await supabase
+                .from(SETUP_CONNECTIONS_TABLE)
+                .delete()
+                .in("setup_id", setupIds);
+            if (deviceConnErr) return res.status(500).json({ error: deviceConnErr.message });
+
+            const { error: deviceErr } = await supabase
+                .from(SETUP_DEVICES_TABLE)
+                .delete()
+                .in("setup_id", setupIds);
+            if (deviceErr) return res.status(500).json({ error: deviceErr.message });
+
+            const { error: setupErr } = await supabase
+                .from(SETUPS_TABLE)
+                .delete()
+                .in("id", setupIds);
+            if (setupErr) return res.status(500).json({ error: setupErr.message });
         }
 
         const { data, error } = await supabase
-            .from(SETUP_TABLE)
+            .from(ROOMS_TABLE)
             .delete()
             .eq("id", setupId)
-            .eq("user_id", userId)
             .select("*");
 
         if (error) {
-            console.error("❌ Supabase delete error:", error);
+            console.error("âťŚ Supabase delete error:", error);
             return res.status(500).json({ error: error.message });
         }
 
@@ -574,7 +822,7 @@ exports.remove = async (req, res) => {
 
         return res.json({ ok: true });
     } catch (err) {
-        console.error("❌ Setup delete hiba:", err);
+        console.error("âťŚ Setup delete hiba:", err);
         return res.status(500).json({ error: "Server error" });
     }
 };
@@ -591,9 +839,10 @@ exports.pcBuildsList = async (req, res) => {
         if (!ok) return res.status(403).json({ pcs: [] });
 
         const { data, error } = await supabase
-            .from(PC_BUILDS_TABLE)
+            .from(SETUPS_TABLE)
             .select("*")
-            .eq("setup_id", setupId)
+            .eq("room_id", setupId)
+            .eq("type", "pc")
             .order("id", { ascending: false })
             .limit(200);
 
@@ -601,12 +850,15 @@ exports.pcBuildsList = async (req, res) => {
 
         const pcs = (data || []).map((r) => ({
             ...r,
-            setup_name: r.setup_name ?? r.pc_name ?? r.name ?? "Névtelen PC",
+            setup_name: r.name ?? "Nevtelen PC",
+            setup_type: "pc",
+            x: Number(r.pos_x ?? 0),
+            y: Number(r.pos_y ?? 0)
         }));
 
         return res.json({ pcs });
     } catch (err) {
-        console.error("❌ pcBuildsList hiba:", err);
+        console.error("âťŚ pcBuildsList hiba:", err);
         return res.status(500).json({ pcs: [] });
     }
 };
@@ -622,23 +874,32 @@ exports.pcBuildsCreate = async (req, res) => {
         const pc_name = (req.body?.pc_name || "").trim();
         if (!pc_name) return res.status(400).json({ error: "pc_name required" });
 
-        const payload = {
-            setup_id: setupId,
-            setup_name: pc_name,
-            setup_type: "pc",
-            processor_id: null,
-            videocard_id: null,
-            motherboard_id: null,
-            ram_id: null,
-            psu_id: null,
-        };
-
-        const { data, error } = await supabase.from(PC_BUILDS_TABLE).insert([payload]).select("*").single();
+        const { data, error } = await supabase
+            .from(SETUPS_TABLE)
+            .insert([{
+                room_id: Number(setupId),
+                name: pc_name,
+                type: "pc",
+                pos_x: 0,
+                pos_y: 0
+            }])
+            .select("*")
+            .single();
         if (error) throw error;
 
-        return res.json({ pc: data });
+        childrenCache.delete(String(setupId));
+
+        return res.json({
+            pc: {
+                ...data,
+                setup_name: data.name ?? pc_name,
+                setup_type: "pc",
+                x: Number(data.pos_x ?? 0),
+                y: Number(data.pos_y ?? 0)
+            }
+        });
     } catch (err) {
-        console.error("❌ pcBuildsCreate hiba:", err);
+        console.error("âťŚ pcBuildsCreate hiba:", err);
         return res.status(500).json({ error: "Create failed" });
     }
 };
@@ -650,26 +911,30 @@ exports.pcBuildsUpdate = async (req, res) => {
 
         if (!pcId) return res.status(400).json({ error: "Missing pcId" });
 
-        const { data: pcRow, error: pcErr } = await supabase.from(PC_BUILDS_TABLE).select("id,setup_id").eq("id", pcId).single();
+        const { data: pcRow, error: pcErr } = await supabase
+            .from(SETUPS_TABLE)
+            .select("*")
+            .eq("id", pcId)
+            .eq("type", "pc")
+            .limit(1)
+            .maybeSingle();
+
         if (pcErr || !pcRow) return res.status(404).json({ error: "PC not found" });
 
-        const ok = await assertSetupOwnedByUser(pcRow.setup_id, userId);
+        const ok = await assertRoomOwnedByUser(pcRow.room_id, userId);
         if (!ok) return res.status(403).json({ error: "Forbidden" });
 
-        const payload = {
-            processor_id: req.body?.processor_id ?? null,
-            videocard_id: req.body?.videocard_id ?? null,
-            motherboard_id: req.body?.motherboard_id ?? null,
-            ram_id: req.body?.ram_id ?? null,
-            psu_id: req.body?.psu_id ?? null,
-        };
-
-        const { data, error } = await supabase.from(PC_BUILDS_TABLE).update(payload).eq("id", pcId).select("*").single();
-        if (error) throw error;
-
-        return res.json({ pc: data });
+        return res.json({
+            pc: {
+                ...pcRow,
+                setup_name: pcRow.name ?? "Nevtelen PC",
+                setup_type: "pc",
+                x: Number(pcRow.pos_x ?? 0),
+                y: Number(pcRow.pos_y ?? 0)
+            }
+        });
     } catch (err) {
-        console.error("❌ pcBuildsUpdate hiba:", err);
+        console.error("âťŚ pcBuildsUpdate hiba:", err);
         return res.status(500).json({ error: "Update failed" });
     }
 };
@@ -683,7 +948,7 @@ exports.pcParts = async (req, res) => {
         const safeSelect = async (table) => {
             const { data, error } = await supabase.from(table).select("*");
             if (error) {
-                console.error(`❌ pcParts select error in ${table}:`, error.message);
+                console.error(`âťŚ pcParts select error in ${table}:`, error.message);
                 return [];
             }
             return Array.isArray(data) ? data : [];
@@ -840,66 +1105,43 @@ exports.pcParts = async (req, res) => {
         cacheSet(pcPartsCache, cacheKey, parts, PCPARTS_TTL_MS);
         return res.json({ parts });
     } catch (err) {
-        console.error("❌ pcParts hiba:", err);
+        console.error("âťŚ pcParts hiba:", err);
         return res.json({ parts: [] });
     }
 };
 
 /* =========================================================
-   ✅ CARS
+   âś… CARS
    ========================================================= */
-const CAR_SOURCES = [
-    { table: "cabrio_cars", fk: "cabrio_id" },
-    { table: "coupe_cars", fk: "coupe_id" },
-    { table: "crossover_cars", fk: "crossover_id" },
-    { table: "hatchback_cars", fk: "hatchback_id" },
-    { table: "mpv_cars", fk: "mpv_id" },
-    { table: "pickup_cars", fk: "pickup_id" },
-    { table: "wagon_cars", fk: "wagon_id" },
-];
-
 exports.carOptions = async (req, res) => {
     try {
-        const cacheKey = "car-options:v1";
+        const cacheKey = "car-options:v2";
         const cached = cacheGet(carOptionsCache, cacheKey);
         if (cached) return res.json({ cars: cached });
 
-        const safeSelect = async (table, select) => {
-            const { data, error } = await supabase.from(table).select(select).limit(5000);
-            if (error) return [];
-            return Array.isArray(data) ? data : [];
-        };
+        const { data, error } = await supabase
+            .from("products")
+            .select("id, name, type")
+            .order("name", { ascending: true })
+            .limit(5000);
 
-        const toStr = (v) => (v === null || v === undefined ? "" : String(v).trim());
+        if (error) throw error;
 
-        const cars = [];
-        for (const src of CAR_SOURCES) {
-            const rows = await safeSelect(src.table, "ID, Manufacturer, Model");
-            for (const r of rows) {
-                const id = r.ID ?? r.id;
-                if (id == null) continue;
-
-                const manufacturer = toStr(r.Manufacturer ?? r.manufacturer);
-                const model = toStr(r.Model ?? r.model);
-                const display_name = [manufacturer, model].filter(Boolean).join(" ").trim() || `${src.table} #${id}`;
-
-                cars.push({
-                    id: Number(id),
-                    source_table: src.table,
-                    fk_column: src.fk,
-                    Manufacturer: manufacturer,
-                    Model: model,
-                    display_name,
-                });
-            }
-        }
+        const cars = (Array.isArray(data) ? data : [])
+            .filter((row) => String(row?.type || "").trim().toLowerCase() === "car")
+            .map((row) => ({
+                id: Number(row.id),
+                name: String(row.name || "").trim(),
+                type: String(row.type || "").trim(),
+                display_name: String(row.name || "").trim() || `Autó #${row.id}`
+            }));
 
         cars.sort((a, b) => a.display_name.localeCompare(b.display_name, "hu"));
 
         cacheSet(carOptionsCache, cacheKey, cars, CAROPTIONS_TTL_MS);
         return res.json({ cars });
     } catch (err) {
-        console.error("❌ carOptions hiba:", err);
+        console.error("âťŚ carOptions hiba:", err);
         return res.json({ cars: [] });
     }
 };
@@ -913,9 +1155,10 @@ exports.carsList = async (req, res) => {
         if (!ok) return res.status(403).json({ cars: [] });
 
         const { data, error } = await supabase
-            .from(CAR_SETUP_TABLE)
+            .from(SETUPS_TABLE)
             .select("*")
-            .eq("setup_id", setupId)
+            .eq("room_id", setupId)
+            .eq("type", "car")
             .order("id", { ascending: false })
             .limit(300);
 
@@ -923,12 +1166,15 @@ exports.carsList = async (req, res) => {
 
         const cars = (data || []).map((r) => ({
             ...r,
-            setup_name: r.setup_name ?? r.name ?? "Névtelen autó",
+            setup_name: r.name ?? "Nevtelen auto",
+            setup_type: "car",
+            x: Number(r.pos_x ?? 0),
+            y: Number(r.pos_y ?? 0)
         }));
 
         return res.json({ cars });
     } catch (err) {
-        console.error("❌ carsList hiba:", err);
+        console.error("âťŚ carsList hiba:", err);
         return res.status(500).json({ cars: [] });
     }
 };
@@ -941,44 +1187,83 @@ exports.carsAdd = async (req, res) => {
         const ok = await assertSetupOwnedByUser(setupId, userId);
         if (!ok) return res.status(403).json({ error: "Forbidden" });
 
-        const source_table = String(req.body?.source_table || "").trim();
         const car_id_raw = req.body?.car_id;
         const car_id = car_id_raw == null ? null : Number(car_id_raw);
 
-        if (!source_table || !car_id || Number.isNaN(car_id)) {
-            return res.status(400).json({ error: "source_table és car_id kötelező" });
+        if (!car_id || Number.isNaN(car_id)) {
+            return res.status(400).json({ error: "A car_id kötelező" });
         }
 
-        const src = CAR_SOURCES.find((s) => s.table === source_table);
-        if (!src) return res.status(400).json({ error: "Ismeretlen car source_table" });
+        const { data: product, error: productError } = await supabase
+            .from("products")
+            .select("id, name, type")
+            .eq("id", car_id)
+            .limit(1)
+            .maybeSingle();
 
-        const { data: carRow } = await supabase.from(source_table).select("ID, Manufacturer, Model").eq("ID", car_id).single();
+        if (productError) throw productError;
+        if (!product) {
+            return res.status(404).json({ error: "Autó termék nem található" });
+        }
 
-        const manufacturer = (carRow?.Manufacturer ?? "").toString().trim();
-        const model = (carRow?.Model ?? "").toString().trim();
-        const setup_name = [manufacturer, model].filter(Boolean).join(" ").trim() || `Car #${car_id}`;
+        const productType = String(product.type || "").trim().toLowerCase();
+        if (productType !== "car") {
+            return res.status(400).json({ error: "A kiválasztott termék nem autó típusú" });
+        }
 
-        const payload = {
-            setup_id: setupId,
-            setup_name,
-            cabrio_id: null,
-            hatchback_id: null,
-            coupe_id: null,
-            wagon_id: null,
-            mpv_id: null,
-            crossover_id: null,
-            pickup_id: null,
-            [src.fk]: car_id,
-        };
+        const setup_name = String(product.name || "").trim() || `Autó #${car_id}`;
 
-        const { data, error } = await supabase.from(CAR_SETUP_TABLE).insert([payload]).select("*").single();
+        const { data, error } = await supabase
+            .from(SETUPS_TABLE)
+            .insert([{
+                room_id: Number(setupId),
+                name: setup_name,
+                type: "car",
+                pos_x: 0,
+                pos_y: 0
+            }])
+            .select("*")
+            .single();
         if (error) throw error;
 
-        childrenCache.delete(setupId);
+        const { data: createdDevice, error: deviceError } = await supabase
+            .from(SETUP_DEVICES_TABLE)
+            .insert([{
+                setup_id: Number(data.id),
+                device_id: Number(car_id),
+                role: "car",
+                pos_x: Number(data.pos_x ?? 0),
+                pos_y: Number(data.pos_y ?? 0),
+                rotation: 0
+            }])
+            .select("*")
+            .single();
 
-        return res.json({ car: data });
+        if (deviceError) {
+            await supabase
+                .from(SETUPS_TABLE)
+                .delete()
+                .eq("id", data.id);
+            throw deviceError;
+        }
+
+        childrenCache.delete(String(setupId));
+        childrenCache.delete(String(data.id));
+
+        return res.json({
+            car: {
+                ...data,
+                setup_name: data.name ?? setup_name,
+                setup_type: "car",
+                car_id,
+                product_id: car_id,
+                device: createdDevice ?? null,
+                x: Number(data.pos_x ?? 0),
+                y: Number(data.pos_y ?? 0)
+            }
+        });
     } catch (err) {
-        console.error("❌ carsAdd hiba:", err);
+        console.error("âťŚ carsAdd hiba:", err);
         return res.status(500).json({ error: "Create failed" });
     }
 };
@@ -1026,72 +1311,98 @@ exports.carSetupDetails = async (req, res) => {
         if (cached) return res.json(cached);
 
         const { data: carSetupRow, error: csErr } = await supabase
-            .from(CAR_SETUP_TABLE)
+            .from(SETUPS_TABLE)
             .select("*")
             .eq("id", carSetupId)
-            .single();
+            .limit(1)
+            .maybeSingle();
 
         if (csErr || !carSetupRow) {
             return res.status(404).json({ error: "Car setup row not found" });
         }
 
-        const ok = await assertSetupOwnedByUser(carSetupRow.setup_id, userId);
+        const ok = await assertSetupOwnedByUser(carSetupRow.id, userId);
         if (!ok) return res.status(403).json({ error: "Forbidden" });
 
-        const link = pickFirstCarLink(carSetupRow);
-
-        const base = {
-            car_setup_id: Number(carSetupId),
-            setup_id: Number(carSetupRow.setup_id),
-            setup_name: carSetupRow.setup_name ?? "Autó",
-            source_table: link?.table ?? null,
-            car_id: link?.id ?? null,
-            fields: {
-                "Manufacturer": "—",
-                "Model": "—",
-                "Price": "—",
-                "Body Type": "—",
-                "Horsepower": "—",
-                "Acceleration (s)": "—",
-                "Seats": "—",
-                "Fuel Type": "—",
-                "Year": "—",
-                "Transmission": "—",
-                "category": "—",
-            }
-        };
-
-        if (!link) {
-            cacheSet(carDetailsCache, String(carSetupId), base, CARDETAILS_TTL_MS);
-            return res.json(base);
-        }
-
-        const { data: carRow, error: carErr } = await supabase
-            .from(link.table)
+        const { data: setupDevice, error: deviceErr } = await supabase
+            .from(SETUP_DEVICES_TABLE)
             .select("*")
-            .eq("ID", link.id)
-            .single();
+            .eq("setup_id", carSetupId)
+            .eq("role", "car")
+            .order("id", { ascending: true })
+            .limit(1)
+            .maybeSingle();
 
-        if (carErr || !carRow) {
-            cacheSet(carDetailsCache, String(carSetupId), base, CARDETAILS_TTL_MS);
-            return res.json(base);
+        if (deviceErr) throw deviceErr;
+        if (!setupDevice?.device_id) {
+            return res.status(404).json({ error: "Car device not found for setup" });
         }
 
-        const manufacturer = pick(carRow, ["Manufacturer", "manufacturer", "Brand", "brand"]) ?? "—";
-        const model = pick(carRow, ["Model", "model"]) ?? "—";
-        const price = pick(carRow, ["Price", "price"]) ?? "—";
-        const bodyType = pick(carRow, ["Body Type", "BodyType", "body_type", "bodyType"]) ?? "—";
-        const hp = pick(carRow, ["Horsepower", "horsepower", "HP", "hp"]) ?? "—";
-        const acc = pick(carRow, ["Acceleration (s)", "Acceleration", "acceleration", "acceleration_s"]) ?? "—";
-        const seats = pick(carRow, ["Seats", "seats"]) ?? "—";
-        const fuel = pick(carRow, ["Fuel Type", "FuelType", "fuel_type", "fuelType"]) ?? "—";
-        const year = pick(carRow, ["Year", "year"]) ?? "—";
-        const trans = pick(carRow, ["Transmission", "transmission"]) ?? "—";
-        const category = pick(carRow, ["category", "Category"]) ?? "—";
+        const productId = Number(setupDevice.device_id);
+
+        const [{ data: product, error: productErr }, { data: valueRows, error: valuesErr }] = await Promise.all([
+            supabase
+                .from("products")
+                .select("id, name, type")
+                .eq("id", productId)
+                .limit(1)
+                .maybeSingle(),
+            supabase
+                .from("values")
+                .select(`
+                    products_id,
+                    value,
+                    properties:properties_id (
+                        id,
+                        property,
+                        type
+                    )
+                `)
+                .eq("products_id", productId)
+        ]);
+
+        if (productErr) throw productErr;
+        if (valuesErr) throw valuesErr;
+
+        const valueMap = {};
+        for (const row of Array.isArray(valueRows) ? valueRows : []) {
+            const propertyName = String(row?.properties?.property || "").trim();
+            if (!propertyName) continue;
+            valueMap[propertyName] = row?.value ?? null;
+        }
+
+        const manufacturer = pick(valueMap, ["manufacturer", "Manufacturer", "brand", "Brand"]) ?? "—";
+        const model = pick(valueMap, ["model", "Model"]) ?? String(product?.name || "").trim() ?? "—";
+        const price = pick(valueMap, ["price", "Price"]) ?? "—";
+        const bodyType = pick(valueMap, ["body_type", "Body Type", "BodyType", "bodyType"]) ?? "—";
+        const hp = pick(valueMap, ["horsepower", "Horsepower", "hp", "HP"]) ?? "—";
+        const acc = pick(valueMap, ["acceleration", "Acceleration", "Acceleration (s)", "acceleration_s"]) ?? "—";
+        const seats = pick(valueMap, ["seats", "Seats"]) ?? "—";
+        const fuel = pick(valueMap, ["fuel_type", "Fuel Type", "FuelType", "fuel"]) ?? "—";
+        const year = pick(valueMap, ["year", "Year"]) ?? "—";
+        const trans = pick(valueMap, ["transmission", "Transmission"]) ?? "—";
 
         const response = {
-            ...base,
-            setup_name: (String(manufacturer).trim() || "—") + " " + (String(model).trim() || "—"),
+            car_setup_id: Number(carSetupId),
+            setup_id: Number(carSetupRow.id),
+            room_id: Number(carSetupRow.room_id ?? 0),
+            product_id: productId,
+            setup_name: String(carSetupRow.name || product?.name || "Autó").trim(),
+            car: {
+                id: productId,
+                name: String(product?.name || "").trim(),
+                type: String(product?.type || "").trim()
+            },
+            manufacturer,
+            model,
+            price,
+            body_type: bodyType,
+            horsepower: hp,
+            acceleration: acc,
+            seats,
+            fuel_type: fuel,
+            year,
+            transmission: trans,
             fields: {
                 "Manufacturer": manufacturer,
                 "Model": model,
@@ -1103,123 +1414,98 @@ exports.carSetupDetails = async (req, res) => {
                 "Fuel Type": fuel,
                 "Year": year,
                 "Transmission": trans,
-                "category": category,
             }
         };
 
         cacheSet(carDetailsCache, String(carSetupId), response, CARDETAILS_TTL_MS);
         return res.json(response);
     } catch (err) {
-        console.error("❌ carSetupDetails hiba:", err);
+        console.error("âťŚ carSetupDetails hiba:", err);
         return res.status(500).json({ error: "Server error" });
     }
 };
 
 /* =========================================================
-   ✅ CONNECTIONS
+   âś… CONNECTIONS
    ========================================================= */
 const typeToTableMap = {
-    "pc": "pc_details[Setup]",
-    "switch": "switches[Setup]",
-    "router": "router[Setup]",
-    "modem": "modem[Setup]",
-    "ht": "home_theater_setups[Setup]",
-    "audiop": "audio_processor[Setup]",
-    "mixer": "mixer[Setup]"
+    "pc": "setup",
+    "switch": "setup",
+    "router": "setup",
+    "modem": "setup",
+    "ht": "setup",
+    "home_theater": "setup",
+    "audiop": "setup",
+    "mixer": "setup",
+    "speaker": "setup",
+    "subwoofer": "setup",
+    "car": "setup"
 };
 
 exports.connections = async (req, res) => {
-    const setupId = req.params.id;
-    const userId = req.user.id;
-
-    if (!setupId) return res.json([]);
-
-    try {
-        const ok = await assertSetupOwnedByUser(setupId, userId);
-        if (!ok) return res.json([]);
-
-        const { data: rawConns, error: connErr } = await supabase
-            .from("connections[Connects]")
-            .select(`
-                *,
-                from_setup:from_setup_id(setup_name),
-                to_setup:to_setup_id(setup_name)
-            `)
-            .or(`from_setup_id.eq.${setupId},to_setup_id.eq.${setupId}`);
-
-        if (connErr) throw connErr;
-        if (!rawConns || rawConns.length === 0) return res.json([]);
-
-        const allConnections = rawConns.map(row => {
-            const sourceTable = typeToTableMap[row.from_device_type] || `${row.from_device_type}[Setup]`;
-            const targetTable = typeToTableMap[row.to_device_type] || `${row.to_device_type}[Setup]`;
-            const crossSetup = String(row.from_setup_id) !== String(row.to_setup_id);
-
-            return {
-                id: row.id,
-                source: { category: sourceTable, id: row.from_device_id },
-                target: { category: targetTable, id: row.to_device_id },
-                crossSetup,
-                from_setup_id: row.from_setup_id,
-                to_setup_id: row.to_setup_id,
-                from_setup: row.from_setup,
-                to_setup: row.to_setup
-            };
-        });
-
-        return res.json(allConnections);
-    } catch (err) {
-        console.error("❌ connections fatal:", err);
-        return res.json([]);
-    }
+    return res.json([]);
 };
 
 exports.connectionsCreate = async (req, res) => {
     try {
         const userId = req.user.id;
         const {
-            from_setup_id,
-            to_setup_id,
-            from_device_type,
             from_device_id,
-            to_device_type,
             to_device_id,
-            utp_id
+            from_setup_device_port_id,
+            to_setup_device_port_id,
+            cable_id,
+            setup_id,
+            type
         } = req.body;
 
-        const okFrom = await assertSetupOwnedByUser(from_setup_id, userId);
-        const okTo = await assertSetupOwnedByUser(to_setup_id, userId);
+        if (!setup_id || !from_device_id || !to_device_id || !from_setup_device_port_id || !to_setup_device_port_id) {
+            return res.status(400).json({ error: "Missing required port connection fields" });
+        }
 
-        if (!okFrom || !okTo) {
-            return res.status(403).json({ error: "Forbidden: You don't own one of these setups" });
+        const setupOwned = await assertSetupOwnedByUser(setup_id, userId);
+        const fromOwned = await assertDeviceOwnedByUser(from_device_id, userId);
+        const toOwned = await assertDeviceOwnedByUser(to_device_id, userId);
+
+        if (!setupOwned || !fromOwned || !toOwned) {
+            return res.status(403).json({ error: "Forbidden" });
+        }
+
+        const fromCapacity = await validatePortCapacity(from_setup_device_port_id);
+        if (!fromCapacity.ok) return res.status(400).json({ error: fromCapacity.error });
+
+        const toCapacity = await validatePortCapacity(to_setup_device_port_id);
+        if (!toCapacity.ok) return res.status(400).json({ error: toCapacity.error });
+
+        const fromPortType = Number(fromCapacity.port?.port_type ?? 0);
+        const toPortType = Number(toCapacity.port?.port_type ?? 0);
+        if (fromPortType && toPortType && fromPortType !== toPortType) {
+            return res.status(400).json({ error: "Incompatible port types" });
         }
 
         const payload = {
-            from_setup_id,
-            to_setup_id,
-            from_device_type,
-            from_device_id,
-            to_device_type,
-            to_device_id,
-            utp_id: utp_id || 1
+            setup_id: Number(setup_id),
+            from_setup_device_id: Number(from_device_id),
+            to_setup_device_id: Number(to_device_id),
+            from_setup_device_port_id: Number(from_setup_device_port_id),
+            to_setup_device_port_id: Number(to_setup_device_port_id),
+            cable_id: cable_id == null ? null : Number(cable_id),
+            type: type == null ? null : type
         };
 
         const { data, error } = await supabase
-            .from("connections[Connects]")
+            .from(SETUP_CONNECTIONS_TABLE)
             .insert([payload])
             .select("*")
             .single();
 
         if (error) throw error;
 
-        childrenCache.delete(String(from_setup_id));
-        if (from_setup_id !== to_setup_id) {
-            childrenCache.delete(String(to_setup_id));
-        }
+        childrenCache.delete(String(setup_id));
 
         res.json({ success: true, connection: data });
     } catch (err) {
-        console.error("❌ connectionsCreate fatal:", err);
+        console.error("âťŚ connectionsCreate fatal:", err);
         res.status(500).json({ error: "Failed to create connection" });
     }
 };
@@ -1230,28 +1516,28 @@ exports.connectionsRemove = async (req, res) => {
         const connId = req.params.id;
 
         const { data: conn, error: findErr } = await supabase
-            .from("connections[Connects]")
-            .select("from_setup_id")
+            .from(SETUP_CONNECTIONS_TABLE)
+            .select("setup_id")
             .eq("id", connId)
             .single();
 
         if (findErr || !conn) return res.status(404).json({ error: "Connection not found" });
 
-        const ok = await assertSetupOwnedByUser(conn.from_setup_id, userId);
+        const ok = await assertSetupOwnedByUser(conn.setup_id, userId);
         if (!ok) return res.status(403).json({ error: "Forbidden" });
 
         const { error: delErr } = await supabase
-            .from("connections[Connects]")
+            .from(SETUP_CONNECTIONS_TABLE)
             .delete()
             .eq("id", connId);
 
         if (delErr) throw delErr;
 
-        childrenCache.delete(String(conn.from_setup_id));
+        childrenCache.delete(String(conn.setup_id));
 
         res.json({ success: true });
     } catch (err) {
-        console.error("❌ connectionsRemove fatal:", err);
+        console.error("âťŚ connectionsRemove fatal:", err);
         res.status(500).json({ error: "Failed to remove connection" });
     }
 };
@@ -1289,7 +1575,7 @@ exports.renameItem = async (req, res) => {
             .single();
 
         if (error) {
-            console.error("❌ renameItem update error:", error);
+            console.error("âťŚ renameItem update error:", error);
             return res.status(500).json({ error: "Rename failed", details: error.message });
         }
 
@@ -1300,8 +1586,57 @@ exports.renameItem = async (req, res) => {
             item: mapDisplay(data, tableName)
         });
     } catch (err) {
-        console.error("❌ renameItem fatal:", err);
+        console.error("âťŚ renameItem fatal:", err);
         return res.status(500).json({ error: "Rename failed" });
+    }
+};
+
+exports.updateItemPosition = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const { itemId, tableName, x, y } = req.body;
+
+        if (!itemId || !tableName) {
+            return res.status(400).json({ error: "Missing itemId or tableName" });
+        }
+
+        if (!isChildSetupTable(tableName)) {
+            return res.status(400).json({ error: "Position update supported only for child setups" });
+        }
+
+        const { data: item, idColumn } = await fetchItemWithSetup(tableName, itemId);
+
+        if (!item || !idColumn) {
+            return res.status(404).json({ error: "Item not found" });
+        }
+
+        const ok = await assertSetupOwnedByUser(item.setup_id, userId);
+        if (!ok) return res.status(403).json({ error: "Forbidden" });
+
+        const payload = String(tableName).toLowerCase() === String(SETUPS_TABLE).toLowerCase()
+            ? { pos_x: Number(x), pos_y: Number(y) }
+            : { pos_x: Number(x), pos_y: Number(y) };
+
+        const { error } = await supabase
+            .from(tableName)
+            .update(payload)
+            .eq(idColumn, itemId);
+
+        if (error) throw error;
+
+        childrenCache.delete(String(item.setup_id));
+
+        return res.json({
+            success: true,
+            item: mapDisplay({
+                ...item,
+                x: Number(x),
+                y: Number(y)
+            }, tableName)
+        });
+    } catch (err) {
+        console.error("updateItemPosition fatal:", err);
+        return res.status(500).json({ error: "Position update failed" });
     }
 };
 
@@ -1330,61 +1665,31 @@ exports.removeItem = async (req, res) => {
 
         if (delErr) throw delErr;
 
+        if (String(tableName).toLowerCase() === String(SETUPS_TABLE).toLowerCase()) {
+            const { error: connErr } = await supabase
+                .from(SETUP_CONNECTIONS_TABLE)
+                .delete()
+                .eq("setup_id", itemId);
+            if (connErr) throw connErr;
+
+            const { error: deviceErr } = await supabase
+                .from(SETUP_DEVICES_TABLE)
+                .delete()
+                .eq("setup_id", itemId);
+            if (deviceErr) throw deviceErr;
+        }
+
         childrenCache.delete(String(item.setup_id));
 
         res.json({ success: true });
     } catch (err) {
-        console.error("❌ removeItem fatal:", err);
+        console.error("âťŚ removeItem fatal:", err);
         res.status(500).json({ error: "Failed to remove item" });
     }
 };
 
 exports.allConnections = async (req, res) => {
-    try {
-        const userId = req.user.id;
-
-        const { data: setups, error: setupErr } = await supabase
-            .from(SETUP_TABLE)
-            .select("id")
-            .eq("user_id", userId);
-
-        if (setupErr || !setups) throw setupErr;
-        const setupIds = setups.map(s => s.id);
-        if (setupIds.length === 0) return res.json([]);
-
-        const { data: rawConns, error: connErr } = await supabase
-            .from("connections[Connects]")
-            .select(`
-                *,
-                from_setup:from_setup_id(setup_name),
-                to_setup:to_setup_id(setup_name)
-            `)
-            .or(`from_setup_id.in.(${setupIds.join(",")}),to_setup_id.in.(${setupIds.join(",")})`);
-
-        if (connErr) throw connErr;
-
-        const allConnections = (rawConns || []).map(row => {
-            const sourceTable = typeToTableMap[row.from_device_type] || `${row.from_device_type}[Setup]`;
-            const targetTable = typeToTableMap[row.to_device_type] || `${row.to_device_type}[Setup]`;
-            const crossSetup = String(row.from_setup_id) !== String(row.to_setup_id);
-
-            return {
-                id: row.id,
-                source: { category: sourceTable, id: row.from_device_id },
-                target: { category: targetTable, id: row.to_device_id },
-                crossSetup,
-                from_setup_id: row.from_setup_id,
-                to_setup_id: row.to_setup_id,
-                from_setup: row.from_setup,
-                to_setup: row.to_setup
-            };
-        });
-
-        res.json(allConnections);
-    } catch (err) {
-        console.error("❌ allConnections fatal:", err);
-        res.json([]);
-    }
+    return res.json([]);
 };
 
 exports.childrenInternal = async (setupId) => {
@@ -1407,29 +1712,26 @@ exports.childrenInternal = async (setupId) => {
 
 exports.deviceConnections = async (req, res) => {
     try {
-        const { deviceId, deviceType } = req.query;
+        const { deviceId } = req.query;
 
-        if (!deviceId || !deviceType) {
+        if (!deviceId) {
             return res.json([]);
         }
 
         const { data, error } = await supabase
-            .from("connections[Connects]")
-            .select(`
-                *,
-                from_setup:from_setup_id(setup_name),
-                to_setup:to_setup_id(setup_name)
-            `)
+            .from(SETUP_CONNECTIONS_TABLE)
+            .select("*")
             .or(
-                `and(from_device_type.eq.${deviceType},from_device_id.eq.${deviceId}),` +
-                `and(to_device_type.eq.${deviceType},to_device_id.eq.${deviceId})`
+                `from_setup_device_id.eq.${deviceId},to_setup_device_id.eq.${deviceId}`
             );
 
         if (error) throw error;
 
         return res.json(data || []);
     } catch (err) {
-        console.error("❌ deviceConnections fatal:", err);
+        console.error("âťŚ deviceConnections fatal:", err);
         return res.json([]);
     }
 };
+
+

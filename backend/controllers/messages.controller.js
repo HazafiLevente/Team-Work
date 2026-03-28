@@ -1,7 +1,6 @@
 // controllers/messages.controller.js
 const { supabase } = require("../services/supabase");
 
-const AI_MESSAGES_TABLES = ["ai_messages[Messages]", "ai_messages"];
 const AI_PANEL_TABLES = ["ai_panel[Messages]", "ai_panel"];
 const AI_TEXTS_TABLES = ["ai_texts[Messages]", "ai_texts"];
 
@@ -30,20 +29,10 @@ function mapAiPanel(row) {
     };
 }
 
-function mapAiText(row) {
-    return {
-        id: Number(pickField(row, ["id", "ID"])),
-        panel_id: Number(pickField(row, ["panel_id", "ai_panel_id", "panelid"])),
-        ai_text: String(pickField(row, ["ai_text", "answer", "assistant_text", "context_ai"]) || ""),
-        user_text: String(pickField(row, ["user_text", "question", "prompt", "context_user"]) || ""),
-        created_at: String(pickField(row, ["created_at", "createdAt"]) || new Date().toISOString())
-    };
-}
-
 function mapAiPanelRow(row) {
     return {
         id: Number(pickField(row, ["id", "ID"])),
-        messages_id: Number(pickField(row, ["messages_id", "ai_messages_id", "message_id"])),
+        user_id: Number(pickField(row, ["user_id", "owner_id", "user1_id", "userid"])),
         created_at: String(pickField(row, ["created_at", "createdAt"]) || new Date().toISOString())
     };
 }
@@ -51,7 +40,7 @@ function mapAiPanelRow(row) {
 function mapAiText(row) {
     return {
         id: Number(pickField(row, ["id", "ID"])),
-        messages_id: Number(pickField(row, ["messages_id", "ai_messages_id", "message_id", "panel_id"])),
+        panel_id: Number(pickField(row, ["panel_id", "ai_panel_id", "panelid", "messages_id", "ai_messages_id", "message_id"])),
         ai_text: String(pickField(row, ["ai_text", "answer", "assistant_text", "context_ai"]) || ""),
         user_text: String(pickField(row, ["user_text", "question", "prompt", "context_user"]) || ""),
         time: Number(pickField(row, ["time", "duration", "seconds"]) || 0),
@@ -141,35 +130,17 @@ async function deleteFromFirstAvailable(tableNames, idColumnCandidates, id) {
 }
 
 async function getAiPanel(panelId, userId) {
-    const root = await getOrCreateAiMessagesRoot(userId);
-
     const { data } = await selectFromFirstAvailable(AI_PANEL_TABLES, (tableName) =>
-        supabase.from(tableName).select("*").eq("id", panelId).eq("messages_id", root.id).maybeSingle()
+        supabase.from(tableName).select("*").eq("id", panelId).eq("user_id", userId).maybeSingle()
     );
 
     return data ? mapAiPanelRow(data) : null;
 }
 
-async function getOrCreateAiMessagesRoot(userId) {
-    const { data } = await selectFromFirstAvailable(AI_MESSAGES_TABLES, (tableName) =>
-        supabase.from(tableName).select("*").eq("user_id", userId).order("created_at", { ascending: false }).limit(1).maybeSingle()
-    );
-
-    if (data) return mapAiPanel(data);
-
-    const now = new Date().toISOString();
-    const created = await insertIntoFirstAvailable(AI_MESSAGES_TABLES, () => ([
-        { user_id: userId, created_at: now }
-    ]));
-
-    return mapAiPanel(created.data);
-}
-
 async function createAiPanel(userId) {
-    const root = await getOrCreateAiMessagesRoot(userId);
     const now = new Date().toISOString();
     const { data } = await insertIntoFirstAvailable(AI_PANEL_TABLES, () => ([
-        { messages_id: root.id, created_at: now }
+        { user_id: userId, created_at: now }
     ]));
 
     return mapAiPanelRow(data);
@@ -661,10 +632,9 @@ exports.aiCreateConversation = async (req, res) => {
 exports.aiConversations = async (req, res) => {
     try {
         const userId = Number(req.user.id);
-        const root = await getOrCreateAiMessagesRoot(userId);
 
         const { data: rawPanels } = await selectFromFirstAvailable(AI_PANEL_TABLES, (tableName) =>
-            supabase.from(tableName).select("*").eq("messages_id", root.id).order("created_at", { ascending: false })
+            supabase.from(tableName).select("*").eq("user_id", userId).order("created_at", { ascending: false })
         );
 
         const panels = (rawPanels || []).map(mapAiPanelRow);

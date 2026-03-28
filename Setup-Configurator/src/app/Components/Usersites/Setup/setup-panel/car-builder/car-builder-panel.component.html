@@ -17,7 +17,6 @@
           <select
             class="select"
             [(ngModel)]="selectedCarKey"
-            (ngModelChange)="onCarChange()"
           >
             <option value="">-- válassz autót --</option>
 
@@ -29,15 +28,6 @@
           </select>
         </div>
 
-        <div class="field-card full">
-          <label class="field-label">Karosszéria / forrástábla</label>
-          <input
-            class="text-input"
-            type="text"
-            [value]="selectedSourceTable || '—'"
-            readonly
-          />
-        </div>
       </div>
 
       <div class="actions">

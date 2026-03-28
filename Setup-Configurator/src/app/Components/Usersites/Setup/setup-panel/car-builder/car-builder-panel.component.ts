@@ -22,7 +22,6 @@ export class CarBuilderPanelComponent implements OnChanges {
 
   cars: any[] = [];
   selectedCarKey = '';
-  selectedSourceTable = '';
 
   constructor(private http: HttpClient) {}
 
@@ -35,7 +34,6 @@ export class CarBuilderPanelComponent implements OnChanges {
 
   private resetForm(): void {
     this.selectedCarKey = '';
-    this.selectedSourceTable = '';
     this.loading = false;
     this.saving = false;
     this.error = '';
@@ -56,19 +54,12 @@ export class CarBuilderPanelComponent implements OnChanges {
   }
 
   public getCarKey(car: any): string {
-    const sourceTable = String(car?.source_table ?? '').trim();
-    const id = car?.id ?? car?.ID ?? '';
-    return `${sourceTable}::${id}`;
+    return String(car?.id ?? car?.ID ?? '');
   }
 
-  private parseCarKey(key: string): { source_table: string; car_id: number | null } {
-    const [source_table, rawId] = String(key || '').split('::');
-    const parsedId = rawId == null || rawId === '' ? null : Number(rawId);
-
-    return {
-      source_table: String(source_table || '').trim(),
-      car_id: parsedId == null || Number.isNaN(parsedId) ? null : parsedId
-    };
+  private parseCarKey(key: string): number | null {
+    const parsedId = key == null || key === '' ? null : Number(key);
+    return parsedId == null || Number.isNaN(parsedId) ? null : parsedId;
   }
 
   loadCarOptions(): void {
@@ -92,12 +83,6 @@ export class CarBuilderPanelComponent implements OnChanges {
     });
   }
 
-  onCarChange(): void {
-    const selected = this.getSelectedCar();
-    this.selectedSourceTable = selected?.source_table ?? '';
-    this.error = '';
-    this.success = '';
-  }
 
   getSelectedCar(): any | null {
     if (!this.selectedCarKey) return null;
@@ -123,8 +108,8 @@ export class CarBuilderPanelComponent implements OnChanges {
       return;
     }
 
-    const parsed = this.parseCarKey(this.selectedCarKey);
-    if (!parsed.source_table || parsed.car_id == null) {
+    const carId = this.parseCarKey(this.selectedCarKey);
+    if (carId == null) {
       this.error = 'Válassz egy autót.';
       return;
     }
@@ -140,8 +125,7 @@ export class CarBuilderPanelComponent implements OnChanges {
     this.success = '';
 
     const payload = {
-      source_table: parsed.source_table,
-      car_id: parsed.car_id
+      car_id: carId
     };
 
     this.http.post<any>(`/api/setup/${sid}/add-car`, payload, { withCredentials: true }).subscribe({
@@ -158,3 +142,4 @@ export class CarBuilderPanelComponent implements OnChanges {
     });
   }
 }
+

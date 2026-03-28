@@ -33,6 +33,7 @@ router.post("/:id/add-car", verifyUser, ctrl.carsAdd);
 router.post("/:id/save-device", verifyUser, ctrl.addDevice);
 
 router.patch("/rename-item", verifyUser, ctrl.renameItem);
+router.patch("/update-item-position", verifyUser, ctrl.updateItemPosition);
 router.delete("/remove-item", verifyUser, ctrl.removeItem);
 
 router.post("/save-connection", verifyUser, ctrl.connectionsCreate);

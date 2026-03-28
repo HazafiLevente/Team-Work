@@ -1,0 +1,30 @@
+id,manufacturer,model,cooler_type,tower_design,supported_sockets,tdp_w,height_mm,radiator_size_mm,fan_size_mm,fan_count,max_rpm,max_airflow_cfm,max_noise_db,rgb,pwm,price_huf,notes,category,created_at
+1,Noctua,NH-D15,air,dual,"AM4, AM5, LGA1700",250,165,,140,2,1500,82,24,false,true,42000,Legendary dual tower,pc,2026-02-23 09:21:58.383652+00
+2,Noctua,NH-U12A,air,single,"AM4, AM5, LGA1700",220,158,,120,2,2000,60,22,false,true,45000,High performance 120mm,pc,2026-02-23 09:21:58.383652+00
+3,Noctua,NH-U12S,air,single,"AM4, AM5, LGA1700",180,158,,120,1,1500,55,22,false,true,30000,Slim tower,pc,2026-02-23 09:21:58.383652+00
+4,Noctua,NH-L9a,air,single,"AM4, AM5",95,37,,92,1,2500,33,23,false,true,20000,Low profile cooler,pc,2026-02-23 09:21:58.383652+00
+5,DeepCool,AK620,air,dual,"AM4, AM5, LGA1700",260,160,,120,2,1850,69,28,false,true,26000,Dual tower value king,pc,2026-02-23 09:21:58.383652+00
+6,DeepCool,AK400,air,single,"AM4, AM5, LGA1700",200,155,,120,1,1850,66,29,false,true,14000,Budget performer,pc,2026-02-23 09:21:58.383652+00
+7,DeepCool,LS720,aio,,"AM4, AM5, LGA1700",300,,360,120,3,2250,85,32,true,true,42000,360mm AIO,pc,2026-02-23 09:21:58.383652+00
+8,Arctic,Freezer 34 eSports,air,single,"AM4, AM5, LGA1700",200,157,,120,1,2100,67,24,false,true,13000,Value air cooler,pc,2026-02-23 09:21:58.383652+00
+9,Arctic,Freezer 50,air,dual,"AM4, AM5, LGA1700",230,166,,120,2,2000,70,27,true,true,28000,RGB dual tower,pc,2026-02-23 09:21:58.383652+00
+10,Arctic,Liquid Freezer II 240,aio,,"AM4, AM5, LGA1700",280,,240,120,2,1800,72,28,false,true,35000,Top value AIO,pc,2026-02-23 09:21:58.383652+00
+11,Arctic,Liquid Freezer II 360,aio,,"AM4, AM5, LGA1700",320,,360,120,3,1800,72,28,false,true,45000,High-end Arctic AIO,pc,2026-02-23 09:21:58.383652+00
+12,Corsair,H100x,aio,,"AM4, AM5, LGA1700",250,,240,120,2,1700,75,30,false,true,30000,Entry AIO,pc,2026-02-23 09:21:58.383652+00
+13,Corsair,H115i Elite,aio,,"AM4, AM5, LGA1700",280,,280,140,2,2000,97,31,true,true,60000,280mm RGB,pc,2026-02-23 09:21:58.383652+00
+14,Corsair,H150i Elite,aio,,"AM4, AM5, LGA1700",300,,360,120,3,2100,75,32,true,true,65000,Premium RGB AIO,pc,2026-02-23 09:21:58.383652+00
+15,NZXT,Kraken 240,aio,,"AM4, AM5, LGA1700",280,,240,120,2,2000,78,30,true,true,60000,LCD pump,pc,2026-02-23 09:21:58.383652+00
+16,NZXT,Kraken 360,aio,,"AM4, AM5, LGA1700",320,,360,120,3,2000,78,31,true,true,75000,High-end LCD,pc,2026-02-23 09:21:58.383652+00
+17,be quiet!,Dark Rock Pro 5,air,dual,"AM4, AM5, LGA1700",270,168,,120,2,2000,93,24,false,true,45000,Flagship air,pc,2026-02-23 09:21:58.383652+00
+18,be quiet!,Dark Rock Elite,air,dual,"AM4, AM5, LGA1700",280,168,,120,2,2000,93,25,false,true,50000,Premium silent,pc,2026-02-23 09:21:58.383652+00
+19,be quiet!,Dark Rock 4,air,single,"AM4, AM5, LGA1700",200,159,,135,1,1400,60,21,false,true,32000,Silent premium,pc,2026-02-23 09:21:58.383652+00
+20,be quiet!,Pure Rock 2,air,single,"AM4, AM5, LGA1700",150,155,,120,1,1500,55,26,false,true,12000,Budget silent,pc,2026-02-23 09:21:58.383652+00
+21,be quiet!,Shadow Rock 3,air,single,"AM4, AM5, LGA1700",190,163,,120,1,1600,67,24,false,true,20000,Mid-range tower,pc,2026-02-23 09:21:58.383652+00
+22,be quiet!,Silent Loop 2 360,aio,,"AM4, AM5, LGA1700",320,,360,120,3,2200,73,39,true,true,55000,Premium AIO,pc,2026-02-23 09:21:58.383652+00
+23,Cooler Master,Hyper 212,air,single,"AM4, AM5, LGA1700",150,158,,120,1,2000,57,30,false,true,11000,Classic,pc,2026-02-23 09:21:58.383652+00
+24,Cooler Master,MasterLiquid ML240,aio,,"AM4, AM5, LGA1700",250,,240,120,2,2000,66,30,true,true,28000,RGB AIO,pc,2026-02-23 09:21:58.383652+00
+25,Cooler Master,MasterLiquid ML360,aio,,"AM4, AM5, LGA1700",300,,360,120,3,2000,66,30,true,true,38000,360mm RGB,pc,2026-02-23 09:21:58.383652+00
+26,Thermalright,Peerless Assassin 120,air,dual,"AM4, AM5, LGA1700",260,157,,120,2,1550,66,25,false,true,20000,Best budget dual tower,pc,2026-02-23 09:21:58.383652+00
+27,ASUS,ROG Ryujin III 360,aio,,"AM4, AM5, LGA1700",320,,360,120,3,2200,85,32,true,true,90000,Premium OLED,pc,2026-02-23 09:21:58.383652+00
+28,Endorfy,Fortis 5,air,single,"AM4, AM5, LGA1700",220,159,,140,1,1400,78,24,false,true,18000,Strong midrange,pc,2026-02-23 09:21:58.383652+00
+29,Endorfy,Navis F360,aio,,"AM4, AM5, LGA1700",300,,360,120,3,1800,75,30,true,true,40000,360mm AIO,pc,2026-02-23 09:21:58.383652+00

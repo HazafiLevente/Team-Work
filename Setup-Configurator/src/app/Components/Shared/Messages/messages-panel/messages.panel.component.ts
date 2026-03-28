@@ -122,7 +122,7 @@ export class MessagesPanelComponent implements OnInit, OnDestroy {
     this.ai.ask(userText, history, this.activeConversationKey).subscribe({
       next: (res: any) => {
         const result = res?.data;
-        const responseConversationKey = String(res?.messages_id || '').trim();
+        const responseConversationKey = String(res?.panel_id || res?.messages_id || '').trim();
         if (responseConversationKey) {
           this.activeConversationKey = responseConversationKey;
         }

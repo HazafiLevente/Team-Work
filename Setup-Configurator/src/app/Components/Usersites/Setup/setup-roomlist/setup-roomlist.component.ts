@@ -10,6 +10,7 @@ import {
 import { CommonModule } from '@angular/common';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
 
 import { SetupDockComponent } from '../dock/dock.component';
 import { WorkspaceComponent } from '../workspace/workspace.component';
@@ -85,13 +86,24 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit {
 
   pcBuilderOpen = false;
   pcBuilderSetup: any = null;
+  private routeRoomId: string | null = null;
 
-  constructor(private http: HttpClient) {}
+  constructor(
+    private http: HttpClient,
+    private router: Router,
+    private route: ActivatedRoute
+  ) {}
 
   ngOnInit(): void {
+    this.route.paramMap.subscribe((params) => {
+      this.routeRoomId = params.get('roomId');
+      this.syncRoomFromRoute();
+    });
+
     this.loadSetups();
     this.loadGlobalConnections();
   }
+
 
   ngAfterViewInit(): void {
     setTimeout(() => this.updateLines(), 100);
@@ -116,6 +128,34 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit {
     };
   }
 
+  private buildRoomRoute(roomId?: number | string | null): any[] {
+    if (this.favoriteMode) {
+      return roomId == null ? ['/user', 'favorite'] : ['/user', 'favorite', roomId];
+    }
+
+    return roomId == null ? ['/user', 'setup'] : ['/user', 'setup', roomId];
+  }
+
+  private syncRoomFromRoute(): void {
+    if (!this.routeRoomId) {
+      if (this.viewingSetup) {
+        this.backToSetups(false);
+      }
+      return;
+    }
+
+    if (!this.userSetups.length) return;
+
+    const target = this.userSetups.find((setup) => String(this.getSetupId(setup)) === String(this.routeRoomId));
+    if (!target) return;
+
+    if (this.viewingSetup && String(this.getSetupId(this.viewingSetup)) === String(this.routeRoomId)) {
+      return;
+    }
+
+    this.openSetupDetails(target, false);
+  }
+
   loadSetups(): void {
     const fav = this.favoriteMode ? 'true' : 'false';
     this.loading = true;
@@ -126,6 +166,7 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit {
           ? res.setups.map((s: any) => this.normalizeSetup(s))
           : [];
         this.loading = false;
+        this.syncRoomFromRoute();
         this.processGlobalConnections(this.rawGlobalConnections);
         this.updateLines();
       },
@@ -168,8 +209,8 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit {
         if (!aggregated.has(key)) {
           aggregated.set(key, {
             id: `global-${key}`,
-            source: { category: 'setup[Setup]', id: sId },
-            target: { category: 'setup[Setup]', id: tId }
+            source: { category: 'setup', id: sId },
+            target: { category: 'setup', id: tId }
           });
         }
       }
@@ -201,11 +242,15 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit {
     this.openSetupDetails(setup);
   }
 
-  openSetupDetails(setup: any): void {
+  openSetupDetails(setup: any, updateRoute = true): void {
     if (!setup) return;
 
     const setupId = this.getSetupId(setup);
     if (!setupId) return;
+
+    if (updateRoute) {
+      this.router.navigate(this.buildRoomRoute(setupId));
+    }
 
     this.viewingSetup = this.normalizeSetup(setup);
     this.selectedProduct = null;
@@ -268,16 +313,8 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit {
 
   private mapTypeToCategory(type: string): string {
     const t = String(type || '').toLowerCase();
-    if (t === 'pc') return 'pc_details[Setup]';
-    if (t === 'switch') return 'switches[Setup]';
-    if (t === 'router') return 'router[Setup]';
-    if (t === 'modem') return 'modem[Setup]';
-    if (t === 'ht' || t === 'home_theater') return 'home_theater_setups[Setup]';
-    if (t === 'audiop') return 'audio_processor[Setup]';
-    if (t === 'mixer') return 'mixer[Setup]';
-
-    if (!t.includes('[setup]')) return `${t}[Setup]`;
-    return t;
+    if (!t || t === 'room') return 'setup';
+    return 'setup';
   }
 
   loadPairingItems(setupId: number | string): void {
@@ -348,6 +385,7 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit {
     const setupId = this.getSetupId(setup);
     if (!setupId) return;
 
+
     this.loadPairingItems(setupId);
     this.loadPairingConnections();
   }
@@ -365,6 +403,7 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit {
     const setupId = this.getSetupId(setup);
     if (!setupId) return;
 
+
     this.loadTargetPairingItems(setupId);
   }
 
@@ -378,8 +417,8 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit {
     const from_device_id = this.getItemId(this.connectSourceItem);
     const to_device_id = this.getItemId(target.item);
 
-    const from_device_type = this.mapItemCategoryToDeviceType(this.connectSourceItem?.category);
-    const to_device_type = this.mapItemCategoryToDeviceType(target.item?.category);
+    const from_device_type = this.mapItemCategoryToDeviceType(this.connectSourceItem);
+    const to_device_type = this.mapItemCategoryToDeviceType(target.item);
 
     if (!from_setup_id || !to_setup_id || !from_device_id || !to_device_id) {
       console.error('❌ Hiányzó connection adatok');
@@ -410,18 +449,26 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit {
     });
   }
 
-  mapItemCategoryToDeviceType(category: string): string {
-    const value = String(category || '').toLowerCase();
+  mapItemCategoryToDeviceType(itemOrCategory: any): string {
+    const setupType = String(
+      itemOrCategory?.setup_type ??
+      itemOrCategory?.type ??
+      itemOrCategory?.device_type ??
+      itemOrCategory?.category ??
+      itemOrCategory ??
+      ''
+    ).toLowerCase();
 
-    if (value.includes('pc_details')) return 'pc';
-    if (value.includes('switches')) return 'switch';
-    if (value.includes('router')) return 'router';
-    if (value.includes('modem')) return 'modem';
-    if (value.includes('home_theater')) return 'ht';
-    if (value.includes('audio_processor')) return 'audiop';
-    if (value.includes('mixer')) return 'mixer';
+    if (setupType.includes('pc')) return 'pc';
+    if (setupType.includes('switch')) return 'switch';
+    if (setupType.includes('router')) return 'router';
+    if (setupType.includes('modem')) return 'modem';
+    if (setupType.includes('home_theater') || setupType === 'ht') return 'ht';
+    if (setupType.includes('audio_processor') || setupType === 'audiop') return 'audiop';
+    if (setupType.includes('mixer')) return 'mixer';
+    if (setupType === 'setup') return '';
 
-    return value.replace('[setup]', '').trim();
+    return setupType.replace('[setup]', '').trim();
   }
 
   openItemOverlay(item: any): void {
@@ -432,8 +479,9 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit {
     if (!item) return;
 
     const category = String(item?.category || '').toLowerCase();
+    const setupType = String(item?.setup_type ?? item?.type ?? '').toLowerCase();
 
-    if (category.includes('car_setup')) {
+    if (setupType.includes('car') || category.includes('car_setup')) {
       this.selectedProduct = null;
       this.selectedPcItem = null;
       this.selectedPcPartItem = null;
@@ -442,7 +490,7 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit {
       return;
     }
 
-    if (category.includes('pc_details')) {
+    if (setupType.includes('pc') || category.includes('pc_details')) {
       this.selectedProduct = null;
       this.selectedCarItem = null;
       this.selectedPcPartItem = null;
@@ -467,6 +515,8 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit {
     }
 
     if (
+      setupType.includes('home_theater') ||
+      setupType === 'ht' ||
       category.includes('home_theater') ||
       category.includes('audio_processor') ||
       category.includes('front_speaker') ||
@@ -525,6 +575,7 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit {
     const setupId = this.getSetupId(setup);
     if (!setupId) return;
 
+
     setup.x = pos.x;
     setup.y = pos.y;
 
@@ -548,7 +599,10 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit {
     });
   }
 
-  backToSetups(): void {
+  backToSetups(updateRoute = true): void {
+    if (updateRoute) {
+      this.router.navigate(this.buildRoomRoute(null));
+    }
     this.viewingSetup = null;
     this.items = [];
     this.connections = [];
@@ -601,6 +655,7 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit {
 
     const setupId = this.getSetupId(setup);
     if (!setupId) return;
+
 
     const name = this.getSetupTitle(setup);
     const ok = window.confirm(`Biztos törlöd?\n\n${name}`);
@@ -847,3 +902,5 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit {
     }
   }
 }
+
+

@@ -1,0 +1,23 @@
+id,manufacturer,model,shaker_type,impedance_ohm,power_rms_w,power_peak_w,frequency_response,sensitivity,mounting,recommended_amp_power,dimensions_mm,weight_kg,use_case,notes,category,created_at,Price
+1,AuraSound,AST-2B-4 Pro,Tactile Transducer,4,50,100,20Hz–80Hz,High,Seat / Sofa,50–100 W,100 x 100 x 60,1.1,Home theater,Classic budget bass shaker,homeT,2026-01-24 09:47:35.523016+00,37941
+2,AuraSound,AST-4B-4,Tactile Transducer,4,100,200,15Hz–80Hz,High,Seat / Platform,100–200 W,120 x 120 x 70,1.8,Home theater,Stronger Aura model,homeT,2026-01-24 09:47:35.523016+00,34252
+3,Dayton Audio,BST-1,Tactile Transducer,4,50,100,10Hz–80Hz,High,Seat / Sofa,50–100 W,125 x 125 x 65,1.9,Home theater,Most popular shaker,homeT,2026-01-24 09:47:35.523016+00,26557
+4,Dayton Audio,BST-2,Tactile Transducer,4,35,75,10Hz–80Hz,Medium,Seat,30–75 W,120 x 120 x 60,1.3,Home theater,Compact shaker,homeT,2026-01-24 09:47:35.523016+00,15188
+5,Dayton Audio,BST-300EX,Tactile Transducer,4,300,600,10Hz–80Hz,Very High,Platform / Couch,300–600 W,190 x 190 x 85,4.9,Home theater,Extreme output,homeT,2026-01-24 09:47:35.523016+00,38057
+6,Dayton Audio,BST-300S,Tactile Transducer,4,300,600,10Hz–80Hz,Very High,Platform,300–600 W,200 x 200 x 90,5.0,Cinema,Heavy-duty shaker,homeT,2026-01-24 09:47:35.523016+00,31246
+7,Clark Synthesis,TST239,Tactile Transducer,4,250,500,5Hz–200Hz,Extreme,Seat / Platform,250–500 W,165 x 165 x 75,3.6,Cinema / Sim,Audiophile tactile,homeT,2026-01-24 09:47:35.523016+00,96833
+8,Clark Synthesis,TST329 Gold,Tactile Transducer,4,250,500,5Hz–200Hz,Extreme,Seat / Platform,250–500 W,170 x 170 x 80,4.0,High-end cinema,Gold series,homeT,2026-01-24 09:47:35.523016+00,281785
+9,Clark Synthesis,AQ339,Tactile Transducer,4,400,800,5Hz–200Hz,Extreme,Platform,400–800 W,190 x 190 x 90,5.5,Reference cinema,Top-tier tactile,homeT,2026-01-24 09:47:35.523016+00,435805
+10,ButtKicker,Mini LFE,Tactile Transducer,4,250,500,5Hz–200Hz,Extreme,Seat / Sofa,250–500 W,180 x 180 x 80,4.5,Home theater,Very popular shaker,homeT,2026-01-24 09:47:35.523016+00,79200
+11,ButtKicker,Advance,Tactile Transducer,2,400,800,5Hz–200Hz,Extreme,Seat / Platform,400–800 W,200 x 200 x 90,5.9,Cinema / Sim,High power,homeT,2026-01-24 09:47:35.523016+00,64566
+12,ButtKicker,LFE,Tactile Transducer,4,400,800,5Hz–200Hz,Extreme,Platform,400–1000 W,220 x 220 x 110,7.0,Professional cinema,Legendary shaker,homeT,2026-01-24 09:47:35.523016+00,184000
+13,ButtKicker,Concert,Tactile Transducer,2,1500,3000,5Hz–200Hz,Extreme,Platform,1500–3000 W,300 x 300 x 150,18.0,Commercial cinema,Insane power,homeT,2026-01-24 09:47:35.523016+00,112974
+14,Sinus Live,BassPump III,Tactile Transducer,4,100,200,10Hz–80Hz,High,Seat,100–200 W,120 x 120 x 65,1.8,Home theater,European classic,homeT,2026-01-24 09:47:35.523016+00,26950
+15,Sinus Live,BassPump IV,Tactile Transducer,4,200,400,10Hz–80Hz,High,Seat / Sofa,200–400 W,150 x 150 x 75,3.0,Cinema,Stronger basspump,homeT,2026-01-24 09:47:35.523016+00,26950
+16,Earthquake Sound,MQB-1,Tactile Transducer,4,300,600,10Hz–80Hz,Very High,Platform,300–600 W,200 x 200 x 90,6.5,Cinema,Heavy industrial shaker,homeT,2026-01-24 09:47:35.523016+00,67050
+17,Earthquake Sound,Q10B,Tactile Transducer,4,250,500,10Hz–80Hz,Very High,Platform,250–500 W,190 x 190 x 85,5.2,Cinema,Deep tactile bass,homeT,2026-01-24 09:47:35.523016+00,203000
+18,Reckhorn,BS-200i,Tactile Transducer,4,200,400,10Hz–80Hz,High,Seat / Platform,200–400 W,160 x 160 x 80,3.8,DIY cinema,German build,homeT,2026-01-24 09:47:35.523016+00,19000
+19,Monacor,BR-50,Tactile Transducer,4,50,100,15Hz–80Hz,Medium,Seat,50–100 W,100 x 100 x 60,1.2,Home theater,Compact shaker,homeT,2026-01-24 09:47:35.523016+00,27773
+20,Monacor,BR-100,Tactile Transducer,4,100,200,10Hz–80Hz,High,Seat,100–200 W,130 x 130 x 70,2.1,Home cinema,Stronger model,homeT,2026-01-24 09:47:35.523016+00,32933
+21,TT25-8,Puck Bass Shaker,Tactile Transducer,8,25,50,20Hz–80Hz,Low,Seat,25–50 W,90 x 90 x 50,0.8,Budget systems,Entry-level,homeT,2026-01-24 09:47:35.523016+00,21000
+23,TT32-4,Mini Bass Shaker,Tactile Transducer,4,40,80,15Hz–80Hz,Medium,Seat,40–80 W,100 x 100 x 55,1.0,Home theater,Compact tactile,homeT,2026-01-24 09:47:35.523016+00,6444

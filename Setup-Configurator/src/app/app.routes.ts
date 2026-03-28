@@ -39,7 +39,9 @@ export const routes: Routes = [
     children: [
       { path: 'profile', component: ProfileComponent },
       { path: 'favorite', component: FavoriteComponent },
+      { path: 'favorite/:roomId', component: FavoriteComponent },
       { path: 'setup', component: SetupComponent },
+      { path: 'setup/:roomId', component: SetupComponent },
 
       { path: 'messages', component: MessagesComponent },
       { path: 'messages/:key', component: MessagesComponent },

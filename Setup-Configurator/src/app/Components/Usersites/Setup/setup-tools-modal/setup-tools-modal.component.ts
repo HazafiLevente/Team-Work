@@ -15,10 +15,8 @@ type PcBuildRow = any;
 
 type CarOption = {
   id: number;
-  source_table: string;
-  fk_column: string;
-  Manufacturer: string;
-  Model: string;
+  name?: string;
+  type?: string;
   display_name: string;
 };
 
@@ -188,9 +186,8 @@ export class SetupToolsModalComponent implements OnChanges {
       return;
     }
 
-    const [source_table, idStr] = this.selectedCarKey.split(':');
-    const car_id = Number(idStr);
-    if (!source_table || !car_id || Number.isNaN(car_id)) {
+    const car_id = Number(this.selectedCarKey);
+    if (!car_id || Number.isNaN(car_id)) {
       this.carCreateError = 'Hibás autó kiválasztás.';
       return;
     }
@@ -200,7 +197,7 @@ export class SetupToolsModalComponent implements OnChanges {
 
     this.http.post<any>(
       `/api/setup/${setupId}/add-car`,
-      { source_table, car_id },
+      { car_id },
       { withCredentials: true }
     ).subscribe({
       next: (res) => {
@@ -279,12 +276,13 @@ export class SetupToolsModalComponent implements OnChanges {
   htSpeakers: { key: string, label: string }[] = [];
 
   htForm: any = {
-    receiver: ''
+    receiver: '',
+    bass_amplifier: ''
   };
 
   generateHtInputs(): void {
     this.htSpeakers = [];
-    this.htForm = { receiver: '' };
+    this.htForm = { receiver: '', bass_amplifier: '' };
 
     if (this.htLayout === '2.1') {
       this.htSpeakers = [
@@ -373,7 +371,8 @@ export class SetupToolsModalComponent implements OnChanges {
     centerSpeakers: [],
     sideSpeakers: [],
     backSpeakers: [],
-    subwoofers: []
+    subwoofers: [],
+    bassAmplifiers: []
   };
 
   private loadHtCatalog(): void {
@@ -392,3 +391,4 @@ export class SetupToolsModalComponent implements OnChanges {
       });
   }
 }
+

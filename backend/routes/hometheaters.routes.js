@@ -25,6 +25,15 @@ router.post("/build", verifyUser, ctrl.saveBuild);
 // Delete a build
 router.delete("/build/:id", verifyUser, ctrl.deleteBuild);
 
+// Devices inside a home theater setup
+router.get("/:setupId/devices", verifyUser, ctrl.listDevices);
+router.post("/device", verifyUser, ctrl.createDevice);
+
+// Connections inside a home theater setup
+router.get("/:setupId/connections", verifyUser, ctrl.listConnections);
+router.post("/connection", verifyUser, ctrl.createConnection);
+router.delete("/connection/:id", verifyUser, ctrl.deleteConnection);
+
 
 // --- LEGACY COMPATIBILITY ---
 // These are kept to ensure no breaking changes for existing un-refactored calls

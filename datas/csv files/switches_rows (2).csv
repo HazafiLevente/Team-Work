@@ -1,0 +1,25 @@
+id,manufacturer,model,switch_type,total_ports,ports_1g,ports_2_5g,ports_10g,sfp_ports,poe,poe_budget_w,supports_vlan,supports_qos,supports_lag,configuration_type,rack_mountable,enterprise,notes,category,created_at,Price
+1,TP-Link,TL-SG108E,smart,8,8,0,0,0,false,,true,true,true,web,false,false,8-port smart switch,network,2026-02-16 19:05:38.199724+00,13000
+2,TP-Link,TL-SG105,unmanaged,5,5,0,0,0,false,,false,false,false,none,false,false,Basic gigabit switch,network,2026-02-16 19:05:38.199724+00,7500
+3,TP-Link,TL-SG108,unmanaged,8,8,0,0,0,false,,false,false,false,none,false,false,Plug and play,network,2026-02-16 19:05:38.199724+00,14000
+4,TP-Link,TL-SG108PE,smart,8,8,0,0,0,true,65,true,true,true,web,false,false,PoE smart switch,network,2026-02-16 19:05:38.199724+00,25000
+5,TP-Link,TL-SX1008,unmanaged,8,0,0,8,0,false,,false,false,false,none,false,false,8x 10G switch,network,2026-02-16 19:05:38.199724+00,170000
+6,TP-Link,TL-SG3210XHP-M2,managed,10,8,2,0,0,true,240,true,true,true,web + CLI,true,true,2.5G PoE managed,network,2026-02-16 19:05:38.199724+00,200000
+7,TP-Link,TL-SG3210X-M2,managed,10,8,2,0,0,false,,true,true,true,web + CLI,true,true,2.5G managed,network,2026-02-16 19:05:38.199724+00,110000
+8,TP-Link,TL-SX3008F,managed,8,0,0,0,8,false,,true,true,true,web + CLI,true,true,8x SFP+ 10G,network,2026-02-16 19:05:38.199724+00,105000
+9,Netgear,GS108,unmanaged,8,8,0,0,0,false,,false,false,false,none,false,false,Metal gigabit,network,2026-02-16 19:05:38.199724+00,12000
+10,Netgear,GS110MX,smart,10,8,2,0,0,false,,true,true,true,web,false,false,2x 10G uplink,network,2026-02-16 19:05:38.199724+00,270000
+11,Netgear,MS510TXUP,managed,8,4,2,2,0,true,295,true,true,true,web + CLI,true,true,Multi-gig PoE,network,2026-02-16 19:05:38.199724+00,310000
+12,Ubiquiti,USW-8,managed,8,8,0,0,0,false,,true,true,true,web + cloud,false,false,UniFi managed,network,2026-02-16 19:05:38.199724+00,40000
+13,Ubiquiti,USW-Enterprise-8-PoE,managed,8,0,8,0,0,true,120,true,true,true,web + cloud,false,true,2.5G PoE switch,network,2026-02-16 19:05:38.199724+00,170000
+14,Ubiquiti,USW-Pro-24,managed,24,24,0,0,2,false,,true,true,true,web + cloud,true,true,24-port pro,network,2026-02-16 19:05:38.199724+00,270000
+15,MikroTik,CRS309-1G-8S+,managed,9,1,0,0,8,false,,true,true,true,CLI + WinBox,false,true,8x 10G SFP+,network,2026-02-16 19:05:38.199724+00,106000
+16,MikroTik,CRS326-24G-2S+,managed,26,24,0,0,2,false,,true,true,true,CLI + WinBox,true,true,24G + 2x10G,network,2026-02-16 19:05:38.199724+00,70000
+17,MikroTik,CSS610-8G-2S+,smart,10,8,0,0,2,false,,true,true,true,web,false,false,Compact 10G uplink,network,2026-02-16 19:05:38.199724+00,48000
+18,Cisco,CBS350-8T-E-2G,managed,10,8,0,0,2,false,,true,true,true,web + CLI + console,false,true,Business switch,network,2026-02-16 19:05:38.199724+00,100000
+19,Cisco,Catalyst 9200L,managed,24,24,0,0,4,false,,true,true,true,CLI + console,true,true,Enterprise L3,network,2026-02-16 19:05:38.199724+00,1200000
+20,Cisco,CBS250-8P-E-2G,managed,10,8,0,0,2,true,67,true,true,true,web + CLI,false,true,PoE business,network,2026-02-16 19:05:38.199724+00,110000
+21,TRENDnet,TPE-TG380,managed,8,0,8,0,0,true,130,true,true,true,web,false,false,2.5G PoE switch,network,2026-02-16 19:05:38.199724+00,74000
+22,TRENDnet,TEG-S750,unmanaged,5,0,5,0,0,false,,false,false,false,none,false,false,5x 2.5G,network,2026-02-16 19:05:38.199724+00,85000
+23,QNAP,QSW-1105-5T,unmanaged,5,0,5,0,0,false,,false,false,false,none,false,false,5x 2.5G fanless,network,2026-02-16 19:05:38.199724+00,50000
+24,QNAP,QSW-M2108-2C,managed,10,8,0,2,0,false,,true,true,true,web,false,false,10G managed,network,2026-02-16 19:05:38.199724+00,155000

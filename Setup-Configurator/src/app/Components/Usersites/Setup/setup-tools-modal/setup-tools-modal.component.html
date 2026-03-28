@@ -124,6 +124,19 @@
               </select>
             </div>
 
+            <div class="field">
+              <label>Bass Amplifier</label>
+              <select [(ngModel)]="htForm.bass_amplifier">
+                <option value="">-- válassz bass amplifier --</option>
+
+                @for (b of htCatalog.bassAmplifiers; track b.id) {
+                  <option [ngValue]="b.id">
+                    {{ b.manufacturer }} {{ b.model }}
+                  </option>
+                }
+              </select>
+            </div>
+
             <!-- Dinamikus hangszórók -->
             @for (sp of htSpeakers; track sp.key) {
 
@@ -216,8 +229,8 @@
             } @else {
               <select [(ngModel)]="selectedCarKey">
                 <option [ngValue]="''">— válassz autót —</option>
-                @for (c of carOptions; track c.source_table + ':' + c.id) {
-                  <option [ngValue]="c.source_table + ':' + c.id">{{ c.display_name }}</option>
+                @for (c of carOptions; track c.id) {
+                  <option [ngValue]="c.id">{{ c.display_name }}</option>
                 }
               </select>
             }
@@ -248,7 +261,6 @@
                 @for (c of cars; track c.id) {
                   <div class="car-card">
                     <div class="car-title">{{ c.setup_name || 'Névtelen autó' }}</div>
-                    <div class="car-sub">Mentve a Car_setup[Setup] táblába</div>
                   </div>
                 }
               </div>

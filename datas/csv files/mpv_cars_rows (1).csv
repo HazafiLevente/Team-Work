@@ -1,0 +1,9 @@
+ID,Manufacturer,Model,Price Range (Ft),Body Type,Horsepower,Acceleration (s),Seats,Fuel Type,Year,Transmission,category,Price
+1,CITROEN,Xsara Picasso 1.6 Exclusive,1000000-3900000,MPV,100 - 149,14.9 - 10,5,Petrol,2006-2007,Manual,car,1002000
+2,OPEL,Zafira 1.9 DTI,500000 - 999999,MPV,100 - 149,14.9 - 10,6+,Diesel,2005-2008,Manual,car,943000
+3,FORD,Galaxy 2.0 TDCi Ghia,1000000 - 3900000,MPV,100 - 149,14.9 - 10,6+,Diesel,2006-2010,Manual,car,2213000
+4,FORD,S-Max 2.0 TDCi Titanium Powershift,1000000 - 3900000,MPV,150 - 199,14.9 - 10,6+,Diesel,2010–,Automatic,car,2787000
+5,VOLKSWAGEN,Touran 1.5 TSI,4000000 - 9900000,MPV,150 - 199,9.9 - 8,6+,Petrol,2018–,Manual,car,7977000
+6,FORD,S-MAX 2.5 FHEV ST-Line,4000000 - 9900000,MPV,150 - 199,9.9 - 8,6+,Hybrid,2021–,Automatic,car,9245000
+7,BMW,225e xDrive DKG,10000000 - 24900000,MPV,100 - 149,7.9 - 6,5,Hybrid,2022–,Automatic,car,14210000
+8,LEXUS,LM 350h Luxury E-Four CVT,25000000 - 49900000,MPV,150 - 199,9.9 - 8,6+,Petrol,2023–,Automatic,car,45130000

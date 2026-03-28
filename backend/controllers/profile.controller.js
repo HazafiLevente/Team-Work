@@ -58,31 +58,44 @@ exports.getProfile = async (req, res) => {
             "router[Setup]", "switches[Setup]", "mixer[Setup]"
         ];
 
-        // Fetch all setup IDs for this user
-        const { data: setups } = await supabase
-            .from("setup[Setup]")
+        const { data: rooms } = await supabase
+            .from("setup_room")
             .select("id")
             .eq("user_id", userId);
 
-        if (setups && setups.length > 0) {
-            const setupIds = setups.map(s => s.id);
+        if (rooms && rooms.length > 0) {
+            const roomIds = rooms.map(s => s.id);
+            const { data: setups } = await supabase
+                .from("setups")
+                .select("id")
+                .in("room_id", roomIds);
 
-            // Parallel calculate across all mapped components
-            const pricePromises = tablesToScan.map(async (tableName) => {
-                const { data, error } = await supabase
-                    .from(tableName)
-                    .select("price, price_huf")
-                    .in("setup_id", setupIds); // match any of the user's setups
+            const setupIds = (setups || []).map(s => s.id);
 
-                if (error || !data) return 0;
-                return data.reduce((sum, item) => {
-                    const p = item.price || item.price_huf || 0;
-                    return sum + Number(p);
-                }, 0);
-            });
+            if (setupIds.length > 0) {
+                const { data: setupDevices } = await supabase
+                    .from("setup_devices")
+                    .select("device_id")
+                    .in("setup_id", setupIds);
 
-            const prices = await Promise.all(pricePromises);
-            totalSetupPrice = prices.reduce((a, b) => a + b, 0);
+                const productIds = Array.from(new Set((setupDevices || []).map((row) => Number(row.device_id)).filter(Number.isFinite)));
+
+                if (productIds.length > 0) {
+                    const [propsRes, valuesRes] = await Promise.all([
+                        supabase.from("properties").select("id, property"),
+                        supabase.from("values").select("products_id, properties_id, value").in("products_id", productIds)
+                    ]);
+
+                    const pricePropIds = new Set((propsRes.data || [])
+                        .filter((p) => String(p.property).toLowerCase() === "price")
+                        .map((p) => Number(p.id)));
+
+                    totalSetupPrice = (valuesRes.data || []).reduce((sum, row) => {
+                        if (!pricePropIds.has(Number(row.properties_id))) return sum;
+                        return sum + Number(row.value || 0);
+                    }, 0);
+                }
+            }
         }
     } catch (err) {
         console.error("Hiba a profil összérték számításában:", err);

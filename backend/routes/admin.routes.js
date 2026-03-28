@@ -218,17 +218,11 @@ router.get("/users/:id/setups", verifyAdmin, async (req, res) => {
     try {
         // 1. All setups
         const { data: setups, error: setupsError } = await supabase
-            .from("setup[Setup]")
+            .from("setup_room")
             .select("*")
             .eq("user_id", id);
 
         if (setupsError) throw setupsError;
-
-        // 2. Room positions
-        const { data: posData } = await supabase
-            .from("setup_rooms[Coordinates]")
-            .select("setup_id, x, y");
-
         // 3. Price calculation setup
         // We'll use the tables.runtime.json to know which tables to scan
         const runtimeFile = path.join(__dirname, "../../datas/Jsons/tables.runtime.json");
@@ -237,33 +231,47 @@ router.get("/users/:id/setups", verifyAdmin, async (req, res) => {
 
         const result = [];
         for (const s of (setups || [])) {
-            const pos = (posData || []).find(p => String(p.setup_id) === String(s.id));
+                        // Calculate total price for THIS setup
+            const { data: roomSetups } = await supabase
+                .from("setups")
+                .select("id")
+                .eq("room_id", s.id);
 
-            // Calculate total price for THIS setup
+            const setupIds = (roomSetups || []).map((row) => row.id);
+
             let totalPrice = 0;
+            if (setupIds.length > 0) {
+                const { data: setupDevices } = await supabase
+                    .from("setup_devices")
+                    .select("device_id")
+                    .in("setup_id", setupIds);
 
-            // We can do this in parallel for speed if there aren't too many tables
-            const pricePromises = productTables.map(async (tableName) => {
-                const { data, error } = await supabase
-                    .from(tableName)
-                    .select("price, price_huf") // Some tables use price, some price_huf
-                    .eq("setup_id", s.id);
+                const productIds = Array.from(new Set((setupDevices || []).map((row) => Number(row.device_id)).filter(Number.isFinite)));
 
-                if (error || !data) return 0;
-                return data.reduce((sum, item) => {
-                    const p = item.price || item.price_huf || 0;
-                    return sum + Number(p);
-                }, 0);
-            });
+                if (productIds.length > 0) {
+                    const valueRows = await Promise.all(productIds.map(async (productId) => {
+                        const { data } = await supabase
+                            .from("values")
+                            .select("value, properties_id")
+                            .eq("products_id", productId);
+                        return data || [];
+                    }));
 
-            const prices = await Promise.all(pricePromises);
-            totalPrice = prices.reduce((a, b) => a + b, 0);
+                    const { data: props } = await supabase.from("properties").select("id, property");
+                    const pricePropIds = new Set((props || []).filter((p) => String(p.property).toLowerCase() === "price").map((p) => Number(p.id)));
+
+                    totalPrice = valueRows.flat().reduce((sum, row) => {
+                        if (!pricePropIds.has(Number(row.properties_id))) return sum;
+                        return sum + Number(row.value || 0);
+                    }, 0);
+                }
+            }
 
             result.push({
                 ...s,
                 setup_name: s.setup_name ?? s.name ?? "Névtelen setup",
-                x: pos?.x ?? 0,
-                y: pos?.y ?? 0,
+                x: s?.pos_x ?? 0,
+                y: s?.pos_y ?? 0,
                 total_price: totalPrice
             });
         }
@@ -366,3 +374,5 @@ router.delete("/logs", verifyAdmin, (req, res) => {
 });
 
 module.exports = router;
+
+

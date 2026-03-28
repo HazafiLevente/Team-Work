@@ -602,7 +602,7 @@ export class MessagesComponent implements OnInit, OnDestroy {
     this.ai.ask(text, history, this.activeAiKey).subscribe({
       next: (response: any) => {
         const result = response?.data;
-        const responseConversationKey = String(response?.messages_id || '').trim();
+        const responseConversationKey = String(response?.panel_id || response?.messages_id || '').trim();
         if (responseConversationKey) {
           this.activeAiKey = responseConversationKey;
         }

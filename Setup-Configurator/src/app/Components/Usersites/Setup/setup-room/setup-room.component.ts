@@ -64,11 +64,24 @@ export class SetupRoomComponent implements AfterViewInit {
     }
   }
 
-  isNetwork(): boolean {
-    return String(this.setup?.isNetwork).toLowerCase() === 'true' || this.setup?.isNetwork === true;
+  isCircularNetworkType(): boolean {
+    const rawValues = [
+      this.setup?.setup_type,
+      this.setup?.type,
+      this.setup?.category,
+      this.setup?.setup_name,
+      this.setup?.display_name,
+      this.setup?.name
+    ];
+
+    const normalized = rawValues
+      .map((value) => String(value || '').toLowerCase().trim())
+      .join(' ');
+
+    return ['modem', 'router', 'switch'].some((token) => normalized.includes(token));
   }
   isHT(): boolean {
-    const type = String(this.setup?.setup_type || '').toLowerCase();
+    const type = String(this.setup?.setup_type ?? this.setup?.type ?? '').toLowerCase();
     return type === 'home_theater' || type === 'hometheater' || type === 'home theater';
   }
   startRename(): void {
@@ -160,3 +173,4 @@ export class SetupRoomComponent implements AfterViewInit {
 
 
 }
+
