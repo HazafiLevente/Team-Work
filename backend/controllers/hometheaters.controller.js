@@ -17,26 +17,18 @@ const { listProducts, clampLimit } = require("../services/products/productCatalo
  */
 exports.getHtCatalog = async (req, res) => {
     try {
-        const items = await listProducts({ limit: 5000, category: "ht" });
-        const byTable = {
-            receivers: "home_theater",
-            frontSpeakers: "front_speaker",
-            backSpeakers: "back_speaker",
-            sideSpeakers: "side_speaker",
-            ceilingSpeakers: "ceiling_speakers",
-            floorSpeakers: "floor_speakers",
-            centerSpeakers: "center_speakers",
-            subwoofers: "subwoofer",
-            audioProcessors: "audio_processors",
-            bassAmplifiers: "bass_amplifier",
-        };
-
-        const catalog = Object.fromEntries(
-            Object.entries(byTable).map(([key, tableName]) => [
-                key,
-                items.filter((item) => String(item?.table_name ?? item?.table ?? "").trim() === tableName),
-            ])
+        const allItems = await listProducts({ limit: 5000 });
+        const items = (Array.isArray(allItems) ? allItems : []).filter(
+            (item) => String(item?.type || "").trim().toLowerCase() === "ht"
         );
+
+        const catalog = {};
+
+        for (const item of items) {
+            const bucket = inferHtCatalogBucket(item);
+            if (!catalog[bucket]) catalog[bucket] = [];
+            catalog[bucket].push(item);
+        }
 
         res.json(catalog);
     } catch (err) {
@@ -217,6 +209,32 @@ function normalizeHtRole(role = "", category = "") {
     if (["surround_right", "surroundright", "side_right"].includes(value)) return "surround_right";
 
     return value;
+}
+
+function inferHtCatalogBucket(item = {}) {
+    const text = [
+        item?.name,
+        item?.model,
+        item?.manufacturer,
+        item?.fields?.type,
+        item?.fields?.category,
+        item?.fields?.role,
+    ]
+        .map((value) => String(value || "").trim().toLowerCase())
+        .join(" ");
+
+    if (text.includes("receiver") || text.includes("avr")) return "receivers";
+    if (text.includes("subwoofer")) return "subwoofers";
+    if (text.includes("center")) return "centerSpeakers";
+    if (text.includes("surround") || text.includes("side speaker") || text.includes("side")) return "sideSpeakers";
+    if (text.includes("back speaker") || text.includes("rear")) return "backSpeakers";
+    if (text.includes("ceiling")) return "ceilingSpeakers";
+    if (text.includes("floor")) return "floorSpeakers";
+    if (text.includes("processor")) return "audioProcessors";
+    if (text.includes("bass amplifier") || text.includes("bassamp") || text.includes("bass amp")) return "bassAmplifiers";
+    if (text.includes("front")) return "frontSpeakers";
+
+    return "htDevices";
 }
 
 async function syncDevices(buildId, devices, layout = null) {

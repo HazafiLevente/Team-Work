@@ -7,7 +7,7 @@ import {
   ViewChild
 } from '@angular/core';
 
-import { Renderer, Program, Mesh, Triangle, Vec2 } from 'ogl';
+import { Renderer, Program, Mesh, Triangle, Vec2, Vec3 } from 'ogl';
 
 const vertex = `
 attribute vec2 position;
@@ -26,6 +26,8 @@ uniform float uNoise;
 uniform float uScan;
 uniform float uScanFreq;
 uniform float uWarp;
+uniform vec3 uTintA;
+uniform vec3 uTintB;
 #define iTime uTime
 #define iResolution uResolution
 
@@ -75,6 +77,10 @@ void mainImage(out vec4 fragColor,in vec2 fragCoord){
 void main(){
     vec4 col;mainImage(col,gl_FragCoord.xy);
     col.rgb=hueShiftRGB(col.rgb,uHueShift);
+    float lum=dot(col.rgb,vec3(0.299,0.587,0.114));
+    vec3 themed=mix(uTintA,uTintB,clamp(lum*1.1,0.0,1.0));
+    vec3 baseTint=mix(vec3(0.10,0.08,0.16), themed, clamp(lum*1.35,0.0,1.0));
+    col.rgb = baseTint * (0.22 + lum * 1.45);
     float scanline_val=sin(gl_FragCoord.y*uScanFreq)*0.5+0.5;
     col.rgb*=1.-(scanline_val*scanline_val)*uScan;
     col.rgb+=(rand(gl_FragCoord.xy+uTime)-0.5)*uNoise;
@@ -125,6 +131,8 @@ export class DarkVeilBgComponent implements AfterViewInit, OnDestroy {
   private mesh?: Mesh;
   private raf = 0;
   private start = 0;
+  private tintA = new Vec3(0.204, 0.827, 0.600);
+  private tintB = new Vec3(0.078, 0.722, 0.651);
 
   private resizeHandler = () => this.resize();
 
@@ -152,7 +160,9 @@ export class DarkVeilBgComponent implements AfterViewInit, OnDestroy {
         uNoise: { value: this.noiseIntensity },
         uScan: { value: this.scanlineIntensity },
         uScanFreq: { value: this.scanlineFrequency },
-        uWarp: { value: this.warpAmount }
+        uWarp: { value: this.warpAmount },
+        uTintA: { value: this.tintA },
+        uTintB: { value: this.tintB }
       }
     });
 
@@ -190,6 +200,7 @@ export class DarkVeilBgComponent implements AfterViewInit, OnDestroy {
     if (!this.renderer || !this.program || !this.mesh) return;
 
     const t = ((performance.now() - this.start) / 1000) * this.speed;
+    this.syncThemeTints();
 
     this.program.uniforms['uTime'].value = t;
     this.program.uniforms['uHueShift'].value = this.hueShift;
@@ -202,4 +213,49 @@ export class DarkVeilBgComponent implements AfterViewInit, OnDestroy {
 
     this.raf = requestAnimationFrame(this.loop);
   };
+
+  private syncThemeTints() {
+    if (!this.program) return;
+
+    const styles = getComputedStyle(document.body);
+    const tintA = this.parseCssColor(styles.getPropertyValue('--page-accent').trim() || '#34d399');
+    const tintB = this.parseCssColor(styles.getPropertyValue('--page-accent-2').trim() || '#14b8a6');
+
+    this.tintA.set(tintA[0], tintA[1], tintA[2]);
+    this.tintB.set(tintB[0], tintB[1], tintB[2]);
+    this.program.uniforms['uTintA'].value = this.tintA;
+    this.program.uniforms['uTintB'].value = this.tintB;
+  }
+
+  private parseCssColor(input: string): [number, number, number] {
+    const color = String(input || '').trim();
+
+    if (/^#([0-9a-f]{6})$/i.test(color)) {
+      const hex = color.slice(1);
+      return [
+        parseInt(hex.slice(0, 2), 16) / 255,
+        parseInt(hex.slice(2, 4), 16) / 255,
+        parseInt(hex.slice(4, 6), 16) / 255
+      ];
+    }
+
+    if (/^#([0-9a-f]{3})$/i.test(color)) {
+      const hex = color.slice(1);
+      return [
+        parseInt(hex[0] + hex[0], 16) / 255,
+        parseInt(hex[1] + hex[1], 16) / 255,
+        parseInt(hex[2] + hex[2], 16) / 255
+      ];
+    }
+
+    const rgb = color.match(/rgba?\(([^)]+)\)/i);
+    if (rgb) {
+      const parts = rgb[1].split(',').map((part) => Number(part.trim())).filter((n) => Number.isFinite(n));
+      if (parts.length >= 3) {
+        return [parts[0] / 255, parts[1] / 255, parts[2] / 255];
+      }
+    }
+
+    return [0.204, 0.827, 0.600];
+  }
 }

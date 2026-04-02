@@ -70,7 +70,7 @@ export class SetupHtDetailsPanelComponent implements OnChanges {
   }
 
   private getSetupId(): number | null {
-    const raw = this.htItem?.setup_id ?? this.htItem?.setupId ?? this.htItem?.id ?? null;
+    const raw = this.htItem?.id ?? this.htItem?.setupId ?? this.htItem?.setup_id ?? null;
     const parsed = Number(raw);
     return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
   }

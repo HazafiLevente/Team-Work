@@ -1,13 +1,19 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 
+export type UiThemeKey =
+  | 'clean-cyan'
+  | 'purple-premium'
+  | 'glass-slate'
+  | 'soft-light';
+
 export type UiSettings = {
   darkMode: boolean;
   setupMode: boolean;
   compactLayout: boolean;
   autoOpenProduct: boolean;
   language: string;
-  accent: string;
+  theme: UiThemeKey;
   publicProfile: boolean;
   rememberFilters: boolean;
 };
@@ -18,7 +24,7 @@ const DEFAULT_SETTINGS: UiSettings = {
   compactLayout: false,
   autoOpenProduct: true,
   language: 'hu',
-  accent: 'purple',
+  theme: 'glass-slate',
   publicProfile: true,
   rememberFilters: true,
 };

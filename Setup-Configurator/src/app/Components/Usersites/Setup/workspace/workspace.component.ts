@@ -25,7 +25,6 @@ import { DevicesMenuComponent } from './setup-windows/devices-menu/devices-menu.
 import { ConnectionsMenuComponent } from './setup-windows/connections-menu/connections-menu.component';
 import { SetupPairingModalComponent } from '../setup-pairing-modal/setup-pairing-modal.component';
 import { ContextMenuDockComponent } from './context-menus/context-menu-dock/context-menu-dock.component';
-import { ContextMenuWorkspaceComponent } from './context-menus/context-menu-workspace/context-menu-workspace.component';
 import { ContextMenuCategoryComponent } from './context-menus/context-menu-category/context-menu-category.component';
 
 import { AddDeviceWindowComponent } from './setup-windows/add-device-window/add-device-window.component';
@@ -67,7 +66,6 @@ export type WorkspaceWindow = {
     SetupPairingModalComponent,
     SetupDockComponent,
     ContextMenuDockComponent,
-    ContextMenuWorkspaceComponent,
     ContextMenuCategoryComponent,
     DotGridComponent,
     AddDeviceWindowComponent,

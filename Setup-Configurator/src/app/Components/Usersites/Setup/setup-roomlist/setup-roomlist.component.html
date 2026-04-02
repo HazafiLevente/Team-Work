@@ -1,35 +1,120 @@
 <div class="setup-shell">
 
-  <app-workspace
-    [userSetups]="userSetups"
-    [items]="items"
-    [viewingSetup]="viewingSetup"
-    [connections]="connections"
-    [globalRoomConnections]="globalRoomConnections"
-    [loading]="loading"
-    [loadingItems]="loadingItems"
-    [lineRefreshTrigger]="lineRefreshTrigger"
-    [connectMousePos]="connectMousePos"
-    [connectSourceSetup]="connectSourceSetup"
-    [pairingStage]="pairingStage"
-    (openSetup)="onSetupDetails($event)"
-    (itemOpen)="openItemOverlay($event)"
-    (back)="backToSetups()"
-    (roomMoved)="onRoomDragEnded($event.setup, $event.pos)"
-    (roomRenamed)="saveRenamedRoom($event)"
-    (itemRenamed)="saveRenamedItem($event)"
-    (createSetup)="createNewSetup($event.x, $event.y)"
-    (createItem)="openDevicesWindowForCurrentSetup($event)"
-    (categorySelected)="handleCategorySelected($event)"
-    (deleteSetup)="deleteSetupFromMenu($event)"
-    (rename)="openRenameFromMenu($event)"
-    (connect)="startConnectingFromMenu($event)"
-    (setupClicked)="onSetupClick($event)"
-    (cancelConnectingEvent)="cancelConnecting()"
-    (selectSourceEvent)="selectSourceItem($event)"
-    (finalizeConnectionEvent)="finalizeConnection($event)"
-    (htSaved)="openSetupDetails(viewingSetup)">
-  </app-workspace>
+  @if (!hierarchyMode) {
+    <div class="property-strip compact">
+      <div class="property-strip-toggle">
+        <label class="hierarchy-toggle" [class.hierarchy-active]="hierarchyMode">
+          <input
+            type="checkbox"
+            class="hierarchy-toggle-input"
+            [checked]="hierarchyMode"
+            (change)="toggleHierarchyMode($any($event.target).checked)" />
+
+          <span class="hierarchy-toggle-track"></span>
+          <span class="hierarchy-toggle-thumb"></span>
+        </label>
+
+        <div class="property-strip-copy">
+          <div class="property-strip-title">Tulajdonsag Sav</div>
+          <div class="property-strip-sub">Huzogatos nezet aktiv</div>
+        </div>
+      </div>
+    </div>
+
+    <app-workspace
+      [userSetups]="userSetups"
+      [items]="items"
+      [viewingSetup]="viewingSetup"
+      [connections]="connections"
+      [globalRoomConnections]="globalRoomConnections"
+      [loading]="loading"
+      [loadingItems]="loadingItems"
+      [lineRefreshTrigger]="lineRefreshTrigger"
+      [connectMousePos]="connectMousePos"
+      [connectSourceSetup]="connectSourceSetup"
+      [pairingStage]="pairingStage"
+      (openSetup)="onSetupDetails($event)"
+      (itemOpen)="openItemOverlay($event)"
+      (back)="backToSetups()"
+      (roomMoved)="onRoomDragEnded($event.setup, $event.pos)"
+      (roomRenamed)="saveRenamedRoom($event)"
+      (itemRenamed)="saveRenamedItem($event)"
+      (createSetup)="createNewSetup($event.x, $event.y)"
+      (createItem)="openDevicesWindowForCurrentSetup($event)"
+      (categorySelected)="handleCategorySelected($event)"
+      (deleteSetup)="deleteSetupFromMenu($event)"
+      (rename)="openRenameFromMenu($event)"
+      (connect)="startConnectingFromMenu($event)"
+      (setupClicked)="onSetupClick($event)"
+      (cancelConnectingEvent)="cancelConnecting()"
+      (selectSourceEvent)="selectSourceItem($event)"
+      (finalizeConnectionEvent)="finalizeConnection($event)"
+      (htSaved)="openSetupDetails(viewingSetup)">
+    </app-workspace>
+  } @else {
+    <div class="hierarchy-workspace-shell">
+      <app-setup-hierarchy-sidebar
+        [hierarchyMode]="hierarchyMode"
+        [rootTreeExpanded]="rootTreeExpanded"
+        [userSetups]="userSetups"
+        [hierarchyRootCtxOpen]="hierarchyRootCtxOpen"
+        [hierarchyRootCtxX]="hierarchyRootCtxX"
+        [hierarchyRootCtxY]="hierarchyRootCtxY"
+        [hierarchySetupCtxOpen]="hierarchySetupCtxOpen"
+        [hierarchySetupCtxX]="hierarchySetupCtxX"
+        [hierarchySetupCtxY]="hierarchySetupCtxY"
+        [hierarchyCategoryPickerSetup]="hierarchyCategoryPickerSetup"
+        [hierarchyCategories]="hierarchyCategories"
+        [setupTitleFn]="hierarchySetupTitle"
+        [itemTitleFn]="hierarchyTreeItemTitle"
+        [isTreeExpandedFn]="hierarchyIsTreeExpanded"
+        [isTreeLoadingFn]="hierarchyIsTreeLoading"
+        [treeChildrenForFn]="hierarchyTreeChildrenFor"
+        (hierarchyModeChange)="toggleHierarchyMode($event)"
+        (rootToggle)="toggleRootTree($event)"
+        (rootRightClick)="onHierarchyRootRightClick($event)"
+        (setupToggle)="toggleTreeSetup($event.setup, $event.event)"
+        (setupSelect)="selectHierarchyRoom($event.setup, $event.event)"
+        (setupRightClick)="onHierarchySetupRightClick($event.setup, $event.event)"
+        (itemSelect)="selectHierarchyItem($event.item, $event.event)"
+        (createSetupFromRoot)="createSetupFromHierarchyRoot()"
+        (openSetup)="openHierarchySetupFromContext()"
+        (openCategoryPicker)="openHierarchyCategoryPickerFromContext()"
+        (renameSetup)="renameHierarchySetupFromContext()"
+        (deleteSetup)="deleteHierarchySetupFromContext()"
+        (closeHierarchyCategoryPicker)="closeHierarchyCategoryPicker()"
+        (selectHierarchyCategory)="selectHierarchyCategory($event)">
+      </app-setup-hierarchy-sidebar>
+
+      @if (hierarchyRightMode === 'home_theater_picker') {
+        <app-setup-hierarchy-device-picker
+          [mode]="'home_theater'"
+          [setupTitle]="getSetupTitle(hierarchyHtPickerSetup)"
+          [catalogLoading]="hierarchyHtCatalogLoading"
+          [selectedLoading]="hierarchyHtSelectedLoading"
+          [catalogError]="hierarchyHtCatalogError"
+          [selectedError]="hierarchyHtSelectedError"
+      [catalog]="hierarchyHtCatalog"
+      [selectedDevices]="hierarchyHtSelectedDevices"
+      [categoryNameFn]="hierarchyHtCategoryName"
+      [productNameFn]="hierarchyHtProductName"
+      [selectedRoleFn]="hierarchyHtRoleName"
+      [renameSaving]="hierarchyHtRenameSaving"
+      (addDevice)="addHierarchyHtDevice($event)"
+      (renameSetup)="renameHierarchyHtSetup($event)">
+    </app-setup-hierarchy-device-picker>
+      } @else {
+        <app-setup-hierarchy-details
+          [loading]="hierarchyDetailsLoading"
+          [error]="hierarchyDetailsError"
+          [selection]="hierarchySelection"
+          [title]="hierarchyDetailsTitle"
+          [subtitle]="hierarchyDetailsSubtitle"
+          [details]="hierarchyDetails">
+        </app-setup-hierarchy-details>
+      }
+    </div>
+  }
 
   @if (selectedProduct) {
     <app-product-details-panel

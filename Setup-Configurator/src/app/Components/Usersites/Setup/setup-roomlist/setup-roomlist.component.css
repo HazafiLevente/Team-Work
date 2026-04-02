@@ -15,7 +15,146 @@
   width: 100%;
   height: calc(100vh - var(--header-h) - 18px + var(--grid-extra-h));
   display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: 14px;
 }
+
+.property-strip.compact {
+  grid-template-columns: 280px;
+  min-height: 64px;
+  max-height: 64px;
+}
+
+.property-strip {
+  position: relative;
+  z-index: 3;
+  display: grid;
+  grid-template-columns: 280px minmax(0, 1fr);
+  gap: 16px;
+  align-items: stretch;
+  min-height: 68px;
+  max-height: 150px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background:
+    radial-gradient(circle at top center, rgba(109, 40, 217, 0.1), transparent 38%),
+    linear-gradient(180deg, rgba(15, 18, 24, 0.96), rgba(15, 18, 24, 0.96));
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.22);
+  overflow: hidden;
+}
+
+.property-strip-toggle {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-width: 0;
+}
+
+.property-strip-copy {
+  min-width: 0;
+}
+
+.property-strip-title {
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #f8fafc;
+}
+
+.property-strip-sub {
+  margin-top: 4px;
+  font-size: 11px;
+  color: rgba(226, 232, 240, 0.56);
+}
+
+.hierarchy-toggle {
+  --toggle-pad: 4px;
+  position: relative;
+  width: 74px;
+  height: 36px;
+  flex-shrink: 0;
+  border-radius: 999px;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.hierarchy-toggle-input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  z-index: 4;
+  cursor: pointer;
+}
+
+.hierarchy-toggle-track {
+  position: absolute;
+  inset: 0;
+  border-radius: 999px;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  background:
+    linear-gradient(180deg, rgba(15, 23, 42, 0.95), rgba(2, 6, 23, 0.96));
+}
+
+.hierarchy-toggle-thumb {
+  position: absolute;
+  top: var(--toggle-pad);
+  left: var(--toggle-pad);
+  width: calc(50% - var(--toggle-pad));
+  height: calc(100% - (var(--toggle-pad) * 2));
+  border-radius: 999px;
+  background:
+    linear-gradient(135deg, rgba(34, 211, 238, 0.3), rgba(59, 130, 246, 0.22)),
+    rgba(15, 23, 42, 0.95);
+  border: 1px solid rgba(34, 211, 238, 0.28);
+  box-shadow: 0 10px 20px rgba(15, 23, 42, 0.4);
+  transition: transform 0.22s ease, border-color 0.22s ease, background 0.22s ease;
+}
+
+.hierarchy-toggle.hierarchy-active .hierarchy-toggle-thumb {
+  transform: translateX(calc(100% - 4px));
+  background:
+    linear-gradient(135deg, rgba(250, 204, 21, 0.3), rgba(249, 115, 22, 0.22)),
+    rgba(15, 23, 42, 0.95);
+  border-color: rgba(250, 204, 21, 0.28);
+}
+
+.hierarchy-workspace-shell {
+  min-height: 0;
+  height: 100%;
+  display: grid;
+  grid-template-columns: 340px minmax(0, 1fr);
+  gap: 14px;
+}
+
+.property-strip-placeholder,
+.tree-panel {
+  width: 100%;
+  min-height: 46px;
+  border-radius: 10px;
+  border: 1px solid rgba(148, 163, 184, 0.12);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.property-strip-placeholder {
+  display: flex;
+  align-items: center;
+  padding: 0 14px;
+  color: rgba(226, 232, 240, 0.6);
+  font-size: 12px;
+}
+
+.tree-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 2px;
+  padding: 6px;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
 
 
 
@@ -115,6 +254,29 @@
 @media (max-width: 980px) {
   :root {
     --grid-extra-h: 140px;
+  }
+
+  .setup-shell {
+    grid-template-rows: auto minmax(0, 1fr);
+  }
+
+  .property-strip,
+  .property-strip.compact {
+    grid-template-columns: 1fr;
+    max-height: none;
+  }
+
+  .tree-node {
+    min-width: 190px;
+  }
+
+  .hierarchy-workspace-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .hierarchy-details-row {
+    grid-template-columns: 1fr;
+    gap: 8px;
   }
 
   .boundary-area {

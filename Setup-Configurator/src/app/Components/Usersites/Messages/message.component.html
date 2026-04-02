@@ -1,20 +1,27 @@
 <div class="chat-layout">
   <div class="chat-sidebar" [class.hidden-mobile]="isMobile && mobileView !== 'list'">
     <div class="sidebar-header">
-      <div class="sidebar-title">Beszelgetesek</div>
+      <div class="sidebar-title">Beszélgetések</div>
 
-      <label class="mode-toggle" [class.ai-active]="mode === 'ai'">
-        <input
-          class="toggle-input"
-          type="checkbox"
-          [checked]="mode === 'ai'"
-          (change)="onToggleMode($any($event.target).checked)" />
+      <div class="messages-ai-toggle-row">
+        <label class="hierarchy-toggle" [class.hierarchy-active]="mode === 'ai'">
+          <input
+            type="checkbox"
+            class="hierarchy-toggle-input"
+            [checked]="mode === 'ai'"
+            (change)="onToggleMode($any($event.target).checked)" />
 
-        <span class="toggle-track"></span>
-        <span class="toggle-thumb"></span>
-        <span class="toggle-option toggle-option-left" [class.active]="mode === 'messages'">Messages</span>
-        <span class="toggle-option toggle-option-right" [class.active]="mode === 'ai'">AI</span>
-      </label>
+          <span class="hierarchy-toggle-track"></span>
+          <span class="hierarchy-toggle-thumb"></span>
+        </label>
+
+        <div class="messages-ai-copy">
+          <div class="messages-ai-title">MessagesAI</div>
+          <div class="messages-ai-sub">
+            {{ mode === 'ai' ? 'AI nézet aktív' : 'Normál üzenet nézet aktív' }}
+          </div>
+        </div>
+      </div>
     </div>
 
     <ng-container *ngIf="mode === 'messages'; else aiSidebar">

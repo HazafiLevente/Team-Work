@@ -1,49 +1,50 @@
 <form class="settings-page" [formGroup]="form">
-
-  <section class="card">
-    <h3>Nyelv</h3>
-
-    <!-- Google Translate ide -->
-    <app-google-translate>
-    <div id="google_translate_element"></div>
-    </app-google-translate>
-
-    <p class="muted">
-      Itt tudod átállítani az oldal nyelvét.
-    </p>
+  <section class="card hero-card">
+    <div>
+      <h2>Tema Beallitas</h2>
+      <p class="muted">
+        Itt tudod kiválasztani, melyik témát szeretnéd használni az oldalon.
+      </p>
+    </div>
   </section>
 
   <section class="card">
-    <h3>Viselkedés</h3>
+    <div class="section-head">
+      <div>
+        <h3>Tema</h3>
+        <p class="muted">Valassz egy témát, és az egész felület azonnal átvált.</p>
+      </div>
+      <div class="theme-badge">
+        Aktiv: {{ activeThemeTitle }}
+      </div>
+    </div>
 
-    <label class="row">
-      <span>Setup mode</span>
-      <input type="checkbox" formControlName="setupMode">
-    </label>
+    <div class="theme-grid">
+      <button
+        type="button"
+        *ngFor="let t of themeOptions"
+        class="theme-card"
+        [class.active]="isThemeActive(t.key)"
+        (click)="selectTheme(t.key)">
 
-    <label class="row">
-      <span>Compact layout</span>
-      <input type="checkbox" formControlName="compactLayout">
-    </label>
+        <div class="theme-preview" [ngClass]="t.previewClass">
+          <div class="mini-sidebar"></div>
+          <div class="mini-content">
+            <div class="mini-top"></div>
+            <div class="mini-cards">
+              <span></span><span></span><span></span>
+            </div>
+          </div>
+        </div>
 
-    <label class="row">
-      <span>Auto-open product</span>
-      <input type="checkbox" formControlName="autoOpenProduct">
-    </label>
+        <div class="theme-meta">
+          <div class="theme-title-row">
+            <div class="theme-title">{{ t.title }}</div>
+            <div class="active-pill" *ngIf="isThemeActive(t.key)">Aktiv</div>
+          </div>
+          <div class="theme-sub">{{ t.sub }}</div>
+        </div>
+      </button>
+    </div>
   </section>
-
-  <section class="card">
-    <h3>Felhasználói élmény</h3>
-
-    <label class="row">
-      <span>Public profile</span>
-      <input type="checkbox" formControlName="publicProfile">
-    </label>
-
-    <label class="row">
-      <span>Remember filters</span>
-      <input type="checkbox" formControlName="rememberFilters">
-    </label>
-  </section>
-
 </form>

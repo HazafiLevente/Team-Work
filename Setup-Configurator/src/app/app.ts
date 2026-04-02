@@ -1,15 +1,10 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Router, RouterOutlet } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { Subscription } from 'rxjs';
-import { map } from 'rxjs/operators';
-import { Observable } from 'rxjs';
+import { Subscription, Observable } from 'rxjs';
 
 import { AuthService } from './Components/Services/Auth/auth.service';
-import { UiSettingsService } from './Components/Services/SettingService/ui-settings.service';
-
-
-
+import { UiSettingsService, UiThemeKey } from './Components/Services/SettingService/ui-settings.service';
 
 import { HeaderComponent } from './Components/header/header.component';
 import { DarkVeilBgComponent } from './Components/Shared/Background/dark-veil-bg.component';
@@ -17,6 +12,22 @@ import { ClickSparkComponent } from './Components/Shared/Effects/click-spark/cli
 import { DockComponent, DockItemData } from './Components/Shared/Dock/dock.component';
 import { MessageButtonComponent } from './Components/Shared/Messages/messages-button/messages.button.component';
 import { MessagesPanelComponent } from './Components/Shared/Messages/messages-panel/messages.panel.component';
+
+type ThemePalette = {
+  pageAccent: string;
+  pageAccent2: string;
+  surface: string;
+  glassAlpha: string;
+  glassBorder: string;
+  text: string;
+  muted: string;
+  accentPurple: string;
+  accentCyan: string;
+  accentMagenta: string;
+  themeBand1: string;
+  themeBand2: string;
+  themeBand3: string;
+};
 
 @Component({
   selector: 'app-root',
@@ -34,36 +45,104 @@ import { MessagesPanelComponent } from './Components/Shared/Messages/messages-pa
   templateUrl: './app.html'
 })
 export class App implements OnInit, OnDestroy {
-
   open = false;
 
   private sub?: Subscription;
+  private userSub?: Subscription;
+
+  user$!: Observable<any | null>;
+  dockItems: DockItemData[] = [];
+  private readonly themePalettes: Record<UiThemeKey, ThemePalette> = {
+    'clean-cyan': {
+      pageAccent: '#67e8f9',
+      pageAccent2: '#38bdf8',
+      surface: 'rgba(8, 16, 24, 0.72)',
+      glassAlpha: 'rgba(255,255,255,0.04)',
+      glassBorder: 'rgba(255,255,255,0.10)',
+      text: '#f4f8ff',
+      muted: 'rgba(244,248,255,0.68)',
+      accentPurple: '#38bdf8',
+      accentCyan: '#67e8f9',
+      accentMagenta: '#22d3ee',
+      themeBand1: 'rgba(103, 232, 249, 0.24)',
+      themeBand2: 'rgba(56, 189, 248, 0.20)',
+      themeBand3: 'rgba(34, 211, 238, 0.12)'
+    },
+    'purple-premium': {
+      pageAccent: '#c084fc',
+      pageAccent2: '#8b5cf6',
+      surface: 'rgba(18, 10, 30, 0.74)',
+      glassAlpha: 'rgba(255,255,255,0.04)',
+      glassBorder: 'rgba(255,255,255,0.10)',
+      text: '#f7f2ff',
+      muted: 'rgba(247,242,255,0.66)',
+      accentPurple: '#c084fc',
+      accentCyan: '#8b5cf6',
+      accentMagenta: '#e879f9',
+      themeBand1: 'rgba(192, 132, 252, 0.26)',
+      themeBand2: 'rgba(139, 92, 246, 0.22)',
+      themeBand3: 'rgba(232, 121, 249, 0.12)'
+    },
+    'glass-slate': {
+      pageAccent: '#34d399',
+      pageAccent2: '#14b8a6',
+      surface: 'rgba(12, 20, 24, 0.62)',
+      glassAlpha: 'rgba(255,255,255,0.05)',
+      glassBorder: 'rgba(255,255,255,0.10)',
+      text: '#f3fbf8',
+      muted: 'rgba(243,251,248,0.66)',
+      accentPurple: '#14b8a6',
+      accentCyan: '#34d399',
+      accentMagenta: '#2dd4bf',
+      themeBand1: 'rgba(52, 211, 153, 0.22)',
+      themeBand2: 'rgba(20, 184, 166, 0.19)',
+      themeBand3: 'rgba(45, 212, 191, 0.10)'
+    },
+    'soft-light': {
+      pageAccent: '#818cf8',
+      pageAccent2: '#38bdf8',
+      surface: 'rgba(20, 24, 36, 0.78)',
+      glassAlpha: 'rgba(255,255,255,0.06)',
+      glassBorder: 'rgba(255,255,255,0.12)',
+      text: '#eef4ff',
+      muted: 'rgba(238,244,255,0.70)',
+      accentPurple: '#818cf8',
+      accentCyan: '#38bdf8',
+      accentMagenta: '#a5b4fc',
+      themeBand1: 'rgba(129, 140, 248, 0.24)',
+      themeBand2: 'rgba(56, 189, 248, 0.18)',
+      themeBand3: 'rgba(165, 180, 252, 0.10)'
+    }
+  };
 
   constructor(
     private auth: AuthService,
     private router: Router,
     private ui: UiSettingsService
   ) {
-    // ✅ SETTINGS APPLY (globál)
-    this.sub = this.ui.state$.subscribe((s: any) => {
+    this.sub = this.ui.state$.subscribe((s) => {
       document.body.classList.toggle('dark', !!s.darkMode);
       document.body.classList.toggle('compact', !!s.compactLayout);
 
-      // ha később akarsz accentet is:
-      // document.documentElement.dataset['accent'] = s.accent || 'purple';
+      document.body.classList.remove(
+        'theme-clean-cyan',
+        'theme-purple-premium',
+        'theme-glass-slate',
+        'theme-soft-light'
+      );
+
+      document.body.classList.add(`theme-${s.theme}`);
+
+      this.applyTheme(s.theme);
     });
   }
-
-  user$!: Observable<any | null>;
-  dockItems: DockItemData[] = [];
 
   ngOnInit(): void {
     this.auth.check();
 
     this.user$ = this.auth.user$;
 
-    this.user$.subscribe(user => {
-
+    this.userSub = this.user$.subscribe(user => {
       if (!user) {
         this.dockItems = [];
         return;
@@ -102,7 +181,6 @@ export class App implements OnInit, OnDestroy {
         }
       ];
 
-      // 🔥 Admin csak jogosultsággal
       if (['admin', 'admin+', 'owner'].includes(user.role)) {
         items.push({
           icon: '🛡',
@@ -117,13 +195,33 @@ export class App implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.sub?.unsubscribe();
+    this.userSub?.unsubscribe();
   }
 
-  /* -----------------------------
-     DOCK
-  ----------------------------- */
+  private applyTheme(theme: UiThemeKey) {
+    const root = document.documentElement;
+    const body = document.body;
+    const palette = this.themePalettes[theme] || this.themePalettes['glass-slate'];
 
-  private scrollHomeTop(): void {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    root.setAttribute('data-theme', theme);
+    body.setAttribute('data-theme', theme);
+    this.applyThemePalette(root, palette);
+    this.applyThemePalette(body, palette);
+  }
+
+  private applyThemePalette(target: HTMLElement, palette: ThemePalette) {
+    target.style.setProperty('--page-accent', palette.pageAccent);
+    target.style.setProperty('--page-accent-2', palette.pageAccent2);
+    target.style.setProperty('--surface', palette.surface);
+    target.style.setProperty('--glass-alpha', palette.glassAlpha);
+    target.style.setProperty('--glass-border', palette.glassBorder);
+    target.style.setProperty('--text', palette.text);
+    target.style.setProperty('--muted', palette.muted);
+    target.style.setProperty('--accent-purple', palette.accentPurple);
+    target.style.setProperty('--accent-cyan', palette.accentCyan);
+    target.style.setProperty('--accent-magenta', palette.accentMagenta);
+    target.style.setProperty('--theme-band-1', palette.themeBand1);
+    target.style.setProperty('--theme-band-2', palette.themeBand2);
+    target.style.setProperty('--theme-band-3', palette.themeBand3);
   }
 }
