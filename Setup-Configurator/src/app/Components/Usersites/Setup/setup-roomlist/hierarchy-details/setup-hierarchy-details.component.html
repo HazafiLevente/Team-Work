@@ -1,0 +1,31 @@
+<div class="hierarchy-stage">
+  @if (loading) {
+    <div class="hierarchy-stage-empty">Betoltes...</div>
+  } @else if (error) {
+    <div class="hierarchy-stage-empty">{{ error }}</div>
+  } @else if (!selection) {
+    <div class="hierarchy-stage-empty">
+      A huzogatos nezet helyett most a hierarchikus rendszer aktiv.
+      Nyiss le egy setupot bal oldalon, es valassz ki egy eszkozt.
+    </div>
+  } @else {
+    <div class="hierarchy-details-card">
+      <div class="hierarchy-details-head">
+        <div class="hierarchy-details-kicker">{{ subtitle }}</div>
+        <div class="hierarchy-details-title">{{ title }}</div>
+      </div>
+
+      <div class="hierarchy-details-list">
+        @for (detail of details; track detail.key + ':' + detail.value) {
+          <div class="hierarchy-details-row">
+            <div class="hierarchy-details-key">{{ detail.key }}</div>
+            <div class="hierarchy-details-value">{{ detail.value }}</div>
+          </div>
+        }
+        @empty {
+          <div class="hierarchy-stage-empty">Nincs megjelenitheto adat.</div>
+        }
+      </div>
+    </div>
+  }
+</div>
