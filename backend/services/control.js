@@ -2,7 +2,11 @@ const fs = require("fs");
 const path = require("path");
 const { createClient } = require("@supabase/supabase-js");
 
-require("dotenv").config();
+require("dotenv").config({
+    path: path.join(__dirname, "..", "..", ".env"),
+    override: false,
+    quiet: true
+});
 
 const filler = require("../../datas/Jsons/filler.json");
 

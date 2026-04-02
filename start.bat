@@ -23,9 +23,7 @@ echo =====================================
 echo Installing dependencies...
 echo =====================================
 
-cd backend
 call npm install
-cd ..
 
 cd Setup-Configurator
 call npm install
