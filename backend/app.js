@@ -5,7 +5,7 @@ const cookieParser = require("cookie-parser");
 const cors = require("cors");
 const express = require("express");
 const path = require("path");
-
+const metaRoutes = require("./routes/meta.routes");
 
 const app = express();
 
@@ -49,7 +49,7 @@ app.use("/api/computers", require("./routes/computers.routes"));
 app.use("/api/cars", require("./routes/cars.routes"));
 app.use("/api/home-theater", require("./routes/hometheaters.routes"));
 app.use("/api/instruments", require("./routes/instruments.routes"));
-
+app.use("/api/meta", metaRoutes);
 
 // Rendszer és felhasználó
 app.use("/api/auth", require("./routes/auth.routes"));

@@ -28,10 +28,17 @@ export class ProductService {
     );
   }
 
-  getComputers(limit = 50) {
+  getComputers(limit = 2000) {
     return this.http.get<{ items: any[] }>(
       `${this.API}/computers`,
       { params: { limit: String(limit) }, withCredentials: true }
+    );
+  }
+
+  getComputerMeta() {
+    return this.http.get<any>(
+      `${this.API}/meta/computer`,
+      { withCredentials: true }
     );
   }
 
@@ -42,7 +49,14 @@ export class ProductService {
     );
   }
 
-  getCars(limit = 50) {
+  getHtMeta() {
+    return this.http.get<any>(
+      `${this.API}/meta/ht`,
+      { withCredentials: true }
+    );
+  }
+
+  getCars(limit = 2000) {
     return this.http.get<{ items: any[] }>(
       `${this.API}/cars`,
       { params: { limit: String(limit) }, withCredentials: true }
@@ -53,6 +67,13 @@ export class ProductService {
     return this.http.get<{ items: any[] }>(
       `${this.API}/instruments`,
       { params: { limit: String(limit) }, withCredentials: true }
+    );
+  }
+
+  getInstrumentMeta() {
+    return this.http.get<any>(
+      `${this.API}/meta/instruments`,
+      { withCredentials: true }
     );
   }
 }

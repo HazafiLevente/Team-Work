@@ -1,85 +1,97 @@
-<div class="carfilter" [formGroup]="form">
+<div class="carfilter" *ngIf="form" [formGroup]="form">
 
   <div class="carfilter-header">
     <span class="tag" title="PC kategória szűrők">🖥️ PC</span>
-    <span class="muted">Csak PC táblákra szűr</span>
+    <span class="muted">Meta-alapú (dinamikus) PC szűrő</span>
   </div>
 
-  <div class="filter-grid">
+  <div class="muted" *ngIf="loading">Betöltés…</div>
+  <div class="muted" *ngIf="error">{{ error }}</div>
 
-    <input class="search-input"
-           title="CPU gyártó (pl. AMD / Intel)"
-           placeholder="CPU gyártó (pl. AMD / Intel)"
-           formControlName="cpuBrand" />
+  <div class="filter-grid" *ngIf="!loading">
 
-    <input class="search-input"
-           title="CPU modell (pl. Ryzen 7 7800X3D)"
-           placeholder="CPU modell (pl. Ryzen 7 7800X3D)"
-           formControlName="cpuModel" />
-
-    <select class="search-input"
-            title="GPU gyártó"
-            formControlName="gpuBrand">
-      <option value="">GPU gyártó (összes)</option>
-      <option value="ASUS">ASUS</option>
-      <option value="MSI">MSI</option>
-      <option value="GIGABYTE">GIGABYTE</option>
-      <option value="PNY">PNY</option>
-      <option value="PALIT">Palit</option>
-
+    <select class="search-input" title="PC tábla" formControlName="tableName">
+      <option value="">PC típus (összes)</option>
+      <option *ngFor="let t of meta?.table_names" [value]="t">{{ t }}</option>
     </select>
 
-    <input class="search-input"
-           title="GPU modell (pl. RTX 4070)"
-           placeholder="GPU modell (pl. RTX 4070)"
-           formControlName="gpuModel" />
-
-    <input class="search-input" type="number" min="0"
-           title="Minimum RAM (GB)"
-           placeholder="RAM min (GB)"
-           formControlName="ramMin" />
-
-    <input class="search-input" type="number" min="0"
-           title="Maximum RAM (GB)"
-           placeholder="RAM max (GB)"
-           formControlName="ramMax" />
-
-    <select class="search-input"
-            title="Tárhely típusa"
-            formControlName="storageType">
-      <option value="">Memória típus (összes)</option>
-      <option value="DDR4">DDR4</option>
-      <option value="DDR5">DDR5</option>
-
+    <select class="search-input" title="Gyártó" formControlName="manufacturer">
+      <option value="">Gyártó (összes)</option>
+      <option *ngFor="let m of meta?.manufacturers" [value]="m">{{ m }}</option>
     </select>
 
-    <input class="search-input" type="number" min="0"
-           title="Minimum tárhely (GB)"
-           placeholder="Tárhely min (GB)"
-           formControlName="storageMin" />
+    <input
+      class="search-input"
+      title="Modell részlet"
+      placeholder="Modell"
+      formControlName="model"
+    />
 
-    <input class="search-input" type="number" min="0"
-           title="Maximum tárhely (GB)"
-           placeholder="Tárhely max (GB)"
-           formControlName="storageMax" />
+    <input
+      class="search-input"
+      type="number"
+      min="0"
+      title="Min ár"
+      placeholder="Ár min"
+      formControlName="priceMin"
+    />
 
-    <input class="search-input" type="number" min="0"
-           title="Minimum tápegység (W)"
-           placeholder="PSU min (W)"
-           formControlName="psuMin" />
+    <input
+      class="search-input"
+      type="number"
+      min="0"
+      title="Max ár"
+      placeholder="Ár max"
+      formControlName="priceMax"
+    />
+  </div>
 
-    <input class="search-input" type="number" min="0"
-           title="Maximum tápegység (W)"
-           placeholder="PSU max (W)"
-           formControlName="psuMax" />
+  <div
+    class="filter-grid"
+    *ngIf="!loading && dynForSelected() as dyn"
+    [formGroup]="dynamicForm"
+  >
+    <ng-container *ngFor="let k of (dyn.booleans || [])">
+      <label class="muted">
+        <input type="checkbox" [formControlName]="k" />
+        {{ k }}
+      </label>
+    </ng-container>
 
+    <ng-container *ngFor="let k of (dyn.numbers || [])">
+      <div [formGroupName]="k">
+        <input
+          class="search-input"
+          type="number"
+          [placeholder]="k + ' min'"
+          formControlName="min"
+        />
+        <input
+          class="search-input"
+          type="number"
+          [placeholder]="k + ' max'"
+          formControlName="max"
+        />
+      </div>
+    </ng-container>
+
+    <ng-container *ngFor="let k of enumKeys()">
+      <select class="search-input" [formControlName]="k" [title]="k">
+        <option value="">{{ k }} (összes)</option>
+        <option *ngFor="let opt of (dyn.enums?.[k] || [])" [value]="opt">
+          {{ opt }}
+        </option>
+      </select>
+    </ng-container>
   </div>
 
   <div class="carfilter-footer">
-    <button type="button"
-            class="btn small"
-            title="Törli a PC szűrőket"
-            (click)="clear()">
+    <button
+      type="button"
+      class="btn small"
+      title="Törli a PC szűrőket"
+      (click)="clear()"
+    >
       🧹 PC szűrők törlése
     </button>
 
