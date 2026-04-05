@@ -148,6 +148,8 @@ export class WorkspaceComponent {
   startPanX = 0;
   startPanY = 0;
 
+  confirmDialogState: { isOpen: boolean; title: string; message: string; onConfirm: () => void } | null = null;
+  
   constructor(private http: HttpClient) {}
 
   onMouseDown(event: MouseEvent): void {
@@ -454,9 +456,23 @@ export class WorkspaceComponent {
       this.ctxItem?.model ??
       'Elem';
 
-    const ok = window.confirm(`Biztos törlöd?\n\n${displayName}`);
-    if (!ok) return;
+    this.confirmDialogState = {
+      isOpen: true,
+      title: 'Biztos törlöd?',
+      message: displayName,
+      onConfirm: () => {
+        this.confirmDialogState = null;
+        this.executeDeleteContextItem();
+      }
+    };
+  }
 
+  private executeDeleteContextItem(): void {
+    if (!this.ctxItem) return;
+    
+    const itemId = this.ctxItem?.id ?? this.ctxItem?.ID ?? this.ctxItem?.item_id;
+    const tableName = this.getContextItemTableName(this.ctxItem);
+    
     const targetKey = this.getContextItemKey(this.ctxItem);
     const dataId = this.getItemDataId(this.ctxItem);
 

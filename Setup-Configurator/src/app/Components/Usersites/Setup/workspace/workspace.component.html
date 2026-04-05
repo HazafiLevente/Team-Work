@@ -185,4 +185,17 @@
       (categorySelected)="onCategorySelected($event)">
     </app-context-menu-category>
   }
+
+  @if (confirmDialogState?.isOpen) {
+    <div class="custom-confirm-overlay" (click)="confirmDialogState = null">
+      <div class="custom-confirm-modal" (click)="$event.stopPropagation()">
+        <h3>{{ confirmDialogState?.title }}</h3>
+        <p>{{ confirmDialogState?.message }}</p>
+        <div class="confirm-actions">
+          <button class="confirm-cancel" (click)="confirmDialogState = null">Mégse</button>
+          <button class="confirm-danger" (click)="confirmDialogState?.onConfirm?.()">Törlés</button>
+        </div>
+      </div>
+    </div>
+  }
 </div>

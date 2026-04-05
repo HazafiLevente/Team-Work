@@ -123,6 +123,8 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit {
   hierarchyHtSelectedLoading = false;
   hierarchyHtSelectedError = '';
   hierarchyHtRenameSaving = false;
+
+  confirmDialogState: { isOpen: boolean; title: string; message: string; onConfirm: () => void } | null = null;
   readonly hierarchyCategories = ['Szamitogep', 'Autok', 'Hazimozi', 'Hangszerek', 'Egyeb'];
   readonly hierarchySetupTitle = (setup: any) => this.getSetupTitle(setup);
   readonly hierarchyTreeItemTitle = (item: any) => this.treeItemTitle(item);
@@ -1229,11 +1231,20 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit {
     const setupId = this.getSetupId(setup);
     if (!setupId) return;
 
-
     const name = this.getSetupTitle(setup);
-    const ok = window.confirm(`Biztos törlöd?\n\n${name}`);
-    if (!ok) return;
+    
+    this.confirmDialogState = {
+      isOpen: true,
+      title: 'Biztos törlöd?',
+      message: name,
+      onConfirm: () => {
+        this.confirmDialogState = null;
+        this.executeDeleteSetup(setupId);
+      }
+    };
+  }
 
+  private executeDeleteSetup(setupId: number): void {
     this.isBusy = true;
 
     this.http.delete<any>(`/api/setup/${setupId}/remove-setup`, { withCredentials: true }).subscribe({

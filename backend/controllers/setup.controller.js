@@ -1,4 +1,4 @@
-﻿const { supabase } = require("../services/supabase");
+const { supabase } = require("../services/supabase");
 
 /**
  * Stabil children scan:
@@ -492,7 +492,7 @@ exports.upsertRoomPosition = async (req, res) => {
 
         const { error } = await supabase
             .from(ROOMS_TABLE)
-            .update({ pos_x: Number(x), pos_y: Number(y) })
+            .update({ pos_x: Math.round(Number(x)), pos_y: Math.round(Number(y)) })
             .eq("id", setupId);
 
         if (error) throw error;
@@ -642,8 +642,8 @@ exports.create = async (req, res) => {
         if (!setup_name) return res.status(400).json({ error: "setup_name required" });
 
         const isFavorite = req.body?.isFavorite === true;
-        const x = Number(req.body?.x ?? 0);
-        const y = Number(req.body?.y ?? 0);
+        const x = Math.round(Number(req.body?.x ?? 0));
+        const y = Math.round(Number(req.body?.y ?? 0));
 
         const { data, error } = await supabase
             .from(ROOMS_TABLE)
@@ -1614,8 +1614,8 @@ exports.updateItemPosition = async (req, res) => {
         if (!ok) return res.status(403).json({ error: "Forbidden" });
 
         const payload = String(tableName).toLowerCase() === String(SETUPS_TABLE).toLowerCase()
-            ? { pos_x: Number(x), pos_y: Number(y) }
-            : { pos_x: Number(x), pos_y: Number(y) };
+            ? { pos_x: Math.round(Number(x)), pos_y: Math.round(Number(y)) }
+            : { pos_x: Math.round(Number(x)), pos_y: Math.round(Number(y)) };
 
         const { error } = await supabase
             .from(tableName)
