@@ -59,7 +59,9 @@ export class MessagesComponent implements OnInit, OnDestroy {
   aiConversations: AiConversationRecord[] = [];
   aiMessages: AiConversationMessage[] = [];
   activeAiKey: string | null = null;
+
   mode: ChatMode = 'messages';
+  messagesAiEnabled = false;
 
   openMenuId: number | null = null;
   editingMessageId: number | null = null;
@@ -73,6 +75,7 @@ export class MessagesComponent implements OnInit, OnDestroy {
 
   isMobile = false;
   mobileView: 'list' | 'chat' = 'list';
+
   private nowMs = Date.now();
   private nowTimer: ReturnType<typeof setInterval> | null = null;
 
@@ -100,13 +103,22 @@ export class MessagesComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     const savedMode = localStorage.getItem('messagesMode');
+    const savedAiEnabled = localStorage.getItem('messagesAiEnabled');
+
     this.mode = savedMode === 'ai' ? 'ai' : 'messages';
+    this.messagesAiEnabled = savedAiEnabled === 'true';
+
+    if (this.messagesAiEnabled) {
+      this.mode = 'ai';
+    }
+
     this.onResize();
     this.loadAuth();
     this.loadConversations();
 
     this.route.paramMap.subscribe((params) => {
       const key = params.get('key');
+
       if (this.mode === 'messages' && key) {
         this.activeKey = key;
         this.openConversation(key);
@@ -145,6 +157,7 @@ export class MessagesComponent implements OnInit, OnDestroy {
   onDocRightClick(event: MouseEvent) {
     const element = event.target as HTMLElement;
     if (element?.closest?.('.ctx-menu')) return;
+
     if (this.contextMenuOpen) {
       event.preventDefault();
       this.closeContextMenu();
@@ -163,11 +176,24 @@ export class MessagesComponent implements OnInit, OnDestroy {
     if (this.mode === 'ai') {
       return this.aiConversations.find((c) => c.key === this.activeAiKey)?.title || 'AI beszelgetes';
     }
+
     return this.conversations.find((c) => String(c.key) === String(this.activeKey))?.title || 'Chat';
   }
 
+  onToggleMode(checked: boolean) {
+    this.messagesAiEnabled = checked;
+    localStorage.setItem('messagesAiEnabled', String(checked));
+    this.setMode(checked ? 'ai' : 'messages');
+  }
+
   setMode(mode: ChatMode) {
-    if (this.mode === mode) return;
+    if (this.mode === mode) {
+      if (this.isMobile) {
+        this.mobileView = this.activeSelectionKey ? 'chat' : 'list';
+      }
+      return;
+    }
+
     this.mode = mode;
     this.showNewChat = false;
     localStorage.setItem('messagesMode', mode);
@@ -175,27 +201,34 @@ export class MessagesComponent implements OnInit, OnDestroy {
     if (mode === 'ai') {
       this.loadAiConversations(() => {
         if (!this.activeAiKey) {
-          if (this.aiConversations.length) this.openAiConversation(this.aiConversations[0].key);
-          else this.aiMessages = [this.buildSystemMessage()];
+          if (this.aiConversations.length) {
+            this.openAiConversation(this.aiConversations[0].key);
+          } else {
+            this.aiMessages = [this.buildSystemMessage()];
+          }
         }
       });
-    } else if (this.isMobile) {
-      this.mobileView = this.activeKey ? 'chat' : 'list';
-    }
-  }
+    } else {
+      if (this.activeKey) {
+        this.openConversation(this.activeKey);
+      }
 
-  onToggleMode(checked: boolean) {
-    this.setMode(checked ? 'ai' : 'messages');
+      if (this.isMobile) {
+        this.mobileView = this.activeKey ? 'chat' : 'list';
+      }
+    }
   }
 
   goBackToList() {
     this.mobileView = 'list';
+
     if (this.mode === 'ai') {
       this.activeAiKey = null;
       this.aiMessages = [];
       this.aiStore.setActiveConversationKey(null).subscribe();
       return;
     }
+
     this.activeKey = null;
     this.messages = [];
     this.router.navigate(['/user/messages']);
@@ -217,6 +250,7 @@ export class MessagesComponent implements OnInit, OnDestroy {
 
   onRightClickMessage(event: MouseEvent, message: any) {
     if (this.mode === 'ai') return;
+
     event.preventDefault();
     event.stopPropagation();
     this.contextTarget = { type: 'message', data: message };
@@ -227,6 +261,7 @@ export class MessagesComponent implements OnInit, OnDestroy {
     const menuWidth = 220;
     const menuHeight = 240;
     const padding = 10;
+
     this.contextMenuX = Math.max(padding, Math.min(x, window.innerWidth - menuWidth - padding));
     this.contextMenuY = Math.max(padding, Math.min(y, window.innerHeight - menuHeight - padding));
     this.contextMenuOpen = true;
@@ -270,7 +305,9 @@ export class MessagesComponent implements OnInit, OnDestroy {
 
     this.http.delete(`/api/messages/conversation/${key}`, { withCredentials: true }).subscribe({
       next: () => {
-        if (String(this.activeKey) === String(key)) this.goBackToList();
+        if (String(this.activeKey) === String(key)) {
+          this.goBackToList();
+        }
         this.loadConversations();
         this.closeContextMenu();
       },
@@ -280,23 +317,37 @@ export class MessagesComponent implements OnInit, OnDestroy {
     });
   }
 
-  ctxMute() { this.closeContextMenu(); }
-  ctxDisable() { this.closeContextMenu(); }
-  ctxBlock() { this.closeContextMenu(); }
+  ctxMute() {
+    this.closeContextMenu();
+  }
+
+  ctxDisable() {
+    this.closeContextMenu();
+  }
+
+  ctxBlock() {
+    this.closeContextMenu();
+  }
 
   toggleMenu(id: number, event: MouseEvent) {
     if (this.mode === 'ai') return;
+
     event.stopPropagation();
     this.openMenuId = this.openMenuId === id ? null : id;
   }
 
   scrollToBottom(smooth = true) {
     if (!this.bottom) return;
-    this.bottom.nativeElement.scrollIntoView({ behavior: smooth ? 'smooth' : 'auto', block: 'end' });
+
+    this.bottom.nativeElement.scrollIntoView({
+      behavior: smooth ? 'smooth' : 'auto',
+      block: 'end'
+    });
   }
 
   startEdit(message: any) {
     if (this.mode === 'ai') return;
+
     this.editingMessageId = message.id;
     this.editText = message.context;
     this.openMenuId = null;
@@ -309,20 +360,35 @@ export class MessagesComponent implements OnInit, OnDestroy {
 
   saveEdit() {
     if (this.mode === 'ai' || !this.editText.trim() || !this.editingMessageId) return;
-    this.http.patch(`/api/messages/${this.editingMessageId}`, { context: this.editText }, { withCredentials: true }).subscribe(() => {
+
+    this.http.patch(
+      `/api/messages/${this.editingMessageId}`,
+      { context: this.editText },
+      { withCredentials: true }
+    ).subscribe(() => {
       this.editingMessageId = null;
       this.editText = '';
-      if (this.activeKey) this.openConversation(this.activeKey);
+
+      if (this.activeKey) {
+        this.openConversation(this.activeKey);
+      }
+
       this.loadConversations();
     });
   }
 
   deleteMessage(id: number) {
     if (this.mode === 'ai') return;
+
     this.openMenuId = null;
+
     if (!confirm('Biztos torlod az uzenetet?')) return;
+
     this.http.delete(`/api/messages/${id}`, { withCredentials: true }).subscribe(() => {
-      if (this.activeKey) this.openConversation(this.activeKey);
+      if (this.activeKey) {
+        this.openConversation(this.activeKey);
+      }
+
       this.loadConversations();
     });
   }
@@ -330,7 +396,10 @@ export class MessagesComponent implements OnInit, OnDestroy {
   goToConversation(key: string) {
     this.setMode('messages');
     this.router.navigate(['/user/messages', key]);
-    if (this.isMobile) this.mobileView = 'chat';
+
+    if (this.isMobile) {
+      this.mobileView = 'chat';
+    }
   }
 
   goToAiConversation(key: string) {
@@ -350,12 +419,17 @@ export class MessagesComponent implements OnInit, OnDestroy {
   loadAuth() {
     this.http.get<any>('/api/auth/me', { withCredentials: true }).subscribe((response) => {
       this.authUserId = response?.user?.id ?? null;
+
       this.aiStore.getActiveConversationKey().subscribe((savedKey) => {
         this.activeAiKey = savedKey;
+
         this.loadAiConversations(() => {
           if (this.mode === 'ai' && !this.activeAiKey) {
-            if (this.aiConversations.length) this.openAiConversation(this.aiConversations[0].key);
-            else this.aiMessages = [this.buildSystemMessage()];
+            if (this.aiConversations.length) {
+              this.openAiConversation(this.aiConversations[0].key);
+            } else {
+              this.aiMessages = [this.buildSystemMessage()];
+            }
           }
         });
       });
@@ -371,28 +445,42 @@ export class MessagesComponent implements OnInit, OnDestroy {
   loadUsers() {
     this.http.get<any[]>('/api/users', { withCredentials: true }).subscribe((response) => {
       const allUsers = response || [];
-      const existingUserIds = (this.conversations || []).map((c) => c?.otherUserId).filter((x: any) => typeof x === 'number');
-      this.users = allUsers.filter((u) => u.id !== this.authUserId && !existingUserIds.includes(u.id));
+      const existingUserIds = (this.conversations || [])
+        .map((c) => c?.otherUserId)
+        .filter((x: any) => typeof x === 'number');
+
+      this.users = allUsers.filter((u) =>
+        u.id !== this.authUserId && !existingUserIds.includes(u.id)
+      );
     });
   }
 
   openConversation(key: string) {
     this.activeKey = key;
+
     this.http.get<any>(`/api/messages/conversation/${key}`, { withCredentials: true }).subscribe((response) => {
       this.messages = response?.items || [];
       setTimeout(() => this.scrollToBottom(false), 0);
-      if (this.isMobile) this.mobileView = 'chat';
+
+      if (this.isMobile) {
+        this.mobileView = 'chat';
+      }
     });
   }
 
   toggleNewChat() {
     this.showNewChat = !this.showNewChat;
+
     if (!this.showNewChat) return;
 
     if (this.mode === 'ai') {
       this.activeAiKey = null;
       this.aiMessages = [this.buildSystemMessage()];
-      if (this.isMobile) this.mobileView = 'chat';
+
+      if (this.isMobile) {
+        this.mobileView = 'chat';
+      }
+
       this.showNewChat = false;
       return;
     }
@@ -401,17 +489,26 @@ export class MessagesComponent implements OnInit, OnDestroy {
   }
 
   startConversation(user: any) {
-    this.http.post<any>('/api/messages/start', { user2_id: user.id }, { withCredentials: true }).subscribe((response) => {
+    this.http.post<any>(
+      '/api/messages/start',
+      { user2_id: user.id },
+      { withCredentials: true }
+    ).subscribe((response) => {
       const panelId = String(response.panelId);
+
       this.showNewChat = false;
       this.router.navigate(['/user/messages', panelId]);
       this.loadConversations();
-      if (this.isMobile) this.mobileView = 'chat';
+
+      if (this.isMobile) {
+        this.mobileView = 'chat';
+      }
     });
   }
 
   sendMessage() {
     if (!this.newMessage.trim() || !this.activeSelectionKey) return;
+
     if (this.mode === 'ai') {
       this.sendAiMessage();
       return;
@@ -420,10 +517,14 @@ export class MessagesComponent implements OnInit, OnDestroy {
     const otherId = this.getOtherUserId();
     if (!otherId) return;
 
-    this.http.post('/api/messages/send', {
-      user2_id: otherId,
-      context: this.newMessage
-    }, { withCredentials: true }).subscribe({
+    this.http.post(
+      '/api/messages/send',
+      {
+        user2_id: otherId,
+        context: this.newMessage
+      },
+      { withCredentials: true }
+    ).subscribe({
       next: () => {
         this.newMessage = '';
         this.openConversation(this.activeKey!);
@@ -442,13 +543,17 @@ export class MessagesComponent implements OnInit, OnDestroy {
     if (!this.activeAiKey) {
       this.aiStore.createConversation().subscribe((conversation) => {
         this.activeAiKey = conversation.key;
-        this.aiConversations = [conversation, ...this.aiConversations.filter((item) => item.key !== conversation.key)];
+        this.aiConversations = [
+          conversation,
+          ...this.aiConversations.filter((item) => item.key !== conversation.key)
+        ];
         this.sendAiMessage();
       });
       return;
     }
 
     const baseMessages = [...this.aiMessages];
+
     const userMessage: AiConversationMessage = {
       id: Date.now(),
       sender: 'me',
@@ -480,14 +585,18 @@ export class MessagesComponent implements OnInit, OnDestroy {
       next: (response: any) => {
         const result = response?.data;
         const responseConversationKey = String(response?.panel_id || response?.messages_id || '').trim();
-        if (responseConversationKey) this.activeAiKey = responseConversationKey;
+
+        if (responseConversationKey) {
+          this.activeAiKey = responseConversationKey;
+        }
 
         const cleanMessages = this.aiMessages.filter((message) => !message.loading);
         const answerText = String(response?.answer || '').trim();
+
         const attachedProducts =
           result?.mode === 'list' && Array.isArray(result?.list) ? result.list :
-          result?.mode === 'product' && Array.isArray(result?.exact) ? result.exact :
-          [];
+            result?.mode === 'product' && Array.isArray(result?.exact) ? result.exact :
+              [];
 
         const aiMessage: AiConversationMessage = {
           id: Date.now() + 2,
@@ -505,6 +614,7 @@ export class MessagesComponent implements OnInit, OnDestroy {
       },
       error: () => {
         const cleanMessages = this.aiMessages.filter((message) => !message.loading);
+
         const aiMessage: AiConversationMessage = {
           id: Date.now() + 3,
           sender: 'ai',
@@ -521,13 +631,18 @@ export class MessagesComponent implements OnInit, OnDestroy {
   }
 
   getOtherUserId(): number | null {
-    const panel = this.conversations.find((conversation) => String(conversation.key) === String(this.activeKey));
+    const panel = this.conversations.find((conversation) =>
+      String(conversation.key) === String(this.activeKey)
+    );
+
     return panel?.otherUserId ?? null;
   }
 
   private openAiConversation(key: string) {
     this.activeAiKey = key;
+
     this.aiStore.setActiveConversationKey(key).subscribe();
+
     this.aiStore.getConversation(key).subscribe((conversation) => {
       if (conversation?.messages?.length) {
         this.aiMessages = [...conversation.messages];
@@ -537,22 +652,32 @@ export class MessagesComponent implements OnInit, OnDestroy {
         this.selectedAiResponseMessageId = null;
         this.selectedAiResponseProducts = [];
       }
-      if (this.isMobile) this.mobileView = 'chat';
+
+      if (this.isMobile) {
+        this.mobileView = 'chat';
+      }
+
       setTimeout(() => this.scrollToBottom(false), 0);
     });
   }
 
   private deleteAiConversation(key: string) {
     if (!confirm('Biztos torlod ezt az AI beszelgetest?')) return;
+
     this.aiStore.deleteConversation(key).subscribe((conversations) => {
       this.aiConversations = conversations;
+
       if (this.activeAiKey === key) {
-        if (this.aiConversations.length) this.openAiConversation(this.aiConversations[0].key);
-        else {
+        if (this.aiConversations.length) {
+          this.openAiConversation(this.aiConversations[0].key);
+        } else {
           this.activeAiKey = null;
           this.aiMessages = [];
           this.aiStore.setActiveConversationKey(null).subscribe();
-          if (this.isMobile) this.mobileView = 'list';
+
+          if (this.isMobile) {
+            this.mobileView = 'list';
+          }
         }
       }
     });
@@ -560,7 +685,9 @@ export class MessagesComponent implements OnInit, OnDestroy {
 
   private saveCurrentAiConversation(messages: AiConversationMessage[], lastText: string) {
     if (!this.activeAiKey) return;
+
     const firstUserMessage = messages.find((message) => message.sender === 'me')?.text || '';
+
     const conversation: AiConversationRecord = {
       key: this.activeAiKey,
       title: this.aiStore.buildTitle(firstUserMessage),
@@ -577,22 +704,30 @@ export class MessagesComponent implements OnInit, OnDestroy {
   private loadAiConversations(afterLoad?: () => void) {
     this.aiStore.getConversations().subscribe((conversations) => {
       this.aiConversations = conversations;
+
       if (!this.activeAiKey && this.aiConversations.length) {
         this.activeAiKey = this.aiConversations[0].key;
       }
-      if (afterLoad) afterLoad();
+
+      if (afterLoad) {
+        afterLoad();
+      }
     });
   }
 
   timeAgo(date: string | number): string {
     const diff = Math.floor((this.nowMs - new Date(date).getTime()) / 1000);
+
     if (diff < 60) return `${diff}s`;
     if (diff < 3600) return `${Math.floor(diff / 60)}m`;
     if (diff < 86400) return `${Math.floor(diff / 3600)}h`;
     return `${Math.floor(diff / 86400)}d`;
   }
 
-  formatAiText(text: string, products: any[] = []): Array<{ type: 'heading' | 'bullet' | 'paragraph', text: string, mention?: string | null, product?: any | null }> {
+  formatAiText(
+    text: string,
+    products: any[] = []
+  ): Array<{ type: 'heading' | 'bullet' | 'paragraph', text: string, mention?: string | null, product?: any | null }> {
     return String(text || '')
       .split('\n')
       .map((line) => line.trim())
@@ -602,8 +737,14 @@ export class MessagesComponent implements OnInit, OnDestroy {
         const mention = this.extractMentionFromLine(line);
         const product = mention ? this.pickBestMentionMatch(products, mention) : null;
 
-        if (/^#{1,6}\s*/.test(line)) return { type: 'heading', text: clean, mention: null, product: null };
-        if (/^[-*•]\s+/.test(line)) return { type: 'bullet', text: clean.replace(/^[-*•]\s+/, ''), mention, product };
+        if (/^#{1,6}\s*/.test(line)) {
+          return { type: 'heading', text: clean, mention: null, product: null };
+        }
+
+        if (/^[-*•]\s+/.test(line)) {
+          return { type: 'bullet', text: clean.replace(/^[-*•]\s+/, ''), mention, product };
+        }
+
         return { type: 'paragraph', text: clean, mention, product };
       });
   }
@@ -626,6 +767,7 @@ export class MessagesComponent implements OnInit, OnDestroy {
     ];
 
     const localTarget = this.pickBestMentionMatch(localProducts, q);
+
     if (localTarget) {
       this.selectAiProduct(localTarget);
       return;
@@ -639,6 +781,7 @@ export class MessagesComponent implements OnInit, OnDestroy {
         const items = Array.isArray(response)
           ? response
           : (Array.isArray(response?.items) ? response.items : []);
+
         const target = this.pickBestMentionMatch(items, q);
 
         if (!target) {
@@ -661,35 +804,52 @@ export class MessagesComponent implements OnInit, OnDestroy {
       this.selectAiProduct(block.product);
       return;
     }
+
     this.openAiMentionByName(String(block?.mention || ''), products);
   }
 
   aiInlineDetails(product: any): any {
-    return this.normalizeAiDetails(product?.data ?? product, product, this.resolveProductTable(product), this.resolveProductId(product));
+    return this.normalizeAiDetails(
+      product?.data ?? product,
+      product,
+      this.resolveProductTable(product),
+      this.resolveProductId(product)
+    );
   }
 
   aiInlineVisibleKeys(product: any): string[] {
     const details = this.aiInlineDetails(product);
-    return Object.keys(details || {}).filter((key) => !this.isHiddenAiKey(key)).slice(0, 4);
+    return Object.keys(details || {})
+      .filter((key) => !this.isHiddenAiKey(key))
+      .slice(0, 4);
   }
 
   openAiProduct(product: any) {
     const table = this.resolveProductTable(product);
     const id = this.resolveProductId(product);
+
     if (table && id !== undefined && id !== null) {
       this.router.navigate(['/product-site', table, id]);
       return;
     }
+
     this.openAiProductByLookup(product);
   }
 
   aiResponsePreview(product: any): any {
-    return this.normalizeAiDetails(product?.data ?? product, product, this.resolveProductTable(product), this.resolveProductId(product));
+    return this.normalizeAiDetails(
+      product?.data ?? product,
+      product,
+      this.resolveProductTable(product),
+      this.resolveProductId(product)
+    );
   }
 
   aiResponsePreviewKeys(product: any): string[] {
     const details = this.aiResponsePreview(product);
-    return Object.keys(details || {}).filter((key) => !this.isHiddenAiKey(key)).slice(0, 3);
+    return Object.keys(details || {})
+      .filter((key) => !this.isHiddenAiKey(key))
+      .slice(0, 3);
   }
 
   aiResponseDisplayName(product: any): string {
@@ -717,6 +877,7 @@ export class MessagesComponent implements OnInit, OnDestroy {
   private selectAiProduct(product: any) {
     const table = this.resolveProductTable(product);
     const id = this.resolveProductId(product);
+
     this.selectedAiProduct = product;
     this.selectedAiProductDetails = null;
     this.selectedAiProductKeys = [];
@@ -728,6 +889,7 @@ export class MessagesComponent implements OnInit, OnDestroy {
     }
 
     this.selectedAiProductLoading = true;
+
     this.productService.getProductDetails(String(table), String(id)).subscribe({
       next: (res: any) => {
         const item = this.normalizeAiDetails(res?.item ?? res, product, table, id);
@@ -744,7 +906,14 @@ export class MessagesComponent implements OnInit, OnDestroy {
   }
 
   private openAiProductByLookup(product: any) {
-    const query = String(product?.name ?? product?.model ?? product?.data?.name ?? product?.data?.model ?? '').trim();
+    const query = String(
+      product?.name ??
+      product?.model ??
+      product?.data?.name ??
+      product?.data?.model ??
+      ''
+    ).trim();
+
     if (!query) return;
 
     this.http.get<any>('/api/products', {
@@ -752,9 +921,15 @@ export class MessagesComponent implements OnInit, OnDestroy {
       withCredentials: true
     }).subscribe({
       next: (response) => {
-        const items = Array.isArray(response) ? response : (Array.isArray(response?.items) ? response.items : []);
+        const items = Array.isArray(response)
+          ? response
+          : (Array.isArray(response?.items) ? response.items : []);
+
         const target = this.pickBestMentionMatch(items, query);
-        if (target) this.selectAiProduct(target);
+
+        if (target) {
+          this.selectAiProduct(target);
+        }
       },
       error: () => {}
     });
@@ -762,29 +937,64 @@ export class MessagesComponent implements OnInit, OnDestroy {
 
   private resolveProductTable(product: any): string {
     const direct =
-      product?.table_name ?? product?.source_table ?? product?.table ?? product?.product_table ??
-      product?.data?.table_name ?? product?.data?.source_table ?? product?.data?.table ?? product?.data?.product_table;
-    if (String(direct ?? '').trim()) return String(direct).trim();
+      product?.table_name ??
+      product?.source_table ??
+      product?.table ??
+      product?.product_table ??
+      product?.data?.table_name ??
+      product?.data?.source_table ??
+      product?.data?.table ??
+      product?.data?.product_table;
 
-    const type = String(product?.type ?? product?.category ?? product?.data?.type ?? product?.data?.category ?? '').trim().toLowerCase();
+    if (String(direct ?? '').trim()) {
+      return String(direct).trim();
+    }
+
+    const type = String(
+      product?.type ??
+      product?.category ??
+      product?.data?.type ??
+      product?.data?.category ??
+      ''
+    ).trim().toLowerCase();
+
     return this.aiTypeToTable[type] || '';
   }
 
   private resolveProductId(product: any): number | string | null {
-    const rawId = product?.id ?? product?.product_id ?? product?.products_id ?? product?.data?.id ?? product?.data?.product_id ?? product?.data?.products_id;
-    if (rawId === undefined || rawId === null || rawId === '') return null;
+    const rawId =
+      product?.id ??
+      product?.product_id ??
+      product?.products_id ??
+      product?.data?.id ??
+      product?.data?.product_id ??
+      product?.data?.products_id;
+
+    if (rawId === undefined || rawId === null || rawId === '') {
+      return null;
+    }
+
     return rawId;
   }
 
   private pickBestMentionMatch(items: any[], name: string): any | null {
     const normalizedTarget = this.normalizeMention(name);
-    if (!items.length || !normalizedTarget) return null;
-    const exact = items.find((item) => this.normalizeMention(item?.name || item?.model) === normalizedTarget);
+
+    if (!items.length || !normalizedTarget) {
+      return null;
+    }
+
+    const exact = items.find((item) =>
+      this.normalizeMention(item?.name || item?.model) === normalizedTarget
+    );
+
     if (exact) return exact;
+
     const contains = items.find((item) => {
       const candidate = this.normalizeMention(item?.name || item?.model);
       return candidate.includes(normalizedTarget) || normalizedTarget.includes(candidate);
     });
+
     return contains || items[0] || null;
   }
 
@@ -799,32 +1009,74 @@ export class MessagesComponent implements OnInit, OnDestroy {
 
   private extractMentionFromLine(line: string): string | null {
     const cleanedLine = String(line || '').replace(/\*\*/g, '').trim();
-    if (!cleanedLine || /^#{1,6}\s*/.test(cleanedLine)) return null;
 
-    const match = cleanedLine.match(/^[-*•]?\s*([A-Z0-9][A-Za-z0-9+/.()' -]{2,90}?)(?:\s+[–-]\s+|:\s*$|\s+\d[\d\s,.]*\s*(ft|forint)\s*$)/i);
+    if (!cleanedLine || /^#{1,6}\s*/.test(cleanedLine)) {
+      return null;
+    }
+
+    const match = cleanedLine.match(
+      /^[-*•]?\s*([A-Z0-9][A-Za-z0-9+/.()' -]{2,90}?)(?:\s+[–-]\s+|:\s*$|\s+\d[\d\s,.]*\s*(ft|forint)\s*$)/i
+    );
+
     if (!match) return null;
 
     const candidate = String(match[1] || '').trim().replace(/[.:;,]+$/, '');
     if (!candidate || candidate.length < 4) return null;
+
     return candidate;
   }
 
   private isHiddenAiKey(key: string): boolean {
     const normalized = String(key || '').toLowerCase();
-    return ['id', 'created_at', 'updated_at', 'price', 'manufacturer', 'model', 'name', 'table_name', 'source_table', 'product_table', 'table', 'category', 'type', 'products', 'data'].includes(normalized);
+
+    return [
+      'id',
+      'created_at',
+      'updated_at',
+      'price',
+      'manufacturer',
+      'model',
+      'name',
+      'table_name',
+      'source_table',
+      'product_table',
+      'table',
+      'category',
+      'type',
+      'products',
+      'data'
+    ].includes(normalized);
   }
 
   private normalizeAiDetails(item: any, fallbackProduct: any, table: any, id: any): any {
     const source = item && typeof item === 'object' ? item : {};
+
     return {
       ...source,
       table_name: source?.table_name ?? table,
       id: source?.id ?? id,
-      manufacturer: source?.manufacturer ?? source?.Manufacturer ?? fallbackProduct?.manufacturer ?? fallbackProduct?.data?.manufacturer ?? '',
-      model: source?.model ?? source?.Model ?? source?.name ?? fallbackProduct?.name ?? fallbackProduct?.model ?? fallbackProduct?.data?.model ?? '',
+      manufacturer:
+        source?.manufacturer ??
+        source?.Manufacturer ??
+        fallbackProduct?.manufacturer ??
+        fallbackProduct?.data?.manufacturer ??
+        '',
+      model:
+        source?.model ??
+        source?.Model ??
+        source?.name ??
+        fallbackProduct?.name ??
+        fallbackProduct?.model ??
+        fallbackProduct?.data?.model ??
+        '',
       price: this.parseAiPrice(
-        source?.price ?? source?.Price ?? source?.price_range ?? source?.['Price Range (Ft)'] ??
-        fallbackProduct?.price ?? fallbackProduct?.data?.price ?? null
+        source?.price ??
+        source?.Price ??
+        source?.price_range ??
+        source?.['Price Range (Ft)'] ??
+        fallbackProduct?.price ??
+        fallbackProduct?.data?.price ??
+        null
       )
     };
   }
@@ -832,9 +1084,14 @@ export class MessagesComponent implements OnInit, OnDestroy {
   private parseAiPrice(raw: any): number | null {
     if (raw == null || raw === '') return null;
     if (typeof raw === 'number') return Number.isFinite(raw) ? Math.round(raw) : null;
-    const nums = (String(raw).match(/\d+(\.\d+)?/g) || []).map(Number).filter(Number.isFinite);
+
+    const nums = (String(raw).match(/\d+(\.\d+)?/g) || [])
+      .map(Number)
+      .filter(Number.isFinite);
+
     if (!nums.length) return null;
     if (nums.length === 1) return Math.round(nums[0]);
+
     return Math.round((Math.min(...nums) + Math.max(...nums)) / 2);
   }
 
@@ -849,13 +1106,23 @@ export class MessagesComponent implements OnInit, OnDestroy {
 
   private dedupeAiProducts(products: any[]): any[] {
     const seen = new Set<string>();
+
     return (products || []).filter((product) => {
       const key = [
         this.resolveProductTable(product),
         this.resolveProductId(product),
-        this.normalizeMention(product?.name || product?.model || product?.data?.name || product?.data?.model)
+        this.normalizeMention(
+          product?.name ||
+          product?.model ||
+          product?.data?.name ||
+          product?.data?.model
+        )
       ].join('|');
-      if (!key.replace(/\|/g, '').trim() || seen.has(key)) return false;
+
+      if (!key.replace(/\|/g, '').trim() || seen.has(key)) {
+        return false;
+      }
+
       seen.add(key);
       return true;
     });
@@ -863,13 +1130,16 @@ export class MessagesComponent implements OnInit, OnDestroy {
 
   private syncSelectedAiResponse() {
     const selected = this.aiMessages.find((message: any) => message?.id === this.selectedAiResponseMessageId);
+
     if (selected && Array.isArray((selected as any)?.products) && (selected as any).products.length) {
       this.selectedAiResponseProducts = this.dedupeAiProducts((selected as any).products || []);
       return;
     }
 
     const latest = [...this.aiMessages].reverse().find((message: any) =>
-      message?.sender === 'ai' && Array.isArray(message?.products) && message.products.length
+      message?.sender === 'ai' &&
+      Array.isArray(message?.products) &&
+      message.products.length
     );
 
     if (latest) {

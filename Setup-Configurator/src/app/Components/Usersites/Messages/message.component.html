@@ -1,14 +1,14 @@
 <div class="chat-layout">
   <div class="chat-sidebar" [class.hidden-mobile]="isMobile && mobileView !== 'list'">
     <div class="sidebar-header">
-      <div class="sidebar-title">Beszélgetések</div>
+      <div class="sidebar-title">Beszélgetesek</div>
 
       <div class="messages-ai-toggle-row">
-        <label class="hierarchy-toggle" [class.hierarchy-active]="mode === 'ai'">
+        <label class="hierarchy-toggle" [class.hierarchy-active]="messagesAiEnabled">
           <input
             type="checkbox"
             class="hierarchy-toggle-input"
-            [checked]="mode === 'ai'"
+            [checked]="messagesAiEnabled"
             (change)="onToggleMode($any($event.target).checked)" />
 
           <span class="hierarchy-toggle-track"></span>
@@ -18,7 +18,7 @@
         <div class="messages-ai-copy">
           <div class="messages-ai-title">MessagesAI</div>
           <div class="messages-ai-sub">
-            {{ mode === 'ai' ? 'AI nézet aktív' : 'Normál üzenet nézet aktív' }}
+            {{ messagesAiEnabled ? 'AI nézet aktív' : 'Normál nézet aktív' }}
           </div>
         </div>
       </div>
