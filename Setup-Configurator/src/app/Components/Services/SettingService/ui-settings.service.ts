@@ -24,7 +24,7 @@ const DEFAULT_SETTINGS: UiSettings = {
   compactLayout: false,
   autoOpenProduct: true,
   language: 'hu',
-  theme: 'glass-slate',
+  theme: 'clean-cyan',
   publicProfile: true,
   rememberFilters: true,
 };

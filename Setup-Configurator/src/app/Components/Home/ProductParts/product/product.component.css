@@ -116,3 +116,27 @@
   transform: translateY(-1px);
   box-shadow: 0 0 0 1px color-mix(in srgb, var(--page-accent, #67e8f9) 18%, transparent);
 }
+
+body[data-appearance="light"] .product-card {
+  background: var(--bg-elevated);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow-soft);
+  backdrop-filter: none;
+}
+
+body[data-appearance="light"] .product-card:hover {
+  border-color: var(--page-accent-2);
+  box-shadow: var(--shadow-soft);
+}
+
+body[data-appearance="light"] .product-card h3 {
+  color: var(--text);
+}
+
+body[data-appearance="light"] .product-card p {
+  color: var(--muted);
+}
+
+body[data-appearance="light"] .product-img {
+  filter: drop-shadow(0 8px 16px var(--line));
+}

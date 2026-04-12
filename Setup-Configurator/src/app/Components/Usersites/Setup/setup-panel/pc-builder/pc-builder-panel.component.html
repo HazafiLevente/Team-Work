@@ -45,7 +45,7 @@
               }
             </option>
 
-            @for (mb of getCompatibleMotherboards(); track getId(mb)) {
+            @for (mb of getVisibleMotherboards(); track getId(mb)) {
               <option [ngValue]="getId(mb)">
                 {{ getMotherboardLabel(mb) }}
               </option>
@@ -58,17 +58,18 @@
           <select
             class="select"
             [(ngModel)]="selectedRamId"
-            [disabled]="!canSelectRam()"
           >
             <option [ngValue]="null">
-              @if (!canSelectRam()) {
-                -- choose compatible motherboard first --
+              @if (rams.length === 0) {
+                -- no RAM loaded --
+              } @else if (!getSelectedMotherboard()) {
+                -- choose RAM (motherboard optional) --
               } @else {
                 -- choose RAM --
               }
             </option>
 
-            @for (ram of getCompatibleRams(); track getId(ram)) {
+            @for (ram of getVisibleRams(); track getId(ram)) {
               <option [ngValue]="getId(ram)">
                 {{ getRamLabel(ram) }}
               </option>

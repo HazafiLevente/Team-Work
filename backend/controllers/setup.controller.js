@@ -23,6 +23,123 @@ const SETUP_PROPERTIES_TABLE = "setup_properties";
 const PC_BUILDS_TABLE = "pc_details[Setup]";
 const CAR_SETUP_TABLE = "Car_setup[Setup]";
 
+exports.pcParts = async (req, res) => {
+    try {
+        const cacheKey = "pcparts:v3";
+        const cached = cacheGet(pcPartsCache, cacheKey);
+        if (cached) return res.json({ parts: cached });
+
+        const { data, error } = await supabase
+            .from("products")
+            .select("id, name, type, category")
+            .eq("type", "pc")
+            .order("name", { ascending: true })
+            .limit(5000);
+
+        if (error) throw error;
+
+        const productRows = Array.isArray(data) ? data : [];
+        const valuesIndex = await getProductValuesIndex(productRows.map((row) => row.id));
+
+        const parts = productRows
+            .map((row) => {
+                const valueMap = valuesIndex.get(String(row.id)) || {};
+                const slot = resolvePcSlotFromRow(row, valueMap);
+                if (!slot) return null;
+
+                const manufacturer = toCleanString(
+                    pickFirstValue(valueMap, ["manufacturer", "Manufacturer", "brand", "Brand"])
+                ) || inferManufacturerFromName(row?.name);
+                const model = toCleanString(
+                    pickFirstValue(valueMap, ["model", "Model", "product_name", "name", "Name"])
+                ) || toCleanString(row?.name);
+                const socket = normalizeSocket(
+                    pickTypedValue(valueMap, ["processors", "motherboard"], [
+                        "socket",
+                        "Socket",
+                        "cpu_socket",
+                        "CPU Socket",
+                        "CPU socket",
+                        "socket_type",
+                        "Socket Type",
+                        "processor_socket",
+                        "Processor Socket",
+                        "cpu_foglalat",
+                        "CPU foglalat",
+                        "foglalat",
+                        "platform",
+                        "Platform"
+                    ])
+                );
+                const ram_type = normalizeRamType(
+                    pickTypedValue(valueMap, ["motherboard", "ram"], [
+                        "ram_type",
+                        "RAM Type",
+                        "Ram Type",
+                        "memory_type",
+                        "Memory Type",
+                        "memory",
+                        "Memory",
+                        "memory_standard",
+                        "Memory Standard",
+                        "ddr_type",
+                        "DDR Type",
+                        "ddr",
+                        "DDR"
+                    ])
+                );
+                const wattage = toCleanString(
+                    pickTypedValue(valueMap, ["psu"], ["wattage", "Wattage", "power", "Power"])
+                );
+                const efficiency = toCleanString(
+                    pickTypedValue(valueMap, ["psu"], ["efficiency", "Efficiency", "80_plus", "80 Plus"])
+                );
+                const price = pickFirstValue(valueMap, ["price", "Price", "price_huf", "Price Range (Ft)"]);
+
+                const extras = [];
+                if (slot === "motherboard" && socket) extras.push(socket);
+                if (slot === "motherboard" && ram_type) extras.push(ram_type);
+                if (slot === "ram" && ram_type) extras.push(ram_type);
+                if (slot === "psu" && wattage) extras.push(`${wattage}W`);
+                if (slot === "psu" && efficiency) extras.push(efficiency);
+
+                const rawName = toCleanString(row?.name);
+                const displayBase = manufacturer && model && !model.toLowerCase().startsWith(manufacturer.toLowerCase())
+                    ? `${manufacturer} ${model}`
+                    : (model || manufacturer || rawName || `PC part #${row?.id}`);
+
+                return {
+                    id: Number(row.id),
+                    slot,
+                    source_table: "products",
+                    category: toCleanString(row?.category),
+                    manufacturer,
+                    model,
+                    socket,
+                    ram_type,
+                    wattage,
+                    efficiency,
+                    price,
+                    display_name: extras.length ? `${displayBase} (${extras.join(", ")})` : displayBase
+                };
+            })
+            .filter(Boolean);
+
+        const order = { cpu: 1, gpu: 2, motherboard: 3, ram: 4, psu: 5, other: 9 };
+        parts.sort((a, b) => {
+            const slotDiff = (order[a.slot] ?? 99) - (order[b.slot] ?? 99);
+            if (slotDiff !== 0) return slotDiff;
+            return String(a.display_name || "").localeCompare(String(b.display_name || ""), "hu");
+        });
+
+        cacheSet(pcPartsCache, cacheKey, parts, PCPARTS_TTL_MS);
+        return res.json({ parts });
+    } catch (err) {
+        console.error("Ă˘ĹĄĹš pcParts hiba:", err);
+        return res.json({ parts: [] });
+    }
+};
+
 /* =========================================================
    âś… FIX: elĹ‘re blacklisteljĂĽk az Ă¶sszes eddig logolt tĂˇblĂˇt,
    amiben biztosan nincs setup_id
@@ -239,6 +356,368 @@ async function upsertSetupValue(setupId, propertyId, value) {
         .insert([payload]);
 
     if (error) throw error;
+}
+
+const PC_ROLE_TO_FIELD = {
+    cpu: "processor_id",
+    gpu: "videocard_id",
+    motherboard: "motherboard_id",
+    ram: "ram_id",
+    psu: "psu_id",
+};
+
+const PC_FIELD_TO_ROLE = Object.entries(PC_ROLE_TO_FIELD).reduce((acc, [role, field]) => {
+    acc[field] = role;
+    return acc;
+}, {});
+
+const PC_CATEGORY_TO_SLOT = {
+    cpu: "cpu",
+    processor: "cpu",
+    processors: "cpu",
+    gpu: "gpu",
+    videocard: "gpu",
+    videocards: "gpu",
+    video_card: "gpu",
+    video_cards: "gpu",
+    graphics_card: "gpu",
+    motherboard: "motherboard",
+    motherboards: "motherboard",
+    mainboard: "motherboard",
+    mainboards: "motherboard",
+    mobo: "motherboard",
+    mobos: "motherboard",
+    mb: "motherboard",
+    alaplap: "motherboard",
+    alaplapok: "motherboard",
+    systemboard: "motherboard",
+    logicboard: "motherboard",
+    ram: "ram",
+    rams: "ram",
+    memory: "ram",
+    memories: "ram",
+    dram: "ram",
+    ddr: "ram",
+    psu: "psu",
+    psus: "psu",
+    power_supply: "psu",
+};
+
+function toCleanString(value) {
+    return value == null ? "" : String(value).trim();
+}
+
+function normalizeKey(value) {
+    return toCleanString(value).toLowerCase();
+}
+
+function resolvePcSlot(categoryValue) {
+    const normalized = normalizeKey(categoryValue);
+    if (!normalized) return null;
+
+    if (PC_CATEGORY_TO_SLOT[normalized]) {
+        return PC_CATEGORY_TO_SLOT[normalized];
+    }
+
+    if (
+        normalized.includes("cooler") ||
+        normalized.includes("cooling") ||
+        normalized.includes("fan") ||
+        normalized.includes("heatsink") ||
+        normalized.includes("water")
+    ) {
+        return null;
+    }
+
+    if (normalized.includes("mother")) return "motherboard";
+    if (normalized.includes("mainboard")) return "motherboard";
+    if (normalized.includes("mobo")) return "motherboard";
+    if (normalized === "mb") return "motherboard";
+    if (normalized.includes("alaplap")) return "motherboard";
+    if (normalized.includes("systemboard")) return "motherboard";
+    if (normalized.includes("logicboard")) return "motherboard";
+    if (normalized.includes("board")) return "motherboard";
+    if (normalized.includes("video") || normalized.includes("vga") || normalized.includes("gpu") || normalized.includes("graphic")) return "gpu";
+    if (normalized.includes("power") || normalized.includes("psu") || normalized.includes("tap")) return "psu";
+    if (normalized.includes("cpu") || normalized.includes("processor")) return "cpu";
+    if (normalized.includes("ram") || normalized.includes("memory") || normalized.includes("dram") || normalized.includes("ddr")) return "ram";
+
+    return null;
+}
+
+function resolvePcSlotFromRow(row, valueMap = {}) {
+    const typedSlot = resolvePcSlotFromValueMap(valueMap);
+    if (typedSlot) return typedSlot;
+
+    return (
+        resolvePcSlot(row?.category) ||
+        resolvePcSlot(row?.name) ||
+        resolvePcSlot(valueMap?.category) ||
+        resolvePcSlot(valueMap?.subcategory) ||
+        resolvePcSlot(valueMap?.sub_category) ||
+        resolvePcSlot(valueMap?.product_type) ||
+        resolvePcSlot(valueMap?.type) ||
+        null
+    );
+}
+
+function resolvePcSlotFromValueMap(valueMap = {}) {
+    const typed = valueMap?.__byType || {};
+    const typeKeys = Object.keys(typed).map((key) => normalizeKey(key));
+
+    if (typeKeys.includes("motherboard")) return "motherboard";
+    if (typeKeys.includes("processors") || typeKeys.includes("processor")) return "cpu";
+    if (typeKeys.includes("ram")) return "ram";
+    if (typeKeys.includes("psu") || typeKeys.includes("power_supply")) return "psu";
+    if (typeKeys.includes("video_cards") || typeKeys.includes("gpu") || typeKeys.includes("videocard")) return "gpu";
+
+    return null;
+}
+
+function normalizeSocket(value) {
+    const raw = toCleanString(value).toUpperCase();
+    if (!raw) return "";
+    return raw.replace(/\s+/g, "").replace(/SOCKET/g, "");
+}
+
+function normalizeRamType(value) {
+    const raw = toCleanString(value).toUpperCase();
+    if (!raw) return "";
+    if (raw.includes("DDR5")) return "DDR5";
+    if (raw.includes("DDR4")) return "DDR4";
+    if (raw.includes("DDR3")) return "DDR3";
+    return raw;
+}
+
+function pickFirstValue(source, keys) {
+    for (const key of keys) {
+        if (!source) continue;
+
+        if (source[key] !== undefined && source[key] !== null && String(source[key]).trim() !== "") {
+            return source[key];
+        }
+
+        const foundKey = Object.keys(source).find((candidate) => candidate.toLowerCase() === String(key).toLowerCase());
+        if (!foundKey) continue;
+
+        const value = source[foundKey];
+        if (value !== undefined && value !== null && String(value).trim() !== "") {
+            return value;
+        }
+    }
+
+    return null;
+}
+
+function pickTypedValue(valueMap, typeKeys, propertyKeys) {
+    const typed = valueMap?.__byType || {};
+
+    for (const typeKey of typeKeys || []) {
+        const normalizedType = normalizeKey(typeKey);
+        const actualTypeKey = Object.keys(typed).find((candidate) => normalizeKey(candidate) === normalizedType);
+        if (!actualTypeKey) continue;
+
+        const hit = pickFirstValue(typed[actualTypeKey], propertyKeys);
+        if (hit !== null && hit !== undefined && String(hit).trim() !== "") {
+            return hit;
+        }
+    }
+
+    return pickFirstValue(valueMap, propertyKeys);
+}
+
+function inferManufacturerFromName(name = "") {
+    const trimmed = toCleanString(name);
+    if (!trimmed) return "";
+    return trimmed.split(/\s+/)[0] || "";
+}
+
+function toNumericId(value) {
+    const parsed = Number(value);
+    return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
+}
+
+function buildPcSelectionFields(deviceRows = []) {
+    const selection = {
+        processor_id: null,
+        videocard_id: null,
+        motherboard_id: null,
+        ram_id: null,
+        psu_id: null,
+    };
+
+    for (const row of deviceRows) {
+        const role = normalizeKey(row?.role);
+        const field = PC_ROLE_TO_FIELD[role];
+        if (!field || selection[field] != null) continue;
+        selection[field] = toNumericId(row?.device_id);
+    }
+
+    return selection;
+}
+
+async function getPcSetupDeviceRows(setupIds) {
+    const ids = (setupIds || []).map(Number).filter((id) => Number.isFinite(id));
+    if (!ids.length) return [];
+
+    const roles = Object.keys(PC_ROLE_TO_FIELD);
+
+    const { data, error } = await supabase
+        .from(SETUP_DEVICES_TABLE)
+        .select("*")
+        .in("setup_id", ids)
+        .in("role", roles);
+
+    if (error) throw error;
+    return Array.isArray(data) ? data : [];
+}
+
+function groupPcSetupDevicesBySetupId(rows = []) {
+    const grouped = new Map();
+
+    for (const row of rows) {
+        const key = String(row?.setup_id ?? "");
+        if (!grouped.has(key)) grouped.set(key, []);
+        grouped.get(key).push(row);
+    }
+
+    return grouped;
+}
+
+async function enrichPcSetupRows(rows = []) {
+    const pcRows = (rows || []).filter((row) => normalizeKey(row?.type ?? row?.setup_type) === "pc");
+    if (!pcRows.length) return rows;
+
+    const deviceRows = await getPcSetupDeviceRows(pcRows.map((row) => row?.id ?? row?.setup_id));
+    const grouped = groupPcSetupDevicesBySetupId(deviceRows);
+
+    return rows.map((row) => {
+        if (normalizeKey(row?.type ?? row?.setup_type) !== "pc") return row;
+        const key = String(row?.id ?? row?.setup_id ?? "");
+        return {
+            ...row,
+            ...buildPcSelectionFields(grouped.get(key) || []),
+        };
+    });
+}
+
+function buildProductValuesIndex(rows = []) {
+    const index = new Map();
+
+    for (const row of rows) {
+        const productId = row?.products_id;
+        const propertyName = row?.properties?.property;
+        const propertyType = row?.properties?.type;
+
+        if (productId == null || !propertyName) continue;
+
+        const key = String(productId);
+        if (!index.has(key)) {
+            index.set(key, { __byType: {} });
+        }
+
+        const target = index.get(key);
+        const cleanPropertyName = String(propertyName).trim();
+        target[cleanPropertyName] = row?.value ?? null;
+
+        if (propertyType) {
+            const cleanType = String(propertyType).trim();
+            if (!target.__byType[cleanType]) {
+                target.__byType[cleanType] = {};
+            }
+            target.__byType[cleanType][cleanPropertyName] = row?.value ?? null;
+        }
+    }
+
+    return index;
+}
+
+async function getProductValuesIndex(productIds) {
+    const ids = (productIds || []).map(Number).filter((id) => Number.isFinite(id));
+    if (!ids.length) return new Map();
+
+    const { data, error } = await supabase
+        .from("values")
+        .select(`
+            products_id,
+            value,
+            properties:properties_id (
+                id,
+                property,
+                type
+            )
+        `)
+        .in("products_id", ids);
+
+    if (error) throw error;
+    return buildProductValuesIndex(Array.isArray(data) ? data : []);
+}
+
+async function syncPcSetupDevices(setupId, payload = {}) {
+    const roles = Object.keys(PC_ROLE_TO_FIELD);
+    const { data, error } = await supabase
+        .from(SETUP_DEVICES_TABLE)
+        .select("*")
+        .eq("setup_id", Number(setupId))
+        .in("role", roles)
+        .order("id", { ascending: true });
+
+    if (error) throw error;
+
+    const existingRows = Array.isArray(data) ? data : [];
+
+    for (const [field, role] of Object.entries(PC_FIELD_TO_ROLE)) {
+        const desiredProductId = toNumericId(payload[field]);
+        const existingForRole = existingRows.filter((row) => normalizeKey(row?.role) === role);
+        const primary = existingForRole[0] || null;
+        const duplicateIds = existingForRole.slice(1).map((row) => row?.id).filter((id) => id != null);
+
+        if (duplicateIds.length) {
+            const { error: duplicateDeleteError } = await supabase
+                .from(SETUP_DEVICES_TABLE)
+                .delete()
+                .in("id", duplicateIds);
+
+            if (duplicateDeleteError) throw duplicateDeleteError;
+        }
+
+        if (!desiredProductId) {
+            if (primary?.id != null) {
+                const { error: deleteError } = await supabase
+                    .from(SETUP_DEVICES_TABLE)
+                    .delete()
+                    .eq("id", primary.id);
+
+                if (deleteError) throw deleteError;
+            }
+            continue;
+        }
+
+        if (primary?.id != null) {
+            if (Number(primary.device_id) !== desiredProductId) {
+                const { error: updateError } = await supabase
+                    .from(SETUP_DEVICES_TABLE)
+                    .update({ device_id: desiredProductId })
+                    .eq("id", primary.id);
+
+                if (updateError) throw updateError;
+            }
+            continue;
+        }
+
+        const { error: insertError } = await supabase
+            .from(SETUP_DEVICES_TABLE)
+            .insert([{
+                setup_id: Number(setupId),
+                device_id: desiredProductId,
+                role,
+                pos_x: 0,
+                pos_y: 0,
+                rotation: 0
+            }]);
+
+        if (insertError) throw insertError;
+    }
 }
 
 /* -----------------------------
@@ -541,6 +1020,8 @@ exports.children = async (req, res) => {
                 x: Number(item.pos_x ?? 0),
                 y: Number(item.pos_y ?? 0)
             }, SETUPS_TABLE));
+
+            allItems = await enrichPcSetupRows(allItems);
         } else {
             const { data, error } = await supabase
                 .from(SETUP_DEVICES_TABLE)
@@ -856,7 +1337,7 @@ exports.pcBuildsList = async (req, res) => {
             y: Number(r.pos_y ?? 0)
         }));
 
-        return res.json({ pcs });
+        return res.json({ pcs: await enrichPcSetupRows(pcs) });
     } catch (err) {
         console.error("âťŚ pcBuildsList hiba:", err);
         return res.status(500).json({ pcs: [] });
@@ -924,11 +1405,24 @@ exports.pcBuildsUpdate = async (req, res) => {
         const ok = await assertRoomOwnedByUser(pcRow.room_id, userId);
         if (!ok) return res.status(403).json({ error: "Forbidden" });
 
+        const payload = {
+            processor_id: toNumericId(req.body?.processor_id),
+            videocard_id: toNumericId(req.body?.videocard_id),
+            motherboard_id: toNumericId(req.body?.motherboard_id),
+            ram_id: toNumericId(req.body?.ram_id),
+            psu_id: toNumericId(req.body?.psu_id)
+        };
+
+        await syncPcSetupDevices(pcId, payload);
+        childrenCache.delete(String(pcRow.room_id));
+        childrenCache.delete(String(pcId));
+
         return res.json({
             pc: {
                 ...pcRow,
                 setup_name: pcRow.name ?? "Nevtelen PC",
                 setup_type: "pc",
+                ...payload,
                 x: Number(pcRow.pos_x ?? 0),
                 y: Number(pcRow.pos_y ?? 0)
             }
@@ -939,7 +1433,7 @@ exports.pcBuildsUpdate = async (req, res) => {
     }
 };
 
-exports.pcParts = async (req, res) => {
+exports.pcPartsLegacy = async (req, res) => {
     try {
         const cacheKey = "pcparts:v2";
         const cached = cacheGet(pcPartsCache, cacheKey);

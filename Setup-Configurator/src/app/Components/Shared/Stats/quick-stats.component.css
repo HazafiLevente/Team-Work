@@ -121,3 +121,32 @@
 .chip.muted {
   opacity: .6;
 }
+
+body[data-appearance="light"] .quick-stats,
+body[data-appearance="light"] .qs {
+  border: 1px solid var(--line);
+  background: var(--bg-elevated);
+  box-shadow: var(--shadow-soft);
+}
+
+body[data-appearance="light"] .stat,
+body[data-appearance="light"] .tile {
+  border: 1px solid var(--line);
+  background: var(--surface);
+}
+
+body[data-appearance="light"] .label,
+body[data-appearance="light"] .k {
+  color: var(--muted);
+  opacity: 1;
+}
+
+body[data-appearance="light"] .value .num {
+  color: var(--text);
+}
+
+body[data-appearance="light"] .chip {
+  border: 1px solid var(--line);
+  background: var(--chrome-bg-hover);
+  color: var(--text);
+}

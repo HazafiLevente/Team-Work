@@ -16,11 +16,6 @@ import { MessagesPanelComponent } from './Components/Shared/Messages/messages-pa
 type ThemePalette = {
   pageAccent: string;
   pageAccent2: string;
-  surface: string;
-  glassAlpha: string;
-  glassBorder: string;
-  text: string;
-  muted: string;
   accentPurple: string;
   accentCyan: string;
   accentMagenta: string;
@@ -56,11 +51,6 @@ export class App implements OnInit, OnDestroy {
     'clean-cyan': {
       pageAccent: '#67e8f9',
       pageAccent2: '#38bdf8',
-      surface: 'rgba(8, 16, 24, 0.72)',
-      glassAlpha: 'rgba(255,255,255,0.04)',
-      glassBorder: 'rgba(255,255,255,0.10)',
-      text: '#f4f8ff',
-      muted: 'rgba(244,248,255,0.68)',
       accentPurple: '#38bdf8',
       accentCyan: '#67e8f9',
       accentMagenta: '#22d3ee',
@@ -71,11 +61,6 @@ export class App implements OnInit, OnDestroy {
     'purple-premium': {
       pageAccent: '#c084fc',
       pageAccent2: '#8b5cf6',
-      surface: 'rgba(18, 10, 30, 0.74)',
-      glassAlpha: 'rgba(255,255,255,0.04)',
-      glassBorder: 'rgba(255,255,255,0.10)',
-      text: '#f7f2ff',
-      muted: 'rgba(247,242,255,0.66)',
       accentPurple: '#c084fc',
       accentCyan: '#8b5cf6',
       accentMagenta: '#e879f9',
@@ -86,11 +71,6 @@ export class App implements OnInit, OnDestroy {
     'glass-slate': {
       pageAccent: '#34d399',
       pageAccent2: '#14b8a6',
-      surface: 'rgba(12, 20, 24, 0.62)',
-      glassAlpha: 'rgba(255,255,255,0.05)',
-      glassBorder: 'rgba(255,255,255,0.10)',
-      text: '#f3fbf8',
-      muted: 'rgba(243,251,248,0.66)',
       accentPurple: '#14b8a6',
       accentCyan: '#34d399',
       accentMagenta: '#2dd4bf',
@@ -101,11 +81,6 @@ export class App implements OnInit, OnDestroy {
     'soft-light': {
       pageAccent: '#818cf8',
       pageAccent2: '#38bdf8',
-      surface: 'rgba(20, 24, 36, 0.78)',
-      glassAlpha: 'rgba(255,255,255,0.06)',
-      glassBorder: 'rgba(255,255,255,0.12)',
-      text: '#eef4ff',
-      muted: 'rgba(238,244,255,0.70)',
       accentPurple: '#818cf8',
       accentCyan: '#38bdf8',
       accentMagenta: '#a5b4fc',
@@ -133,7 +108,7 @@ export class App implements OnInit, OnDestroy {
 
       document.body.classList.add(`theme-${s.theme}`);
 
-      this.applyTheme(s.theme);
+      this.applyTheme(s.theme, !!s.darkMode);
     });
   }
 
@@ -198,13 +173,16 @@ export class App implements OnInit, OnDestroy {
     this.userSub?.unsubscribe();
   }
 
-  private applyTheme(theme: UiThemeKey) {
+  private applyTheme(theme: UiThemeKey, darkMode: boolean) {
     const root = document.documentElement;
     const body = document.body;
     const palette = this.themePalettes[theme] || this.themePalettes['glass-slate'];
+    const appearance = darkMode ? 'dark' : 'light';
 
     root.setAttribute('data-theme', theme);
     body.setAttribute('data-theme', theme);
+    root.setAttribute('data-appearance', appearance);
+    body.setAttribute('data-appearance', appearance);
     this.applyThemePalette(root, palette);
     this.applyThemePalette(body, palette);
   }
@@ -212,11 +190,6 @@ export class App implements OnInit, OnDestroy {
   private applyThemePalette(target: HTMLElement, palette: ThemePalette) {
     target.style.setProperty('--page-accent', palette.pageAccent);
     target.style.setProperty('--page-accent-2', palette.pageAccent2);
-    target.style.setProperty('--surface', palette.surface);
-    target.style.setProperty('--glass-alpha', palette.glassAlpha);
-    target.style.setProperty('--glass-border', palette.glassBorder);
-    target.style.setProperty('--text', palette.text);
-    target.style.setProperty('--muted', palette.muted);
     target.style.setProperty('--accent-purple', palette.accentPurple);
     target.style.setProperty('--accent-cyan', palette.accentCyan);
     target.style.setProperty('--accent-magenta', palette.accentMagenta);

@@ -1,18 +1,82 @@
 <form class="settings-page" [formGroup]="form">
-  <section class="card hero-card">
-    <div>
-      <h2>Tema Beallitas</h2>
+  <section class="hero-card">
+    <div class="hero-copy">
+      <div class="eyebrow">Interface Studio</div>
+      <h2>Designold a feluletet a sajat stilusodra</h2>
       <p class="muted">
-        Itt tudod kiválasztani, melyik témát szeretnéd használni az oldalon.
+        Valassz megjelenesi modot, utana allitsd be a hozza tartozo szinpalettat.
+        A sotet nezet az alap, de a vilagos mod is teljes erteku es szabadon szinezheto.
       </p>
+
+      <div class="hero-stats">
+        <div class="stat-chip">
+          <span class="stat-label">Aktiv mod</span>
+          <strong>{{ activeAppearanceLabel }}</strong>
+        </div>
+        <div class="stat-chip">
+          <span class="stat-label">Aktiv paletta</span>
+          <strong>{{ activeThemeTitle }}</strong>
+        </div>
+      </div>
+    </div>
+
+    <div class="hero-preview">
+      <div class="preview-shell" [class.preview-light]="!form.value.darkMode">
+        <div class="preview-topbar">
+          <span></span><span></span><span></span>
+        </div>
+        <div class="preview-body" [ngClass]="selectedTheme?.previewClass">
+          <aside></aside>
+          <main>
+            <div class="preview-head"></div>
+            <div class="preview-panels">
+              <span></span>
+              <span></span>
+              <span></span>
+            </div>
+            <div class="preview-line"></div>
+          </main>
+        </div>
+      </div>
     </div>
   </section>
 
-  <section class="card">
+  <section class="panel-card">
     <div class="section-head">
       <div>
-        <h3>Tema</h3>
-        <p class="muted">Valassz egy témát, és az egész felület azonnal átvált.</p>
+        <div class="section-kicker">1. Megjelenes</div>
+        <h3>Valassz alap temat</h3>
+        <p class="muted">A mod a teljes felulet vilagossagat adja, a szinek utana kulon valthatok.</p>
+      </div>
+    </div>
+
+    <div class="appearance-grid">
+      <button
+        type="button"
+        *ngFor="let option of appearanceOptions"
+        class="appearance-card"
+        [class.active]="form.value.darkMode === (option.key === 'dark')"
+        (click)="setAppearance(option.key)">
+        <div class="appearance-visual" [class.light]="option.key === 'light'">
+          <div class="appearance-glow"></div>
+          <div class="appearance-surface">
+            <span></span><span></span><span></span>
+          </div>
+        </div>
+        <div class="appearance-copy">
+          <div class="appearance-title">{{ option.title }}</div>
+          <div class="appearance-sub">{{ option.sub }}</div>
+        </div>
+      </button>
+    </div>
+  </section>
+
+  <section class="panel-card">
+    <div class="section-head">
+      <div>
+        <div class="section-kicker">2. Szinpaletta</div>
+        <h3>Finomhangold a hangulatot</h3>
+        <p class="muted">Ugyanaz a paletta mukodik sotetben es vilagosban is, csak a felulet alaphangja valtozik.</p>
       </div>
       <div class="theme-badge">
         Aktiv: {{ activeThemeTitle }}
@@ -27,7 +91,7 @@
         [class.active]="isThemeActive(t.key)"
         (click)="selectTheme(t.key)">
 
-        <div class="theme-preview" [ngClass]="t.previewClass">
+        <div class="theme-preview" [ngClass]="t.previewClass" [class.preview-light]="!form.value.darkMode">
           <div class="mini-sidebar"></div>
           <div class="mini-content">
             <div class="mini-top"></div>
@@ -43,8 +107,63 @@
             <div class="active-pill" *ngIf="isThemeActive(t.key)">Aktiv</div>
           </div>
           <div class="theme-sub">{{ t.sub }}</div>
+          <div class="swatches">
+            <span *ngFor="let swatch of t.swatches" [style.background]="swatch"></span>
+          </div>
         </div>
       </button>
+    </div>
+  </section>
+
+  <section class="utility-grid">
+    <div class="panel-card compact-card">
+      <div class="section-kicker">3. Elrendezes</div>
+      <h3>Felhasznaloi beallitasok</h3>
+
+      <label class="toggle-row">
+        <div>
+          <div class="toggle-title">Kompakt nezet</div>
+          <div class="toggle-help">Surubb kartyaelrendezes, kevesebb whitespace.</div>
+        </div>
+        <input type="checkbox" formControlName="compactLayout">
+      </label>
+
+      <label class="toggle-row">
+        <div>
+          <div class="toggle-title">Auto-open product</div>
+          <div class="toggle-help">Termek kattintas utan nyissa meg azonnal a reszleteket.</div>
+        </div>
+        <input type="checkbox" formControlName="autoOpenProduct">
+      </label>
+
+      <label class="toggle-row">
+        <div>
+          <div class="toggle-title">Setup mod</div>
+          <div class="toggle-help">Gyorsabb setup epiteshez optimalizalt viselkedes.</div>
+        </div>
+        <input type="checkbox" formControlName="setupMode">
+      </label>
+    </div>
+
+    <div class="panel-card compact-card">
+      <div class="section-kicker">4. Profil es memoria</div>
+      <h3>Megjegyzesek</h3>
+
+      <label class="toggle-row">
+        <div>
+          <div class="toggle-title">Nyilvanos profil</div>
+          <div class="toggle-help">Masok is lathatjak a profilod nyilvanos elemeit.</div>
+        </div>
+        <input type="checkbox" formControlName="publicProfile">
+      </label>
+
+      <label class="toggle-row">
+        <div>
+          <div class="toggle-title">Szurok megjegyzese</div>
+          <div class="toggle-help">Tartsuk meg a korabbi keresesi szuroket.</div>
+        </div>
+        <input type="checkbox" formControlName="rememberFilters">
+      </label>
     </div>
   </section>
 </form>

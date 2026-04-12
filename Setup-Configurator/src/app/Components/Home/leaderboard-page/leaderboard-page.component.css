@@ -241,6 +241,70 @@
   border-color: rgba(255, 90, 90, 0.3);
 }
 
+body[data-appearance="light"] .leaderboard-page {
+  background: var(--bg);
+  color: var(--text);
+}
+
+body[data-appearance="light"] .subtitle,
+body[data-appearance="light"] .summary-k,
+body[data-appearance="light"] .summary-sub,
+body[data-appearance="light"] .user .username,
+body[data-appearance="light"] .progress-range,
+body[data-appearance="light"] .search-input::placeholder {
+  color: var(--muted);
+}
+
+body[data-appearance="light"] .back-btn,
+body[data-appearance="light"] .summary-card,
+body[data-appearance="light"] .search-input,
+body[data-appearance="light"] .board,
+body[data-appearance="light"] .state-card {
+  background: var(--bg-elevated);
+  border: 1px solid var(--line);
+  color: var(--text);
+  box-shadow: var(--shadow-soft);
+}
+
+body[data-appearance="light"] .search-input {
+  background: #fdf5e6;
+}
+
+body[data-appearance="light"] .board-head {
+  background: var(--surface-2);
+  color: var(--text);
+}
+
+body[data-appearance="light"] .board-row {
+  border-top: 1px solid var(--line);
+}
+
+body[data-appearance="light"] .board-row:hover {
+  background: var(--chrome-bg-hover);
+}
+
+body[data-appearance="light"] .board-row.top1,
+body[data-appearance="light"] .board-row.top2,
+body[data-appearance="light"] .board-row.top3 {
+  background: var(--chrome-bg);
+}
+
+body[data-appearance="light"] .board-row.me {
+  background: var(--theme-band-1);
+  border-left: 4px solid var(--page-accent);
+}
+
+body[data-appearance="light"] .summary-v,
+body[data-appearance="light"] .user .name,
+body[data-appearance="light"] .next-rank,
+body[data-appearance="light"] .progress-top {
+  color: var(--text);
+}
+
+body[data-appearance="light"] .progress-track {
+  background: var(--line);
+}
+
 @media (max-width: 980px) {
   .top-summary {
     grid-template-columns: 1fr;

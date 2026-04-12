@@ -3,10 +3,22 @@
     ------------------------- */
 :root{
   --bg: #070b12;
+  --bg-elevated: #0b1220;
   --surface: rgba(12, 20, 24, 0.62);
   --surface-2: rgba(18, 24, 37, 0.78);
   --glass-alpha: rgba(255,255,255,0.05);
   --glass-border: rgba(255,255,255,0.10);
+  --line: rgba(255,255,255,0.08);
+  --header-bg: rgba(9, 13, 21, 0.72);
+  --header-text: #f4f8ff;
+  --header-muted: rgba(255,255,255,0.58);
+  --chrome-bg: rgba(255,255,255,0.04);
+  --chrome-bg-hover: rgba(255,255,255,0.06);
+  --menu-bg: rgba(11, 15, 24, 0.9);
+  --overlay-top: rgba(0, 0, 0, 0.55);
+  --overlay-mid: rgba(0, 0, 0, 0.35);
+  --overlay-bottom: rgba(0, 0, 0, 0.65);
+  --veil-opacity: 1;
 
   --text: #f3fbf8;
   --muted: rgba(243,251,248,0.66);
@@ -46,11 +58,13 @@ html, body {
 
 body {
   position: relative;
+  color-scheme: dark;
   background:
     radial-gradient(circle at 20% 20%, rgba(255,255,255,0.04), transparent 35%),
     radial-gradient(circle at 80% 30%, rgba(255,255,255,0.03), transparent 35%),
     radial-gradient(circle at 50% 80%, rgba(255,255,255,0.025), transparent 45%),
-    #05070d;
+    var(--bg);
+  transition: background .25s ease, color .25s ease;
 }
 
 body::before{
@@ -76,6 +90,73 @@ body::after{
     radial-gradient(ellipse at 52% 17%, var(--theme-band-2), transparent 14%),
     radial-gradient(circle at 50% 85%, var(--theme-band-3), transparent 32%);
   opacity: .9;
+}
+
+body[data-appearance="light"] {
+  color-scheme: light;
+  --page-accent: #8b5e3c;
+  --page-accent-2: #bc8a5f;
+  --accent-cyan: #8b5e3c;
+  --accent-purple: #3a322f;
+  --accent-magenta: #bc8a5f;
+  --bg: #e6d5c1;
+  --bg-elevated: #dcc7b1;
+  --surface: rgba(230, 213, 193, 0.96);
+  --surface-2: rgba(220, 199, 177, 0.45);
+  --glass-alpha: rgba(253, 245, 230, 0.6);
+  --glass-border: rgba(139, 94, 60, 0.35);
+  --line: rgba(139, 94, 60, 0.32);
+  --text: #2a2421;
+  --muted: rgba(42, 36, 33, 0.85);
+  --header-bg: #3b2b20;
+  --header-text: #fdf5e6;
+  --header-muted: rgba(253, 245, 230, 0.75);
+  --chrome-bg: #dcc7b1;
+  --chrome-bg-hover: #d2b48c;
+  --menu-bg: rgba(230, 213, 193, 0.98);
+  --overlay-top: rgba(255, 255, 255, 0);
+  --overlay-mid: rgba(255, 255, 255, 0);
+  --overlay-bottom: rgba(255, 255, 255, 0);
+  --veil-opacity: 0;
+  --theme-band-1: rgba(139, 94, 60, 0.12);
+  --theme-band-2: rgba(188, 138, 95, 0.14);
+  --theme-band-3: rgba(220, 199, 177, 0.18);
+  --shadow-soft: 0 14px 34px rgba(42, 36, 33, 0.12);
+  scrollbar-color: #8b5e3c #e6d5c1;
+}
+
+/* Scrollbar light mode overrides */
+body[data-appearance="light"] ::-webkit-scrollbar-track,
+body[data-appearance="light"]::-webkit-scrollbar-track {
+  background: #e6d5c1 !important;
+}
+
+body[data-appearance="light"] ::-webkit-scrollbar-thumb,
+body[data-appearance="light"]::-webkit-scrollbar-thumb {
+  background: #8b5e3c !important;
+  border: 3px solid #e6d5c1 !important;
+}
+
+body[data-appearance="light"] ::-webkit-scrollbar-thumb:hover,
+body[data-appearance="light"]::-webkit-scrollbar-thumb:hover {
+  background: #6f4a30 !important;
+}
+
+body[data-appearance="light"] ::placeholder,
+body[data-appearance="light"]::-webkit-input-placeholder {
+  color: rgba(42, 36, 33, 0.65) !important;
+}
+
+body[data-appearance="light"] input,
+body[data-appearance="light"] textarea,
+body[data-appearance="light"] select {
+  background: #fdf5e6 !important;
+  color: #2a2421 !important;
+  border-color: rgba(139, 94, 60, 0.35) !important;
+}
+
+body[data-appearance="light"]::after {
+  opacity: 0;
 }
 
 body[data-theme="clean-cyan"]{
@@ -124,7 +205,7 @@ body[data-theme="soft-light"]{
 
 .surface-soft{
   background: var(--surface-2);
-  border: 1px solid rgba(255,255,255,0.08);
+  border: 1px solid var(--line);
   border-radius: var(--radius-lg);
   backdrop-filter: blur(10px);
 }
@@ -141,7 +222,8 @@ button, input, select, textarea {
 input[type="text"],
 input[type="password"],
 input[type="email"],
-textarea {
+textarea,
+select {
   background: var(--glass-alpha);
   border: 1px solid var(--glass-border);
   border-radius: var(--radius);
@@ -170,24 +252,36 @@ body.compact .row {
 }
 
 ::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.02);
+  background: color-mix(in srgb, var(--text) 6%, transparent);
 }
 
 ::-webkit-scrollbar-thumb {
   background: linear-gradient(180deg,
-  rgba(138, 43, 226, 0.55),
-    /* purple */
-  rgba(0, 255, 255, 0.45)
-    /* cyan */
+  color-mix(in srgb, var(--page-accent-2) 70%, transparent),
+  color-mix(in srgb, var(--page-accent) 55%, transparent)
   );
   border-radius: 10px;
-  border: 3px solid rgba(10, 10, 10, 0.9);
+  border: 3px solid color-mix(in srgb, var(--bg) 86%, transparent);
 }
 
 /* 🔥 finom hover glow */
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(0, 255, 255, 0.65);
-  box-shadow: 0 0 10px rgba(0, 255, 255, 0.35);
+  background: color-mix(in srgb, var(--page-accent) 82%, transparent);
+  box-shadow: 0 0 10px color-mix(in srgb, var(--page-accent) 30%, transparent);
+}
+
+body[data-appearance="light"] ::-webkit-scrollbar-track {
+  background: var(--bg);
+}
+
+body[data-appearance="light"] ::-webkit-scrollbar-thumb {
+  background: var(--bg-elevated);
+  border: 3px solid var(--bg);
+}
+
+body[data-appearance="light"] ::-webkit-scrollbar-thumb:hover {
+  background: var(--line);
+  box-shadow: none;
 }
 
 
@@ -1282,6 +1376,11 @@ app-root {
   position: relative;
 }
 
+app-dark-veil-bg {
+  opacity: var(--veil-opacity);
+  transition: opacity .25s ease;
+}
+
 .app-foreground {
   position: relative;
   z-index: 1;
@@ -1297,9 +1396,9 @@ app-root {
   /* 🔥 sötétítés + enyhe szín */
   background:
     linear-gradient(180deg,
-    rgba(0, 0, 0, 0.55) 0%,
-    rgba(0, 0, 0, 0.35) 40%,
-    rgba(0, 0, 0, 0.65) 100%);
+    var(--overlay-top) 0%,
+    var(--overlay-mid) 40%,
+    var(--overlay-bottom) 100%);
 
   pointer-events: none;
 }

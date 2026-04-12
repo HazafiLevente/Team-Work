@@ -281,3 +281,61 @@
   background: rgba(255, 77, 77, 0.3);
   transform: scale(1.05);
 }
+
+body[data-appearance="light"] .setup-workspace {
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow-soft);
+}
+
+body[data-appearance="light"] .setup-workspace::before {
+  background: linear-gradient(180deg, var(--bg-elevated), var(--surface-2));
+  backdrop-filter: none;
+}
+
+body[data-appearance="light"] .dot-bg {
+  display: none;
+}
+
+body[data-appearance="light"] .boundary-area {
+  background: var(--bg);
+}
+
+body[data-appearance="light"] .back-btn {
+  border: 1px solid var(--line);
+  background: var(--bg-elevated);
+  color: var(--text);
+  box-shadow: var(--shadow-soft);
+}
+
+body[data-appearance="light"] .back-btn:hover {
+  background: var(--chrome-bg-hover);
+  border-color: var(--page-accent-2);
+}
+
+body[data-appearance="light"] .device-row,
+body[data-appearance="light"] .item-popup-row {
+  background: var(--chrome-bg);
+  border: 1px solid var(--line);
+}
+
+body[data-appearance="light"] .device-type {
+  color: var(--text);
+  background: var(--theme-band-1);
+  border: 1px solid var(--line);
+}
+body[data-appearance="light"] .item-popup-row-name,
+body[data-appearance="light"] .item-popup-state {
+  color: var(--text);
+}
+
+body[data-appearance="light"] .item-popup-row-type,
+body[data-appearance="light"] .no-data {
+  color: var(--muted);
+}
+
+body[data-appearance="light"] .status-box {
+  background: var(--bg-elevated);
+  border: 1px solid var(--line);
+  color: var(--text);
+  box-shadow: var(--shadow-soft);
+}

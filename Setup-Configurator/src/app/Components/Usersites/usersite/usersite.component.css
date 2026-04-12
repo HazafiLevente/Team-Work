@@ -115,6 +115,30 @@
   padding: 0;
 }
 
+body[data-appearance="light"] .usersite-sidebar {
+  background: var(--bg-elevated);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow-soft);
+}
+
+body[data-appearance="light"] .nav-btn {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  color: var(--text);
+}
+
+body[data-appearance="light"] .nav-btn:hover {
+  background: var(--chrome-bg-hover);
+  border-color: var(--page-accent-2);
+}
+
+body[data-appearance="light"] .nav-btn.active {
+  background: linear-gradient(135deg, var(--theme-band-1), var(--theme-band-2));
+  border-color: var(--page-accent);
+  color: var(--text);
+  box-shadow: none;
+}
+
 /* =========================
    FORM
    ========================= */
@@ -130,6 +154,7 @@
   background: var(--glass-alpha);
   border: 1px solid var(--glass-border);
   color: var(--text);
+  font-family: inherit;
 }
 
 .form button {
