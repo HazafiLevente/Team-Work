@@ -83,9 +83,40 @@ export class PcBuilderPanelComponent implements OnChanges {
   }
 
   private normalizeSocket(value: any): string {
-    const v = String(value ?? '').trim().toUpperCase();
-    if (!v) return '';
-    return v.replace(/\s+/g, '').replace(/SOCKET/g, '');
+    const raw = String(value ?? '').trim().toUpperCase();
+    if (!raw) return '';
+
+    const compact = raw.replace(/\s+/g, '').replace(/SOCKET/g, '');
+
+    const knownPatterns = [
+      /LGA-?1851/,
+      /LGA-?1700/,
+      /LGA-?1200/,
+      /LGA-?1151/,
+      /LGA-?1150/,
+      /LGA-?3647/,
+      /SWRX8/,
+      /STRX4/,
+      /TR4/,
+      /AM5/,
+      /AM4/,
+      /AM3\+/,
+      /AM3/,
+      /AM2\+/,
+      /AM2/,
+      /FM2\+/,
+      /FM2/,
+      /FM1/
+    ];
+
+    for (const pattern of knownPatterns) {
+      const match = compact.match(pattern);
+      if (match) {
+        return match[0].replace('-', '');
+      }
+    }
+
+    return compact;
   }
 
   private normalizeRamType(value: any): string {
@@ -269,20 +300,15 @@ export class PcBuilderPanelComponent implements OnChanges {
   }
 
   canSelectMotherboard(): boolean {
-    return !!this.getSelectedProcessor();
+    return !!this.getSelectedProcessor() && this.getCompatibleMotherboards().length > 0;
   }
 
   canSelectRam(): boolean {
-    return this.rams.length > 0;
+    return !!this.getSelectedMotherboard() && this.getCompatibleRams().length > 0;
   }
 
   getVisibleMotherboards(): PcPart[] {
-    const cpu = this.getSelectedProcessor();
-    if (!cpu) return this.motherboards;
-
-    const compatible = this.motherboards.filter(mb => this.isMotherboardCompatible(mb, cpu));
-    const incompatible = this.motherboards.filter(mb => !this.isMotherboardCompatible(mb, cpu));
-    return [...compatible, ...incompatible];
+    return this.getCompatibleMotherboards();
   }
 
   isMotherboardCompatible(mb: PcPart, cpu: PcPart | null = this.getSelectedProcessor()): boolean {
@@ -320,42 +346,17 @@ export class PcBuilderPanelComponent implements OnChanges {
     }
 
     if (!mbRamType) {
-      return this.rams;
+      return [];
     }
 
-    const compatible = this.rams.filter(ram => {
+    return this.rams.filter(ram => {
       const ramType = this.getRamType(ram);
-      if (!ramType) {
-        return true;
-      }
-
-      return this.isRamCompatible(cpuSocket, mbRamType, ramType);
+      return !!ramType && this.isRamCompatible(cpuSocket, mbRamType, ramType);
     });
-
-    return compatible.length ? compatible : this.rams;
   }
 
   getVisibleRams(): PcPart[] {
-    const cpu = this.getSelectedProcessor();
-    const mb = this.getSelectedMotherboard();
-
-    if (!cpu || !mb) {
-      return this.rams;
-    }
-
-    const compatible = this.getCompatibleRams();
-    const compatibleIds = new Set(
-      compatible
-        .map(ram => this.getId(ram))
-        .filter((id): id is number => id !== null)
-    );
-
-    const incompatible = this.rams.filter(ram => {
-      const id = this.getId(ram);
-      return id == null || !compatibleIds.has(id);
-    });
-
-    return [...compatible, ...incompatible];
+    return this.getCompatibleRams();
   }
 
   isRamVisibleCompatible(ram: PcPart): boolean {
@@ -442,31 +443,25 @@ export class PcBuilderPanelComponent implements OnChanges {
 
   getMotherboardLabel(mb: PcPart): string {
     const displayName = String(mb?.display_name ?? '').trim();
-    if (displayName) {
-      return this.isMotherboardCompatible(mb) ? displayName : `${displayName} [nem kompatibilis]`;
-    }
+    if (displayName) return displayName;
 
     const manufacturer = this.getManufacturer(mb);
     const model = this.getModel(mb);
     const socket = this.getSocket(mb);
     const ramType = this.getRamType(mb);
-    const base = [manufacturer, model, socket ? `(${socket})` : '', ramType ? `- ${ramType}` : '']
+    return [manufacturer, model, socket ? `(${socket})` : '', ramType ? `- ${ramType}` : '']
       .filter(Boolean)
       .join(' ');
-    return this.isMotherboardCompatible(mb) ? base : `${base} [nem kompatibilis]`;
   }
 
   getRamLabel(ram: PcPart): string {
     const displayName = String(ram?.display_name ?? '').trim();
-    if (displayName) {
-      return this.isRamVisibleCompatible(ram) ? displayName : `${displayName} [nem kompatibilis]`;
-    }
+    if (displayName) return displayName;
 
     const manufacturer = this.getManufacturer(ram);
     const model = this.getModel(ram);
     const ramType = this.getRamType(ram);
-    const base = [manufacturer, model, ramType ? `(${ramType})` : ''].filter(Boolean).join(' ');
-    return this.isRamVisibleCompatible(ram) ? base : `${base} [nem kompatibilis]`;
+    return [manufacturer, model, ramType ? `(${ramType})` : ''].filter(Boolean).join(' ');
   }
 
   getGpuLabel(gpu: PcPart): string {
@@ -506,8 +501,30 @@ export class PcBuilderPanelComponent implements OnChanges {
       return;
     }
 
+    const compatibleMotherboardIds = new Set(
+      this.getCompatibleMotherboards()
+        .map(mb => this.getId(mb))
+        .filter((id): id is number => id !== null)
+    );
+
+    if (!compatibleMotherboardIds.has(this.selectedMotherboardId)) {
+      this.error = 'The selected motherboard is not compatible with this processor.';
+      return;
+    }
+
     if (!this.selectedRamId) {
       this.error = 'Choose a compatible RAM.';
+      return;
+    }
+
+    const compatibleRamIds = new Set(
+      this.getCompatibleRams()
+        .map(ram => this.getId(ram))
+        .filter((id): id is number => id !== null)
+    );
+
+    if (!compatibleRamIds.has(this.selectedRamId)) {
+      this.error = 'The selected RAM is not compatible with this processor and motherboard.';
       return;
     }
 

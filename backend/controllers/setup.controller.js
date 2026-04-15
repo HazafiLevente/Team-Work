@@ -25,14 +25,14 @@ const CAR_SETUP_TABLE = "Car_setup[Setup]";
 
 exports.pcParts = async (req, res) => {
     try {
-        const cacheKey = "pcparts:v3";
+        const cacheKey = "pcparts:v5";
         const cached = cacheGet(pcPartsCache, cacheKey);
         if (cached) return res.json({ parts: cached });
 
         const { data, error } = await supabase
             .from("products")
             .select("id, name, type, category")
-            .eq("type", "pc")
+            .ilike("type", "pc%")
             .order("name", { ascending: true })
             .limit(5000);
 
@@ -636,21 +636,38 @@ async function getProductValuesIndex(productIds) {
     const ids = (productIds || []).map(Number).filter((id) => Number.isFinite(id));
     if (!ids.length) return new Map();
 
-    const { data, error } = await supabase
-        .from("values")
-        .select(`
-            products_id,
-            value,
-            properties:properties_id (
-                id,
-                property,
-                type
-            )
-        `)
-        .in("products_id", ids);
+    const rows = [];
+    const pageSize = 1000;
+    let from = 0;
 
-    if (error) throw error;
-    return buildProductValuesIndex(Array.isArray(data) ? data : []);
+    while (true) {
+        const { data, error } = await supabase
+            .from("values")
+            .select(`
+                products_id,
+                value,
+                properties:properties_id (
+                    id,
+                    property,
+                    type
+                )
+            `)
+            .in("products_id", ids)
+            .range(from, from + pageSize - 1);
+
+        if (error) throw error;
+
+        const page = Array.isArray(data) ? data : [];
+        rows.push(...page);
+
+        if (page.length < pageSize) {
+            break;
+        }
+
+        from += pageSize;
+    }
+
+    return buildProductValuesIndex(rows);
 }
 
 async function syncPcSetupDevices(setupId, payload = {}) {

@@ -39,7 +39,11 @@
           >
             <option [ngValue]="null">
               @if (!canSelectMotherboard()) {
-                -- choose processor first --
+                @if (!getSelectedProcessor()) {
+                  -- choose processor first --
+                } @else {
+                  -- no compatible motherboard --
+                }
               } @else {
                 -- choose motherboard --
               }
@@ -58,12 +62,17 @@
           <select
             class="select"
             [(ngModel)]="selectedRamId"
+            [disabled]="!canSelectRam()"
           >
             <option [ngValue]="null">
               @if (rams.length === 0) {
                 -- no RAM loaded --
+              } @else if (!getSelectedProcessor()) {
+                -- choose processor first --
               } @else if (!getSelectedMotherboard()) {
-                -- choose RAM (motherboard optional) --
+                -- choose motherboard first --
+              } @else if (!canSelectRam()) {
+                -- no compatible RAM --
               } @else {
                 -- choose RAM --
               }
