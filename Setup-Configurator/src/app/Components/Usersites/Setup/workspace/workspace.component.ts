@@ -32,6 +32,7 @@ import {
   HomeTheaterBuilderComponent
 } from '../setup-panel/home-theater-builder/ht-builder/home-theater-builder.component';
 import { CarBuilderPanelComponent } from '../setup-panel/car-builder/car-builder-panel.component';
+import { InstrumentBuilderPanelComponent } from '../setup-panel/instrument-builder/instrument-builder-panel.component';
 
 
 export type WorkspaceWindow = {
@@ -71,7 +72,7 @@ export type WorkspaceWindow = {
     DotGridComponent,
     HomeTheaterBuilderComponent,
     CarBuilderPanelComponent,
-
+    InstrumentBuilderPanelComponent,
   ]
 })
 export class WorkspaceComponent {

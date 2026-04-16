@@ -1,0 +1,49 @@
+<div class="instrument-builder-shell">
+  <div class="instrument-builder-body">
+    @if (loading) {
+      <div class="state">Hangszerek betöltése...</div>
+    } @else {
+      @if (error) {
+        <div class="state error">{{ error }}</div>
+      }
+
+      @if (success) {
+        <div class="state success">{{ success }}</div>
+      }
+
+      <div class="grid">
+        <div class="field-card full">
+          <label class="field-label">Hangszer kiválasztása</label>
+          <select
+            class="select"
+            [(ngModel)]="selectedInstrumentKey"
+          >
+            <option value="">-- válassz hangszert --</option>
+
+            @for (inst of instruments; track trackInstrument($index, inst)) {
+              <option [value]="inst.__instKey">
+                {{ getInstrumentLabel(inst) }}
+              </option>
+            }
+          </select>
+        </div>
+
+      </div>
+
+      <div class="actions">
+        <button
+          type="button"
+          class="save-btn"
+          (click)="saveInstrument()"
+          [disabled]="saving || loading"
+        >
+          @if (saving) {
+            Mentés...
+          } @else {
+            Hangszer hozzáadása
+          }
+        </button>
+      </div>
+    }
+  </div>
+</div>

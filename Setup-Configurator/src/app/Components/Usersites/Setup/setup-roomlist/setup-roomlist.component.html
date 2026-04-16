@@ -156,6 +156,14 @@
     </app-setup-ht-details-panel>
   }
 
+  @if (selectedInstrumentItem) {
+    <app-setup-instrument-details-panel
+      class="workspace-floating-panel"
+      [instrumentItem]="selectedInstrumentItem"
+      (close)="closeProductOverlay()">
+    </app-setup-instrument-details-panel>
+  }
+
   @if (pcBuilderOpen && pcBuilderSetup) {
     <app-pc-builder-panel
       [setup]="pcBuilderSetup"

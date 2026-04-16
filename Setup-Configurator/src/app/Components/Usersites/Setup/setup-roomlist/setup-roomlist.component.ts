@@ -21,6 +21,7 @@ import { SetupPcDetailsPanelComponent } from '../workspace/setup-windows/quick-b
 import { SetupPcPartDetailsPanelComponent } from '../workspace/setup-windows/quick-builder/setup-pc-part-details-panel/setup-pc-part-details-panel.component';
 import { ProductDetailsPanelComponent } from '../../../Panels/Product/product-details-panel.component';
 import { SetupHtDetailsPanelComponent } from '../workspace/setup-windows/quick-builder/setup-ht-details-panel/setup-ht-details-panel.component';
+import { SetupInstrumentDetailsPanelComponent } from '../workspace/setup-windows/quick-builder/setup-instrument-details-panel/setup-instrument-details-panel.component';
 import { SetupPairingModalComponent } from '../setup-pairing-modal/setup-pairing-modal.component';
 import { PcBuilderPanelComponent } from '../setup-panel/pc-builder/pc-builder-panel.component';
 import { SetupHierarchySidebarComponent } from './hierarchy-sidebar/setup-hierarchy-sidebar.component';
@@ -49,7 +50,8 @@ type PairingStage = 'NONE' | 'PICK_SOURCE' | 'PICK_TARGET_SETUP' | 'PICK_TARGET_
     PcBuilderPanelComponent,
     SetupHierarchySidebarComponent,
     SetupHierarchyDetailsComponent,
-    SetupHierarchyDevicePickerComponent
+    SetupHierarchyDevicePickerComponent,
+    SetupInstrumentDetailsPanelComponent
   ],
   templateUrl: './setup-roomlist.component.html',
   styleUrls: ['./setup-roomlist.component.css']
@@ -71,6 +73,7 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit {
 
   selectedProduct: any = null;
   selectedCarItem: any = null;
+  selectedInstrumentItem: any = null;
   selectedPcItem: any = null;
   selectedPcPartItem: any = null;
   selectedHtItem: any = null;
@@ -1061,7 +1064,18 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit {
       this.selectedPcItem = null;
       this.selectedPcPartItem = null;
       this.selectedHtItem = null;
+      this.selectedInstrumentItem = null;
       this.selectedCarItem = item;
+      return;
+    }
+
+    if (setupType === 'instrument' || setupType === 'inst' || category === 'instrument') {
+      this.selectedProduct = null;
+      this.selectedCarItem = null;
+      this.selectedPcItem = null;
+      this.selectedPcPartItem = null;
+      this.selectedHtItem = null;
+      this.selectedInstrumentItem = item;
       return;
     }
 
@@ -1070,6 +1084,7 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit {
       this.selectedCarItem = null;
       this.selectedPcPartItem = null;
       this.selectedHtItem = null;
+      this.selectedInstrumentItem = null;
       this.selectedPcItem = item;
       return;
     }
@@ -1106,6 +1121,7 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit {
       this.selectedCarItem = null;
       this.selectedPcItem = null;
       this.selectedPcPartItem = null;
+      this.selectedInstrumentItem = null;
       this.selectedHtItem = item;
       return;
     }
@@ -1122,6 +1138,7 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit {
     this.selectedPcItem = null;
     this.selectedPcPartItem = null;
     this.selectedHtItem = null;
+    this.selectedInstrumentItem = null;
     this.selectedProduct = {
       id,
       table,
@@ -1144,6 +1161,7 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit {
     this.selectedPcItem = null;
     this.selectedPcPartItem = null;
     this.selectedHtItem = null;
+    this.selectedInstrumentItem = null;
   }
 
   onRoomDragEnded(setup: any, pos: { x: number; y: number }): void {
@@ -1232,7 +1250,7 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit {
     if (!setupId) return;
 
     const name = this.getSetupTitle(setup);
-    
+
     this.confirmDialogState = {
       isOpen: true,
       title: 'Biztos törlöd?',
