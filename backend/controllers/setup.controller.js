@@ -231,12 +231,14 @@ const tablesToScan = [
 const childrenCache = new Map(); // setupId -> { exp, value }
 const pcPartsCache = new Map(); // global -> { exp, value }
 const carOptionsCache = new Map(); // global -> { exp, value }
-const carDetailsCache = new Map(); // carSetupId -> { exp, value }  âś… NEW
+const carDetailsCache = new Map(); // carSetupId -> { exp, value  }  âś… NEW
+const instrumentOptionsCache = new Map();
 
 const CHILDREN_TTL_MS = 30_000;
 const PCPARTS_TTL_MS = 10 * 60_000;
 const CAROPTIONS_TTL_MS = 10 * 60_000;
 const CARDETAILS_TTL_MS = 30_000; // âś… NEW (kicsi TTL, de vĂ©di a Supabase-t)
+const INSTRUMENTOPTIONS_TTL_MS = 10 * 60_000;
 
 function cacheGet(map, key) {
     const hit = map.get(key);
@@ -1775,6 +1777,161 @@ exports.carsAdd = async (req, res) => {
         });
     } catch (err) {
         console.error("âťŚ carsAdd hiba:", err);
+        return res.status(500).json({ error: "Create failed" });
+    }
+};
+
+exports.instrumentOptions = async (req, res) => {
+    try {
+        const cacheKey = "instrument-options:v1";
+        const cached = cacheGet(instrumentOptionsCache, cacheKey);
+        if (cached) return res.json({ instruments: cached });
+
+        const { data, error } = await supabase
+            .from("products")
+            .select("id, name, type")
+            .order("name", { ascending: true })
+            .limit(5000);
+
+        if (error) throw error;
+
+        const instruments = (Array.isArray(data) ? data : [])
+            .filter((row) => String(row?.type || "").trim().toLowerCase() === "inst")
+            .map((row) => ({
+                id: Number(row.id),
+                name: String(row.name || "").trim(),
+                type: String(row.type || "").trim(),
+                display_name: String(row.name || "").trim() || `Hangszer #${row.id}`
+            }));
+
+        instruments.sort((a, b) => a.display_name.localeCompare(b.display_name, "hu"));
+
+        cacheSet(instrumentOptionsCache, cacheKey, instruments, INSTRUMENTOPTIONS_TTL_MS);
+        return res.json({ instruments });
+    } catch (err) {
+        console.error("❌ instrumentOptions hiba:", err);
+        return res.json({ instruments: [] });
+    }
+};
+
+exports.instrumentsList = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const setupId = req.params.id;
+
+        const ok = await assertSetupOwnedByUser(setupId, userId);
+        if (!ok) return res.status(403).json({ instruments: [] });
+
+        const { data, error } = await supabase
+            .from(SETUPS_TABLE)
+            .select("*")
+            .eq("room_id", setupId)
+            .eq("type", "instrument")
+            .order("id", { ascending: false })
+            .limit(300);
+
+        if (error) throw error;
+
+        const instruments = (data || []).map((r) => ({
+            ...r,
+            setup_name: r.name ?? "Nevtelen hangszer",
+            setup_type: "instrument",
+            x: Number(r.pos_x ?? 0),
+            y: Number(r.pos_y ?? 0)
+        }));
+
+        return res.json({ instruments });
+    } catch (err) {
+        console.error("❌ instrumentsList hiba:", err);
+        return res.status(500).json({ instruments: [] });
+    }
+};
+
+exports.instrumentsAdd = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const setupId = req.params.id;
+
+        const ok = await assertSetupOwnedByUser(setupId, userId);
+        if (!ok) return res.status(403).json({ error: "Forbidden" });
+
+        const instrument_id_raw = req.body?.instrument_id;
+        const instrument_id = instrument_id_raw == null ? null : Number(instrument_id_raw);
+
+        if (!instrument_id || Number.isNaN(instrument_id)) {
+            return res.status(400).json({ error: "A instrument_id kötelező" });
+        }
+
+        const { data: product, error: productError } = await supabase
+            .from("products")
+            .select("id, name, type")
+            .eq("id", instrument_id)
+            .limit(1)
+            .maybeSingle();
+
+        if (productError) throw productError;
+        if (!product) {
+            return res.status(404).json({ error: "Hangszer termék nem található" });
+        }
+
+        const productType = String(product.type || "").trim().toLowerCase();
+        if (productType !== "inst") {
+            return res.status(400).json({ error: "A kiválasztott termék nem hangszer típusú" });
+        }
+
+        const setup_name = String(product.name || "").trim() || `Hangszer #${instrument_id}`;
+
+        const { data, error } = await supabase
+            .from(SETUPS_TABLE)
+            .insert([{
+                room_id: Number(setupId),
+                name: setup_name,
+                type: "instrument",
+                pos_x: 0,
+                pos_y: 0
+            }])
+            .select("*")
+            .single();
+        if (error) throw error;
+
+        const { data: createdDevice, error: deviceError } = await supabase
+            .from(SETUP_DEVICES_TABLE)
+            .insert([{
+                setup_id: Number(data.id),
+                device_id: Number(instrument_id),
+                role: "instrument",
+                pos_x: Number(data.pos_x ?? 0),
+                pos_y: Number(data.pos_y ?? 0),
+                rotation: 0
+            }])
+            .select("*")
+            .single();
+
+        if (deviceError) {
+            await supabase
+                .from(SETUPS_TABLE)
+                .delete()
+                .eq("id", data.id);
+            throw deviceError;
+        }
+
+        childrenCache.delete(String(setupId));
+        childrenCache.delete(String(data.id));
+
+        return res.json({
+            instrument: {
+                ...data,
+                setup_name: data.name ?? setup_name,
+                setup_type: "instrument",
+                instrument_id,
+                product_id: instrument_id,
+                device: createdDevice ?? null,
+                x: Number(data.pos_x ?? 0),
+                y: Number(data.pos_y ?? 0)
+            }
+        });
+    } catch (err) {
+        console.error("❌ instrumentsAdd hiba:", err);
         return res.status(500).json({ error: "Create failed" });
     }
 };

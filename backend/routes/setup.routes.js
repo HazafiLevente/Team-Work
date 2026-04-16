@@ -10,6 +10,7 @@ router.delete("/remove-setup/:id", verifyUser, ctrl.remove);
 router.patch("/save-pcbuild/:pcId", verifyUser, ctrl.pcBuildsUpdate);
 
 router.get("/car-options", verifyUser, ctrl.carOptions);
+router.get("/instrument-options", verifyUser, ctrl.instrumentOptions);
 router.get("/car-setup/:carSetupId/details", verifyUser, ctrl.carSetupDetails);
 
 router.get("/", verifyUser, ctrl.list);
@@ -30,6 +31,8 @@ router.patch("/rooms/:setupId/update-position", verifyUser, ctrl.upsertRoomPosit
 
 router.get("/:id/get-cars", verifyUser, ctrl.carsList);
 router.post("/:id/add-car", verifyUser, ctrl.carsAdd);
+router.get("/:id/get-instruments", verifyUser, ctrl.instrumentsList);
+router.post("/:id/add-instrument", verifyUser, ctrl.instrumentsAdd);
 router.post("/:id/save-device", verifyUser, ctrl.addDevice);
 
 router.patch("/rename-item", verifyUser, ctrl.renameItem);

@@ -33,6 +33,7 @@ import {
 } from '../setup-panel/home-theater-builder/ht-builder/home-theater-builder.component';
 import { CarBuilderPanelComponent } from '../setup-panel/car-builder/car-builder-panel.component';
 
+
 export type WorkspaceWindow = {
   id: string;
   title: string;
@@ -68,9 +69,9 @@ export type WorkspaceWindow = {
     ContextMenuDockComponent,
     ContextMenuCategoryComponent,
     DotGridComponent,
-    AddDeviceWindowComponent,
     HomeTheaterBuilderComponent,
-    CarBuilderPanelComponent
+    CarBuilderPanelComponent,
+
   ]
 })
 export class WorkspaceComponent {
@@ -149,7 +150,7 @@ export class WorkspaceComponent {
   startPanY = 0;
 
   confirmDialogState: { isOpen: boolean; title: string; message: string; onConfirm: () => void } | null = null;
-  
+
   constructor(private http: HttpClient) {}
 
   onMouseDown(event: MouseEvent): void {
@@ -254,6 +255,13 @@ export class WorkspaceComponent {
 
     if (this.ctxSetup && (normalized === 'autók' || normalized === 'autok' || normalized === 'auto' || normalized === 'autó')) {
       this.openCarBuilderWindow(this.ctxSetup);
+      this.ctxCategoryOpen = false;
+      this.ctxSetup = null;
+      return;
+    }
+
+    if (this.ctxSetup && (normalized === 'hangszer' || normalized === 'hangszerek' || normalized === 'instrument' || normalized === 'instruments')) {
+      this.openInstrumentBuilderWindow(this.ctxSetup);
       this.ctxCategoryOpen = false;
       this.ctxSetup = null;
       return;
@@ -469,10 +477,10 @@ export class WorkspaceComponent {
 
   private executeDeleteContextItem(): void {
     if (!this.ctxItem) return;
-    
+
     const itemId = this.ctxItem?.id ?? this.ctxItem?.ID ?? this.ctxItem?.item_id;
     const tableName = this.getContextItemTableName(this.ctxItem);
-    
+
     const targetKey = this.getContextItemKey(this.ctxItem);
     const dataId = this.getItemDataId(this.ctxItem);
 
@@ -645,6 +653,34 @@ export class WorkspaceComponent {
       id: winId,
       kind: 'empty',
       title: 'Autók',
+      payload: { setup },
+      instanceNo: this.windows.length + 1,
+      x: 160,
+      y: 90,
+      width: 900,
+      zIndex: ++this.nextZIndex,
+      minimized: false,
+      maximized: false
+    };
+
+    this.closeContextMenu();
+    this.windows = [...this.windows, newWindow];
+  }
+
+  private openInstrumentBuilderWindow(setup: any): void {
+    const setupId = setup?.id ?? setup?.setup_id ?? setup?.setupId ?? Date.now();
+    const winId = 'instrument_builder_' + setupId;
+
+    const existing = this.windows.find(w => w.id === winId);
+    if (existing) {
+      this.focusWindow(winId);
+      return;
+    }
+
+    const newWindow: WorkspaceWindow = {
+      id: winId,
+      kind: 'empty',
+      title: 'Hangszerek',
       payload: { setup },
       instanceNo: this.windows.length + 1,
       x: 160,
