@@ -5,16 +5,19 @@ echo =====================================
 echo Checking Node.js...
 echo =====================================
 
+set "NODEJS_MSI=%~dp0tools\nodejs-msi\node-v25.9.0-x64.msi"
+
 node -v >nul 2>&1
 IF %ERRORLEVEL% NEQ 0 (
-    echo Node.js not found. Downloading...
-
-    powershell -Command "Invoke-WebRequest https://nodejs.org/dist/v22.12.0/node-v22.12.0-x64.msi -OutFile nodejs.msi"
-
-    echo Installing Node.js...
-    msiexec /i nodejs.msi /quiet /norestart
-
-    echo Node installed.
+    IF EXIST "%NODEJS_MSI%" (
+        echo Node.js not found. Installing from tools\nodejs-msi...
+        msiexec /i "%NODEJS_MSI%" /quiet /norestart
+        echo Node installed.
+    ) ELSE (
+        echo Node.js installer not found: %NODEJS_MSI%
+        pause
+        exit /b 1
+    )
 ) ELSE (
     echo Node.js already installed.
 )

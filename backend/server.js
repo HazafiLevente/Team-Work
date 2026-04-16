@@ -11,6 +11,34 @@ require("dotenv").config({
 
 const PORT = process.env.PORT || 3000;
 
+let shuttingDown = false;
+
+process.on("beforeExit", (code) => {
+    console.warn("[SERVER] beforeExit fired with code:", code);
+});
+
+process.on("exit", (code) => {
+    console.warn("[SERVER] exit fired with code:", code);
+});
+
+process.on("uncaughtException", (error) => {
+    console.error("[SERVER] uncaughtException:", error);
+});
+
+process.on("unhandledRejection", (reason) => {
+    console.error("[SERVER] unhandledRejection:", reason);
+});
+
+process.on("SIGINT", () => {
+    shuttingDown = true;
+    console.warn("[SERVER] SIGINT received");
+});
+
+process.on("SIGTERM", () => {
+    shuttingDown = true;
+    console.warn("[SERVER] SIGTERM received");
+});
+
 console.log("ENV CHECK:", {
     SUPABASE_URL: process.env.SUPABASE_URL,
     HAS_KEY: !!process.env.SUPABASE_SERVICE_ROLE_KEY,
@@ -20,9 +48,19 @@ console.log("ENV CHECK:", {
 
 try {
     const app = require("./app");
-
-    app.listen(PORT, () => {
+    const server = app.listen(PORT, () => {
         console.log(`Server running on http://localhost:${PORT}`);
+    });
+
+    server.on("close", () => {
+        console.warn("[SERVER] HTTP server closed", {
+            port: PORT,
+            shuttingDown
+        });
+    });
+
+    server.on("error", (error) => {
+        console.error("[SERVER] HTTP server error:", error);
     });
 } catch (error) {
     console.error("Server startup failed.");
