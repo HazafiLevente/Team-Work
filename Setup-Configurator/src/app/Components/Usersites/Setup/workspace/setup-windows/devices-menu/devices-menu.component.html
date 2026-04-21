@@ -14,6 +14,43 @@
 
     }
 
+    @if (!devices.length) {
+      <div class="loading">
+        Nincs megjeleníthető eszköz.
+      </div>
+    }
+
+    @if (totalPages > 1) {
+      <div class="pager">
+        <button class="pager-btn" type="button" (click)="prevPage()" [disabled]="currentPage === 1 || loading">
+          Előző
+        </button>
+
+        <div class="pager-pages">
+          @for (page of visiblePages(); track page) {
+            <button
+              class="pager-page"
+              type="button"
+              [class.active]="page === currentPage"
+              (click)="goToPage(page)"
+              [disabled]="loading">
+              {{ page }}
+            </button>
+          }
+        </div>
+
+        <button class="pager-btn" type="button" (click)="nextPage()" [disabled]="currentPage === totalPages || loading">
+          Következő
+        </button>
+      </div>
+    }
+
+    @if (totalItems > 0) {
+      <div class="pager-meta">
+        {{ currentPage }} / {{ totalPages }} oldal · összesen {{ totalItems }} eszköz
+      </div>
+    }
+
   }
 
 </div>

@@ -346,89 +346,16 @@ export class MessagesPanelComponent implements OnInit, OnDestroy {
     // allow fallback href to navigate to /product-open/:name
   }
 
-  buildToolCards(message: AiConversationMessage): Array<{
-    title: string;
-    subtitle: string;
-    eyebrow: string;
-    href: string;
-    icon: string;
-  }> {
-    const cards: Array<{
-      title: string;
-      subtitle: string;
-      eyebrow: string;
-      href: string;
-      icon: string;
-    }> = [];
-    const seen = new Set<string>();
-    const products = Array.isArray(message?.products) ? message.products : [];
+  openInlineProductCard(event: MouseEvent, product: any, mention?: string | null) {
+    event.preventDefault();
+    event.stopPropagation();
 
-    for (const product of products) {
-      const title = String(
-        product?.name ??
-        product?.model ??
-        product?.data?.name ??
-        product?.data?.model ??
-        ''
-      ).trim();
-      const href = this.buildProductPath(product);
-      if (!title || !href) continue;
-
-      const key = this.normalizeMention(title);
-      if (seen.has(key)) continue;
-      seen.add(key);
-
-      const typeSource = String(
-        product?.type ??
-        product?.category ??
-        product?.table_name ??
-        product?.source_table ??
-        ''
-      ).trim();
-      const meta = this.resolveToolMeta(typeSource, title);
-
-      cards.push({
-        title,
-        subtitle: typeSource ? this.formatToolSubtitle(typeSource) : 'Megnyithato ajanlas',
-        eyebrow: meta.label,
-        href,
-        icon: meta.icon
-      });
+    if (product) {
+      this.openProduct(product);
+      return;
     }
 
-    const mentionBlocks = this.formatAiText(message?.text || '', products)
-      .filter((block) => !!block.mention)
-      .slice(0, 8);
-
-    for (const block of mentionBlocks) {
-      const mention = String(block.mention || '').trim();
-      if (!mention) continue;
-
-      const key = this.normalizeMention(mention);
-      if (seen.has(key)) continue;
-      seen.add(key);
-
-      const href = this.buildProductPath(block.product) || this.buildMentionOpenPath(mention);
-      const meta = this.resolveToolMeta(block.product?.type || block.product?.category || mention, mention);
-
-      cards.push({
-        title: mention,
-        subtitle: block.product ? 'Felismert termek az uzenetbol' : 'Kereses erre az eszkozre',
-        eyebrow: meta.label,
-        href,
-        icon: meta.icon
-      });
-    }
-
-    return cards.slice(0, 6);
-  }
-
-  trackByToolCard(_: number, card: { href: string; title: string }): string {
-    return `${card.href}::${card.title}`;
-  }
-
-  hasToolCards(message: AiConversationMessage): boolean {
-    return this.buildToolCards(message).length > 0;
+    this.openMentionByName(String(mention || ''));
   }
 
   private openProductByLookup(product: any) {

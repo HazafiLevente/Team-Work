@@ -467,6 +467,19 @@
   color: rgba(226, 232, 240, 0.56);
 }
 
+.ai-inline-link {
+  color: #9b8cff;
+  text-decoration: none;
+  font-weight: 700;
+  transition: color .16s ease, text-decoration-color .16s ease;
+}
+
+.ai-inline-link:hover {
+  color: #60a5fa;
+  text-decoration: underline;
+  text-decoration-color: rgba(96, 165, 250, 0.7);
+}
+
 
 /* ugyanaz a toggle mint a setupnál */
 .hierarchy-toggle {

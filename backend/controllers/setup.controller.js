@@ -1009,8 +1009,33 @@ exports.children = async (req, res) => {
     const setupId = req.params.id;
     if (!setupId) return res.json([]);
 
+    const pageRaw = Number.parseInt(String(req.query?.page ?? ""), 10);
+    const limitRaw = Number.parseInt(String(req.query?.limit ?? ""), 10);
+    const isPaginated = Number.isFinite(pageRaw) && Number.isFinite(limitRaw);
+    const page = isPaginated ? Math.max(pageRaw, 1) : 1;
+    const limit = isPaginated ? Math.min(Math.max(limitRaw, 1), 100) : null;
+
     const cached = cacheGet(childrenCache, setupId);
-    if (cached) return res.json(cached);
+    if (cached) {
+        if (!isPaginated) return res.json(cached);
+
+        const total = cached.length;
+        const totalPages = Math.max(Math.ceil(total / limit), 1);
+        const safePage = Math.min(page, totalPages);
+        const start = (safePage - 1) * limit;
+
+        return res.json({
+            items: cached.slice(start, start + limit),
+            pagination: {
+                page: safePage,
+                limit,
+                total,
+                totalPages,
+                hasPrev: safePage > 1,
+                hasNext: safePage < totalPages,
+            },
+        });
+    }
 
     try {
         const { data: roomRow } = await supabase
@@ -1023,6 +1048,45 @@ exports.children = async (req, res) => {
         let allItems = [];
 
         if (roomRow?.id) {
+            if (isPaginated) {
+                const from = (page - 1) * limit;
+                const to = from + limit - 1;
+                const { data, error, count } = await supabase
+                    .from(SETUPS_TABLE)
+                    .select("*", { count: "exact" })
+                    .eq("room_id", setupId)
+                    .order("id", { ascending: true })
+                    .range(from, to);
+
+                if (error) throw error;
+
+                const items = (data || []).map((item) => mapDisplay({
+                    ...item,
+                    setup_id: Number(item.room_id ?? 0),
+                    setup_name: item.name ?? "Nevtelen setup",
+                    setup_type: item.type ?? "setup",
+                    x: Number(item.pos_x ?? 0),
+                    y: Number(item.pos_y ?? 0)
+                }, SETUPS_TABLE));
+
+                const enrichedItems = await enrichPcSetupRows(items);
+                const total = Number(count ?? 0);
+                const totalPages = Math.max(Math.ceil(total / limit), 1);
+                const safePage = Math.min(page, totalPages);
+
+                return res.json({
+                    items: enrichedItems,
+                    pagination: {
+                        page: safePage,
+                        limit,
+                        total,
+                        totalPages,
+                        hasPrev: safePage > 1,
+                        hasNext: safePage < totalPages,
+                    },
+                });
+            }
+
             const { data, error } = await supabase
                 .from(SETUPS_TABLE)
                 .select("*")
@@ -1042,6 +1106,45 @@ exports.children = async (req, res) => {
 
             allItems = await enrichPcSetupRows(allItems);
         } else {
+            if (isPaginated) {
+                const from = (page - 1) * limit;
+                const to = from + limit - 1;
+                const { data, error, count } = await supabase
+                    .from(SETUP_DEVICES_TABLE)
+                    .select("*", { count: "exact" })
+                    .eq("setup_id", setupId)
+                    .order("id", { ascending: true })
+                    .range(from, to);
+
+                if (error) throw error;
+
+                const items = (data || []).map((item) => mapDisplay({
+                    ...item,
+                    type: item.role ?? "device",
+                    setup_type: item.role ?? "device",
+                    product_id: Number(item.device_id ?? 0),
+                    x: Number(item.pos_x ?? 0),
+                    y: Number(item.pos_y ?? 0),
+                    rotation: Number(item.rotation ?? 0)
+                }, SETUP_DEVICES_TABLE));
+
+                const total = Number(count ?? 0);
+                const totalPages = Math.max(Math.ceil(total / limit), 1);
+                const safePage = Math.min(page, totalPages);
+
+                return res.json({
+                    items,
+                    pagination: {
+                        page: safePage,
+                        limit,
+                        total,
+                        totalPages,
+                        hasPrev: safePage > 1,
+                        hasNext: safePage < totalPages,
+                    },
+                });
+            }
+
             const { data, error } = await supabase
                 .from(SETUP_DEVICES_TABLE)
                 .select("*")

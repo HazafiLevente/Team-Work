@@ -3,12 +3,23 @@ import { CommonModule } from '@angular/common';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { SetupPcBuilderModalComponent } from '../setup-pc-builder-modal/setup-pc-builder-modal.component';
-import { HomeTheaterBuilderComponent } from '../setup-panel/home-theater-builder/ht-builder/home-theater-builder.component';
 
 type UiItem = {
   category: string;
   display_name: string;
   manufacturer?: string;
+};
+
+type PaginatedItemsResponse = {
+  items: UiItem[];
+  pagination?: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+    hasPrev: boolean;
+    hasNext: boolean;
+  };
 };
 
 type PcBuildRow = any;
@@ -25,11 +36,12 @@ type CarSetupRow = any;
 @Component({
   selector: 'app-setup-tools-modal',
   standalone: true,
-  imports: [CommonModule, HttpClientModule, FormsModule, SetupPcBuilderModalComponent, HomeTheaterBuilderComponent],
+  imports: [CommonModule, HttpClientModule, FormsModule, SetupPcBuilderModalComponent],
   templateUrl: './setup-tools-modal.component.html',
   styleUrls: ['./setup-tools-modal.component.css']
 })
 export class SetupToolsModalComponent implements OnChanges {
+  private readonly itemsPageSize = 20;
 
   @Input() setup: any;
   @Input() startTab: 'items' | 'pc' | 'cars' | 'ht' = 'items';
@@ -42,6 +54,9 @@ export class SetupToolsModalComponent implements OnChanges {
   loading = false;
   items: UiItem[] = [];
   errorMsg = '';
+  itemsCurrentPage = 1;
+  itemsTotalPages = 1;
+  itemsTotal = 0;
 
   pcLoading = false;
   pcs: PcBuildRow[] = [];
@@ -74,7 +89,7 @@ export class SetupToolsModalComponent implements OnChanges {
 
     this.tab = this.startTab ?? 'items';
 
-    this.loadItems();
+    this.loadItems(1);
     this.loadPcBuilds();
     this.loadCarOptions();
     this.loadCars();
@@ -85,7 +100,7 @@ export class SetupToolsModalComponent implements OnChanges {
     return this.setup?.id ?? this.setup?.setup_id ?? this.setup?.setupId;
   }
 
-  private loadItems(): void {
+  private loadItems(page = 1): void {
     const setupId = this.setupId();
     if (!setupId) return;
 
@@ -93,19 +108,58 @@ export class SetupToolsModalComponent implements OnChanges {
     this.items = [];
     this.errorMsg = '';
 
-    this.http.get<UiItem[]>(`/api/setup/${setupId}/get-children`, { withCredentials: true })
+    this.http.get<PaginatedItemsResponse>(`/api/setup/${setupId}/get-children`, {
+      withCredentials: true,
+      params: {
+        page,
+        limit: this.itemsPageSize
+      }
+    })
       .subscribe({
-        next: (items) => {
-          this.items = Array.isArray(items) ? items : [];
+        next: (res) => {
+          const pagination = res?.pagination;
+
+          this.items = Array.isArray(res?.items) ? res.items : [];
+          this.itemsCurrentPage = pagination?.page ?? page;
+          this.itemsTotalPages = Math.max(pagination?.totalPages ?? 1, 1);
+          this.itemsTotal = pagination?.total ?? this.items.length;
           this.loading = false;
         },
         error: (err) => {
-          console.error('❌ Tools modal children hiba:', err);
+          console.error('Tools modal children hiba:', err);
           this.items = [];
+          this.itemsCurrentPage = 1;
+          this.itemsTotalPages = 1;
+          this.itemsTotal = 0;
           this.loading = false;
           this.errorMsg = 'Betöltés sikertelen.';
         }
       });
+  }
+
+  prevItemsPage(): void {
+    if (this.itemsCurrentPage <= 1 || this.loading) return;
+    this.loadItems(this.itemsCurrentPage - 1);
+  }
+
+  nextItemsPage(): void {
+    if (this.itemsCurrentPage >= this.itemsTotalPages || this.loading) return;
+    this.loadItems(this.itemsCurrentPage + 1);
+  }
+
+  goToItemsPage(page: number): void {
+    if (page === this.itemsCurrentPage || this.loading) return;
+    this.loadItems(page);
+  }
+
+  visibleItemsPages(): number[] {
+    const total = this.itemsTotalPages;
+    if (total <= 5) {
+      return Array.from({ length: total }, (_, index) => index + 1);
+    }
+
+    const start = Math.max(Math.min(this.itemsCurrentPage - 2, total - 4), 1);
+    return Array.from({ length: 5 }, (_, index) => start + index);
   }
 
   private loadPcBuilds(): void {
@@ -124,7 +178,7 @@ export class SetupToolsModalComponent implements OnChanges {
           this.pcLoading = false;
         },
         error: (err) => {
-          console.error('❌ pcbuilds hiba:', err);
+          console.error('pcbuilds hiba:', err);
           this.pcs = [];
           this.pcLoading = false;
           this.pcError = 'PC-k betöltése sikertelen.';
@@ -145,7 +199,7 @@ export class SetupToolsModalComponent implements OnChanges {
           this.carOptionsLoading = false;
         },
         error: (err) => {
-          console.error('❌ car-options hiba:', err);
+          console.error('car-options hiba:', err);
           this.carOptions = [];
           this.carOptionsLoading = false;
           this.carOptionsError = 'Autó lista betöltése sikertelen.';
@@ -169,7 +223,7 @@ export class SetupToolsModalComponent implements OnChanges {
           this.carLoading = false;
         },
         error: (err) => {
-          console.error('❌ cars list hiba:', err);
+          console.error('cars list hiba:', err);
           this.cars = [];
           this.carLoading = false;
           this.carError = 'Autók betöltése sikertelen.';
@@ -207,7 +261,7 @@ export class SetupToolsModalComponent implements OnChanges {
         this.carCreateSaving = false;
       },
       error: (err) => {
-        console.error('❌ car create hiba:', err);
+        console.error('car create hiba:', err);
         this.carCreateError = 'Létrehozás sikertelen.';
         this.carCreateSaving = false;
       }
@@ -248,7 +302,7 @@ export class SetupToolsModalComponent implements OnChanges {
           this.pcCreateSaving = false;
         },
         error: (err) => {
-          console.error('❌ pc create hiba:', err);
+          console.error('pc create hiba:', err);
           this.pcCreateError = 'Létrehozás sikertelen.';
           this.pcCreateSaving = false;
         }
@@ -391,4 +445,3 @@ export class SetupToolsModalComponent implements OnChanges {
       });
   }
 }
-

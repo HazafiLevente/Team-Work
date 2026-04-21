@@ -146,106 +146,10 @@
   color: #90a0b4;
 }
 
-.ai-tools-shell {
-  margin-bottom: 12px;
-}
-
-.ai-tools-header {
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-  margin-bottom: 8px;
-}
-
-.ai-tools-kicker {
-  font-size: 10px;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: #81aee0;
-  font-weight: 800;
-}
-
-.ai-tools-caption {
-  font-size: 12px;
-  color: #93a4ba;
-}
-
-.ai-tools-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 8px;
-}
-
-.ai-tool-card {
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  padding: 11px 12px;
-  border-radius: 14px;
-  text-decoration: none;
-  color: inherit;
-  background: #141b24;
-  border: 1px solid rgba(108, 131, 163, 0.2);
-  transition: border-color 0.16s ease, transform 0.16s ease, background 0.16s ease;
-}
-
-.ai-tool-card:hover {
-  transform: translateY(-1px);
-  border-color: rgba(116, 172, 230, 0.42);
-  background: #17202b;
-}
-
-.ai-tool-icon {
-  width: 34px;
-  height: 34px;
-  flex-shrink: 0;
-  border-radius: 10px;
-  display: grid;
-  place-items: center;
-  background: rgba(129, 174, 224, 0.14);
-  color: #bcd8f8;
-  font-size: 10px;
-  font-weight: 800;
-  text-transform: uppercase;
-}
-
-.ai-tool-copy {
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.ai-tool-eyebrow {
-  font-size: 10px;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: #8eb3df;
-  font-weight: 700;
-}
-
-.ai-tool-title {
-  font-size: 13px;
-  font-weight: 700;
-  color: #f5f8fd;
-  word-break: break-word;
-}
-
-.ai-tool-subtitle {
-  font-size: 12px;
-  color: #9aacbf;
-  word-break: break-word;
-}
-
 .ai-rich-text {
   display: flex;
   flex-direction: column;
   gap: 8px;
-}
-
-.ai-rich-text-muted {
-  border-top: 1px solid rgba(99, 116, 141, 0.18);
-  padding-top: 10px;
 }
 
 .ai-line {
@@ -275,28 +179,17 @@
   flex-shrink: 0;
 }
 
-.ai-mention-card {
-  display: block;
-  width: 100%;
-  padding: 10px 12px;
-  border-radius: 12px;
+.ai-inline-link {
+  color: #8b7dff;
   text-decoration: none;
-  background: rgba(126, 166, 216, 0.08);
-  border: 1px solid rgba(126, 166, 216, 0.18);
-}
-
-.ai-mention-label {
-  display: block;
-  margin-bottom: 3px;
-  font-size: 10px;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: #8fb3de;
-}
-
-.ai-mention-name {
-  color: #eff6ff;
   font-weight: 700;
+  transition: color 0.16s ease, text-decoration-color 0.16s ease;
+}
+
+.ai-inline-link:hover {
+  color: #60a5fa;
+  text-decoration: underline;
+  text-decoration-color: rgba(96, 165, 250, 0.7);
 }
 
 .panel-input {

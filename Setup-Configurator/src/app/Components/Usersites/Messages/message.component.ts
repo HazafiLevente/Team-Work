@@ -808,6 +808,34 @@ export class MessagesComponent implements OnInit, OnDestroy {
     this.openAiMentionByName(String(block?.mention || ''), products);
   }
 
+  buildAiProductPath(product: any): string | null {
+    const table = this.resolveProductTable(product);
+    const id = this.resolveProductId(product);
+    if (!table || id === undefined || id === null) return null;
+    return `/product-site/${table}/${id}`;
+  }
+
+  buildAiMentionOpenPath(name: string | null | undefined): string {
+    return `/product-open/${encodeURIComponent(String(name || '').trim())}`;
+  }
+
+  splitAiLineByMention(text: string, mention: string | null | undefined): { before: string; mention: string; after: string } | null {
+    const source = String(text || '');
+    const needle = String(mention || '').trim();
+    if (!source || !needle) return null;
+
+    const lowerSource = source.toLowerCase();
+    const lowerNeedle = needle.toLowerCase();
+    const index = lowerSource.indexOf(lowerNeedle);
+    if (index === -1) return null;
+
+    return {
+      before: source.slice(0, index),
+      mention: source.slice(index, index + needle.length),
+      after: source.slice(index + needle.length)
+    };
+  }
+
   aiInlineDetails(product: any): any {
     return this.normalizeAiDetails(
       product?.data ?? product,

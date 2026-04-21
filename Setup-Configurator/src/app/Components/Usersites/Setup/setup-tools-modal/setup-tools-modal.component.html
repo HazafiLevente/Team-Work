@@ -1,4 +1,3 @@
-
 <div class="overlay" (click)="onBackdropClick()">
   <div class="window" (click)="stop($event)">
 
@@ -19,7 +18,6 @@
 
     <div class="content">
 
-      <!-- ---------- ESZKÖZÖK TAB ---------- -->
       @if (tab === 'items') {
         @if (loading) {
           <div class="hint">Betöltés...</div>
@@ -41,14 +39,41 @@
                   </div>
                 }
               </div>
+
+              @if (itemsTotalPages > 1) {
+                <div class="pager">
+                  <button class="pager-btn" type="button" (click)="prevItemsPage()" [disabled]="itemsCurrentPage === 1 || loading">
+                    Előző
+                  </button>
+
+                  <div class="pager-pages">
+                    @for (page of visibleItemsPages(); track page) {
+                      <button
+                        class="pager-page"
+                        type="button"
+                        [class.active]="page === itemsCurrentPage"
+                        (click)="goToItemsPage(page)"
+                        [disabled]="loading">
+                        {{ page }}
+                      </button>
+                    }
+                  </div>
+
+                  <button class="pager-btn" type="button" (click)="nextItemsPage()" [disabled]="itemsCurrentPage === itemsTotalPages || loading">
+                    Következő
+                  </button>
+                </div>
+              }
+
+              <div class="pager-meta">
+                {{ itemsCurrentPage }} / {{ itemsTotalPages }} oldal · összesen {{ itemsTotal }} eszköz
+              </div>
             }
           }
         }
       }
 
-      <!-- ---------- PC TAB ---------- -->
       @if (tab === 'pc') {
-
         <div class="pc-create">
           <div class="pc-field">
             <label>Új PC neve</label>
@@ -85,13 +110,9 @@
           }
         }
       }
-      <!-- ---------- HT TAB ---------- -->
 
       @if (tab === 'ht') {
-
         <div class="ht-section">
-
-          <!-- Layout választás -->
           <div class="field">
             <label>Layout</label>
             <select [(ngModel)]="htLayout" (change)="generateHtInputs()">
@@ -103,15 +124,13 @@
           </div>
 
           @if (htLayout) {
-
-            <!-- Receiver -->
             <div class="field">
               <label>Receiver</label>
 
-            <div class="field">
-              <label>Build neve</label>
-              <input [(ngModel)]="htTitle" placeholder="pl. Nappali 5.1 mozi" />
-            </div>
+              <div class="field">
+                <label>Build neve</label>
+                <input [(ngModel)]="htTitle" placeholder="pl. Nappali 5.1 mozi" />
+              </div>
 
               <select [(ngModel)]="htForm.receiver">
                 <option value="">-- válassz receiver --</option>
@@ -137,9 +156,7 @@
               </select>
             </div>
 
-            <!-- Dinamikus hangszórók -->
             @for (sp of htSpeakers; track sp.key) {
-
               <div class="field">
                 <label>{{ sp.label }}</label>
 
@@ -147,79 +164,59 @@
                   <option value="">-- válassz eszközt --</option>
 
                   @if (sp.key.includes('sub')) {
-
                     @for (s of htCatalog.subwoofers; track s.id) {
                       <option [ngValue]="s.id" style="color:white;">
                         {{ s.manufacturer }} {{ s.model }}
                       </option>
                     }
-
                   } @else if (sp.key.includes('center')) {
-
                     @for (s of htCatalog.centerSpeakers; track s.id) {
                       <option [ngValue]="s.id" style="color:white;">
                         {{ s.manufacturer }} {{ s.model }}
                       </option>
                     }
-
                   } @else if (sp.key.includes('back')) {
-
                     @for (s of htCatalog.backSpeakers; track s.id) {
                       <option [ngValue]="s.id" style="color:white;">
                         {{ s.manufacturer }} {{ s.model }}
                       </option>
                     }
-
                   } @else if (sp.key.includes('surround')) {
-
                     @for (s of htCatalog.sideSpeakers; track s.id) {
                       <option [ngValue]="s.id" style="color:white;">
                         {{ s.manufacturer }} {{ s.model }}
                       </option>
                     }
-
                   } @else {
-
                     @for (s of htCatalog.frontSpeakers; track s.id) {
                       <option [ngValue]="s.id" style="color:white;">
                         {{ s.manufacturer }} {{ s.model }}
                       </option>
                     }
-
                   }
-
                 </select>
               </div>
             }
 
-            <button class="btn primary" (click)="saveHtConfig()">
-              Mentés
-            </button>
             <button class="btn primary"
                     [disabled]="htSaving"
                     (click)="saveHtConfig()">
-
               @if (htSaving) { Mentés... }
               @else { Mentés }
-
             </button>
 
             @if (htSaveSuccess) {
-              <div class="success-msg">✔ Sikeresen elmentve</div>
+              <div class="success-msg">Sikeresen elmentve</div>
             }
 
             @if (htSaveError) {
               <div class="error">{{ htSaveError }}</div>
             }
-
           }
-
         </div>
       }
 
-      <!-- ---------- CARS TAB ---------- -->
       @if (tab === 'cars') {
-
         <div class="car-create">
           <div class="car-field">
             <label>Autó kiválasztása</label>
@@ -228,7 +225,7 @@
               <div class="hint">Autók betöltése...</div>
             } @else {
               <select [(ngModel)]="selectedCarKey">
-                <option [ngValue]="''">— válassz autót —</option>
+                <option [ngValue]="''">-- válassz autót --</option>
                 @for (c of carOptions; track c.id) {
                   <option [ngValue]="c.id">{{ c.display_name }}</option>
                 }
@@ -268,14 +265,11 @@
           }
         }
       }
-
-
     </div>
 
   </div>
 </div>
 
-<!-- ✅ PC Builder modal -->
 @if (pcBuilderOpen && pcBuilderRow) {
   <app-setup-pc-builder-modal
     [setup]="setup"

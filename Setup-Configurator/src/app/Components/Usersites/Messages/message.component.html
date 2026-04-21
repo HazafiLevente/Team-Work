@@ -122,29 +122,25 @@
                     [class.ai-line-bullet]="block.type === 'bullet'"
                     [class.ai-line-paragraph]="block.type === 'paragraph'">
                     <ng-container *ngIf="block.mention; else plainAiLine">
-                      <button
-                        class="ai-mention-card inline"
-                        type="button"
-                        [attr.data-table]="block.product?.table_name || block.product?.source_table || block.product?.table || null"
-                        [attr.data-id]="block.product?.id || block.product?.data?.id || null"
-                        [attr.data-mention]="block.mention"
-                        (click)="openAiMentionBlock(block, m.products || []); $event.preventDefault(); $event.stopPropagation()">
-                        <span class="ai-mention-label">Eszkoz</span>
-                        <span class="ai-mention-name">{{ block.mention }}</span>
-                        <ng-container *ngIf="block.product">
-                          <span class="ai-mention-meta" *ngIf="aiInlineDetails(block.product)?.manufacturer">
-                            {{ aiInlineDetails(block.product)?.manufacturer }}
-                          </span>
-                          <span class="ai-mention-price" *ngIf="aiInlineDetails(block.product)?.price != null">
-                            {{ aiInlineDetails(block.product)?.price | number:'1.0-0':'hu-HU' }} Ft
-                          </span>
-                          <div class="ai-mention-specs" *ngIf="aiInlineVisibleKeys(block.product).length">
-                            <span class="ai-mention-spec" *ngFor="let key of aiInlineVisibleKeys(block.product)">
-                              <strong>{{ key }}:</strong> {{ aiInlineDetails(block.product)?.[key] }}
-                            </span>
-                          </div>
-                        </ng-container>
-                      </button>
+                      <span *ngIf="block.type === 'bullet'" class="ai-line-dot"></span>
+                      <ng-container *ngIf="splitAiLineByMention(block.text, block.mention) as parts; else mentionOnlyLink">
+                        <span>{{ parts.before }}</span>
+                        <a
+                          class="ai-inline-link"
+                          [attr.href]="buildAiProductPath(block.product) || buildAiMentionOpenPath(block.mention)"
+                          (click)="openAiMentionBlock(block, m.products || []); $event.preventDefault(); $event.stopPropagation()">
+                          {{ parts.mention }}
+                        </a>
+                        <span>{{ parts.after }}</span>
+                      </ng-container>
+                      <ng-template #mentionOnlyLink>
+                        <a
+                          class="ai-inline-link"
+                          [attr.href]="buildAiProductPath(block.product) || buildAiMentionOpenPath(block.mention)"
+                          (click)="openAiMentionBlock(block, m.products || []); $event.preventDefault(); $event.stopPropagation()">
+                          {{ block.mention }}
+                        </a>
+                      </ng-template>
                     </ng-container>
 
                     <ng-template #plainAiLine>

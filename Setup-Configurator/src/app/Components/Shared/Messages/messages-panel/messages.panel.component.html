@@ -26,40 +26,20 @@
             <span class="ai-message-time">{{ m.created_at | date:'HH:mm' }}</span>
           </div>
 
-          <div class="ai-tools-shell" *ngIf="buildToolCards(m) as toolCards">
-            <div class="ai-tools-header" *ngIf="toolCards.length">
-              <span class="ai-tools-kicker">Ajanlott eszkozok</span>
-              <span class="ai-tools-caption">A valaszhoz tartozo termekek</span>
-            </div>
-
-            <div class="ai-tools-grid" *ngIf="toolCards.length">
-              <a
-                *ngFor="let card of toolCards; trackBy: trackByToolCard"
-                class="ai-tool-card"
-                [href]="card.href">
-                <div class="ai-tool-icon">{{ card.icon }}</div>
-                <div class="ai-tool-copy">
-                  <span class="ai-tool-eyebrow">{{ card.eyebrow }}</span>
-                  <span class="ai-tool-title">{{ card.title }}</span>
-                  <span class="ai-tool-subtitle">{{ card.subtitle }}</span>
-                </div>
-              </a>
-            </div>
-          </div>
-
-          <div class="ai-rich-text" [class.ai-rich-text-muted]="hasToolCards(m)">
+          <div class="ai-rich-text">
             <div
               *ngFor="let block of formatAiText(m.text, m.products || [])"
               class="ai-line"
               [class.ai-line-heading]="block.type === 'heading'"
               [class.ai-line-bullet]="block.type === 'bullet'"
               [class.ai-line-paragraph]="block.type === 'paragraph'">
-              <ng-container *ngIf="block.mention && !block.product; else plainPanelAiLine">
+              <ng-container *ngIf="block.mention; else plainPanelAiLine">
+                <span *ngIf="block.type === 'bullet'" class="ai-line-dot"></span>
                 <a
-                  class="ai-mention-card inline"
-                  [attr.href]="buildMentionOpenPath(block.mention)">
-                  <span class="ai-mention-label">Eszkoz</span>
-                  <span class="ai-mention-name">{{ block.mention }}</span>
+                  class="ai-inline-link"
+                  [attr.href]="buildProductPath(block.product) || buildMentionOpenPath(block.mention)"
+                  (click)="openInlineProductCard($event, block.product, block.mention)">
+                  {{ block.mention }}
                 </a>
               </ng-container>
 

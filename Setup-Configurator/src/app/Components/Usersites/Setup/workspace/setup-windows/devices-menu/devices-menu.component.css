@@ -4,3 +4,58 @@
   gap:6px;
   padding:10px;
 }
+
+.loading{
+  padding: 10px 6px;
+  color: rgba(255,255,255,0.72);
+  font-size: 13px;
+}
+
+.pager{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  margin-top:10px;
+  padding-top:10px;
+  border-top:1px solid rgba(255,255,255,0.08);
+}
+
+.pager-pages{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+  flex-wrap:wrap;
+}
+
+.pager-btn,
+.pager-page{
+  min-width:36px;
+  height:36px;
+  padding:0 12px;
+  border-radius:10px;
+  border:1px solid rgba(255,255,255,0.12);
+  background:rgba(255,255,255,0.05);
+  color:rgba(255,255,255,0.88);
+  cursor:pointer;
+}
+
+.pager-page.active{
+  background:rgba(82,39,255,0.32);
+  border-color:rgba(82,39,255,0.55);
+  color:#fff;
+}
+
+.pager-btn:disabled,
+.pager-page:disabled{
+  opacity:0.45;
+  cursor:default;
+}
+
+.pager-meta{
+  color: rgba(255,255,255,0.6);
+  font-size: 12px;
+  text-align: center;
+  margin-top: 4px;
+}
