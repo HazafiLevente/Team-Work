@@ -47,6 +47,16 @@ export class MessagesPanelComponent implements OnInit, OnDestroy {
     server_desktop: 'storages',
     soundbar: 'home_theater'
   };
+  private readonly toolTypeMeta: Array<{ match: RegExp; icon: string; label: string }> = [
+    { match: /(cpu|processzor)/i, icon: 'chip', label: 'Processzor' },
+    { match: /(gpu|video|grafikus|vga)/i, icon: 'monitor', label: 'Grafika' },
+    { match: /(speaker|hangfal|studio_monitor|soundbar|subwoofer|receiver|audio)/i, icon: 'volume-2', label: 'Audio' },
+    { match: /(motherboard|alaplap)/i, icon: 'circuit-board', label: 'Alaplap' },
+    { match: /(ram|memoria)/i, icon: 'memory-stick', label: 'Memoria' },
+    { match: /(psu|power|tapegyseg)/i, icon: 'battery-charging', label: 'Tapegyseg' },
+    { match: /(guitar|drums|trumpet|saxophone|instrument)/i, icon: 'music-4', label: 'Hangszer' },
+    { match: /(switch|server|storage|network)/i, icon: 'server', label: 'Halozat' }
+  ];
 
   @Output() close = new EventEmitter<void>();
 
@@ -64,7 +74,7 @@ export class MessagesPanelComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     document.body.classList.add('ai-open');
-    this.messages = [this.buildSystemMessage()];
+    this.restoreConversation();
   }
 
   ngOnDestroy(): void {
@@ -82,6 +92,7 @@ export class MessagesPanelComponent implements OnInit, OnDestroy {
     if (!this.activeConversationKey) {
       this.aiStore.createConversation().subscribe((conversation) => {
         this.activeConversationKey = conversation.key;
+        this.aiStore.setActiveConversationKey(conversation.key).subscribe();
         this.send();
       });
       return;
@@ -125,6 +136,7 @@ export class MessagesPanelComponent implements OnInit, OnDestroy {
         const responseConversationKey = String(res?.panel_id || res?.messages_id || '').trim();
         if (responseConversationKey) {
           this.activeConversationKey = responseConversationKey;
+          this.aiStore.setActiveConversationKey(responseConversationKey).subscribe();
         }
 
         const cleanMessages = this.messages.filter((message) => !message.loading);
@@ -334,6 +346,91 @@ export class MessagesPanelComponent implements OnInit, OnDestroy {
     // allow fallback href to navigate to /product-open/:name
   }
 
+  buildToolCards(message: AiConversationMessage): Array<{
+    title: string;
+    subtitle: string;
+    eyebrow: string;
+    href: string;
+    icon: string;
+  }> {
+    const cards: Array<{
+      title: string;
+      subtitle: string;
+      eyebrow: string;
+      href: string;
+      icon: string;
+    }> = [];
+    const seen = new Set<string>();
+    const products = Array.isArray(message?.products) ? message.products : [];
+
+    for (const product of products) {
+      const title = String(
+        product?.name ??
+        product?.model ??
+        product?.data?.name ??
+        product?.data?.model ??
+        ''
+      ).trim();
+      const href = this.buildProductPath(product);
+      if (!title || !href) continue;
+
+      const key = this.normalizeMention(title);
+      if (seen.has(key)) continue;
+      seen.add(key);
+
+      const typeSource = String(
+        product?.type ??
+        product?.category ??
+        product?.table_name ??
+        product?.source_table ??
+        ''
+      ).trim();
+      const meta = this.resolveToolMeta(typeSource, title);
+
+      cards.push({
+        title,
+        subtitle: typeSource ? this.formatToolSubtitle(typeSource) : 'Megnyithato ajanlas',
+        eyebrow: meta.label,
+        href,
+        icon: meta.icon
+      });
+    }
+
+    const mentionBlocks = this.formatAiText(message?.text || '', products)
+      .filter((block) => !!block.mention)
+      .slice(0, 8);
+
+    for (const block of mentionBlocks) {
+      const mention = String(block.mention || '').trim();
+      if (!mention) continue;
+
+      const key = this.normalizeMention(mention);
+      if (seen.has(key)) continue;
+      seen.add(key);
+
+      const href = this.buildProductPath(block.product) || this.buildMentionOpenPath(mention);
+      const meta = this.resolveToolMeta(block.product?.type || block.product?.category || mention, mention);
+
+      cards.push({
+        title: mention,
+        subtitle: block.product ? 'Felismert termek az uzenetbol' : 'Kereses erre az eszkozre',
+        eyebrow: meta.label,
+        href,
+        icon: meta.icon
+      });
+    }
+
+    return cards.slice(0, 6);
+  }
+
+  trackByToolCard(_: number, card: { href: string; title: string }): string {
+    return `${card.href}::${card.title}`;
+  }
+
+  hasToolCards(message: AiConversationMessage): boolean {
+    return this.buildToolCards(message).length > 0;
+  }
+
   private openProductByLookup(product: any) {
     const query = String(
       product?.name ??
@@ -381,6 +478,22 @@ export class MessagesPanelComponent implements OnInit, OnDestroy {
     return contains || items[0] || null;
   }
 
+  private resolveToolMeta(...values: any[]): { icon: string; label: string } {
+    const haystack = values
+      .map((value) => String(value || '').trim())
+      .filter(Boolean)
+      .join(' ');
+
+    const matched = this.toolTypeMeta.find((item) => item.match.test(haystack));
+    return matched || { icon: 'sparkles', label: 'Eszkoz' };
+  }
+
+  private formatToolSubtitle(value: string): string {
+    return String(value || '')
+      .replace(/[_-]+/g, ' ')
+      .replace(/\b\w/g, (char) => char.toUpperCase());
+  }
+
   private normalizeMention(value: any): string {
     return String(value || '')
       .toLowerCase()
@@ -420,6 +533,39 @@ export class MessagesPanelComponent implements OnInit, OnDestroy {
     };
 
     this.aiStore.saveConversation(conversation).subscribe();
+  }
+
+  private restoreConversation() {
+    this.aiStore.getActiveConversationKey().subscribe((key) => {
+      if (!key) {
+        this.aiStore.getConversations().subscribe((conversations) => {
+          const latest = conversations[0];
+          if (!latest?.key) {
+            this.messages = [this.buildSystemMessage()];
+            return;
+          }
+
+          this.activeConversationKey = latest.key;
+          this.aiStore.setActiveConversationKey(latest.key).subscribe();
+          this.aiStore.getConversation(latest.key).subscribe((conversation) => {
+            this.messages = conversation?.messages?.length
+              ? [...conversation.messages]
+              : [this.buildSystemMessage()];
+          });
+        });
+        return;
+      }
+
+      this.activeConversationKey = key;
+      this.aiStore.getConversation(key).subscribe((conversation) => {
+        if (conversation?.messages?.length) {
+          this.messages = [...conversation.messages];
+          return;
+        }
+
+        this.messages = [this.buildSystemMessage()];
+      });
+    });
   }
 
   private buildSystemMessage(): AiConversationMessage {
