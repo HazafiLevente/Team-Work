@@ -1,47 +1,35 @@
 <app-context-menu-base [x]="x" [y]="y" (close)="close.emit()">
-
   <div class="menu-section">
-
     <button class="menu-item" (click)="$event.stopPropagation(); emitAndClose(openSetup)">
-      📂 Megnyitás
+      Megnyitas
     </button>
 
     <button class="menu-item" (click)="$event.stopPropagation(); emitAndClose(openTools)">
-      🧰 Eszközök
+      Eszkozok
     </button>
 
     <button class="menu-item" (click)="$event.stopPropagation(); emitAndClose(rename)">
-      ✏️ Átnevezés
+      Atnevezes
     </button>
-
-    <button class="menu-item" (click)="$event.stopPropagation(); emitAndClose(categoryMenu)">
-      🏷️ Típus választása
-    </button>
-
   </div>
 
   <div class="menu-separator"></div>
 
   <div class="menu-section">
-
     <button class="menu-item" (click)="$event.stopPropagation(); connect.emit(); close.emit()">
-      Összekötés
+      Osszekotes
     </button>
 
     <button class="menu-item" (click)="$event.stopPropagation(); emitAndClose(connections)">
-      📡 Kapcsolatok
+      Kapcsolatok
     </button>
-
   </div>
 
   <div class="menu-separator"></div>
 
   <div class="menu-section">
-
     <button class="menu-item danger" (click)="$event.stopPropagation(); emitAndClose(deleteSetup)">
-      🗑 Törlés
+      Torles
     </button>
-
   </div>
-
 </app-context-menu-base>

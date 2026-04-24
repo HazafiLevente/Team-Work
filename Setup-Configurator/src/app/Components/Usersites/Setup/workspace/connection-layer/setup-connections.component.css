@@ -26,3 +26,13 @@
   stroke-dasharray: 8 8;
   opacity: 0.8;
 }
+
+.connection-label {
+  fill: rgba(255, 255, 255, 0.78);
+  font-size: 7px;
+  text-anchor: middle;
+  dominant-baseline: middle;
+  letter-spacing: 0.5px;
+  pointer-events: none;
+  user-select: none;
+}

@@ -873,15 +873,27 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit {
       return;
     }
 
-    this.connections = raw.map(c => {
+    const currentSetupId = String(this.getSetupId(this.viewingSetup) ?? '');
+
+    this.connections = raw
+      .filter((c) => {
+        const fromSetupId = String(c?.from_setup_id ?? '');
+        const toSetupId = String(c?.to_setup_id ?? '');
+
+        if (!currentSetupId) return fromSetupId === toSetupId;
+        return fromSetupId === currentSetupId && toSetupId === currentSetupId;
+      })
+      .map(c => {
       return {
         ...c,
+        crossSetup: false,
+        cableLabel: 'utp',
         source: {
-          category: this.mapTypeToCategory(c.from_device_type),
+          category: this.mapTypeToCategory(c.from_device_type, c?.source?.category),
           id: c.from_device_id
         },
         target: {
-          category: this.mapTypeToCategory(c.to_device_type),
+          category: this.mapTypeToCategory(c.to_device_type, c?.target?.category),
           id: c.to_device_id
         }
       };
@@ -889,10 +901,15 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit {
     this.updateLines();
   }
 
-  private mapTypeToCategory(type: string): string {
-    const t = String(type || '').toLowerCase();
+  private isAllowedConnectionType(type: string): boolean {
+    const normalized = String(type || '').toLowerCase().replace('[setup]', '').trim();
+    return normalized === 'pc' || normalized === 'ht' || normalized === 'home_theater';
+  }
+
+  private mapTypeToCategory(type: string, fallback?: string): string {
+    const t = String(type || fallback || '').toLowerCase().replace('[setup]', '').trim();
     if (!t || t === 'room') return 'setup';
-    return 'setup';
+    return t;
   }
 
   loadPairingItems(setupId: number | string): void {
@@ -969,6 +986,12 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit {
   }
 
   selectSourceItem(item: any): void {
+    const sourceType = this.mapItemCategoryToDeviceType(item);
+    if (!this.isAllowedConnectionType(sourceType)) {
+      console.warn('Csak PC és házimozi setup köthető össze.');
+      return;
+    }
+
     this.connectSourceItem = item;
     this.pairingStage = 'PICK_TARGET_SETUP';
     this.workspaceComp?.closeWindow('pairing_source');
@@ -1003,14 +1026,24 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit {
       return;
     }
 
+    if (!this.isAllowedConnectionType(from_device_type) || !this.isAllowedConnectionType(to_device_type)) {
+      console.warn('Csak PC és házimozi setup köthető össze UTP kábellel.');
+      return;
+    }
+
     this.http.post<any>('/api/setup/save-connection', {
+      name: 'utp',
+      setup_from: from_setup_id,
+      setup_to: to_setup_id,
+      device_from: from_device_id,
+      device_to: to_device_id,
+      port_type: 'utp',
       from_setup_id,
       to_setup_id,
       from_device_type,
       from_device_id,
       to_device_type,
-      to_device_id,
-      utp_id: 1
+      to_device_id
     }, { withCredentials: true }).subscribe({
       next: () => {
         this.cancelConnecting();
@@ -1044,7 +1077,7 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit {
     if (setupType.includes('home_theater') || setupType === 'ht') return 'ht';
     if (setupType.includes('audio_processor') || setupType === 'audiop') return 'audiop';
     if (setupType.includes('mixer')) return 'mixer';
-    if (setupType === 'setup') return '';
+    if (setupType === 'setup') return 'setup';
 
     return setupType.replace('[setup]', '').trim();
   }

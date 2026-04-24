@@ -72,6 +72,7 @@ export class MessagesComponent implements OnInit, OnDestroy {
   authUserId: number | null = null;
 
   @ViewChild('bottom') bottom!: ElementRef<HTMLDivElement>;
+  @ViewChild('messagesContainer') messagesContainer!: ElementRef<HTMLDivElement>;
 
   isMobile = false;
   mobileView: 'list' | 'chat' = 'list';
@@ -91,6 +92,23 @@ export class MessagesComponent implements OnInit, OnDestroy {
   contextMenuX = 0;
   contextMenuY = 0;
   contextTarget: { type: 'conversation' | 'message' | 'aiConversation', data: any } | null = null;
+
+  conversationMenuKey: string | null = null;
+  messageMenuId: number | null = null;
+  reportTarget: any = null;
+  reportScope: 'profile' | 'message' = 'profile';
+  reportTitle = '';
+  reportType = 'spam';
+  reportMessage = '';
+  reportSending = false;
+  reportError = '';
+  reportTypes = [
+    { value: 'spam', label: 'Spam' },
+    { value: 'harassment', label: 'Zaklatas' },
+    { value: 'hate', label: 'Gyuloletkeltes' },
+    { value: 'scam', label: 'Atveres' },
+    { value: 'other', label: 'Egyeb' }
+  ];
 
   constructor(
     private http: HttpClient,
@@ -145,6 +163,8 @@ export class MessagesComponent implements OnInit, OnDestroy {
   @HostListener('document:click')
   onDocClick() {
     this.openMenuId = null;
+    this.conversationMenuKey = null;
+    this.messageMenuId = null;
     this.closeContextMenu();
   }
 
@@ -172,12 +192,25 @@ export class MessagesComponent implements OnInit, OnDestroy {
     return this.mode === 'ai' ? this.aiMessages : this.messages;
   }
 
+  isOwnMessage(message: any): boolean {
+    if (message?.sender === 'me') return true;
+    return Number(message?.user_id) === Number(this.authUserId);
+  }
+
   getActiveTitle(): string {
     if (this.mode === 'ai') {
       return this.aiConversations.find((c) => c.key === this.activeAiKey)?.title || 'AI beszelgetes';
     }
 
     return this.conversations.find((c) => String(c.key) === String(this.activeKey))?.title || 'Chat';
+  }
+
+  contextIsOwnMessage(): boolean {
+    return this.contextTarget?.type === 'message' && this.isOwnMessage(this.contextTarget.data);
+  }
+
+  contextIsOtherMessage(): boolean {
+    return this.contextTarget?.type === 'message' && !this.isOwnMessage(this.contextTarget.data);
   }
 
   onToggleMode(checked: boolean) {
@@ -239,6 +272,94 @@ export class MessagesComponent implements OnInit, OnDestroy {
     event.stopPropagation();
     this.contextTarget = { type: 'conversation', data: conversation };
     this.openContextMenu(event.clientX, event.clientY);
+  }
+
+  toggleConversationMenu(event: MouseEvent, conversation: any) {
+    event.preventDefault();
+    event.stopPropagation();
+    this.conversationMenuKey =
+      this.conversationMenuKey === String(conversation.key) ? null : String(conversation.key);
+  }
+
+  openReportModal(event: MouseEvent, conversation: any) {
+    event.preventDefault();
+    event.stopPropagation();
+    this.conversationMenuKey = null;
+    this.prepareProfileReport(conversation);
+  }
+
+  private prepareProfileReport(conversation: any) {
+    this.reportScope = 'profile';
+    this.reportTarget = conversation;
+    this.reportTitle = `Report: ${conversation.title || 'Felhasznalo'}`;
+    this.reportType = 'spam';
+    this.reportMessage = '';
+    this.reportError = '';
+    this.reportSending = false;
+  }
+
+  openMessageReportModal(event: MouseEvent, message: any) {
+    event.preventDefault();
+    event.stopPropagation();
+    if (this.mode !== 'messages' || this.isOwnMessage(message)) return;
+
+    this.messageMenuId = null;
+    this.prepareMessageReport(message);
+  }
+
+  private prepareMessageReport(message: any) {
+    this.reportScope = 'message';
+    this.reportTarget = message;
+    this.reportTitle = 'Report message';
+    this.reportType = 'spam';
+    this.reportMessage = '';
+    this.reportError = '';
+    this.reportSending = false;
+  }
+
+  closeReportModal() {
+    if (this.reportSending) return;
+    this.reportTarget = null;
+    this.reportError = '';
+  }
+
+  submitReport() {
+    if (!this.reportTarget || this.reportSending) return;
+
+    const title = this.reportTitle.trim();
+    const message = this.reportMessage.trim();
+
+    if (!title || !this.reportType || !message) {
+      this.reportError = 'Tolts ki minden mezot.';
+      return;
+    }
+
+    this.reportSending = true;
+    this.reportError = '';
+
+    this.http.post(
+      '/api/messages/report',
+      {
+        panel_id: this.reportScope === 'profile' ? this.reportTarget.key : this.activeKey,
+        reported_user_id: this.reportScope === 'profile' ? this.reportTarget.otherUserId : this.reportTarget.user_id,
+        message_id: this.reportScope === 'message' ? this.reportTarget.id : undefined,
+        report_scope: this.reportScope,
+        title,
+        report_type: this.reportType,
+        message
+      },
+      { withCredentials: true }
+    ).subscribe({
+      next: () => {
+        this.reportSending = false;
+        this.reportTarget = null;
+        alert('Report elkuldve az adminoknak.');
+      },
+      error: (err) => {
+        this.reportSending = false;
+        this.reportError = err.error?.error || 'Nem sikerult elkuldeni a reportot.';
+      }
+    });
   }
 
   onRightClickAiConversation(event: MouseEvent, conversation: AiConversationRecord) {
@@ -336,12 +457,58 @@ export class MessagesComponent implements OnInit, OnDestroy {
     this.openMenuId = this.openMenuId === id ? null : id;
   }
 
-  scrollToBottom(smooth = true) {
-    if (!this.bottom) return;
+  ctxEditMessage() {
+    const target = this.contextTarget;
+    if (target?.type !== 'message' || !this.isOwnMessage(target.data)) {
+      this.closeContextMenu();
+      return;
+    }
 
-    this.bottom.nativeElement.scrollIntoView({
+    this.startEdit(target.data);
+    this.closeContextMenu();
+  }
+
+  ctxReport() {
+    const target = this.contextTarget;
+    if (!target) return;
+
+    if (target.type === 'conversation') {
+      this.prepareProfileReport(target.data);
+      this.closeContextMenu();
+      return;
+    }
+
+    if (target.type === 'message' && !this.isOwnMessage(target.data)) {
+      this.prepareMessageReport(target.data);
+      this.closeContextMenu();
+    }
+  }
+
+  ctxHide() {
+    this.closeContextMenu();
+  }
+
+  toggleMessageMenu(id: number, event: MouseEvent) {
+    if (this.mode === 'ai') return;
+
+    event.stopPropagation();
+    this.messageMenuId = this.messageMenuId === id ? null : id;
+  }
+
+  scrollToBottom(smooth = true) {
+    const container = this.messagesContainer?.nativeElement;
+
+    if (container) {
+      container.scrollTo({
+        top: container.scrollHeight,
+        behavior: smooth ? 'smooth' : 'auto'
+      });
+      return;
+    }
+
+    this.bottom?.nativeElement.scrollIntoView({
       behavior: smooth ? 'smooth' : 'auto',
-      block: 'end'
+      block: 'nearest'
     });
   }
 

@@ -33,10 +33,20 @@
   transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
 }
 
+body[data-appearance="light"] .stat-card {
+  background: var(--bg-elevated);
+  border-color: var(--line);
+  box-shadow: var(--shadow-soft);
+}
+
 .stat-card:hover {
   transform: translateY(-2px);
   border-color: color-mix(in srgb, var(--page-accent, #fb923c) 24%, transparent);
   box-shadow: 0 16px 34px color-mix(in srgb, var(--page-accent, #fb923c) 14%, transparent);
+}
+
+body[data-appearance="light"] .stat-card:hover {
+  border-color: var(--page-accent);
 }
 
 .stat-card .icon {
@@ -72,10 +82,21 @@
   transition: transform 0.18s ease, background 0.18s ease, border-color 0.18s ease;
 }
 
+body[data-appearance="light"] .admin-btn {
+  background: var(--bg-elevated);
+  border-color: var(--line);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
 .admin-btn:hover {
   transform: translateY(-1px);
   background: color-mix(in srgb, var(--page-accent, #fb923c) 12%, transparent);
   border-color: color-mix(in srgb, var(--page-accent, #fb923c) 28%, transparent);
+}
+
+body[data-appearance="light"] .admin-btn:hover {
+  background: var(--chrome-bg-hover);
+  border-color: var(--page-accent);
 }
 
 .admin-btn.danger:hover {

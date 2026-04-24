@@ -66,8 +66,7 @@
   @if (ctxOpen && ctxSetup) {
     <app-context-menu-room [x]="ctxX" [y]="ctxY" (close)="closeContextMenu()" (openSetup)="openSetupDetails(ctxSetup)"
                            (openTools)="openDevicesWindow(ctxSetup)" (rename)="startRenameForContextSetup()" (connect)="connect.emit(ctxSetup)"
-                           (categoryMenu)="openCategoryMenuForRoom(ctxSetup)" (connections)="openConnectionsWindow(ctxSetup)"
-                           (deleteSetup)="deleteSetup.emit(ctxSetup)">
+                           (connections)="openConnectionsWindow(ctxSetup)" (deleteSetup)="deleteSetup.emit(ctxSetup)">
     </app-context-menu-room>
   }
 

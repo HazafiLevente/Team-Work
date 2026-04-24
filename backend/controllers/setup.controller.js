@@ -1,4 +1,5 @@
 const { supabase } = require("../services/supabase");
+const connectionService = require("../services/setup.connections");
 
 /**
  * Stabil children scan:
@@ -1387,11 +1388,11 @@ exports.remove = async (req, res) => {
         const setupIds = (roomSetups || []).map((row) => Number(row.id)).filter(Number.isFinite);
 
         if (setupIds.length) {
-            const { error: deviceConnErr } = await supabase
-                .from(SETUP_CONNECTIONS_TABLE)
-                .delete()
-                .in("setup_id", setupIds);
-            if (deviceConnErr) return res.status(500).json({ error: deviceConnErr.message });
+            try {
+                await connectionService.removeConnectionsForSetupIds(setupIds);
+            } catch (deviceConnErr) {
+                return res.status(500).json({ error: deviceConnErr.message });
+            }
 
             const { error: deviceErr } = await supabase
                 .from(SETUP_DEVICES_TABLE)
@@ -2214,70 +2215,63 @@ const typeToTableMap = {
 };
 
 exports.connections = async (req, res) => {
-    return res.json([]);
+    try {
+        const userId = req.user.id;
+        const setupId = Number(req.params.id);
+
+        if (!setupId) return res.json([]);
+
+        const ok = await assertSetupOwnedByUser(setupId, userId);
+        if (!ok) return res.status(403).json({ error: "Forbidden" });
+
+        const rows = await connectionService.listConnectionsBySetup(setupId);
+        return res.json(rows);
+    } catch (err) {
+        console.error("connections fatal:", err);
+        return res.json([]);
+    }
 };
 
 exports.connectionsCreate = async (req, res) => {
     try {
         const userId = req.user.id;
-        const {
-            from_device_id,
-            to_device_id,
-            from_setup_device_port_id,
-            to_setup_device_port_id,
-            cable_id,
-            setup_id,
-            type
-        } = req.body;
+        const fromDeviceType = String(req.body?.from_device_type || "").toLowerCase().trim();
+        const toDeviceType = String(req.body?.to_device_type || "").toLowerCase().trim();
+        const allowedTypes = new Set(["pc", "ht", "home_theater"]);
+        const setupFromId = Number(
+            req.body?.setup_from ?? req.body?.from_setup_id ?? req.body?.setup_id ?? 0
+        );
+        const setupToId = Number(
+            req.body?.setup_to ?? req.body?.to_setup_id ?? req.body?.setup_id ?? 0
+        );
 
-        if (!setup_id || !from_device_id || !to_device_id || !from_setup_device_port_id || !to_setup_device_port_id) {
-            return res.status(400).json({ error: "Missing required port connection fields" });
+        if (!setupFromId || !setupToId) {
+            return res.status(400).json({ error: "Missing required connection fields" });
         }
 
-        const setupOwned = await assertSetupOwnedByUser(setup_id, userId);
-        const fromOwned = await assertDeviceOwnedByUser(from_device_id, userId);
-        const toOwned = await assertDeviceOwnedByUser(to_device_id, userId);
+        if (!allowedTypes.has(fromDeviceType) || !allowedTypes.has(toDeviceType)) {
+            return res.status(400).json({ error: "Only PC and home theater setups can be connected" });
+        }
 
-        if (!setupOwned || !fromOwned || !toOwned) {
+        req.body.port_type = "utp";
+        req.body.name = "utp";
+
+        const fromOwned = await assertSetupOwnedByUser(setupFromId, userId);
+        const toOwned = await assertSetupOwnedByUser(setupToId, userId);
+
+        if (!fromOwned || !toOwned) {
             return res.status(403).json({ error: "Forbidden" });
         }
 
-        const fromCapacity = await validatePortCapacity(from_setup_device_port_id);
-        if (!fromCapacity.ok) return res.status(400).json({ error: fromCapacity.error });
+        const connection = await connectionService.createConnection(req.body);
 
-        const toCapacity = await validatePortCapacity(to_setup_device_port_id);
-        if (!toCapacity.ok) return res.status(400).json({ error: toCapacity.error });
+        childrenCache.delete(String(setupFromId));
+        childrenCache.delete(String(setupToId));
 
-        const fromPortType = Number(fromCapacity.port?.port_type ?? 0);
-        const toPortType = Number(toCapacity.port?.port_type ?? 0);
-        if (fromPortType && toPortType && fromPortType !== toPortType) {
-            return res.status(400).json({ error: "Incompatible port types" });
-        }
-
-        const payload = {
-            setup_id: Number(setup_id),
-            from_setup_device_id: Number(from_device_id),
-            to_setup_device_id: Number(to_device_id),
-            from_setup_device_port_id: Number(from_setup_device_port_id),
-            to_setup_device_port_id: Number(to_setup_device_port_id),
-            cable_id: cable_id == null ? null : Number(cable_id),
-            type: type == null ? null : type
-        };
-
-        const { data, error } = await supabase
-            .from(SETUP_CONNECTIONS_TABLE)
-            .insert([payload])
-            .select("*")
-            .single();
-
-        if (error) throw error;
-
-        childrenCache.delete(String(setup_id));
-
-        res.json({ success: true, connection: data });
+        res.json({ success: true, connection });
     } catch (err) {
         console.error("âťŚ connectionsCreate fatal:", err);
-        res.status(500).json({ error: "Failed to create connection" });
+        res.status(err?.status || 500).json({ error: err?.message || "Failed to create connection" });
     }
 };
 
@@ -2286,25 +2280,24 @@ exports.connectionsRemove = async (req, res) => {
         const userId = req.user.id;
         const connId = req.params.id;
 
-        const { data: conn, error: findErr } = await supabase
-            .from(SETUP_CONNECTIONS_TABLE)
-            .select("setup_id")
-            .eq("id", connId)
-            .single();
+        const allConnections = await connectionService.listAllConnections();
+        const conn = allConnections.find((row) => String(row?.id) === String(connId));
 
-        if (findErr || !conn) return res.status(404).json({ error: "Connection not found" });
+        if (!conn) return res.status(404).json({ error: "Connection not found" });
 
-        const ok = await assertSetupOwnedByUser(conn.setup_id, userId);
-        if (!ok) return res.status(403).json({ error: "Forbidden" });
+        const fromOwned = conn?.from_setup_id
+            ? await assertSetupOwnedByUser(conn.from_setup_id, userId)
+            : false;
+        const toOwned = conn?.to_setup_id
+            ? await assertSetupOwnedByUser(conn.to_setup_id, userId)
+            : false;
 
-        const { error: delErr } = await supabase
-            .from(SETUP_CONNECTIONS_TABLE)
-            .delete()
-            .eq("id", connId);
+        if (!fromOwned && !toOwned) return res.status(403).json({ error: "Forbidden" });
 
-        if (delErr) throw delErr;
+        await connectionService.removeConnection(connId);
 
-        childrenCache.delete(String(conn.setup_id));
+        if (conn?.from_setup_id) childrenCache.delete(String(conn.from_setup_id));
+        if (conn?.to_setup_id) childrenCache.delete(String(conn.to_setup_id));
 
         res.json({ success: true });
     } catch (err) {
@@ -2437,17 +2430,15 @@ exports.removeItem = async (req, res) => {
         if (delErr) throw delErr;
 
         if (String(tableName).toLowerCase() === String(SETUPS_TABLE).toLowerCase()) {
-            const { error: connErr } = await supabase
-                .from(SETUP_CONNECTIONS_TABLE)
-                .delete()
-                .eq("setup_id", itemId);
-            if (connErr) throw connErr;
+            await connectionService.removeConnectionsForSetupIds([itemId]);
 
             const { error: deviceErr } = await supabase
                 .from(SETUP_DEVICES_TABLE)
                 .delete()
                 .eq("setup_id", itemId);
             if (deviceErr) throw deviceErr;
+        } else if (String(tableName).toLowerCase() === String(SETUP_DEVICES_TABLE).toLowerCase()) {
+            await connectionService.removeConnectionsForDeviceIds([itemId]);
         }
 
         childrenCache.delete(String(item.setup_id));
@@ -2460,7 +2451,34 @@ exports.removeItem = async (req, res) => {
 };
 
 exports.allConnections = async (req, res) => {
-    return res.json([]);
+    try {
+        const userId = req.user.id;
+        const rows = await connectionService.listAllConnections();
+        const allowedSetupIds = new Set();
+
+        for (const row of rows) {
+            const fromSetupId = Number(row?.from_setup_id ?? 0);
+            const toSetupId = Number(row?.to_setup_id ?? 0);
+
+            if (fromSetupId && !allowedSetupIds.has(fromSetupId)) {
+                if (await assertSetupOwnedByUser(fromSetupId, userId)) allowedSetupIds.add(fromSetupId);
+            }
+
+            if (toSetupId && !allowedSetupIds.has(toSetupId)) {
+                if (await assertSetupOwnedByUser(toSetupId, userId)) allowedSetupIds.add(toSetupId);
+            }
+        }
+
+        return res.json(
+            rows.filter((row) =>
+                allowedSetupIds.has(Number(row?.from_setup_id ?? 0)) &&
+                allowedSetupIds.has(Number(row?.to_setup_id ?? 0))
+            )
+        );
+    } catch (err) {
+        console.error("allConnections fatal:", err);
+        return res.json([]);
+    }
 };
 
 exports.childrenInternal = async (setupId) => {
@@ -2489,16 +2507,8 @@ exports.deviceConnections = async (req, res) => {
             return res.json([]);
         }
 
-        const { data, error } = await supabase
-            .from(SETUP_CONNECTIONS_TABLE)
-            .select("*")
-            .or(
-                `from_setup_device_id.eq.${deviceId},to_setup_device_id.eq.${deviceId}`
-            );
-
-        if (error) throw error;
-
-        return res.json(data || []);
+        const rows = await connectionService.listConnectionsByDevice(deviceId);
+        return res.json(rows);
     } catch (err) {
         console.error("âťŚ deviceConnections fatal:", err);
         return res.json([]);

@@ -1,8 +1,7 @@
 <div class="overlay" (click)="close()"></div>
 
 <div class="panel" (click)="$event.stopPropagation()">
-  <!-- FIX X mindig látható -->
-  <button class="x" type="button" (click)="close()" aria-label="Bezárás">✕</button>
+  <button class="x" type="button" (click)="close()" aria-label="Bezaras">×</button>
 
   <div class="panel-header">
     <div class="title">
@@ -12,12 +11,12 @@
   </div>
 
   <div class="panel-body">
-    <div *ngIf="loading">Betöltés...</div>
+    <div *ngIf="loading">Betoltes...</div>
     <div *ngIf="!loading && error" class="error">{{ error }}</div>
 
     <div *ngIf="!loading && details">
       <div class="price">
-        Ár: <strong>{{ details.price !== null && details.price !== undefined && details.price !== '' ? (details.price | number:'1.0-0') + ' Ft' : 'N/A' }}</strong>
+        Ar: <strong>{{ details.price !== null && details.price !== undefined && details.price !== '' ? (details.price | number:'1.0-0') + ' Ft' : 'N/A' }}</strong>
       </div>
 
       <div class="kv">
@@ -32,7 +31,57 @@
   </div>
 
   <div class="panel-footer" *ngIf="!loading && details">
-    <button type="button" class="btn secondary" (click)="onMore()">Több</button>
+    <button type="button" class="btn secondary" (click)="onMore()">Tobb</button>
     <button type="button" class="btn primary icon" (click)="onPlus()">+</button>
+  </div>
+</div>
+
+<div class="setup-picker-overlay" *ngIf="setupPickerOpen" (click)="closeSetupPicker()">
+  <div class="setup-picker" (click)="$event.stopPropagation()">
+    <div class="setup-picker-header">
+      <div>
+        <div class="setup-picker-kicker">Product hozzaadas</div>
+        <div class="setup-picker-title">Valaszd ki a setupot vagy favorite roomot</div>
+      </div>
+      <button type="button" class="setup-picker-close" (click)="closeSetupPicker()">×</button>
+    </div>
+
+    <div class="setup-picker-body">
+      <div class="setup-picker-state" *ngIf="pickerLoading">Betoltes...</div>
+      <div class="setup-picker-state error" *ngIf="!pickerLoading && pickerError">{{ pickerError }}</div>
+      <div class="setup-picker-state success" *ngIf="!pickerLoading && pickerSuccess">{{ pickerSuccess }}</div>
+
+      <ng-container *ngIf="!pickerLoading && !pickerError">
+        <div class="setup-picker-section" *ngIf="regularTargets.length">
+          <div class="setup-picker-section-title">MySetup</div>
+          <button
+            type="button"
+            class="setup-target"
+            *ngFor="let target of regularTargets"
+            [disabled]="savingTargetId === target.id"
+            (click)="addProductToTarget(target)">
+            <span>{{ target.name }}</span>
+            <span class="setup-target-action">{{ savingTargetId === target.id ? 'Mentes...' : 'Hozzaad' }}</span>
+          </button>
+        </div>
+
+        <div class="setup-picker-section" *ngIf="favoriteTargets.length">
+          <div class="setup-picker-section-title">Favorite</div>
+          <button
+            type="button"
+            class="setup-target"
+            *ngFor="let target of favoriteTargets"
+            [disabled]="savingTargetId === target.id"
+            (click)="addProductToTarget(target)">
+            <span>{{ target.name }}</span>
+            <span class="setup-target-action">{{ savingTargetId === target.id ? 'Mentes...' : 'Hozzaad' }}</span>
+          </button>
+        </div>
+
+        <div class="setup-picker-state" *ngIf="!regularTargets.length && !favoriteTargets.length">
+          Nincs elerheto mySetup vagy favorite room.
+        </div>
+      </ng-container>
+    </div>
   </div>
 </div>

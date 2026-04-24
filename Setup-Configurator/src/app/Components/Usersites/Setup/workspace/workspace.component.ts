@@ -925,11 +925,32 @@ export class WorkspaceComponent {
     return `${source}::${slot}::${id}::${index}`;
   }
 
+  private getConnectionCategoryForItem(item: any): string {
+    const setupType = String(
+      item?.setup_type ??
+      item?.type ??
+      item?.device_type ??
+      item?.category ??
+      item?.source_table ??
+      item?.table_name ??
+      ''
+    ).toLowerCase().replace('[setup]', '').trim();
+
+    if (!setupType || setupType === 'room') return 'setup';
+    if (setupType.includes('pc')) return 'pc';
+    if (setupType.includes('switch')) return 'switch';
+    if (setupType.includes('router')) return 'router';
+    if (setupType.includes('modem')) return 'modem';
+    if (setupType.includes('home_theater') || setupType === 'ht') return 'ht';
+    if (setupType.includes('audio_processor') || setupType === 'audiop') return 'audiop';
+    if (setupType.includes('mixer')) return 'mixer';
+    if (setupType.includes('car')) return 'car';
+
+    return setupType;
+  }
+
   getItemDataId(item: any): string {
-    const cat = String(item?.category || item?.source_table || item?.table_name || '')
-      .toLowerCase()
-      .replace('[setup]', '')
-      .trim();
+    const cat = this.getConnectionCategoryForItem(item);
     const id = item?.id ?? item?.ID ?? item?.item_id;
     return `${cat}:${id}`;
   }

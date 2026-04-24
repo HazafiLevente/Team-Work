@@ -18,14 +18,19 @@ export class SetupPairingModalComponent {
     @Output() selectSource = new EventEmitter<any>();
     @Output() finalize = new EventEmitter<any>();
 
-    public getDeviceType(item: any): string {
-        const cat = String(item.category || '').toLowerCase();
-        if (cat.includes('pc')) return 'pc';
-        if (cat.includes('switch')) return 'switch';
-        if (cat.includes('router')) return 'router';
-        if (cat.includes('modem')) return 'modem';
-        if (cat.includes('home_theater')) return 'ht';
-        if (cat.includes('setup')) return 'setup';
-        return 'other';
+    public get connectableItems(): any[] {
+        return (this.pairingItemList || []).filter((item) => this.isConnectable(item));
+    }
+
+    public isConnectable(item: any): boolean {
+        const type = String(
+            item?.setup_type ??
+            item?.type ??
+            item?.device_type ??
+            item?.category ??
+            ''
+        ).toLowerCase();
+
+        return type.includes('pc') || type.includes('home_theater') || type === 'ht';
     }
 }

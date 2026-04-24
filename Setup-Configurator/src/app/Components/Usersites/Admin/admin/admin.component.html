@@ -19,6 +19,10 @@
     <button class="admin-btn" [class.active]="activeSection === 'products'" (click)="openProducts()">📦
       Products</button>
 
+    <button class="admin-btn" [class.active]="activeSection === 'reports'" (click)="openReports()">
+      Reports
+    </button>
+
 
     <button class="admin-btn" [class.active]="activeSection === 'logs'" (click)="openLogs()">
       🧾 Logs
@@ -119,6 +123,11 @@
     <!-- PRODUCTS -->
     <ng-container *ngIf="activeSection === 'products'">
       <app-admin-products></app-admin-products>
+    </ng-container>
+
+    <!-- REPORTS -->
+    <ng-container *ngIf="activeSection === 'reports'">
+      <app-admin-reports></app-admin-reports>
     </ng-container>
 
     <!-- SYSTEM -->

@@ -87,9 +87,27 @@
   pointer-events: none;
 }
 
-.usersite-sidebar:hover .nav-label {
-  opacity: 1;
-  transform: translateX(0);
+body[data-appearance="light"] .usersite-sidebar {
+  background: var(--bg-elevated);
+  border-color: var(--line);
+  box-shadow: var(--shadow-soft);
+}
+
+body[data-appearance="light"] .nav-btn {
+  background: var(--chrome-bg);
+  border-color: var(--line);
+  color: var(--text);
+}
+
+body[data-appearance="light"] .nav-btn:hover {
+  background: var(--chrome-bg-hover);
+  border-color: var(--page-accent);
+}
+
+body[data-appearance="light"] .nav-btn.active {
+  background: var(--page-accent);
+  color: #fff;
+  border-color: var(--page-accent);
 }
 
 .admin-btn {

@@ -78,14 +78,22 @@
 
 body[data-appearance="light"] .dock-panel {
   background: var(--surface);
-  border: 1px solid var(--line);
+  border: 1px solid var(--glass-border);
   box-shadow: var(--shadow-soft);
+  backdrop-filter: blur(14px) saturate(1.1);
 }
 
 body[data-appearance="light"] .dock-item {
   background: var(--bg-elevated);
   border: 1px solid var(--line);
-  box-shadow: none;
+  color: var(--text);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+body[data-appearance="light"] .dock-item:hover {
+  background: var(--chrome-bg-hover);
+  border-color: var(--page-accent);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
 }
 
 body[data-appearance="light"] .dock-label {
@@ -93,6 +101,7 @@ body[data-appearance="light"] .dock-label {
   background: var(--bg-elevated);
   color: var(--text);
   box-shadow: var(--shadow-soft);
+  font-weight: 600;
 }
 
 @media (max-width: 768px) {

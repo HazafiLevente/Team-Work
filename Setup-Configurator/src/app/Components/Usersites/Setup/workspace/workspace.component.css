@@ -157,10 +157,21 @@
 
 }
 
-.dock-item:hover {
+body[data-appearance="light"] .workspace-dock {
+  background: var(--bg-elevated);
+  border-color: var(--line);
+  box-shadow: var(--shadow-soft);
+}
 
-  background: #2d2155;
+body[data-appearance="light"] .dock-item {
+  background: var(--chrome-bg);
+  border: 1px solid var(--line);
+  color: var(--text);
+}
 
+body[data-appearance="light"] .dock-item:hover {
+  background: var(--chrome-bg-hover);
+  border-color: var(--page-accent);
 }
 
 .device-row {

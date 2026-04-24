@@ -229,7 +229,7 @@
   cursor: pointer;
 }
 
-@media (max-width: 520px) {
+@media (max-width: 768px) {
   .panel {
     width: 100vw;
   }

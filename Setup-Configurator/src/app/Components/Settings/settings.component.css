@@ -1,7 +1,9 @@
 .settings-page {
-  padding: 18px 0 120px;
+  margin: 0;
+  padding: 96px 32px 190px;
   display: grid;
   gap: 18px;
+  min-height: 100vh;
 }
 
 .muted {
@@ -422,7 +424,7 @@ input[type="checkbox"] {
 
 @media (max-width: 720px) {
   .settings-page {
-    padding-bottom: 110px;
+    padding: 82px 14px 150px;
   }
 
   .hero-card,

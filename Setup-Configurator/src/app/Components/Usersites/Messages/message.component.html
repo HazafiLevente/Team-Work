@@ -38,6 +38,25 @@
           <div class="chat-title">{{ c.title }}</div>
           <div class="chat-preview">{{ c.lastText || '-' }}</div>
         </div>
+
+        <div class="conversation-menu-wrap" (click)="$event.stopPropagation()">
+          <button
+            type="button"
+            class="conversation-dots"
+            title="Muveletek"
+            (click)="toggleConversationMenu($event, c)">
+            &#8942;
+          </button>
+
+          <div
+            *ngIf="conversationMenuKey === c.key"
+            class="conversation-menu"
+            (click)="$event.stopPropagation()">
+            <button type="button" class="conversation-menu-item danger" (click)="openReportModal($event, c)">
+              Report
+            </button>
+          </div>
+        </div>
       </div>
 
       <button class="new-chat-btn" type="button" (click)="toggleNewChat()">
@@ -83,11 +102,11 @@
     </div>
 
     <div class="chat-main">
-      <div class="messages-container">
+      <div #messagesContainer class="messages-container">
         <div
           *ngFor="let m of displayedMessages"
           class="message"
-          [class.mine]="m.user_id === authUserId || m.sender === 'me'"
+          [class.mine]="isOwnMessage(m)"
           [class.ai-message]="m.sender === 'ai' || m.sender === 'system'"
           [class.ai-selected]="mode === 'ai' && m.sender === 'ai' && selectedAiResponseMessageId === m.id"
           [class.product-wrapper]="m.sender === 'product'"
@@ -157,7 +176,7 @@
             </div>
 
             <div
-              *ngIf="mode === 'messages' && m.user_id === authUserId"
+              *ngIf="mode === 'messages' && isOwnMessage(m)"
               class="menu-wrapper">
 
               <button
@@ -178,6 +197,32 @@
 
                 <div class="dropdown-item danger" (click)="deleteMessage(m.id)">
                   Torles
+                </div>
+              </div>
+            </div>
+
+            <div
+              *ngIf="mode === 'messages' && !isOwnMessage(m) && m.sender !== 'ai' && m.sender !== 'system'"
+              class="menu-wrapper">
+
+              <button
+                type="button"
+                class="dots-btn"
+                (click)="toggleMessageMenu(m.id, $event)">
+                â‹®
+              </button>
+
+              <div
+                *ngIf="messageMenuId === m.id"
+                class="dropdown-menu"
+                (click)="$event.stopPropagation()">
+
+                <div class="dropdown-item danger" (click)="openMessageReportModal($event, m)">
+                  Report
+                </div>
+
+                <div class="dropdown-item disabled">
+                  Eltuntetes
                 </div>
               </div>
             </div>
@@ -254,6 +299,57 @@
   </div>
 
   <div
+    *ngIf="reportTarget"
+    class="report-modal-backdrop"
+    (click)="closeReportModal()">
+    <form class="report-modal" (click)="$event.stopPropagation()" (ngSubmit)="submitReport()">
+      <div class="report-modal-head">
+        <div>
+          <div class="report-eyebrow">Report kuldese</div>
+          <h2>{{ reportScope === 'profile' ? reportTarget.title : 'Message report' }}</h2>
+        </div>
+        <button type="button" class="report-close" (click)="closeReportModal()">x</button>
+      </div>
+
+      <label>
+        Title
+        <input
+          name="reportTitle"
+          [(ngModel)]="reportTitle"
+          maxlength="120"
+          required>
+      </label>
+
+      <label>
+        Type
+        <select name="reportType" [(ngModel)]="reportType" required>
+          <option *ngFor="let type of reportTypes" [value]="type.value">{{ type.label }}</option>
+        </select>
+      </label>
+
+      <label>
+        Message az adminoknak
+        <textarea
+          name="reportMessage"
+          [(ngModel)]="reportMessage"
+          rows="5"
+          maxlength="1200"
+          placeholder="Ird le roviden, mi tortent..."
+          required></textarea>
+      </label>
+
+      <div *ngIf="reportError" class="report-error">{{ reportError }}</div>
+
+      <div class="report-actions">
+        <button type="button" class="report-secondary" (click)="closeReportModal()">Megse</button>
+        <button type="submit" class="report-submit" [disabled]="reportSending">
+          {{ reportSending ? 'Kuldes...' : 'Report kuldese' }}
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <div
     *ngIf="contextMenuOpen"
     class="ctx-backdrop"
     (click)="closeContextMenu()">
@@ -266,14 +362,22 @@
     [style.top.px]="contextMenuY"
     (click)="$event.stopPropagation()">
 
-    <div class="ctx-item" (click)="ctxDetails()">Reszletek</div>
-    <div class="ctx-sep"></div>
+    <ng-container *ngIf="contextTarget?.type === 'conversation'">
+      <div class="ctx-item danger" (click)="ctxReport()">Report</div>
+    </ng-container>
 
-    <div *ngIf="mode === 'messages'" class="ctx-item" (click)="ctxMute()">Lenemitas</div>
-    <div *ngIf="mode === 'messages'" class="ctx-item" (click)="ctxDisable()">Tiltas</div>
-    <div *ngIf="mode === 'messages'" class="ctx-item" (click)="ctxBlock()">Blokkolas</div>
-    <div *ngIf="mode === 'messages'" class="ctx-sep"></div>
+    <ng-container *ngIf="contextIsOwnMessage()">
+      <div class="ctx-item" (click)="ctxEditMessage()">Szerkesztes</div>
+      <div class="ctx-item danger" (click)="ctxDelete()">Torles</div>
+    </ng-container>
 
-    <div class="ctx-item danger" (click)="ctxDelete()">Torles</div>
+    <ng-container *ngIf="contextIsOtherMessage()">
+      <div class="ctx-item danger" (click)="ctxReport()">Report</div>
+      <div class="ctx-item disabled" (click)="ctxHide()">Eltuntetes</div>
+    </ng-container>
+
+    <ng-container *ngIf="contextTarget?.type === 'aiConversation'">
+      <div class="ctx-item danger" (click)="ctxDelete()">Torles</div>
+    </ng-container>
   </div>
 </div>

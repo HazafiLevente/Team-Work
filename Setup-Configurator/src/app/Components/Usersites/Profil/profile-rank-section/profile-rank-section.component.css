@@ -14,7 +14,18 @@
   font-weight: 700;
   background: linear-gradient(135deg, #6c63ff, #4cc9f0);
   color: white;
-  transition: transform 0.15s ease, opacity 0.15s ease;
+  transition: transform 0.15s ease, opacity 0.15s ease, background 0.2s ease, box-shadow 0.2s ease;
+}
+
+body[data-appearance="light"] .leaderboard-btn {
+  background: var(--page-accent);
+  color: white;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+body[data-appearance="light"] .leaderboard-btn:hover {
+  background: var(--page-accent-2);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
 }
 
 .leaderboard-btn:hover {

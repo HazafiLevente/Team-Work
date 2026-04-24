@@ -40,17 +40,6 @@
     transform: translateX(4px);
 }
 
-.item-icon {
-    background: rgba(0, 168, 255, 0.2);
-    color: #00a8ff;
-    font-size: 0.7rem;
-    font-weight: bold;
-    padding: 4px 8px;
-    border-radius: 4px;
-    min-width: 50px;
-    text-align: center;
-}
-
 .item-name {
     font-size: 0.9rem;
     font-weight: 500;

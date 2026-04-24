@@ -129,6 +129,38 @@ async function deleteFromFirstAvailable(tableNames, idColumnCandidates, id) {
     throw new Error("Delete failed for all AI tables");
 }
 
+async function ensureReportProperty(propertyName) {
+    const { data: existing, error: findError } = await supabase
+        .from("reports_properties[Admin]")
+        .select("*")
+        .ilike("property", propertyName)
+        .maybeSingle();
+
+    if (findError) throw findError;
+    if (existing) return Number(pickField(existing, ["id", "ID"]));
+
+    const { data: created, error: insertError } = await supabase
+        .from("reports_properties[Admin]")
+        .insert({ property: propertyName })
+        .select("*")
+        .single();
+
+    if (insertError) throw insertError;
+    return Number(pickField(created, ["id", "ID"]));
+}
+
+async function insertReportValue(payload) {
+    const { error } = await supabase
+        .from("reports_values[Admin]")
+        .insert({
+            report_id: payload.reportId,
+            property_id: payload.propertyId,
+            value: payload.value
+        });
+
+    if (error) throw error;
+}
+
 async function getAiPanel(panelId, userId) {
     const { data } = await selectFromFirstAvailable(AI_PANEL_TABLES, (tableName) =>
         supabase.from(tableName).select("*").eq("id", panelId).eq("user_id", userId).maybeSingle()
@@ -287,6 +319,140 @@ exports.send = async (req, res) => {
         return res.json({ success: true });
 
     } catch (e) {
+        return res.status(500).json({ error: e.message });
+    }
+};
+
+exports.reportUser = async (req, res) => {
+    try {
+        const reporterUserId = Number(req.user.id);
+        let reportedUserId = Number(req.body.reported_user_id || req.body.target_user_id);
+        const panelId = Number(req.body.panel_id || req.body.conversation_key);
+        const reportedMessageId = Number(req.body.message_id);
+        const reportScope = String(req.body.report_scope || req.body.scope || "profile").trim() === "message"
+            ? "message"
+            : "profile";
+        const title = String(req.body.title || "").trim();
+        const reportType = String(req.body.report_type || req.body.type || "").trim();
+        const reportMessage = String(req.body.message || req.body.report_message || "").trim();
+
+        if (!panelId || !title || !reportType || !reportMessage) {
+            return res.status(400).json({ error: "Missing report data" });
+        }
+
+        const { data: panel, error: panelError } = await supabase
+            .from("messages_panel[Messages]")
+            .select("id, user1_id, user2_id")
+            .eq("id", panelId)
+            .maybeSingle();
+
+        if (panelError) return res.status(500).json({ error: panelError.message });
+        if (!panel) return res.status(404).json({ error: "Conversation not found" });
+
+        const participants = [Number(panel.user1_id), Number(panel.user2_id)];
+        if (!participants.includes(reporterUserId)) {
+            return res.status(403).json({ error: "Forbidden" });
+        }
+
+        let reportedMessageContext = "";
+
+        if (reportScope === "message") {
+            if (!Number.isFinite(reportedMessageId)) {
+                return res.status(400).json({ error: "Missing message id" });
+            }
+
+            const { data: messageRow, error: messageError } = await supabase
+                .from("messages[Messages]")
+                .select("id, messages_panel_id, user_id, context")
+                .eq("id", reportedMessageId)
+                .eq("messages_panel_id", panelId)
+                .maybeSingle();
+
+            if (messageError) return res.status(500).json({ error: messageError.message });
+            if (!messageRow) return res.status(404).json({ error: "Message not found" });
+
+            reportedUserId = Number(messageRow.user_id);
+            reportedMessageContext = String(messageRow.context || "");
+        }
+
+        if (!reportedUserId || !participants.includes(reportedUserId)) {
+            return res.status(403).json({ error: "Forbidden" });
+        }
+
+        if (reportedUserId === reporterUserId) {
+            return res.status(400).json({ error: "You cannot report yourself" });
+        }
+
+        const { data: report, error: reportError } = await supabase
+            .from("reports[Admin]")
+            .insert({
+                title,
+                created_at: new Date().toISOString()
+            })
+            .select("*")
+            .single();
+
+        if (reportError) return res.status(500).json({ error: reportError.message });
+
+        const reportId = Number(pickField(report, ["id", "ID"]));
+        const propertyIds = {
+            reporter_user_id: await ensureReportProperty("reporter_user_id"),
+            reported_user_id: await ensureReportProperty("reported_user_id"),
+            report_type: await ensureReportProperty("report_type"),
+            report_message: await ensureReportProperty("report_message"),
+            type: await ensureReportProperty("type"),
+            message_id: reportScope === "message" ? await ensureReportProperty("message_id") : null,
+            message_context: reportScope === "message" ? await ensureReportProperty("message_context") : null
+        };
+
+        const valuesToInsert = [
+            insertReportValue({
+                reportId,
+                propertyId: propertyIds.reporter_user_id,
+                value: String(reporterUserId)
+            }),
+            insertReportValue({
+                reportId,
+                propertyId: propertyIds.reported_user_id,
+                value: String(reportedUserId)
+            }),
+            insertReportValue({
+                reportId,
+                propertyId: propertyIds.report_type,
+                value: reportType
+            }),
+            insertReportValue({
+                reportId,
+                propertyId: propertyIds.report_message,
+                value: reportMessage
+            }),
+            insertReportValue({
+                reportId,
+                propertyId: propertyIds.type,
+                value: reportScope
+            })
+        ];
+
+        if (reportScope === "message") {
+            valuesToInsert.push(
+                insertReportValue({
+                    reportId,
+                    propertyId: propertyIds.message_id,
+                    value: String(reportedMessageId)
+                }),
+                insertReportValue({
+                    reportId,
+                    propertyId: propertyIds.message_context,
+                    value: reportedMessageContext
+                })
+            );
+        }
+
+        await Promise.all(valuesToInsert);
+
+        return res.json({ success: true, reportId });
+    } catch (e) {
+        console.error("Message report error:", e);
         return res.status(500).json({ error: e.message });
     }
 };

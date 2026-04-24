@@ -5,12 +5,13 @@ import { UsersComponent } from '../users/users.component';
 import { ProductsSiteComponent } from '../product-site/products.site.component';
 import { AdminSystemComponent } from '../system/admin-system.component';
 import { AdminLogsComponent } from '../logs/admin-logs.component';
+import { AdminReportsComponent } from '../reports/admin-reports.component';
 
 
 @Component({
   standalone: true,
   selector: 'app-admin',
-  imports: [CommonModule, UsersComponent, ProductsSiteComponent, AdminSystemComponent, AdminLogsComponent],
+  imports: [CommonModule, UsersComponent, ProductsSiteComponent, AdminSystemComponent, AdminLogsComponent, AdminReportsComponent],
   templateUrl: './admin.component.html',
   styleUrls: ['./admin.component.css']
 })
@@ -30,7 +31,7 @@ export class AdminComponent implements OnInit, OnDestroy {
   onlineList: any[] = [];
   selectedUserId: number | null = null; // Track user to auto-expand
 
-  activeSection: 'dashboard' | 'users' | 'products' | 'system' | 'logs' = 'dashboard';
+  activeSection: 'dashboard' | 'users' | 'products' | 'reports' | 'system' | 'logs' = 'dashboard';
 
   constructor(private http: HttpClient) { }
 
@@ -73,6 +74,10 @@ export class AdminComponent implements OnInit, OnDestroy {
 
   openProducts() {
     this.activeSection = 'products';
+  }
+
+  openReports() {
+    this.activeSection = 'reports';
   }
 
 

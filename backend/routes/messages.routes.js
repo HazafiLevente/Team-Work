@@ -4,6 +4,7 @@ const ctrl = require("../controllers/messages.controller");
 
 router.post("/start", verifyUser, ctrl.createPanelAndMessage);
 router.post("/send", verifyUser, ctrl.send);
+router.post("/report", verifyUser, ctrl.reportUser);
 
 router.get("/panels", verifyUser, ctrl.getPanels);
 router.get("/panel/:id", verifyUser, ctrl.getPanelMessages);

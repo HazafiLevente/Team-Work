@@ -16,6 +16,30 @@
   transition: 0.2s;
 }
 
+body.product-details-open .message-fab {
+  right: 24px;
+  bottom: 88px;
+}
+
 .message-fab:hover {
   transform: scale(1.08);
+}
+
+body[data-appearance="light"] .message-fab {
+  color: var(--text);
+  background: var(--bg-elevated);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow-soft);
+}
+
+body[data-appearance="light"] .message-fab:hover {
+  background: var(--chrome-bg-hover);
+  border-color: var(--page-accent);
+}
+
+@media (max-width: 768px) {
+  body.product-details-open .message-fab {
+    right: 24px;
+    bottom: 88px;
+  }
 }

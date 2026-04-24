@@ -21,7 +21,6 @@ export class ContextMenuRoomComponent {
   @Output() rename = new EventEmitter<void>();
   @Output() connect = new EventEmitter<void>();
   @Output() connections = new EventEmitter<void>();
-  @Output() categoryMenu = new EventEmitter<void>();
   @Output() deleteSetup = new EventEmitter<void>();
 
   emitAndClose(emitter: EventEmitter<void>) {
