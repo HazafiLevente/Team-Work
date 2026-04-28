@@ -14,27 +14,21 @@
 
 .panel{
   position: fixed;
-  top: 0;          /* ✅ NINCS header-h, biztosan látszik a teteje */
+  top: 78px;
   right: 0;
   bottom: 0;
   width: min(520px, 92vw);
-
   background: rgba(14,14,18,0.92);
   color: #fff;
-
   z-index: 1;
-
   display: flex;
   flex-direction: column;
-
   border-left: 1px solid rgba(255,255,255,.10);
   box-shadow: -20px 0 60px rgba(0,0,0,.6);
   backdrop-filter: blur(10px);
-
   overflow: hidden;
 }
 
-/* FIX X mindig */
 .x{
   position: absolute;
   top: 10px;
@@ -44,10 +38,8 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-
   line-height: 1;
   font-size: 18px;
-
   background: rgba(0,0,0,.25);
   border: 1px solid rgba(255,255,255,.25);
   color: #fff;
@@ -57,7 +49,7 @@
 }
 
 .panel-header{
-  padding: 16px 56px 12px 16px; /* ✅ hely az X-nek */
+  padding: 16px 56px 12px 16px;
   border-bottom: 1px solid rgba(255,255,255,.12);
   flex: 0 0 auto;
 }
@@ -214,15 +206,18 @@
   color: #8cf0d0;
 }
 
-/* mobil */
 @media (max-width: 768px){
   .panel{
     left: 0;
     width: 100vw;
-    top: auto;
+    top: 78px;
     bottom: 0;
-    height: 85vh;
+    height: auto;
     border-radius: 16px 16px 0 0;
   }
-  .x{ top: 10px; right: 10px; }
+
+  .x{
+    top: 10px;
+    right: 10px;
+  }
 }

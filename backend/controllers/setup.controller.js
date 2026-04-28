@@ -1292,7 +1292,7 @@ exports.create = async (req, res) => {
 
 /* =========================================================
    ADD GENERIC DEVICE TO A SETUP
-   POST /api/setup/:id/add-device
+   POST /api/setup/:id/save-device
    body: { product_id, source_table, display_name, manufacturer }
    ========================================================= */
 exports.addDevice = async (req, res) => {
@@ -1312,54 +1312,98 @@ exports.addDevice = async (req, res) => {
         const ok = await assertSetupOwnedByUser(setupId, userId);
         if (!ok) return res.status(403).json({ error: "Forbidden" });
 
-        const normalizeType = (value) => {
-            const raw = String(value || "").toLowerCase();
-            if (raw.includes("router")) return "router";
-            if (raw.includes("switch")) return "switch";
-            if (raw.includes("modem")) return "modem";
-            if (raw.includes("home_theater")) return "home_theater";
-            if (raw.includes("audio_processor")) return "audiop";
-            if (raw.includes("subwoofer")) return "subwoofer";
-            if (raw.includes("speaker")) return "speaker";
-            if (raw.includes("projector")) return "projector";
-            if (raw.includes("television")) return "television";
-            return raw.replace("[setup]", "").trim() || "device";
-        };
+        const itemName = String(display_name || manufacturer || "Product").trim() || "Product";
+        const itemType = "product";
+        const sourceTable = String(source_table || "products").trim() || "products";
 
-        const itemName = String(display_name || manufacturer || "Eszkoz").trim() || "Eszkoz";
-        const itemType = normalizeType(source_table);
-
-        const { data, error } = await supabase
-            .from(SETUP_DEVICES_TABLE)
+        const { data: createdSetup, error: setupError } = await supabase
+            .from(SETUPS_TABLE)
             .insert([{
-                setup_id: Number(setupId),
-                device_id: Number(product_id),
-                role: itemType,
+                room_id: Number(setupId),
+                name: itemName,
+                type: itemType,
                 pos_x: 0,
-                pos_y: 0,
-                rotation: 0
+                pos_y: 0
             }])
             .select("*")
             .single();
 
-        if (error) {
-            console.error("addDevice insert error:", error);
-            return res.status(500).json({ error: error.message });
+        if (setupError) {
+            console.error("addDevice setup insert error:", setupError);
+            return res.status(500).json({ error: setupError.message });
+        }
+
+        const baseInsert = {
+            setup_id: Number(createdSetup.id),
+            device_id: Number(product_id),
+            role: itemType,
+            pos_x: Number(createdSetup.pos_x ?? 0),
+            pos_y: Number(createdSetup.pos_y ?? 0),
+            rotation: 0
+        };
+
+        const insertVariants = [
+            {
+                ...baseInsert,
+                source_table: sourceTable
+            },
+            baseInsert
+        ];
+
+        let createdDevice = null;
+        let deviceError = null;
+
+        for (const row of insertVariants) {
+            const result = await supabase
+                .from(SETUP_DEVICES_TABLE)
+                .insert([row])
+                .select("*")
+                .single();
+
+            if (!result.error) {
+                createdDevice = result.data;
+                deviceError = null;
+                break;
+            }
+
+            deviceError = result.error;
+        }
+
+        if (deviceError) {
+            await supabase
+                .from(SETUPS_TABLE)
+                .delete()
+                .eq("id", createdSetup.id);
+
+            console.error("addDevice device insert error:", deviceError);
+            return res.status(500).json({ error: deviceError.message });
         }
 
         childrenCache.delete(String(setupId));
+        childrenCache.delete(String(createdSetup.id));
 
         return res.json({
             ok: true,
-            device: mapDisplay({
-                ...data,
-                name: itemName,
-                type: itemType,
+            product: {
+                ...createdSetup,
+                setup_name: createdSetup.name ?? itemName,
                 setup_type: itemType,
+                type: itemType,
                 product_id: Number(product_id),
-                x: Number(data.pos_x ?? 0),
-                y: Number(data.pos_y ?? 0)
-            }, SETUP_DEVICES_TABLE)
+                source_table: sourceTable,
+                x: Number(createdSetup.pos_x ?? 0),
+                y: Number(createdSetup.pos_y ?? 0),
+                device: mapDisplay({
+                    ...createdDevice,
+                    name: itemName,
+                    type: itemType,
+                    setup_type: itemType,
+                    product_id: Number(product_id),
+                    source_table: sourceTable,
+                    x: Number(createdDevice.pos_x ?? 0),
+                    y: Number(createdDevice.pos_y ?? 0)
+                }, SETUP_DEVICES_TABLE)
+            }
         });
     } catch (err) {
         console.error("addDevice fatal:", err);

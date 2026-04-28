@@ -124,6 +124,21 @@ export class ProductDetailsPanelComponent implements OnChanges, OnDestroy {
     return String((this.product as any)?.manufacturer ?? o?.manufacturer ?? o?.Manufacturer ?? '').trim();
   }
 
+  get displayHeading(): string {
+    const detailsManufacturer = String(this.details?.manufacturer ?? this.details?.Manufacturer ?? '').trim();
+    const detailsModel = String(this.details?.model ?? this.details?.Model ?? this.details?.name ?? '').trim();
+
+    const manufacturer = detailsManufacturer || this.displayManufacturer;
+    const model = detailsModel || this.displayModel;
+
+    if (manufacturer && model) {
+      if (model.toLowerCase().startsWith(manufacturer.toLowerCase())) return model;
+      return `${manufacturer} ${model}`.trim();
+    }
+
+    return manufacturer || model || 'Product';
+  }
+
   private fetchDetails() {
     this.loading = true;
     this.error = null;
@@ -246,7 +261,8 @@ export class ProductDetailsPanelComponent implements OnChanges, OnDestroy {
   isHiddenKey(k: string): boolean {
     const x = String(k).toLowerCase();
     return x === 'id' || x === 'created_at' || x === 'updated_at'
-      || x === 'price' || x === 'price ';
+      || x === 'price' || x === 'price '
+      || x === 'table' || x === 'table_name';
   }
 
   private lockScroll() {
@@ -299,7 +315,7 @@ export class ProductDetailsPanelComponent implements OnChanges, OnDestroy {
     this.pickerError = null;
     this.pickerSuccess = null;
 
-    this.http.post<any>(`/api/setup/${target.id}/add-device`, {
+    this.http.post<any>(`/api/setup/${target.id}/save-device`, {
       product_id: productId,
       source_table: sourceTable,
       display_name: this.displayModel || 'Eszkoz',

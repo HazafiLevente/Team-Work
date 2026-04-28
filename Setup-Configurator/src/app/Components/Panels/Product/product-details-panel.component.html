@@ -1,12 +1,11 @@
 <div class="overlay" (click)="close()"></div>
 
 <div class="panel" (click)="$event.stopPropagation()">
-  <button class="x" type="button" (click)="close()" aria-label="Bezaras">×</button>
+  <button class="x" type="button" (click)="close()" aria-label="Bezaras">X</button>
 
   <div class="panel-header">
     <div class="title">
-      <div class="model">{{ displayModel || 'N/A' }}</div>
-      <div class="sub">{{ displayManufacturer || 'N/A' }}</div>
+      <div class="model">{{ displayHeading }}</div>
     </div>
   </div>
 
@@ -43,7 +42,7 @@
         <div class="setup-picker-kicker">Product hozzaadas</div>
         <div class="setup-picker-title">Valaszd ki a setupot vagy favorite roomot</div>
       </div>
-      <button type="button" class="setup-picker-close" (click)="closeSetupPicker()">×</button>
+      <button type="button" class="setup-picker-close" (click)="closeSetupPicker()">X</button>
     </div>
 
     <div class="setup-picker-body">
