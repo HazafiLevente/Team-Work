@@ -31,7 +31,7 @@
   backdrop-filter: blur(10px);
 }
 
-/* DotGrid háttér */
+
 .dot-bg{
   position: absolute;
   inset: 0;
@@ -40,7 +40,7 @@
   pointer-events: none;
 }
 
-/* tartó a dotgrid felett */
+
 .boundary-area{
   position: relative;
   z-index: 1;

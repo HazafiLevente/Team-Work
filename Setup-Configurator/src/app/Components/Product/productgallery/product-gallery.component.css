@@ -8,7 +8,7 @@
 }
 
 .swap-wrap{
-  height: 420px;   /* ✅ nagy hero kép */
+  height: 420px;
   width: 100%;
   border-radius: 16px;
   overflow: hidden;
@@ -35,56 +35,7 @@
 }
 
 .noimg-hint{ opacity:.75; font-size: 13px; }
-/*
-.stack{
-  position: relative;
-  height: 100%;
-}
 
-.stack-main{
-  width: 100%;
-  border: 1px solid rgba(255,255,255,.12);
-  background: rgba(255,255,255,.03);
-  border-radius: 16px;
-  overflow: hidden;
-  cursor: pointer;
-  position: relative;
-  z-index: 3;
-}
-
-.stack-main img{
-  width: 100%;
-  height: 220px;
-  object-fit: cover;
-  display:block;
-}
-
-.stack-behind{
-  position:absolute;
-  inset: 8px 8px auto auto;
-  width: 78%;
-  height: 210px;
-  border-radius: 16px;
-  overflow: hidden;
-  border: 1px solid rgba(255,255,255,.10);
-  background: rgba(255,255,255,.02);
-  z-index: 2;
-
-  transform:
-    translateX(calc(var(--i, 0) * 10px))
-    translateY(calc(var(--i, 0) * 10px));
-
-  opacity: calc(1 - (var(--i, 0) * 0.18));
-  pointer-events: none;
-}
-/*
-.stack-behind img{
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  filter: blur(.2px);
-  opacity: .8;
-}*/
 
 .thumbs{
   margin-top: 10px;
@@ -117,7 +68,7 @@
   border-color: rgba(255,255,255,.35);
 }
 
-/* Fullscreen viewer */
+
 .viewer{
   position: fixed;
   inset: 0;
@@ -159,7 +110,7 @@
   animation: pop .18s ease-out;
 }
 
-/* kis “váltás” anim (slide feeling) */
+
 .viewer-frame[data-dir="next"] .viewer-img{ animation: slideNext .18s ease-out; }
 .viewer-frame[data-dir="prev"] .viewer-img{ animation: slidePrev .18s ease-out; }
 
@@ -220,5 +171,5 @@
 }
 
 .card-swap-container {
-  height: 240px; /* vagy 100% ha a parent fix magasságú */
+  height: 240px;
 }

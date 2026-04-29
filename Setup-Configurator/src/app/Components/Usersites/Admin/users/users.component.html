@@ -7,7 +7,7 @@
       <div class="user-card" *ngFor="let u of usersList" [class.expanded]="expandedUserId === u.id"
         [id]="'user-card-' + u.id" [class.banned]="u.banned" (contextmenu)="onUserContextMenu($event, u)">
 
-        <!-- CARD HEADER -->
+
         <div class="user-header" (click)="toggleUser(u)">
           <div class="user-info">
             <span class="user-name">{{ u.username }}</span>
@@ -21,7 +21,7 @@
           </div>
         </div>
 
-        <!-- EXPANDED CONTENT -->
+
         <div class="user-details" *ngIf="expandedUserId === u.id">
 
           <div class="details-grid">
@@ -57,7 +57,7 @@
 
           <hr class="sep">
 
-          <!-- SETUPS GRID -->
+
           <div class="setups-section">
             <h3>Setups</h3>
 
@@ -88,7 +88,7 @@
     </div>
   </div>
 
-  <!-- SIDE PANEL: SETUP ITEMS -->
+
   <div class="items-side-panel" *ngIf="itemsViewOpen">
     <div class="panel-header">
       <div class="panel-title">
@@ -114,7 +114,7 @@
     </div>
   </div>
 
-  <!-- CONTEXT MENU -->
+
   <div class="custom-context-menu" *ngIf="contextMenuVisible" [style.top.px]="contextMenuPos.y"
     [style.left.px]="contextMenuPos.x">
     <div class="menu-item danger" *ngIf="canBan && !contextUser?.banned" (click)="banUser(contextUser)">

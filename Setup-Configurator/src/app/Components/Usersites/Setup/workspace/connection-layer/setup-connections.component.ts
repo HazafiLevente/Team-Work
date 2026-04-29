@@ -108,13 +108,8 @@ export class SetupConnectionsComponent {
     const sEl = this.elementRegistry.get(sId);
     const tEl = this.elementRegistry.get(tId);
 
-    /*console.log('🔗 [Connections] Drawing room line:', {
-      sId,
-      tId,
-      foundS: !!sEl,
-      foundT: !!tEl,
-      registrySize: this.elementRegistry?.size
-    });*/
+
+
 
     if (!sEl || !tEl) return '';
 

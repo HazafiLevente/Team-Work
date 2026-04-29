@@ -103,9 +103,8 @@ export class ProductlistComponent implements OnInit, OnDestroy {
     this.openProduct.emit(p);
   }
 
-  /* -----------------------------
-     UTILS
-  ----------------------------- */
+
+
 
   private norm(v: any): string {
     return String(v ?? '').trim().toLowerCase();
@@ -346,9 +345,8 @@ export class ProductlistComponent implements OnInit, OnDestroy {
     this.allInstruments = merged.filter(p => this.isInstrumentProduct(p));
   }
 
-  /* -----------------------------
-     ALL MERGED (dedup)
-  ----------------------------- */
+
+
 
   private getAllMergedBase(): AnyProduct[] {
     const map = new Map<string, AnyProduct>();
@@ -402,9 +400,8 @@ export class ProductlistComponent implements OnInit, OnDestroy {
     }
   }
 
-  /* -----------------------------
-     SEARCHBAR FILTER
-  ----------------------------- */
+
+
 
   private applySearch(list: AnyProduct[], state: CombinedFilters): AnyProduct[] {
     const s: any = (state as any).search ?? {};
@@ -447,9 +444,8 @@ export class ProductlistComponent implements OnInit, OnDestroy {
     }
   }
 
-  /* -----------------------------
-     DETAILED FILTERS
-  ----------------------------- */
+
+
 
   private applyDetailed(list: AnyProduct[], state: CombinedFilters): AnyProduct[] {
     switch (state.activeCategory) {
@@ -470,9 +466,8 @@ export class ProductlistComponent implements OnInit, OnDestroy {
     }
   }
 
-  /* -----------------------------
-     SORT
-  ----------------------------- */
+
+
 
   private applySort(list: AnyProduct[], state: CombinedFilters): AnyProduct[] {
     const s: any = (state as any).search ?? {};
@@ -492,9 +487,8 @@ export class ProductlistComponent implements OnInit, OnDestroy {
     return out;
   }
 
-  /* -----------------------------
-     MAIN APPLY
-  ----------------------------- */
+
+
 
   private applyFilters(state: CombinedFilters) {
     const source = this.getSourceByCategory(state);
@@ -535,9 +529,8 @@ export class ProductlistComponent implements OnInit, OnDestroy {
     }
   }
 
-  /* -----------------------------
-     STATS
-  ----------------------------- */
+
+
 
   private emitStats() {
     const merged = this.getAllMerged();

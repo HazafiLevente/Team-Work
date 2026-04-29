@@ -6,15 +6,15 @@
   [sparkCount]="8"
   [duration]="400">
 
-  <!-- TOP: search + mobile filter button -->
+
   <div class="home-top">
 
-    <!-- Searchbar wrapper (hogy a mobil sticky CSS biztosan eltalálja) -->
+
     <div class="searchbar">
       <app-searchbar></app-searchbar>
     </div>
 
-    <!-- Mobile: “Több” gomb (bottom sheet) -->
+
     <button
       type="button"
       class="more-btn mobile-only"
@@ -22,14 +22,14 @@
       Több: <span class="muted">(részletes keresés)</span>
     </button>
 
-    <!-- Desktop: filterlist kint marad -->
+
     <div class="desktop-only">
       <app-filterlist></app-filterlist>
     </div>
 
   </div>
 
-  <!-- MAIN: products + right side -->
+
   <div class="home-row">
     <div class="left">
       <app-productlist
@@ -39,7 +39,7 @@
       </app-productlist>
     </div>
 
-    <!-- Right side: desktop only -->
+
     <div class="right desktop-only">
       <app-quick-stats
         [total]="totalAll"
@@ -54,7 +54,7 @@
     </div>
   </div>
 
-  <!-- Product details panel -->
+
 
   <app-product-details-panel
     *ngIf="selectedProduct"
@@ -63,7 +63,7 @@
   </app-product-details-panel>
 
 
-  <!-- MOBILE FILTER SHEET -->
+
   <div
     class="mobile-overlay"
     *ngIf="mobileFiltersOpen"

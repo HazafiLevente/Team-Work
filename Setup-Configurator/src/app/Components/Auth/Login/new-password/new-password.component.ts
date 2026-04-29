@@ -22,7 +22,7 @@ export class NewPasswordComponent {
   showPassword = false;
 
   @Output() back = new EventEmitter<void>();
-  @Output() success = new EventEmitter<void>(); // ✅ ezt használja a szülő redirecthez
+  @Output() success = new EventEmitter<void>();
 
   constructor(private auth: AuthService) {}
 
@@ -39,7 +39,7 @@ export class NewPasswordComponent {
       next: () => {
         this.loading = false;
         this.message = 'Jelszó sikeresen módosítva.';
-        setTimeout(() => this.success.emit(), 500); // ✅ szülő kezeli a navigációt
+        setTimeout(() => this.success.emit(), 500);
       },
       error: (err) => {
         this.loading = false;

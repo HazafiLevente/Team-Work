@@ -1,6 +1,6 @@
 <div class="searchbar-row" role="search">
 
-  <!-- Gyártó -->
+
   <select [(ngModel)]="manufacturer"
           class="ctrl w-manufacturer"
           title="Gyártó szűrő">
@@ -8,7 +8,7 @@
     <option *ngFor="let m of manufacturers" [value]="m">{{ m }}</option>
   </select>
 
-  <!-- Modell keresés -->
+
   <input type="text"
          class="ctrl w-term"
          title="Keresés modell névre"
@@ -16,7 +16,7 @@
          [(ngModel)]="term"
          (keydown.enter)="searchButton()" />
 
-  <!-- Min ár (desktop only mobilon elrejtjük CSS-sel) -->
+
   <input type="number"
          class="ctrl w-price min-price"
          title="Minimum ár (Ft)"
@@ -27,7 +27,7 @@
          step="1"
          (input)="sanitizePrice('min')" />
 
-  <!-- Max ár (desktop only mobilon elrejtjük CSS-sel) -->
+
   <input type="number"
          class="ctrl w-price max-price"
          title="Maximum ár (Ft)"
@@ -38,7 +38,7 @@
          step="1"
          (input)="sanitizePrice('max')" />
 
-  <!-- Rendezés (desktop only mobilon elrejtjük CSS-sel) -->
+
   <select [(ngModel)]="sort"
           class="ctrl w-sort sort-select"
           title="Rendezés">
@@ -49,7 +49,7 @@
     <option value="name_desc">Név Z→A</option>
   </select>
 
-  <!-- Keresés gomb -->
+
   <button type="button"
           class="btn small w-btn"
           title="Keresés indítása"

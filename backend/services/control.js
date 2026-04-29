@@ -50,9 +50,7 @@ const supabase = createClient(
     process.env.SUPABASE_SERVICE_ROLE_KEY
 );
 
-/* ======================================================
-   TABLES
-====================================================== */
+
 
 function isExcluded(name) {
     return filler.exclude_table_patterns.some(p => name.includes(p));
@@ -117,7 +115,7 @@ async function getAllTableColumns() {
         return {};
     }
 
-    // A data most már közvetlenül a map (jsonb miatt)
+
     return data;
 }
 
@@ -134,8 +132,8 @@ function detectColumns(columns, tableName) {
     const price =
         columns.find(c => ["price", "cost", "price_huf"].includes(c.toLowerCase()));
 
-    // Fallbacks ha hiányzik valami
-    if (!manufacturer) manufacturer = null; // buildUnionSQL fogja kezelni
+
+    if (!manufacturer) manufacturer = null;
     if (!model) model = null;
 
     return { id, manufacturer, model, price: price || null };
@@ -211,9 +209,7 @@ async function updateProductsHomeFunction(tablesMeta) {
     }
 }
 
-/* ======================================================
-   ADMIN / ROLES
-====================================================== */
+
 
 const OWNER_IDS = new Set(
     (process.env.OWNERS || "")
@@ -276,18 +272,18 @@ function updateUserEnvRole(userId, newRole) {
         return;
     }
 
-    // 1. Update in-memory sets
+
     adminPlus.delete(numId);
     admins.delete(numId);
 
     if (newRole === "admin+") adminPlus.add(numId);
     if (newRole === "admin") admins.add(numId);
 
-    // 2. Update process.env strings for other parts of the app
+
     process.env.ADMINS_PLUS = Array.from(adminPlus).join(",");
     process.env.ADMINS = Array.from(admins).join(",");
 
-    // 3. Update the physical .env file
+
     content = content.replace(/^ADMINS_PLUS=.*$/m, `ADMINS_PLUS=${process.env.ADMINS_PLUS}`);
     content = content.replace(/^ADMINS=.*$/m, `ADMINS=${process.env.ADMINS}`);
 
@@ -352,9 +348,9 @@ module.exports = {
     startControl,
     refreshTables,
     resolveRole,
-    updateUserEnvRole, // ✅ NEW
-    isBanned,          // ✅ NEW
-    updateUserBanStatus, // ✅ NEW
+    updateUserEnvRole,
+    isBanned,
+    updateUserBanStatus,
     canAssignRole,
     hasAdminAccess,
     hasAdminPlusAccess,

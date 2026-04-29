@@ -21,7 +21,7 @@
   backdrop-filter: blur(12px);
   box-shadow: 0 12px 30px rgba(0, 0, 0, .35);
 
-  overflow: visible; /* EZ A LÉNYEG */
+  overflow: visible;
 }
 
 .dock-item {
@@ -53,7 +53,7 @@
 
 .dock-label {
   position: absolute;
-  bottom: calc(100% + 10px); /* top helyett ez stabilabb */
+  bottom: calc(100% + 10px);
   left: 50%;
   transform: translateX(-50%) translateY(6px);
   opacity: 0;
@@ -118,6 +118,6 @@ body[data-appearance="light"] .dock-label {
   }
 
   .dock-label {
-    display: none; /* mobilon tooltip úgysem hasznos */
+    display: none;
   }
 }

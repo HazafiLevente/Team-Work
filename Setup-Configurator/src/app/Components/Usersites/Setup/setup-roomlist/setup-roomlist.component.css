@@ -159,7 +159,7 @@
 
 
 
-/* ✅ DETAIL VIEW item kártyák */
+
 .item-card {
   width: 160px;
   height: 90px;
@@ -203,7 +203,7 @@
   text-align: center;
 }
 
-/* ✅ Context menü */
+
 .ctx-backdrop {
   position: absolute;
   inset: 0;
@@ -292,7 +292,7 @@
   }
 }
 
-/* ✅ PAIRING UI */
+
 .pairing-overlay {
   z-index: 10000;
   position: fixed;
@@ -389,7 +389,7 @@
   background: rgba(255, 80, 80, 0.4);
 }
 
-/* Connection Manager Specifics */
+
 .manager-window {
   max-width: 450px;
 }

@@ -27,7 +27,7 @@
   gap: 16px;
 }
 
-/* általános hover feedback */
+
 .search-input {
   transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease;
 }
@@ -49,7 +49,7 @@
   box-shadow: 0 0 0 1px color-mix(in srgb, var(--page-accent, #67e8f9) 18%, transparent);
 }
 
-/* desktop default */
+
 .mobile-only {
   display: none !important;
 }
@@ -58,7 +58,7 @@
   display: block !important;
 }
 
-/* FONTOS: desktopon a mobile sheet ne látszódjon */
+
 .mobile-overlay,
 .mobile-sheet {
   display: none;

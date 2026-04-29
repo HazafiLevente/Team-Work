@@ -3,9 +3,7 @@ const path = require("path");
 const { db } = require("./localDb");
 const { shouldExclude } = require("./tableFilter");
 
-/* =====================================================
-   FILTER JSON
-===================================================== */
+
 
 const FILTER_PATH = path.join(
     __dirname,
@@ -16,18 +14,16 @@ const FILTER_PATH = path.join(
     "search-filter.json"
 );
 
-/* =====================================================
-   HELPERS
-===================================================== */
+
 
 function normalize(str = "") {
     return String(str)
         .toLowerCase()
         .normalize("NFD")
         .replace(/[\u0300-\u036f]/g, "")
-        .replace(/[^a-z0-9-]/g, "") // Megtartjuk a kötőjelet
-        .replace(/-+/g, "-") // Dupla kötőjel -> szimpla
-        .replace(/^-|-$/g, ""); // Szélekről leszedjük
+        .replace(/[^a-z0-9-]/g, "")
+        .replace(/-+/g, "-")
+        .replace(/^-|-$/g, "");
 }
 
 function tokens(str = "") {
@@ -57,9 +53,7 @@ function parsePrice(priceRaw) {
     return Number.isNaN(p) ? null : p;
 }
 
-/* =====================================================
-   INTENT DETECTION
-===================================================== */
+
 
 function isListQuestion(q) {
     const n = normalize(q);
@@ -95,9 +89,7 @@ function isPriceQuestion(q) {
     );
 }
 
-/* =====================================================
-   MANUFACTURERS
-===================================================== */
+
 
 let MANUFACTURERS_CACHE = null;
 
@@ -144,9 +136,7 @@ function extractBrand(question) {
     return null;
 }
 
-/* =====================================================
-   TOKEN MATCH LOGIC
-===================================================== */
+
 
 function tokenMatch(model, question) {
     const mTokens = tokens(model);
@@ -160,13 +150,11 @@ function tokenMatch(model, question) {
         if (qTokens.includes(t)) hits++;
     }
 
-    // legalább 60% token egyezés kell
+
     return hits >= Math.ceil(mTokens.length * 0.6);
 }
 
-/* =====================================================
-   MAIN SEARCH
-===================================================== */
+
 
 function getProductsForAI(question = "") {
     const listIntent = isListQuestion(question);
@@ -230,9 +218,8 @@ function getProductsForAI(question = "") {
             const tStem = normalize(table).replace(/es$/, "").replace(/s$/, "");
             const tableMatch = tTokens.some(tt => qTokens.some(qt => qt.includes(tStem) || tt.includes(qt)));
 
-            /* =============================
-               LIST MODE (PRIORITY)
-            ============================= */
+
+
 
             if (listIntent && manufacturer) {
                 if (brand && normalize(manufacturer) === normalize(brand)) {
@@ -246,9 +233,8 @@ function getProductsForAI(question = "") {
                 }
             }
 
-            /* =============================
-               PRODUCT MODE
-            ============================= */
+
+
 
             if (model) {
                 if (tokenMatch(model, question)) {
@@ -261,21 +247,20 @@ function getProductsForAI(question = "") {
                     continue;
                 }
 
-                // lazább similar match
+
                 const modelNorm = normalize(model);
                 if (modelNorm.length > 5 && qNorm.includes(modelNorm.slice(0, 6))) {
                     similar.push(row);
                 }
             } else if (tableTokenMatch || isCategoryMatch) {
-                // Ha nincs modellünk, de a tábla neve telibetalál
+
                 exact.push(row);
             }
         }
     }
 
-    /* =============================
-       RESULT PRIORITY
-    ============================= */
+
+
 
     if (listIntent) {
         return list.length

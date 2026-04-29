@@ -12,7 +12,7 @@ import { CommonModule } from '@angular/common';
 
 
 export type DockItemData = {
-  icon: string;     // pl: '🏠' vagy '⚙️' vagy egy SVG string (egyszerűen)
+  icon: string;
   label: string;
   onClick: () => void;
   className?: string;
@@ -45,9 +45,9 @@ export class DockComponent implements AfterViewInit {
 
   ngAfterViewInit(): void {
     this.measure();
-    // első render
+
     this.applySizes();
-    // resize esetén újramérés
+
     setTimeout(() => this.measure(), 0);
   }
 
@@ -76,7 +76,7 @@ export class DockComponent implements AfterViewInit {
   onMouseLeave() {
     this.isHovering = false;
     this.mouseX = Number.POSITIVE_INFINITY;
-    this.applySizes(); // vissza base méretre
+    this.applySizes();
   }
 
   private mapRange(x: number, inMin: number, inMax: number, outMin: number, outMax: number) {
@@ -99,7 +99,7 @@ export class DockComponent implements AfterViewInit {
       let size = this.baseItemSize;
 
       if (this.isHovering && Number.isFinite(this.mouseX)) {
-        // 0 távolság: magnification, distance-en túl: base
+
         const t = this.mapRange(adx, 0, this.distance, 0, 1);
         size = this.magnification + (this.baseItemSize - this.magnification) * t;
       }

@@ -1,4 +1,4 @@
-// controllers/messages.controller.js
+
 const { supabase } = require("../services/supabase");
 
 const AI_PANEL_TABLES = ["ai_panel[Messages]", "ai_panel"];
@@ -188,7 +188,7 @@ exports.createPanelAndMessage = async (req, res) => {
         const user2 = Number(req.body.user2_id);
         const context = req.body.context?.trim();
 
-        // ✅ ha a user2 blokkolt téged, ne tudj panelt indítani
+
         const { data: rel } = await supabase
             .from('messages_relations[Messages]')
             .select('blocked')
@@ -202,7 +202,7 @@ exports.createPanelAndMessage = async (req, res) => {
 
         if (!user2) return res.status(400).json({ error: "Missing user2_id" });
 
-        // 🔎 Panel keresés (mindkét irány)
+
         const { data: existing } = await supabase
             .from("messages_panel[Messages]")
             .select("*")
@@ -214,7 +214,7 @@ exports.createPanelAndMessage = async (req, res) => {
         if (existing && existing.length > 0) {
             panel = existing[0];
         } else {
-            // ➕ Panel létrehozás
+
             const { data: created, error } = await supabase
                 .from("messages_panel[Messages]")
                 .insert({
@@ -230,7 +230,7 @@ exports.createPanelAndMessage = async (req, res) => {
             panel = created;
         }
 
-        // ✉️ Ha van üzenet, akkor insert
+
         if (context) {
             await supabase
                 .from("messages[Messages]")
@@ -250,16 +250,14 @@ exports.createPanelAndMessage = async (req, res) => {
 };
 
 
-/**
- * POST /api/messages/send
- */
+
 exports.send = async (req, res) => {
     try {
         const user1 = Number(req.user.id);
         const user2 = Number(req.body.user2_id);
         const context = String(req.body.context || '');
 
-        // ✅ ha a címzett (user2) blokkolt vagy tiltott téged, akkor ne tudj írni
+
         const { data: rel } = await supabase
             .from('messages_relations[Messages]')
             .select('blocked, disabled')
@@ -274,7 +272,7 @@ exports.send = async (req, res) => {
             return res.status(400).json({ error: "Missing data" });
         }
 
-        // panel keresése (kétirányú)
+
         let { data: panel } = await supabase
             .from('messages_panel[Messages]')
             .select('*')
@@ -457,9 +455,7 @@ exports.reportUser = async (req, res) => {
     }
 };
 
-/**
- * GET /api/messages/panels
- */
+
 exports.getPanels = async (req, res) => {
     try {
         const userId = Number(req.user.id);
@@ -479,9 +475,7 @@ exports.getPanels = async (req, res) => {
     }
 };
 
-/**
- * GET /api/messages/panel/:id
- */
+
 exports.getPanelMessages = async (req, res) => {
     try {
         const panelId = Number(req.params.id);
@@ -577,7 +571,7 @@ exports.editMessage = async (req, res) => {
             return res.status(400).json({ error: "Empty message" });
         }
 
-        // Lekérjük az üzenetet
+
         const { data: message, error } = await supabase
             .from('messages[Messages]')
             .select('*')
@@ -588,7 +582,7 @@ exports.editMessage = async (req, res) => {
             return res.status(404).json({ error: "Message not found" });
         }
 
-        // 🔒 csak saját üzenet módosítható
+
         if (message.user_id !== userId) {
             return res.status(403).json({ error: "Not allowed" });
         }
@@ -643,13 +637,13 @@ exports.deleteMessage = async (req, res) => {
     }
 };
 
-// ✅ DELETE /api/messages/conversation/:key
+
 exports.deleteConversation = async (req, res) => {
     try {
         const userId = Number(req.user.id);
-        const key = Number(req.params.key); // panel id
+        const key = Number(req.params.key);
 
-        // 1️⃣ panel ellenőrzés + jogosultság
+
         const { data: panel, error: panelErr } = await supabase
             .from("messages_panel[Messages]")
             .select("id, user1_id, user2_id")
@@ -664,7 +658,7 @@ exports.deleteConversation = async (req, res) => {
             return res.status(403).json({ error: "Forbidden" });
         }
 
-        // 2️⃣ üzenetek törlése (✅ helyes oszlop: messages_panel_id)
+
         const { error: msgErr } = await supabase
             .from("messages[Messages]")
             .delete()
@@ -674,7 +668,7 @@ exports.deleteConversation = async (req, res) => {
             return res.status(500).json({ error: msgErr.message });
         }
 
-        // 3️⃣ panel törlése (✅ helyes tábla: messages_panel[Messages])
+
         const { error: delErr } = await supabase
             .from("messages_panel[Messages]")
             .delete()
@@ -692,7 +686,7 @@ exports.deleteConversation = async (req, res) => {
 
 
 
-// ✅ Relations (mute/disable/block)
+
 async function upsertRelation(ownerId, targetId, patch) {
 
     const { data: existing, error: findErr } = await supabase

@@ -16,9 +16,9 @@ import { ContextMenuBaseComponent } from '../context-menu-base/context-menu-base
           <span>🗖</span> Nagyítás / Kicsinyítés
         </button>
       </div>
-      
+
       <div class="menu-separator"></div>
-      
+
       <div class="menu-section">
         <button class="menu-item danger" (click)="terminate.emit(); close.emit()">
           <span>×</span> Bezárás

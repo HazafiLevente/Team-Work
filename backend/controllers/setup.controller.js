@@ -1,14 +1,7 @@
 const { supabase } = require("../services/supabase");
 const connectionService = require("../services/setup.connections");
 
-/**
- * Stabil children scan:
- * - amiben nincs setup_id, azt nem kĂ©rdezzĂĽk le (elĹ‘re blacklist + auto blacklist)
- * - cache + limit + concurrency -> nem terheli tĂşl a Supabase-t
- * - PC builder mĹ±kĂ¶dik (pcbuilds + pcparts)
- * - âś… Cars: car-options + cars list + cars add (Car_setup[Setup])
- * - âś… NEW: Car_setup details (egy Car_setup sorhoz tartozĂł autĂł adatok)
- */
+
 
 const ROOMS_TABLE = "setup_room";
 const SETUPS_TABLE = "setups";
@@ -141,10 +134,7 @@ exports.pcParts = async (req, res) => {
     }
 };
 
-/* =========================================================
-   âś… FIX: elĹ‘re blacklisteljĂĽk az Ă¶sszes eddig logolt tĂˇblĂˇt,
-   amiben biztosan nincs setup_id
-   ========================================================= */
+
 const NO_SETUPID_TABLES = new Set([
     "bass_shaker[Setup]",
     "bass_amplifier[Setup]",
@@ -180,10 +170,7 @@ const NO_SETUPID_TABLES = new Set([
     "brass_instruments[Setup]",
 ]);
 
-/**
- * Teljes tĂˇblalista maradhat, mert a children Ăşgyis skippeli a NO_SETUPID_TABLES-t.
- * FONTOS: "setup[Setup]" nem children tĂˇbla, ezĂ©rt nincs itt.
- */
+
 const tablesToScan = [
     "acoustic_keyboards[Setup]",
     "acoustic[Setup]",
@@ -226,19 +213,17 @@ const tablesToScan = [
     "mixer[Setup]",
 ];
 
-/* -----------------------------
-   In-memory cache
-   ----------------------------- */
-const childrenCache = new Map(); // setupId -> { exp, value }
-const pcPartsCache = new Map(); // global -> { exp, value }
-const carOptionsCache = new Map(); // global -> { exp, value }
-const carDetailsCache = new Map(); // carSetupId -> { exp, value  }  âś… NEW
+
+const childrenCache = new Map();
+const pcPartsCache = new Map();
+const carOptionsCache = new Map();
+const carDetailsCache = new Map();
 const instrumentOptionsCache = new Map();
 
 const CHILDREN_TTL_MS = 30_000;
 const PCPARTS_TTL_MS = 10 * 60_000;
 const CAROPTIONS_TTL_MS = 10 * 60_000;
-const CARDETAILS_TTL_MS = 30_000; // âś… NEW (kicsi TTL, de vĂ©di a Supabase-t)
+const CARDETAILS_TTL_MS = 30_000;
 const INSTRUMENTOPTIONS_TTL_MS = 10 * 60_000;
 
 function cacheGet(map, key) {
@@ -740,9 +725,7 @@ async function syncPcSetupDevices(setupId, payload = {}) {
     }
 }
 
-/* -----------------------------
-   Helpers
-   ----------------------------- */
+
 async function assertRoomOwnedByUser(roomId, userId) {
     const { data, error } = await supabase
         .from(ROOMS_TABLE)
@@ -941,10 +924,7 @@ function resolveRenameColumn(item) {
     return null;
 }
 
-/* =========================================================
-   SETUP LISTA
-   - âś… query param: ?favorite=true/false (ha nincs -> mind)
-   ========================================================= */
+
 exports.list = async (req, res) => {
     try {
         const userId = req.user.id;
@@ -1003,9 +983,7 @@ exports.upsertRoomPosition = async (req, res) => {
     }
 };
 
-/* =========================================================
-   SETUP GYEREKEK
-   ========================================================= */
+
 exports.children = async (req, res) => {
     const setupId = req.params.id;
     if (!setupId) return res.json([]);
@@ -1173,9 +1151,7 @@ exports.children = async (req, res) => {
     }
 };
 
-/* =========================================================
-   UPDATE / CREATE / DELETE
-   ========================================================= */
+
 exports.update = async (req, res) => {
     try {
         const userId = req.user.id;
@@ -1290,11 +1266,7 @@ exports.create = async (req, res) => {
     }
 };
 
-/* =========================================================
-   ADD GENERIC DEVICE TO A SETUP
-   POST /api/setup/:id/save-device
-   body: { product_id, source_table, display_name, manufacturer }
-   ========================================================= */
+
 exports.addDevice = async (req, res) => {
     try {
         const userId = req.user?.id;
@@ -1475,9 +1447,7 @@ exports.remove = async (req, res) => {
     }
 };
 
-/* =========================================================
-   PC BUILDER
-   ========================================================= */
+
 exports.pcBuildsList = async (req, res) => {
     try {
         const userId = req.user.id;
@@ -1771,9 +1741,7 @@ exports.pcPartsLegacy = async (req, res) => {
     }
 };
 
-/* =========================================================
-   âś… CARS
-   ========================================================= */
+
 exports.carOptions = async (req, res) => {
     try {
         const cacheKey = "car-options:v2";
@@ -2241,9 +2209,7 @@ exports.carSetupDetails = async (req, res) => {
     }
 };
 
-/* =========================================================
-   âś… CONNECTIONS
-   ========================================================= */
+
 const typeToTableMap = {
     "pc": "setup",
     "switch": "setup",

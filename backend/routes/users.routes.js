@@ -9,7 +9,7 @@ router.get("/", verifyUser, async (req, res) => {
     const { data, error } = await supabase
         .from("user[Auth]")
         .select("ID, UserName")
-        .neq("ID", currentUserId); // saját magát ne listázza
+        .neq("ID", currentUserId);
 
     if (error) {
         console.error(error);

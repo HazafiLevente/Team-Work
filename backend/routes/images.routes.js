@@ -4,7 +4,7 @@ const fs = require("fs");
 
 const router = express.Router();
 
-// 🔥 FONTOS: ez a path a datas mappára mutat
+
 const IMAGES_JSON_PATH = path.join(
     __dirname,
     "..",

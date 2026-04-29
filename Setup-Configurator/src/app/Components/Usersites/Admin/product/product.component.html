@@ -1,6 +1,4 @@
-<!-- ===========================
-        HOME MODE
-=========================== -->
+
 <ng-container *ngIf="!adminMode; else adminTemplate">
 
   <div class="product-card" (click)="onOpen()">
@@ -16,9 +14,7 @@
 </ng-container>
 
 
-<!-- ===========================
-        ADMIN MODE
-=========================== -->
+
 <ng-template #adminTemplate>
 
   <div class="products-right" *ngIf="product; else empty">
@@ -40,17 +36,17 @@
           <label>
             {{ formatLabel(key) }}
 
-            <!-- Number -->
+
             <input *ngIf="getInputType(obj[key]) === 'number'" type="number" [(ngModel)]="obj[key]" />
 
-            <!-- Checkbox -->
+
             <input *ngIf="getInputType(obj[key]) === 'checkbox'" type="checkbox" [(ngModel)]="obj[key]" />
 
-            <!-- Textarea -->
+
             <textarea *ngIf="getInputType(obj[key]) === 'textarea'" rows="3" [(ngModel)]="obj[key]">
             </textarea>
 
-            <!-- Text -->
+
             <input *ngIf="getInputType(obj[key]) === 'text'" type="text" [(ngModel)]="obj[key]" />
 
           </label>
@@ -69,7 +65,7 @@
       </button>
     </div>
 
-    <!-- DEBUG -->
+
     <pre class="debug">{{ obj | json }}</pre>
 
   </div>

@@ -2,17 +2,14 @@ const { selectWithFallback } = require("../services/dataProvider");
 const { supabase } = require("../services/supabase");
 const { listNotifications } = require("../services/notificationStore");
 
-/**
- * GET /api/bell
- * -> { items: [...] }
- */
+
 exports.list = async (req, res) => {
     try {
         const userId = Number(req.user.id);
         const userRole = req.user.role;
         const all = await listNotifications();
 
-        // 🔥 TARGET SZŰRÉS
+
         const filtered = all.filter(m => {
 
             const target = String(m.target || '').toLowerCase().trim();
@@ -28,7 +25,7 @@ exports.list = async (req, res) => {
             return false;
         });
 
-        // idő szerint rendezés
+
         filtered.sort((a,b) => new Date(b.created_at) - new Date(a.created_at));
 
         return res.json({ items: filtered });
@@ -40,17 +37,13 @@ exports.list = async (req, res) => {
 
 
 
-/**
- * POST /api/bell/read
- * body: { system_id: number }
- * (csak a system_message típushoz értelmezett nálatok)
- */
+
 exports.read = async (req, res) => {
     try {
         const system_id = Number(req.body?.system_id);
         if (!system_id) return res.status(400).json({ error: "Missing system_id" });
 
-        // system_reads[System] oszlopok: system_id, user_id (+ created_at)
+
         const { error } = await supabase
             .from('system_reads[System]')
             .insert({
@@ -67,9 +60,7 @@ exports.read = async (req, res) => {
     }
 };
 
-/**
- * GET /api/bell/:source_table/:id
- */
+
 exports.getOne = async (req, res) => {
     try {
         const { source_table, id } = req.params;
@@ -152,7 +143,7 @@ exports.conversations = async (req, res) => {
             const targetRaw = String(r.target || '').toLowerCase().trim();
             const userIdStr = String(userId);
 
-            // 🔥 target szűrés
+
             const allowed =
                 targetRaw === 'all' ||
                 targetRaw === userIdStr ||

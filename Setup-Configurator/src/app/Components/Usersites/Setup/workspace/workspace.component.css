@@ -8,10 +8,10 @@
   border-radius: 16px;
   border: 1px solid rgba(255, 255, 255, 0.10);
 
-  /* ❌ FONTOS: backdrop-filter innen KIKERÜL, mert bugolja a position:fixed + CDK drag-ot */
-  /* backdrop-filter: blur(10px); */
 
-  /* a háttér/blend marad, de blur a ::before-ben lesz */
+
+
+
   background: transparent;
 
   box-shadow: 0 18px 60px rgba(0, 0, 0, 0.55);
@@ -24,7 +24,7 @@
   user-select: none;
 }
 
-/* ✅ Blur + háttér pseudo-elemen: így a fixed panelek nem ugranak */
+
 .setup-workspace::before {
   content: "";
   position: absolute;
@@ -38,7 +38,7 @@
   pointer-events: none;
 }
 
-/* ✅ felső gombsor: Új setup + Vissza */
+
 .toolbar {
   position: absolute;
   top: 12px;
@@ -75,7 +75,7 @@
   border-color: rgba(82, 39, 255, 0.45);
 }
 
-/* DotGrid háttér */
+
 .dot-bg {
   position: absolute;
   inset: 0;
@@ -84,7 +84,7 @@
   pointer-events: none;
 }
 
-/* kártyák tartója */
+
 .boundary-area {
   position: relative;
   z-index: 2;
@@ -251,11 +251,11 @@ body[data-appearance="light"] .dock-item:hover {
   word-break: break-word;
 }
 
-/* PAIRING STATUS OVERLAY */
+
 .pairing-status {
   position: absolute;
   bottom: 80px;
-  /* Dock fölött */
+
   left: 50%;
   transform: translateX(-50%);
   z-index: 10002;

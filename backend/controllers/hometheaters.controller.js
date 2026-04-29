@@ -1,20 +1,11 @@
-﻿const { supabase } = require("../services/supabase");
+const { supabase } = require("../services/supabase");
 const { listProducts, clampLimit } = require("../services/products/productCatalog.service");
 
-/**
- * hometheaters.controller.js
- * 
- * Handles all Home Theater related operations including gear catalog,
- * setup builds, devices, and connections.
- */
 
-/* =========================================================
-   CATALOG & GEAR
-   ========================================================= */
 
-/**
- * Returns the full Home Theater product catalog grouped by equipment type.
- */
+
+
+
 exports.getHtCatalog = async (req, res) => {
     try {
         const allItems = await listProducts({ limit: 5000 });
@@ -37,13 +28,9 @@ exports.getHtCatalog = async (req, res) => {
     }
 };
 
-/* =========================================================
-   BUILD MANAGEMENT (The HT Layout itself)
-   ========================================================= */
 
-/**
- * Fetches all HT builds associated with a specific room (setup_id).
- */
+
+
 exports.listBuildsForSetup = async (req, res) => {
     try {
         const { setupId } = req.params;
@@ -68,9 +55,7 @@ exports.listBuildsForSetup = async (req, res) => {
     }
 };
 
-/**
- * Fetches a single build by its unique primary ID.
- */
+
 exports.getBuildById = async (req, res) => {
     try {
         const { id } = req.params;
@@ -95,10 +80,7 @@ exports.getBuildById = async (req, res) => {
     }
 };
 
-/**
- * Creates or updates an HT build.
- * [IMPORTANT] Requires unique setup_id constraint to be removed in DB for multiple builds per room.
- */
+
 exports.saveBuild = async (req, res) => {
     try {
         const { id, setup_id, layout, title, devices } = req.body;
@@ -118,7 +100,7 @@ exports.saveBuild = async (req, res) => {
         };
 
         if (id) {
-            // Update existing
+
             const { data, error } = await supabase
                 .from("setups")
                 .update(buildData)
@@ -128,7 +110,7 @@ exports.saveBuild = async (req, res) => {
             if (error) throw error;
             build = data;
         } else {
-            // Insert new
+
             const { data, error } = await supabase
                 .from("setups")
                 .insert([buildData])
@@ -138,7 +120,7 @@ exports.saveBuild = async (req, res) => {
             build = data;
         }
 
-        // Sync local devices
+
         await syncDevices(build.id, devices, layout);
 
         res.json(build);
@@ -148,9 +130,7 @@ exports.saveBuild = async (req, res) => {
     }
 };
 
-/**
- * Deletes a build and its associated device links.
- */
+
 exports.deleteBuild = async (req, res) => {
     try {
         const { id } = req.params;
@@ -166,11 +146,11 @@ exports.deleteBuild = async (req, res) => {
             return res.status(403).json({ error: "Access denied" });
         }
 
-        // 1. Delete devices
+
         await supabase.from("setup_devices").delete().eq("setup_id", id);
-        // 2. Delete build
+
         const { error } = await supabase.from("setups").delete().eq("id", id);
-        
+
         if (error) throw error;
         res.json({ success: true });
     } catch (err) {
@@ -179,9 +159,7 @@ exports.deleteBuild = async (req, res) => {
     }
 };
 
-/* =========================================================
-   INTERNAL HELPERS
-   ========================================================= */
+
 
 async function assertSetupOwnedByUser(setupId, userId) {
     const { data, error } = await supabase
@@ -279,14 +257,14 @@ async function syncDevices(buildId, devices, layout = null) {
     }
 }
 
-// Map for backward compatibility if routes still use old names
+
 exports.saveHtBuild = exports.saveBuild;
 exports.getHtBuild = async (req, res) => {
-    // Legacy support: returns latest build for a setupId
+
     const { setupId } = req.params;
     const userId = req.user.id;
     if (!await assertSetupOwnedByUser(setupId, userId)) return res.status(403).json({ error: "Access denied" });
-    
+
     const { data } = await supabase.from("setups").select("*").eq("room_id", setupId).eq("type", "home_theater").order("created_at", { ascending: false });
     res.json(data?.[0] || { room_id: setupId, name: "Uj Hazimozi", type: "home_theater" });
 };
@@ -421,6 +399,6 @@ exports.deleteConnection = async (req, res) => {
     if (error) return res.status(500).json({ error: error.message });
     res.json({ success: true });
 };
-exports.saveHtConfig = async (req, res) => { /* Dummy */ res.json({ success: true }); };
+exports.saveHtConfig = async (req, res) => {  res.json({ success: true }); };
 
 

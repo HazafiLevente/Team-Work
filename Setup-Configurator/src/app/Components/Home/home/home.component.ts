@@ -13,7 +13,6 @@ import { QuickStatsComponent } from '../../Shared/Stats/quick-stats.component';
 import { ClickSparkComponent } from '../../Shared/Effects/click-spark/click-spark.component';
 import { ProductDetailsPanelComponent } from '../../Panels/Product/product-details-panel.component';
 
-import { DockComponent, DockItemData } from '../../Shared/Dock/dock.component';
 import { UiSettingsService } from '../../Services/SettingService/ui-settings.service';
 
 type AnyProduct = any;
@@ -29,7 +28,6 @@ type AnyProduct = any;
     FilterlistComponent,
     ProductlistComponent,
     ProductDetailsPanelComponent,
-    DockComponent,
     FeaturedSpotlightComponent,
     QuickStatsComponent,
     ClickSparkComponent

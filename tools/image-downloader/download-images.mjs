@@ -65,7 +65,7 @@ async function searchImages(query) {
 
   const html = await r.text();
 
-  // Bing HTML-ben murl mező tartalmazza a valódi képet
+
   const regex = /"murl":"(.*?)"/g;
   const results = [];
 

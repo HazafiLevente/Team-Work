@@ -343,7 +343,7 @@ export class MessagesPanelComponent implements OnInit, OnDestroy {
       return;
     }
 
-    // allow fallback href to navigate to /product-open/:name
+
   }
 
   openInlineProductCard(event: MouseEvent, product: any, mention?: string | null) {

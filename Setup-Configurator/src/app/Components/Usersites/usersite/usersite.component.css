@@ -9,9 +9,7 @@
   min-height: 100vh;
 }
 
-/* =========================
-   BAL OLDAL – HOVER SIDEBAR
-   ========================= */
+
 .usersite-sidebar {
   width: 84px;
   display: flex;
@@ -125,9 +123,7 @@ body[data-appearance="light"] .nav-btn.active {
   border-color: rgba(255, 152, 0, 0.34);
 }
 
-/* =========================
-   JOBB OLDAL – TARTALOM
-   ========================= */
+
 .usersite-content {
   min-width: 0;
   padding: 0;
@@ -157,9 +153,7 @@ body[data-appearance="light"] .nav-btn.active {
   box-shadow: none;
 }
 
-/* =========================
-   FORM
-   ========================= */
+
 .form {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -185,9 +179,7 @@ body[data-appearance="light"] .nav-btn.active {
   opacity: 0.25;
 }
 
-/* =========================
-   RESPONSIVE
-   ========================= */
+
 @media (max-width: 900px) {
   .usersite-layout {
     grid-template-columns: 1fr;

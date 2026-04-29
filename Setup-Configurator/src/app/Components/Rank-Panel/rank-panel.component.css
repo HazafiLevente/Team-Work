@@ -1,4 +1,4 @@
-/* popup overlay */
+
 .rank-backdrop{
   position: fixed;
   inset: 0;
@@ -12,13 +12,13 @@
   padding: 18px;
 }
 
-/* shared shell */
+
 .rank-shell{
   width: min(720px, 100%);
   display: block;
 }
 
-/* embedded on profile page */
+
 .rank-embedded{
   width: 100%;
   max-width: 980px;
@@ -29,7 +29,7 @@
   width: 100%;
 }
 
-/* card -> stable dimensions for canvas */
+
 .rank-card{
   width: 100%;
   min-height: 140px;

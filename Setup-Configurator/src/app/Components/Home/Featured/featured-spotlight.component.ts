@@ -27,7 +27,7 @@ export class FeaturedSpotlightComponent implements OnChanges {
 
   constructor(private imagesSvc: ImageService) {}
 
-  // ✅ HTML ezt használja: *ngIf="current as p"
+
   get current(): AnyProduct | null {
     return this.cards?.[this.activeIndex] ?? null;
   }
@@ -39,13 +39,13 @@ export class FeaturedSpotlightComponent implements OnChanges {
     }
   }
 
-  // ✅ CardSwap kattintás -> nyissa a details panelt
+
   onCardClick(idx: number) {
     const p = this.cards[idx];
     if (p) this.openProduct.emit(p);
   }
 
-  // ✅ CardSwap váltás -> frissüljön a current + specs
+
   onActiveChanged(idx: number) {
     this.activeIndex = idx;
   }
@@ -65,7 +65,7 @@ export class FeaturedSpotlightComponent implements OnChanges {
       const t = (p as any)?.table_name ?? (p as any)?.table ?? '';
       if (t) set.add(String(t));
     }
-    return Array.from(set).slice(0, 6); // max 6 chip
+    return Array.from(set).slice(0, 6);
   }
 
   private buildCards() {

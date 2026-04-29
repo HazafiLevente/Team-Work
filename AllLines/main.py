@@ -33,7 +33,7 @@ def collect_files():
 
     for root, dirs, filenames in os.walk(PROJECT_PATH):
 
-        # itt vágjuk ki a mappákat
+
         dirs[:] = [d for d in dirs if d not in IGNORE_FOLDERS]
 
         for name in filenames:

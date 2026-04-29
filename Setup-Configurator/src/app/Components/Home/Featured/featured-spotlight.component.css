@@ -149,7 +149,7 @@
 }
 
 .swap-wrap{
-  height: 560px;           /* ezt húzd fel 650-750-re ha kell még nagyobb */
+  height: 560px;
   margin-top: 16px;
 
   border: 1px solid rgba(255,255,255,.12);
@@ -170,5 +170,5 @@
 .info{ margin-top: 16px; }
 
 .latest-fixed{
-  top: 140px; /* volt 120px nálad */
+  top: 140px;
 }

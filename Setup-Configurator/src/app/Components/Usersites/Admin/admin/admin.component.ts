@@ -29,7 +29,7 @@ export class AdminComponent implements OnInit, OnDestroy {
   showDailyStats = false;
   dailyStats: any[] = [];
   onlineList: any[] = [];
-  selectedUserId: number | null = null; // Track user to auto-expand
+  selectedUserId: number | null = null;
 
   activeSection: 'dashboard' | 'users' | 'products' | 'reports' | 'system' | 'logs' = 'dashboard';
 
@@ -53,7 +53,7 @@ export class AdminComponent implements OnInit, OnDestroy {
       }
     });
 
-    // Auto-refresh online count every 10s
+
     this.statsInterval = setInterval(() => this.refreshOnline(), 10000);
   }
 
@@ -126,7 +126,7 @@ export class AdminComponent implements OnInit, OnDestroy {
   }
 
   onUserExpanded(userId: number | null) {
-    // Clear the selection once it's handled by child
+
     if (userId === this.selectedUserId) {
       this.selectedUserId = null;
     }

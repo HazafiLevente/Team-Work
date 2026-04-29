@@ -86,7 +86,7 @@ export class ProductsSiteComponent implements OnInit {
     const table = prompt("Melyik táblába szánod? (pl. routers, switches, motherboard)");
     if (!table) return;
 
-    // Üres objektum alapértelmezett mezőkkel
+
     this.selected = {
       id: 0,
       table_name: table,

@@ -11,7 +11,7 @@ security definer
 as $$
     select jsonb_object_agg(table_name, columns)
     from (
-        select 
+        select
             t.relname::text as table_name,
             jsonb_agg(a.attname::text) as columns
         from pg_catalog.pg_class t

@@ -14,7 +14,7 @@ export class ProfileInfoSectionComponent implements OnInit {
 
   form!: FormGroup;
   editingField: string | null = null;
-  totalPrice: number = 0; // ✅ Store total price separately from the form
+  totalPrice: number = 0;
 
   constructor(private fb: FormBuilder, private http: HttpClient) { }
 

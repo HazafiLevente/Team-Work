@@ -5,9 +5,7 @@ const { shouldExclude } = require("./tableFilter");
 
 const { supabase } = require("./supabase");
 
-/* ----------------------------------
-   search-filter.json
----------------------------------- */
+
 const FILTER_PATH = path.join(
     __dirname,
     "..",
@@ -17,10 +15,7 @@ const FILTER_PATH = path.join(
     "search-filter.json"
 );
 
-/**
- * selectWithFallback
- * Próbál Supabase-ből olvasni, ha nem megy (error), akkor SQLite local_cache.db-ből.
- */
+
 async function selectWithFallback({
     supabaseName,
     sqliteName,
@@ -29,7 +24,7 @@ async function selectWithFallback({
     ascending = true,
     limit = 200
 }) {
-    // 1. Megpróbáljuk a Supabase-t
+
     try {
         let query = supabase.from(supabaseName).select(select);
 
@@ -50,21 +45,21 @@ async function selectWithFallback({
         console.warn(`⚠️ Supabase exception (${supabaseName}), falling back to SQLite:`, e.message);
     }
 
-    // 2. Fallback: SQLite
+
     try {
-        // Ellenőrizzük, létezik-e a tábla
+
         const exists = db.prepare(`SELECT name FROM sqlite_master WHERE type='table' AND name=?`).get(sqliteName || supabaseName);
         if (!exists) return [];
 
         const table = sqliteName || supabaseName;
         const sortDir = ascending ? "ASC" : "DESC";
 
-        // Alapvédelem injection ellen: qIdent helyett itt fix mezők, de a biztonság kedvéért érdemesebb lenne qIdent-et használni ha változó a mezőnév.
-        // Itt most egyszerűsített query-t írunk.
+
+
         const rows = db.prepare(`
-            SELECT ${select === "*" ? "*" : select} 
-            FROM "${table}" 
-            ORDER BY "${orderBy}" ${sortDir} 
+            SELECT ${select === "*" ? "*" : select}
+            FROM "${table}"
+            ORDER BY "${orderBy}" ${sortDir}
             LIMIT ?
         `).all(limit);
 
@@ -75,9 +70,7 @@ async function selectWithFallback({
     }
 }
 
-/* ----------------------------------
-   HELPERS
----------------------------------- */
+
 function pick(obj, keys) {
     for (const k of keys) {
         const v = obj?.[k];
@@ -119,9 +112,7 @@ function tokenMatch(model, question) {
     return hits >= Math.ceil(mTokens.length * 0.6);
 }
 
-/* ----------------------------------
-   MODEL TOKEN (EZ A KULCS!)
-   ---------------------------------- */
+
 function extractModelToken(question = "") {
     const q = question.toLowerCase();
 
@@ -132,9 +123,7 @@ function extractModelToken(question = "") {
     return m ? normalize(m[1]) : null;
 }
 
-/* ----------------------------------
-   LIST INTENT
----------------------------------- */
+
 function isListQuestion(q) {
     const n = normalize(q);
 
@@ -160,9 +149,7 @@ function isListQuestion(q) {
 
 
 
-/* ----------------------------------
-   MANUFACTURERS FROM JSON
----------------------------------- */
+
 let MANUFACTURERS_CACHE = null;
 
 function loadManufacturersFromFilter() {
@@ -204,9 +191,7 @@ function extractBrand(question) {
     return null;
 }
 
-/* ----------------------------------
-   MAIN
----------------------------------- */
+
 function getProductsForAI(question = "") {
     const listIntent = isListQuestion(question);
     const brand = extractBrand(question);
@@ -257,9 +242,8 @@ function getProductsForAI(question = "") {
 
             const row = { table, manufacturer, model, price };
 
-            /* ===============================
-               LIST MODE (ELSŐ PRIORITÁS)
-            =============================== */
+
+
 
             const qTokens = tokens(question);
             const tTokens = tokens(table);
@@ -278,9 +262,8 @@ function getProductsForAI(question = "") {
                 }
             }
 
-            /* ===============================
-               PRODUCT MODE
-            =============================== */
+
+
 
             if (model) {
                 if (tokenMatch(model, question)) {

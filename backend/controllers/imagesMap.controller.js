@@ -1,7 +1,8 @@
 const fs = require("fs");
 const path = require("path");
+const { IMAGES_DIR } = require("../config/paths");
 
-const IMAGES_ROOT = path.join(__dirname, "..", "..", "datas", "images");
+const IMAGES_ROOT = IMAGES_DIR;
 const ALLOWED_EXT = new Set([".jpg", ".jpeg", ".png", ".webp"]);
 
 function isDir(p) {

@@ -1,7 +1,5 @@
-const path = require("path");
-
-const ROOT = path.resolve(__dirname, "..");
-const ENV_PATH = path.join(ROOT, ".env");
+const { ENV_PATH, ROOT } = require("./config/paths");
+const { isShuttingDown, registerProcessEvents } = require("./config/processEvents");
 
 require("dotenv").config({
     path: ENV_PATH,
@@ -11,33 +9,7 @@ require("dotenv").config({
 
 const PORT = process.env.PORT || 3000;
 
-let shuttingDown = false;
-
-process.on("beforeExit", (code) => {
-    console.warn("[SERVER] beforeExit fired with code:", code);
-});
-
-process.on("exit", (code) => {
-    console.warn("[SERVER] exit fired with code:", code);
-});
-
-process.on("uncaughtException", (error) => {
-    console.error("[SERVER] uncaughtException:", error);
-});
-
-process.on("unhandledRejection", (reason) => {
-    console.error("[SERVER] unhandledRejection:", reason);
-});
-
-process.on("SIGINT", () => {
-    shuttingDown = true;
-    console.warn("[SERVER] SIGINT received");
-});
-
-process.on("SIGTERM", () => {
-    shuttingDown = true;
-    console.warn("[SERVER] SIGTERM received");
-});
+registerProcessEvents();
 
 console.log("ENV CHECK:", {
     SUPABASE_URL: process.env.SUPABASE_URL,
@@ -55,7 +27,7 @@ try {
     server.on("close", () => {
         console.warn("[SERVER] HTTP server closed", {
             port: PORT,
-            shuttingDown
+            shuttingDown: isShuttingDown()
         });
     });
 

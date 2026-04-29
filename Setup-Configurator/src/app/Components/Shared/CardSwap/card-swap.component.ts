@@ -56,12 +56,12 @@ export class CardSwapComponent implements AfterViewInit, OnDestroy, OnChanges {
   @Input() easing: 'linear' | 'elastic' = 'elastic';
   @Input() skewAmount = 0;
 
-  // külső active index (ha kell)
+
   @Input() activeIndex = 0;
 
   @Output() cardClick = new EventEmitter<number>();
 
-  // ✅ ÚJ: jelezzük kifelé, hogy épp melyik card van elöl
+
   @Output() activeIndexChanged = new EventEmitter<number>();
 
   @ViewChild('container', { static: true }) containerRef!: ElementRef<HTMLDivElement>;
@@ -116,9 +116,8 @@ export class CardSwapComponent implements AfterViewInit, OnDestroy, OnChanges {
     this.bringToFront(i);
   }
 
-  // -----------------------------
-  // Core lifecycle
-  // -----------------------------
+
+
 
   private rebuild() {
     this.cleanup();
@@ -152,10 +151,10 @@ export class CardSwapComponent implements AfterViewInit, OnDestroy, OnChanges {
 
     this.layout(this.els, this.order);
 
-    // ✅ induláskor is jelezzük, mi van elöl
+
     this.emitFront();
 
-    // ✅ induláskor egy swap
+
     this.swapOnce();
 
     this.startInterval();
@@ -177,9 +176,8 @@ export class CardSwapComponent implements AfterViewInit, OnDestroy, OnChanges {
     node.addEventListener('mouseleave', this.onLeave);
   }
 
-  // -----------------------------
-  // Animation
-  // -----------------------------
+
+
 
   private swapOnce() {
     if (this.order.length < 2 || this.total < 2) return;
@@ -225,16 +223,15 @@ export class CardSwapComponent implements AfterViewInit, OnDestroy, OnChanges {
       'return'
     );
 
-    // ✅ amikor kész a swap, frissítsük az ordert és emitteljük az új frontot
+
     tl.call(() => {
       this.order = [...rest, front];
       this.emitFront();
     });
   }
 
-  // -----------------------------
-  // External control
-  // -----------------------------
+
+
 
   private bringToFront(idx: number) {
     if (!this.els?.length || this.total === 0) return;
@@ -247,7 +244,7 @@ export class CardSwapComponent implements AfterViewInit, OnDestroy, OnChanges {
 
     this.layout(this.els, this.order);
 
-    // ✅ kattintásra is jelezzük
+
     this.emitFront();
 
     this.startInterval();

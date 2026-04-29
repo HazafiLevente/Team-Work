@@ -13,16 +13,13 @@ import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 
-import { SetupDockComponent } from '../dock/dock.component';
 import { WorkspaceComponent } from '../workspace/workspace.component';
-import { SetupConnectionsComponent } from '../workspace/connection-layer/setup-connections.component';
 import { SetupCarDetailsPanelComponent } from '../workspace/setup-windows/quick-builder/setup-car-details-panel/setup-car-details-panel.component';
 import { SetupPcDetailsPanelComponent } from '../workspace/setup-windows/quick-builder/setup-pc-details-panel/setup-pc-details-panel.component';
 import { SetupPcPartDetailsPanelComponent } from '../workspace/setup-windows/quick-builder/setup-pc-part-details-panel/setup-pc-part-details-panel.component';
 import { ProductDetailsPanelComponent } from '../../../Panels/Product/product-details-panel.component';
 import { SetupHtDetailsPanelComponent } from '../workspace/setup-windows/quick-builder/setup-ht-details-panel/setup-ht-details-panel.component';
 import { SetupInstrumentDetailsPanelComponent } from '../workspace/setup-windows/quick-builder/setup-instrument-details-panel/setup-instrument-details-panel.component';
-import { SetupPairingModalComponent } from '../setup-pairing-modal/setup-pairing-modal.component';
 import { PcBuilderPanelComponent } from '../setup-panel/pc-builder/pc-builder-panel.component';
 import { SetupHierarchySidebarComponent } from './hierarchy-sidebar/setup-hierarchy-sidebar.component';
 import { SetupHierarchyDetailsComponent } from './hierarchy-details/setup-hierarchy-details.component';
@@ -38,15 +35,12 @@ type PairingStage = 'NONE' | 'PICK_SOURCE' | 'PICK_TARGET_SETUP' | 'PICK_TARGET_
     CommonModule,
     HttpClientModule,
     FormsModule,
-    SetupDockComponent,
     WorkspaceComponent,
-    SetupConnectionsComponent,
     SetupCarDetailsPanelComponent,
     SetupPcDetailsPanelComponent,
     SetupPcPartDetailsPanelComponent,
     ProductDetailsPanelComponent,
     SetupHtDetailsPanelComponent,
-    SetupPairingModalComponent,
     PcBuilderPanelComponent,
     SetupHierarchySidebarComponent,
     SetupHierarchyDetailsComponent,
@@ -1383,7 +1377,7 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit {
       { withCredentials: true }
     ).subscribe({
       next: () => {
-        // Update local items array
+
         this.items = this.items.map(it => {
           const itId = it?.id ?? it?.ID ?? it?.item_id;
           const itTab = it?.category ?? it?.source_table ?? it?.table_name;

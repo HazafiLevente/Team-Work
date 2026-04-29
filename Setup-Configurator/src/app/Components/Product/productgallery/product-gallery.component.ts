@@ -48,7 +48,7 @@ export class ProductGalleryComponent {
     this.active = (this.active + 1) % this.images.length;
   }
 
-  // ✅ THUMB: csak vált, nem nyit viewert
+
   setActive(i: number) {
     if (!this.hasImages) return;
     this.direction = i > this.active ? 'next' : 'prev';

@@ -1,11 +1,11 @@
 <div class="wrap">
 
-  <!-- TOPBAR: Vissza mindig -->
+
   <div class="topbar">
     <button class="btn ghost" (click)="goBack()">← Vissza</button>
   </div>
 
-  <!-- Header blokk -->
+
   <div class="left-panel" *ngIf="!loading && item; else loadingBlock">
     <div class="topline">
       <div>
@@ -26,7 +26,7 @@
       Tipp: kattints a képre a fullscreen nézethez.
     </div>
 
-    <!-- Info kártyák -->
+
     <div class="info-grid">
       <div class="card">
         <div class="card-title">Áttekintés</div>
@@ -73,7 +73,7 @@
       </div>
     </div>
 
-    <!-- KÉPEK LEGALUL -->
+
     <div class="card gallery-bottom">
       <div class="card-title">Képek</div>
 
@@ -83,7 +83,7 @@
       </app-product-gallery>
     </div>
 
-    <!-- Debug -->
+
     <div class="card subtle-card" *ngIf="userRole === 'admin' || userRole === 'admin+' || userRole === 'owner'">
       <details>
         <summary>Debug / nyers adat</summary>

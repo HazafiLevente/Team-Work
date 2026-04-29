@@ -1,30 +1,26 @@
-// backend/services/syncService.js
+
 const fs = require("fs");
 const path = require("path");
 const Database = require("better-sqlite3");
 const { supabase } = require("./supabase");
 const { shouldExclude } = require("./tableFilter");
 
-/* ----------------------------------
-   CONFIG
----------------------------------- */
 
-// extra cache-elt nevek (view-k is lehetnek)
+
+
 const EXTRA_CACHE_OBJECTS = [
     "bell_messages_view"
 ];
 
-// ezeket SOHA ne próbáljuk visszatölteni Supabase-be
+
 const NEVER_UPLOAD = new Set([
     "bell_messages_view"
 ]);
 
-// upload alapból OFF
+
 const ENABLE_UPLOAD_TO_SUPABASE = false;
 
-/* ----------------------------------
-   LOG BUFFER
----------------------------------- */
+
 
 function createLogBuffer(title) {
     return {
@@ -41,9 +37,7 @@ function createLogBuffer(title) {
     };
 }
 
-/* ----------------------------------
-   PATHS
----------------------------------- */
+
 
 const DB_DIR = path.join(__dirname, "../../datas/setup_configurator");
 const DB_PATH = path.join(DB_DIR, "local_cache.db");
@@ -53,18 +47,14 @@ const TABLE_LIST_FILE = path.join(
     "../../datas/Jsons/tables.list.json"
 );
 
-/* ----------------------------------
-   INIT DIR + DB
----------------------------------- */
+
 
 if (!fs.existsSync(DB_DIR)) fs.mkdirSync(DB_DIR, { recursive: true });
 
 const db = new Database(DB_PATH);
 db.pragma("foreign_keys = ON");
 
-/* ----------------------------------
-   HELPERS
----------------------------------- */
+
 
 function qIdent(name) {
     return `"${String(name).replace(/"/g, '""')}"`;
@@ -73,7 +63,7 @@ function qIdent(name) {
 function ensureTable(table, sampleRow) {
     db.prepare(`DROP TABLE IF EXISTS ${qIdent(table)}`).run();
 
-    // Deduplikáljuk az oszlopneveket case-insensitive módon
+
     const seen = new Set();
     const uniqueCols = [];
     for (const col of Object.keys(sampleRow)) {
@@ -135,9 +125,7 @@ function tableExists(table) {
     return !!row;
 }
 
-/* ----------------------------------
-   SYNC FROM SUPABASE (one-shot)
----------------------------------- */
+
 
 async function syncFromSupabase() {
     const log = createLogBuffer("LOCAL SYNC FROM SUPABASE");
@@ -198,9 +186,7 @@ async function syncFromSupabase() {
     return { synced, empty, failed };
 }
 
-/* ----------------------------------
-   SYNC TO SUPABASE (optional)
----------------------------------- */
+
 
 async function syncToSupabase() {
     console.log("📤 Syncing TO Supabase...");

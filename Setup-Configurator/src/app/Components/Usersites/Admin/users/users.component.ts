@@ -64,7 +64,7 @@ export class UsersComponent implements OnInit, OnChanges {
       this.loadUserSetups(user.id);
       this.onExpanded.emit(user.id);
 
-      // Scroll into view
+
       setTimeout(() => {
         const el = document.getElementById('user-card-' + user.id);
         if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -72,9 +72,8 @@ export class UsersComponent implements OnInit, OnChanges {
     }
   }
 
-  /* ======================
-     LOAD USERS
-  ====================== */
+
+
   loadUsers() {
     console.log('🔄 Loading users...');
     this.http.get<any>('/api/admin/users', {
@@ -104,9 +103,8 @@ export class UsersComponent implements OnInit, OnChanges {
     return this.currentUserRole === 'admin+' || this.currentUserRole === 'owner';
   }
 
-  /* ======================
-     INLINE EDIT HELPERS
-  ====================== */
+
+
   edit(user: any, field: string) {
     this.editing[`${user.id}_${field}`] = true;
   }
@@ -119,9 +117,8 @@ export class UsersComponent implements OnInit, OnChanges {
     return !!this.editing[`${user.id}_${field}`];
   }
 
-  /* ======================
-     ACCORDION & SETUPS
-  ====================== */
+
+
   toggleUser(user: any) {
     const userId = user.id;
     if (this.expandedUserId === userId) {
@@ -149,9 +146,8 @@ export class UsersComponent implements OnInit, OnChanges {
       });
   }
 
-  /* ======================
-     ITEMS VIEW (SIDE PANEL)
-  ====================== */
+
+
   onSetupDblClick(setup: any) {
     this.selectedSetup = setup;
     this.itemsViewOpen = true;
@@ -184,9 +180,8 @@ export class UsersComponent implements OnInit, OnChanges {
     return setup.total_price || 0;
   }
 
-  /* ======================
-     SAVE USER
-  ====================== */
+
+
   saveUser(user: any) {
     this.http.patch(
       `/api/admin/users/${user.id}`,
@@ -201,7 +196,7 @@ export class UsersComponent implements OnInit, OnChanges {
     ).subscribe({
       next: () => {
         console.log('💾 User saved:', user.id);
-        // Opcionálisan mutathatunk egy toast-ot vagy visszajelzést
+
       },
       error: err => console.error('❌ Save error', err)
     });

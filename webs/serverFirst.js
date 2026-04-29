@@ -15,16 +15,12 @@ const cookieParser = require("cookie-parser");
 const { createClient } = require("@supabase/supabase-js");
 const cors = require("cors");
 
-/* ======================================================
-   APP + CONFIG
-====================================================== */
+
 const app = express();
 const PORT = process.env.PORT || 4200;
 const JWT_SECRET = process.env.JWT_SECRET;
 
-/* ======================================================
-   LOAD ADMINS FROM JSON
-====================================================== */
+
 const adminFilePath = path.join(__dirname, "admin.json");
 
 const TABLES_FILE = path.join(__dirname, "tables.runtime.json");
@@ -36,17 +32,13 @@ function getRuntimeTables() {
 }
 
 
-/* ======================================================
-   SUPABASE (SERVICE ROLE – NO RLS)
-====================================================== */
+
 const supabase = createClient(
     process.env.SUPABASE_URL,
     process.env.SUPABASE_SERVICE_ROLE_KEY
 );
 
-/* ======================================================
-   MIDDLEWARE
-====================================================== */
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
@@ -54,9 +46,7 @@ app.use(express.static(path.join(__dirname, "webs")));
 
 
 
-/* ======================================================
-   AUTH MIDDLEWARE
-====================================================== */
+
 
 function verifyUser(req, res, next) {
     const token =
@@ -72,7 +62,7 @@ function verifyUser(req, res, next) {
     try {
         const decoded = jwt.verify(token, JWT_SECRET);
 
-        // 🔥 ide kerül minden, amit a tokenbe raktál login-kor
+
         req.user = {
             id: Number(decoded.id),
             name: decoded.name,
@@ -109,9 +99,7 @@ function verifyAdminPlus(req, res, next) {
 }
 
 
-/* ======================================================
-   PAGE ROUTES
-====================================================== */
+
 
 
 
@@ -147,9 +135,7 @@ app.get("/test",  async (req, res) => {
 })
 
 
-/* ======================================================
-   PUBLIC DATA API
-====================================================== */
+
 app.get("/api/guitars", async (_, res) => {
     const { data, error } = await supabase.from("electric_guitars").select("*");
     if (error) return res.status(500).json({ error: error.message });
@@ -242,9 +228,7 @@ app.get("/api/public/table/:name", async (req, res) => {
 
 
 
-/* ======================================================
-   META API
-====================================================== */
+
 app.get("/api/all", async (_, res) => {
     const { data, error } = await supabase.rpc("get_all_tables");
 
@@ -298,7 +282,7 @@ app.get("/meta/filler", (_, res) => {
 app.get("/api/products/tables", (_, res) => {
     const runtime = getRuntimeTables();
 
-    // object → array
+
     const tables = Object.keys(runtime);
 
     res.json({ tables });
@@ -332,9 +316,7 @@ app.get("/api/products/brands", async (_, res) => {
 
 
 
-/* ======================================================
-   ADMIN API
-====================================================== */
+
 
 
 app.get("/api/admin/tables", verifyAdmin, async (_, res) => {
@@ -343,7 +325,7 @@ app.get("/api/admin/tables", verifyAdmin, async (_, res) => {
     if (error) return res.status(500).json({ error: error.message });
     if (!Array.isArray(data)) return res.json({ tables: [] });
 
-    // ✅ admin-only = van benne [
+
     const adminTables = data
         .map(t => t.table_name)
         .filter(name => name && name.includes("["));
@@ -374,10 +356,10 @@ app.post("/api/admin/update-row", verifyAdmin, async (req, res) => {
         return res.status(400).json({ error: "Missing data" });
     }
 
-    // ❌ SOHA ne engedjük ID módosítását
+
     ["id", "ID", "created_at", "password"].forEach(k => delete updates[k]);
 
-    // ✅ IGAZI PK MEGHATÁROZÁSA
+
     const idColumn = table === "user[Auth]" ? "ID" : "id";
 
     const { error } = await supabase
@@ -401,7 +383,7 @@ app.post("/api/admin/update-user", verifyAdmin, async (req, res) => {
         return res.status(400).json({ error: "Missing userId" });
     }
 
-    // ❌ jelszót direkt nem engedünk
+
     const updateData = {};
     if (Name) updateData.Name = Name;
     if (UserName) updateData.UserName = UserName;
@@ -455,7 +437,7 @@ app.post("/api/admin/delete-row", verifyAdmin, async (req, res) => {
         return res.status(400).json({ error: "Missing table or id" });
     }
 
-    // ❌ saját user törlése tiltva
+
     if (table === "user[Auth]" && Number(id) === req.user.id) {
         return res.status(403).json({ error: "Saját fiók nem törölhető" });
     }
@@ -485,13 +467,11 @@ app.post("/api/admin/delete-row", verifyAdmin, async (req, res) => {
 
 
 
-/* ======================================================
-   SETUP / PC API
-====================================================== */
+
 app.get("/api/my-first-setup", verifyUser, async (req, res) => {
     const userId = req.user.id;
 
-    // 1️⃣ megkeressük a user setupjait (legkisebb ID elöl)
+
     const { data: setups, error: setupErr } = await supabase
         .from("setup[Setup]")
         .select("id, setup_name")
@@ -508,7 +488,7 @@ app.get("/api/my-first-setup", verifyUser, async (req, res) => {
 
     const setupIds = setups.map(s => s.id);
 
-    // 2️⃣ megkeressük a legelső pc_details rekordot ezekhez a setupokhoz
+
     const { data: pc, error: pcErr } = await supabase
         .from("pc_details[Setup]")
         .select(`
@@ -529,8 +509,8 @@ app.get("/api/my-first-setup", verifyUser, async (req, res) => {
         return res.status(500).json({ error: pcErr.message });
     }
 
-    // 3️⃣ visszaadjuk pontosan azt a formátumot,
-    // amit a frontend már MOST is vár
+
+
     res.json({
         setup: pc.setup,
         details: pc
@@ -548,7 +528,7 @@ app.post("/api/update-setup-name", verifyUser, async (req, res) => {
         .from("setup[Setup]")
         .update({ setup_name: newName })
         .eq("id", setupId)
-        .eq("user_id", req.user.id); // 🔒 csak a sajátját
+        .eq("user_id", req.user.id);
 
     if (error) {
         return res.status(500).json({ error: error.message });
@@ -597,9 +577,7 @@ app.post("/api/my-setups", verifyUser, async (req, res) => {
 });
 
 
-/* ======================================================
-   SETUP DETAILS (PC OR HOME THEATER)
-====================================================== */
+
 app.get("/api/setup/details", verifyUser, async (req, res) => {
     const { type, id } = req.query;
     const childId = Number(id);
@@ -610,7 +588,7 @@ app.get("/api/setup/details", verifyUser, async (req, res) => {
         return res.status(400).json({ error: "Missing type or id" });
     }
 
-    /* ===================== PC ===================== */
+
     if (type === "pc") {
         const { data: pc, error } = await supabase
             .from("pc_details[Setup]")
@@ -642,10 +620,10 @@ app.get("/api/setup/details", verifyUser, async (req, res) => {
         });
     }
 
-    /* ================= HOME THEATER ================= */
+
     if (type === "home_theater") {
         const { data: ht, error } = await supabase
-            .from("home_theater_setups[Setups]") // ✅ FONTOS
+            .from("home_theater_setups[Setups]")
             .select(`
                 *,
                 setup:setup_id(id, setup_name)
@@ -676,15 +654,13 @@ app.get("/api/setup/details", verifyUser, async (req, res) => {
     res.status(400).json({ error: "Invalid type" });
 });
 
-/* ======================================================
-   AUTÓK LISTÁZÁSA (ÖSSZES TÁBLÁBÓL)
-====================================================== */
+
 app.get("/api/items/list", verifyUser, async (req, res) => {
     const { type } = req.query;
     let allResults = [];
 
     try {
-        // --- 1. AUTÓK (A te jól működő logikád alapján) ---
+
         if (type === "car") {
             const carTables = ["cabrio_cars", "coupe_cars", "hatchback_cars", "wagon_cars", "mpv_cars", "pickup_cars", "crossover_cars"];
             const results = await Promise.all(carTables.map(table => supabase.from(table).select("*")));
@@ -705,24 +681,24 @@ app.get("/api/items/list", verifyUser, async (req, res) => {
             return res.json({ results: allResults });
         }
 
-        // --- 2. PC ALKATRÉSZEK (Az új "PC" kategória logika) ---
+
         if (type === "pc") {
             const pcTables = ["video_cards", "ram", "psu", "processors", "motherboard"];
 
-            // Itt is használjuk a gyorsabb Promise.all-t
+
             const results = await Promise.all(pcTables.map(table => supabase.from(table).select("*")));
 
             results.forEach((res, index) => {
                 const currentTable = pcTables[index];
                 if (res.data) {
-                    // Itt szűrünk a "PC" nagybetűs kategóriára
+
                     const pcOnly = res.data.filter(item => {
                         const cat = item.category || item.Category || "";
                         return cat.toString().trim().toUpperCase() === "PC";
                     });
 
                     pcOnly.forEach(item => {
-                        // Rugalmas névkezelés (Manufacturer/Brand, Model/model)
+
                         const brand = item.Manufacturer || item.manufacturer || item.Brand || item.brand || "Márka";
                         const model = item.Model || item.model || "Modell";
 
@@ -739,7 +715,7 @@ app.get("/api/items/list", verifyUser, async (req, res) => {
             return res.json({ results: allResults });
         }
 
-        // Ha sem autó, sem pc
+
         res.json({ results: [] });
 
     } catch (err) {
@@ -752,7 +728,7 @@ app.get("/api/items/list", verifyUser, async (req, res) => {
 
 app.get("/api/items/pc-list", verifyUser, async (req, res) => {
     let allResults = [];
-    // A te pontos táblaneveid:
+
     const pcTables = ["ram", "psu", "processors", "motherboard", "video_cards"];
 
     try {
@@ -768,8 +744,8 @@ app.get("/api/items/pc-list", verifyUser, async (req, res) => {
                 res.data.forEach(item => {
                     allResults.push({
                         id: item.id,
-                        name: `${item.Manufacturer} ${item.Model}`, // Nagybetűs mezők!
-                        category: currentTable, // Ezt küldjük a mentéshez
+                        name: `${item.Manufacturer} ${item.Model}`,
+                        category: currentTable,
                         type: "pc"
                     });
                 });
@@ -785,17 +761,15 @@ app.get("/api/items/pc-list", verifyUser, async (req, res) => {
 });
 
 
-/* ======================================================
-   3. AL-ELEMEK LISTÁZÁSA (EZ HIÁNYZIK NÁLAD!)
-====================================================== */
+
 app.get("/api/setup/:id/get-children", verifyUser, async (req, res) => {
-    // Kicsit biztosabbá tesszük az ID kezelést
+
     const setupId = req.params.id;
     console.log(`--- SETUP ELEMEK LEKÉRÉSE: ID ${setupId} ---`);
 
     try {
-        // Párhuzamosan lekérjük mind a 4 kategória táblájából az adatokat
-        // Figyelem: A táblaneveknek és oszlopoknak pontosan egyezniük kell!
+
+
         const [pcs, hts, cars, studios] = await Promise.all([
             supabase.from("pc_details[Setup]").select("*").eq("setup_id", setupId),
             supabase.from("home_theater_setups[Setup]").select("*").eq("setup_id", setupId),
@@ -803,14 +777,14 @@ app.get("/api/setup/:id/get-children", verifyUser, async (req, res) => {
             supabase.from("studio_monitor_setup[Setup]").select("*").eq("setup_id", setupId)
         ]);
 
-        // Ellenőrizzük, jött-e hiba valamelyiknél (kiírjuk a terminálba, ha igen)
+
         if (pcs.error) console.error("PC hiba:", pcs.error.message);
         if (hts.error) console.error("Home Theater hiba:", hts.error.message);
         if (cars.error) console.error("Car hiba:", cars.error.message);
         if (studios.error) console.error("Studio hiba:", studios.error.message);
 
-        // Összefűzzük az eredményeket egy közös listába
-        // A frontendnek a 'setup_name' oszlopot küldjük display_name-ként
+
+
         const allItems = [
             ...(pcs.data || []).map(i => ({ ...i, type: 'pc', label: 'PC Alkatrész' })),
             ...(hts.data || []).map(i => ({ ...i, type: 'home_theater', label: 'Mozi eszköz' })),
@@ -820,7 +794,7 @@ app.get("/api/setup/:id/get-children", verifyUser, async (req, res) => {
 
         console.log(`Setup ${setupId}: ${allItems.length} elem megtalálva.`);
 
-        // Ez a sor küldi vissza a JSON választ a frontendnek
+
         res.json(allItems);
 
     } catch (err) {
@@ -830,15 +804,11 @@ app.get("/api/setup/:id/get-children", verifyUser, async (req, res) => {
 });
 
 
-/* ======================================================
-   ÚJ CHILD LÉTREHOZÁSA (POST)
-====================================================== */
-/* ======================================================
-   ÚJ CHILD LÉTREHOZÁSA (POST) - JAVÍTOTT PC LOGIKA
-====================================================== */
+
+
 app.post("/api/setup/:id/add-child", verifyUser, async (req, res) => {
     const setupId = Number(req.params.id);
-    // Fontos: a frontendnek küldenie kell az 'itemId'-t és a 'category'-t is!
+
     const { type, name, itemId, category } = req.body;
 
     if (!type || !name) return res.status(400).json({ error: "Missing data" });
@@ -850,37 +820,37 @@ app.post("/api/setup/:id/add-child", verifyUser, async (req, res) => {
     };
 
     switch (type) {
-        // --- ITT A MÓDOSÍTÁS A PC RÉSZNÉL ---
+
         case "pc":
             tableName = "pc_details[Setup]";
 
-            // Ez a térkép köti össze a táblaneveket (amiket a listázó küld)
-            // a setup tábla oszlopneveivel.
+
+
             const pcColumnMap = {
-                "video_cards": "videocard_id", // Figyelj: tábla='video_cards', oszlop='videocard_id'
+                "video_cards": "videocard_id",
                 "ram": "ram_id",
                 "psu": "psu_id",
                 "processors": "processor_id",
                 "motherboard": "motherboard_id"
             };
 
-            // Megkeressük, melyik oszlopba kell írni
+
             const targetColumn = pcColumnMap[category];
 
-            // Ha van érvényes oszlop és kaptunk ID-t, beleírjuk az adatcsomagba
+
             if (targetColumn && itemId) {
                 insertData[targetColumn] = itemId;
             }
             break;
-        // -------------------------------------
+
 
         case "home_theater":
             tableName = "home_theater_setups[Setup]";
-            insertData.receiver_id = 1; // Meglévő kényszer miatt
+            insertData.receiver_id = 1;
             break;
 
         case "car":
-            // ❗ FIGYELEM: A Supabase képed alapján nagy 'C' betű!
+
             tableName = "Car_setup[Setup]";
             break;
 
@@ -911,9 +881,8 @@ app.post("/api/setup/:id/add-child", verifyUser, async (req, res) => {
 
 
 
-// ==========================================
-// 2. MENTÉS (POST) - PC ID KEZELÉSSEL
-// ==========================================
+
+
 app.post("/api/setup/:id/save-child-legacy", verifyUser, async (req, res) => {
     const setupId = req.params.id;
     const { type, name, itemId, category } = req.body;
@@ -925,7 +894,7 @@ app.post("/api/setup/:id/save-child-legacy", verifyUser, async (req, res) => {
     else if (type === "pc") {
         tableName = "pc_details[Setup]";
         const pcMap = { "processors": "processor_id", "motherboard": "motherboard_id", "ram": "ram_id", "psu": "psu_id", "video_cards": "videocard_id" };
-        if (pcMap[category]) insertData[pcMap[category]] = itemId; // Beírjuk a konkrét ID-t
+        if (pcMap[category]) insertData[pcMap[category]] = itemId;
     }
     else if (type === "studio") tableName = "studio_monitor_setup[Setup]";
     else if (type === "home_theater") tableName = "home_theater_setups[Setup]";
@@ -939,15 +908,13 @@ app.post("/api/setup/:id/save-child-legacy", verifyUser, async (req, res) => {
     }
 });
 
-/* ======================================================
-   CHILD TÖRLÉSE (DELETE)
-====================================================== */
+
 app.delete("/api/remove-child/:type/:id", verifyUser, async (req, res) => {
     const { type, id } = req.params;
 
     let tableName = "";
 
-    // Ugyanaz a logika, mint a létrehozásnál: típus -> tábla
+
     switch (type) {
         case "pc": tableName = "pc_details[Setup]"; break;
         case "home_theater": tableName = "home_theater_setups[Setup]"; break;
@@ -961,8 +928,8 @@ app.delete("/api/remove-child/:type/:id", verifyUser, async (req, res) => {
             .from(tableName)
             .delete()
             .eq("id", id);
-        // Itt érdemes lenne ellenőrizni, hogy a setup a useré-e,
-        // de ha a frontend jól van megírva, első körben ez is működik.
+
+
 
         if (error) {
             console.error("Delete error:", error);
@@ -977,9 +944,7 @@ app.delete("/api/remove-child/:type/:id", verifyUser, async (req, res) => {
     }
 });
 
-/* ======================================================
-   AUTH API
-====================================================== */
+
 app.post("/api/register", async (req, res) => {
     const { fullname, username, email, password } = req.body;
     if (!fullname || !username || !email || !password)
@@ -1017,7 +982,7 @@ app.post("/api/login", async (req, res) => {
     const role = resolveRole(Number(user.ID));
 
     const token = jwt.sign({
-        id: Number(user.ID), // 🔥 EZ A FIX
+        id: Number(user.ID),
         name: user.Name,
         username: user.UserName,
         email: user.Email
@@ -1047,9 +1012,7 @@ app.get("/api/me", verifyUser, (req, res) => {
 });
 
 
-/* ======================================================
-   RUNTIME API'S
-====================================================== */
+
 
 app.get("/api/runtime/tables", (_, res) => {
     const json = JSON.parse(
@@ -1061,16 +1024,14 @@ app.get("/api/runtime/tables", (_, res) => {
     res.json(json);
 });
 
-/* ======================================================
-   SERVER START
-====================================================== */
+
 
 app.listen(PORT, () => {
     console.clear();
     console.log(`
 ╔══════════════════════════════════════════════╗
-║  💫 SETUP CONFIGURATOR – SERVER RUNNING 💫   
-║  🌐 http://localhost:${PORT}             
+║  💫 SETUP CONFIGURATOR – SERVER RUNNING 💫
+║  🌐 http://localhost:${PORT}
 ╚══════════════════════════════════════════════╝
 `);
 });

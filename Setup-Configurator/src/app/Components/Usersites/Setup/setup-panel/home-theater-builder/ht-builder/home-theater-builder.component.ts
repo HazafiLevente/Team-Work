@@ -6,8 +6,8 @@ import { FormsModule } from '@angular/forms';
 import { DragDropModule, CdkDragEnd } from '@angular/cdk/drag-drop';
 
 interface HTItem {
-    id: string; // Instance ID
-    ref_id: number; // Product DB ID
+    id: string;
+    ref_id: number;
     name: string;
     manufacturer: string;
     type: string;
@@ -16,7 +16,7 @@ interface HTItem {
     y: number;
     rotation: number;
     role?: string;
-    connections?: string[]; // IDs of connected items
+    connections?: string[];
 }
 
 @Component({
@@ -163,7 +163,7 @@ export class HomeTheaterBuilderComponent implements OnInit, OnChanges {
     removeItem(id: string): void {
         this.placedItems = this.placedItems.filter(item => {
             if (item.id === id) return false;
-            // Also remove connections to this item
+
             if (item.connections) {
                 item.connections = item.connections.filter(cid => cid !== id);
             }
@@ -202,7 +202,7 @@ export class HomeTheaterBuilderComponent implements OnInit, OnChanges {
             sourceItem.connections.push(targetId);
         }
 
-        // Keep it reactive
+
         this.placedItems = [...this.placedItems];
         this.connectingFrom = null;
     }
@@ -211,7 +211,7 @@ export class HomeTheaterBuilderComponent implements OnInit, OnChanges {
         const pos = event.source.getFreeDragPosition();
         item.x += pos.x;
         item.y += pos.y;
-        event.source.reset(); // Reset CDK internal position tracking
+        event.source.reset();
     }
 
     getFilteredCatalog() {
@@ -250,9 +250,9 @@ export class HomeTheaterBuilderComponent implements OnInit, OnChanges {
         return names[key] || key;
     }
 
-    // Helper for SVG lines
+
     getItemCenter(item: HTItem) {
-        // Approximate center of the card
+
         return {
             x: item.x + 80,
             y: item.y + 40

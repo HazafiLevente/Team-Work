@@ -6,15 +6,15 @@
   height: 0;
   display: block;
   z-index: 1000;
-  /* Base z-index, will be overridden by hostZIndex */
+
   pointer-events: none;
-  /* Let clicks pass through host to cdkDrag div */
+
 }
 
 .window {
   position: absolute;
   pointer-events: all;
-  /* Catch clicks on the actual window */
+
 
   min-width: 420px;
   min-height: 250px;
@@ -109,7 +109,7 @@
   overflow-x: hidden;
 }
 
-/* Scrollbar refinement */
+
 .window-body::-webkit-scrollbar {
   width: 6px;
 }

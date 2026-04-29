@@ -1,5 +1,5 @@
 <div class="ht-container" [class.sidebar-open]="sidebarOpen">
-    <!-- Header with Title Input and Actions -->
+
     <div class="canvas-header">
         <div class="build-info">
             <input type="text" [(ngModel)]="buildTitle" placeholder="Házimozi neve..." class="title-input">
@@ -16,11 +16,11 @@
     </div>
 
     <div class="main-layout">
-        <!-- Canvas Area -->
+
         <div class="canvas-area">
             <div class="room-boundary" #boundary>
 
-                <!-- Connection Lines Layer -->
+
                 <svg class="connections-layer">
                     <defs>
                         <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
@@ -84,7 +84,7 @@
             </div>
         </div>
 
-        <!-- Product Sidebar -->
+
         <div class="product-sidebar" [class.open]="sidebarOpen">
             <div class="sidebar-header">
                 <h3>Katalógus</h3>

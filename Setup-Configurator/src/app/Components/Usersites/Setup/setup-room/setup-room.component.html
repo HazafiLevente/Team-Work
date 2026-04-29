@@ -4,13 +4,13 @@
   (cdkDragEnded)="onDragEnded($event)" (click)="onClick()" (dblclick)="onDblClick()"
   (contextmenu)="onRightClick($event)">
 
-  <!-- NORMAL NÉV -->
+
   <span class="setup-name" *ngIf="!editing">
     <span *ngIf="isHT()" class="ht-icon">🎬</span>
     {{ setup?.display_name || setup?.setup_name || setup?.name || 'Névtelen setup' }}
   </span>
 
-  <!-- EDIT INPUT -->
+
   <input *ngIf="editing" class="setup-edit-input" [(ngModel)]="editName" (keydown.enter)="confirmRename()"
     (keydown.escape)="cancelRename()" (blur)="confirmRename()" (mousedown)="$event.stopPropagation()"
     (click)="$event.stopPropagation()" />

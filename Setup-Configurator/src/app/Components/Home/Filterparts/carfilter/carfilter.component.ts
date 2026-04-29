@@ -85,7 +85,7 @@ export class CarfilterComponent implements OnInit, OnDestroy {
       )
       .subscribe(() => this.emitFilters());
 
-    // induláskor is küldjük ki a defaultot (opcionális)
+
     this.emitFilters();
   }
 
@@ -94,13 +94,13 @@ export class CarfilterComponent implements OnInit, OnDestroy {
   }
 
   private s(v: any): string {
-    // stringes mezők tisztítása
+
     return String(v ?? '').trim();
   }
 
   private n(v: any): string {
-    // number inputokból jöhet number vagy '' vagy null
-    // mi stringet tárolunk a filterben, hogy a parseRange/toNum tudja kezelni
+
+
     if (v === '' || v == null) return '';
     return String(v).trim();
   }

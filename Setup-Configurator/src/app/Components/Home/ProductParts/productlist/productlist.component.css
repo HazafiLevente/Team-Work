@@ -10,7 +10,7 @@
   align-items: center;
   justify-content: center;
   gap: 12px;
-  margin: 20px 0 140px; /* ez a lényeg */
+  margin: 20px 0 140px;
   position: relative;
   z-index: 1;
 }
@@ -40,7 +40,7 @@
   color: rgba(255,255,255,0.62);
 }
 
-/* hover helpers */
+
 .search-input {
   transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease;
 }

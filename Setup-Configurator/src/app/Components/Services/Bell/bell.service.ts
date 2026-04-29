@@ -19,7 +19,7 @@ export type BellItem = {
   sender_name?: string | null;
   receiver_name?: string | null;
 
-  read?: boolean; // ha nincs a view-ban, akkor undefined marad
+  read?: boolean;
 };
 
 @Injectable({ providedIn: 'root' })
@@ -31,7 +31,7 @@ export class BellService {
   items$: Observable<BellItem[]> = this.itemsSub.asObservable();
 
   constructor(private http: HttpClient) {
-    // induláskor töltsön
+
     this.refresh();
   }
 
@@ -39,7 +39,7 @@ export class BellService {
     const next = !this.openSub.value;
     this.openSub.next(next);
 
-    // amikor kinyitod, frissítsen
+
     if (next) this.refresh();
   }
 

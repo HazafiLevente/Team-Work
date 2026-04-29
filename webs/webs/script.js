@@ -1,11 +1,10 @@
-/* ----------------------------------
-   PAGE INIT
----------------------------------- */
+
+
 
 document.addEventListener("DOMContentLoaded", async () => {
     const path = window.location.pathname;
 
-    // ✅ KELL minden oldalra, mert product-site.html-en is kell a kép
+
     await loadImageMap();
 
     if (path === "/home" || path === "/") {
@@ -14,7 +13,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         await loadManufacturersDropdown();
         bindExtraFiltersAutoRun();
         bindCarClearButton();
-        // await loadBrandFilters();
+
     }
 
     if (path !== "/regist") {
@@ -57,19 +56,18 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 
 
-    // ✅ és utána jöhet a product-site page loader rész (ami nálad lentebb van)
 
 
 
 
 
-    /* ----------------------------------
-       PRODUCT PAGE LOADER
-    ---------------------------------- */
 
 
-    // ❗ Csak product-site oldalon fusson
-    // ✅ HELYES – csak product-site logika
+
+
+
+
+
     if (window.location.pathname.includes("product-site.html")) {
         const box = document.getElementById("product-site-box");
         if (!box) return;
@@ -92,7 +90,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
             const data = await res.json();
 
-            // 🔥 NORMALIZÁLT ID KERESÉS (EZ A FIX)
+
             const foundRow = data.find(row => {
                 const lower = {};
                 Object.keys(row).forEach(k => lower[k.toLowerCase()] = row[k]);
@@ -104,7 +102,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                 return;
             }
 
-            // 🔁 végleges normalizált objektum
+
             const lower = {};
             Object.keys(foundRow).forEach(k => lower[k.toLowerCase()] = foundRow[k]);
 
@@ -142,9 +140,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 });
 
-/* ----------------------------------
-   SEARCH + PRODUCT GRID INJECTOR
----------------------------------- */
+
 
 function injectSearchArea() {
     if (document.getElementById("search-input")) return;
@@ -161,7 +157,7 @@ function injectSearchArea() {
         <select id="manufacturer-select" class="search-input" style="max-width:260px;">
           <option value="">⏳ Gyártók betöltése...</option>
         </select>
-        
+
         <input id="search-input" type="text"
                placeholder="Keresés: model, kategória..."
                class="search-input" />
@@ -180,13 +176,11 @@ function injectSearchArea() {
 
 
 
-/* ----------------------------------
-   LOGIN PAGE
----------------------------------- */
+
 
 
 async function login() {
-    var main = document.querySelector(".content"); // <-- EZ A HELYES
+    var main = document.querySelector(".content");
     main.innerHTML = `
     <section class="panel">
         <div class="hero">
@@ -204,9 +198,7 @@ async function login() {
     </section>`;
 }
 
-/* ----------------------------------
-   REGISTRATION PAGE
----------------------------------- */
+
 
 
 async function regist() {
@@ -233,9 +225,7 @@ async function regist() {
 }
 
 
-/* ----------------------------------
-   AUTH
----------------------------------- */
+
 
 async function connectreg() {
     const fullname = document.getElementById("fullname").value;
@@ -296,9 +286,7 @@ async function requireLoginOrRedirect() {
 }
 
 
-/* ----------------------------------
-   LOGIN BUTTON
----------------------------------- */
+
 
 async function checkLoginStatus() {
     const userWrap = document.getElementById("user-menu-wrap");
@@ -365,7 +353,7 @@ function openUserDropdown(user, anchor) {
         <div class="muted">${user.email}</div>
 
         <hr>
-        
+
         <div class="menu-item" onclick="location.href='/profile'">👤 Profile</div>
         <div class="menu-item" onclick="location.href='/favorite'">⭐ Favorite</div>
         <div class="menu-item" onclick="location.href='/setup'">🧰 My Setup</div>
@@ -386,9 +374,7 @@ function openUserDropdown(user, anchor) {
         0
     );
 }
-/* ----------------------------------
-        BELL AUTH
- ---------------------------------- */
+
 
 document.addEventListener("DOMContentLoaded", () => {
     const bell = document.getElementById("bell-message");
@@ -447,7 +433,7 @@ async function AuthBell() {
 function formatBellDate(dateStr) {
     const d = new Date(dateStr);
     const now = new Date();
-    const diff = (now - d) / 1000 / 60 / 60;// órában
+    const diff = (now - d) / 1000 / 60 / 60;
     if (diff < 24) {
         return d.toLocaleTimeString("hu-HU", {
             hour: "2-digit",
@@ -473,9 +459,7 @@ async function markBellRead(messageId, el) {
 }
 
 
-/* ----------------------------------
-   PROFILE PAGE
----------------------------------- */
+
 let isSetup = false;
 
 async function loadProfile() {
@@ -492,9 +476,7 @@ async function loadProfile() {
 }
 
 
-/* ----------------------------------
-   MYSETUP PAGE
----------------------------------- */
+
 
 function renderProfile(box, user) {
     box.innerHTML = `
@@ -509,9 +491,7 @@ function renderProfile(box, user) {
     `;
 }
 
-/* ----------------------------------
-   GLOBAL PRODUCT SEARCH
----------------------------------- */
+
 
 let allProducts = [];
 let currentResults = [];
@@ -519,56 +499,7 @@ let currentResults = [];
 let activeBrands = new Set();
 let filterPanelOpen = false;
 
-/*async function loadProducts() {
-    const grid = document.getElementById("product-site-grid");
-    try {
-        const res = await fetch("/api/products/tables");
 
-        if (!res.ok) {
-            const txt = await res.text();
-            console.error("❌ /api/products/tables failed:", res.status, txt);
-            if (grid) grid.innerHTML = `<p class="muted">❌ Hiba: /api/products/tables (${res.status})</p>`;
-            return;
-        }
-
-        const { tables } = await res.json();
-
-        console.log("✅ PRODUCT TABLES:", tables);
-
-        if (!Array.isArray(tables) || tables.length === 0) {
-            if (grid) grid.innerHTML = `<p class="muted">Nincs egyetlen product-site tábla sem (nincs [ a névben).</p>`;
-            return;
-        }
-
-        const requests = tables.map(t =>
-            fetch(`/api/public/table/${t}`)
-                .then(async r => {
-                    if (!r.ok) {
-                        const txt = await r.text();
-                        console.error(`❌ table fetch failed: ${t}`, r.status, txt);
-                        return [];
-                    }
-                    return r.json();
-                })
-                .catch(err => {
-                    console.error(`❌ fetch crashed: ${t}`, err);
-                    return [];
-                })
-                .then(rows => rows.map(row => normalizeProduct(row, t)))
-        );
-        const results = await Promise.all(requests);
-        allProducts = results.flat();
-
-        console.log("✅ PRODUCTS:", allProducts.length);
-        renderProducts(allProducts);
-        buildBrandFilters(allProducts);
-
-
-    } catch (err) {
-        console.error("❌ loadProducts error:", err);
-        if (grid) grid.innerHTML = `<p class="muted">❌ JS error: ${err.message}</p>`;
-    }
-}*/
 
 
 async function loadProducts(q = null) {
@@ -587,7 +518,7 @@ async function loadProducts(q = null) {
         manufacturer: p.manufacturer,
         model: p.model,
         price: p.price,
-        raw: p   // 🔥 EZ A LÉNYEG
+        raw: p
     }));
 
 
@@ -618,13 +549,13 @@ async function runSearchFilter() {
 
     let result = allProducts;
 
-    // top manufacturer select
+
     if (SELECTED_MANUFACTURER !== "__all__") {
         const selectedLower = SELECTED_MANUFACTURER.toLowerCase();
         result = result.filter(p => (p.manufacturer || "").toLowerCase() === selectedLower);
     }
 
-    // text search
+
     if (term) {
         result = result.filter(p =>
             (p.model || "").toLowerCase().includes(term) ||
@@ -634,11 +565,11 @@ async function runSearchFilter() {
 
     const carFilters = getCarFilters();
     if (isCarFilterActive(carFilters)) {
-        await ensureCarDetailsLoaded();               // ✅ most már létezik
+        await ensureCarDetailsLoaded();
 
         result = applyCarFilters(allProducts, carFilters);
 
-        // optional: még ráengedjük a top filtereket
+
         if (SELECTED_MANUFACTURER !== "__all__") {
             const selectedLower = SELECTED_MANUFACTURER.toLowerCase();
             result = result.filter(p => (p.manufacturer || "").toLowerCase() === selectedLower);
@@ -662,16 +593,16 @@ function populateManufacturerDropdown(products) {
     const optionsBox = document.getElementById("brand-dd-options");
     if (!optionsBox) return;
 
-    optionsBox.innerHTML = "";           // ✅ fontos: ne duplázzon
+    optionsBox.innerHTML = "";
 
     const manufacturers = [...new Set(
         products.map(p => (p.manufacturer || "").trim()).filter(Boolean)
     )].sort((a, b) => a.localeCompare(b, "hu"));
 
-    // ... a többi maradhat ugyanaz
 
 
-    // első opció: összes
+
+
     const allBtn = document.createElement("button");
     allBtn.type = "button";
     allBtn.className = "dd-option active";
@@ -697,7 +628,7 @@ function selectManufacturer(name) {
     const label = document.getElementById("brand-dd-label");
     if (label) label.textContent = SELECTED_MANUFACTURER || "(Összes gyártó)";
 
-    // active class frissítés
+
     document.querySelectorAll("#brand-dd-options .dd-option").forEach(btn => {
         const isAll = btn.textContent.includes("Összes");
         const isMatch = btn.textContent === SELECTED_MANUFACTURER;
@@ -726,19 +657,19 @@ function bindDropdownUI() {
         }
     });
 
-    // click outside => close
+
     document.addEventListener("click", (e) => {
         const wrap = document.getElementById("brand-dd");
         if (!wrap) return;
         if (!wrap.contains(e.target)) closeDropdown();
     });
 
-    // dropdown search (szűrők a listában)
+
     search?.addEventListener("input", () => {
         const term = (search.value || "").toLowerCase().trim();
         document.querySelectorAll("#brand-dd-options .dd-option").forEach(btn => {
             const txt = btn.textContent.toLowerCase();
-            // az "Összes" mindig látszódjon
+
             if (btn.textContent.includes("Összes")) {
                 btn.style.display = "";
                 return;
@@ -760,7 +691,7 @@ function bindManufacturerSearch() {
     btn.dataset.bound = "1";
 
     btn.addEventListener("click", () => {
-        // ✅ mindig a frontend filter fusson
+
         runSearchFilter();
     });
 
@@ -852,13 +783,13 @@ function getCarFilters() {
 
 
 function isCarFilterActive(cf) {
-    // ha bármelyik mező ki van töltve, akkor aktívnak vesszük
+
     return Object.values(cf).some(x => String(x || "").length > 0);
 }
 
 
-// --- CAR DETAILS CACHE (GLOBAL) ---
-const CAR_TABLE_CACHE = new Map(); // table -> Map(id -> fullRow)
+
+const CAR_TABLE_CACHE = new Map();
 let carDetailsLoading = null;
 
 function normalizeTableForFetch(t = "") {
@@ -910,7 +841,7 @@ async function ensureCarDetailsLoaded() {
             }
         }
 
-        // merge full rows into allProducts.raw
+
         allProducts = allProducts.map(p => {
             if (!isCarTable(p.table)) return p;
 
@@ -950,7 +881,7 @@ function isCarTable(tableName = "") {
 function pickNumber(obj, keys) {
     for (const k of keys) {
         const val = obj?.[k];
-        const n = toNumber(val);   // 🔥 nem sima Number()
+        const n = toNumber(val);
         if (n !== null) return n;
     }
     return null;
@@ -1000,10 +931,10 @@ function includesAny(haystack, terms) {
 
 
 function applyCarFilters(list, cf) {
-    // csak autós táblák
+
     let cars = list.filter(p => p.raw && isCarTable(p.table));
 
-    // Ár (Price) - MIN/MAX
+
     const pMin = cf.priceMin ? Number(cf.priceMin) : null;
     const pMax = cf.priceMax ? Number(cf.priceMax) : null;
 
@@ -1019,7 +950,7 @@ function applyCarFilters(list, cf) {
 
 
 
-    // Gyártó (manufacturer)
+
     if (cf.manufacturer) {
         const m = cf.manufacturer.toLowerCase();
         cars = cars.filter(p =>
@@ -1027,7 +958,7 @@ function applyCarFilters(list, cf) {
         );
     }
 
-    // Modell
+
     if (cf.model) {
         const m = cf.model.toLowerCase();
         cars = cars.filter(p =>
@@ -1035,7 +966,7 @@ function applyCarFilters(list, cf) {
         );
     }
 
-    // Kivitel (Body Type) - táblanév alapján
+
     if (cf.bodyType) {
         const bt = cf.bodyType.toLowerCase().trim();
 
@@ -1063,7 +994,7 @@ function applyCarFilters(list, cf) {
 
 
 
-// Lóerő (Horsepower)
+
     const hpMin = cf.hpMin ? toNumber(cf.hpMin) : null;
     const hpMax = cf.hpMax ? toNumber(cf.hpMax) : null;
 
@@ -1074,7 +1005,7 @@ function applyCarFilters(list, cf) {
             const raw = getCarRaw(p);
             const hp = pickNumber(raw, ["horsepower","hp","power","ps","loero","loerő","loeero"]);
 
-            if (hp === null) { missing++; return false; } // ha szűrsz HP-ra, akkor hiányzó adat kiesik
+            if (hp === null) { missing++; return false; }
 
             if (hpMin !== null && hp < hpMin) return false;
             if (hpMax !== null && hp > hpMax) return false;
@@ -1086,7 +1017,7 @@ function applyCarFilters(list, cf) {
 
 
 
-// Gyorsulás (0-100) másodperc
+
     const aMin = cf.accelMin ? toNumber(cf.accelMin) : null;
     const aMax = cf.accelMax ? toNumber(cf.accelMax) : null;
 
@@ -1107,7 +1038,7 @@ function applyCarFilters(list, cf) {
     }
 
 
-// Ülések (Seats)
+
     const sMin = cf.seatsMin ? toNumber(cf.seatsMin) : null;
     const sMax = cf.seatsMax ? toNumber(cf.seatsMax) : null;
 
@@ -1128,9 +1059,9 @@ function applyCarFilters(list, cf) {
 
 
 
-// Üzemanyag (Fuel Type)
+
     if (cf.fuel) {
-        const key = cf.fuel.toLowerCase().trim();           // petrol/diesel/hybrid/electric
+        const key = cf.fuel.toLowerCase().trim();
         const terms = FUEL_SYNONYMS[key] || [key];
 
         cars = cars.filter(p => {
@@ -1146,7 +1077,7 @@ function applyCarFilters(list, cf) {
 
 
 
-// Évjárat (Year)
+
     const yMin = cf.yearMin ? toNumber(cf.yearMin) : null;
     const yMax = cf.yearMax ? toNumber(cf.yearMax) : null;
 
@@ -1167,9 +1098,9 @@ function applyCarFilters(list, cf) {
 
 
 
-// Váltó (Transmission)
+
     if (cf.transmission) {
-        const key = cf.transmission.toLowerCase().trim();   // manual/automatic
+        const key = cf.transmission.toLowerCase().trim();
         const terms = TRANS_SYNONYMS[key] || [key];
 
         cars = cars.filter(p => {
@@ -1200,7 +1131,7 @@ function normalizeRawKeys(obj) {
         const nk = String(k)
             .trim()
             .toLowerCase()
-            .replace(/\s+/g, "_"); // "Body Type" -> "body_type"
+            .replace(/\s+/g, "_");
         out[nk] = v;
     }
     return out;
@@ -1214,7 +1145,7 @@ function toNumber(val) {
     const s = String(val).toLowerCase().trim();
     if (!s) return null;
 
-    // 1) tartomány: "99-100", "99–100", "99 - 100"
+
     const rangeMatch = s.match(/(\d+(?:[.,]\d+)?)\s*[-–]\s*(\d+(?:[.,]\d+)?)/);
     if (rangeMatch) {
         const a = Number(rangeMatch[1].replace(",", "."));
@@ -1222,7 +1153,7 @@ function toNumber(val) {
         if (Number.isFinite(a) && Number.isFinite(b)) return (a + b) / 2;
     }
 
-    // 2) sima szám: "7,2 s", "250 hp", "1 500", "250.000"
+
     const cleaned = s
         .replace(",", ".")
         .replace(/\s+/g, "")
@@ -1246,7 +1177,7 @@ function parseNumberSafe(val) {
     const s = String(val).trim();
     if (!s) return null;
 
-    // engedjük: "250000", "250 000", "250.000"
+
     const cleaned = s.replace(/[^\d]/g, "");
     if (!cleaned) return null;
 
@@ -1294,7 +1225,6 @@ function populateManufacturerSelect(products) {
 
 
 
-// biztonságos option szöveghez
 function escapeHtml(str = "") {
     return String(str)
         .replaceAll("&", "&amp;")
@@ -1317,7 +1247,7 @@ function normalizeProduct(row, table) {
         id: lower.id,
         manufacturer: lower.manufacturer || lower.brand || "Unknown",
 
-        // 🔥 EZ A FONTOS RÉSZ
+
         model:
             lower.model ||
             lower.product_name ||
@@ -1330,9 +1260,7 @@ function normalizeProduct(row, table) {
 }
 
 
-/* ----------------------------------
-   SEARCH INPUT
----------------------------------- */
+
 
 document.addEventListener("input", e => {
     if (e.target.id !== "search-input") return;
@@ -1360,9 +1288,7 @@ document.addEventListener("keydown", (e) => {
 
     document.getElementById("brand-search-btn")?.click();
 });
-/* ----------------------------------
-   RENDER PRODUCT GRID
----------------------------------- */
+
 
 function buildBrandFilters(products) {
     const box = document.getElementById("brand-filters");
@@ -1445,10 +1371,10 @@ async function loadManufacturersDropdown() {
 
         const data = await res.json();
 
-        // ✅ engedjük: {brands:[...]} vagy sima [...]
+
         const raw = Array.isArray(data) ? data : (data.brands || []);
 
-        // ✅ engedjük: ["Asus"] vagy [{manufacturer:"Asus"}] vagy [{brand:"Asus"}]
+
         const manufacturers = raw
             .map(x => typeof x === "string" ? x : (x.manufacturer || x.brand || x.name || ""))
             .map(s => String(s).trim())
@@ -1477,7 +1403,7 @@ function applyFilters() {
 
     let result = allProducts;
 
-    // 🔍 TEXT SEARCH
+
     if (term) {
         result = result.filter(p =>
             p.manufacturer.toLowerCase().includes(term) ||
@@ -1486,7 +1412,7 @@ function applyFilters() {
         );
     }
 
-    // 🧰 BRAND FILTER
+
     if (activeBrands.size > 0) {
         result = result.filter(p =>
             activeBrands.has(p.manufacturer)
@@ -1497,9 +1423,7 @@ function applyFilters() {
 }
 
 
-/* ----------------------------------
-   SEARCH FILTER
----------------------------------- */
+
 
 document.addEventListener("click", e => {
     if (e.target.id !== "filter-toggle-btn") return;
@@ -1510,9 +1434,7 @@ document.addEventListener("click", e => {
     panel.classList.toggle("hidden", !filterPanelOpen);
 });
 
-/* ----------------------------------
-   RENDER PRODUCT GRID
----------------------------------- */
+
 
 function renderProducts(list) {
     const grid = document.getElementById("product-site-grid");
@@ -1538,10 +1460,10 @@ function renderProducts(list) {
 
         div.innerHTML = `
     <div class="cpu-item" style="padding:12px; text-align:center;">
-        <img src="${img}" 
+        <img src="${img}"
          alt="product image"
-         style="display:block; margin:0 auto; 
-                width:120px; height:120px; 
+         style="display:block; margin:0 auto;
+                width:120px; height:120px;
                 object-fit:contain; margin-bottom:10px; border-radius: 6px;">
 
 
@@ -1564,7 +1486,7 @@ function renderProducts(list) {
 }
 
 
-//PRODUCTIMAGE//
+
 
 let IMAGE_MAP = {};
 
@@ -1687,7 +1609,7 @@ function getProductImage(table, product) {
             }
         }
 
-        // 🟡 fallback: első kép a kategóriából
+
         const fallback = Object.values(categoryRules)[0];
         if (fallback) return fallback;
     }
@@ -1739,9 +1661,7 @@ function getCategoryRules(category) {
 
 
 
-/* ----------------------------------
-   ADMIN PAGE
----------------------------------- */
+
 
 let adminAllRows = [];
 let currentTableRows = [];
@@ -1772,7 +1692,7 @@ document.addEventListener("input", e => {
     const term = e.target.value.toLowerCase().trim();
 
     if (!term) {
-        renderTableList(adminTables); // vissza az összes
+        renderTableList(adminTables);
         return;
     }
 
@@ -1830,9 +1750,7 @@ async function selectTable(table, el) {
 
 }
 
-/* ==================================================
-   ADMIN – TABLE RENDER (⋮ MENÜ!)
-================================================== */
+
 function renderAdminTable(rows) {
     const thead = document.getElementById("admin-thead");
     const tbody = document.getElementById("admin-tbody");
@@ -1847,7 +1765,7 @@ function renderAdminTable(rows) {
         "Email" in rows[0] &&
         "UserName" in rows[0];
 
-    /* ---------- HEAD ---------- */
+
     const headRow = document.createElement("tr");
 
     Object.keys(rows[0]).forEach(col => {
@@ -1869,11 +1787,11 @@ function renderAdminTable(rows) {
 
     thead.appendChild(headRow);
 
-    /* ---------- BODY ---------- */
+
     rows.forEach(r => {
         const tr = document.createElement("tr");
 
-        // 🔥 EZ KELL
+
         tr.dataset.pk = r.id ?? r.ID ?? r.Id;
         tr.dataset.pkColumn = r.id !== undefined
             ? "id"
@@ -1886,7 +1804,7 @@ function renderAdminTable(rows) {
 
         Object.entries(r).forEach(([k, v]) => {
             if (k === "password") return;
-            if (isUserTable && k === "role") return; // 🔥 EZ IS
+            if (isUserTable && k === "role") return;
 
             const td = document.createElement("td");
             td.textContent = v ?? "—";
@@ -1930,7 +1848,7 @@ function renderAdminTable(rows) {
 
 
     });
-    // ➕ ADD ROW BAR – VÉGÉN (NEM user[Auth]-nál)
+
     if (!isUserTable) {
         const addRowTr = document.createElement("tr");
         addRowTr.className = "add-row-tr";
@@ -1996,7 +1914,7 @@ function enableRowEdit(tr, row) {
 
         original[col] = row[col];
 
-        // tiltott mezők
+
         if (["id", "password", "created_at"].includes(col)) return;
 
         const input = document.createElement("input");
@@ -2063,9 +1981,7 @@ function enableRowEdit(tr, row) {
 }
 
 
-/* ==================================================
-   ⋮ MENÜK
-================================================== */
+
 
 function closeAnyMenu() {
     const m = document.getElementById("context-menu");
@@ -2091,9 +2007,9 @@ function openUserMenu(user, anchor) {
 
         <div class="menu-title">👑 Rang adás</div>
         ${renderRoleList(user)}
-        
+
         <hr>
-        
+
         <hr>
 
         <div class="menu-item danger"
@@ -2167,7 +2083,7 @@ async function deleteRow(id) {
 
     closeAnyMenu();
 
-    // 🔄 frissítjük a táblát
+
     selectTable(table, document.querySelector(".admin-sidebar li.active"));
 }
 
@@ -2193,7 +2109,7 @@ function closeModal() {
 
 function canAssignFrontend(granter, target) {
     const rank = { owner: 3, "admin+": 2, admin: 1, user: 0 };
-    return (rank[granter] || 0) > (rank[target] || 0); // ✅ Null-safe check
+    return (rank[granter] || 0) > (rank[target] || 0);
 }
 
 
@@ -2264,7 +2180,7 @@ function createEmptyRow(exampleRow) {
         tr.appendChild(td);
     });
 
-    // role / action oszlopok üresen
+
     const filler = document.createElement("td");
     tr.appendChild(filler);
     tr.appendChild(document.createElement("td"));
@@ -2307,15 +2223,13 @@ function createEmptyRow(exampleRow) {
 
     tr.querySelector("input")?.focus();
 
-    // createEmptyRow végén
+
     tr.addEventListener("focusout", save, { once: true });
 
 }
 
 
-/* ==================================================
-   ADMIN – TOGGLE ROLE
-================================================== */
+
 
 async function toggleAdmin(userId) {
     if (!confirm("Biztos módosítod az admin jogot?")) return;
@@ -2337,9 +2251,7 @@ async function toggleAdmin(userId) {
     selectTable(table, document.querySelector(".admin-sidebar li.active"));
 }
 
-/* ==================================================
-   ADMIN – SQL
-================================================== */
+
 
 function bindSQLButton() {
     const addBtn = document.getElementById("add-query-btn");
@@ -2399,19 +2311,17 @@ async function deleteGenericRow(table, id) {
 
 
 
-/* ----------------------------------
-   SETUP PAGE
----------------------------------- */
+
 
 async function loadSetupChildren(setupId) {
     const content = document.querySelector(".content");
 
-    // 1. Alap szerkezet felépítése
+
     content.innerHTML = `
         <button class="btn small" onclick="loadMySetupsPage()">⬅ Vissza a setupokhoz</button>
         <h2>Setup konfigurációk</h2>
         <div class="neon-line"></div>
-        
+
         <div class="setup-page-wide">
             <div id="child-list" class="setup-grid-wide">
                 <p class="muted">⏳ Betöltés...</p>
@@ -2420,7 +2330,7 @@ async function loadSetupChildren(setupId) {
     `;
 
     try {
-        // 2. Adatok lekérése
+
         const res = await fetch(`/api/setup/${setupId}/children`, {
             credentials: "include"
         });
@@ -2430,17 +2340,17 @@ async function loadSetupChildren(setupId) {
             return;
         }
 
-        // 3. Adat feldolgozása
+
         const data = await res.json();
 
-        // Mivel a szervered közvetlenül a tömböt küldi,
-        // ellenőrizzük, hogy tömb-e, ha nem, akkor keressük a .children kulcsot.
+
+
         const itemsToRender = Array.isArray(data) ? data : (data.children || []);
 
         console.log("Megjelenítendő elemek:", itemsToRender);
 
-        // 4. Renderelés meghívása
-        // A renderChildCards fogja kirakni a kártyákat és a "+" gombot
+
+
         renderChildCards(itemsToRender, setupId);
 
     } catch (err) {
@@ -2533,7 +2443,7 @@ async function deleteSetup(setupId, event) {
 
         if (res.ok && data.success) {
             alert("Setup sikeresen törölve!");
-            await loadMySetupsPage(); // Lista frissítése
+            await loadMySetupsPage();
         } else {
             alert("Hiba a törlés során: " + (data.error || "Ismeretlen hiba"));
         }
@@ -2585,12 +2495,12 @@ async function openListModal(setupId, type) {
     document.body.appendChild(modal);
 
     try {
-        // Itt hívjuk meg az új listázó API-t
+
         const res = await fetch(`/api/items/list?type=${type}`, { credentials: "include" });
         const data = await res.json();
         const container = document.getElementById("items-container");
 
-        container.innerHTML = ""; // Töröljük a "Betöltés..." szöveget
+        container.innerHTML = "";
 
         if (!data.results || data.results.length === 0) {
             container.innerHTML = "<p style='text-align:center; padding:20px;'>Nincs elérhető elem.</p>";
@@ -2602,11 +2512,11 @@ async function openListModal(setupId, type) {
             div.style.cssText = "padding:12px; border-bottom:1px solid #222; cursor:pointer; transition: 0.2s;";
             div.innerHTML = `<strong>${item.name}</strong> <span style="font-size:12px; color:#666; float:right;">${item.category}</span>`;
 
-            // Hover effekt
+
             div.onmouseover = () => div.style.background = "#222";
             div.onmouseout = () => div.style.background = "transparent";
 
-            // Kattintáskor mentünk
+
             div.onclick = () => saveSelection(setupId, type, item.name);
             container.appendChild(div);
         });
@@ -2615,7 +2525,7 @@ async function openListModal(setupId, type) {
     }
 }
 
-// Mentés funkció
+
 async function saveSelection(setupId, type, itemName) {
     document.getElementById("search-modal").remove();
     try {
@@ -2626,29 +2536,27 @@ async function saveSelection(setupId, type, itemName) {
             credentials: "include"
         });
         if (res.ok) {
-            loadSetupChildren(setupId); // Frissítjük a kártyákat
+            loadSetupChildren(setupId);
         }
     } catch (err) {
         console.error(err);
     }
 }
 
-/* ----------------------------------
-   CHILD SETUP KEZELÉS
----------------------------------- */
 
-// Ez a függvény rajzolja ki a kártyákat + a "Hozzáadás" gombot
+
+
 function renderChildCards(children, setupId) {
     const list = document.getElementById("child-list");
     if (!list) return;
     list.innerHTML = "";
 
-    // 1. MEGLÉVŐ ELEMEK LISTÁZÁSA
+
     children.forEach(child => {
         const div = document.createElement("div");
         div.className = "setup-card";
 
-        // Ikon kiválasztása
+
         let icon = "❓";
         if (child.type === "pc") icon = "🖥️";
         if (child.type === "car") icon = "🚗";
@@ -2660,19 +2568,19 @@ function renderChildCards(children, setupId) {
             <p class="muted" style="font-size:12px">${child.label}</p>
 
             <div class="setup-menu" onclick="toggleChildMenu(event, 'menu-${child.id}-${child.type}')">⋮</div>
-            
+
             <div id="menu-${child.id}-${child.type}" class="setup-dropdown hidden">
                 <div onclick="deleteChild('${child.type}', '${child.id}', '${setupId}', event)">🗑️ Törlés</div>
             </div>
         `;
 
-        // Kattintás a kártyára (részletek)
+
         div.onclick = () => alert(`Részletek megnyitása: ${child.setup_name}`);
 
         list.appendChild(div);
     });
 
-    // 2. A "HOZZÁADÁS" KÁRTYA (VÁLTOZATLAN)
+
     const addCard = document.createElement("div");
     addCard.className = "setup-card setup-card-add";
     addCard.style.display = "flex";
@@ -2696,13 +2604,13 @@ function showAddChildModal(setupId) {
 
     const modal = document.createElement("div");
     modal.id = "custom-modal";
-    // Stílus, hogy jól nézzen ki
+
     modal.style.cssText = "position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); display:flex; align-items:center; justify-content:center; z-index:1000;";
 
     modal.innerHTML = `
         <div style="background:#1a1a1a; padding:30px; border-radius:12px; width:90%; max-width:450px; border:1px solid #333; text-align:center; color: white;">
             <h2 style="margin-bottom:20px;">Mit szeretnél hozzáadni?</h2>
-            
+
             <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:20px;">
                 <button class="btn" onclick="openListModal('${setupId}', 'pc')">🖥️ PC Alkatrész</button>
                 <button class="btn" onclick="openListModal('${setupId}', 'car')">🚗 Autó</button>
@@ -2716,12 +2624,12 @@ function showAddChildModal(setupId) {
 }
 
 
-// 📡 API HÍVÁS A LÉTREHOZÁSHOZ
+
 async function createChild(setupId, type, defaultName) {
-    // Bezárjuk a modalt
+
     document.getElementById("custom-modal").remove();
 
-    // Név bekérése
+
     const name = prompt(`Nevezd el az új ${type} elemet:`, defaultName);
     if (!name) return;
 
@@ -2736,7 +2644,7 @@ async function createChild(setupId, type, defaultName) {
         const data = await res.json();
 
         if (res.ok) {
-            // Siker! Újratöltjük a listát, hogy megjelenjen az új elem
+
             loadSetupChildren(setupId);
         } else {
             alert("Hiba: " + data.error);
@@ -2749,11 +2657,11 @@ async function createChild(setupId, type, defaultName) {
 }
 
 
-// 🛠️ MENÜ MEGJELENÍTÉSE / ELREJTÉSE
-function toggleChildMenu(event, menuId) {
-    event.stopPropagation(); // Ne nyissa meg a kártyát
 
-    // Először becsukjuk az összes többit
+function toggleChildMenu(event, menuId) {
+    event.stopPropagation();
+
+
     document.querySelectorAll(".setup-dropdown").forEach(el => el.classList.add("hidden"));
 
     const menu = document.getElementById(menuId);
@@ -2762,15 +2670,15 @@ function toggleChildMenu(event, menuId) {
     }
 }
 
-// Ha bárhova máshova kattintunk, záródjanak be a menük
+
 document.addEventListener("click", () => {
     document.querySelectorAll(".setup-dropdown").forEach(el => el.classList.add("hidden"));
 });
 
 
-// 🗑️ TÖRLÉS FUNKCIÓ
+
 async function deleteChild(type, id, setupId, event) {
-    if (event) event.stopPropagation(); // Ne klikkeljen a kártyára
+    if (event) event.stopPropagation();
 
     if (!confirm("Biztosan törölni szeretnéd ezt az elemet?")) return;
 
@@ -2783,7 +2691,7 @@ async function deleteChild(type, id, setupId, event) {
         const data = await res.json();
 
         if (res.ok) {
-            // Siker esetén frissítjük a nézetet
+
             loadSetupChildren(setupId);
         } else {
             alert("Hiba: " + (data.error || "Ismeretlen hiba"));
@@ -2822,7 +2730,7 @@ function renderSetupCards(setups) {
         list.appendChild(div);
     });
 
-    // ➕ Új setup kártya
+
     const addCard = document.createElement("div");
     addCard.className = "setup-card setup-card-add";
     addCard.innerHTML = `
@@ -2874,27 +2782,9 @@ async function confirmDeleteSetup(setupId) {
 
 
 
-/*
-async function requireLoginOrRedirect() {
-    const res = await fetch("/api/me", { credentials: "include" });
-    if (!res.ok) {
-        window.location.href = "/regist";
-        return false;
-    }
 
-    const data = await res.json();
-    if (!data.loggedIn) {
-        window.location.href = "/regist";
-        return false;
-    }
 
-    return true;
-}
-*/
 
-/* ==================================================
-   FAVORITE SITE
-================================================== */
 
 async function loadFavorite() {
     const box = document.getElementById("favorite-box");
@@ -2905,7 +2795,5 @@ async function loadFavorite() {
     `;
 }
 
-/* ==================================================
-   SEARCH FILTERS
-================================================== */
+
 

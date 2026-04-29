@@ -25,25 +25,25 @@ type AnyProduct = any;
 })
 export class ProductStaggeredPanelComponent implements AfterViewInit, OnChanges, OnDestroy {
 
-  /** Nyitva van-e a panel */
+
   @Input() open = false;
 
-  /** A kiválasztott termék */
+
   @Input() product: AnyProduct | null = null;
 
-  /** Bezárás esemény */
+
   @Output() closed = new EventEmitter<void>();
 
-  /** Klikk az overlay-en kívül => zárás */
+
   @Input() closeOnOverlayClick = true;
 
-  /** Jobb oldalról jöjjön (right) / balról (left) */
+
   @Input() position: 'right' | 'left' = 'right';
 
-  /** Overlay háttér erősség */
+
   @Input() overlayOpacity = 0.55;
 
-  @Input() colors: string[] = ['#B19EEF', '#5227FF']; // [0]=cyan-ish, [1]=accent
+  @Input() colors: string[] = ['#B19EEF', '#5227FF'];
 
   @ViewChild('overlay', { static: true }) overlayRef!: ElementRef<HTMLDivElement>;
   @ViewChild('panel', { static: true }) panelRef!: ElementRef<HTMLDivElement>;
@@ -60,7 +60,7 @@ export class ProductStaggeredPanelComponent implements AfterViewInit, OnChanges,
       this.initStyles();
       this.inited = true;
 
-      // ha már open=true-vel jön létre
+
       if (this.open) this.playOpen();
     });
   }
@@ -80,9 +80,8 @@ export class ProductStaggeredPanelComponent implements AfterViewInit, OnChanges,
     this.tlClose?.kill();
   }
 
-  // -------------------------
-  // UI handlers
-  // -------------------------
+
+
 
   onOverlayClick(): void {
     if (!this.closeOnOverlayClick) return;
@@ -90,13 +89,12 @@ export class ProductStaggeredPanelComponent implements AfterViewInit, OnChanges,
   }
 
   requestClose(): void {
-    // input open-t a parent fogja false-ra tenni, mi csak jelezzük
+
     this.closed.emit();
   }
 
-  // -------------------------
-  // Animations
-  // -------------------------
+
+
 
   private initStyles(): void {
     const overlay = this.overlayRef?.nativeElement;
@@ -122,7 +120,7 @@ export class ProductStaggeredPanelComponent implements AfterViewInit, OnChanges,
 
     const offX = this.position === 'left' ? -110 : 110;
 
-    // reset (ha előtte már zárt)
+
     gsap.set(panel, { xPercent: offX });
     gsap.set(content, { opacity: 0, y: 10 });
 
@@ -142,7 +140,7 @@ export class ProductStaggeredPanelComponent implements AfterViewInit, OnChanges,
       ease: 'power4.out'
     }, 0);
 
-    // belső “staggered” jelleg (cím+adatok szépen feljönnek)
+
     this.tlOpen.to(content, {
       opacity: 1,
       y: 0,
@@ -164,8 +162,8 @@ export class ProductStaggeredPanelComponent implements AfterViewInit, OnChanges,
 
     this.tlClose = gsap.timeline({
       onComplete: () => {
-        // nagyon fontos: itt ne nyúljunk már "eltűnt" elemhez,
-        // de nálunk a DOM-ban marad, csak pointerEvents off.
+
+
         gsap.set(overlay, { pointerEvents: 'none' });
       }
     });
@@ -190,9 +188,8 @@ export class ProductStaggeredPanelComponent implements AfterViewInit, OnChanges,
     }, 0.04);
   }
 
-  // -------------------------
-  // Helpers (template-hez)
-  // -------------------------
+
+
 
   formatPrice(v: any): string {
     const n = Number(v);

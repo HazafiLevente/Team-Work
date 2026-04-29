@@ -28,7 +28,7 @@ export const routes: Routes = [
     component: LeaderboardPageComponent
   },
   { path: '', redirectTo: 'home', pathMatch: 'full'},
-  { path: 'home', component: HomeComponent }, //{, canActivate: [authGuard] },
+  { path: 'home', component: HomeComponent },
   { path: 'product-open/:name', component: ProductOpenComponent },
   { path: 'product-site/:table/:id', component: ProductPageComponent },
   { path: 'settings', component: SettingsComponent },

@@ -1,6 +1,5 @@
-/*  -------------------------
-    Színváltozók (Cyberpunk Neon Core)
-    ------------------------- */
+
+
 :root{
     --bg:#0A0A0A;
     --surface:#0F0F17;
@@ -14,9 +13,7 @@
     --text:#E9EEF8;
 }
 
-/* -------------------------
-   Reset & alapok
-   ------------------------- */
+
 *{box-sizing:border-box}
 html,body{height:100%}
 body{
@@ -42,9 +39,7 @@ input[type="text"], input[type="password"], input[type="email"], textarea{
     font-weight:500;
     transition: all .16s;
 }
-/* =========================
-   CYBERPUNK SCROLLBAR (NO RAINBOW)
-========================= */
+
 
 ::-webkit-scrollbar {
     width: 12px;
@@ -58,22 +53,20 @@ input[type="text"], input[type="password"], input[type="email"], textarea{
 ::-webkit-scrollbar-thumb {
     background: linear-gradient(
             180deg,
-            rgba(138,43,226,0.55),   /* purple */
-            rgba(0,255,255,0.45)     /* cyan */
+            rgba(138,43,226,0.55),
+            rgba(0,255,255,0.45)
     );
     border-radius: 10px;
     border: 3px solid rgba(10,10,10,0.9);
 }
 
-/* 🔥 finom hover glow */
+
 ::-webkit-scrollbar-thumb:hover {
     background: rgba(0,255,255,0.65);
     box-shadow: 0 0 10px rgba(0,255,255,0.35);
 }
 
-/* -------------------------
-   Top menu (fixed, glass + neon)
-   ------------------------- */
+
 .top-menu{
     position:fixed;
     left:0; right:0; top:0;
@@ -133,9 +126,7 @@ input[type="text"], input[type="password"], input[type="email"], textarea{
     height:6px; bottom:4px;
 }
 
-/*  ----------------------------
-    Glow action button in top menu
-    ---------------------------- */
+
 .cta{
     padding:8px 14px;
     background: linear-gradient(90deg, var(--accent-magenta), var(--accent-cyan));
@@ -145,9 +136,7 @@ input[type="text"], input[type="password"], input[type="email"], textarea{
     border:1px solid rgba(255,255,255,0.06);
 }
 
-/* -------------------------
-   Content area
-   ------------------------- */
+
 @media (max-width: 980px) {
     main.content {
         margin-right: 0 !important;
@@ -159,7 +148,7 @@ input[type="text"], input[type="password"], input[type="email"], textarea{
 }
 main.content {
     max-width: 1200px;
-    margin: 28px 380px 28px 20px;  /* TOP | RIGHT | BOTTOM | LEFT */
+    margin: 28px 380px 28px 20px;
     padding: 24px;
     display: grid;
     gap: 22px;
@@ -169,9 +158,7 @@ main.content {
 
 
 
-/*  --------------
-    fő kártya / panel
-    -------------- */
+
 .panel{
     background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
     border: 1px solid var(--glass-border);
@@ -200,18 +187,14 @@ main.content {
 }
 .hero p{margin:0; color:rgba(233,238,248,0.9)}
 
-/* ------------------
-    Neon accent separator
-   ------------------ */
+
 .neon-line{
     height:6px; border-radius:999px; margin:8px 0;
     background: linear-gradient(90deg, var(--accent-cyan), var(--accent-purple), var(--accent-magenta));
     box-shadow: 0 6px 30px rgba(0,255,255,0.06), 0 0 40px rgba(138,43,226,0.06);
 }
 
-/* --------------------
-    cards list on the right
-   -------------------- */
+
 .sidebar{
     display:flex; flex-direction:column; gap:14px;
 }
@@ -227,9 +210,7 @@ main.content {
     color:var(--text);
 }
 
-/*  ----------------
-    link-styled buttons
-    ---------------- */
+
 .btn{
     display:inline-block; padding:10px 16px; border-radius:10px; font-weight:700;
     text-decoration:none; border:1px solid rgba(255,255,255,0.04);
@@ -239,24 +220,18 @@ main.content {
 }
 .btn:hover{ transform: translateY(-3px); box-shadow:0 12px 40px rgba(0,0,0,0.6);}
 
-/*  ---------------------------
-    tipográfia kisebb részletekhez
-    --------------------------- */
+
 .muted{ color:rgba(233,238,248,0.65); font-size:13px }
 .mono{ font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, "Roboto Mono", monospace; font-size:13px }
 
-/* ---------
-    responsive
-   ---------*/
+
 @media (max-width:980px){
     main.content{ grid-template-columns: 1fr; padding:18px; margin:16px;}
     .top-menu{padding:10px 14px}
     .nav{display:none}
 }
 
-/*  --------------------
-    prefers-reduced-motion
-    --------------------*/
+
 @media (prefers-reduced-motion: reduce){
     *{transition:none!important;animation:none!important}
 }
@@ -308,9 +283,7 @@ a.logorreg:hover
     color: var(--text);
     opacity: 0.8;
 }
-/* --------------------------
-   Szélesebb tartalom CPU nézethez
-   -------------------------- */
+
 .wide-content {
     max-width: 1600px !important;
     grid-template-columns: 1fr !important;
@@ -339,9 +312,7 @@ a.logorreg:hover
 }
 
 
-/* =========================
-   ADMIN LAYOUT
-========================= */
+
 .admin-layout {
     display: grid;
     grid-template-columns: 260px 1fr;
@@ -349,9 +320,7 @@ a.logorreg:hover
     margin: 20px;
 }
 
-/* =========================
-   SIDEBAR
-========================= */
+
 .admin-sidebar {
     background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
     border: 1px solid var(--glass-border);
@@ -390,9 +359,7 @@ a.logorreg:hover
     font-weight: 700;
 }
 
-/* =========================
-   MAIN PANEL
-========================= */
+
 .admin-main {
     background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
     border: 1px solid var(--glass-border);
@@ -400,14 +367,12 @@ a.logorreg:hover
     padding: 20px;
 }
 
-/* HEADER */
+
 .admin-header {
     margin-bottom: 14px;
 }
 
-/* =========================
-   TABLE (SUPABASE STYLE)
-========================= */
+
 .admin-table-wrapper {
     overflow-x: auto;
 }
@@ -439,9 +404,7 @@ a.logorreg:hover
     background: rgba(255,255,255,0.03);
 }
 
-/* =========================
-   ADMIN TABLE SEARCH
-========================= */
+
 .admin-table-search {
     width: 100%;
     padding: 8px 10px;
@@ -544,7 +507,7 @@ a.logorreg:hover
 
 
 
-/* === ALAP GRID (setup lista) === */
+
 .setup-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
@@ -552,18 +515,18 @@ a.logorreg:hover
     margin-top: 20px;
 }
 
-/* === SZÉLES GRID (children + details) === */
+
 .setup-grid-wide {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
     gap: 20px;
     margin-top: 20px;
 
-    /* 🔥 EZ A LÉNYEG */
+
     width: 100%;
     max-width: 1200px;
-    margin-left: 0;      /* balra */
-    margin-right: auto; /* ne középre */
+    margin-left: 0;
+    margin-right: auto;
 }
 
 
@@ -610,15 +573,15 @@ a.logorreg:hover
     opacity: 0.8;
 }
 
-/* 🔓 Setup oldalaknál engedjük ki a tartalmat balra */
+
 .setup-page-wide {
     width: 100%;
-    max-width: none;        /* 🔥 nincs korlát */
-    padding-left: 40px;     /* ahol bekarikáztad */
+    max-width: none;
+    padding-left: 40px;
     padding-right: 40px;
 }
 
-/* maga a grid */
+
 .setup-grid-wide {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
@@ -896,7 +859,7 @@ tr.editing {
     right:0;
     border-radius:12px;
     padding:10px;
-    background:rgba(255,255,255,0.04); /* ✅ ugyanaz mint a div-ek */
+    background:rgba(255,255,255,0.04);
     border:1px solid rgba(255,255,255,0.10);
     backdrop-filter: blur(10px);
 }
@@ -945,7 +908,7 @@ tr.editing {
 
 
 
-/* a "sáv" (maga a select) */
+
 #manufacturer-select{
     background: #121212;
     color: #eaeaea;
@@ -953,12 +916,12 @@ tr.editing {
     border-radius: 10px;
     padding: 10px 12px;
     outline: none;
-    appearance: none;           /* Chrome/Edge */
-    -webkit-appearance: none;   /* Safari */
-    -moz-appearance: none;      /* Firefox */
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
 }
 
-/* hover/focus */
+
 #manufacturer-select:focus{
     border-color: rgba(180, 120, 255, 0.6);
     box-shadow: 0 0 0 3px rgba(180, 120, 255, 0.15);
@@ -969,21 +932,21 @@ tr.editing {
 
 
 
-/* SELECT + OPTION FIX */
+
 select {
     color: white;
     background-color: #1a1a1a;
 }
 
 select option {
-    background-color: #1a1a1a; /* lenyíló lista háttere */
-    color: #ffffff;            /* SZÖVEG SZÍNE */
+    background-color: #1a1a1a;
+    color: #ffffff;
 }
 
-/* hover / kiválasztott */
+
 select option:hover,
 select option:checked {
-    background-color: #6a4cff; /* lila */
+    background-color: #6a4cff;
     color: #ffffff;
 }
 
@@ -1003,7 +966,7 @@ select {
 
 
 
-/* === USER DROPDOWN === */
+
 
 .user-avatar {
     width: 40px;
@@ -1034,18 +997,18 @@ select {
     gap: 8px;
 }
 
-/* alap szöveg */
+
 .user-menu .menu-item {
     color: rgba(255,255,255,0.9);
     transition: color 0.15s ease, opacity 0.15s ease;
 }
 
-/* 🔥 HOVER: csak a szöveg halványul */
+
 .user-menu .menu-item:hover {
     color: rgba(255,255,255,0.55);
 }
 
-/* danger marad piros, de halványodik */
+
 .user-menu .menu-item.danger {
     color: #ff4d4d;
 }
@@ -1058,7 +1021,7 @@ select {
 
 
 
-/* === BELL PART === */
+
 
 .bell-dropdown {
     position: absolute;

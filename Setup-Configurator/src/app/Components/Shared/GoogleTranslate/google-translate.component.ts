@@ -31,14 +31,14 @@ export class GoogleTranslateComponent implements AfterViewInit {
   constructor(@Inject(DOCUMENT) private document: Document) {}
 
   ngAfterViewInit(): void {
-    // SSR / prerender safe
+
     if (typeof window === 'undefined') return;
 
-    // callback ugyanaz, mint az eredeti JS-ben
+
     window.googleTranslateElementInit = () => {
       if (!window.google?.translate) return;
 
-      // 🔥 ne duplikáljon hot reloadnál
+
       this.host.nativeElement.innerHTML = '';
 
       new window.google.translate.TranslateElement(
@@ -50,7 +50,7 @@ export class GoogleTranslateComponent implements AfterViewInit {
       );
     };
 
-    // Script csak egyszer töltődjön be
+
     if (!GoogleTranslateComponent.scriptLoaded) {
       const script = this.document.createElement('script');
       script.type = 'text/javascript';
@@ -62,7 +62,7 @@ export class GoogleTranslateComponent implements AfterViewInit {
       this.document.body.appendChild(script);
       GoogleTranslateComponent.scriptLoaded = true;
     } else {
-      // ha már megvan a script, azonnal init
+
       window.googleTranslateElementInit();
     }
   }

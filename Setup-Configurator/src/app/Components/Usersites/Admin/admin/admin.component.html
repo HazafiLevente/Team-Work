@@ -1,12 +1,12 @@
 <div class="admin-page">
 
-  <!-- HEADER -->
+
   <div class="admin-header">
     <h1>🛡 Admin Panel</h1>
     <p class="muted">Valós rendszer statisztikák</p>
   </div>
 
-  <!-- ACTION BAR (MINDIG LÁTSZIK) -->
+
   <div class="admin-actions-bar">
     <button class="admin-btn" [class.active]="activeSection === 'dashboard'" (click)="openDashboard()">
       📊 Dashboard
@@ -33,10 +33,10 @@
     </button>
   </div>
 
-  <!-- CONTENT -->
+
   <div class="admin-content">
 
-    <!-- DASHBOARD -->
+
     <ng-container *ngIf="activeSection === 'dashboard'">
       <div class="admin-stats">
 
@@ -67,12 +67,12 @@
 
       </div>
 
-      <!-- DAILY ACTIVITY PANEL -->
+
       @if (showDailyStats) {
       <div class="daily-panel">
         <h3>📊 Napi aktivitás</h3>
 
-        <!-- Currently online users -->
+
         @if (onlineList.length > 0) {
         <div class="online-section">
           <h4>🟢 Jelenleg online ({{ onlineList.length }})</h4>
@@ -85,7 +85,7 @@
         </div>
         }
 
-        <!-- Daily bar chart -->
+
         @if (dailyStats.length > 0) {
         <div class="chart-section">
           <h4>📅 Napi egyedi felhasználók</h4>
@@ -98,7 +98,7 @@
               <span class="bar-val">{{ day.unique }}</span>
               <span class="bar-label">{{ day.date.slice(5) }}</span>
 
-              <!-- User list for this day -->
+
               <div class="day-users-list" *ngIf="day.users?.length > 0">
                 @for (u of day.users; track u.id) {
                 <div class="day-user-item" (dblclick)="onUserDblClick(u)">{{ u.username }}</div>
@@ -115,27 +115,27 @@
       }
     </ng-container>
 
-    <!-- USERS -->
+
     <ng-container *ngIf="activeSection === 'users'">
       <app-users [autoExpandUserId]="selectedUserId" (onExpanded)="onUserExpanded($event)"></app-users>
     </ng-container>
 
-    <!-- PRODUCTS -->
+
     <ng-container *ngIf="activeSection === 'products'">
       <app-admin-products></app-admin-products>
     </ng-container>
 
-    <!-- REPORTS -->
+
     <ng-container *ngIf="activeSection === 'reports'">
       <app-admin-reports></app-admin-reports>
     </ng-container>
 
-    <!-- SYSTEM -->
+
     <ng-container *ngIf="activeSection === 'system'">
       <app-admin-system></app-admin-system>
     </ng-container>
 
-    <!-- LOGS -->
+
     <ng-container *ngIf="activeSection === 'logs'">
       <app-admin-logs></app-admin-logs>
     </ng-container>

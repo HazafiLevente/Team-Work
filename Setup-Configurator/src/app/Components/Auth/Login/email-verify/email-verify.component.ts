@@ -16,7 +16,7 @@ export class EmailVerifyComponent {
   error = '';
   loading = false;
 
-  @Output() codeSent = new EventEmitter<string>(); // ✅ emailt küldünk vissza
+  @Output() codeSent = new EventEmitter<string>();
   @Output() back = new EventEmitter<void>();
 
   constructor(private auth: AuthService) {}
@@ -30,11 +30,11 @@ export class EmailVerifyComponent {
       next: () => {
         this.loading = false;
         this.message = 'Kód elküldve az email címre.';
-        this.codeSent.emit(this.email); // ✅ továbblépéshez
+        this.codeSent.emit(this.email);
       },
       error: (err) => {
         this.loading = false;
-        // opcionálisan: ha nem akarod elárulni, hogy létezik-e email, itt is lehet "siker" szöveg.
+
         this.error = err?.status === 404
           ? 'Nincs ilyen email a rendszerben.'
           : 'Hiba történt. Próbáld újra.';

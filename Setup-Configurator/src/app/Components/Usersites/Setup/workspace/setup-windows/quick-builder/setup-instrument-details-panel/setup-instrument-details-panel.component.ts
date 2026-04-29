@@ -111,7 +111,7 @@ export class SetupInstrumentDetailsPanelComponent implements OnChanges {
     this.errorMsg = '';
     if (!this.instrumentItem) return;
 
-    // Egyelőre csak a nevet jelenítjük meg egy sorban a kérés szerint
+
     this.rows = [
       {
         key: 'name',

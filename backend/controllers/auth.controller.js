@@ -6,7 +6,7 @@ const { sendPasswordResetCode } = require("../services/mailer");
 const { sendRegisterCode } = require("../services/mailer");
 const { OAuth2Client } = require("google-auth-library");
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
-const crypto = require("crypto"); // vagy maradhat Math.random is
+const crypto = require("crypto");
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
@@ -41,7 +41,7 @@ exports.googleLogin = async (req, res) => {
 
         let user = null;
 
-        // 1️⃣ Google ID alapján keresés
+
         const { data: byGoogle } = await supabase
             .from("user[Auth]")
             .select("*")
@@ -52,7 +52,7 @@ exports.googleLogin = async (req, res) => {
             user = byGoogle;
         }
 
-        // 2️⃣ Ha nincs google_id, email alapján keresés
+
         if (!user) {
             const { data: byEmail } = await supabase
                 .from("user[Auth]")
@@ -61,7 +61,7 @@ exports.googleLogin = async (req, res) => {
                 .single();
 
             if (byEmail) {
-                // 🔗 linking
+
                 await supabase
                     .from("user[Auth]")
                     .update({ google_id: googleId })
@@ -71,7 +71,7 @@ exports.googleLogin = async (req, res) => {
             }
         }
 
-        // 3️⃣ Ha semmi nincs → új user
+
         if (!user) {
             const { data: newUser } = await supabase
                 .from("user[Auth]")
@@ -92,7 +92,7 @@ exports.googleLogin = async (req, res) => {
                 .insert({ user_id: user.ID });
         }
 
-        // 🎟 JWT generálás
+
         const token = jwt.sign({
             id: user.ID,
             username: user.UserName,
@@ -175,7 +175,7 @@ exports.login = async (req, res) => {
         { expiresIn: rememberMe ? "25d" : "12h" }
     );
 
-    setAuthCookie(res, token, rememberMe); // ✅ IDE JÖN BE
+    setAuthCookie(res, token, rememberMe);
 
     res.json({ success: true });
 };
@@ -220,13 +220,13 @@ exports.requestRegisterCode = async (req, res) => {
 
         console.log("✅ register code saved:", inserted);
 
-        // 🔥 mail küldés: ha ez száll el, attól még ne legyen 500 (különben nincs code step)
+
         try {
             await sendRegisterCode(email, code);
         } catch (mailErr) {
             console.error("❌ sendRegisterCode failed:", mailErr);
-            // opcionálisan: visszaadhatsz 200-at is, hogy a UI menjen tovább,
-            // csak jelezd, hogy mail hiba volt:
+
+
             return res.status(200).json({ success: true, mailSent: false });
         }
 
@@ -310,7 +310,7 @@ exports.resetPassword = async (req, res) => {
 
         const hashed = await bcrypt.hash(newPassword, 10);
 
-        // user update (ID alapján a legbiztosabb)
+
         const { error: upErr } = await supabase
             .from("user[Auth]")
             .update({ password: hashed })
@@ -337,7 +337,7 @@ exports.requestPasswordReset = async (req, res) => {
         const { email } = req.body;
         if (!email) return res.status(400).json({ error: "Missing email" });
 
-        // user lookup (nálad Email nagy E!)
+
         const { data: user, error: userErr } = await supabase
             .from("user[Auth]")
             .select("ID, Email")

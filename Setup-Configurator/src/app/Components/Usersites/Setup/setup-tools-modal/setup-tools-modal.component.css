@@ -58,7 +58,7 @@
   color: #fff;
 }
 
-/* ✅ Tabs */
+
 .tabs{
   display: flex;
   gap: 6px;
@@ -177,7 +177,7 @@
   text-align: center;
 }
 
-/* ✅ PC create */
+
 .pc-create{
   display: flex;
   gap: 10px;
@@ -227,7 +227,7 @@
   cursor: default;
 }
 
-/* ✅ PC list */
+
 .pcs{
   display: grid;
   gap: 10px;
@@ -259,7 +259,7 @@
   color: rgba(233,238,248,0.8);
 }
 
-/* ✅ CARS create */
+
 .car-create{
   display: flex;
   gap: 10px;
@@ -309,7 +309,7 @@
   cursor: default;
 }
 
-/* ✅ Cars list */
+
 .cars{
   display: grid;
   gap: 10px;

@@ -68,7 +68,7 @@
         <span class="avatar-placeholder"></span>
       </div>
 
-      <!-- ✅ dropdown always in DOM -->
+
       <div #userMenu class="user-menu neon" [attr.aria-hidden]="!dropdownOpen">
 
         <div class="menu-title">{{ user.username }}</div>
@@ -80,7 +80,7 @@
         <div class="menu-item" routerLink="/user/favorite">⭐ Favorite</div>
         <div class="menu-item" routerLink="/user/setup">🧰 My Setup</div>
 
-        <!-- ✅ Rangok -->
+
         <div id="rank">
           <app-rank-panel [embedded]="true"></app-rank-panel>
         </div>
@@ -106,7 +106,7 @@
   </nav>
 </header>
 
-<!-- ✅ ezt teheted ide is -->
+
 <app-rank-panel *ngIf="ranksOpen" (close)="closeRanks()"></app-rank-panel>
 
 

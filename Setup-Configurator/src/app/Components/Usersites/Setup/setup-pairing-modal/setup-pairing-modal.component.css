@@ -52,7 +52,7 @@
     font-style: italic;
 }
 
-/* Scrollbar styling */
+
 .pairing-list::-webkit-scrollbar {
     width: 6px;
 }

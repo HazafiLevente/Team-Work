@@ -49,8 +49,8 @@ export class SetupWindowComponent {
     this.hostZIndex = this.zIndex;
 
     if (!this.maximized) {
-      // Csak akkor frissítjük a pozíciót fentről, ha tényleg változott az x/y
-      // (megelőzve a végtelen ciklust visszacsatolásnál)
+
+
       if (Math.abs(this.dragPosition.x - this.x) > 1 || Math.abs(this.dragPosition.y - this.y) > 1) {
         this.dragPosition = { x: this.x, y: this.y };
       }

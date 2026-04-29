@@ -1,4 +1,4 @@
-/* Wrapper */
+
 .searchbar-row{
   display: flex;
   gap: 12px;
@@ -10,7 +10,7 @@
   margin: 16px 0 10px;
 }
 
-/* közös input/select kinézet */
+
 .ctrl{
   padding: 14px;
   border-radius: 12px;
@@ -36,7 +36,7 @@
   box-shadow: 0 0 0 1px rgba(0,255,255,.18);
 }
 
-/* gomb */
+
 .btn{
   display: inline-flex;
   align-items: center;
@@ -98,7 +98,7 @@ body[data-appearance="light"] .btn:hover{
   transform: translateY(-1px);
 }
 
-/* szélesség szabályok (desktop) */
+
 .w-manufacturer{ min-width: 240px; }
 .w-term{ flex: 1; min-width: 240px; }
 .w-price{ width: 160px; }
@@ -113,24 +113,24 @@ body[data-appearance="light"] .searchbar-row .w-btn {
   background: #f7f2eb;
 }
 
-/* ✅ MOBIL: csak gyártó + keresés + gomb marad */
+
 @media (max-width: 768px){
 
-  /* rejtsük mobilon */
+
   .min-price,
   .max-price,
   .sort-select{
     display: none !important;
   }
 
-  /* mobil layout: középre, max szélesség */
+
   .searchbar-row{
     display: grid;
     grid-template-columns: 1fr;
     gap: 10px;
 
     width: 100%;
-    max-width: 420px;   /* ✅ középre fogja */
+    max-width: 420px;
     margin: 12px auto 10px;
     padding: 0 12px;
   }

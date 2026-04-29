@@ -6,7 +6,7 @@ exports.listLeaderboard = async (req, res) => {
     try {
         console.log("✅ listLeaderboard called");
 
-        // 1) user pontok + szint
+
         const { data: levelData, error: levelError } = await supabase
             .from("user_level[Level]")
             .select("user_id, level, points")
@@ -17,7 +17,7 @@ exports.listLeaderboard = async (req, res) => {
             return res.status(500).json(levelError);
         }
 
-        // 2) szint határok
+
         const { data: rankData, error: rankError } = await supabase
             .from("level_ranks[Level]")
             .select("level, min_point, max_point")
@@ -28,7 +28,7 @@ exports.listLeaderboard = async (req, res) => {
             return res.status(500).json(rankError);
         }
 
-        // 3) user adatok
+
         const { data: usersData, error: usersError } = await supabase
             .from("user[Auth]")
             .select('ID, Name, UserName, Email');
@@ -73,7 +73,7 @@ exports.listLeaderboard = async (req, res) => {
                         ? Math.max(0, Number(nextRankRow.min_point) - points)
                         : 0,
 
-                    // ⭐ EZEK HIÁNYOZNAK MOST A FRONTENDNEK
+
                     currentLevelNumber: currentLevel,
 
                     currentMinPoints: currentRankRow

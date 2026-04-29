@@ -32,7 +32,7 @@ begin
 
     execute format('select to_jsonb(t) from public.%I t where %I = %L', p_table, v_id_col, p_id)
     into result;
-    
+
     return result;
 end;
 $$;
@@ -144,12 +144,12 @@ begin
     if array_length(v_cols, 1) = 0 then
          v_query := format('insert into public.%I default values returning id::text', p_table);
     else
-         v_query := format('insert into public.%I (%s) values (%s) returning id::text', 
-                           p_table, 
-                           array_to_string(v_cols, ', '), 
+         v_query := format('insert into public.%I (%s) values (%s) returning id::text',
+                           p_table,
+                           array_to_string(v_cols, ', '),
                            array_to_string(v_vals, ', '));
     end if;
-    
+
     execute v_query into v_new_id;
     return v_new_id;
 end;

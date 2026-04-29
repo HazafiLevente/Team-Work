@@ -50,7 +50,7 @@ export class LeaderboardPageComponent implements OnInit, OnDestroy {
         '';
     });
 
-    // ha kell, ezzel frissítheted is az auth state-et
+
     this.auth.check();
   }
 

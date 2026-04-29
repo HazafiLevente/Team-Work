@@ -2,10 +2,7 @@ import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
-/**
- * Ugyanaz a komponens megy Home + Admin oldalon.
- * adminMode kapcsolja a szerkeszthető módot.
- */
+
 @Component({
   selector: 'app-product',
   standalone: true,
@@ -22,15 +19,13 @@ export class ProductComponent {
   @Output() openProduct = new EventEmitter<any>();
   @Output() deleteProduct = new EventEmitter<any>();
 
-  /**
-   * Ha view-ból jön (data mezőben vannak a specifikációk),
-   * akkor azt használjuk, különben sima objektum.
-   */
+
+
   get obj(): any {
     return this.product?.data ?? this.product ?? {};
   }
 
-  /** Dinamikusan szerkeszthető mezők */
+
   editableKeys(): string[] {
     const o = this.obj;
     const exclusions = ['id', 'table_name', 'data', 'type', 'category', 'created_at', 'image', 'image_url'];

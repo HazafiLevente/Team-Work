@@ -14,7 +14,7 @@ attribute vec2 position;
 void main(){gl_Position=vec4(position,0.0,1.0);}
 `;
 
-// 👉 A TE fragment shadered (változatlanul)
+
 const fragment = `
 #ifdef GL_ES
 precision lowp float;
@@ -117,7 +117,7 @@ void main(){
 export class DarkVeilBgComponent implements AfterViewInit, OnDestroy {
   @ViewChild('cv', { static: true }) canvasRef!: ElementRef<HTMLCanvasElement>;
 
-  // ugyanazok a “Props”-ok, csak Angular Inputként
+
   @Input() hueShift = 0;
   @Input() noiseIntensity = 0;
   @Input() scanlineIntensity = 0;
@@ -137,7 +137,7 @@ export class DarkVeilBgComponent implements AfterViewInit, OnDestroy {
   private resizeHandler = () => this.resize();
 
   ngAfterViewInit() {
-    // ha a user reduced motiont kér, ne indítsuk el
+
     if (window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches) return;
 
     const canvas = this.canvasRef.nativeElement;
@@ -179,7 +179,7 @@ export class DarkVeilBgComponent implements AfterViewInit, OnDestroy {
     cancelAnimationFrame(this.raf);
     window.removeEventListener('resize', this.resizeHandler);
 
-    // OGL cleanup (minimálisan)
+
     try {
       const gl = this.renderer?.gl;
       if (gl) gl.getExtension('WEBGL_lose_context')?.loseContext();

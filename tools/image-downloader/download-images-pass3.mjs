@@ -1,4 +1,4 @@
-// tools/image-downloader/download-images-pass3.mjs
+
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -65,7 +65,7 @@ function makeQueries(p) {
 
     const base = displayName || normalize(`${man} ${model}`) || normalize(dataName) || hint || `${p.table_name || ""} ${p.id}`.trim();
 
-    // 5 query elég, gyorsabb és kevésbé triggereli a robot-check-et
+
     return [
         `${base} product photo`,
         `${base} product image`,
@@ -79,12 +79,12 @@ function isBadUrl(u) {
     const s = (u || "").toLowerCase();
     if (!s) return true;
 
-    // kiszűrjük a tipikus junkot
+
     if (s.includes("logo") || s.includes("icon") || s.includes("sprite") || s.includes("banner")) return true;
     if (s.includes("data:image")) return true;
     if (s.endsWith(".svg")) return true;
 
-    // bing redirect / tracking url-ek
+
     if (s.includes("bing.com/th?") && s.includes("pid=")) return true;
 
     return false;
@@ -134,13 +134,13 @@ async function searchBing(query, dbgCtx) {
 
     const blocked = detectBlocked(html);
     if (blocked) {
-        // ha blokkol: dobjuk hibára, így felmegy a topErrors-be
+
         throw new Error(blocked);
     }
 
     let results = [];
 
-    // 1) klasszikus JSON: "murl":"https://..."
+
     {
         const regex = /"murl"\s*:\s*"(.*?)"/g;
         let m;
@@ -151,7 +151,7 @@ async function searchBing(query, dbgCtx) {
         }
     }
 
-    // 2) HTML-escape: m="{&quot;murl&quot;:&quot;https://...&quot;,...}"
+
     if (results.length === 0) {
         const regex2 = /murl&quot;\s*:\s*&quot;(.*?)&quot;/g;
         let m2;
@@ -162,7 +162,7 @@ async function searchBing(query, dbgCtx) {
         }
     }
 
-    // 3) fallback: "imgurl":"..."
+
     if (results.length === 0) {
         const regex3 = /"imgurl"\s*:\s*"(.*?)"/g;
         let m3;
@@ -173,12 +173,12 @@ async function searchBing(query, dbgCtx) {
         }
     }
 
-    // ha még mindig 0 → JSON debug mentés
+
     if (results.length === 0) {
         ensureDir(DEBUG_DIR);
 
         const title = extractTitle(html);
-        const sample = html.slice(0, 5000); // ne legyen végtelen
+        const sample = html.slice(0, 5000);
 
         const out = {
             when: new Date().toISOString(),
@@ -240,7 +240,7 @@ async function run() {
 
         let have = existingImageCount(dir);
 
-        // ✅ ha már megvan a TARGET → skip
+
         if (have >= TARGET) { skip++; continue; }
 
         touched++;

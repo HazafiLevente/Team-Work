@@ -68,7 +68,7 @@ export class InstrumentBuilderPanelComponent implements OnChanges {
     this.error = '';
     this.success = '';
 
-    // Az API-nak szűrnie kell a type='inst' oszlopra a products táblában
+
     this.http.get<any>('/api/setup/instrument-options', { withCredentials: true }).subscribe({
       next: (res) => {
         this.instruments = this.unwrapInstruments(res).map((inst: any) => ({

@@ -9,7 +9,7 @@
 
 
 
-  <!-- ✅ nagy kártya animáció -->
+
   <div class="swap-wrap" *ngIf="cards.length">
     <app-card-swap
       [images]="images"
@@ -22,7 +22,7 @@
     </app-card-swap>
   </div>
 
-  <!-- ✅ ez vált együtt az animációval -->
+
   <ng-container *ngIf="current as p">
     <div class="meta">
       <div class="manu">{{ p.manufacturer || '—' }}</div>

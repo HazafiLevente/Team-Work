@@ -1,6 +1,6 @@
 <div #overlay class="ps-overlay" (click)="onOverlayClick()"></div>
 
-<!-- Overlay: mindig a DOM-ban -->
+
 <div
   #overlay
   class="ps-overlay"
@@ -8,7 +8,7 @@
   aria-hidden="true"
 ></div>
 
-<!-- Panel: mindig a DOM-ban -->
+
 <aside #panel class="ps-panel" [attr.data-pos]="position">
   <div class="ps-head">
     <div class="ps-title">Termék</div>
@@ -26,7 +26,7 @@
         <span class="chip">id: {{ product?.id }}</span>
       </div>
 
-      <!-- ha van data object -->
+
       <div class="ps-specs" *ngIf="product?.data">
         <div class="row" *ngFor="let kv of (product?.data | keyvalue) | slice:0:10">
           <div class="k">{{ kv.key }}</div>
