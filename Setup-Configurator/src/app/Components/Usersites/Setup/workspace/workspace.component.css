@@ -26,7 +26,7 @@
 
 .snap-assist {
   position: absolute;
-  top: 10px;
+  top: 14px;
   left: 50%;
   transform: translateX(-50%);
   z-index: 14000;
@@ -88,10 +88,10 @@
 
 .note-bookmarks {
   position: absolute;
-  top: 58px;
+  top: 70px;
   right: 12px;
   bottom: auto;
-  z-index: 12050;
+  z-index: 12040;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
@@ -246,7 +246,7 @@
   position: absolute;
   top: 12px;
   right: 12px;
-  z-index: 5;
+  z-index: 12100;
   display: flex;
   gap: 10px;
   pointer-events: none;

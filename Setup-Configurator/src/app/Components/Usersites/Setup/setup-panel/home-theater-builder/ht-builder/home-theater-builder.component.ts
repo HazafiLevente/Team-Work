@@ -79,9 +79,75 @@ export class HomeTheaterBuilderComponent implements OnInit, OnChanges {
 
     loadCatalog(): void {
         this.htService.getCatalog().subscribe({
-            next: (catalog) => this.catalog = catalog,
+            next: (catalog) => this.catalog = this.normalizeCatalog(catalog),
             error: (err) => console.error('Failed to load HT catalog', err)
         });
+    }
+
+    private normalizeCatalog(source: any): any {
+        const normalized: any = {};
+        this.categoryOrder.forEach((key) => normalized[key] = []);
+        const seen = new Set<string>();
+
+        const addProduct = (product: any): void => {
+            const dedupeKey = String(product?.id ?? `${product?.name ?? product?.model ?? Math.random()}`);
+            if (seen.has(dedupeKey)) return;
+            seen.add(dedupeKey);
+
+            const key = this.normalizeCategoryKey(this.productCategory(product));
+            if (!normalized[key]) normalized[key] = [];
+            normalized[key].push(product);
+        };
+
+        Object.keys(source || {}).forEach((key) => {
+            const products = Array.isArray(source?.[key]) ? source[key] : [];
+            products.forEach((product: any) => addProduct(product));
+        });
+
+        return normalized;
+    }
+
+    private normalizeCategoryKey(value: any): string {
+        const key = String(value || '').trim().toLowerCase();
+        const aliases: any = {
+            reciever: 'reciever',
+            recievers: 'reciever',
+            receiver: 'reciever',
+            receivers: 'reciever',
+            audio_processor: 'audio_processor',
+            audio_processors: 'audio_processor',
+            audioprocessors: 'audio_processor',
+            processor: 'audio_processor',
+            front_speaker: 'front_speaker',
+            frontspeakers: 'front_speaker',
+            front_speakers: 'front_speaker',
+            center_speaker: 'center_speaker',
+            centerspeakers: 'center_speaker',
+            center_speakers: 'center_speaker',
+            side_speaker: 'side_speaker',
+            sidespeakers: 'side_speaker',
+            side_speakers: 'side_speaker',
+            back_speaker: 'back_speaker',
+            backspeakers: 'back_speaker',
+            back_speakers: 'back_speaker',
+            subwoofer: 'subwoofer',
+            subwoofers: 'subwoofer',
+            speaker: 'speaker',
+            speakers: 'speaker',
+            htdevices: 'speaker'
+        };
+
+        return aliases[key] || 'speaker';
+    }
+
+    private productCategory(product: any): string {
+        const originalCategory = String(product?.data?.category || '').trim();
+        if (originalCategory) return originalCategory;
+
+        const category = String(product?.category || '').trim();
+        if (category && category.toLowerCase() !== 'ht') return category;
+
+        return '';
     }
 
     loadBuild(): void {
@@ -160,11 +226,11 @@ export class HomeTheaterBuilderComponent implements OnInit, OnChanges {
             name: product.model || product.name || 'Ismeretlen',
             manufacturer: product.manufacturer || product.brand || '',
             type: 'ht',
-            category: category,
+            category: this.normalizeCategoryKey(this.productCategory(product) || category),
             x: 100,
             y: 100,
             rotation: 0,
-            role: category,
+            role: this.normalizeCategoryKey(this.productCategory(product) || category),
             connections: []
         };
         this.placedItems = [...this.placedItems, newItem];
@@ -247,14 +313,14 @@ export class HomeTheaterBuilderComponent implements OnInit, OnChanges {
 
     getCategoryName(key: string): string {
         const orderedNames: any = {
-            reciever: 'Reciever',
-            audio_processor: 'Audio processor',
-            front_speaker: 'Front speaker',
-            center_speaker: 'Center speaker',
-            side_speaker: 'Side speaker',
-            back_speaker: 'Back speaker',
-            subwoofer: 'Subwoofer',
-            speaker: 'Speakers'
+            reciever: 'reciever',
+            audio_processor: 'audio_processor',
+            front_speaker: 'front_speaker',
+            center_speaker: 'center_speaker',
+            side_speaker: 'side_speaker',
+            back_speaker: 'back_speaker',
+            subwoofer: 'subwoofer',
+            speaker: 'speaker'
         };
 
         if (orderedNames[key]) return orderedNames[key];
@@ -285,6 +351,10 @@ export class HomeTheaterBuilderComponent implements OnInit, OnChanges {
 
     getProductBrand(product: any): string {
         return String(product?.manufacturer || product?.brand || product?.category || '');
+    }
+
+    getProductCategory(product: any, fallback = ''): string {
+        return this.normalizeCategoryKey(this.productCategory(product) || fallback);
     }
 
 

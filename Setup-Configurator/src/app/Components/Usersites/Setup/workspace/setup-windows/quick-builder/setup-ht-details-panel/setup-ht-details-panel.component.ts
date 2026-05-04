@@ -158,9 +158,11 @@ export class SetupHtDetailsPanelComponent implements OnChanges {
 
   private roleOf(device: any): string {
     return this.normalizeText(
+      device?.product_category ??
+      device?.category ??
+      device?.fields?.category ??
       device?.role ??
       device?.type ??
-      device?.category ??
       ''
     );
   }
@@ -275,19 +277,28 @@ export class SetupHtDetailsPanelComponent implements OnChanges {
 
     const labels: Record<string, string> = {
       receiver: 'Receiver',
-      av_receiver: 'Receiver',
-      avr: 'Receiver',
+      reciever: 'reciever',
+      recievers: 'reciever',
+      av_receiver: 'reciever',
+      avr: 'reciever',
+      audio_processor: 'audio_processor',
       bass_amplifier: 'Bass Amplifier',
+      front_speaker: 'front_speaker',
       front_left: 'Front Left',
       front_right: 'Front Right',
+      center_speaker: 'center_speaker',
       center: 'Center',
+      side_speaker: 'side_speaker',
       surround_left: 'Surround Left',
       surround_right: 'Surround Right',
+      back_speaker: 'back_speaker',
       back_left: 'Back Left',
       back_right: 'Back Right',
       side_left: 'Side Left',
       side_right: 'Side Right',
-      subwoofer: 'Subwoofer'
+      subwoofer: 'Subwoofer',
+      speaker: 'speaker',
+      htdevices: 'speaker'
     };
 
     return labels[normalized] ?? role;
@@ -297,15 +308,23 @@ export class SetupHtDetailsPanelComponent implements OnChanges {
     const normalized = this.normalizeText(role);
     const order: Record<string, number> = {
       receiver: 10,
-      bass_amplifier: 20,
-      front_left: 30,
-      front_right: 40,
-      center: 50,
-      surround_left: 60,
-      surround_right: 70,
-      back_left: 80,
-      back_right: 90,
-      subwoofer: 100
+      reciever: 10,
+      audio_processor: 20,
+      bass_amplifier: 25,
+      front_speaker: 30,
+      front_left: 31,
+      front_right: 32,
+      center_speaker: 40,
+      center: 41,
+      side_speaker: 50,
+      surround_left: 51,
+      surround_right: 52,
+      back_speaker: 60,
+      back_left: 61,
+      back_right: 62,
+      subwoofer: 70,
+      speaker: 80,
+      htdevices: 80
     };
 
     return order[normalized] ?? 999;

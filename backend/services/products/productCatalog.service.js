@@ -67,7 +67,7 @@ async function fetchAllProductsRows(tableName) {
         (from, to) => (
             supabase
                 .from(tableName)
-                .select("id, name, type")
+                .select("id, name, type, category")
                 .order("id", { ascending: true })
                 .range(from, to)
         ),
@@ -125,6 +125,7 @@ function decorateProduct(baseRow, valueMap = {}) {
             id: baseRow?.id ?? null,
             name: baseRow?.name ?? "",
             type: baseRow?.type ?? null,
+            category: baseRow?.category ?? valueMap?.category ?? null,
             source_table: mappedTable,
             table_name: mappedTable,
             product_table: "products",
@@ -274,7 +275,7 @@ async function getProductByRoute(tableName, id) {
 
     let query = supabase
         .from(unifiedTable)
-        .select("id, name, type")
+        .select("id, name, type, category")
         .eq("id", id);
 
     if (Array.isArray(allowedTypes) && allowedTypes.length) {

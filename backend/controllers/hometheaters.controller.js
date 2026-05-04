@@ -8,7 +8,7 @@ const { listProducts, clampLimit } = require("../services/products/productCatalo
 
 exports.getHtCatalog = async (req, res) => {
     try {
-        const allItems = await listProducts({ limit: 5000, category: "ht" });
+        const allItems = await listProducts({ limit: 5000 });
         const items = (Array.isArray(allItems) ? allItems : []).filter(
             (item) => String(item?.type || "").trim().toLowerCase() === "ht"
         );
@@ -204,9 +204,10 @@ function normalizeHtRole(role = "", category = "") {
 }
 
 function inferHtCatalogBucket(item = {}) {
-    const category = String(item?.category || item?.data?.category || "").trim().toLowerCase();
+    const category = String(item?.data?.category || item?.category || "").trim().toLowerCase();
     const byCategory = {
         reciever: "reciever",
+        recievers: "reciever",
         receiver: "reciever",
         receivers: "reciever",
         audio_processor: "audio_processor",
@@ -222,28 +223,7 @@ function inferHtCatalogBucket(item = {}) {
         speakers: "speaker"
     };
 
-    if (byCategory[category]) return byCategory[category];
-
-    const text = [
-        item?.name,
-        item?.model,
-        item?.manufacturer,
-        item?.fields?.type,
-        item?.fields?.category,
-        item?.fields?.role,
-    ]
-        .map((value) => String(value || "").trim().toLowerCase())
-        .join(" ");
-
-    if (text.includes("receiver") || text.includes("reciever") || text.includes("avr")) return "reciever";
-    if (text.includes("processor")) return "audio_processor";
-    if (text.includes("front")) return "front_speaker";
-    if (text.includes("center")) return "center_speaker";
-    if (text.includes("surround") || text.includes("side speaker") || text.includes("side")) return "side_speaker";
-    if (text.includes("back speaker") || text.includes("rear")) return "back_speaker";
-    if (text.includes("subwoofer")) return "subwoofer";
-
-    return "speaker";
+    return byCategory[category] || "speaker";
 }
 
 async function syncDevices(buildId, devices, layout = null) {
@@ -332,7 +312,7 @@ exports.listDevices = async (req, res) => {
 
     const { data: products, error: productsError } = await supabase
         .from("products")
-        .select("id, name, type")
+        .select("id, name, type, category")
         .in("id", productIds);
 
     if (productsError) return res.status(500).json({ error: productsError.message });
@@ -377,6 +357,8 @@ exports.listDevices = async (req, res) => {
             product_id: productId,
             name: product.name || productValues.model || productValues.name || "",
             product_type: product.type || "",
+            product_category: product.category || "",
+            category: product.category || device.category || device.role || "",
             manufacturer: productValues.manufacturer || "",
             model: productValues.model || "",
             fields: productValues

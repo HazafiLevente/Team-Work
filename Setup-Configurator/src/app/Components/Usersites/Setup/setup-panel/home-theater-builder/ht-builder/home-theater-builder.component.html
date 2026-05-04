@@ -62,6 +62,7 @@
               <div class="card-body" (click)="connectingFrom ? toggleConnection(item.id) : null">
                 <div class="item-manufacturer">{{ item.manufacturer }}</div>
                 <div class="item-name">{{ item.name }}</div>
+                <div class="item-category">{{ item.category }}</div>
               </div>
             </div>
           </div>
@@ -100,6 +101,7 @@
                   <div class="prod-info">
                     <span class="prod-brand">{{ getProductBrand(prod) }}</span>
                     <span class="prod-model">{{ getProductName(prod) }}</span>
+                    <span class="prod-category">{{ getProductCategory(prod, cat) }}</span>
                   </div>
                   <button class="add-btn" type="button">+</button>
                 </div>

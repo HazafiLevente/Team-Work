@@ -34,6 +34,7 @@ export class SetupWindowComponent {
 
   @Input() maximized = false;
   @Input() boundaryRef!: HTMLElement;
+  @Input() topInset = 0;
 
   @Output() closed = new EventEmitter<string>();
   @Output() minimized = new EventEmitter<string>();
@@ -61,7 +62,7 @@ export class SetupWindowComponent {
   private readonly minHeight = 250;
 
   get activeDragPosition(): { x: number; y: number } {
-    return this.maximized ? { x: 0, y: 0 } : this.dragPosition;
+    return this.maximized ? { x: 0, y: this.topInset } : this.dragPosition;
   }
 
   get maximizedWidth(): number | null {
@@ -71,7 +72,8 @@ export class SetupWindowComponent {
 
   get maximizedHeight(): number | null {
     if (!this.maximized) return null;
-    return this.boundaryRef?.clientHeight || null;
+    const height = this.boundaryRef?.clientHeight;
+    return height ? Math.max(this.minHeight, height - this.topInset) : null;
   }
 
   get activeHeight(): number | null {
@@ -102,6 +104,20 @@ export class SetupWindowComponent {
   close(): void {
     this.closed.emit(this.id);
   }
+
+  constrainDragPosition = (point: { x: number; y: number }): { x: number; y: number } => {
+    const boundary = this.boundaryRef?.getBoundingClientRect();
+    const windowRect = this.windowEl?.nativeElement.getBoundingClientRect();
+
+    if (!boundary || !windowRect) return point;
+
+    const minX = boundary.left;
+    const minY = boundary.top + this.topInset;
+    return {
+      x: point.x,
+      y: Math.max(point.y, minY)
+    };
+  };
 
   minimize(): void {
     this.minimized.emit(this.id);
@@ -197,7 +213,12 @@ export class SetupWindowComponent {
     const boundaryHeight = this.boundaryRef?.clientHeight ?? Number.POSITIVE_INFINITY;
 
     nextX = Math.max(0, nextX);
-    nextY = Math.max(0, nextY);
+    if (nextY < this.topInset) {
+      if (this.resizeDirection.includes('n')) {
+        nextHeight = Math.max(this.minHeight, nextHeight - (this.topInset - nextY));
+      }
+      nextY = this.topInset;
+    }
     nextWidth = Math.min(nextWidth, Math.max(this.minWidth, boundaryWidth - nextX));
     nextHeight = Math.min(nextHeight, Math.max(this.minHeight, boundaryHeight - nextY));
 

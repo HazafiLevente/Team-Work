@@ -522,16 +522,26 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit {
 
   private prettyHtCatalogCategory(key: string): string {
     const labels: Record<string, string> = {
-      htDevices: 'HT eszkozok',
-      receivers: 'Receiverek',
-      frontSpeakers: 'Front hangfalak',
-      backSpeakers: 'Hatso hangfalak',
-      sideSpeakers: 'Oldalso hangfalak',
-      ceilingSpeakers: 'Mennyezeti hangfalak',
-      floorSpeakers: 'Allo hangfalak',
-      centerSpeakers: 'Center hangfalak',
-      subwoofers: 'Subwooferek',
-      audioProcessors: 'Audio processzorok',
+      htDevices: 'speaker',
+      reciever: 'reciever',
+      receiver: 'reciever',
+      receivers: 'reciever',
+      audio_processor: 'audio_processor',
+      audioProcessors: 'audio_processor',
+      front_speaker: 'front_speaker',
+      frontSpeakers: 'front_speaker',
+      center_speaker: 'center_speaker',
+      centerSpeakers: 'center_speaker',
+      side_speaker: 'side_speaker',
+      sideSpeakers: 'side_speaker',
+      back_speaker: 'back_speaker',
+      backSpeakers: 'back_speaker',
+      subwoofer: 'subwoofer',
+      subwoofers: 'subwoofer',
+      speaker: 'speaker',
+      speakers: 'speaker',
+      ceilingSpeakers: 'speaker',
+      floorSpeakers: 'speaker',
       bassAmplifiers: 'Bass amplifier'
     };
 

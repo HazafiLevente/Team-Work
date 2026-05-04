@@ -103,7 +103,7 @@
     @if (!w.minimized) {
       <app-setup-window [id]="w.id" [title]="w.title" [instanceNo]="w.instanceNo" [x]="w.x" [y]="w.y" [zIndex]="w.zIndex"
                         [width]="w.width || 420" [maximized]="w.maximized" [boundaryRef]="boundaryEl.nativeElement"
-                        [height]="w.height || null" [snapMode]="w.snapMode || null"
+                        [height]="w.height || null" [snapMode]="w.snapMode || null" [topInset]="windowSafeTop"
                         (closed)="onWindowClosed($event)" (minimized)="minimizeWindow($event)" (focused)="focusWindow($event)"
                         (maximizeToggled)="toggleMaximizeWindow($event)" (dragMoved)="onWindowDragMoved(w.id, $event)"
                         (resized)="resizeWindow(w.id, $event)"
