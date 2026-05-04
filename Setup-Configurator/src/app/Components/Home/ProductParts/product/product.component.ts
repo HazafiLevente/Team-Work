@@ -15,6 +15,7 @@ export class ProductComponent implements OnInit {
   @Output() openProduct = new EventEmitter<Product>();
 
   imageUrl = 'https://via.placeholder.com/200?text=Loading';
+  private dragging = false;
 
   constructor(private images: ImageService) {}
 
@@ -88,6 +89,26 @@ export class ProductComponent implements OnInit {
   }
 
   open(): void {
+    if (this.dragging) {
+      this.dragging = false;
+      return;
+    }
+
     this.openProduct.emit(this.product);
+  }
+
+  onDragStart(event: DragEvent): void {
+    this.dragging = true;
+    event.dataTransfer?.setData('application/json', JSON.stringify(this.product));
+    event.dataTransfer?.setData('text/plain', JSON.stringify(this.product));
+    if (event.dataTransfer) {
+      event.dataTransfer.effectAllowed = 'copy';
+    }
+  }
+
+  onDragEnd(): void {
+    setTimeout(() => {
+      this.dragging = false;
+    });
   }
 }

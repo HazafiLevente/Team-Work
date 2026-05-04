@@ -7,24 +7,25 @@
     <div class="title">
       <div class="model">{{ displayHeading }}</div>
     </div>
+    <div class="price" *ngIf="!loading && details">
+      <span class="price-label">Ár:</span>
+      <strong>{{ details.price !== null && details.price !== undefined && details.price !== '' ? (details.price | number:'1.0-0') + ' Ft' : 'N/A' }}</strong>
+    </div>
   </div>
 
   <div class="panel-body">
-    <div *ngIf="loading">Betoltes...</div>
+    <div *ngIf="loading" class="loading-state">Betoltes...</div>
     <div *ngIf="!loading && error" class="error">{{ error }}</div>
 
     <div *ngIf="!loading && details">
-      <div class="price">
-        Ar: <strong>{{ details.price !== null && details.price !== undefined && details.price !== '' ? (details.price | number:'1.0-0') + ' Ft' : 'N/A' }}</strong>
-      </div>
 
       <div class="kv">
-        <div class="row" *ngFor="let k of detailsKeys; trackBy: trackKey">
-          <ng-container *ngIf="!isHiddenKey(k)">
+        <ng-container *ngFor="let k of detailsKeys; trackBy: trackKey">
+          <div class="row" *ngIf="!isHiddenKey(k) && details[k] !== null && details[k] !== undefined && details[k] !== ''">
             <div class="k">{{ k }}</div>
             <div class="v">{{ details[k] }}</div>
-          </ng-container>
-        </div>
+          </div>
+        </ng-container>
       </div>
     </div>
   </div>
@@ -51,6 +52,38 @@
       <div class="setup-picker-state success" *ngIf="!pickerLoading && pickerSuccess">{{ pickerSuccess }}</div>
 
       <ng-container *ngIf="!pickerLoading && !pickerError">
+        <div class="setup-picker-section note-create">
+          <div class="setup-picker-section-title">Uj jegyzet</div>
+          <div class="note-create-row">
+            <input
+              type="text"
+              [(ngModel)]="noteName"
+              placeholder="Jegyzet neve"
+              [disabled]="creatingNote"
+              (keydown.enter)="createNoteAndAddProduct()" />
+            <button
+              type="button"
+              class="note-create-btn"
+              [disabled]="creatingNote"
+              (click)="createNoteAndAddProduct()">
+              {{ creatingNote ? 'Mentes...' : 'Letrehoz' }}
+            </button>
+          </div>
+        </div>
+
+        <div class="setup-picker-section" *ngIf="noteTargets.length">
+          <div class="setup-picker-section-title">Jegyzetek</div>
+          <button
+            type="button"
+            class="setup-target note-target"
+            *ngFor="let target of noteTargets"
+            [disabled]="savingTargetId === target.id"
+            (click)="addProductToTarget(target)">
+            <span>{{ target.name }}</span>
+            <span class="setup-target-action">{{ savingTargetId === target.id ? 'Mentes...' : 'Hozzaad' }}</span>
+          </button>
+        </div>
+
         <div class="setup-picker-section" *ngIf="regularTargets.length">
           <div class="setup-picker-section-title">MySetup</div>
           <button

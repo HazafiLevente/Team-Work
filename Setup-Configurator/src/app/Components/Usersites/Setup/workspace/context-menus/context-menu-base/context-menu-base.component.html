@@ -1,7 +1,8 @@
 <div
+  #menu
   class="context-menu"
-  [style.left.px]="x"
-  [style.top.px]="y"
+  [style.left.px]="menuX"
+  [style.top.px]="menuY"
   (contextmenu)="$event.preventDefault()"
   (click)="$event.stopPropagation()"
 >

@@ -20,7 +20,6 @@ import { SetupPcPartDetailsPanelComponent } from '../workspace/setup-windows/qui
 import { ProductDetailsPanelComponent } from '../../../Panels/Product/product-details-panel.component';
 import { SetupHtDetailsPanelComponent } from '../workspace/setup-windows/quick-builder/setup-ht-details-panel/setup-ht-details-panel.component';
 import { SetupInstrumentDetailsPanelComponent } from '../workspace/setup-windows/quick-builder/setup-instrument-details-panel/setup-instrument-details-panel.component';
-import { PcBuilderPanelComponent } from '../setup-panel/pc-builder/pc-builder-panel.component';
 import { SetupHierarchySidebarComponent } from './hierarchy-sidebar/setup-hierarchy-sidebar.component';
 import { SetupHierarchyDetailsComponent } from './hierarchy-details/setup-hierarchy-details.component';
 import { SetupHierarchyDevicePickerComponent } from './hierarchy-device-picker/setup-hierarchy-device-picker.component';
@@ -41,7 +40,6 @@ type PairingStage = 'NONE' | 'PICK_SOURCE' | 'PICK_TARGET_SETUP' | 'PICK_TARGET_
     SetupPcPartDetailsPanelComponent,
     ProductDetailsPanelComponent,
     SetupHtDetailsPanelComponent,
-    PcBuilderPanelComponent,
     SetupHierarchySidebarComponent,
     SetupHierarchyDetailsComponent,
     SetupHierarchyDevicePickerComponent,
@@ -121,7 +119,15 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit {
   hierarchyHtSelectedError = '';
   hierarchyHtRenameSaving = false;
 
-  confirmDialogState: { isOpen: boolean; title: string; message: string; onConfirm: () => void } | null = null;
+  confirmDialogState: {
+    isOpen: boolean;
+    title: string;
+    message: string;
+    onConfirm: () => void;
+    confirmText?: string;
+    cancelText?: string;
+    hideCancel?: boolean;
+  } | null = null;
   readonly hierarchyCategories = ['Szamitogep', 'Autok', 'Hazimozi', 'Hangszerek', 'Egyeb'];
   readonly hierarchySetupTitle = (setup: any) => this.getSetupTitle(setup);
   readonly hierarchyTreeItemTitle = (item: any) => this.treeItemTitle(item);
@@ -166,7 +172,8 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit {
     return {
       ...setup,
       id: id,
-      setup_name: setup?.setup_name ?? setup?.name ?? 'Névtelen setup'
+      setup_name: setup?.setup_name ?? setup?.name ?? 'Névtelen setup',
+      isNote: setup?.isNote === true || setup?.is_note === true || setup?.isnote === true
     };
   }
 
@@ -804,6 +811,10 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit {
     return setup?.setup_name ?? setup?.display_name ?? setup?.name ?? 'Setup';
   }
 
+  isNoteSetup(setup: any): boolean {
+    return setup?.isNote === true || setup?.is_note === true || setup?.isnote === true;
+  }
+
   onSetupClick(setup: any): void {
     if (this.pairingStage === 'PICK_TARGET_SETUP') {
       this.selectTargetSetup(setup);
@@ -819,6 +830,11 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit {
 
     const setupId = this.getSetupId(setup);
     if (!setupId) return;
+
+    if (this.isNoteSetup(setup)) {
+      this.workspaceComp?.openDevicesWindow(this.normalizeSetup(setup));
+      return;
+    }
 
     if (updateRoute) {
       this.router.navigate(this.buildRoomRoute(setupId));
@@ -897,7 +913,44 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit {
 
   private isAllowedConnectionType(type: string): boolean {
     const normalized = String(type || '').toLowerCase().replace('[setup]', '').trim();
-    return normalized === 'pc' || normalized === 'ht' || normalized === 'home_theater';
+    return [
+      'pc',
+      'ht',
+      'home_theater',
+      'network_card',
+      'router',
+      'switch',
+      'modem'
+    ].includes(normalized);
+  }
+
+  private normalizeConnectableType(value: any): string {
+    return String(value || '')
+      .toLowerCase()
+      .replace('[setup]', '')
+      .replace(/[\s-]+/g, '_')
+      .trim();
+  }
+
+  private itemTypeHaystack(itemOrCategory: any): string {
+    if (typeof itemOrCategory === 'string') {
+      return this.normalizeConnectableType(itemOrCategory);
+    }
+
+    return [
+      itemOrCategory?.setup_type,
+      itemOrCategory?.type,
+      itemOrCategory?.device_type,
+      itemOrCategory?.category,
+      itemOrCategory?.source_table,
+      itemOrCategory?.table_name,
+      itemOrCategory?.table,
+      itemOrCategory?.slot,
+      itemOrCategory?.display_name,
+      itemOrCategory?.setup_name,
+      itemOrCategory?.name,
+      itemOrCategory?.model
+    ].map((value) => this.normalizeConnectableType(value)).filter(Boolean).join(' ');
   }
 
   private mapTypeToCategory(type: string, fallback?: string): string {
@@ -1055,16 +1108,14 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit {
   }
 
   mapItemCategoryToDeviceType(itemOrCategory: any): string {
-    const setupType = String(
-      itemOrCategory?.setup_type ??
-      itemOrCategory?.type ??
-      itemOrCategory?.device_type ??
-      itemOrCategory?.category ??
-      itemOrCategory ??
-      ''
-    ).toLowerCase();
+    const setupType = this.itemTypeHaystack(itemOrCategory);
 
     if (setupType.includes('pc')) return 'pc';
+    if (setupType.includes('network_card')) return 'network_card';
+    if (setupType.includes('network_adapter')) return 'network_card';
+    if (setupType.includes('ethernet_adapter')) return 'network_card';
+    if (setupType.includes('wifi_adapter')) return 'network_card';
+    if (setupType.includes('wi_fi_adapter')) return 'network_card';
     if (setupType.includes('switch')) return 'switch';
     if (setupType.includes('router')) return 'router';
     if (setupType.includes('modem')) return 'modem';
@@ -1073,7 +1124,7 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit {
     if (setupType.includes('mixer')) return 'mixer';
     if (setupType === 'setup') return 'setup';
 
-    return setupType.replace('[setup]', '').trim();
+    return setupType.trim();
   }
 
   openItemOverlay(item: any): void {
@@ -1259,7 +1310,8 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit {
       x: customX ?? 50,
       y: customY ?? 50,
       setup_type: 'other',
-      isFavorite: this.favoriteMode
+      isFavorite: this.favoriteMode,
+      isNote: false
     };
 
     this.createSetupRequest(payload, (res) => {
@@ -1306,7 +1358,16 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit {
       error: (err) => {
         this.isBusy = false;
         console.error('❌ Setup törlés hiba:', err);
-        alert('Törlés sikertelen.');
+        this.confirmDialogState = {
+          isOpen: true,
+          title: 'Torles sikertelen',
+          message: err?.error?.error || 'A setup torlese nem sikerult.',
+          confirmText: 'Rendben',
+          hideCancel: true,
+          onConfirm: () => {
+            this.confirmDialogState = null;
+          }
+        };
       }
     });
   }
@@ -1483,7 +1544,8 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit {
         x: pos.x,
         y: pos.y,
         setup_type: type,
-        isFavorite: this.favoriteMode
+        isFavorite: this.favoriteMode,
+        isNote: false
       }, (res) => {
         if (res?.setup) {
           this.userSetups = [this.normalizeSetup(res.setup), ...this.userSetups];
@@ -1495,8 +1557,13 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit {
   }
 
   openPcBuilder(setup: any): void {
-    this.pcBuilderSetup = setup;
-    this.pcBuilderOpen = true;
+    const target = setup || this.viewingSetup;
+    if (!target) return;
+
+    if (this.workspaceComp) {
+      (this.workspaceComp as any).closeContextMenu?.();
+      (this.workspaceComp as any).openPcBuilderWindow?.(target);
+    }
   }
 
   closePcBuilder(): void {

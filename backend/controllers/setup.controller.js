@@ -1,5 +1,6 @@
 const { supabase } = require("../services/supabase");
 const connectionService = require("../services/setup.connections");
+const { getProductByRoute, listProducts } = require("../services/products/productCatalog.service");
 
 
 
@@ -219,12 +220,14 @@ const pcPartsCache = new Map();
 const carOptionsCache = new Map();
 const carDetailsCache = new Map();
 const instrumentOptionsCache = new Map();
+const networkOptionsCache = new Map();
 
 const CHILDREN_TTL_MS = 30_000;
 const PCPARTS_TTL_MS = 10 * 60_000;
 const CAROPTIONS_TTL_MS = 10 * 60_000;
 const CARDETAILS_TTL_MS = 30_000;
 const INSTRUMENTOPTIONS_TTL_MS = 10 * 60_000;
+const NETWORKOPTIONS_TTL_MS = 10 * 60_000;
 
 function cacheGet(map, key) {
     const hit = map.get(key);
@@ -397,6 +400,41 @@ function toCleanString(value) {
 
 function normalizeKey(value) {
     return toCleanString(value).toLowerCase();
+}
+
+function isCarProductType(value) {
+    const normalized = normalizeKey(value)
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "");
+
+    return ["car", "cars", "auto", "autos", "automobile", "vehicle"].includes(normalized);
+}
+
+function normalizeNetworkType(value) {
+    const normalized = normalizeKey(value)
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/[\s-]+/g, "_");
+
+    if (normalized.includes("modem")) return "modem";
+    if (normalized.includes("router")) return "router";
+    if (normalized.includes("switch")) return "switch";
+    return null;
+}
+
+function resolveNetworkType(product) {
+    const productType = normalizeKey(product?.type);
+    if (productType !== "network") return null;
+
+    return normalizeNetworkType(product?.category);
+}
+
+function networkSourceTable(type) {
+    const normalized = normalizeNetworkType(type);
+    if (normalized === "switch") return "switches";
+    if (normalized === "router") return "router";
+    if (normalized === "modem") return "modem";
+    return "products";
 }
 
 function resolvePcSlot(categoryValue) {
@@ -750,6 +788,31 @@ async function findSetupById(setupId) {
     return data || null;
 }
 
+async function findChildSetupInRoom(roomId, setupId) {
+    const roomRef = Number(roomId);
+    const setupRef = Number(setupId);
+    if (!Number.isFinite(roomRef) || !Number.isFinite(setupRef)) return null;
+
+    const { data, error } = await supabase
+        .from(SETUPS_TABLE)
+        .select("*")
+        .eq("id", setupRef)
+        .eq("room_id", roomRef)
+        .limit(1)
+        .maybeSingle();
+
+    if (error) throw error;
+    if (!data) return null;
+
+    return {
+        ...data,
+        setup_id: Number(data.room_id ?? 0),
+        x: Number(data.pos_x ?? 0),
+        y: Number(data.pos_y ?? 0),
+        type: String(data.type ?? "")
+    };
+}
+
 async function findDeviceById(deviceId) {
     const { data, error } = await supabase
         .from(SETUP_DEVICES_TABLE)
@@ -760,6 +823,164 @@ async function findDeviceById(deviceId) {
 
     if (error) throw error;
     return data || null;
+}
+
+function uniqueNumericIds(values) {
+    return [...new Set((values || []).map((value) => Number(value)).filter(Number.isFinite))];
+}
+
+function isMissingSchemaObjectError(error) {
+    if (!error) return false;
+    const message = String(error.message || "").toLowerCase();
+    return error.code === "PGRST205"
+        || error.code === "42703"
+        || message.includes("could not find the table")
+        || message.includes("could not find")
+        || message.includes("schema cache")
+        || message.includes("column");
+}
+
+function normalizeItemTableName(tableName) {
+    const normalized = String(tableName || "").trim().toLowerCase();
+
+    if (
+        normalized === String(SETUPS_TABLE).toLowerCase()
+        || normalized === "setups[setup]"
+        || normalized === "setup[setup]"
+    ) {
+        return SETUPS_TABLE;
+    }
+
+    if (
+        normalized === String(SETUP_DEVICES_TABLE).toLowerCase()
+        || normalized === "setup_devices[setup]"
+        || normalized === "setup_device"
+    ) {
+        return SETUP_DEVICES_TABLE;
+    }
+
+    return String(tableName || "").trim();
+}
+
+async function deleteRowsByIds(tableName, columnName, ids) {
+    const normalizedIds = uniqueNumericIds(ids);
+    if (!normalizedIds.length) return;
+
+    const { error } = await supabase
+        .from(tableName)
+        .delete()
+        .in(columnName, normalizedIds);
+
+    if (isMissingSchemaObjectError(error)) return;
+    if (error) throw error;
+}
+
+async function listSetupDeviceIds(setupIds) {
+    const normalizedIds = uniqueNumericIds(setupIds);
+    if (!normalizedIds.length) return [];
+
+    const { data, error } = await supabase
+        .from(SETUP_DEVICES_TABLE)
+        .select("id")
+        .in("setup_id", normalizedIds);
+
+    if (error) throw error;
+    return uniqueNumericIds((data || []).map((row) => row.id));
+}
+
+async function listSetupDevicePortIds(deviceIds) {
+    const normalizedIds = uniqueNumericIds(deviceIds);
+    if (!normalizedIds.length) return [];
+
+    const candidateColumns = ["setup_device_id", "device_id"];
+    let lastError = null;
+
+    for (const columnName of candidateColumns) {
+        const { data, error } = await supabase
+            .from(SETUP_DEVICE_PORTS_TABLE)
+            .select("id")
+            .in(columnName, normalizedIds);
+
+        if (!error) return uniqueNumericIds((data || []).map((row) => row.id));
+        lastError = error;
+    }
+
+    if (isMissingSchemaObjectError(lastError)) return [];
+    throw lastError;
+}
+
+async function removeLegacySetupConnections({ setupIds, deviceIds, portIds }) {
+    await deleteRowsByIds(SETUP_CONNECTIONS_TABLE, "setup_id", setupIds);
+    await deleteRowsByIds(SETUP_CONNECTIONS_TABLE, "from_setup_device_id", deviceIds);
+    await deleteRowsByIds(SETUP_CONNECTIONS_TABLE, "to_setup_device_id", deviceIds);
+    await deleteRowsByIds(SETUP_CONNECTIONS_TABLE, "from_setup_device_port_id", portIds);
+    await deleteRowsByIds(SETUP_CONNECTIONS_TABLE, "to_setup_device_port_id", portIds);
+}
+
+async function removeChildSetupRow(childSetupId, userId, expectedRoomId = null) {
+    const childId = Number(childSetupId);
+    if (!Number.isFinite(childId)) {
+        const error = new Error("Invalid setup item id");
+        error.status = 400;
+        throw error;
+    }
+
+    const childSetup = await findSetupById(childId);
+    if (!childSetup?.id) {
+        const error = new Error("Setup item not found");
+        error.status = 404;
+        throw error;
+    }
+
+    if (expectedRoomId != null && Number(childSetup.room_id) !== Number(expectedRoomId)) {
+        const error = new Error("Setup item is not in this room");
+        error.status = 404;
+        throw error;
+    }
+
+    const ok = await assertSetupOwnedByUser(childId, userId);
+    if (!ok) {
+        const error = new Error("Forbidden");
+        error.status = 403;
+        throw error;
+    }
+
+    await connectionService.removeConnectionsForSetupIds([childId]);
+
+    const deviceIds = await listSetupDeviceIds([childId]);
+    const portIds = await listSetupDevicePortIds(deviceIds);
+
+    await removeLegacySetupConnections({
+        setupIds: [childId],
+        deviceIds,
+        portIds
+    });
+
+    await deleteRowsByIds(SETUP_DEVICE_PORTS_TABLE, "id", portIds);
+
+    const { error: deviceErr } = await supabase
+        .from(SETUP_DEVICES_TABLE)
+        .delete()
+        .eq("setup_id", childId);
+    if (deviceErr) throw deviceErr;
+
+    const { data, error: setupErr } = await supabase
+        .from(SETUPS_TABLE)
+        .delete()
+        .eq("id", childId)
+        .select("*");
+    if (setupErr) throw setupErr;
+
+    if (!data || data.length === 0) {
+        const error = new Error("Setup item not found");
+        error.status = 404;
+        throw error;
+    }
+
+    childrenCache.delete(String(childSetup.room_id));
+    childrenCache.delete(String(childId));
+
+    return data[0];
 }
 
 async function assertSetupOwnedByUser(setupId, userId) {
@@ -898,6 +1119,31 @@ async function fetchItemWithSetup(tableName, itemId) {
     return { data: null, idColumn: null };
 }
 
+async function findSetupDeviceByProductId(setupId, productId) {
+    const setupRef = Number(setupId);
+    const productRef = Number(productId);
+    if (!Number.isFinite(setupRef) || !Number.isFinite(productRef)) return null;
+
+    const { data, error } = await supabase
+        .from(SETUP_DEVICES_TABLE)
+        .select("*")
+        .eq("setup_id", setupRef)
+        .eq("device_id", productRef)
+        .limit(1)
+        .maybeSingle();
+
+    if (error && !isMissingSchemaObjectError(error)) throw error;
+    if (!data) return null;
+
+    return {
+        ...data,
+        setup_id: Number(data.setup_id ?? 0),
+        x: Number(data.pos_x ?? 0),
+        y: Number(data.pos_y ?? 0),
+        type: String(data.role ?? data.type ?? "device")
+    };
+}
+
 function isChildSetupTable(tableName) {
     const normalized = String(tableName || "").toLowerCase();
     return normalized === String(CHILD_SETUPS_TABLE).toLowerCase()
@@ -924,6 +1170,62 @@ function resolveRenameColumn(item) {
     return null;
 }
 
+function normalizeBoolean(value) {
+    return value === true || value === "true" || value === 1 || value === "1";
+}
+
+function extractPrice(item) {
+    return item?.price
+        ?? item?.Price
+        ?? item?.price_huf
+        ?? item?.["Price Range (Ft)"]
+        ?? item?.data?.price
+        ?? item?.data?.Price
+        ?? item?.data?.price_huf
+        ?? item?.data?.["Price Range (Ft)"]
+        ?? null;
+}
+
+async function enrichNoteItemsWithProductData(items) {
+    const enriched = [...items];
+    let catalogItems = null;
+
+    await runWithConcurrency(enriched, 6, async (item) => {
+        const childSetupId = Number(item?.id ?? 0);
+        if (!Number.isFinite(childSetupId) || childSetupId <= 0) return;
+
+        const { data: deviceRow } = await supabase
+            .from(SETUP_DEVICES_TABLE)
+            .select("*")
+            .eq("setup_id", childSetupId)
+            .limit(1)
+            .maybeSingle();
+
+        const productId = Number(deviceRow?.device_id ?? deviceRow?.product_id ?? 0);
+        const sourceTable = String(deviceRow?.source_table ?? item?.source_table ?? "products").trim() || "products";
+
+        item.product_id = Number.isFinite(productId) && productId > 0 ? productId : item.product_id;
+        item.source_table = sourceTable || item.source_table;
+
+        if (!Number.isFinite(productId) || productId <= 0) return;
+
+        let product = await getProductByRoute(sourceTable, productId);
+
+        if (!product || extractPrice(product) == null) {
+            catalogItems = catalogItems || await listProducts({ category: "all", limit: 5000 });
+            product = catalogItems.find((candidate) => String(candidate?.id) === String(productId)) ?? product;
+        }
+
+        if (!product) return;
+
+        item.price = extractPrice(product);
+        item.manufacturer = item.manufacturer || product.manufacturer || product.Manufacturer || "";
+        item.display_name = item.display_name || product.name || product.model || product.Model || item.name;
+    });
+
+    return enriched;
+}
+
 
 exports.list = async (req, res) => {
     try {
@@ -945,6 +1247,7 @@ exports.list = async (req, res) => {
                 x: Number(s.pos_x ?? 0),
                 y: Number(s.pos_y ?? 0),
                 isFavorite: Boolean(s.is_favorite),
+                isNote: normalizeBoolean(s.isNote ?? s.is_note ?? s.isnote),
                 user_id: s.user_id == null ? null : Number(s.user_id),
                 type: "room"
             }))
@@ -1019,7 +1322,7 @@ exports.children = async (req, res) => {
     try {
         const { data: roomRow } = await supabase
             .from(ROOMS_TABLE)
-            .select("id")
+            .select("*")
             .eq("id", setupId)
             .limit(1)
             .maybeSingle();
@@ -1048,7 +1351,10 @@ exports.children = async (req, res) => {
                     y: Number(item.pos_y ?? 0)
                 }, SETUPS_TABLE));
 
-                const enrichedItems = await enrichPcSetupRows(items);
+                let enrichedItems = await enrichPcSetupRows(items);
+                if (normalizeBoolean(roomRow?.isNote ?? roomRow?.is_note ?? roomRow?.isnote)) {
+                    enrichedItems = await enrichNoteItemsWithProductData(enrichedItems);
+                }
                 const total = Number(count ?? 0);
                 const totalPages = Math.max(Math.ceil(total / limit), 1);
                 const safePage = Math.min(page, totalPages);
@@ -1084,6 +1390,9 @@ exports.children = async (req, res) => {
             }, SETUPS_TABLE));
 
             allItems = await enrichPcSetupRows(allItems);
+            if (normalizeBoolean(roomRow?.isNote ?? roomRow?.is_note ?? roomRow?.isnote)) {
+                allItems = await enrichNoteItemsWithProductData(allItems);
+            }
         } else {
             if (isPaginated) {
                 const from = (page - 1) * limit;
@@ -1221,7 +1530,8 @@ exports.create = async (req, res) => {
         const setup_name = String(req.body?.setup_name ?? req.body?.name ?? "").trim();
         if (!setup_name) return res.status(400).json({ error: "setup_name required" });
 
-        const isFavorite = req.body?.isFavorite === true;
+        const isFavorite = normalizeBoolean(req.body?.isFavorite);
+        const isNote = normalizeBoolean(req.body?.isNote);
         const x = Math.round(Number(req.body?.x ?? 0));
         const y = Math.round(Number(req.body?.y ?? 0));
 
@@ -1232,7 +1542,8 @@ exports.create = async (req, res) => {
                 name: setup_name,
                 pos_x: x,
                 pos_y: y,
-                is_favorite: isFavorite
+                is_favorite: isFavorite,
+                isNote
             }])
             .select("*")
             .single();
@@ -1257,6 +1568,7 @@ exports.create = async (req, res) => {
                 x: Number(data.pos_x ?? x),
                 y: Number(data.pos_y ?? y),
                 isFavorite: Boolean(data.is_favorite),
+                isNote: normalizeBoolean(data.isNote ?? data.is_note ?? data.isnote ?? isNote),
                 user_id: Number(data.user_id ?? userId)
             }
         });
@@ -1401,15 +1713,39 @@ exports.remove = async (req, res) => {
             return res.status(500).json({ error: setupsErr.message });
         }
 
+        const roomId = Number(setupId);
         const setupIds = (roomSetups || []).map((row) => Number(row.id)).filter(Number.isFinite);
+        const connectionSetupIds = [roomId, ...setupIds].filter(Number.isFinite);
+        const deviceIds = await listSetupDeviceIds(setupIds);
+        const portIds = await listSetupDevicePortIds(deviceIds);
 
-        if (setupIds.length) {
+        if (connectionSetupIds.length) {
             try {
-                await connectionService.removeConnectionsForSetupIds(setupIds);
+                await connectionService.removeConnectionsForSetupIds(connectionSetupIds);
             } catch (deviceConnErr) {
                 return res.status(500).json({ error: deviceConnErr.message });
             }
+        }
 
+        try {
+            await removeLegacySetupConnections({
+                setupIds: connectionSetupIds,
+                deviceIds,
+                portIds
+            });
+        } catch (legacyConnErr) {
+            return res.status(500).json({ error: legacyConnErr.message });
+        }
+
+        if (portIds.length) {
+            const { error: portErr } = await supabase
+                .from(SETUP_DEVICE_PORTS_TABLE)
+                .delete()
+                .in("id", portIds);
+            if (portErr) return res.status(500).json({ error: portErr.message });
+        }
+
+        if (setupIds.length) {
             const { error: deviceErr } = await supabase
                 .from(SETUP_DEVICES_TABLE)
                 .delete()
@@ -1744,24 +2080,25 @@ exports.pcPartsLegacy = async (req, res) => {
 
 exports.carOptions = async (req, res) => {
     try {
-        const cacheKey = "car-options:v2";
+        const cacheKey = "car-options:v3";
         const cached = cacheGet(carOptionsCache, cacheKey);
         if (cached) return res.json({ cars: cached });
 
         const { data, error } = await supabase
             .from("products")
-            .select("id, name, type")
+            .select("id, name, type, category")
             .order("name", { ascending: true })
             .limit(5000);
 
         if (error) throw error;
 
         const cars = (Array.isArray(data) ? data : [])
-            .filter((row) => String(row?.type || "").trim().toLowerCase() === "car")
+            .filter((row) => isCarProductType(row?.type))
             .map((row) => ({
                 id: Number(row.id),
                 name: String(row.name || "").trim(),
                 type: String(row.type || "").trim(),
+                category: row.category ?? null,
                 display_name: String(row.name || "").trim() || `Autó #${row.id}`
             }));
 
@@ -1825,7 +2162,7 @@ exports.carsAdd = async (req, res) => {
 
         const { data: product, error: productError } = await supabase
             .from("products")
-            .select("id, name, type")
+            .select("id, name, type, category")
             .eq("id", car_id)
             .limit(1)
             .maybeSingle();
@@ -1836,7 +2173,7 @@ exports.carsAdd = async (req, res) => {
         }
 
         const productType = String(product.type || "").trim().toLowerCase();
-        if (productType !== "car") {
+        if (!isCarProductType(productType)) {
             return res.status(400).json({ error: "A kiválasztott termék nem autó típusú" });
         }
 
@@ -2052,6 +2389,157 @@ exports.instrumentsAdd = async (req, res) => {
     }
 };
 
+exports.networkOptions = async (req, res) => {
+    try {
+        const cacheKey = "network-options:v2";
+        const cached = cacheGet(networkOptionsCache, cacheKey);
+        if (cached) return res.json({ devices: cached });
+
+        const { data, error } = await supabase
+            .from("products")
+            .select("id, name, type, category")
+            .eq("type", "network")
+            .in("category", ["modem", "router", "switch"])
+            .order("name", { ascending: true })
+            .limit(5000);
+
+        if (error) throw error;
+
+        const devices = (Array.isArray(data) ? data : [])
+            .map((row) => {
+                const networkType = resolveNetworkType(row);
+                if (!networkType) return null;
+
+                return {
+                    id: Number(row.id),
+                    name: String(row.name || "").trim(),
+                    type: networkType,
+                    raw_type: String(row.type || "").trim(),
+                    category: row.category ?? null,
+                    source_table: networkSourceTable(networkType),
+                    display_name: String(row.name || "").trim() || `${networkType} #${row.id}`
+                };
+            })
+            .filter(Boolean);
+
+        devices.sort((a, b) => {
+            const typeDiff = String(a.type).localeCompare(String(b.type), "hu");
+            return typeDiff || a.display_name.localeCompare(b.display_name, "hu");
+        });
+
+        cacheSet(networkOptionsCache, cacheKey, devices, NETWORKOPTIONS_TTL_MS);
+        return res.json({ devices });
+    } catch (err) {
+        console.error("networkOptions hiba:", err);
+        return res.json({ devices: [] });
+    }
+};
+
+exports.networkAdd = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const setupId = req.params.id;
+
+        const ok = await assertSetupOwnedByUser(setupId, userId);
+        if (!ok) return res.status(403).json({ error: "Forbidden" });
+
+        const productIdRaw = req.body?.product_id ?? req.body?.network_id;
+        const productId = productIdRaw == null ? null : Number(productIdRaw);
+
+        if (!productId || Number.isNaN(productId)) {
+            return res.status(400).json({ error: "A product_id kotelezo" });
+        }
+
+        const { data: product, error: productError } = await supabase
+            .from("products")
+            .select("id, name, type, category")
+            .eq("id", productId)
+            .limit(1)
+            .maybeSingle();
+
+        if (productError) throw productError;
+        if (!product) {
+            return res.status(404).json({ error: "Network termek nem talalhato" });
+        }
+
+        const networkType = resolveNetworkType(product);
+        if (!networkType) {
+            return res.status(400).json({ error: "A kivalasztott termek nem modem/router/switch tipus" });
+        }
+
+        const setupName = String(product.name || "").trim() || `${networkType} #${productId}`;
+
+        const { data, error } = await supabase
+            .from(SETUPS_TABLE)
+            .insert([{
+                room_id: Number(setupId),
+                name: setupName,
+                type: networkType,
+                pos_x: 0,
+                pos_y: 0
+            }])
+            .select("*")
+            .single();
+        if (error) throw error;
+
+        const sourceTable = networkSourceTable(networkType);
+        const baseDevice = {
+            setup_id: Number(data.id),
+            device_id: Number(productId),
+            role: networkType,
+            pos_x: Number(data.pos_x ?? 0),
+            pos_y: Number(data.pos_y ?? 0),
+            rotation: 0
+        };
+
+        let createdDevice = null;
+        let deviceError = null;
+
+        for (const row of [{ ...baseDevice, source_table: sourceTable }, baseDevice]) {
+            const result = await supabase
+                .from(SETUP_DEVICES_TABLE)
+                .insert([row])
+                .select("*")
+                .single();
+
+            if (!result.error) {
+                createdDevice = result.data;
+                deviceError = null;
+                break;
+            }
+
+            deviceError = result.error;
+        }
+
+        if (deviceError) {
+            await supabase
+                .from(SETUPS_TABLE)
+                .delete()
+                .eq("id", data.id);
+            throw deviceError;
+        }
+
+        childrenCache.delete(String(setupId));
+        childrenCache.delete(String(data.id));
+
+        return res.json({
+            device: {
+                ...data,
+                setup_name: data.name ?? setupName,
+                setup_type: networkType,
+                product_id: productId,
+                source_table: sourceTable,
+                device: createdDevice ?? null,
+                x: Number(data.pos_x ?? 0),
+                y: Number(data.pos_y ?? 0)
+            }
+        });
+    } catch (err) {
+        console.error("networkAdd hiba:", err);
+        return res.status(500).json({ error: "Create failed" });
+    }
+};
+
 function pickFirstCarLink(row) {
     if (!row) return null;
 
@@ -2212,6 +2700,11 @@ exports.carSetupDetails = async (req, res) => {
 
 const typeToTableMap = {
     "pc": "setup",
+    "network_card": "setup",
+    "network_adapter": "setup",
+    "ethernet_adapter": "setup",
+    "wifi_adapter": "setup",
+    "wi_fi_adapter": "setup",
     "switch": "setup",
     "router": "setup",
     "modem": "setup",
@@ -2247,7 +2740,19 @@ exports.connectionsCreate = async (req, res) => {
         const userId = req.user.id;
         const fromDeviceType = String(req.body?.from_device_type || "").toLowerCase().trim();
         const toDeviceType = String(req.body?.to_device_type || "").toLowerCase().trim();
-        const allowedTypes = new Set(["pc", "ht", "home_theater"]);
+        const allowedTypes = new Set([
+            "pc",
+            "ht",
+            "home_theater",
+            "network_card",
+            "network_adapter",
+            "ethernet_adapter",
+            "wifi_adapter",
+            "wi_fi_adapter",
+            "router",
+            "switch",
+            "modem"
+        ]);
         const setupFromId = Number(
             req.body?.setup_from ?? req.body?.from_setup_id ?? req.body?.setup_id ?? 0
         );
@@ -2260,7 +2765,7 @@ exports.connectionsCreate = async (req, res) => {
         }
 
         if (!allowedTypes.has(fromDeviceType) || !allowedTypes.has(toDeviceType)) {
-            return res.status(400).json({ error: "Only PC and home theater setups can be connected" });
+            return res.status(400).json({ error: "Only PC, home theater and network devices can be connected" });
         }
 
         req.body.port_type = "utp";
@@ -2417,39 +2922,75 @@ exports.updateItemPosition = async (req, res) => {
 exports.removeItem = async (req, res) => {
     try {
         const userId = req.user.id;
-        const { itemId, tableName } = req.body;
+        const { itemId } = req.body;
+        const setupId = req.body?.setupId;
+        let tableName = normalizeItemTableName(req.body?.tableName);
 
         if (!itemId || !tableName) {
             return res.status(400).json({ error: "Missing itemId or tableName" });
         }
 
-        const { data: item, idColumn } = await fetchItemWithSetup(tableName, itemId);
+        if (String(tableName).toLowerCase() !== String(SETUPS_TABLE).toLowerCase()) {
+            const childSetup = await findChildSetupInRoom(setupId, itemId);
+            if (childSetup) {
+                tableName = SETUPS_TABLE;
+            }
+        }
+
+        let { data: item, idColumn } = await fetchItemWithSetup(tableName, itemId);
+
+        if (!item && String(tableName).toLowerCase() === String(SETUP_DEVICES_TABLE).toLowerCase()) {
+            item = await findSetupDeviceByProductId(setupId, itemId);
+            idColumn = item ? "id" : null;
+        }
 
         if (!item || !idColumn) {
             return res.status(404).json({ error: "Item not found" });
         }
 
+        const deleteId = Number(item.id ?? item.ID ?? itemId);
         const ok = await assertSetupOwnedByUser(item.setup_id, userId);
         if (!ok) return res.status(403).json({ error: "Forbidden" });
 
-        const { error: delErr } = await supabase
-            .from(tableName)
-            .delete()
-            .eq(idColumn, itemId);
-
-        if (delErr) throw delErr;
-
         if (String(tableName).toLowerCase() === String(SETUPS_TABLE).toLowerCase()) {
-            await connectionService.removeConnectionsForSetupIds([itemId]);
+            await connectionService.removeConnectionsForSetupIds([deleteId]);
+
+            const deviceIds = await listSetupDeviceIds([deleteId]);
+            const portIds = await listSetupDevicePortIds(deviceIds);
+
+            await removeLegacySetupConnections({
+                setupIds: [deleteId],
+                deviceIds,
+                portIds
+            });
+
+            await deleteRowsByIds(SETUP_DEVICE_PORTS_TABLE, "id", portIds);
 
             const { error: deviceErr } = await supabase
                 .from(SETUP_DEVICES_TABLE)
                 .delete()
-                .eq("setup_id", itemId);
+                .eq("setup_id", deleteId);
             if (deviceErr) throw deviceErr;
         } else if (String(tableName).toLowerCase() === String(SETUP_DEVICES_TABLE).toLowerCase()) {
-            await connectionService.removeConnectionsForDeviceIds([itemId]);
+            await connectionService.removeConnectionsForDeviceIds([deleteId]);
+
+            const portIds = await listSetupDevicePortIds([deleteId]);
+
+            await removeLegacySetupConnections({
+                setupIds: [],
+                deviceIds: [deleteId],
+                portIds
+            });
+
+            await deleteRowsByIds(SETUP_DEVICE_PORTS_TABLE, "id", portIds);
         }
+
+        const { error: delErr } = await supabase
+            .from(tableName)
+            .delete()
+            .eq(idColumn, deleteId);
+
+        if (delErr) throw delErr;
 
         childrenCache.delete(String(item.setup_id));
 
@@ -2457,6 +2998,49 @@ exports.removeItem = async (req, res) => {
     } catch (err) {
         console.error("âťŚ removeItem fatal:", err);
         res.status(500).json({ error: "Failed to remove item" });
+    }
+};
+
+exports.removeChildSetup = async (req, res) => {
+    try {
+        const userId = req.user?.id;
+        const childSetupId = req.params.id;
+        const roomId = req.body?.roomId ?? req.body?.setupId ?? req.query?.roomId ?? req.query?.setupId ?? null;
+
+        console.log("[setup.removeChildSetup] request", {
+            userId,
+            childSetupId,
+            roomId,
+            body: req.body,
+            query: req.query
+        });
+
+        if (!userId) return res.status(401).json({ error: "Unauthorized" });
+
+        const removed = await removeChildSetupRow(childSetupId, userId, roomId);
+
+        console.log("[setup.removeChildSetup] success", {
+            childSetupId,
+            roomId,
+            removed
+        });
+
+        return res.json({
+            success: true,
+            removed
+        });
+    } catch (err) {
+        console.error("[setup.removeChildSetup] failed", {
+            message: err?.message,
+            status: err?.status,
+            stack: err?.stack,
+            body: req.body,
+            params: req.params,
+            query: req.query
+        });
+        return res.status(err.status || 500).json({
+            error: err.message || "Failed to remove setup item"
+        });
     }
 };
 

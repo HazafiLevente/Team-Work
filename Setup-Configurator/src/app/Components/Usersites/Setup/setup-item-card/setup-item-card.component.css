@@ -36,6 +36,23 @@
     0 10px 24px rgba(0,0,0,0.35);
 }
 
+.drag-element.circle {
+  width: 76px;
+  height: 76px;
+  min-width: 76px;
+  border-radius: 50%;
+  box-shadow: 0 8px 22px rgba(0,0,0,0.35);
+}
+
+.drag-element.circle::before {
+  display: none;
+}
+
+.drag-element.circle .setup-name {
+  padding: 0 8px;
+  font-size: 12px;
+}
+
 .setup-name {
   pointer-events: none;
   padding: 0 16px;

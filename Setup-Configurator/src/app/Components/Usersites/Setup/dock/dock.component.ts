@@ -27,6 +27,12 @@ export class SetupDockComponent {
     this.isManagerOpen = !this.isManagerOpen;
   }
 
+  openManager(event: MouseEvent) {
+    event.preventDefault();
+    event.stopPropagation();
+    this.isManagerOpen = true;
+  }
+
   onRestore(id: string) {
     this.restore.emit(id);
     this.isManagerOpen = false;

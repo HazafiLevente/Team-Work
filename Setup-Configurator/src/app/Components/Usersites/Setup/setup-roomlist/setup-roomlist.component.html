@@ -164,14 +164,6 @@
     </app-setup-instrument-details-panel>
   }
 
-  @if (pcBuilderOpen && pcBuilderSetup) {
-    <app-pc-builder-panel
-      [setup]="pcBuilderSetup"
-      (close)="closePcBuilder()"
-      (saved)="onPcBuilderSaved()">
-    </app-pc-builder-panel>
-  }
-
 </div>
 
 @if (confirmDialogState?.isOpen) {
@@ -180,8 +172,10 @@
       <h3>{{ confirmDialogState?.title }}</h3>
       <p>{{ confirmDialogState?.message }}</p>
       <div class="confirm-actions">
-        <button class="confirm-cancel" (click)="confirmDialogState = null">Mégse</button>
-        <button class="confirm-danger" (click)="confirmDialogState?.onConfirm?.()">Törlés</button>
+        @if (!confirmDialogState?.hideCancel) {
+          <button class="confirm-cancel" (click)="confirmDialogState = null">{{ confirmDialogState?.cancelText || 'Megse' }}</button>
+        }
+        <button class="confirm-danger" (click)="confirmDialogState?.onConfirm?.()">{{ confirmDialogState?.confirmText || 'Torles' }}</button>
       </div>
     </div>
   </div>

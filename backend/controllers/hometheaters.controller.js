@@ -8,12 +8,21 @@ const { listProducts, clampLimit } = require("../services/products/productCatalo
 
 exports.getHtCatalog = async (req, res) => {
     try {
-        const allItems = await listProducts({ limit: 5000 });
+        const allItems = await listProducts({ limit: 5000, category: "ht" });
         const items = (Array.isArray(allItems) ? allItems : []).filter(
             (item) => String(item?.type || "").trim().toLowerCase() === "ht"
         );
 
-        const catalog = {};
+        const catalog = {
+            reciever: [],
+            audio_processor: [],
+            front_speaker: [],
+            center_speaker: [],
+            side_speaker: [],
+            back_speaker: [],
+            subwoofer: [],
+            speaker: []
+        };
 
         for (const item of items) {
             const bucket = inferHtCatalogBucket(item);
@@ -175,10 +184,15 @@ function normalizeHtRole(role = "", category = "") {
     const value = String(role || category || "").trim().toLowerCase();
 
     if (!value) return "device";
-    if (["receiver", "receivers", "avr", "av_receiver"].includes(value)) return "receiver";
+    if (["receiver", "receivers", "reciever", "recievers", "avr", "av_receiver"].includes(value)) return "receiver";
+    if (["audio_processor", "audio_processors", "processor"].includes(value)) return "audio_processor";
     if (["bassamplifier", "bass_amplifier", "bass-amplifier", "bassamplifiers"].includes(value)) return "bass_amplifier";
     if (["subwoofer", "subwoofers"].includes(value)) return "subwoofer";
+    if (["front_speaker", "frontspeakers", "front_speakers"].includes(value)) return "front_speaker";
     if (["center", "centerspeaker", "center_speaker", "centerspeakers"].includes(value)) return "center";
+    if (["side_speaker", "side_speakers"].includes(value)) return "side_speaker";
+    if (["back_speaker", "back_speakers"].includes(value)) return "back_speaker";
+    if (["speaker", "speakers"].includes(value)) return "speaker";
     if (["front_left", "frontleft"].includes(value)) return "front_left";
     if (["front_right", "frontright"].includes(value)) return "front_right";
     if (["back_left", "backleft"].includes(value)) return "back_left";
@@ -190,6 +204,26 @@ function normalizeHtRole(role = "", category = "") {
 }
 
 function inferHtCatalogBucket(item = {}) {
+    const category = String(item?.category || item?.data?.category || "").trim().toLowerCase();
+    const byCategory = {
+        reciever: "reciever",
+        receiver: "reciever",
+        receivers: "reciever",
+        audio_processor: "audio_processor",
+        audio_processors: "audio_processor",
+        front_speaker: "front_speaker",
+        center_speaker: "center_speaker",
+        center_speakers: "center_speaker",
+        side_speaker: "side_speaker",
+        back_speaker: "back_speaker",
+        subwoofer: "subwoofer",
+        subwoofers: "subwoofer",
+        speaker: "speaker",
+        speakers: "speaker"
+    };
+
+    if (byCategory[category]) return byCategory[category];
+
     const text = [
         item?.name,
         item?.model,
@@ -201,18 +235,15 @@ function inferHtCatalogBucket(item = {}) {
         .map((value) => String(value || "").trim().toLowerCase())
         .join(" ");
 
-    if (text.includes("receiver") || text.includes("avr")) return "receivers";
-    if (text.includes("subwoofer")) return "subwoofers";
-    if (text.includes("center")) return "centerSpeakers";
-    if (text.includes("surround") || text.includes("side speaker") || text.includes("side")) return "sideSpeakers";
-    if (text.includes("back speaker") || text.includes("rear")) return "backSpeakers";
-    if (text.includes("ceiling")) return "ceilingSpeakers";
-    if (text.includes("floor")) return "floorSpeakers";
-    if (text.includes("processor")) return "audioProcessors";
-    if (text.includes("bass amplifier") || text.includes("bassamp") || text.includes("bass amp")) return "bassAmplifiers";
-    if (text.includes("front")) return "frontSpeakers";
+    if (text.includes("receiver") || text.includes("reciever") || text.includes("avr")) return "reciever";
+    if (text.includes("processor")) return "audio_processor";
+    if (text.includes("front")) return "front_speaker";
+    if (text.includes("center")) return "center_speaker";
+    if (text.includes("surround") || text.includes("side speaker") || text.includes("side")) return "side_speaker";
+    if (text.includes("back speaker") || text.includes("rear")) return "back_speaker";
+    if (text.includes("subwoofer")) return "subwoofer";
 
-    return "htDevices";
+    return "speaker";
 }
 
 async function syncDevices(buildId, devices, layout = null) {

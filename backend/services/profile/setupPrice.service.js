@@ -3,12 +3,17 @@ const { supabase } = require("../../services/supabase");
 async function getUserSetupIds(userId) {
     const { data: rooms } = await supabase
         .from("setup_room")
-        .select("id")
+        .select("id, is_favorite, isNote")
         .eq("user_id", userId);
 
     if (!rooms || rooms.length === 0) return [];
 
-    const roomIds = rooms.map(room => room.id);
+    const roomIds = rooms
+        .filter((room) => !toBoolean(room.is_favorite) && !toBoolean(room.isNote))
+        .map((room) => room.id);
+
+    if (roomIds.length === 0) return [];
+
     const { data: setups } = await supabase
         .from("setups")
         .select("id")
@@ -44,6 +49,28 @@ async function getPricePropertyIds() {
     );
 }
 
+function toBoolean(value) {
+    return value === true || value === "true" || value === 1 || value === "1";
+}
+
+function toPriceNumber(value) {
+    if (value == null || value === "") return 0;
+    if (typeof value === "number") return Number.isFinite(value) ? value : 0;
+
+    const nums = String(value)
+        .replace(/\s/g, "")
+        .replace(/,/g, ".")
+        .match(/\d+(\.\d+)?/g);
+
+    if (!nums?.length) return 0;
+
+    const parsed = nums.map(Number).filter(Number.isFinite);
+    if (!parsed.length) return 0;
+    if (parsed.length === 1) return Math.round(parsed[0]);
+
+    return Math.round((Math.min(...parsed) + Math.max(...parsed)) / 2);
+}
+
 async function calculateUserSetupPrice(userId) {
     const setupIds = await getUserSetupIds(userId);
     const productIds = await getSetupProductIds(setupIds);
@@ -60,7 +87,7 @@ async function calculateUserSetupPrice(userId) {
 
     return (valuesRes.data || []).reduce((sum, row) => {
         if (!pricePropIds.has(Number(row.properties_id))) return sum;
-        return sum + Number(row.value || 0);
+        return sum + toPriceNumber(row.value);
     }, 0);
 }
 

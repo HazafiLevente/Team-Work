@@ -103,8 +103,11 @@
     @if (!w.minimized) {
       <app-setup-window [id]="w.id" [title]="w.title" [instanceNo]="w.instanceNo" [x]="w.x" [y]="w.y" [zIndex]="w.zIndex"
                         [width]="w.width || 420" [maximized]="w.maximized" [boundaryRef]="boundaryEl.nativeElement"
+                        [height]="w.height || null" [snapMode]="w.snapMode || null"
                         (closed)="onWindowClosed($event)" (minimized)="minimizeWindow($event)" (focused)="focusWindow($event)"
-                        (maximizeToggled)="toggleMaximizeWindow($event)" (moved)="updateWindowPosition(w.id, $event)">
+                        (maximizeToggled)="toggleMaximizeWindow($event)" (dragMoved)="onWindowDragMoved(w.id, $event)"
+                        (resized)="resizeWindow(w.id, $event)"
+                        (moved)="onWindowDragEnded(w.id, $event)">
         @if (w.kind === 'devices') {
           <app-devices-menu [setup]="w.payload.setup"></app-devices-menu>
         }
@@ -124,6 +127,13 @@
         }
 
         @if (w.kind === 'empty') {
+          @if (w.title === 'Szamitogep') {
+            <app-pc-builder-panel
+              [setup]="w.payload.setup"
+              (close)="closeWindow(w.id)"
+              (saved)="onHtSaved(); closeWindow(w.id)">
+            </app-pc-builder-panel>
+          } @else {
           @if (w.title === 'Házimozi') {
             <app-home-theater-builder
               [setup]="w.payload.setup"
@@ -142,10 +152,17 @@
               (saved)="onHtSaved()">
             </app-instrument-builder-panel>
 
+          } @else if (w.title === 'Halozat') {
+            <app-network-builder-panel
+              [setup]="w.payload.setup"
+              (saved)="onHtSaved()">
+            </app-network-builder-panel>
+
           } @else {
             <div class="empty-window-content">
               <p>Hamarosan: {{ w.title }} tartalom...</p>
             </div>
+          }
           }
         }
 
@@ -155,7 +172,39 @@
     }
   }
 
-  @if (windows.length > 0) {
+  @if (snapAssistVisible && snapAssistWindowId) {
+    <div class="snap-assist" (contextmenu)="$event.preventDefault()" (click)="$event.stopPropagation()">
+      <button type="button" class="snap-option snap-max" (click)="applySnapLayout('max')" title="Teljes meret">
+        <span></span>
+      </button>
+      <button type="button" class="snap-option snap-left" (click)="applySnapLayout('left')" title="Bal oldal">
+        <span></span>
+      </button>
+      <button type="button" class="snap-option snap-right" (click)="applySnapLayout('right')" title="Jobb oldal">
+        <span></span>
+      </button>
+      <button type="button" class="snap-close" (click)="closeSnapAssist()" title="Bezaras">x</button>
+    </div>
+  }
+
+  @if (noteSetups().length) {
+    <div class="note-bookmarks" aria-label="Jegyzet konyvjelzok">
+      @for (note of noteSetups(); track noteTrackKey($index, note)) {
+        <button
+          type="button"
+          class="note-bookmark"
+          [attr.aria-label]="noteName(note)"
+          [attr.data-title]="noteName(note)"
+          (click)="openNoteBookmark(note, $event)"
+          (dblclick)="openNoteBookmark(note, $event)"
+          (contextmenu)="$event.preventDefault(); $event.stopPropagation()">
+          <span>{{ noteBookmarkLabel(note, $index) }}</span>
+        </button>
+      }
+    </div>
+  }
+
+  @if (windows.length > 0 && !hideDock) {
     <app-setup-dock [windows]="windows" (restore)="restoreWindow($event)" (maximize)="toggleMaximizeWindow($event)"
                     (terminate)="onWindowClosed($event)" (dockItemRightClick)="onDockItemRightClick($event)">
     </app-setup-dock>
@@ -198,8 +247,10 @@
         <h3>{{ confirmDialogState?.title }}</h3>
         <p>{{ confirmDialogState?.message }}</p>
         <div class="confirm-actions">
-          <button class="confirm-cancel" (click)="confirmDialogState = null">Mégse</button>
-          <button class="confirm-danger" (click)="confirmDialogState?.onConfirm?.()">Törlés</button>
+          @if (!confirmDialogState?.hideCancel) {
+            <button class="confirm-cancel" (click)="confirmDialogState = null">{{ confirmDialogState?.cancelText || 'Megse' }}</button>
+          }
+          <button class="confirm-danger" (click)="confirmDialogState?.onConfirm?.()">{{ confirmDialogState?.confirmText || 'Torles' }}</button>
         </div>
       </div>
     </div>

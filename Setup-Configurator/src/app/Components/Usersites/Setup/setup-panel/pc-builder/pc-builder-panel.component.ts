@@ -17,6 +17,8 @@ type PcPart = {
   price?: number | string;
 };
 
+type PcBuilderMode = 'build' | 'all_in_one' | 'laptop';
+
 @Component({
   selector: 'app-pc-builder-panel',
   standalone: true,
@@ -39,13 +41,18 @@ export class PcBuilderPanelComponent implements OnChanges {
   rams: PcPart[] = [];
   gpus: PcPart[] = [];
   psus: PcPart[] = [];
+  computerProducts: any[] = [];
+  loadingComputerProducts = false;
 
   selectedProcessorId: number | null = null;
   selectedMotherboardId: number | null = null;
   selectedRamId: number | null = null;
   selectedGpuId: number | null = null;
   selectedPsuId: number | null = null;
+  selectedComputerId: number | null = null;
 
+  mode: PcBuilderMode = 'build';
+  computerSearch = '';
   buildName = '';
 
   constructor(private http: HttpClient) {}
@@ -54,6 +61,7 @@ export class PcBuilderPanelComponent implements OnChanges {
     if (changes['setup'] && this.setup) {
       this.resetSelections();
       this.loadAllParts();
+      this.loadComputerProducts();
     }
   }
 
@@ -63,6 +71,9 @@ export class PcBuilderPanelComponent implements OnChanges {
     this.selectedRamId = null;
     this.selectedGpuId = null;
     this.selectedPsuId = null;
+    this.selectedComputerId = null;
+    this.mode = 'build';
+    this.computerSearch = '';
     this.buildName = '';
     this.error = '';
     this.success = '';
@@ -168,6 +179,26 @@ export class PcBuilderPanelComponent implements OnChanges {
     });
   }
 
+  private loadComputerProducts(): void {
+    this.loadingComputerProducts = true;
+
+    this.http.get<any>('/api/computers', {
+      withCredentials: true,
+      params: { limit: 2000 }
+    }).subscribe({
+      next: (res) => {
+        const items = Array.isArray(res?.items) ? res.items : Array.isArray(res) ? res : [];
+        this.computerProducts = items;
+        this.loadingComputerProducts = false;
+      },
+      error: (err) => {
+        console.error('Computer catalog load error:', err);
+        this.computerProducts = [];
+        this.loadingComputerProducts = false;
+      }
+    });
+  }
+
   private createPcBuild(setupId: number): void {
     const pcName = this.buildName.trim();
 
@@ -188,6 +219,36 @@ export class PcBuilderPanelComponent implements OnChanges {
         console.error('PC build create error:', err);
         this.saving = false;
         this.error = 'Failed to create PC build.';
+      }
+    });
+  }
+
+  private saveReadyComputer(setupId: number): void {
+    const product = this.getSelectedComputer();
+    if (!product) {
+      this.saving = false;
+      this.error = this.mode === 'laptop' ? 'Valassz laptopot.' : 'Valassz egybegepet.';
+      return;
+    }
+
+    const sourceTable = this.getProductSourceTable(product);
+    const displayName = this.getComputerLabel(product);
+
+    this.http.post<any>(`/api/setup/${setupId}/save-device`, {
+      product_id: this.getId(product),
+      source_table: sourceTable,
+      display_name: displayName,
+      manufacturer: this.getManufacturer(product)
+    }, { withCredentials: true }).subscribe({
+      next: () => {
+        this.saving = false;
+        this.success = 'Eszkoz hozzaadva.';
+        this.saved.emit();
+      },
+      error: (err) => {
+        console.error('Ready computer save error:', err);
+        this.saving = false;
+        this.error = 'Nem sikerult hozzaadni a gepet.';
       }
     });
   }
@@ -284,6 +345,73 @@ export class PcBuilderPanelComponent implements OnChanges {
 
     const num = Number(value);
     return Number.isNaN(num) ? null : num;
+  }
+
+  setMode(mode: PcBuilderMode): void {
+    if (this.mode === mode) return;
+    this.mode = mode;
+    this.error = '';
+    this.success = '';
+    this.selectedComputerId = null;
+  }
+
+  isBuildMode(): boolean {
+    return this.mode === 'build';
+  }
+
+  isReadyComputerMode(): boolean {
+    return this.mode === 'all_in_one' || this.mode === 'laptop';
+  }
+
+  getComputerLabel(product: any): string {
+    const display = String(product?.display_name ?? '').trim();
+    if (display) return display;
+
+    const manufacturer = this.getManufacturer(product);
+    const model = this.getModel(product);
+    const name = String(product?.name ?? product?.product_name ?? product?.title ?? '').trim();
+    return [manufacturer, model || name].filter(Boolean).join(' ') || 'Ismeretlen gep';
+  }
+
+  getComputerMeta(product: any): string {
+    const category = String(product?.category ?? product?.type ?? product?.product_type ?? '').trim();
+    const price = this.getPrice(product);
+    return [category, price != null ? `${new Intl.NumberFormat('hu-HU').format(price)} Ft` : ''].filter(Boolean).join(' - ');
+  }
+
+  private getProductSourceTable(product: any): string {
+    return String(
+      product?.source_table ??
+      product?.table_name ??
+      product?.table ??
+      product?.category ??
+      'products'
+    ).trim() || 'products';
+  }
+
+  private getProductCategory(product: any): string {
+    return String(product?.category ?? product?.Category ?? '').trim().toLowerCase();
+  }
+
+  private isLaptopProduct(product: any): boolean {
+    return this.getProductCategory(product) === 'laptop';
+  }
+
+  private isAllInOneProduct(product: any): boolean {
+    return this.getProductCategory(product) === 'desktop';
+  }
+
+  getVisibleComputerProducts(): any[] {
+    const query = String(this.computerSearch || '').trim().toLowerCase();
+
+    return this.computerProducts
+      .filter((product) => this.mode === 'laptop' ? this.isLaptopProduct(product) : this.isAllInOneProduct(product))
+      .filter((product) => !query || this.getComputerLabel(product).toLowerCase().includes(query))
+      .slice(0, 120);
+  }
+
+  getSelectedComputer(): any | null {
+    return this.computerProducts.find(product => this.getId(product) === this.selectedComputerId) ?? null;
   }
 
   getWattage(row: any): string {
@@ -488,6 +616,19 @@ export class PcBuilderPanelComponent implements OnChanges {
     const sid = this.setupId();
     if (!sid) {
       this.error = 'Missing setup id.';
+      return;
+    }
+
+    if (this.isReadyComputerMode()) {
+      if (!this.selectedComputerId) {
+        this.error = this.mode === 'laptop' ? 'Valassz laptopot.' : 'Valassz egybegepet.';
+        return;
+      }
+
+      this.saving = true;
+      this.error = '';
+      this.success = '';
+      this.saveReadyComputer(sid);
       return;
     }
 

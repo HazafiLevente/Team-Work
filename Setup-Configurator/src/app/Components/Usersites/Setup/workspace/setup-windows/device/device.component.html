@@ -8,4 +8,12 @@
     {{ device?.display_name || device?.name }}
   </span>
 
+  <button
+    type="button"
+    class="device-delete"
+    [disabled]="deleting"
+    (click)="onDelete($event)">
+    {{ deleting ? '...' : 'X' }}
+  </button>
+
 </div>

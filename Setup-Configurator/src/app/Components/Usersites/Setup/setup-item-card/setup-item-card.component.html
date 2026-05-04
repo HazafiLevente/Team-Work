@@ -1,6 +1,7 @@
 <div
   #root
   class="drag-element item-element"
+  [class.circle]="isCircularNetworkType()"
   cdkDrag
   [cdkDragDisabled]="dragDisabled || isRenaming"
   [cdkDragFreeDragPosition]="dragPosition"

@@ -1,7 +1,11 @@
 const { PRODUCT_TYPE_TO_TABLE, CATEGORY_ALIASES } = require("./productCatalog.constants");
 
 function norm(value) {
-    return String(value ?? "").trim().toLowerCase();
+    return String(value ?? "")
+        .trim()
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "");
 }
 
 function clampLimit(limit, fallback = 200, max = 5000) {
@@ -66,6 +70,10 @@ function inferCategoryFromType(type = "") {
 
     if (normalized.includes("drum") || normalized.includes("guitar") || normalized.includes("trumpet") || normalized.includes("saxophone")) {
         return "instrument";
+    }
+
+    if (["car", "cars", "auto", "autos", "automobile", "vehicle"].includes(normalized)) {
+        return "car";
     }
 
     if (normalized.includes("switch")) {

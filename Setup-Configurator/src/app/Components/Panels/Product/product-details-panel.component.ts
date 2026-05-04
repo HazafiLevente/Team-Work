@@ -9,16 +9,18 @@ import {
 } from '@angular/core';
 import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
-import { Subscription, forkJoin } from 'rxjs';
+import { Subscription } from 'rxjs';
+import { FormsModule } from '@angular/forms';
 
 import { Product } from '../../../Models/Product/product.model';
 import { ProductService } from '../../Services/Home/ProductParts/product/product.service';
+import { SetupNoteService, SetupTarget } from '../../Services/Setup/setup-note.service';
 import { HostListener } from '@angular/core';
 
 @Component({
   selector: 'app-product-details-panel',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './product-details-panel.component.html',
   styleUrls: ['./product-details-panel.component.css']
 })
@@ -37,11 +39,13 @@ export class ProductDetailsPanelComponent implements OnChanges, OnDestroy {
 
   details: any = null;
   setupPickerOpen = false;
-  setupTargets: Array<{ id: number; name: string; isFavorite: boolean }> = [];
+  setupTargets: SetupTarget[] = [];
   pickerLoading = false;
   pickerError: string | null = null;
   pickerSuccess: string | null = null;
   savingTargetId: number | null = null;
+  noteName = '';
+  creatingNote = false;
 
   detailsKeys: string[] = [];
   trackKey = (_: number, k: string) => k;
@@ -55,7 +59,8 @@ export class ProductDetailsPanelComponent implements OnChanges, OnDestroy {
   constructor(
     private productService: ProductService,
     private router: Router,
-    private http: HttpClient
+    private http: HttpClient,
+    private setupNote: SetupNoteService
   ) {}
 
   ngOnChanges(): void {
@@ -262,7 +267,10 @@ export class ProductDetailsPanelComponent implements OnChanges, OnDestroy {
     const x = String(k).toLowerCase();
     return x === 'id' || x === 'created_at' || x === 'updated_at'
       || x === 'price' || x === 'price '
-      || x === 'table' || x === 'table_name';
+      || x === 'table' || x === 'table_name'
+      || x === 'name' || x === 'type'
+      || x === 'source_table' || x === 'product_table'
+      || x === 'category' || x === 'data';
   }
 
   private lockScroll() {
@@ -292,21 +300,25 @@ export class ProductDetailsPanelComponent implements OnChanges, OnDestroy {
     this.setupPickerOpen = false;
     this.pickerError = null;
     this.pickerSuccess = null;
+    this.noteName = '';
   }
 
   get regularTargets() {
-    return this.setupTargets.filter((target) => !target.isFavorite);
+    return this.setupTargets.filter((target) => !target.isFavorite && !target.isNote);
   }
 
   get favoriteTargets() {
-    return this.setupTargets.filter((target) => target.isFavorite);
+    return this.setupTargets.filter((target) => target.isFavorite && !target.isNote);
   }
 
-  addProductToTarget(target: { id: number; name: string; isFavorite: boolean }) {
-    const productId = this.getId(this.product);
-    const sourceTable = this.getTable(this.product);
+  get noteTargets() {
+    return this.setupTargets.filter((target) => target.isNote);
+  }
 
-    if (!productId || !sourceTable) {
+  addProductToTarget(target: SetupTarget) {
+    const payload = this.setupNote.buildDevicePayload(this.product);
+
+    if (!payload) {
       this.pickerError = 'Hianyzik a termek azonositoja.';
       return;
     }
@@ -315,12 +327,7 @@ export class ProductDetailsPanelComponent implements OnChanges, OnDestroy {
     this.pickerError = null;
     this.pickerSuccess = null;
 
-    this.http.post<any>(`/api/setup/${target.id}/save-device`, {
-      product_id: productId,
-      source_table: sourceTable,
-      display_name: this.displayModel || 'Eszkoz',
-      manufacturer: this.displayManufacturer || ''
-    }, { withCredentials: true }).subscribe({
+    this.setupNote.addProductToTarget(target.id, payload).subscribe({
       next: () => {
         this.savingTargetId = null;
         this.pickerSuccess = `Hozzaadva ide: ${target.name}`;
@@ -336,42 +343,45 @@ export class ProductDetailsPanelComponent implements OnChanges, OnDestroy {
     });
   }
 
+  createNoteAndAddProduct() {
+    const name = this.noteName.trim();
+    const payload = this.setupNote.buildDevicePayload(this.product);
+
+    if (!name) {
+      this.pickerError = 'Adj nevet a jegyzetnek.';
+      return;
+    }
+
+    if (!payload) {
+      this.pickerError = 'Hianyzik a termek azonositoja.';
+      return;
+    }
+
+    this.creatingNote = true;
+    this.pickerError = null;
+    this.pickerSuccess = null;
+
+    this.setupNote.createNoteAndAddProduct(name, payload).subscribe({
+      next: () => {
+        this.creatingNote = false;
+        this.pickerSuccess = `Jegyzet letrehozva: ${name}`;
+        this.noteName = '';
+        this.loadSetupTargets();
+      },
+      error: (err) => {
+        this.creatingNote = false;
+        this.pickerError = err?.error?.error || err?.message || 'Nem sikerult letrehozni a jegyzetet.';
+      }
+    });
+  }
+
   private loadSetupTargets() {
     this.pickerLoading = true;
     this.pickerError = null;
 
-    forkJoin({
-      regular: this.http.get<any>('/api/setup?favorite=false', { withCredentials: true }),
-      favorite: this.http.get<any>('/api/setup?favorite=true', { withCredentials: true })
-    }).subscribe({
-      next: ({ regular, favorite }) => {
-        const normalize = (response: any, isFavorite: boolean) => {
-          const items = Array.isArray(response)
-            ? response
-            : (Array.isArray(response?.setups) ? response.setups : []);
-
-          return items
-            .map((item: any) => ({
-              id: Number(item?.id ?? item?.setup_id ?? 0),
-              name: String(item?.setup_name ?? item?.name ?? 'Setup').trim() || 'Setup',
-              isFavorite
-            }))
-            .filter((item: { id: number }) => Number.isFinite(item.id) && item.id > 0);
-        };
-
-        const merged = [...normalize(regular, false), ...normalize(favorite, true)];
-        const preferredOrder = ['mysetup', 'favorite4'];
-
-        this.setupTargets = merged.sort((a, b) => {
-          const ai = preferredOrder.indexOf(a.name.toLowerCase());
-          const bi = preferredOrder.indexOf(b.name.toLowerCase());
-          const aRank = ai === -1 ? 999 : ai;
-          const bRank = bi === -1 ? 999 : bi;
-          if (aRank !== bRank) return aRank - bRank;
-          if (a.isFavorite !== b.isFavorite) return Number(a.isFavorite) - Number(b.isFavorite);
-          return a.name.localeCompare(b.name, 'hu');
-        });
-
+    this.setupNote.loadTargets().subscribe({
+      next: (targets) => {
+        this.setupTargets = targets;
         this.pickerLoading = false;
       },
       error: () => {

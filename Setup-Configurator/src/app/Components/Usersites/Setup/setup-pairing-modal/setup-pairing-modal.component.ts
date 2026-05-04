@@ -23,14 +23,33 @@ export class SetupPairingModalComponent {
     }
 
     public isConnectable(item: any): boolean {
-        const type = String(
-            item?.setup_type ??
-            item?.type ??
-            item?.device_type ??
-            item?.category ??
-            ''
-        ).toLowerCase();
+        const type = [
+            item?.setup_type,
+            item?.type,
+            item?.device_type,
+            item?.category,
+            item?.source_table,
+            item?.table_name,
+            item?.table,
+            item?.slot,
+            item?.display_name,
+            item?.setup_name,
+            item?.name,
+            item?.model
+        ].map((value) => String(value || '').toLowerCase().replace(/[\s-]+/g, '_').trim()).filter(Boolean).join(' ');
 
-        return type.includes('pc') || type.includes('home_theater') || type === 'ht';
+        return (
+            type.includes('pc') ||
+            type.includes('home_theater') ||
+            type === 'ht' ||
+            type.includes('network_card') ||
+            type.includes('network_adapter') ||
+            type.includes('ethernet_adapter') ||
+            type.includes('wifi_adapter') ||
+            type.includes('wi_fi_adapter') ||
+            type.includes('router') ||
+            type.includes('switch') ||
+            type.includes('modem')
+        );
     }
 }

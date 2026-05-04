@@ -33,6 +33,8 @@ import {
 } from '../setup-panel/home-theater-builder/ht-builder/home-theater-builder.component';
 import { CarBuilderPanelComponent } from '../setup-panel/car-builder/car-builder-panel.component';
 import { InstrumentBuilderPanelComponent } from '../setup-panel/instrument-builder/instrument-builder-panel.component';
+import { PcBuilderPanelComponent } from '../setup-panel/pc-builder/pc-builder-panel.component';
+import { NetworkBuilderPanelComponent } from '../setup-panel/network-builder/network-builder-panel.component';
 
 
 export type WorkspaceWindow = {
@@ -47,6 +49,8 @@ export type WorkspaceWindow = {
   minimized: boolean;
   maximized: boolean;
   width?: number;
+  height?: number | null;
+  snapMode?: 'left' | 'right' | null;
 };
 
 @Component({
@@ -73,6 +77,8 @@ export type WorkspaceWindow = {
     HomeTheaterBuilderComponent,
     CarBuilderPanelComponent,
     InstrumentBuilderPanelComponent,
+    PcBuilderPanelComponent,
+    NetworkBuilderPanelComponent,
   ]
 })
 export class WorkspaceComponent {
@@ -87,6 +93,7 @@ export class WorkspaceComponent {
   @Input() connections: any[] = [];
   @Input() globalRoomConnections: any[] = [];
   @Input() viewingSetup: any = null;
+  @Input() hideDock = false;
   @Input() loading = false;
   @Input() loadingItems = false;
 
@@ -119,6 +126,8 @@ export class WorkspaceComponent {
   ctxY = 0;
   ctxSetup: any = null;
   ctxItem: any = null;
+  pendingDeleteItem: any = null;
+  pendingDeleteSetup: any = null;
 
   ctxWorkspaceOpen = false;
   ctxWorkspaceX = 0;
@@ -136,8 +145,12 @@ export class WorkspaceComponent {
   windows: WorkspaceWindow[] = [];
   private nextZIndex = 10000;
 
+  snapAssistWindowId: string | null = null;
+  snapAssistVisible = false;
+  private readonly snapAssistThreshold = 18;
+
   extWidth = 0;
-  extHeight = 0;
+  extHeight = 1100;
 
   @ViewChild('workspaceRoot', { static: true })
   workspaceRoot!: ElementRef<HTMLElement>;
@@ -150,11 +163,21 @@ export class WorkspaceComponent {
   startPanX = 0;
   startPanY = 0;
 
-  confirmDialogState: { isOpen: boolean; title: string; message: string; onConfirm: () => void } | null = null;
+  confirmDialogState: {
+    isOpen: boolean;
+    title: string;
+    message: string;
+    onConfirm: () => void;
+    confirmText?: string;
+    cancelText?: string;
+    hideCancel?: boolean;
+  } | null = null;
 
   constructor(private http: HttpClient) {}
 
   onMouseDown(event: MouseEvent): void {
+    return;
+
     const target = event.target as HTMLElement;
     const isBackground = target.classList.contains('setup-workspace') ||
       target.classList.contains('boundary-area') ||
@@ -215,6 +238,33 @@ export class WorkspaceComponent {
     this.updateLines();
   }
 
+  noteSetups(): any[] {
+    return (this.userSetups || []).filter((setup) => this.isNoteSetup(setup));
+  }
+
+  isNoteSetup(setup: any): boolean {
+    return setup?.isNote === true || setup?.is_note === true || setup?.isnote === true;
+  }
+
+  noteName(setup: any): string {
+    return String(setup?.display_name ?? setup?.setup_name ?? setup?.name ?? 'Jegyzet');
+  }
+
+  noteBookmarkLabel(setup: any, index: number): string {
+    const name = this.noteName(setup).trim();
+    return name ? name.slice(0, 1).toUpperCase() : String(index + 1);
+  }
+
+  noteTrackKey(index: number, setup: any): any {
+    return setup?.id ?? setup?.setup_id ?? setup?.setupId ?? index;
+  }
+
+  openNoteBookmark(setup: any, event?: MouseEvent): void {
+    event?.preventDefault();
+    event?.stopPropagation();
+    this.openDevicesWindow(setup);
+  }
+
   updateLines(): void {
     if (this.rafId) return;
 
@@ -263,6 +313,13 @@ export class WorkspaceComponent {
 
     if (this.ctxSetup && (normalized === 'hangszer' || normalized === 'hangszerek' || normalized === 'instrument' || normalized === 'instruments')) {
       this.openInstrumentBuilderWindow(this.ctxSetup);
+      this.ctxCategoryOpen = false;
+      this.ctxSetup = null;
+      return;
+    }
+
+    if (this.ctxSetup && (normalized === 'hálózat' || normalized === 'halozat' || normalized === 'network' || normalized === 'modem' || normalized === 'router' || normalized === 'switch')) {
+      this.openNetworkBuilderWindow(this.ctxSetup);
       this.ctxCategoryOpen = false;
       this.ctxSetup = null;
       return;
@@ -332,13 +389,16 @@ export class WorkspaceComponent {
 
   onDockItemRightClick(payload: { event: MouseEvent, window: any }): void {
     const rect = this.boundaryEl.nativeElement.getBoundingClientRect();
-    this.ctxDockWindow = payload.window;
-    this.ctxDockX = payload.event.clientX - rect.left;
-    this.ctxDockY = payload.event.clientY - rect.top;
+    const dockItem = payload.event.currentTarget as HTMLElement | null;
+    const dockItemRect = dockItem?.getBoundingClientRect();
 
-    if (this.ctxDockY > rect.height - 150) {
-      this.ctxDockY -= 150;
-    }
+    this.ctxDockWindow = payload.window;
+    this.ctxDockX = dockItemRect
+      ? dockItemRect.left - rect.left + (dockItemRect.width / 2) - 122
+      : payload.event.clientX - rect.left;
+    this.ctxDockY = dockItemRect
+      ? dockItemRect.top - rect.top + 14
+      : payload.event.clientY - rect.top;
 
     this.ctxDockOpen = true;
     this.ctxOpen = false;
@@ -387,6 +447,10 @@ export class WorkspaceComponent {
   }
 
   private getContextItemTableName(item: any): string {
+    if (this.isSetupRoomContext(this.viewingSetup)) return 'setups';
+    if (item?.room_id != null) return 'setups';
+    if (item?.setup_id != null && item?.device_id != null) return 'setup_devices';
+
     return (
       item?.category ??
       item?.source_table ??
@@ -394,6 +458,10 @@ export class WorkspaceComponent {
       item?.table ??
       ''
     );
+  }
+
+  private isSetupRoomContext(setup: any): boolean {
+    return !!setup && setup?.room_id == null;
   }
 
   startRenameForContextItem(): void {
@@ -413,23 +481,48 @@ export class WorkspaceComponent {
 
   private tryDeleteContextItem(
     urls: string[],
-    body: { itemId: any; tableName: string },
+    body: { itemId: any; tableName: string; setupId?: any },
     onSuccess: () => void,
     index = 0
   ): void {
     if (index >= urls.length) {
       console.error('❌ Item törlés hiba: egyik endpoint sem működött.', urls);
-      alert('Törlés sikertelen.');
+      this.showDeleteError('Torles sikertelen.');
       return;
     }
 
     const url = urls[index];
+    const deleteUrl = body.tableName === 'setups'
+      ? `/api/setup/remove-child-setup/${body.itemId}`
+      : url;
+    const deleteBody = body.tableName === 'setups'
+      ? { roomId: body.setupId }
+      : body;
 
-    this.http.request<any>('delete', url, {
-      body,
-      withCredentials: true
-    }).subscribe({
-      next: () => {
+    console.log('[workspace] delete request', {
+      url: deleteUrl,
+      body: deleteBody,
+      ctxItem: this.ctxItem,
+      viewingSetup: this.viewingSetup
+    });
+
+    const request = body.tableName === 'setups'
+      ? this.http.request<any>('delete', deleteUrl, {
+          body: deleteBody,
+          withCredentials: true
+        })
+      : this.http.request<any>('delete', deleteUrl, {
+          body: deleteBody,
+          withCredentials: true
+        });
+
+    request.subscribe({
+      next: (res) => {
+        console.log('[workspace] delete success', {
+          url: deleteUrl,
+          body: deleteBody,
+          response: res
+        });
         onSuccess();
       },
       error: (err) => {
@@ -442,28 +535,60 @@ export class WorkspaceComponent {
         }
 
         console.error('❌ Item törlés hiba:', err);
-        alert('Törlés sikertelen.');
+        this.showDeleteError(err?.error?.error || 'Torles sikertelen.');
       }
     });
   }
 
-  deleteContextItem(): void {
-    if (!this.ctxItem) return;
+  private showDeleteError(message: string): void {
+    this.confirmDialogState = {
+      isOpen: true,
+      title: 'Torles sikertelen',
+      message,
+      confirmText: 'Rendben',
+      hideCancel: true,
+      onConfirm: () => {
+        this.confirmDialogState = null;
+      }
+    };
+  }
 
-    const itemId = this.ctxItem?.id ?? this.ctxItem?.ID ?? this.ctxItem?.item_id;
-    const tableName = this.getContextItemTableName(this.ctxItem);
+  deleteContextItem(): void {
+    const item = this.ctxItem;
+    const setup = this.viewingSetup;
+
+    console.error('[workspace] context delete clicked', {
+      ctxItem: item,
+      viewingSetup: setup
+    });
+
+    if (!item) {
+      console.error('[workspace] context delete stopped: missing ctxItem');
+      return;
+    }
+
+    const itemId = item?.id ?? item?.ID ?? item?.item_id;
+    const tableName = this.getContextItemTableName(item);
 
     if (!itemId || !tableName) {
+      console.error('[workspace] context delete stopped: missing itemId or tableName', {
+        itemId,
+        tableName,
+        ctxItem: item
+      });
       console.error('❌ Hiányzó itemId vagy tableName törléshez:', this.ctxItem);
       return;
     }
 
     const displayName =
-      this.ctxItem?.display_name ??
-      this.ctxItem?.setup_name ??
-      this.ctxItem?.name ??
-      this.ctxItem?.model ??
+      item?.display_name ??
+      item?.setup_name ??
+      item?.name ??
+      item?.model ??
       'Elem';
+
+    this.pendingDeleteItem = { ...item };
+    this.pendingDeleteSetup = setup ? { ...setup } : null;
 
     this.confirmDialogState = {
       isOpen: true,
@@ -477,20 +602,29 @@ export class WorkspaceComponent {
   }
 
   private executeDeleteContextItem(): void {
-    if (!this.ctxItem) return;
+    const item = this.pendingDeleteItem;
+    const setup = this.pendingDeleteSetup ?? this.viewingSetup;
 
-    const itemId = this.ctxItem?.id ?? this.ctxItem?.ID ?? this.ctxItem?.item_id;
-    const tableName = this.getContextItemTableName(this.ctxItem);
+    if (!item) {
+      console.error('[workspace] execute delete stopped: missing pendingDeleteItem');
+      return;
+    }
 
-    const targetKey = this.getContextItemKey(this.ctxItem);
-    const dataId = this.getItemDataId(this.ctxItem);
+    const itemId = item?.id ?? item?.ID ?? item?.item_id;
+    const tableName = this.getContextItemTableName(item);
+    const setupId = item?.setup_id ?? item?.room_id ?? setup?.id ?? setup?.setup_id;
+
+    const targetKey = this.getContextItemKey(item);
+    const dataId = this.getItemDataId(item);
 
     this.tryDeleteContextItem(
       ['/api/setup/remove-item', '/api/remove-item'],
-      { itemId, tableName },
+      { itemId, tableName, setupId },
       () => {
         this.items = this.items.filter(it => this.getContextItemKey(it) !== targetKey);
         this.elementRegistry.delete(dataId);
+        this.pendingDeleteItem = null;
+        this.pendingDeleteSetup = null;
         this.closeContextMenu();
         this.updateLines();
       }
@@ -576,14 +710,26 @@ export class WorkspaceComponent {
   }
 
   openDevicesWindow(setup: any): void {
+    const isNote = setup?.isNote === true || setup?.is_note === true || setup?.isnote === true;
+    const setupName = setup?.setup_name ?? setup?.display_name ?? setup?.name ?? 'Jegyzet';
+    const setupId = setup?.id ?? setup?.setup_id ?? setup?.setupId ?? setupName;
+    const winId = `${isNote ? 'note' : 'devices'}_${setupId}`;
+    const existing = this.windows.find(w => w.id === winId);
+
+    if (existing) {
+      this.windows = this.windows.map(w => w.id === winId ? { ...w, minimized: false, zIndex: ++this.nextZIndex } : w);
+      this.closeContextMenu();
+      return;
+    }
+
     const devicesCount = this.windows.filter(w => w.kind === 'devices').length + 1;
     const offset = (devicesCount - 1) * 28;
 
     const newWindow: WorkspaceWindow = {
-      id: 'win_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
+      id: winId,
       kind: 'devices',
-      title: 'Eszközök',
       payload: { setup },
+      title: isNote ? `Jegyzet: ${setupName}` : 'Eszkozok',
       instanceNo: devicesCount,
       x: 100 + offset,
       y: 100 + offset,
@@ -631,6 +777,34 @@ export class WorkspaceComponent {
       x: 100 + offset,
       y: 60 + offset,
       width: title === 'Házimozi' || title === 'Autók' ? 1100 : undefined,
+      zIndex: ++this.nextZIndex,
+      minimized: false,
+      maximized: false
+    };
+
+    this.closeContextMenu();
+    this.windows = [...this.windows, newWindow];
+  }
+
+  openPcBuilderWindow(setup: any): void {
+    const setupId = setup?.id ?? setup?.setup_id ?? setup?.setupId ?? Date.now();
+    const winId = 'pc_builder_' + setupId;
+
+    const existing = this.windows.find(w => w.id === winId);
+    if (existing) {
+      this.focusWindow(winId);
+      return;
+    }
+
+    const newWindow: WorkspaceWindow = {
+      id: winId,
+      kind: 'empty',
+      title: 'Szamitogep',
+      payload: { setup },
+      instanceNo: this.windows.length + 1,
+      x: 140,
+      y: 70,
+      width: 1100,
       zIndex: ++this.nextZIndex,
       minimized: false,
       maximized: false
@@ -696,6 +870,34 @@ export class WorkspaceComponent {
     this.windows = [...this.windows, newWindow];
   }
 
+  private openNetworkBuilderWindow(setup: any): void {
+    const setupId = setup?.id ?? setup?.setup_id ?? setup?.setupId ?? Date.now();
+    const winId = 'network_builder_' + setupId;
+
+    const existing = this.windows.find(w => w.id === winId);
+    if (existing) {
+      this.focusWindow(winId);
+      return;
+    }
+
+    const newWindow: WorkspaceWindow = {
+      id: winId,
+      kind: 'empty',
+      title: 'Halozat',
+      payload: { setup },
+      instanceNo: this.windows.length + 1,
+      x: 180,
+      y: 110,
+      width: 760,
+      zIndex: ++this.nextZIndex,
+      minimized: false,
+      maximized: false
+    };
+
+    this.closeContextMenu();
+    this.windows = [...this.windows, newWindow];
+  }
+
   openConnectionsWindow(setup: any): void {
     const connCount = this.windows.filter(w => w.kind === 'connections').length + 1;
     const offset = (connCount - 1) * 28;
@@ -748,20 +950,110 @@ export class WorkspaceComponent {
     if (idx !== -1) {
       this.windows[idx].x = pos.x;
       this.windows[idx].y = pos.y;
+      this.windows[idx].snapMode = null;
+      this.windows[idx].height = null;
       this.calculateWorkspaceExtension();
     }
+  }
+
+  resizeWindow(id: string, size: { width: number, height: number, x: number, y: number }): void {
+    const idx = this.windows.findIndex(w => w.id === id);
+    if (idx === -1) return;
+
+    this.windows[idx] = {
+      ...this.windows[idx],
+      x: size.x,
+      y: size.y,
+      width: size.width,
+      height: size.height,
+      maximized: false,
+      snapMode: null
+    };
+
+    this.calculateWorkspaceExtension();
+  }
+
+  onWindowDragMoved(id: string, pos: { x: number, y: number }): void {
+    if (pos.y <= this.snapAssistThreshold) {
+      this.snapAssistWindowId = id;
+      this.snapAssistVisible = true;
+      return;
+    }
+
+    if (this.snapAssistWindowId === id) {
+      this.snapAssistVisible = false;
+      this.snapAssistWindowId = null;
+    }
+  }
+
+  onWindowDragEnded(id: string, pos: { x: number, y: number }): void {
+    this.updateWindowPosition(id, pos);
+
+    if (pos.y <= this.snapAssistThreshold) {
+      this.snapAssistWindowId = id;
+      this.snapAssistVisible = true;
+    }
+  }
+
+  closeSnapAssist(): void {
+    this.snapAssistVisible = false;
+    this.snapAssistWindowId = null;
+  }
+
+  applySnapLayout(mode: 'max' | 'left' | 'right'): void {
+    const id = this.snapAssistWindowId;
+    const boundary = this.boundaryEl?.nativeElement;
+    if (!id || !boundary) return;
+
+    const width = boundary.clientWidth;
+    const height = boundary.clientHeight;
+    const halfWidth = Math.max(420, Math.floor(width / 2));
+
+    this.windows = this.windows.map(w => {
+      if (w.id !== id) return w;
+
+      if (mode === 'max') {
+        return {
+          ...w,
+          x: 0,
+          y: 0,
+          width: undefined,
+          height: null,
+          snapMode: null,
+          maximized: true,
+          minimized: false,
+          zIndex: ++this.nextZIndex
+        };
+      }
+
+      return {
+        ...w,
+        x: mode === 'left' ? 0 : Math.max(0, width - halfWidth),
+        y: 0,
+        width: halfWidth,
+        height,
+        snapMode: mode,
+        maximized: false,
+        minimized: false,
+        zIndex: ++this.nextZIndex
+      };
+    });
+
+    this.closeSnapAssist();
+    this.calculateWorkspaceExtension();
   }
 
   private calculateWorkspaceExtension(): void {
     if (!this.boundaryEl) return;
 
+    const defaultWorkspaceHeight = 1100;
     let maxX = 0;
-    let maxY = 0;
+    let maxY = defaultWorkspaceHeight;
 
     this.windows.forEach(w => {
       if (w.minimized) return;
       const width = w.width || 420;
-      const height = 500;
+      const height = this.getEstimatedWindowHeight(w);
 
       const right = w.x + width;
       const bottom = w.y + height;
@@ -774,9 +1066,21 @@ export class WorkspaceComponent {
     const margin = 100;
 
     this.extWidth = maxX > rect.width ? maxX + margin : 0;
-    this.extHeight = maxY > rect.height ? maxY + margin : 0;
+    this.extHeight = Math.max(defaultWorkspaceHeight, rect.height, maxY + margin);
 
     this.updateLines();
+  }
+
+  private getEstimatedWindowHeight(window: WorkspaceWindow): number {
+    if (window.kind === 'pairing') return 560;
+    if (window.kind === 'devices' || window.kind === 'connections') return 560;
+
+    const title = String(window.title || '').toLowerCase();
+    if (title.includes('szamitogep')) return 780;
+    if (title.includes('házimozi') || title.includes('hazimozi')) return 720;
+    if (title.includes('aut') || title.includes('hangszer')) return 700;
+
+    return 560;
   }
 
   onWindowClosed(id: string): void {
@@ -789,6 +1093,9 @@ export class WorkspaceComponent {
 
   closeWindow(id: string): void {
     this.windows = this.windows.filter(w => w.id !== id);
+    if (this.snapAssistWindowId === id) {
+      this.closeSnapAssist();
+    }
   }
 
   minimizeWindow(id: string): void {
@@ -804,7 +1111,8 @@ export class WorkspaceComponent {
   }
 
   toggleMaximizeWindow(id: string): void {
-    this.windows = this.windows.map(w => w.id === id ? { ...w, maximized: !w.maximized, minimized: false, zIndex: ++this.nextZIndex } : w);
+    this.windows = this.windows.map(w => w.id === id ? { ...w, maximized: !w.maximized, minimized: false, snapMode: null, height: null, zIndex: ++this.nextZIndex } : w);
+    this.closeSnapAssist();
   }
 
   onRoomDragEnded(setup: any, pos: any): void {
@@ -926,18 +1234,28 @@ export class WorkspaceComponent {
   }
 
   private getConnectionCategoryForItem(item: any): string {
-    const setupType = String(
-      item?.setup_type ??
-      item?.type ??
-      item?.device_type ??
-      item?.category ??
-      item?.source_table ??
-      item?.table_name ??
-      ''
-    ).toLowerCase().replace('[setup]', '').trim();
+    const setupType = [
+      item?.setup_type,
+      item?.type,
+      item?.device_type,
+      item?.category,
+      item?.source_table,
+      item?.table_name,
+      item?.table,
+      item?.slot,
+      item?.display_name,
+      item?.setup_name,
+      item?.name,
+      item?.model
+    ].map((value) => String(value || '').toLowerCase().replace('[setup]', '').replace(/[\s-]+/g, '_').trim()).filter(Boolean).join(' ');
 
     if (!setupType || setupType === 'room') return 'setup';
     if (setupType.includes('pc')) return 'pc';
+    if (setupType.includes('network_card')) return 'network_card';
+    if (setupType.includes('network_adapter')) return 'network_card';
+    if (setupType.includes('ethernet_adapter')) return 'network_card';
+    if (setupType.includes('wifi_adapter')) return 'network_card';
+    if (setupType.includes('wi_fi_adapter')) return 'network_card';
     if (setupType.includes('switch')) return 'switch';
     if (setupType.includes('router')) return 'router';
     if (setupType.includes('modem')) return 'modem';

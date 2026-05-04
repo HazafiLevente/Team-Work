@@ -72,6 +72,25 @@ export class SetupItemCardComponent implements OnInit, AfterViewInit {
     );
   }
 
+  isCircularNetworkType(): boolean {
+    const rawValues = [
+      this.item?.setup_type,
+      this.item?.type,
+      this.item?.device_type,
+      this.item?.category,
+      this.item?.source_table,
+      this.item?.display_name,
+      this.item?.setup_name,
+      this.item?.name
+    ];
+
+    const normalized = rawValues
+      .map((value) => String(value || '').toLowerCase().trim())
+      .join(' ');
+
+    return ['modem', 'router', 'switch'].some((token) => normalized.includes(token));
+  }
+
   startRename(): void {
     this.isRenaming = true;
     this.renameValue = this.displayName;

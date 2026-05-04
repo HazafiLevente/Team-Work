@@ -10,7 +10,7 @@
   box-shadow:
     0 10px 30px rgba(0, 0, 0, 0.5),
     0 0 20px rgba(82, 39, 255, 0.1);
-  z-index: 10005;
+  z-index: 13000;
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
   animation: menuAppear 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }

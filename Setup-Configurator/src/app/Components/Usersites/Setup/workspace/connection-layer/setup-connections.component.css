@@ -22,9 +22,9 @@
 }
 
 .connection-line.ghost-line {
-  stroke: #00a8ff;
+  stroke: #a855f7;
   stroke-dasharray: 8 8;
-  opacity: 0.8;
+  opacity: 0.9;
 }
 
 .connection-label {

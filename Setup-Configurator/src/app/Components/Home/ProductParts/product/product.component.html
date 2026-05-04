@@ -1,4 +1,9 @@
-<div class="product-card" (click)="open()">
+<div
+  class="product-card"
+  draggable="true"
+  (click)="open()"
+  (dragstart)="onDragStart($event)"
+  (dragend)="onDragEnd()">
   <img [src]="imageUrl" alt="product image" class="product-img" />
 
   <h3>{{ displayName }}</h3>

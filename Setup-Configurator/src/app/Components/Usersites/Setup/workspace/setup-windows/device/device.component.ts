@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 @Component({
@@ -11,6 +11,8 @@ import { CommonModule } from '@angular/common';
 export class DeviceComponent {
 
   @Input() device: any;
+  @Input() deleting = false;
+  @Output() deleteDevice = new EventEmitter<any>();
 
   getDeviceType(): string {
 
@@ -23,6 +25,15 @@ export class DeviceComponent {
     if (cat.includes('home_theater')) return 'ht';
 
     return 'device';
+  }
+
+  onDelete(event: MouseEvent): void {
+    event.stopPropagation();
+    console.error('[device-card] delete button clicked', {
+      device: this.device,
+      deleting: this.deleting
+    });
+    this.deleteDevice.emit(this.device);
   }
 
 }

@@ -84,6 +84,10 @@ export class SetupRoomComponent implements AfterViewInit {
     const type = String(this.setup?.setup_type ?? this.setup?.type ?? '').toLowerCase();
     return type === 'home_theater' || type === 'hometheater' || type === 'home theater';
   }
+
+  isNote(): boolean {
+    return this.setup?.isNote === true || this.setup?.is_note === true || this.setup?.isnote === true;
+  }
   startRename(): void {
 
     this.editing = true;

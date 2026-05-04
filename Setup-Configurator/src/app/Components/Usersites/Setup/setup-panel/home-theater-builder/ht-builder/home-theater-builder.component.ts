@@ -44,6 +44,16 @@ export class HomeTheaterBuilderComponent implements OnInit, OnChanges {
     saving = false;
 
     connectingFrom: string | null = null;
+    readonly categoryOrder = [
+        'reciever',
+        'audio_processor',
+        'front_speaker',
+        'center_speaker',
+        'side_speaker',
+        'back_speaker',
+        'subwoofer',
+        'speaker'
+    ];
 
     constructor(
         private http: HttpClient,
@@ -147,9 +157,9 @@ export class HomeTheaterBuilderComponent implements OnInit, OnChanges {
         const newItem: HTItem = {
             id: 'item_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
             ref_id: product.id,
-            name: product.model || 'Ismeretlen',
-            manufacturer: product.manufacturer || '',
-            type: product.type || category,
+            name: product.model || product.name || 'Ismeretlen',
+            manufacturer: product.manufacturer || product.brand || '',
+            type: 'ht',
             category: category,
             x: 100,
             y: 100,
@@ -215,15 +225,15 @@ export class HomeTheaterBuilderComponent implements OnInit, OnChanges {
     }
 
     getFilteredCatalog() {
-        if (!this.searchQuery) return this.catalog;
-
         const q = this.searchQuery.toLowerCase();
         const filtered: any = {};
 
-        Object.keys(this.catalog).forEach(cat => {
-            filtered[cat] = this.catalog[cat].filter((p: any) =>
+        this.categoryOrder.forEach(cat => {
+            const products = Array.isArray(this.catalog?.[cat]) ? this.catalog[cat] : [];
+            filtered[cat] = !q ? products : products.filter((p: any) =>
                 (p.manufacturer && p.manufacturer.toLowerCase().includes(q)) ||
-                (p.model && p.model.toLowerCase().includes(q))
+                (p.model && p.model.toLowerCase().includes(q)) ||
+                (p.name && p.name.toLowerCase().includes(q))
             );
         });
 
@@ -231,10 +241,24 @@ export class HomeTheaterBuilderComponent implements OnInit, OnChanges {
     }
 
     getCategoryKeys() {
-        return Object.keys(this.catalog);
+        const filtered = this.getFilteredCatalog();
+        return this.categoryOrder.filter((key) => Array.isArray(filtered?.[key]) && filtered[key].length > 0);
     }
 
     getCategoryName(key: string): string {
+        const orderedNames: any = {
+            reciever: 'Reciever',
+            audio_processor: 'Audio processor',
+            front_speaker: 'Front speaker',
+            center_speaker: 'Center speaker',
+            side_speaker: 'Side speaker',
+            back_speaker: 'Back speaker',
+            subwoofer: 'Subwoofer',
+            speaker: 'Speakers'
+        };
+
+        if (orderedNames[key]) return orderedNames[key];
+
         const names: any = {
             receivers: 'Erősítők / Receiverek',
             frontSpeakers: 'Front Hangszórók',
@@ -248,6 +272,19 @@ export class HomeTheaterBuilderComponent implements OnInit, OnChanges {
             bassAmplifiers: 'Basszus Erősítők'
         };
         return names[key] || key;
+    }
+
+    getCategoryCount(key: string): number {
+        const filtered = this.getFilteredCatalog();
+        return Array.isArray(filtered?.[key]) ? filtered[key].length : 0;
+    }
+
+    getProductName(product: any): string {
+        return String(product?.model || product?.name || 'Ismeretlen');
+    }
+
+    getProductBrand(product: any): string {
+        return String(product?.manufacturer || product?.brand || product?.category || '');
     }
 
 

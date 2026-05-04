@@ -1,7 +1,7 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { Router, RouterOutlet } from '@angular/router';
+import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { Subscription, Observable } from 'rxjs';
+import { filter, Subscription, Observable } from 'rxjs';
 
 import { AuthService } from './Components/Services/Auth/auth.service';
 import { UiSettingsService, UiThemeKey } from './Components/Services/SettingService/ui-settings.service';
@@ -47,6 +47,7 @@ export class App implements OnInit, OnDestroy {
 
   user$!: Observable<any | null>;
   dockItems: DockItemData[] = [];
+  hideGlobalDock = false;
   private readonly themePalettes: Record<UiThemeKey, ThemePalette> = {
     'clean-cyan': {
       pageAccent: '#67e8f9',
@@ -117,6 +118,14 @@ export class App implements OnInit, OnDestroy {
 
     this.user$ = this.auth.user$;
 
+    this.hideGlobalDock = this.shouldHideGlobalDock(this.router.url);
+
+    this.sub = this.router.events
+      .pipe(filter((event): event is NavigationEnd => event instanceof NavigationEnd))
+      .subscribe((event) => {
+        this.hideGlobalDock = this.shouldHideGlobalDock(event.urlAfterRedirects || event.url);
+      });
+
     this.userSub = this.user$.subscribe(user => {
       if (!user) {
         this.dockItems = [];
@@ -171,6 +180,10 @@ export class App implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.sub?.unsubscribe();
     this.userSub?.unsubscribe();
+  }
+
+  private shouldHideGlobalDock(url: string): boolean {
+    return url.startsWith('/user/setup') || url.startsWith('/user/favorite');
   }
 
   private applyTheme(theme: UiThemeKey, darkMode: boolean) {

@@ -32,7 +32,7 @@ const PRODUCT_TYPE_TO_TABLE = {
 
 const CATEGORY_ALIASES = {
     all: [],
-    car: ["car", "cars", "cabrio_cars", "coupe_cars", "crossover_cars", "hatchback_cars", "mpv_cars", "pickup_cars", "wagon_cars"],
+    car: ["car", "cars", "auto", "autos", "automobile", "vehicle", "cabrio_cars", "coupe_cars", "crossover_cars", "hatchback_cars", "mpv_cars", "pickup_cars", "wagon_cars"],
     computer: ["computer", "computers", "pc", "pcs", "processors", "video_cards", "ram", "storage", "psu", "motherboard", "cpu", "cpu_coolers", "soundcards", "storages"],
     ht: [
         "ht",

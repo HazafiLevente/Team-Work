@@ -25,4 +25,11 @@
       }
     }
   }
+
+  @if (pairingStage === 'PICK_TARGET_SETUP' || pairingStage === 'PICK_TARGET_ITEM') {
+    <path
+      [attr.d]="getGhostLinePath()"
+      class="connection-line ghost-line">
+    </path>
+  }
 </svg>
