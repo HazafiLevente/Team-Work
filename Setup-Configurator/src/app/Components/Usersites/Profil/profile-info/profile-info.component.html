@@ -1,14 +1,15 @@
 <section class="section">
 
   <div class="section-header">
-    <h3>Profil adatok</h3>
-    <span>Felhasználónév, elérhetőség</span>
+    <div>
+      <h3>Profil adatok</h3>
+      <span>Felhasználónév, elérhetőség</span>
+    </div>
   </div>
 
   <div class="section-hr"></div>
 
   <div class="profile-display" [formGroup]="form">
-
 
     <div class="profile-row">
       <label>Felhasználónév</label>
@@ -21,7 +22,6 @@
         (keydown.enter)="saveField()" />
     </div>
 
-
     <div class="profile-row">
       <label>Teljes név</label>
 
@@ -32,7 +32,6 @@
       <input *ngIf="editingField === 'fullname'" formControlName="fullname" (blur)="saveField()"
         (keydown.enter)="saveField()" />
     </div>
-
 
     <div class="profile-row">
       <label>Telefonszám</label>
@@ -45,7 +44,6 @@
         (keydown.enter)="saveField()" />
     </div>
 
-
     <div class="profile-row">
       <label>Életkor</label>
 
@@ -56,7 +54,6 @@
       <input *ngIf="editingField === 'age'" type="number" formControlName="age" (blur)="saveField()"
         (keydown.enter)="saveField()" />
     </div>
-
 
     <div class="profile-row">
       <label>Város</label>
@@ -69,10 +66,9 @@
         (keydown.enter)="saveField()" />
     </div>
 
-
     <div class="profile-row">
       <label>Setupok összértéke</label>
-      <span class="price-badge" style="font-weight: bold; color: #5227FF;">
+      <span class="price-badge">
         {{ totalPrice | number:'1.0-0' }} Ft
       </span>
     </div>

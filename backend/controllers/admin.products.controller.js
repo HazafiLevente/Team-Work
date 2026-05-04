@@ -1,5 +1,6 @@
 const { supabase } = require("../services/supabase");
 const { listProducts, clampLimit } = require("../services/products/productCatalog.service");
+const { awardRankPointsSafe } = require("../services/rankPoints.service");
 
 async function list(req, res) {
     const q = (req.query.q ?? "").trim();
@@ -37,6 +38,7 @@ async function create(req, res) {
     });
 
     if (error) return res.status(500).json({ error: error.message });
+    await awardRankPointsSafe(req.user?.id, "product_add");
     res.json({ id: data });
 }
 
@@ -48,6 +50,7 @@ async function remove(req, res) {
     });
 
     if (error) return res.status(500).json({ error: error.message });
+    await awardRankPointsSafe(req.user?.id, "product_delete");
     res.json({ success: true });
 }
 

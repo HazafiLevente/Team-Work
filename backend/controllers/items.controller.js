@@ -1,4 +1,5 @@
 const { getProductByRoute } = require("../services/products/productCatalog.service");
+const { awardRankPointsSafe } = require("../services/rankPoints.service");
 
 exports.getOne = async (req, res) => {
     const table = String(req.params.table || "").trim();
@@ -19,6 +20,8 @@ exports.getOne = async (req, res) => {
         if (!item) {
             return res.status(404).json({ error: "Not found", table, id: idRaw });
         }
+
+        await awardRankPointsSafe(req.user?.id, "product_view");
 
         return res.json({ item, source: "supabase" });
     } catch (error) {

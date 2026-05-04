@@ -3,7 +3,7 @@
   margin: 0;
   padding: 82px 20px 28px;
   display: grid;
-  grid-template-columns: 84px minmax(0, 1fr);
+  grid-template-columns: 220px minmax(0, 1fr);
   gap: 20px;
   box-sizing: border-box;
   min-height: 100vh;
@@ -11,7 +11,7 @@
 
 
 .usersite-sidebar {
-  width: 84px;
+  width: 220px;
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -79,10 +79,17 @@
 
 .nav-label {
   white-space: nowrap;
-  opacity: 0;
-  transform: translateX(-6px);
+  opacity: 1;
+  transform: none;
   transition: opacity .18s ease, transform .18s ease;
-  pointer-events: none;
+  pointer-events: auto;
+}
+
+.usersite-sidebar:hover .nav-label,
+.usersite-sidebar:focus-within .nav-label {
+  opacity: 1;
+  transform: none;
+  pointer-events: auto;
 }
 
 body[data-appearance="light"] .usersite-sidebar {

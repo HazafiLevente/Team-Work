@@ -11,10 +11,12 @@ function registerProcessEvents() {
 
     process.on("uncaughtException", (error) => {
         console.error("[SERVER] uncaughtException:", error);
+        process.exitCode = 1;
     });
 
     process.on("unhandledRejection", (reason) => {
         console.error("[SERVER] unhandledRejection:", reason);
+        process.exitCode = 1;
     });
 
     process.on("SIGINT", () => {

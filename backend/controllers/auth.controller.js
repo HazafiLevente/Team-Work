@@ -7,6 +7,7 @@ const { sendRegisterCode } = require("../services/mailer");
 const { OAuth2Client } = require("google-auth-library");
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 const crypto = require("crypto");
+const { awardRankPointsSafe } = require("../services/rankPoints.service");
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
@@ -90,6 +91,8 @@ exports.googleLogin = async (req, res) => {
             await supabase
                 .from("user_more[Auth]")
                 .insert({ user_id: user.ID });
+
+            await awardRankPointsSafe(user.ID, "register");
         }
 
 
@@ -137,6 +140,7 @@ exports.register = async (req, res) => {
         if (error) return res.status(500).json({ error: error.message });
 
         await supabase.from("user_more[Auth]").insert({ user_id: user.ID });
+        await awardRankPointsSafe(user.ID, "register");
 
         const token = jwt.sign({
             id: user.ID,
@@ -273,6 +277,7 @@ exports.verifyRegisterCode = async (req, res) => {
         .single();
 
     await supabase.from("user_more[Auth]").insert({ user_id: user.ID });
+    await awardRankPointsSafe(user.ID, "register");
 
     const token = jwt.sign({
         id: user.ID,
