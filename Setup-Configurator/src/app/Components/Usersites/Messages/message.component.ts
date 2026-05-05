@@ -365,11 +365,11 @@ export class MessagesComponent implements OnInit, OnDestroy {
   }
 
   openDetailedProfile() {
-    const username = this.profileTarget?.user?.username;
-    if (!username) return;
+    const profileName = this.profileTarget?.user?.name || this.profileTarget?.user?.username;
+    if (!profileName) return;
 
     this.closeProfileModal();
-    const urlName = this.auth.formatNameForUrl(username);
+    const urlName = this.auth.formatNameForUrl(profileName);
     this.router.navigate(['/user/profile', urlName]);
   }
 

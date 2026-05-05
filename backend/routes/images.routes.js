@@ -1,10 +1,17 @@
+/**
+ * --------------------------------------------------------------------------
+ *  IMAGE ASSETS ROUTES
+ * --------------------------------------------------------------------------
+ *  Exposes metadata and file paths for static image resources.
+ */
+
 const express = require("express");
 const path = require("path");
 const fs = require("fs");
 
 const router = express.Router();
 
-
+// Define data source path
 const IMAGES_JSON_PATH = path.join(
     __dirname,
     "..",
@@ -14,6 +21,7 @@ const IMAGES_JSON_PATH = path.join(
     "images.json"
 );
 
+// Retrieve all image metadata from JSON storage
 router.get("/", (req, res) => {
     try {
         if (!fs.existsSync(IMAGES_JSON_PATH)) {

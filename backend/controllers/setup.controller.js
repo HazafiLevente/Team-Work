@@ -933,6 +933,65 @@ function normalizeItemTableName(tableName) {
     return String(tableName || "").trim();
 }
 
+function normalizeUniqueNameKey(value) {
+    return String(value || "").trim().replace(/\s+/g, " ").toLowerCase();
+}
+
+function splitNumberedName(value) {
+    const clean = String(value || "").trim().replace(/\s+/g, " ");
+    const match = clean.match(/^(.*?)(?:\s+(\d+))?$/);
+    const base = String(match?.[1] || clean || "Nevtelen").trim() || "Nevtelen";
+    const number = match?.[2] ? Number(match[2]) : null;
+    return { base, number: Number.isFinite(number) ? number : null };
+}
+
+function nextUniqueName(desiredName, existingNames) {
+    const clean = String(desiredName || "").trim().replace(/\s+/g, " ") || "Nevtelen";
+    const existing = new Set((existingNames || []).map(normalizeUniqueNameKey).filter(Boolean));
+    if (!existing.has(normalizeUniqueNameKey(clean))) return clean;
+
+    const { base, number } = splitNumberedName(clean);
+    let suffix = Math.max(Number(number || 1), 1) + 1;
+    let candidate = `${base} ${suffix}`;
+
+    while (existing.has(normalizeUniqueNameKey(candidate))) {
+        suffix += 1;
+        candidate = `${base} ${suffix}`;
+    }
+
+    return candidate;
+}
+
+async function getUniqueRoomNameForUser(userId, desiredName, excludeRoomId = null) {
+    const { data, error } = await supabase
+        .from(ROOMS_TABLE)
+        .select("id, name")
+        .eq("user_id", Number(userId));
+
+    if (error) throw error;
+
+    const names = (data || [])
+        .filter((row) => excludeRoomId == null || String(row.id) !== String(excludeRoomId))
+        .map((row) => row.name);
+
+    return nextUniqueName(desiredName, names);
+}
+
+async function getUniqueChildSetupName(roomId, desiredName, excludeSetupId = null) {
+    const { data, error } = await supabase
+        .from(SETUPS_TABLE)
+        .select("id, name")
+        .eq("room_id", Number(roomId));
+
+    if (error) throw error;
+
+    const names = (data || [])
+        .filter((row) => excludeSetupId == null || String(row.id) !== String(excludeSetupId))
+        .map((row) => row.name);
+
+    return nextUniqueName(desiredName, names);
+}
+
 async function deleteRowsByIds(tableName, columnName, ids) {
     const normalizedIds = uniqueNumericIds(ids);
     if (!normalizedIds.length) return;
@@ -1635,8 +1694,9 @@ exports.list = async (req, res) => {
             if (!listState) return res.json({ setups: [] });
 
             const setupIds = new Set((listState.setupIds || []).map((id) => String(id)));
+            const listRooms = normalized.filter((room) => setupIds.has(String(room.id)) || room.isNote);
             return res.json({
-                setups: normalized.filter((room) => setupIds.has(String(room.id)) || room.isNote)
+                setups: hasPlan ? listRooms.filter((room) => room.isPlan === planBool) : listRooms
             });
         }
 
@@ -1974,7 +2034,7 @@ exports.update = async (req, res) => {
 
         if (setup_name !== undefined) {
             const trimmedName = String(setup_name || "").trim();
-            updateData.name = trimmedName;
+            updateData.name = await getUniqueRoomNameForUser(userId, trimmedName, setupId);
         }
 
         if (Object.keys(updateData).length === 0) {
@@ -2028,6 +2088,7 @@ exports.create = async (req, res) => {
 
         const setup_name = String(req.body?.setup_name ?? req.body?.name ?? "").trim();
         if (!setup_name) return res.status(400).json({ error: "setup_name required" });
+        const uniqueSetupName = await getUniqueRoomNameForUser(userId, setup_name);
 
         const isFavorite = normalizeBoolean(req.body?.isFavorite);
         const isNote = normalizeBoolean(req.body?.isNote);
@@ -2041,7 +2102,7 @@ exports.create = async (req, res) => {
             .from(ROOMS_TABLE)
             .insert([{
                 user_id: Number(userId),
-                name: setup_name,
+                name: uniqueSetupName,
                 pos_x: x,
                 pos_y: y,
                 is_plan: isPlan || isFavorite,
@@ -2085,8 +2146,8 @@ exports.create = async (req, res) => {
         return res.json({
             setup: {
                 ...data,
-                setup_name: data.name ?? setup_name,
-                name: data.name ?? setup_name,
+                setup_name: data.name ?? uniqueSetupName,
+                name: data.name ?? uniqueSetupName,
                 setup_type: "room",
                 type: "room",
                 x: Number(data.pos_x ?? x),
@@ -2122,8 +2183,25 @@ exports.addDevice = async (req, res) => {
         const ok = await assertSetupOwnedByUser(setupId, userId);
         if (!ok) return res.status(403).json({ error: "Forbidden" });
 
-        const itemName = String(display_name || manufacturer || "Product").trim() || "Product";
-        const itemType = "product";
+        const { data: productRow, error: productErr } = await supabase
+            .from("products")
+            .select("id, type, category")
+            .eq("id", Number(product_id))
+            .limit(1)
+            .maybeSingle();
+
+        if (productErr) {
+            console.error("addDevice product lookup error:", productErr);
+        }
+
+        const itemName = await getUniqueChildSetupName(setupId, String(display_name || manufacturer || "Product").trim() || "Product");
+        const pType = String(productRow?.type || "").trim().toLowerCase();
+        const pCategory = String(productRow?.category || "").trim().toLowerCase();
+
+        // Special-case ready computers so they can participate in PC connection flows.
+        // Requirement: products.type === 'pc' and products.category is 'desktop'|'laptop'
+        const isReadyPc = pType === "pc" && (pCategory === "desktop" || pCategory === "laptop");
+        const itemType = isReadyPc ? "pc" : "product";
         const sourceTable = String(source_table || "products").trim() || "products";
 
         const { data: createdSetup, error: setupError } = await supabase
@@ -2353,12 +2431,13 @@ exports.pcBuildsCreate = async (req, res) => {
 
         const pc_name = (req.body?.pc_name || "").trim();
         if (!pc_name) return res.status(400).json({ error: "pc_name required" });
+        const uniquePcName = await getUniqueChildSetupName(setupId, pc_name);
 
         const { data, error } = await supabase
             .from(SETUPS_TABLE)
             .insert([{
                 room_id: Number(setupId),
-                name: pc_name,
+                name: uniquePcName,
                 type: "pc",
                 pos_x: 0,
                 pos_y: 0
@@ -2372,7 +2451,7 @@ exports.pcBuildsCreate = async (req, res) => {
         return res.json({
             pc: {
                 ...data,
-                setup_name: data.name ?? pc_name,
+                setup_name: data.name ?? uniquePcName,
                 setup_type: "pc",
                 x: Number(data.pos_x ?? 0),
                 y: Number(data.pos_y ?? 0)
@@ -2703,7 +2782,7 @@ exports.carsAdd = async (req, res) => {
             return res.status(400).json({ error: "A kiválasztott termék nem autó típusú" });
         }
 
-        const setup_name = String(product.name || "").trim() || `Autó #${car_id}`;
+        const setup_name = await getUniqueChildSetupName(setupId, String(product.name || "").trim() || `Auto #${car_id}`);
 
         const { data, error } = await supabase
             .from(SETUPS_TABLE)
@@ -2858,7 +2937,7 @@ exports.instrumentsAdd = async (req, res) => {
             return res.status(400).json({ error: "A kiválasztott termék nem hangszer típusú" });
         }
 
-        const setup_name = String(product.name || "").trim() || `Hangszer #${instrument_id}`;
+        const setup_name = await getUniqueChildSetupName(setupId, String(product.name || "").trim() || `Hangszer #${instrument_id}`);
 
         const { data, error } = await supabase
             .from(SETUPS_TABLE)
@@ -2993,7 +3072,7 @@ exports.networkAdd = async (req, res) => {
             return res.status(400).json({ error: "A kivalasztott termek nem modem/router/switch tipus" });
         }
 
-        const setupName = String(product.name || "").trim() || `${networkType} #${productId}`;
+        const setupName = await getUniqueChildSetupName(setupId, String(product.name || "").trim() || `${networkType} #${productId}`);
 
         const { data, error } = await supabase
             .from(SETUPS_TABLE)
@@ -3266,19 +3345,21 @@ exports.connectionsCreate = async (req, res) => {
         const userId = req.user.id;
         const fromDeviceType = String(req.body?.from_device_type || "").toLowerCase().trim();
         const toDeviceType = String(req.body?.to_device_type || "").toLowerCase().trim();
-        const allowedTypes = new Set([
-            "pc",
-            "ht",
-            "home_theater",
-            "network_card",
-            "network_adapter",
-            "ethernet_adapter",
-            "wifi_adapter",
-            "wi_fi_adapter",
-            "router",
-            "switch",
-            "modem"
-        ]);
+        const allowPcHtLinks =
+            req.body?.allow_pc_ht_links === true ||
+            req.body?.allow_pc_ht_links === "true" ||
+            req.body?.allow_pc_ht_links === 1 ||
+            req.body?.allow_pc_ht_links === "1";
+
+        const norm = (v) =>
+            String(v || "")
+                .toLowerCase()
+                .replace("[setup]", "")
+                .replace(/[\s-]+/g, "_")
+                .trim();
+
+        const isNetwork = (t) => ["router", "switch", "modem"].includes(norm(t));
+        const isPcOrHt = (t) => ["pc", "ht", "home_theater"].includes(norm(t));
         const setupFromId = Number(
             req.body?.setup_from ?? req.body?.from_setup_id ?? req.body?.setup_id ?? 0
         );
@@ -3290,8 +3371,41 @@ exports.connectionsCreate = async (req, res) => {
             return res.status(400).json({ error: "Missing required connection fields" });
         }
 
-        if (!allowedTypes.has(fromDeviceType) || !allowedTypes.has(toDeviceType)) {
-            return res.status(400).json({ error: "Only PC, home theater and network devices can be connected" });
+        // Rules:
+        // - default: PC/HT only connect to network endpoints (router/switch/modem)
+        // - network endpoints can connect to anything
+        // - allowPcHtLinks: allow PC↔PC, PC↔HT, HT↔HT
+        const canConnect =
+            isNetwork(fromDeviceType) ||
+            isNetwork(toDeviceType) ||
+            (allowPcHtLinks && isPcOrHt(fromDeviceType) && isPcOrHt(toDeviceType));
+
+        if (!canConnect) {
+            return res.status(400).json({ error: "Connection not allowed by rules" });
+        }
+
+        // Limit: a PC/HT can have only one network endpoint connection.
+        // If the new connection involves a network endpoint, the PC/HT side must not already have one.
+        if (isNetwork(fromDeviceType) || isNetwork(toDeviceType)) {
+            const pcLikeDeviceId = isNetwork(fromDeviceType)
+                ? Number(req.body?.to_device_id ?? req.body?.device_to)
+                : Number(req.body?.from_device_id ?? req.body?.device_from);
+            const pcLikeType = isNetwork(fromDeviceType) ? toDeviceType : fromDeviceType;
+
+            if (pcLikeDeviceId && isPcOrHt(pcLikeType)) {
+                const existing = await connectionService.listConnectionsByDevice(pcLikeDeviceId);
+                const alreadyHasNetwork = (existing || []).some((row) => {
+                    const fromId = Number(row?.from_device_id ?? 0);
+                    const toId = Number(row?.to_device_id ?? 0);
+                    if (fromId !== pcLikeDeviceId && toId !== pcLikeDeviceId) return false;
+                    const otherType = fromId === pcLikeDeviceId ? row?.to_device_type : row?.from_device_type;
+                    return isNetwork(otherType);
+                });
+
+                if (alreadyHasNetwork) {
+                    return res.status(400).json({ error: "Device already connected to a network endpoint" });
+                }
+            }
         }
 
         req.body.port_type = "utp";
@@ -3302,6 +3416,41 @@ exports.connectionsCreate = async (req, res) => {
 
         if (!fromOwned || !toOwned) {
             return res.status(403).json({ error: "Forbidden" });
+        }
+
+        // Persist user-facing device names on the connection row values.
+        async function resolveDeviceName(setupDeviceId) {
+            const id = Number(setupDeviceId);
+            if (!id || Number.isNaN(id)) return null;
+
+            const { data: deviceRow, error: devErr } = await supabase
+                .from(SETUP_DEVICES_TABLE)
+                .select("id, setup_id")
+                .eq("id", id)
+                .limit(1)
+                .maybeSingle();
+
+            if (devErr) return null;
+            const childSetupId = Number(deviceRow?.setup_id ?? 0);
+            if (!childSetupId) return null;
+
+            const { data: childSetup, error: setupErr } = await supabase
+                .from(SETUPS_TABLE)
+                .select("id, name")
+                .eq("id", childSetupId)
+                .limit(1)
+                .maybeSingle();
+
+            if (setupErr) return null;
+            const name = String(childSetup?.name ?? "").trim();
+            return name || null;
+        }
+
+        if (!req.body.device_name_from) {
+            req.body.device_name_from = await resolveDeviceName(req.body?.from_device_id ?? req.body?.device_from);
+        }
+        if (!req.body.device_name_to) {
+            req.body.device_name_to = await resolveDeviceName(req.body?.to_device_id ?? req.body?.device_to);
         }
 
         const connection = await connectionService.createConnection(req.body);
@@ -3350,7 +3499,8 @@ exports.connectionsRemove = async (req, res) => {
 exports.renameItem = async (req, res) => {
     try {
         const userId = req.user.id;
-        const { itemId, tableName, newName } = req.body;
+        const { itemId, newName } = req.body;
+        const tableName = normalizeItemTableName(req.body?.tableName);
 
         if (!itemId || !tableName || !String(newName || "").trim()) {
             return res.status(400).json({ error: "Missing itemId, tableName or newName" });
@@ -3370,7 +3520,10 @@ exports.renameItem = async (req, res) => {
             return res.status(400).json({ error: "This item cannot be renamed" });
         }
 
-        const value = String(newName).trim();
+        let value = String(newName).trim();
+        if (String(tableName).toLowerCase() === String(SETUPS_TABLE).toLowerCase()) {
+            value = await getUniqueChildSetupName(item.setup_id, value, itemId);
+        }
 
         const { data, error } = await supabase
             .from(tableName)

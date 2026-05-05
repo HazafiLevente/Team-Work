@@ -54,7 +54,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
 
         if (!nameInUrl) {
           if (currentUser) {
-            const myName = this.auth.formatNameForUrl(currentUser.username);
+            const myName = this.auth.formatNameForUrl(currentUser.fullname || currentUser.username);
             this.router.navigate(['/user/profile', myName], { replaceUrl: true });
           } else {
             this.publicProfileId = null;
@@ -67,9 +67,9 @@ export class ProfileComponent implements OnInit, OnDestroy {
         }
 
         // If we have a name in URL, check if it's "me" or someone else
-        const formattedMyName = currentUser ? this.auth.formatNameForUrl(currentUser.username) : null;
+        const formattedMyName = currentUser ? this.auth.formatNameForUrl(currentUser.fullname || currentUser.username) : null;
 
-        if (formattedMyName && nameInUrl === formattedMyName) {
+        if (formattedMyName && nameInUrl.toLowerCase() === formattedMyName.toLowerCase()) {
           // It's me
           this.publicProfileId = null;
           this.publicProfile = null; // Clear public profile to show "My Profile" sections

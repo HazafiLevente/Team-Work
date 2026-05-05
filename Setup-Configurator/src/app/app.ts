@@ -146,13 +146,13 @@ export class App implements OnInit, OnDestroy {
         {
           icon: '🗂️',
           label: 'MySetup',
-          onClick: () => this.router.navigateByUrl('/user/setup')
+          onClick: () => this.router.navigateByUrl('/user/setup/desktop')
         },
         {
           icon: '👤',
           label: 'Profile',
           onClick: () => {
-            const myName = this.auth.formatNameForUrl(user.username);
+            const myName = this.auth.formatNameForUrl(user.fullname || user.username);
             this.router.navigate(['/user/profile', myName]);
           }
         },
@@ -164,7 +164,7 @@ export class App implements OnInit, OnDestroy {
         {
           icon: '⚙️',
           label: 'Settings',
-          onClick: () => this.router.navigateByUrl('/settings')
+          onClick: () => this.router.navigateByUrl('/user/settings')
         }
       ];
 

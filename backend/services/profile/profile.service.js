@@ -1,5 +1,16 @@
+/**
+ * --------------------------------------------------------------------------
+ *  USER PROFILE SERVICE
+ * --------------------------------------------------------------------------
+ *  Manages core identity and extended user metadata. Handles synchronized
+ *  updates across primary 'user[Auth]' and secondary 'user_more[Auth]' tables.
+ */
+
 const { supabase } = require("../../services/supabase");
 
+/**
+ * Retrieves the core identity data for a specific user.
+ */
 async function getUserProfile(userId) {
     const { data: user, error } = await supabase
         .from("user[Auth]")
@@ -11,6 +22,10 @@ async function getUserProfile(userId) {
     return user;
 }
 
+/**
+ * Fetches extended details (age, phone, city) or initializes a record if none exists.
+ * Code 'PGRST116' denotes a missing row in PostgREST, triggering initialization.
+ */
 async function getOrCreateUserDetails(userId) {
     const { data, error } = await supabase
         .from("user_more[Auth]")
@@ -36,6 +51,9 @@ async function getOrCreateUserDetails(userId) {
     return inserted;
 }
 
+/**
+ * Updates primary account credentials (Username and Display Name).
+ */
 async function updateUserProfile(userId, profile) {
     const { username, fullname } = profile;
     const { error } = await supabase
@@ -49,6 +67,10 @@ async function updateUserProfile(userId, profile) {
     if (error) throw error;
 }
 
+/**
+ * Performs an upsert-like operation on extended user details.
+ * Attempts an update first; if no rows are affected, it proceeds to insert.
+ */
 async function upsertUserDetails(userId, profile) {
     const { phone, age, city } = profile;
     const details = {

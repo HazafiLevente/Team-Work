@@ -1,5 +1,9 @@
 const router = require("express").Router();
 
+/**
+ * Admin sub-routes entry point
+ */
+
 router.use(require("./admin/stats.routes"));
 router.use(require("./admin/reports.routes"));
 router.use(require("./admin/users.routes"));

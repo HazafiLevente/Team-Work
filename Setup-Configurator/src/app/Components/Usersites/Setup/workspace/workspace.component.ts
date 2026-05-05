@@ -85,8 +85,11 @@ export class WorkspaceComponent {
   @Input() lineRefreshTrigger = 0;
   @Input() connectMousePos: any = { x: 0, y: 0 };
   @Input() connectSourceSetup: any = null;
+  @Input() connectSourceItem: any = null;
   @Input() connectTargetSetup: any = null;
   @Input() pairingStage: 'NONE' | 'PICK_SOURCE' | 'PICK_TARGET_SETUP' | 'PICK_TARGET_ITEM' = 'NONE';
+  @Input() allowPcHtLinks = false;
+  @Input() pairingConnections: any[] = [];
 
   @Input() userSetups: any[] = [];
   @Input() items: any[] = [];
@@ -108,6 +111,7 @@ export class WorkspaceComponent {
   @Output() openSetup = new EventEmitter<any>();
   @Output() roomRenamed = new EventEmitter<any>();
   @Output() setupClicked = new EventEmitter<any>();
+  @Output() backgroundClicked = new EventEmitter<void>();
   @Output() createSetup = new EventEmitter<{ x: number; y: number }>();
   @Output() createItem = new EventEmitter<{ x: number; y: number }>();
   @Output() categorySelected = new EventEmitter<any>();
@@ -115,8 +119,10 @@ export class WorkspaceComponent {
   @Output() cancelConnectingEvent = new EventEmitter<void>();
   @Output() selectSourceEvent = new EventEmitter<any>();
   @Output() finalizeConnectionEvent = new EventEmitter<any>();
+  @Output() allowPcHtLinksChange = new EventEmitter<boolean>();
 
   @Output() itemOpen = new EventEmitter<any>();
+  @Output() itemClicked = new EventEmitter<any>();
   @Output() htSaved = new EventEmitter<void>();
 
   private rafId: number | null = null;
@@ -350,6 +356,19 @@ export class WorkspaceComponent {
     this.ctxItem = null;
   }
 
+  onBackgroundClick(event: MouseEvent): void {
+    const target = event.target as HTMLElement | null;
+    if (!target) return;
+
+    const interactive = target.closest(
+      '.drag-element, app-setup-room, app-setup-item-card, app-setup-window, app-setup-dock, app-context-menu-base, button, input, select, textarea'
+    );
+    if (interactive) return;
+
+    this.closeContextMenu();
+    this.backgroundClicked.emit();
+  }
+
   onSetupRightClick(payload: any): void {
     const rect = this.boundaryEl.nativeElement.getBoundingClientRect();
 
@@ -405,12 +424,17 @@ export class WorkspaceComponent {
   }
 
   startRenameForContextSetup(): void {
-    if (!this.ctxSetup || !this.roomComponents) return;
+    this.startRenameForSetup(this.ctxSetup);
+    this.closeContextMenu();
+  }
+
+  startRenameForSetup(setup: any): void {
+    if (!setup || !this.roomComponents) return;
 
     const targetId =
-      this.ctxSetup?.id ??
-      this.ctxSetup?.setup_id ??
-      this.ctxSetup?.setupId;
+      setup?.id ??
+      setup?.setup_id ??
+      setup?.setupId;
 
     const room = this.roomComponents.find(c => {
       const cid =
@@ -422,7 +446,6 @@ export class WorkspaceComponent {
     });
 
     room?.startRename();
-    this.closeContextMenu();
   }
 
   private getContextItemKey(item: any): string {
@@ -464,9 +487,14 @@ export class WorkspaceComponent {
   }
 
   startRenameForContextItem(): void {
-    if (!this.ctxItem || !this.itemComponents) return;
+    this.startRenameForItem(this.ctxItem);
+    this.closeContextMenu();
+  }
 
-    const targetKey = this.getContextItemKey(this.ctxItem);
+  startRenameForItem(item: any): void {
+    if (!item || !this.itemComponents) return;
+
+    const targetKey = this.getContextItemKey(item);
 
     const itemComp = this.itemComponents.find(c => {
       const item = (c as any).item;
@@ -475,7 +503,6 @@ export class WorkspaceComponent {
     });
 
     (itemComp as any)?.startRename?.();
-    this.closeContextMenu();
   }
 
   private tryDeleteContextItem(
@@ -802,7 +829,7 @@ export class WorkspaceComponent {
     this.windows = [...this.windows, newWindow];
   }
 
-  private openCarBuilderWindow(setup: any): void {
+  openCarBuilderWindow(setup: any): void {
     const setupId = setup?.id ?? setup?.setup_id ?? setup?.setupId ?? Date.now();
     const winId = 'car_builder_' + setupId;
 
@@ -830,7 +857,7 @@ export class WorkspaceComponent {
     this.windows = [...this.windows, newWindow];
   }
 
-  private openInstrumentBuilderWindow(setup: any): void {
+  openInstrumentBuilderWindow(setup: any): void {
     const setupId = setup?.id ?? setup?.setup_id ?? setup?.setupId ?? Date.now();
     const winId = 'instrument_builder_' + setupId;
 
@@ -858,7 +885,7 @@ export class WorkspaceComponent {
     this.windows = [...this.windows, newWindow];
   }
 
-  private openNetworkBuilderWindow(setup: any): void {
+  openNetworkBuilderWindow(setup: any): void {
     const setupId = setup?.id ?? setup?.setup_id ?? setup?.setupId ?? Date.now();
     const winId = 'network_builder_' + setupId;
 
@@ -1109,6 +1136,10 @@ export class WorkspaceComponent {
 
   onSetupClick(setup: any): void {
     this.setupClicked.emit(setup);
+  }
+
+  onItemClick(item: any): void {
+    this.itemClicked.emit(item);
   }
 
   openSetupDetails(setup: any): void {

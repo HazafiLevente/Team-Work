@@ -1,4 +1,4 @@
-<div class="setup-workspace" #workspaceRoot (contextmenu)="onBackgroundRightClick($event)" (mousedown)="onMouseDown($event)" [class.panning]="isPanning">
+<div class="setup-workspace" #workspaceRoot (contextmenu)="onBackgroundRightClick($event)" (mousedown)="onMouseDown($event)" (click)="onBackgroundClick($event)" [class.panning]="isPanning">
 
   <div class="pan-wrapper" [style.transform]="'translate(' + panX + 'px, ' + panY + 'px)'" (contextmenu)="onBackgroundRightClick($event)">
     <app-dot-grid class="dot-bg" [dotSize]="5" [gap]="15" baseColor="#271E37" activeColor="#5227FF" [proximity]="100"
@@ -46,7 +46,7 @@
           @for (item of items; track getItemTrackKey(item, $index)) {
             <app-setup-item-card [item]="item" [dataId]="getItemDataId(item)" [boundaryRef]="boundaryEl.nativeElement"
                                  [dragDisabled]="false" [initialPosition]="getItemPosition(item, $index)" (elementReady)="registerElement($event)"
-                                 (moved)="updateLines()" (dragEnded)="onItemDragEnded(item, $event)" (itemDblClick)="openItemDetails($event)"
+                                 (moved)="updateLines()" (dragEnded)="onItemDragEnded(item, $event)" (itemClick)="onItemClick($event)" (itemDblClick)="openItemDetails($event)"
                                  (itemRightClick)="onItemRightClick($event)" (renamed)="onItemRenamed($event)">
             </app-setup-item-card>
           }
@@ -121,8 +121,15 @@
 
         @if (w.kind === 'pairing') {
           <app-setup-pairing-modal [pairingStage]="w.payload.pairingStage" [pairingItemList]="w.payload.pairingItemList"
-                                   [connectSourceSetup]="w.payload.setup" [connectTargetSetup]="connectTargetSetup" (cancel)="closeWindow(w.id)"
-                                   (selectSource)="selectSourceEvent.emit($event)" (finalize)="finalizeConnectionEvent.emit({setup: w.payload.setup, item: $event})">
+                                   [connectSourceSetup]="w.payload.setup"
+                                   [connectTargetSetup]="connectTargetSetup"
+                                   [connectSourceItem]="connectSourceItem"
+                                   [allowPcHtLinks]="allowPcHtLinks"
+                                   [pairingConnections]="pairingConnections"
+                                   (allowPcHtLinksChange)="allowPcHtLinksChange.emit($event)"
+                                   (cancel)="closeWindow(w.id)"
+                                   (selectSource)="selectSourceEvent.emit($event)"
+                                   (finalize)="finalizeConnectionEvent.emit({setup: w.payload.setup, item: $event})">
           </app-setup-pairing-modal>
         }
 

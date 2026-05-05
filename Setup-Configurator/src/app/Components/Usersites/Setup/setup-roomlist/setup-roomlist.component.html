@@ -3,21 +3,82 @@
   @if (!hierarchyMode) {
     <div class="property-strip compact">
       <div class="property-strip-toggle">
-        <label class="hierarchy-toggle" [class.hierarchy-active]="hierarchyMode">
-          <input
-            type="checkbox"
-            class="hierarchy-toggle-input"
-            [checked]="hierarchyMode"
-            (change)="toggleHierarchyMode($any($event.target).checked)" />
+        @if (!fixedLayout) {
+          <label class="hierarchy-toggle" [class.hierarchy-active]="hierarchyMode">
+            <input
+              type="checkbox"
+              class="hierarchy-toggle-input"
+              [checked]="hierarchyMode"
+              (change)="toggleHierarchyMode($any($event.target).checked)" />
 
-          <span class="hierarchy-toggle-track"></span>
-          <span class="hierarchy-toggle-thumb"></span>
-        </label>
+            <span class="hierarchy-toggle-track"></span>
+            <span class="hierarchy-toggle-thumb"></span>
+          </label>
+        }
 
         <div class="property-strip-copy">
-          <div class="property-strip-title">Tulajdonsag Sav</div>
-          <div class="property-strip-sub">Huzogatos nezet aktiv</div>
+          <div class="property-strip-title">
+            {{ viewingSetup ? viewingSetupTitle() : 'Tulajdonsag Sav' }}
+          </div>
+          <div class="property-strip-sub">
+            {{ viewingSetup ? 'Setup belso nezete' : 'Huzogatos nezet aktiv' }}
+          </div>
         </div>
+      </div>
+
+      <div class="property-actions">
+        @if (viewingSetup && selectedWorkspaceItem) {
+          <div class="property-selection">
+            <span>Kijelolt eszkoz</span>
+            <strong>{{ itemTitle() }}</strong>
+          </div>
+
+          <div class="property-detail-list">
+            @for (detail of itemDetails(); track detail.label) {
+              <div class="property-detail">
+                <span>{{ detail.label }}</span>
+                <strong>{{ detail.value }}</strong>
+              </div>
+            }
+          </div>
+
+          <div class="property-action-grid">
+            <button type="button" class="property-action" (click)="openSelectedItem()">Megnyitas</button>
+            <button type="button" class="property-action" (click)="renameSelectedItem()">Atnevezes</button>
+            <button type="button" class="property-action" (click)="modifySelectedItem()">Modositas</button>
+          </div>
+        } @else if (viewingSetup) {
+          <div class="property-selection">
+            <span>Uj eszkoz</span>
+            <strong>{{ viewingSetupTitle() }}</strong>
+          </div>
+
+          <div class="property-action-grid category-grid">
+            @for (category of deviceCategories; track category) {
+              <button type="button" class="property-action" (click)="selectDeviceCategory(category)">
+                {{ category }}
+              </button>
+            }
+          </div>
+        } @else if (!selectedSetup) {
+          <button type="button" class="property-action primary" (click)="createNewSetup()">
+            + Uj setup
+          </button>
+        } @else {
+          <div class="property-selection">
+            <span>Kijelolt setup</span>
+            <strong>{{ selectedSetupTitle() }}</strong>
+          </div>
+
+          <div class="property-action-grid">
+            <button type="button" class="property-action" (click)="openSelectedSetup()">Megnyitas</button>
+            <button type="button" class="property-action" (click)="openSelectedSetupTools()">Eszkozok</button>
+            <button type="button" class="property-action" (click)="renameSelectedSetup()">Atnevezes</button>
+            <button type="button" class="property-action" (click)="connectSelectedSetup()">Osszekotes</button>
+            <button type="button" class="property-action" (click)="openSelectedSetupConnections()">Kapcsolatok</button>
+            <button type="button" class="property-action danger" (click)="deleteSelectedSetup()">Torles</button>
+          </div>
+        }
       </div>
     </div>
 
@@ -32,9 +93,14 @@
       [lineRefreshTrigger]="lineRefreshTrigger"
       [connectMousePos]="connectMousePos"
       [connectSourceSetup]="connectSourceSetup"
+      [connectSourceItem]="connectSourceItem"
       [pairingStage]="pairingStage"
+      [allowPcHtLinks]="allowPcHtLinks"
+      [pairingConnections]="pairingConnections"
+      (allowPcHtLinksChange)="allowPcHtLinks = $event"
       (openSetup)="onSetupDetails($event)"
       (itemOpen)="openItemOverlay($event)"
+      (itemClicked)="onWorkspaceItemSelect($event)"
       (back)="backToSetups()"
       (roomMoved)="onRoomDragEnded($event.setup, $event.pos)"
       (roomRenamed)="saveRenamedRoom($event)"
@@ -46,6 +112,7 @@
       (rename)="openRenameFromMenu($event)"
       (connect)="startConnectingFromMenu($event)"
       (setupClicked)="onSetupClick($event)"
+      (backgroundClicked)="onWorkspaceBackgroundClick()"
       (cancelConnectingEvent)="cancelConnecting()"
       (selectSourceEvent)="selectSourceItem($event)"
       (finalizeConnectionEvent)="finalizeConnection($event)"
@@ -86,7 +153,97 @@
         (selectHierarchyCategory)="selectHierarchyCategory($event)">
       </app-setup-hierarchy-sidebar>
 
-      @if (hierarchyRightMode === 'home_theater_picker') {
+      @if (hierarchyRightMode === 'builder') {
+        <div class="hierarchy-builder-stage">
+          @if (fixedLayout === 'mobile') {
+            @if (hierarchyBuilderType === 'pc') {
+              <app-pc-builder-panel
+                [setup]="hierarchyBuilderSetup"
+                (close)="closeHierarchyBuilder()"
+                (saved)="onHierarchyBuilderSaved()">
+              </app-pc-builder-panel>
+            } @else if (hierarchyBuilderType === 'car') {
+              <app-car-builder-panel
+                [setup]="hierarchyBuilderSetup"
+                (close)="closeHierarchyBuilder()"
+                (saved)="onHierarchyBuilderSaved()">
+              </app-car-builder-panel>
+            } @else if (hierarchyBuilderType === 'instrument') {
+              <app-instrument-builder-panel
+                [setup]="hierarchyBuilderSetup"
+                (close)="closeHierarchyBuilder()"
+                (saved)="onHierarchyBuilderSaved()">
+              </app-instrument-builder-panel>
+            } @else if (hierarchyBuilderType === 'network') {
+              <app-network-builder-panel
+                [setup]="hierarchyBuilderSetup"
+                (close)="closeHierarchyBuilder()"
+                (saved)="onHierarchyBuilderSaved()">
+              </app-network-builder-panel>
+            } @else if (hierarchyBuilderType === 'home_theater') {
+              <div class="hierarchy-builder-placeholder">
+                <div class="hierarchy-builder-placeholder-title">Hazi-mozi builder</div>
+                <div class="hierarchy-builder-placeholder-sub">
+                  Ehhez a kategorihoz itt most csak placeholder van.
+                </div>
+              </div>
+            } @else {
+              <div class="hierarchy-builder-placeholder">
+                <div class="hierarchy-builder-placeholder-title">Egyeb builder</div>
+                <div class="hierarchy-builder-placeholder-sub">
+                  Ehhez a kategorihoz itt most csak placeholder van.
+                </div>
+              </div>
+            }
+          } @else if (hierarchyBuilderLoading) {
+            <div class="hierarchy-builder-placeholder">
+              <div class="hierarchy-builder-placeholder-title">Betoltes...</div>
+              <div class="hierarchy-builder-placeholder-sub">Setup elemek betoltese folyamatban.</div>
+            </div>
+          } @else if (hierarchyBuilderError) {
+            <div class="hierarchy-builder-placeholder">
+              <div class="hierarchy-builder-placeholder-title">Hiba</div>
+              <div class="hierarchy-builder-placeholder-sub">{{ hierarchyBuilderError }}</div>
+            </div>
+          } @else if (hierarchyBuilderType === 'pc' && hierarchyBuilderItem) {
+            <app-setup-pc-details-panel
+              [pcItem]="hierarchyBuilderItem"
+              (close)="closeHierarchyBuilder()">
+            </app-setup-pc-details-panel>
+          } @else if (hierarchyBuilderType === 'car' && hierarchyBuilderItem) {
+            <app-setup-car-details-panel
+              [carItem]="hierarchyBuilderItem"
+              (close)="closeHierarchyBuilder()">
+            </app-setup-car-details-panel>
+          } @else if (hierarchyBuilderType === 'instrument' && hierarchyBuilderItem) {
+            <app-setup-instrument-details-panel
+              [instrumentItem]="hierarchyBuilderItem"
+              (close)="closeHierarchyBuilder()">
+            </app-setup-instrument-details-panel>
+          } @else if (hierarchyBuilderType === 'home_theater') {
+            <div class="hierarchy-builder-placeholder">
+              <div class="hierarchy-builder-placeholder-title">Hazi-mozi builder</div>
+              <div class="hierarchy-builder-placeholder-sub">
+                Ehhez a kategorihoz itt most csak placeholder van.
+              </div>
+            </div>
+          } @else if (hierarchyBuilderType === 'network') {
+            <div class="hierarchy-builder-placeholder">
+              <div class="hierarchy-builder-placeholder-title">Halozat builder</div>
+              <div class="hierarchy-builder-placeholder-sub">
+                Ehhez a kategorihoz most nincs quick-details panel, csak placeholder.
+              </div>
+            </div>
+          } @else {
+            <div class="hierarchy-builder-placeholder">
+              <div class="hierarchy-builder-placeholder-title">Egyeb builder</div>
+              <div class="hierarchy-builder-placeholder-sub">
+                Ehhez a kategorihoz itt most csak placeholder van.
+              </div>
+            </div>
+          }
+        </div>
+      } @else if (hierarchyRightMode === 'home_theater_picker') {
         <app-setup-hierarchy-device-picker
           [mode]="'home_theater'"
           [setupTitle]="getSetupTitle(hierarchyHtPickerSetup)"

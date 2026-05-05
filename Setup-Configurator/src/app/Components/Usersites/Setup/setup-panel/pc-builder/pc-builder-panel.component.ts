@@ -390,15 +390,41 @@ export class PcBuilderPanelComponent implements OnChanges {
   }
 
   private getProductCategory(product: any): string {
-    return String(product?.category ?? product?.Category ?? '').trim().toLowerCase();
+    return String(
+      product?.category ??
+      product?.Category ??
+      product?.data?.category ??
+      product?.data?.Category ??
+      ''
+    )
+      .trim()
+      .toLowerCase();
+  }
+
+  private getProductType(product: any): string {
+    return String(
+      product?.type ??
+      product?.Type ??
+      product?.product_type ??
+      product?.productType ??
+      product?.data?.type ??
+      product?.data?.Type ??
+      product?.data?.product_type ??
+      product?.data?.productType ??
+      ''
+    )
+      .trim()
+      .toLowerCase();
   }
 
   private isLaptopProduct(product: any): boolean {
-    return this.getProductCategory(product) === 'laptop';
+    // Requirement: products.category === 'laptop' AND products.type === 'pc'
+    return this.getProductCategory(product) === 'laptop' && this.getProductType(product) === 'pc';
   }
 
   private isAllInOneProduct(product: any): boolean {
-    return this.getProductCategory(product) === 'desktop';
+    // Requirement: products.category === 'desktop' AND products.type === 'pc'
+    return this.getProductCategory(product) === 'desktop' && this.getProductType(product) === 'pc';
   }
 
   getVisibleComputerProducts(): any[] {

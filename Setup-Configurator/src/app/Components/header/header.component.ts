@@ -160,6 +160,13 @@ export class HeaderComponent implements OnInit, AfterViewInit {
     this.ranksOpen = false;
   }
 
+  openLeaderboard(event?: Event) {
+    event?.preventDefault();
+    event?.stopPropagation();
+    this.closeMenu();
+    this.router.navigateByUrl('/leaderboard');
+  }
+
   toggleBell(event: MouseEvent) {
     event.stopPropagation();
     this.bell.toggle();

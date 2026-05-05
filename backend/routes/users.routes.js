@@ -1,8 +1,18 @@
+/**
+ * --------------------------------------------------------------------------
+ *  USER & SOCIAL ECOSYSTEM ROUTES
+ * --------------------------------------------------------------------------
+ *  Manages public profiles, user discovery, and complex data enrichment
+ *  for user-specific setups and hardware assets.
+ */
+
 const router = require("express").Router();
 const { supabase } = require("../services/supabase");
 const verifyUser = require("../middlewares/verifyUser");
 const optionalUser = require("../middlewares/optionalUser");
 const { resolveRole } = require("../services/control");
+
+// --- UTILITY HELPERS ---
 
 function pickFirst(row, keys) {
     if (!row || typeof row !== "object") return null;
@@ -20,6 +30,14 @@ function pickFirst(row, keys) {
 
 function toBoolean(value) {
     return value === true || value === "true" || value === 1 || value === "1";
+}
+
+function slugifyUserName(value) {
+    return String(value || "").trim().replace(/\s+/g, "_").toLowerCase();
+}
+
+function unslugUserName(value) {
+    return String(value || "").trim().replace(/_/g, " ");
 }
 
 function isRegularSetup(setup) {
@@ -45,12 +63,19 @@ function extractPrice(item) {
         ?? null;
 }
 
+
+// --- DATA ENRICHMENT SERVICES ---
+
+/**
+ * Fetches and attaches detailed device information and price calculations to setups.
+ */
+
 async function enrichSetupsWithDevices(setups) {
     if (!setups || setups.length === 0) return [];
 
     const setupIds = setups.map(s => s.id);
 
-    // Kérdezzük le az eszközöket minden szobához
+
     const { data: devices, error: devicesError } = await supabase
         .from("setups")
         .select("*")
@@ -60,7 +85,7 @@ async function enrichSetupsWithDevices(setups) {
 
     const childSetupIds = devices.map(d => d.id);
     
-    // Kérdezzük le a termék kapcsolatokat
+
     const { data: deviceConnections, error: connError } = await supabase
         .from("setup_devices")
         .select("setup_id, device_id, source_table")
@@ -68,7 +93,7 @@ async function enrichSetupsWithDevices(setups) {
 
     if (connError) return setups;
 
-    // Gyűjtsük össze az összes product_id-t táblánként
+
     const tableToIds = {};
     deviceConnections.forEach(conn => {
         const table = conn.source_table || "products";
@@ -76,7 +101,7 @@ async function enrichSetupsWithDevices(setups) {
         tableToIds[table].push(conn.device_id);
     });
 
-    // Kérdezzük le a termék adatokat
+
     const productDataMap = new Map();
     for (const table of Object.keys(tableToIds)) {
         const ids = [...new Set(tableToIds[table])];
@@ -90,7 +115,7 @@ async function enrichSetupsWithDevices(setups) {
         }
     }
 
-    // Szervezzük össze az adatokat
+
     return setups.map(setup => {
         const setupDevices = devices.filter(d => d.room_id === setup.id);
         const enrichedDevices = setupDevices.map(d => {
@@ -119,6 +144,12 @@ async function enrichSetupsWithDevices(setups) {
     });
 }
 
+
+/**
+ * Filters and prepares public-facing setup information.
+ */
+
+
 async function getPublicSetups(targetUserId, isMe) {
     const { data: setups, error: setupsError } = await supabase
         .from("setup_room")
@@ -131,18 +162,17 @@ async function getPublicSetups(targetUserId, isMe) {
     let mySetups = (setups || []);
 
     if (!isMe) {
-        // Publikus profil esetén csak a nem titkosakat mutatjuk
-        // És kivesszük a jegyzeteket/terveket, hogy csak a valódi setupok maradjanak
+
         mySetups = mySetups.filter(s => {
             const isSecret = toBoolean(s.isSecret ?? s.is_secret ?? s.isPrivate ?? s.is_private);
             const isPlan = toBoolean(s.is_plan);
             return !isSecret && isRegularSetup(s) && !isPlan;
         });
         
-        // Dúsítás eszközökkel és árakkal
+
         mySetups = await enrichSetupsWithDevices(mySetups);
     } else {
-        // Saját profil esetén (ha valamiért ide jutna) is szűrjük a "regular" típusra
+
         mySetups = mySetups.filter(isRegularSetup);
     }
 
@@ -155,6 +185,14 @@ async function getPublicSetups(targetUserId, isMe) {
         totalPrice: setup.totalPrice || 0
     }));
 }
+
+
+// --- PUBLIC ROUTES ---
+
+/**
+ * List all users (excluding the current authenticated user)
+ */
+
 
 router.get("/", verifyUser, async (req, res) => {
     const currentUserId = Number(req.user.id);
@@ -177,17 +215,29 @@ router.get("/", verifyUser, async (req, res) => {
     res.json(users);
 });
 
+/**
+ * Fetch detailed user profile and their public setups by slug/username
+ */
+
 router.get("/by-name/:name/profile", optionalUser, async (req, res) => {
     try {
-        const name = req.params.name.replace(/_/g, " ");
+        const rawName = req.params.name;
+        const readableName = unslugUserName(rawName);
+        const requestedSlug = slugifyUserName(readableName);
         const currentUserId = Number(req.user?.id || 0);
-        
-        const { data: users, error: userError } = await supabase
+
+        const { data: allUsers, error: userError } = await supabase
             .from("user[Auth]")
-            .select("ID, UserName, Name")
-            .or(`UserName.eq."${name}",Name.eq."${name}"`);
+            .select("ID, UserName, Name");
 
         if (userError) return res.status(500).json({ error: userError.message });
+
+        const users = (allUsers || []).filter((candidate) => {
+            const usernameSlug = slugifyUserName(candidate?.UserName);
+            const nameSlug = slugifyUserName(candidate?.Name);
+            return usernameSlug === requestedSlug || nameSlug === requestedSlug;
+        });
+
         if (!users || users.length === 0) return res.status(404).json({ error: "User not found" });
 
         const user = users[0];
@@ -229,6 +279,12 @@ router.get("/by-name/:name/profile", optionalUser, async (req, res) => {
         res.status(500).json({ error: err.message || "Internal Server Error" });
     }
 });
+
+
+/**
+ * Fetch detailed user profile and their public setups by User ID
+ */
+
 
 router.get("/:id/profile", optionalUser, async (req, res) => {
     try {

@@ -200,13 +200,42 @@ async function hydrateConnections(connectionRows) {
         ])
     );
 
+    // Also fetch device-owned child setups (setup_devices.setup_id -> setups.id),
+    // because the user-facing device name lives there.
+    const deviceSetupIds = [...new Set((deviceRowsRes.data || [])
+        .map((row) => toNumberOrNull(row?.setup_id))
+        .filter(Number.isFinite))];
+
+    const missingDeviceSetupIds = deviceSetupIds.filter((id) => !setupsById.has(id));
+    if (missingDeviceSetupIds.length) {
+        const { data: deviceSetupRows, error: deviceSetupErr } = await supabase
+            .from(SETUPS_TABLE)
+            .select("*")
+            .in("id", missingDeviceSetupIds);
+
+        if (deviceSetupErr) throw deviceSetupErr;
+
+        for (const row of deviceSetupRows || []) {
+            const id = pickId(row);
+            if (!id) continue;
+            setupsById.set(id, {
+                id,
+                setup_name: row?.name || row?.setup_name || `Setup #${id}`
+            });
+        }
+    }
+
     const devicesById = new Map(
         (deviceRowsRes.data || []).map((row) => [
             pickId(row),
             {
                 id: pickId(row),
                 setup_id: toNumberOrNull(row?.setup_id),
-                title: row?.title || row?.name || row?.product_name || null,
+                title: setupsById.get(toNumberOrNull(row?.setup_id))?.setup_name ||
+                    row?.title ||
+                    row?.name ||
+                    row?.product_name ||
+                    null,
                 role: String(row?.role || row?.type || "device").trim() || "device"
             }
         ])
@@ -225,6 +254,8 @@ async function hydrateConnections(connectionRows) {
         const toSetup = setupsById.get(toSetupId) || null;
         const fromDeviceType = toStringOrNull(values.device_type_from) || fromDevice?.role || "setup";
         const toDeviceType = toStringOrNull(values.device_type_to) || toDevice?.role || "setup";
+        const fromDeviceName = toStringOrNull(values.device_name_from) || null;
+        const toDeviceName = toStringOrNull(values.device_name_to) || null;
 
         return {
             id: connectionId,
@@ -240,19 +271,21 @@ async function hydrateConnections(connectionRows) {
             port_type: values.port_type ?? null,
             from_setup: {
                 id: fromSetupId,
-                setup_name: fromDevice?.title || fromSetup?.setup_name || `Eszkoz #${fromDeviceId ?? "?"}`
+                setup_name: fromDeviceName || fromDevice?.title || fromSetup?.setup_name || `Eszkoz #${fromDeviceId ?? "?"}`
             },
             to_setup: {
                 id: toSetupId,
-                setup_name: toDevice?.title || toSetup?.setup_name || `Eszkoz #${toDeviceId ?? "?"}`
+                setup_name: toDeviceName || toDevice?.title || toSetup?.setup_name || `Eszkoz #${toDeviceId ?? "?"}`
             },
             source: {
                 category: fromDeviceType,
-                id: fromDeviceId
+                id: fromDeviceId,
+                name: fromDeviceName || fromDevice?.title || null,
             },
             target: {
                 category: toDeviceType,
-                id: toDeviceId
+                id: toDeviceId,
+                name: toDeviceName || toDevice?.title || null,
             }
         };
     });
@@ -269,7 +302,9 @@ function normalizeCreatePayload(raw = {}) {
         portTo: toStringOrNull(raw.port_to ?? raw.to_setup_device_port_id),
         portType: toStringOrNull(raw.port_type ?? raw.type),
         from_device_type: toStringOrNull(raw.from_device_type),
-        to_device_type: toStringOrNull(raw.to_device_type)
+        to_device_type: toStringOrNull(raw.to_device_type),
+        device_name_from: toStringOrNull(raw.device_name_from),
+        device_name_to: toStringOrNull(raw.device_name_to),
     };
 }
 
@@ -307,6 +342,8 @@ async function createConnection(rawPayload = {}) {
         if (payload.portType) valuesToInsert.push(["port_type", payload.portType]);
         if (payload.from_device_type) valuesToInsert.push(["device_type_from", payload.from_device_type]);
         if (payload.to_device_type) valuesToInsert.push(["device_type_to", payload.to_device_type]);
+        if (payload.device_name_from) valuesToInsert.push(["device_name_from", payload.device_name_from]);
+        if (payload.device_name_to) valuesToInsert.push(["device_name_to", payload.device_name_to]);
 
         for (const [propertyName, value] of valuesToInsert) {
             const propertyId = await ensureProperty(propertyName);

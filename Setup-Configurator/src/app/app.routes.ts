@@ -23,11 +23,7 @@ export const routes: Routes = [
     loadComponent: () => import('./Components/Product/product/product-page.component')
       .then(m => m.ProductPageComponent)
   },
-  {
-    path: 'settings',
-    loadComponent: () => import('./Components/Settings/settings.component')
-      .then(m => m.SettingsComponent)
-  },
+  { path: 'settings', redirectTo: 'user/settings', pathMatch: 'full' },
   {
     path: 'user',
     loadComponent: () => import('./Components/Usersites/usersite/usersite.component')
@@ -45,25 +41,65 @@ export const routes: Routes = [
       },
       {
         path: 'plan',
-        loadComponent: () => import('./Components/Usersites/Plan/plan/plan.component')
-          .then(m => m.PlanComponent)
+        redirectTo: 'plan/desktop',
+        pathMatch: 'full'
+      },
+      {
+        path: 'plan/desktop',
+        loadComponent: () => import('./Components/Usersites/Plan/plan-desktop/plan-desktop.component')
+          .then(m => m.PlanDesktopComponent)
+      },
+      {
+        path: 'plan/desktop/:roomId',
+        loadComponent: () => import('./Components/Usersites/Plan/plan-desktop/plan-desktop.component')
+          .then(m => m.PlanDesktopComponent)
+      },
+      {
+        path: 'plan/mobile',
+        loadComponent: () => import('./Components/Usersites/Plan/plan-mobile/plan-mobile.component')
+          .then(m => m.PlanMobileComponent)
+      },
+      {
+        path: 'plan/mobile/:roomId',
+        loadComponent: () => import('./Components/Usersites/Plan/plan-mobile/plan-mobile.component')
+          .then(m => m.PlanMobileComponent)
       },
       {
         path: 'plan/:roomId',
-        loadComponent: () => import('./Components/Usersites/Plan/plan/plan.component')
-          .then(m => m.PlanComponent)
+        redirectTo: 'plan/desktop/:roomId',
+        pathMatch: 'full'
       },
       { path: 'favorite', redirectTo: 'plan', pathMatch: 'full' },
       { path: 'favorite/:roomId', redirectTo: 'plan/:roomId', pathMatch: 'full' },
       {
         path: 'setup',
-        loadComponent: () => import('./Components/Usersites/Setup/setup/setup.component')
-          .then(m => m.SetupComponent)
+        redirectTo: 'setup/desktop',
+        pathMatch: 'full'
+      },
+      {
+        path: 'setup/desktop',
+        loadComponent: () => import('./Components/Usersites/Setup/setup-desktop/setup-desktop.component')
+          .then(m => m.SetupDesktopComponent)
+      },
+      {
+        path: 'setup/desktop/:roomId',
+        loadComponent: () => import('./Components/Usersites/Setup/setup-desktop/setup-desktop.component')
+          .then(m => m.SetupDesktopComponent)
+      },
+      {
+        path: 'setup/mobile',
+        loadComponent: () => import('./Components/Usersites/Setup/setup-mobile/setup-mobile.component')
+          .then(m => m.SetupMobileComponent)
+      },
+      {
+        path: 'setup/mobile/:roomId',
+        loadComponent: () => import('./Components/Usersites/Setup/setup-mobile/setup-mobile.component')
+          .then(m => m.SetupMobileComponent)
       },
       {
         path: 'setup/:roomId',
-        loadComponent: () => import('./Components/Usersites/Setup/setup/setup.component')
-          .then(m => m.SetupComponent)
+        redirectTo: 'setup/desktop/:roomId',
+        pathMatch: 'full'
       },
       {
         path: 'messages',
@@ -74,6 +110,11 @@ export const routes: Routes = [
         path: 'messages/:key',
         loadComponent: () => import('./Components/Usersites/Messages/message.component')
           .then(m => m.MessagesComponent)
+      },
+      {
+        path: 'settings',
+        loadComponent: () => import('./Components/Settings/settings.component')
+          .then(m => m.SettingsComponent)
       },
       {
         path: 'admin',

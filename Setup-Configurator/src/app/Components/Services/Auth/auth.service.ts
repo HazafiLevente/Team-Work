@@ -5,6 +5,7 @@ import { BehaviorSubject, Observable, map, tap, switchMap, catchError, of } from
 export type AuthUser = {
   id: number;
   username: string;
+  fullname?: string;
   email: string;
   role: string;
 };
@@ -106,7 +107,7 @@ export class AuthService {
   }
 
   formatNameForUrl(name: string): string {
-    return (name || '').replace(/\s+/g, '_');
+    return (name || '').trim().replace(/\s+/g, '_');
   }
 
   googleLogin(idToken: string) {

@@ -6,11 +6,21 @@
             : 'Válassz egy cél eszközt az összekötéshez:' }}
     </div>
 
+    <label class="pairing-allow-box">
+        <input
+            type="checkbox"
+            [checked]="allowPcHtLinks"
+            (change)="allowPcHtLinksChange.emit($any($event.target).checked)" />
+        <span>Engedélyezd a PC ↔ PC / PC ↔ Házi mozi / Házi mozi ↔ Házi mozi összekötést</span>
+    </label>
+
     <div class="pairing-list">
         @for (item of connectableItems; track item.id || $index) {
         <button class="pairing-item"
+            [ngClass]="itemClasses(item)"
             (click)="pairingStage === 'PICK_SOURCE' ? selectSource.emit(item) : finalize.emit(item)">
             <span class="item-name">{{ item.display_name || item.name || 'Eszköz' }}</span>
+            <span class="item-badge">{{ connectionCount(item) }}</span>
         </button>
         } @empty {
         <div class="no-data">Nincsenek összeköthető eszközök ebben a setupban.</div>

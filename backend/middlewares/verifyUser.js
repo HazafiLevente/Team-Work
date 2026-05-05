@@ -17,6 +17,7 @@ module.exports = function verifyUser(req, res, next) {
         req.user = {
             id: Number(decoded.id),
             username: decoded.username,
+            fullname: decoded.fullname,
             email: decoded.email,
             role
         };

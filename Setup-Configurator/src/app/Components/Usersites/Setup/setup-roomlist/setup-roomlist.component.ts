@@ -26,6 +26,10 @@ import { SetupHierarchySidebarComponent } from './hierarchy-sidebar/setup-hierar
 import { SetupHierarchyDetailsComponent } from './hierarchy-details/setup-hierarchy-details.component';
 import { SetupHierarchyDevicePickerComponent } from './hierarchy-device-picker/setup-hierarchy-device-picker.component';
 import { HomeTheaterService } from '../services/home-theater.service';
+import { PcBuilderPanelComponent } from '../setup-panel/pc-builder/pc-builder-panel.component';
+import { CarBuilderPanelComponent } from '../setup-panel/car-builder/car-builder-panel.component';
+import { InstrumentBuilderPanelComponent } from '../setup-panel/instrument-builder/instrument-builder-panel.component';
+import { NetworkBuilderPanelComponent } from '../setup-panel/network-builder/network-builder-panel.component';
 
 type PairingStage = 'NONE' | 'PICK_SOURCE' | 'PICK_TARGET_SETUP' | 'PICK_TARGET_ITEM';
 
@@ -45,7 +49,11 @@ type PairingStage = 'NONE' | 'PICK_SOURCE' | 'PICK_TARGET_SETUP' | 'PICK_TARGET_
     SetupHierarchySidebarComponent,
     SetupHierarchyDetailsComponent,
     SetupHierarchyDevicePickerComponent,
-    SetupInstrumentDetailsPanelComponent
+    SetupInstrumentDetailsPanelComponent,
+    PcBuilderPanelComponent,
+    CarBuilderPanelComponent,
+    InstrumentBuilderPanelComponent,
+    NetworkBuilderPanelComponent
   ],
   templateUrl: './setup-roomlist.component.html',
   styleUrls: ['./setup-roomlist.component.css']
@@ -55,6 +63,7 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit, OnChanges 
   @Input() isPlanView = false;
   @Input() setupListId: number | null = null;
   @Input() allowCreate = true;
+  @Input() fixedLayout: 'desktop' | 'mobile' | null = null;
 
   @Output() openCategoryPicker = new EventEmitter<any>();
 
@@ -74,6 +83,8 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit, OnChanges 
   selectedPcPartItem: any = null;
   selectedHtItem: any = null;
   viewingSetup: any = null;
+  selectedSetup: any = null;
+  selectedWorkspaceItem: any = null;
 
   loading = false;
   loadingItems = false;
@@ -83,6 +94,7 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit, OnChanges 
   connectSourceSetup: any = null;
   connectSourceItem: any = null;
   connectTargetSetup: any = null;
+  allowPcHtLinks = false;
   pairingItems: any[] = [];
   pairingTargetItems: any[] = [];
   pairingConnections: any[] = [];
@@ -113,7 +125,12 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit, OnChanges 
   hierarchySetupCtxY = 0;
   hierarchySetupCtxTarget: any = null;
   hierarchyCategoryPickerSetup: any = null;
-  hierarchyRightMode: 'details' | 'home_theater_picker' = 'details';
+  hierarchyRightMode: 'details' | 'home_theater_picker' | 'builder' = 'details';
+  hierarchyBuilderSetup: any = null;
+  hierarchyBuilderType: 'pc' | 'car' | 'instrument' | 'network' | 'home_theater' | 'other' | null = null;
+  hierarchyBuilderItem: any = null;
+  hierarchyBuilderLoading = false;
+  hierarchyBuilderError = '';
   hierarchyHtPickerSetup: any = null;
   hierarchyHtCatalog: Record<string, any[]> = {};
   hierarchyHtCatalogLoading = false;
@@ -133,6 +150,7 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit, OnChanges 
     hideCancel?: boolean;
   } | null = null;
   readonly hierarchyCategories = ['Szamitogep', 'Autok', 'Hazimozi', 'Hangszerek', 'Egyeb'];
+  readonly deviceCategories = ['Szamitogep', 'Autok', 'Hazimozi', 'Hangszerek', 'Halozat', 'Egyeb'];
   readonly hierarchySetupTitle = (setup: any) => this.getSetupTitle(setup);
   readonly hierarchyTreeItemTitle = (item: any) => this.treeItemTitle(item);
   readonly hierarchyIsTreeExpanded = (setup: any) => this.isTreeExpanded(setup);
@@ -147,6 +165,12 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit, OnChanges 
   ) {}
 
   ngOnInit(): void {
+    if (this.fixedLayout === 'mobile') {
+      this.hierarchyMode = true;
+    } else if (this.fixedLayout === 'desktop') {
+      this.hierarchyMode = false;
+    }
+
     this.route.paramMap.subscribe((params) => {
       this.routeRoomId = params.get('roomId');
       this.syncRoomFromRoute();
@@ -198,6 +222,7 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit, OnChanges 
   }
 
   toggleHierarchyMode(checked: boolean): void {
+    if (this.fixedLayout) return;
     this.hierarchyMode = checked;
     if (!checked) {
       this.resetHierarchyRightPanel();
@@ -276,13 +301,34 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit, OnChanges 
       .replace(/[óòöôő]/g, 'o')
       .replace(/[úùüûű]/g, 'u');
 
+    this.resetHierarchyRightPanel();
+
     if (normalized.includes('hazimozi') || normalized.includes('home')) {
-      this.openHierarchyHtPicker(setup);
+      this.openHierarchyBuilder('home_theater', setup);
       return;
     }
 
-    this.resetHierarchyRightPanel();
-    this.handleCategorySelected({ category, setup });
+    if (normalized.includes('szamitogep') || normalized.includes('szam') || normalized.includes('pc')) {
+      this.openHierarchyBuilder('pc', setup);
+      return;
+    }
+
+    if (normalized.includes('autok') || normalized.includes('auto') || normalized.includes('car')) {
+      this.openHierarchyBuilder('car', setup);
+      return;
+    }
+
+    if (normalized.includes('hangszer') || normalized.includes('instrument')) {
+      this.openHierarchyBuilder('instrument', setup);
+      return;
+    }
+
+    if (normalized.includes('halozat') || normalized.includes('network') || normalized.includes('router') || normalized.includes('switch') || normalized.includes('modem')) {
+      this.openHierarchyBuilder('network', setup);
+      return;
+    }
+
+    this.openHierarchyBuilder('other', setup);
   }
 
   openHierarchySetupFromContext(): void {
@@ -567,6 +613,11 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit, OnChanges 
 
   private resetHierarchyRightPanel(): void {
     this.hierarchyRightMode = 'details';
+    this.hierarchyBuilderSetup = null;
+    this.hierarchyBuilderType = null;
+    this.hierarchyBuilderItem = null;
+    this.hierarchyBuilderLoading = false;
+    this.hierarchyBuilderError = '';
     this.hierarchyHtPickerSetup = null;
     this.hierarchyHtCatalogError = '';
     this.hierarchyHtSelectedError = '';
@@ -574,6 +625,103 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit, OnChanges 
     this.hierarchyHtSelectedLoading = false;
     this.hierarchyHtSelectedDevices = [];
     this.hierarchyHtRenameSaving = false;
+  }
+
+  openHierarchyBuilder(type: 'pc' | 'car' | 'instrument' | 'network' | 'home_theater' | 'other', setup: any): void {
+    this.hierarchyRightMode = 'builder';
+    this.hierarchyBuilderType = type;
+    this.hierarchyBuilderSetup = setup;
+    this.hierarchyBuilderItem = null;
+    this.hierarchyBuilderLoading = true;
+    this.hierarchyBuilderError = '';
+
+    // Mobile route uses the "builder" panels (selection + add flows),
+    // so we don't need to locate an existing child item first.
+    if (this.fixedLayout === 'mobile') {
+      this.hierarchyBuilderLoading = false;
+      return;
+    }
+
+    const setupId = this.getSetupId(setup);
+    if (!setupId) {
+      this.hierarchyBuilderLoading = false;
+      this.hierarchyBuilderError = 'Hiányzó setup azonosító.';
+      return;
+    }
+
+    this.http.get<any[]>(`/api/setup/${setupId}/get-children`, { withCredentials: true }).subscribe({
+      next: (children) => {
+        const list = Array.isArray(children) ? children : [];
+        this.treeChildren[String(setupId)] = list;
+        const picked = this.pickBuilderItem(type, list);
+        // The quick-details panels expect setup_id (parent setup id) for some lookups.
+        // Children from get-children often only have their own id.
+        if (picked && type === 'pc') {
+          const hasSetupId = picked?.setup_id != null || picked?.setupId != null;
+          this.hierarchyBuilderItem = hasSetupId ? picked : { ...picked, setup_id: setupId };
+        } else {
+          this.hierarchyBuilderItem = picked;
+        }
+        this.hierarchyBuilderLoading = false;
+        if (!this.hierarchyBuilderItem && (type === 'pc' || type === 'car' || type === 'instrument')) {
+          this.hierarchyBuilderError = 'Ehhez a setuphoz nem találok megjeleníthető elemet.';
+        }
+      },
+      error: (err) => {
+        console.error('Hierarchy builder children hiba:', err);
+        this.hierarchyBuilderLoading = false;
+        this.hierarchyBuilderError = 'Nem sikerült betölteni a setup elemeit.';
+      }
+    });
+  }
+
+  closeHierarchyBuilder(): void {
+    this.resetHierarchyRightPanel();
+  }
+
+  onHierarchyBuilderSaved(): void {
+    this.loadSetups();
+    this.resetHierarchyRightPanel();
+  }
+
+  private normalizeTypeString(value: any): string {
+    return String(value ?? '')
+      .trim()
+      .toLowerCase()
+      .replace(/[áàäâ]/g, 'a')
+      .replace(/[éèëê]/g, 'e')
+      .replace(/[íìïî]/g, 'i')
+      .replace(/[óòöôő]/g, 'o')
+      .replace(/[úùüûű]/g, 'u')
+      .replace(/[\s_\-]+/g, '_');
+  }
+
+  private isPcItem(item: any): boolean {
+    const t = this.normalizeTypeString(item?.setup_type ?? item?.type ?? item?.category ?? item?.source_table ?? '');
+    return t.includes('pc') || item?.processor_id != null || item?.motherboard_id != null || item?.ram_id != null;
+  }
+
+  private isCarItem(item: any): boolean {
+    const t = this.normalizeTypeString(item?.setup_type ?? item?.type ?? item?.category ?? item?.source_table ?? '');
+    return t.includes('car') || item?.car_id != null;
+  }
+
+  private isInstrumentItem(item: any): boolean {
+    const t = this.normalizeTypeString(item?.setup_type ?? item?.type ?? item?.category ?? item?.source_table ?? '');
+    return t.includes('instrument') || t.includes('hangszer') || item?.instrument_id != null;
+  }
+
+  private pickBuilderItem(
+    type: 'pc' | 'car' | 'instrument' | 'network' | 'home_theater' | 'other',
+    children: any[]
+  ): any | null {
+    if (!Array.isArray(children) || !children.length) return null;
+
+    if (type === 'pc') return children.find((x) => this.isPcItem(x)) ?? null;
+    if (type === 'car') return children.find((x) => this.isCarItem(x)) ?? null;
+    if (type === 'instrument') return children.find((x) => this.isInstrumentItem(x)) ?? null;
+
+    return null;
   }
 
   private openHierarchyHtPicker(setup: any): void {
@@ -759,7 +907,9 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit, OnChanges 
 
   loadSetups(): void {
     const plan = this.favoriteMode ? 'true' : 'false';
-    const listQuery = this.setupListId ? `listId=${this.setupListId}` : `plan=${plan}`;
+    const listQuery = this.isPlanView
+      ? 'plan=true'
+      : (this.setupListId ? `listId=${this.setupListId}` : `plan=${plan}`);
 
     // Setup oldalra is_plan=false szűrés
     this.loading = true;
@@ -842,7 +992,24 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit, OnChanges 
   onSetupClick(setup: any): void {
     if (this.pairingStage === 'PICK_TARGET_SETUP') {
       this.selectTargetSetup(setup);
+      return;
     }
+
+    this.selectedSetup = this.normalizeSetup(setup);
+    this.selectedWorkspaceItem = null;
+  }
+
+  onWorkspaceBackgroundClick(): void {
+    if (this.pairingStage !== 'NONE') return;
+    this.selectedSetup = null;
+    this.selectedWorkspaceItem = null;
+    this.closeProductOverlay();
+  }
+
+  onWorkspaceItemSelect(item: any): void {
+    this.selectedWorkspaceItem = item;
+    this.selectedSetup = null;
+    this.closeProductOverlay();
   }
 
   onSetupDetails(setup: any): void {
@@ -865,6 +1032,8 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit, OnChanges 
     }
 
     this.viewingSetup = this.normalizeSetup(setup);
+    this.selectedSetup = null;
+    this.selectedWorkspaceItem = null;
     this.selectedProduct = null;
     this.selectedCarItem = null;
     this.selectedPcItem = null;
@@ -1032,11 +1201,49 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit, OnChanges 
     this.connectSourceSetup = null;
     this.connectSourceItem = null;
     this.connectTargetSetup = null;
+    this.allowPcHtLinks = false;
     this.pairingItems = [];
     this.pairingTargetItems = [];
     this.pairingConnections = [];
     this.pairingStage = 'NONE';
     this.workspaceComp?.closePairingWindows();
+  }
+
+  private isNetworkEndpoint(type: string): boolean {
+    const t = this.normalizeConnectableType(type);
+    return t === 'router' || t === 'switch' || t === 'modem';
+  }
+
+  private isPcOrHt(type: string): boolean {
+    const t = this.normalizeConnectableType(type);
+    return t === 'pc' || t === 'ht' || t === 'home_theater';
+  }
+
+  private canConnectTypes(fromType: string, toType: string): boolean {
+    const f = this.normalizeConnectableType(fromType);
+    const t = this.normalizeConnectableType(toType);
+
+    // Default: if either side is a network endpoint, allow.
+    if (this.isNetworkEndpoint(f) || this.isNetworkEndpoint(t)) return true;
+
+    // Checkbox: allow PC/HT interconnect
+    if (this.allowPcHtLinks && this.isPcOrHt(f) && this.isPcOrHt(t)) return true;
+
+    return false;
+  }
+
+  private hasNetworkConnection(deviceId: number, connections: any[]): boolean {
+    return (Array.isArray(connections) ? connections : []).some((c) => {
+      const fromId = Number(c?.from_device_id ?? c?.fromDeviceId ?? 0);
+      const toId = Number(c?.to_device_id ?? c?.toDeviceId ?? 0);
+      if (fromId !== deviceId && toId !== deviceId) return false;
+
+      const otherType = fromId === deviceId
+        ? String(c?.to_device_type ?? c?.toDeviceType ?? '')
+        : String(c?.from_device_type ?? c?.fromDeviceType ?? '');
+
+      return this.isNetworkEndpoint(otherType);
+    });
   }
 
   startConnectingFromMenu(setup: any): void {
@@ -1058,11 +1265,6 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit, OnChanges 
 
   selectSourceItem(item: any): void {
     const sourceType = this.mapItemCategoryToDeviceType(item);
-    if (!this.isAllowedConnectionType(sourceType)) {
-      console.warn('Csak PC és házimozi setup köthető össze.');
-      return;
-    }
-
     this.connectSourceItem = item;
     this.pairingStage = 'PICK_TARGET_SETUP';
     this.workspaceComp?.closeWindow('pairing_source');
@@ -1097,9 +1299,28 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit, OnChanges 
       return;
     }
 
-    if (!this.isAllowedConnectionType(from_device_type) || !this.isAllowedConnectionType(to_device_type)) {
-      console.warn('Csak PC és házimozi setup köthető össze UTP kábellel.');
+    // Rules:
+    // - default: PC/HT can only connect to network endpoints (router/switch/modem)
+    // - network endpoints can connect to anything
+    // - checkbox: allow PC↔PC, PC↔HT, HT↔HT
+    if (!this.canConnectTypes(from_device_type, to_device_type)) {
+      console.warn('Ez a két eszköz így nem köthető össze.');
       return;
+    }
+
+    // Limit: a PC/HT only 1 network connection
+    const fromNorm = this.normalizeConnectableType(from_device_type);
+    const toNorm = this.normalizeConnectableType(to_device_type);
+    const involvesNetwork = this.isNetworkEndpoint(fromNorm) || this.isNetworkEndpoint(toNorm);
+
+    if (involvesNetwork) {
+      const pcLikeId = this.isNetworkEndpoint(fromNorm) ? to_device_id : from_device_id;
+      const pcLikeType = this.isNetworkEndpoint(fromNorm) ? toNorm : fromNorm;
+
+      if (this.isPcOrHt(pcLikeType) && this.hasNetworkConnection(pcLikeId, this.pairingConnections)) {
+        console.warn('Egy gép/házimozi csak egy hálózati eszközhöz csatlakozhat.');
+        return;
+      }
     }
 
     this.http.post<any>('/api/setup/save-connection', {
@@ -1114,7 +1335,8 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit, OnChanges 
       from_device_type,
       from_device_id,
       to_device_type,
-      to_device_id
+      to_device_id,
+      allow_pc_ht_links: this.allowPcHtLinks
     }, { withCredentials: true }).subscribe({
       next: () => {
         this.cancelConnecting();
@@ -1298,6 +1520,8 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit, OnChanges 
       this.router.navigate(this.buildRoomRoute(null));
     }
     this.viewingSetup = null;
+    this.selectedSetup = null;
+    this.selectedWorkspaceItem = null;
     this.items = [];
     this.connections = [];
     this.selectedProduct = null;
@@ -1340,7 +1564,9 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit, OnChanges 
 
     this.createSetupRequest(payload, (res) => {
       if (res?.setup) {
-        this.userSetups = [res.setup, ...this.userSetups];
+        const created = this.normalizeSetup(res.setup);
+        this.userSetups = [created, ...this.userSetups];
+        this.selectedSetup = created;
         this.updateLines();
       }
     });
@@ -1372,6 +1598,9 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit, OnChanges 
       next: () => {
         this.isBusy = false;
         this.userSetups = this.userSetups.filter(s => String(this.getSetupId(s)) !== String(setupId));
+        if (this.selectedSetup && String(this.getSetupId(this.selectedSetup)) === String(setupId)) {
+          this.selectedSetup = null;
+        }
 
         if (this.viewingSetup && String(this.getSetupId(this.viewingSetup)) === String(setupId)) {
           this.backToSetups();
@@ -1432,9 +1661,25 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit, OnChanges 
             : s;
         });
 
+        if (this.selectedSetup && String(this.getSetupId(this.selectedSetup)) === String(setupId)) {
+          this.selectedSetup = {
+            ...this.selectedSetup,
+            ...updated,
+            display_name: updated.setup_name
+          };
+        }
+
         if (this.viewingSetup && String(this.getSetupId(this.viewingSetup)) === String(setupId)) {
           this.viewingSetup = {
             ...this.viewingSetup,
+            ...updated,
+            display_name: updated.setup_name
+          };
+        }
+
+        if (this.selectedWorkspaceItem && String(this.getSetupId(this.selectedWorkspaceItem)) === String(setupId)) {
+          this.selectedWorkspaceItem = {
+            ...this.selectedWorkspaceItem,
             ...updated,
             display_name: updated.setup_name
           };
@@ -1462,21 +1707,31 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit, OnChanges 
       { withCredentials: true }
     ).subscribe({
       next: () => {
+        let selectedUpdate: any = null;
 
         this.items = this.items.map(it => {
           const itId = it?.id ?? it?.ID ?? it?.item_id;
           const itTab = it?.category ?? it?.source_table ?? it?.table_name;
 
           if (String(itId) === String(itemId) && itTab === tableName) {
-            return {
+            selectedUpdate = {
               ...it,
               display_name: newName,
               setup_name: newName,
               name: newName
             };
+            return selectedUpdate;
           }
           return it;
         });
+
+        if (selectedUpdate && this.selectedWorkspaceItem) {
+          const selectedId = this.selectedWorkspaceItem?.id ?? this.selectedWorkspaceItem?.ID ?? this.selectedWorkspaceItem?.item_id;
+          const selectedTab = this.selectedWorkspaceItem?.category ?? this.selectedWorkspaceItem?.source_table ?? this.selectedWorkspaceItem?.table_name;
+          if (String(selectedId) === String(itemId) && selectedTab === tableName) {
+            this.selectedWorkspaceItem = selectedUpdate;
+          }
+        }
       },
       error: (err) => {
         console.error('❌ Item átnevezés hiba:', err);
@@ -1513,6 +1768,10 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit, OnChanges 
       type = 'pc';
     } else if (catName === 'Autók' || catNorm.includes('autok') || catNorm.includes('auto')) {
       type = 'car';
+    } else if (catNorm.includes('hangszer') || catNorm.includes('instrument')) {
+      type = 'instrument';
+    } else if (catNorm.includes('halozat') || catNorm.includes('network') || catNorm.includes('router') || catNorm.includes('switch') || catNorm.includes('modem')) {
+      type = 'network';
     } else {
       type = 'other';
     }
@@ -1530,11 +1789,21 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit, OnChanges 
       }
 
       if (type === 'car') {
-        this.openDevicesWindowForCurrentSetup();
+        this.workspaceComp?.openCarBuilderWindow(this.viewingSetup);
         return;
       }
 
-      this.openDevicesWindowForCurrentSetup();
+      if (type === 'instrument') {
+        this.workspaceComp?.openInstrumentBuilderWindow(this.viewingSetup);
+        return;
+      }
+
+      if (type === 'network') {
+        this.workspaceComp?.openNetworkBuilderWindow(this.viewingSetup);
+        return;
+      }
+
+      this.openEmptyWindowForCategory('Egyeb', this.viewingSetup);
       return;
     }
 
@@ -1573,10 +1842,109 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit, OnChanges 
       }, (res) => {
         if (res?.setup) {
           this.userSetups = [this.normalizeSetup(res.setup), ...this.userSetups];
+          this.selectedSetup = this.normalizeSetup(res.setup);
           this.updateLines();
         }
       });
     }
+  }
+
+  selectedSetupTitle(): string {
+    return this.selectedSetup ? this.getSetupTitle(this.selectedSetup) : '';
+  }
+
+  openSelectedSetup(): void {
+    if (!this.selectedSetup) return;
+    this.openSetupDetails(this.selectedSetup);
+  }
+
+  openSelectedSetupTools(): void {
+    if (!this.selectedSetup) return;
+    this.workspaceComp?.openDevicesWindow(this.selectedSetup);
+  }
+
+  renameSelectedSetup(): void {
+    if (!this.selectedSetup) return;
+    this.workspaceComp?.startRenameForSetup(this.selectedSetup);
+  }
+
+  connectSelectedSetup(): void {
+    if (!this.selectedSetup) return;
+    this.startConnectingFromMenu(this.selectedSetup);
+  }
+
+  openSelectedSetupConnections(): void {
+    if (!this.selectedSetup) return;
+    this.workspaceComp?.openConnectionsWindow(this.selectedSetup);
+  }
+
+  deleteSelectedSetup(): void {
+    if (!this.selectedSetup) return;
+    this.deleteSetupFromMenu(this.selectedSetup);
+  }
+
+  viewingSetupTitle(): string {
+    return this.viewingSetup ? this.getSetupTitle(this.viewingSetup) : '';
+  }
+
+  itemTitle(item = this.selectedWorkspaceItem): string {
+    return String(
+      item?.display_name ||
+      item?.product_name ||
+      item?.setup_name ||
+      item?.name ||
+      item?.model ||
+      'Eszkoz'
+    );
+  }
+
+  itemTypeLabel(item = this.selectedWorkspaceItem): string {
+    return String(
+      item?.setup_type ||
+      item?.type ||
+      item?.device_type ||
+      item?.category ||
+      item?.source_table ||
+      'Nincs tipus'
+    );
+  }
+
+  itemDetails(item = this.selectedWorkspaceItem): Array<{ label: string; value: string }> {
+    if (!item) return [];
+
+    const rows = [
+      { label: 'Nev', value: this.itemTitle(item) },
+      { label: 'Tipus', value: this.itemTypeLabel(item) },
+      { label: 'Gyarto', value: item?.manufacturer || item?.Manufacturer || item?.brand || '' },
+      { label: 'Modell', value: item?.model || item?.Model || item?.product_name || '' },
+      { label: 'Tabla', value: item?.category || item?.source_table || item?.table_name || item?.table || '' },
+      { label: 'ID', value: item?.id ?? item?.ID ?? item?.item_id ?? '' }
+    ];
+
+    return rows
+      .map((row) => ({ label: row.label, value: String(row.value ?? '').trim() }))
+      .filter((row) => row.value);
+  }
+
+  selectDeviceCategory(category: string): void {
+    if (!this.viewingSetup) return;
+    this.selectedWorkspaceItem = null;
+    this.handleCategorySelected({ category, setup: this.viewingSetup });
+  }
+
+  openSelectedItem(): void {
+    if (!this.selectedWorkspaceItem) return;
+    this.openItemOverlay(this.selectedWorkspaceItem);
+  }
+
+  renameSelectedItem(): void {
+    if (!this.selectedWorkspaceItem) return;
+    this.workspaceComp?.startRenameForItem(this.selectedWorkspaceItem);
+  }
+
+  modifySelectedItem(): void {
+    if (!this.selectedWorkspaceItem) return;
+    this.workspaceComp?.onItemModify(this.selectedWorkspaceItem);
   }
 
   openPcBuilder(setup: any): void {
@@ -1621,5 +1989,3 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit, OnChanges 
     }
   }
 }
-
-

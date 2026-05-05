@@ -20,6 +20,7 @@ module.exports = function optionalUser(req, _res, next) {
         req.user = {
             id: Number(decoded.id),
             username: decoded.username,
+            fullname: decoded.fullname,
             email: decoded.email,
             role
         };

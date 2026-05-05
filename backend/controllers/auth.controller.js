@@ -99,6 +99,7 @@ exports.googleLogin = async (req, res) => {
         const token = jwt.sign({
             id: user.ID,
             username: user.UserName,
+            fullname: user.Name,
             email: user.Email,
             role: resolveRole(user.ID)
         }, JWT_SECRET, { expiresIn: "12h" });
@@ -145,6 +146,7 @@ exports.register = async (req, res) => {
         const token = jwt.sign({
             id: user.ID,
             username: user.UserName,
+            fullname: user.Name,
             email: user.Email,
             role: resolveRole(user.ID)
         }, JWT_SECRET, { expiresIn: "12h" });
@@ -174,7 +176,7 @@ exports.login = async (req, res) => {
     if (!ok) return res.status(401).json({ error: "Invalid login" });
 
     const token = jwt.sign(
-        { id: user.ID, username: user.UserName, email: user.Email, role: resolveRole(user.ID, user.Role) },
+        { id: user.ID, username: user.UserName, fullname: user.Name, email: user.Email, role: resolveRole(user.ID) },
         JWT_SECRET,
         { expiresIn: rememberMe ? "25d" : "12h" }
     );
@@ -197,9 +199,29 @@ exports.logout = (_, res) => {
 };
 
 
-exports.me = (req, res) => {
+exports.me = async (req, res) => {
     if (!req.user) return res.json({ loggedIn: false });
-    res.json({ loggedIn: true, user: req.user });
+
+    const { data: user, error } = await supabase
+        .from("user[Auth]")
+        .select("ID, UserName, Name, Email")
+        .eq("ID", req.user.id)
+        .maybeSingle();
+
+    if (error) {
+        return res.json({ loggedIn: true, user: req.user });
+    }
+
+    res.json({
+        loggedIn: true,
+        user: {
+            id: req.user.id,
+            username: user?.UserName || req.user.username,
+            fullname: user?.Name || req.user.fullname,
+            email: user?.Email || req.user.email,
+            role: req.user.role
+        }
+    });
 };
 exports.requestRegisterCode = async (req, res) => {
     try {
@@ -281,8 +303,9 @@ exports.verifyRegisterCode = async (req, res) => {
     const token = jwt.sign({
         id: user.ID,
         username: user.UserName,
+        fullname: user.Name,
         email: user.Email,
-        role: resolveRole(user.ID, user.Role)
+        role: resolveRole(user.ID)
     }, JWT_SECRET, { expiresIn: "12h" });
 
     setAuthCookie(res, token);

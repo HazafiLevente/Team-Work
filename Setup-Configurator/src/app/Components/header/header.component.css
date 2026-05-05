@@ -177,6 +177,18 @@ body[data-appearance="light"] .logo {
 
 #rank {
   margin-top: 10px;
+  cursor: pointer;
+  transition: transform .16s ease, filter .16s ease;
+}
+
+#rank:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.08);
+}
+
+#rank:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--page-accent, #67e8f9) 65%, transparent);
+  outline-offset: 4px;
 }
 
 .username {

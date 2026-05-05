@@ -1,5 +1,46 @@
+/**
+ * --------------------------------------------------------------------------
+ *  SETUP PRICE VALUATION SERVICE
+ * --------------------------------------------------------------------------
+ *  Calculates the total monetary value of a user's setups by traversing
+ *  rooms, devices, and their associated EAV price properties.
+ */
+
 const { supabase } = require("../../services/supabase");
 
+// --- CORE CALCULATION LOGIC ---
+
+/**
+ * Orchestrates the full valuation process for a user.
+ *
+ * @param {string|number} userId - The unique identifier of the user.
+ * @returns {Promise<number>} - The total calculated price.
+ */
+async function calculateUserSetupPrice(userId) {
+    const setupIds = await getUserSetupIds(userId);
+    const productIds = await getSetupProductIds(setupIds);
+
+    if (productIds.length === 0) return 0;
+
+    const [pricePropIds, valuesRes] = await Promise.all([
+        getPricePropertyIds(),
+        supabase
+            .from("values")
+            .select("products_id, properties_id, value")
+            .in("products_id", productIds)
+    ]);
+
+    return (valuesRes.data || []).reduce((sum, row) => {
+        if (!pricePropIds.has(Number(row.properties_id))) return sum;
+        return sum + toPriceNumber(row.value);
+    }, 0);
+}
+
+// --- DATABASE TRAVERSAL HELPERS ---
+
+/**
+ * Finds all active setup IDs belonging to a user, filtering out non-physical rooms.
+ */
 async function getUserSetupIds(userId) {
     const { data: rooms } = await supabase
         .from("setup_room")
@@ -22,6 +63,9 @@ async function getUserSetupIds(userId) {
     return (setups || []).map(setup => setup.id);
 }
 
+/**
+ * Maps setup IDs to unique product IDs across the setup_devices relation.
+ */
 async function getSetupProductIds(setupIds) {
     if (setupIds.length === 0) return [];
 
@@ -37,6 +81,9 @@ async function getSetupProductIds(setupIds) {
     ));
 }
 
+/**
+ * Retrieves the property IDs that represent 'price' in the EAV model.
+ */
 async function getPricePropertyIds() {
     const { data: properties } = await supabase
         .from("properties")
@@ -49,10 +96,15 @@ async function getPricePropertyIds() {
     );
 }
 
+// --- DATA NORMALIZATION & VALIDATION ---
+
 function toBoolean(value) {
     return value === true || value === "true" || value === 1 || value === "1";
 }
 
+/**
+ * Filters out plans, notes, and favorites to ensure only real hardware is counted.
+ */
 function isRegularSetupRoom(room) {
     const setupType = String(room?.setup_type ?? room?.type ?? "").trim().toLowerCase();
     return !toBoolean(room?.is_plan ?? room?.is_favorite ?? room?.isFavorite)
@@ -60,6 +112,9 @@ function isRegularSetupRoom(room) {
         && !["favorite", "plan", "note"].includes(setupType);
 }
 
+/**
+ * Safely converts price strings or ranges into a single numeric value.
+ */
 function toPriceNumber(value) {
     if (value == null || value === "") return 0;
     if (typeof value === "number") return Number.isFinite(value) ? value : 0;
@@ -75,27 +130,8 @@ function toPriceNumber(value) {
     if (!parsed.length) return 0;
     if (parsed.length === 1) return Math.round(parsed[0]);
 
+    // Handle price ranges by taking the median
     return Math.round((Math.min(...parsed) + Math.max(...parsed)) / 2);
-}
-
-async function calculateUserSetupPrice(userId) {
-    const setupIds = await getUserSetupIds(userId);
-    const productIds = await getSetupProductIds(setupIds);
-
-    if (productIds.length === 0) return 0;
-
-    const [pricePropIds, valuesRes] = await Promise.all([
-        getPricePropertyIds(),
-        supabase
-            .from("values")
-            .select("products_id, properties_id, value")
-            .in("products_id", productIds)
-    ]);
-
-    return (valuesRes.data || []).reduce((sum, row) => {
-        if (!pricePropIds.has(Number(row.properties_id))) return sum;
-        return sum + toPriceNumber(row.value);
-    }, 0);
 }
 
 module.exports = {
