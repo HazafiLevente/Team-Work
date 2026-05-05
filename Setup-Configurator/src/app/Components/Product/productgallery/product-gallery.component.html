@@ -24,7 +24,7 @@
         [class.active]="i === active"
         (click)="setActive(i)"
         title="Kép váltás">
-        <img [src]="img" alt="" />
+        <img [src]="img" alt="" loading="lazy" decoding="async" />
       </button>
     </div>
 
@@ -46,7 +46,7 @@
     <button class="nav left" (click)="prev()" aria-label="Előző">‹</button>
 
     <div class="viewer-frame" [attr.data-dir]="direction">
-      <img [src]="currentSrc" [alt]="title" class="viewer-img" />
+      <img [src]="currentSrc" [alt]="title" class="viewer-img" decoding="async" />
     </div>
 
     <button class="nav right" (click)="next()" aria-label="Következő">›</button>

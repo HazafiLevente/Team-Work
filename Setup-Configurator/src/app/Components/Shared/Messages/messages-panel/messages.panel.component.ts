@@ -335,7 +335,6 @@ export class MessagesPanelComponent implements OnInit, OnDestroy {
 
   handleMentionLinkClick(event: MouseEvent, block: { mention?: string | null, product?: any | null }) {
     const href = this.buildProductPath(block?.product);
-    console.log('AI panel mention link click', { block, href });
 
     if (href) {
       window.location.assign(href);

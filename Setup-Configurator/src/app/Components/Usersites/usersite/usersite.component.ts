@@ -46,7 +46,7 @@ export class UsersiteComponent implements OnDestroy {
     let page = 'profile';
 
     if (url.includes('/messages')) page = 'messages';
-    else if (url.includes('/favorite')) page = 'favorite';
+    else if (url.includes('/plan') || url.includes('/favorite')) page = 'plan';
     else if (url.includes('/admin')) page = 'admin';
     else if (url.includes('/settings')) page = 'settings';
     else if (url.includes('/notifications')) page = 'notifications';

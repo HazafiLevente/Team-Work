@@ -24,7 +24,7 @@
       class="bell-wrap"
       (click)="toggleBell($event)">
 
-      <i class="fas fa-bell"></i>
+      <span class="bell-icon" aria-hidden="true">&#128276;</span>
 
       <div
         *ngIf="bellOpen$ | async"
@@ -76,8 +76,8 @@
 
         <hr>
 
-        <div class="menu-item" routerLink="/user/profile">👤 Profile</div>
-        <div class="menu-item" routerLink="/user/favorite">⭐ Favorite</div>
+        <div class="menu-item" [routerLink]="['/user/profile', auth.formatNameForUrl(user.username)]">👤 Profile</div>
+        <div class="menu-item" routerLink="/user/plan">⭐ Plan</div>
         <div class="menu-item" routerLink="/user/setup">🧰 My Setup</div>
 
 

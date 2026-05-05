@@ -105,6 +105,9 @@ export class AuthService {
     return this.http.post('/api/auth/password/reset', { email, code, newPassword });
   }
 
+  formatNameForUrl(name: string): string {
+    return (name || '').replace(/\s+/g, '_');
+  }
 
   googleLogin(idToken: string) {
     return this.http.post(

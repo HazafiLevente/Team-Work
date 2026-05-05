@@ -70,7 +70,6 @@ export class SearchbarComponent implements OnInit {
       sort: (this.sort || '').trim()
     };
 
-    console.log('SEARCHBAR -> setFilters()', filters);
 
     this.filtersService.setSearch(filters as SearchFilters);
   }

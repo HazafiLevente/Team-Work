@@ -147,7 +147,6 @@ export class WorkspaceComponent {
 
   snapAssistWindowId: string | null = null;
   snapAssistVisible = false;
-  readonly windowSafeTop = 62;
   private readonly snapAssistThreshold = 18;
 
   extWidth = 0;
@@ -234,7 +233,6 @@ export class WorkspaceComponent {
   elementRegistry = new Map<string, HTMLElement>();
 
   registerElement(e: { id: string; el: HTMLElement }) {
-    console.log(`📝 [Workspace] Registering element: ${e.id}`, !!e.el);
     this.elementRegistry.set(e.id, e.el);
     this.updateLines();
   }
@@ -500,12 +498,6 @@ export class WorkspaceComponent {
       ? { roomId: body.setupId }
       : body;
 
-    console.log('[workspace] delete request', {
-      url: deleteUrl,
-      body: deleteBody,
-      ctxItem: this.ctxItem,
-      viewingSetup: this.viewingSetup
-    });
 
     const request = body.tableName === 'setups'
       ? this.http.request<any>('delete', deleteUrl, {
@@ -519,11 +511,6 @@ export class WorkspaceComponent {
 
     request.subscribe({
       next: (res) => {
-        console.log('[workspace] delete success', {
-          url: deleteUrl,
-          body: deleteBody,
-          response: res
-        });
         onSuccess();
       },
       error: (err) => {
@@ -950,7 +937,7 @@ export class WorkspaceComponent {
     const idx = this.windows.findIndex(w => w.id === id);
     if (idx !== -1) {
       this.windows[idx].x = pos.x;
-      this.windows[idx].y = Math.max(this.windowSafeTop, pos.y);
+      this.windows[idx].y = pos.y;
       this.windows[idx].snapMode = null;
       this.windows[idx].height = null;
       this.calculateWorkspaceExtension();
@@ -964,7 +951,7 @@ export class WorkspaceComponent {
     this.windows[idx] = {
       ...this.windows[idx],
       x: size.x,
-      y: Math.max(this.windowSafeTop, size.y),
+      y: size.y,
       width: size.width,
       height: size.height,
       maximized: false,
@@ -975,7 +962,7 @@ export class WorkspaceComponent {
   }
 
   onWindowDragMoved(id: string, pos: { x: number, y: number }): void {
-    if (pos.y <= this.windowSafeTop + this.snapAssistThreshold) {
+    if (pos.y <= this.snapAssistThreshold) {
       this.snapAssistWindowId = id;
       this.snapAssistVisible = true;
       return;
@@ -990,7 +977,7 @@ export class WorkspaceComponent {
   onWindowDragEnded(id: string, pos: { x: number, y: number }): void {
     this.updateWindowPosition(id, pos);
 
-    if (pos.y <= this.windowSafeTop + this.snapAssistThreshold) {
+    if (pos.y <= this.snapAssistThreshold) {
       this.snapAssistWindowId = id;
       this.snapAssistVisible = true;
     }
@@ -1017,7 +1004,7 @@ export class WorkspaceComponent {
         return {
           ...w,
           x: 0,
-          y: this.windowSafeTop,
+          y: 0,
           width: undefined,
           height: null,
           snapMode: null,
@@ -1030,9 +1017,9 @@ export class WorkspaceComponent {
       return {
         ...w,
         x: mode === 'left' ? 0 : Math.max(0, width - halfWidth),
-        y: this.windowSafeTop,
+        y: 0,
         width: halfWidth,
-        height: Math.max(250, height - this.windowSafeTop),
+        height,
         snapMode: mode,
         maximized: false,
         minimized: false,
@@ -1146,7 +1133,6 @@ export class WorkspaceComponent {
     if (isHT) {
       this.openHtBuilderWindow(item);
     } else {
-      console.log('Modify not supported for this item type:', item);
     }
   }
 

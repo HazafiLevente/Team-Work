@@ -2,7 +2,9 @@
   display: grid;
   grid-template-columns: 260px minmax(0, 1fr);
   gap: 18px;
-  min-height: calc(100vh - 120px);
+  width: 100%;
+  min-height: 100vh;
+  padding: 88px 18px 112px;
   color: #fff;
 }
 
@@ -93,6 +95,7 @@
 @media (max-width: 900px) {
   .notifications-layout {
     grid-template-columns: 1fr;
+    padding: 82px 12px 104px;
   }
 
   .sidebar,

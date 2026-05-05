@@ -94,7 +94,6 @@ export class ClickSparkComponent implements AfterViewInit, OnDestroy {
 
     if (!this.enabled) return;
     if (typeof window === 'undefined') return;
-    console.log('CLICK SPARK fired');
 
     const rect = this.canvasRef.nativeElement.getBoundingClientRect();
     const x = e.clientX - rect.left;

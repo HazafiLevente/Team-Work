@@ -57,11 +57,8 @@ export class BellService {
                 [];
 
         this.itemsSub.next(arr);
-        console.log("🔔 bell refresh got:", res);
-        console.log("🔔 bell items array:", arr);
       },
       error: (err) => {
-        console.log("🔔 bell refresh error:", err);
         this.itemsSub.next([]);
       }
     });

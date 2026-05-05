@@ -11,7 +11,74 @@
     <button class="menu-item" (click)="$event.stopPropagation(); emitAndClose(rename)">
       Atnevezes
     </button>
+
+    <button class="menu-item" (click)="toggleLists($event)">
+      Listak
+    </button>
   </div>
+
+  @if (listsOpen) {
+    <div class="list-panel" (click)="$event.stopPropagation()">
+      <button
+        type="button"
+        class="favorite-toggle"
+        [class.active]="favoriteList() && isSetupInList(favoriteList()!)"
+        [disabled]="listsSavingId !== null"
+        (click)="toggleFavoriteList($event)">
+        <span class="check">@if (favoriteList() && isSetupInList(favoriteList()!)) { <span>&#10003;</span> }</span>
+        <span>Favorite</span>
+      </button>
+
+      @if (!listsLoading) {
+        <div class="list-toggle-stack">
+          @for (list of planLists(); track list.id) {
+            <button
+              type="button"
+              class="favorite-toggle list-toggle"
+              [class.active]="isSetupInList(list)"
+              [disabled]="listsSavingId !== null"
+              (click)="togglePlanList($event, list)">
+              <span class="check">@if (isSetupInList(list)) { <span>&#10003;</span> }</span>
+              <span>
+                <strong>{{ list.title || list.name }}</strong>
+                <small>{{ list.setupIds.length }} setup · {{ list.isSecret ? 'privat' : 'publikus' }}</small>
+              </span>
+            </button>
+          }
+        </div>
+      }
+
+      <div class="create-row">
+        <input [(ngModel)]="newListName" placeholder="Uj lista" (click)="$event.stopPropagation()" />
+        <button
+          type="button"
+          class="privacy-toggle"
+          [class.private]="newListPrivate"
+          [title]="newListPrivate ? 'Privat lista' : 'Publikus lista'"
+          (click)="$event.stopPropagation(); newListPrivate = !newListPrivate">
+          {{ newListPrivate ? '🔒' : '🔓' }}
+        </button>
+        <button type="button" [disabled]="!newListName.trim() || listsSavingId === -1" (click)="createSetupList($event)">
+          +
+        </button>
+      </div>
+      <div class="privacy-hint">
+        {{ newListPrivate ? 'Privat lista lesz.' : 'Alapbol publikus lista.' }}
+      </div>
+
+      @if (listsLoading) {
+        <div class="list-hint">Betoltes...</div>
+      } @else {
+        @if (!planLists().length) {
+          <div class="list-hint">Meg nincs sajat lista.</div>
+        }
+      }
+
+      @if (listsError) {
+        <div class="list-error">{{ listsError }}</div>
+      }
+    </div>
+  }
 
   <div class="menu-separator"></div>
 

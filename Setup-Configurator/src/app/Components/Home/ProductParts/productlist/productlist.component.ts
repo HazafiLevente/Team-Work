@@ -58,7 +58,7 @@ export class ProductlistComponent implements OnInit, OnDestroy {
 
   filteredProducts: AnyProduct[] = [];
 
-  readonly PAGE_SIZE = 50;
+  readonly PAGE_SIZE = 24;
   page = 1;
   totalPages = 1;
   pagedProducts: AnyProduct[] = [];

@@ -36,7 +36,14 @@ const makeSlot = (i: number, distX: number, distY: number, total: number): Slot 
         *ngFor="let img of images; let i = index"
         (click)="onCardClick(i)"
         [attr.aria-label]="'Image ' + (i + 1)">
-        <img [src]="img" alt="" draggable="false" />
+        <img
+          [src]="cardImageSrc(i, img)"
+          alt=""
+          draggable="false"
+          (error)="onImageError(i, img)"
+          [attr.loading]="i === activeIndex ? 'eager' : 'lazy'"
+          [attr.fetchpriority]="i === activeIndex ? 'high' : 'low'"
+          decoding="async" />
       </button>
     </div>
   `,
@@ -74,6 +81,10 @@ export class CardSwapComponent implements AfterViewInit, OnDestroy, OnChanges {
 
   private els: HTMLElement[] = [];
   private total = 0;
+  private hydrateTimer: number | null = null;
+  visibleImages = new Set<number>();
+  private failedImages = new Set<number>();
+  readonly placeholderSrc = 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 16 16%22/%3E';
 
   private config = {
     ease: 'elastic.out(0.6,0.9)',
@@ -125,6 +136,7 @@ export class CardSwapComponent implements AfterViewInit, OnDestroy, OnChanges {
     this.els = this.cardEls?.toArray().map(r => r.nativeElement) ?? [];
     this.total = this.els.length;
     if (this.total === 0) return;
+    this.visibleImages = new Set([this.clampIndex(this.activeIndex, this.total)]);
 
     this.config =
       this.easing === 'elastic'
@@ -155,10 +167,9 @@ export class CardSwapComponent implements AfterViewInit, OnDestroy, OnChanges {
     this.emitFront();
 
 
-    this.swapOnce();
-
     this.startInterval();
     this.bindHover();
+    this.scheduleImageHydration();
   }
 
   private startInterval() {
@@ -237,6 +248,7 @@ export class CardSwapComponent implements AfterViewInit, OnDestroy, OnChanges {
     if (!this.els?.length || this.total === 0) return;
 
     const front = this.clampIndex(idx, this.total);
+    this.visibleImages = new Set([...this.visibleImages, front]);
     this.order = this.makeOrderWithFront(front, this.total);
 
     this.tl?.kill();
@@ -290,10 +302,17 @@ export class CardSwapComponent implements AfterViewInit, OnDestroy, OnChanges {
   private cleanup() {
     try { this.tl?.kill(); } catch {}
     this.tl = null;
+    this.visibleImages = new Set();
+    this.failedImages = new Set();
 
     if (this.intervalId) {
       clearInterval(this.intervalId);
       this.intervalId = null;
+    }
+
+    if (this.hydrateTimer) {
+      clearTimeout(this.hydrateTimer);
+      this.hydrateTimer = null;
     }
 
     if (this.pauseOnHover && this.containerRef?.nativeElement) {
@@ -312,4 +331,32 @@ export class CardSwapComponent implements AfterViewInit, OnDestroy, OnChanges {
     this.paused = false;
     this.tl?.play();
   };
+
+  private scheduleImageHydration() {
+    if (this.hydrateTimer) clearTimeout(this.hydrateTimer);
+
+    this.hydrateTimer = window.setTimeout(() => {
+      this.visibleImages = new Set(this.images.map((_, i) => i));
+      this.hydrateTimer = null;
+    }, 2500);
+  }
+
+  cardImageSrc(index: number, src: string): string {
+    if (!this.visibleImages.has(index)) return this.placeholderSrc;
+    if (!this.failedImages.has(index)) return src;
+
+    return this.originalImageSrc(src) || this.placeholderSrc;
+  }
+
+  onImageError(index: number, src: string) {
+    if (this.failedImages.has(index) || !this.originalImageSrc(src)) return;
+    this.failedImages = new Set([...this.failedImages, index]);
+  }
+
+  private originalImageSrc(src: string): string {
+    if (!src.startsWith('/image-preview/')) return '';
+
+    const pathPart = src.slice('/image-preview/'.length).split('?')[0];
+    return `/images/${pathPart}`;
+  }
 }

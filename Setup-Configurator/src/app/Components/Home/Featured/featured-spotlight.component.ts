@@ -304,7 +304,7 @@ export class FeaturedSpotlightComponent implements OnChanges {
 
     this.images = picked.map(p => {
       const table = (p as any).table_name ?? (p as any).table ?? '';
-      return this.imagesSvc.getImage(table, p);
+      return this.imagesSvc.getImage(table, p, 640);
     });
 
     this.activeIndex = 0;

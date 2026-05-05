@@ -62,7 +62,7 @@
     >
       <div class="place">{{ getMedal(getPlace(user)) }}</div>
 
-      <div class="user">
+      <div class="user" (click)="viewProfile(user)" style="cursor: pointer;">
         <div class="name">
           {{ displayName(user) }}
           <span class="me-badge" *ngIf="isCurrentUser(user)">Te</span>

@@ -41,7 +41,7 @@
     <div class="setup-picker-header">
       <div>
         <div class="setup-picker-kicker">Product hozzaadas</div>
-        <div class="setup-picker-title">Valaszd ki a setupot vagy favorite roomot</div>
+        <div class="setup-picker-title">Valaszd ki a setupot vagy plan roomot</div>
       </div>
       <button type="button" class="setup-picker-close" (click)="closeSetupPicker()">X</button>
     </div>
@@ -98,7 +98,7 @@
         </div>
 
         <div class="setup-picker-section" *ngIf="favoriteTargets.length">
-          <div class="setup-picker-section-title">Favorite</div>
+          <div class="setup-picker-section-title">Plan</div>
           <button
             type="button"
             class="setup-target"
@@ -111,7 +111,7 @@
         </div>
 
         <div class="setup-picker-state" *ngIf="!regularTargets.length && !favoriteTargets.length">
-          Nincs elerheto mySetup vagy favorite room.
+          Nincs elerheto mySetup vagy plan room.
         </div>
       </ng-container>
     </div>

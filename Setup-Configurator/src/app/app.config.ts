@@ -14,11 +14,6 @@ import {
 import { routes } from './app.routes';
 import { AuthInterceptor } from './HTTP/auth/auth.interceptor';
 
-import {
-  SocialAuthServiceConfig,
-  GoogleLoginProvider
-} from '@abacritt/angularx-social-login';
-
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
@@ -33,20 +28,5 @@ export const appConfig: ApplicationConfig = {
       useClass: AuthInterceptor,
       multi: true
     },
-    {
-      provide: 'SocialAuthServiceConfig',
-      useValue: {
-        autoLogin: false,
-        providers: [
-          {
-            id: GoogleLoginProvider.PROVIDER_ID,
-            provider: new GoogleLoginProvider(
-              '532912380153-m52bf55o6mh97thupt086j8ift2r4qro.apps.googleusercontent.com'
-            )
-          }
-        ]
-      } as SocialAuthServiceConfig
-    }
-
   ]
 };

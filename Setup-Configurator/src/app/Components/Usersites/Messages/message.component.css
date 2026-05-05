@@ -6,8 +6,6 @@
   min-height: 620px;
   overflow: hidden;
 }
-
-
 .chat-sidebar {
   display: flex;
   flex-direction: column;
@@ -93,6 +91,53 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.conversation-menu-wrap {
+  position: relative;
+  flex: 0 0 auto;
+}
+
+.conversation-dots {
+  width: 30px;
+  height: 30px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.04);
+  color: rgba(255,255,255,0.72);
+  cursor: pointer;
+}
+
+.conversation-menu {
+  position: absolute;
+  top: 34px;
+  right: 0;
+  z-index: 30;
+  min-width: 130px;
+  padding: 6px;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,0.10);
+  background: rgba(11, 15, 24, 0.96);
+  box-shadow: 0 10px 28px rgba(0,0,0,0.36);
+}
+
+.conversation-menu-item {
+  width: 100%;
+  border: 0;
+  border-radius: 10px;
+  padding: 9px 10px;
+  background: transparent;
+  color: #e5e7eb;
+  text-align: left;
+  cursor: pointer;
+}
+
+.conversation-menu-item:hover {
+  background: color-mix(in srgb, var(--page-accent, #60a5fa) 10%, transparent);
+}
+
+.conversation-menu-item.danger {
+  color: #ff9b9b;
 }
 
 
@@ -365,6 +410,145 @@
   padding: 20px 8px;
 }
 
+.profile-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 10010;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(0, 0, 0, 0.48);
+}
+
+.profile-modal {
+  width: min(430px, 100%);
+  max-height: calc(100vh - 48px);
+  overflow-y: auto;
+  border-radius: 20px;
+  border: 1px solid rgba(255,255,255,0.10);
+  background: rgba(11, 15, 24, 0.98);
+  box-shadow: 0 24px 70px rgba(0,0,0,0.52);
+  padding: 18px;
+}
+
+.profile-modal-head {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  padding: 6px 0 12px;
+}
+
+.profile-avatar-large {
+  width: 86px;
+  height: 86px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--page-accent, #60a5fa) 35%, transparent);
+  background: color-mix(in srgb, var(--page-accent, #60a5fa) 18%, transparent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  color: #f8fafc;
+  font-size: 34px;
+  font-weight: 900;
+}
+
+.profile-avatar-large img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.profile-close {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 30px;
+  height: 30px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.04);
+  color: rgba(255,255,255,0.72);
+  cursor: pointer;
+}
+
+.profile-name {
+  text-align: center;
+  color: #f8fafc;
+  font-size: 22px;
+  font-weight: 900;
+}
+
+.profile-age {
+  margin-top: 4px;
+  text-align: center;
+  color: rgba(226,232,240,0.64);
+  font-size: 13px;
+}
+
+.profile-state {
+  padding: 18px;
+  text-align: center;
+  color: rgba(226,232,240,0.72);
+}
+
+.profile-setup-card {
+  margin-top: 18px;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,0.10);
+  background: rgba(255,255,255,0.04);
+  padding: 12px;
+}
+
+.profile-setup-title {
+  color: rgba(226,232,240,0.72);
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.profile-setup-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.profile-setup-row {
+  display: grid;
+  grid-template-columns: 14px 22px minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
+  min-height: 32px;
+  padding: 4px 6px;
+  border-radius: 10px;
+  color: #f4f7fb;
+}
+
+.profile-chevron {
+  color: rgba(226,232,240,0.58);
+  font-size: 12px;
+}
+
+.profile-folder {
+  color: #d6a84e;
+  font-size: 15px;
+}
+
+.profile-setup-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 800;
+}
+
+.profile-empty-setups {
+  padding: 8px 2px;
+  color: rgba(226,232,240,0.58);
+}
+
 
 .ctx-backdrop {
   position: fixed;
@@ -527,9 +711,6 @@
   text-decoration: underline;
   text-decoration-color: rgba(96, 165, 250, 0.7);
 }
-
-
-
 .hierarchy-toggle {
   --toggle-pad: 4px;
   position: relative;

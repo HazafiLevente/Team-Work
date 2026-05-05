@@ -129,11 +129,6 @@ export class DevicesMenuComponent implements OnInit {
 
     request.subscribe({
       next: (res) => {
-        console.log('[devices-menu] delete success', {
-          url: deleteUrl,
-          body: deleteBody,
-          response: res
-        });
         this.deletingDeviceId = null;
         this.loadPage(this.currentPage);
       },

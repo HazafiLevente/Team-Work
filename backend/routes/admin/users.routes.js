@@ -30,7 +30,7 @@ router.get("/users", verifyAdmin, async (req, res) => {
             username: u.UserName,
             email: u.Email,
             created_at: u.created_at,
-            role: resolveRole(u.ID, u.Role),
+            role: resolveRole(u.ID),
             banned: isBanned(u.ID),
             city: extra?.city ?? "",
             age: extra?.age ?? null,
@@ -47,7 +47,6 @@ router.patch("/users/:id", verifyAdmin, async (req, res) => {
 
     try {
         const numId = Number(id);
-        console.log(`đź‘¤ Admin updating user ID: ${numId}`, { username, role, city, age, phone });
 
         const { error: authError } = await supabase
             .from("user[Auth]")
@@ -61,12 +60,10 @@ router.patch("/users/:id", verifyAdmin, async (req, res) => {
 
         try {
             updateUserEnvRole(numId, role);
-            console.log("âś… Step 2 (.env role) updated");
         } catch (envErr) {
             console.error("âťŚ Step 2 (.env role) failed:", envErr);
         }
 
-        console.log(`đź”Ť Checking user_more for user_id: ${numId}`);
         const { data: existingMore, error: findError } = await supabase
             .from("user_more[Auth]")
             .select("id")
@@ -79,7 +76,6 @@ router.patch("/users/:id", verifyAdmin, async (req, res) => {
         }
 
         if (existingMore) {
-            console.log(`đź“ť Updating existing user_more entry ID: ${existingMore.id}`);
             const { error: moreError } = await supabase
                 .from("user_more[Auth]")
                 .update({
@@ -93,7 +89,6 @@ router.patch("/users/:id", verifyAdmin, async (req, res) => {
                 throw moreError;
             }
         } else {
-            console.log(`âž• Creating new user_more entry for user_id: ${numId}`);
             const { error: moreError } = await supabase
                 .from("user_more[Auth]")
                 .insert({
@@ -108,7 +103,6 @@ router.patch("/users/:id", verifyAdmin, async (req, res) => {
             }
         }
 
-        console.log("đźŽŠ User update completed successfully");
         res.json({ success: true });
     } catch (err) {
         console.error("đź’Ą CRITICAL: Admin user update fatal error:", err);

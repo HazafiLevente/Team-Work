@@ -12,7 +12,7 @@ module.exports = function optionalUser(req, _res, next) {
         let role = "user";
 
         try {
-            role = resolveRole(Number(decoded.id), decoded.role);
+            role = resolveRole(Number(decoded.id));
         } catch {
             role = decoded.role || "user";
         }

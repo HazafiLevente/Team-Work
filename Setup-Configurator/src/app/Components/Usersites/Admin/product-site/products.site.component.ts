@@ -51,7 +51,6 @@ export class ProductsSiteComponent implements OnInit {
   }
 
   onProductSelect(p: AdminProduct) {
-    console.log("KATT LISTA:", p);
     this.selected = { ...p };
 
     this.http.get<any>(
@@ -98,7 +97,6 @@ export class ProductsSiteComponent implements OnInit {
 
 
   onSave(product: AdminProduct) {
-    console.log('Mentés:', product);
 
     const isNew = !product.id || product.id === 0;
     const url = isNew

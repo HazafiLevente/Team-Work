@@ -49,7 +49,6 @@ export class RegisterComponent {
       },
       error: (err) => {
         this.loading = false;
-        console.log("REGISTER REQUEST ERROR:", err);
         this.errorMessage = "Nem sikerült elküldeni a kódot.";
       }
     });

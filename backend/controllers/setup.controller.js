@@ -15,8 +15,32 @@ const SETUP_TABLE = SETUPS_TABLE;
 const CHILD_SETUPS_TABLE = SETUPS_TABLE;
 const SETUP_VALUES_TABLE = "setup_values";
 const SETUP_PROPERTIES_TABLE = "setup_properties";
+const SETUP_LIST_TABLE = "setup_list";
+const SETUP_LIST_PROPERTIES_TABLE = "setup_list_properties";
+const SETUP_LIST_VALUES_TABLE = "setup_list_values";
 const PC_BUILDS_TABLE = "pc_details[Setup]";
 const CAR_SETUP_TABLE = "Car_setup[Setup]";
+
+const LIST_PROPERTY_NAMES = {
+    title: "title",
+    description: "description",
+    color: "color",
+    setupType: "setup_type",
+    viewUserId: "view_user_id",
+    isFavorite: "isFavorite",
+    isSecret: "isSecret",
+    editableUserId: "editable_user_id",
+    setupId: "setup_id"
+};
+
+const SETUP_LIST_VALUE_LIST_ID_COLUMN_CANDIDATES = [
+    "setup_list_id",
+    "setup-list_id",
+    "setuplist_id",
+    "list_id"
+];
+let setupListValueListIdColumnCache = null;
+let setupListPermissionRepairPromise = null;
 
 exports.pcParts = async (req, res) => {
     try {
@@ -840,6 +864,53 @@ function isMissingSchemaObjectError(error) {
         || message.includes("column");
 }
 
+function isPermissionDeniedError(error) {
+    if (!error) return false;
+    const message = String(error.message || "").toLowerCase();
+    return error.code === "42501" || message.includes("permission denied");
+}
+
+async function ensureSetupListTablePermissions() {
+    if (!setupListPermissionRepairPromise) {
+        const tables = [
+            SETUP_LIST_TABLE,
+            SETUP_LIST_PROPERTIES_TABLE,
+            SETUP_LIST_VALUES_TABLE
+        ].map((table) => `"${String(table).replace(/"/g, '""')}"`);
+
+        const sql = `
+grant usage on schema public to service_role;
+grant select, insert, update, delete on table public.${tables[0]} to service_role;
+grant select, insert, update, delete on table public.${tables[1]} to service_role;
+grant select, insert, update, delete on table public.${tables[2]} to service_role;
+grant usage, select on all sequences in schema public to service_role;
+alter default privileges in schema public grant usage, select on sequences to service_role;
+        `.trim();
+
+        setupListPermissionRepairPromise = supabase
+            .rpc("update_products_home", { sql })
+            .then(({ error }) => {
+                if (error) throw error;
+            })
+            .catch((error) => {
+                setupListPermissionRepairPromise = null;
+                throw error;
+            });
+    }
+
+    return setupListPermissionRepairPromise;
+}
+
+async function withSetupListPermissionsRetry(action) {
+    try {
+        return await action();
+    } catch (error) {
+        if (!isPermissionDeniedError(error)) throw error;
+        await ensureSetupListTablePermissions();
+        return action();
+    }
+}
+
 function normalizeItemTableName(tableName) {
     const normalized = String(tableName || "").trim().toLowerCase();
 
@@ -1170,6 +1241,300 @@ function resolveRenameColumn(item) {
     return null;
 }
 
+async function getSetupListPropertyId(propertyName) {
+    const normalizedName = String(propertyName || "").trim();
+    if (!normalizedName) return null;
+
+    const { data: existing, error: findError } = await supabase
+        .from(SETUP_LIST_PROPERTIES_TABLE)
+        .select("id, property")
+        .eq("property", normalizedName)
+        .limit(1)
+        .maybeSingle();
+
+    if (findError && !isMissingSchemaObjectError(findError)) throw findError;
+    if (existing?.id) return Number(existing.id);
+
+    const { data: created, error: createError } = await supabase
+        .from(SETUP_LIST_PROPERTIES_TABLE)
+        .insert([{ property: normalizedName }])
+        .select("id, property")
+        .single();
+
+    if (createError) throw createError;
+    return created?.id == null ? null : Number(created.id);
+}
+
+async function getSetupListPropertyMap() {
+    const { data, error } = await supabase
+        .from(SETUP_LIST_PROPERTIES_TABLE)
+        .select("id, property");
+
+    if (error && !isMissingSchemaObjectError(error)) throw error;
+
+    const byId = new Map();
+    const byName = new Map();
+
+    (data || []).forEach((row) => {
+        const id = String(row?.id ?? "");
+        const property = String(row?.property ?? "").trim();
+        if (!id || !property) return;
+        byId.set(id, property);
+        byName.set(property, Number(row.id));
+    });
+
+    return { byId, byName };
+}
+
+async function getSetupListValueListIdColumn() {
+    if (setupListValueListIdColumnCache) return setupListValueListIdColumnCache;
+
+    const { data: columnsByTable, error: columnsError } = await supabase.rpc("get_table_columns");
+    const valueColumns = Array.isArray(columnsByTable?.[SETUP_LIST_VALUES_TABLE])
+        ? columnsByTable[SETUP_LIST_VALUES_TABLE].map((column) => String(column))
+        : [];
+    const detectedColumn = SETUP_LIST_VALUE_LIST_ID_COLUMN_CANDIDATES.find((column) => valueColumns.includes(column));
+    if (detectedColumn) {
+        setupListValueListIdColumnCache = detectedColumn;
+        return setupListValueListIdColumnCache;
+    }
+    if (columnsError && !isMissingSchemaObjectError(columnsError)) throw columnsError;
+
+    for (const columnName of SETUP_LIST_VALUE_LIST_ID_COLUMN_CANDIDATES) {
+        const { error } = await supabase
+            .from(SETUP_LIST_VALUES_TABLE)
+            .select(columnName)
+            .limit(1);
+
+        if (!error) {
+            setupListValueListIdColumnCache = columnName;
+            return setupListValueListIdColumnCache;
+        }
+
+        if (!isMissingSchemaObjectError(error)) throw error;
+    }
+
+    setupListValueListIdColumnCache = "setup_list_id";
+    return setupListValueListIdColumnCache;
+}
+
+function setupListValuePayload(listId, propertyId, value) {
+    return {
+        [setupListValueListIdColumnCache || "setup_list_id"]: listId,
+        property: propertyId,
+        value: String(value)
+    };
+}
+
+async function ensureSetupList(name, userId, defaults = {}) {
+    return withSetupListPermissionsRetry(async () => {
+        const listName = String(name || "").trim() || "favorite";
+
+        const { data: existing, error: findError } = await supabase
+            .from(SETUP_LIST_TABLE)
+            .select("*")
+            .eq("name", listName)
+            .eq("user_id", userId)
+            .limit(1)
+            .maybeSingle();
+
+        if (findError && !isMissingSchemaObjectError(findError)) throw findError;
+
+        let list = existing?.id ? existing : null;
+        if (!list) {
+            const { data: created, error: createError } = await supabase
+                .from(SETUP_LIST_TABLE)
+                .insert([{ name: listName, user_id: userId }])
+                .select("*")
+                .single();
+            if (createError) throw createError;
+            list = created;
+        }
+
+        if (!list?.id) throw new Error("Setup list create failed");
+
+        await ensureSetupListMeta(list.id, {
+            title: defaults.title ?? listName,
+            setupType: defaults.setupType ?? listName,
+            viewUserId: userId,
+            editableUserId: userId,
+            isFavorite: defaults.isFavorite ?? (listName.toLowerCase() === "favorite"),
+            isSecret: defaults.isSecret ?? false,
+            color: defaults.color ?? "",
+            description: defaults.description ?? ""
+        });
+
+        return list;
+    });
+}
+
+async function ensureSetupListMeta(listId, meta) {
+    const listIdColumn = await getSetupListValueListIdColumn();
+    const entries = [
+        [LIST_PROPERTY_NAMES.title, meta.title],
+        [LIST_PROPERTY_NAMES.description, meta.description],
+        [LIST_PROPERTY_NAMES.color, meta.color],
+        [LIST_PROPERTY_NAMES.setupType, meta.setupType],
+        [LIST_PROPERTY_NAMES.viewUserId, meta.viewUserId],
+        [LIST_PROPERTY_NAMES.isFavorite, meta.isFavorite],
+        [LIST_PROPERTY_NAMES.isSecret, meta.isSecret],
+        [LIST_PROPERTY_NAMES.editableUserId, meta.editableUserId]
+    ];
+
+    for (const [propertyName, rawValue] of entries) {
+        if (rawValue === undefined || rawValue === null || rawValue === "") continue;
+        const propertyId = await getSetupListPropertyId(propertyName);
+        if (!propertyId) continue;
+
+        const { data: existing, error: findError } = await supabase
+            .from(SETUP_LIST_VALUES_TABLE)
+            .select("id")
+            .eq(listIdColumn, listId)
+            .eq("property", propertyId)
+            .limit(1)
+            .maybeSingle();
+
+        if (findError && !isMissingSchemaObjectError(findError)) throw findError;
+        if (existing?.id) continue;
+
+        const { error } = await supabase
+            .from(SETUP_LIST_VALUES_TABLE)
+            .insert([setupListValuePayload(listId, propertyId, rawValue)]);
+
+        if (error) throw error;
+    }
+}
+
+async function addSetupToList(listId, setupId) {
+    const listIdColumn = await getSetupListValueListIdColumn();
+    const propertyId = await getSetupListPropertyId(LIST_PROPERTY_NAMES.setupId);
+    if (!propertyId) throw new Error("Missing setup_id list property");
+
+    const setupValue = String(setupId);
+    const { data: existing, error: findError } = await supabase
+        .from(SETUP_LIST_VALUES_TABLE)
+        .select("id")
+        .eq(listIdColumn, listId)
+        .eq("property", propertyId)
+        .eq("value", setupValue)
+        .limit(1)
+        .maybeSingle();
+
+    if (findError && !isMissingSchemaObjectError(findError)) throw findError;
+    if (existing?.id) return existing;
+
+    const { data, error } = await supabase
+        .from(SETUP_LIST_VALUES_TABLE)
+        .insert([setupListValuePayload(listId, propertyId, setupValue)])
+        .select("*")
+        .single();
+
+    if (error) throw error;
+    return data;
+}
+
+async function removeSetupFromList(listId, setupId) {
+    const listIdColumn = await getSetupListValueListIdColumn();
+    const propertyId = await getSetupListPropertyId(LIST_PROPERTY_NAMES.setupId);
+    if (!propertyId) return;
+
+    const { error } = await supabase
+        .from(SETUP_LIST_VALUES_TABLE)
+        .delete()
+        .eq(listIdColumn, listId)
+        .eq("property", propertyId)
+        .eq("value", String(setupId));
+
+    if (error && !isMissingSchemaObjectError(error)) throw error;
+}
+
+async function getSetupListRows(userId) {
+    return withSetupListPermissionsRetry(async () => {
+        const { data: lists, error: listError } = await supabase
+            .from(SETUP_LIST_TABLE)
+            .select("*")
+            .eq("user_id", userId)
+            .order("id", { ascending: true });
+
+        if (listError && !isMissingSchemaObjectError(listError)) throw listError;
+
+        const listRows = lists || [];
+        const listIds = listRows.map((list) => list.id).filter((id) => id != null);
+        const propertyMap = await getSetupListPropertyMap();
+        const listIdColumn = await getSetupListValueListIdColumn();
+
+        let values = [];
+        if (listIds.length) {
+            const { data, error } = await supabase
+                .from(SETUP_LIST_VALUES_TABLE)
+                .select("*")
+                .in(listIdColumn, listIds);
+
+            if (error && !isMissingSchemaObjectError(error)) throw error;
+            values = data || [];
+        }
+
+        const valueGroups = new Map();
+        values.forEach((row) => {
+            const listId = String(row?.[listIdColumn] ?? "");
+            const propertyName = propertyMap.byId.get(String(row?.property ?? "")) || String(row?.property ?? "");
+            if (!listId || !propertyName) return;
+            if (!valueGroups.has(listId)) valueGroups.set(listId, {});
+            const group = valueGroups.get(listId);
+            if (!group[propertyName]) group[propertyName] = [];
+            group[propertyName].push(row?.value);
+        });
+
+        return listRows
+            .map((list) => {
+                const valuesByProperty = valueGroups.get(String(list.id)) || {};
+                const setupIds = (valuesByProperty[LIST_PROPERTY_NAMES.setupId] || [])
+                    .map((value) => Number(value))
+                    .filter((value) => Number.isFinite(value) && value > 0);
+                const viewUserId = valuesByProperty[LIST_PROPERTY_NAMES.viewUserId]?.[0];
+                const editableUserId = valuesByProperty[LIST_PROPERTY_NAMES.editableUserId]?.[0];
+
+                return {
+                    id: Number(list.id),
+                    name: list.name,
+                    title: valuesByProperty[LIST_PROPERTY_NAMES.title]?.[0] || list.name,
+                    description: valuesByProperty[LIST_PROPERTY_NAMES.description]?.[0] || "",
+                    color: valuesByProperty[LIST_PROPERTY_NAMES.color]?.[0] || "",
+                    setupType: valuesByProperty[LIST_PROPERTY_NAMES.setupType]?.[0] || list.name,
+                    isFavorite: normalizeBoolean(valuesByProperty[LIST_PROPERTY_NAMES.isFavorite]?.[0]),
+                    isSecret: normalizeBoolean(valuesByProperty[LIST_PROPERTY_NAMES.isSecret]?.[0]),
+                    viewUserId: viewUserId == null ? null : Number(viewUserId),
+                    editableUserId: editableUserId == null ? null : Number(editableUserId),
+                    setupIds
+                };
+            })
+            .filter((list) => {
+                const viewAllowed = list.viewUserId == null || String(list.viewUserId) === String(userId);
+                const editAllowed = list.editableUserId == null || String(list.editableUserId) === String(userId);
+                return viewAllowed || editAllowed;
+            });
+    });
+}
+
+async function syncLegacyFavoriteSetupsToDefaultList(userId, setupRows) {
+    const favoriteList = await ensureSetupList("favorite", userId, {
+        title: "Favorite",
+        setupType: "favorite",
+        isFavorite: true
+    });
+
+    const legacyFavorites = (setupRows || [])
+        .filter((room) => room.isFavorite || room.isNote)
+        .map((room) => Number(room.id))
+        .filter((id) => Number.isFinite(id) && id > 0);
+
+    for (const setupId of legacyFavorites) {
+        await addSetupToList(favoriteList.id, setupId);
+    }
+
+    return favoriteList;
+}
+
 function normalizeBoolean(value) {
     return value === true || value === "true" || value === 1 || value === "1";
 }
@@ -1232,8 +1597,12 @@ exports.list = async (req, res) => {
         const userId = req.user.id;
 
         const favoriteParam = req.query?.favorite;
+        const planParam = req.query?.plan;
         const hasFav = favoriteParam === "true" || favoriteParam === "false";
+        const hasPlan = planParam === "true" || planParam === "false";
         const favBool = favoriteParam === "true";
+        const planBool = planParam === "true";
+        const requestedListId = Number(req.query?.listId);
 
         const { data: setupData, error: setupErr } = await supabase
             .from(ROOMS_TABLE)
@@ -1241,23 +1610,153 @@ exports.list = async (req, res) => {
         if (setupErr) throw setupErr;
 
         const normalized = (setupData || [])
-            .map((s) => ({
-                ...s,
-                setup_name: s.name ?? "Nevtelen setup",
-                x: Number(s.pos_x ?? 0),
-                y: Number(s.pos_y ?? 0),
-                isFavorite: Boolean(s.is_favorite),
-                isNote: normalizeBoolean(s.isNote ?? s.is_note ?? s.isnote),
-                user_id: s.user_id == null ? null : Number(s.user_id),
-                type: "room"
-            }))
-            .filter((room) => String(room.user_id) === String(userId))
-            .filter((room) => !hasFav || room.isFavorite === favBool);
+            .map((s) => {
+                const isNote = normalizeBoolean(s.isNote ?? s.is_note ?? s.isnote);
 
-        res.json({ setups: normalized });
+                return {
+                    ...s,
+                    setup_name: s.name ?? "Nevtelen setup",
+                    x: Number(s.pos_x ?? 0),
+                    y: Number(s.pos_y ?? 0),
+                    isFavorite: isNote ? true : (s.is_favorite === true || s.is_favorite === 1 || s.is_favorite === 'true'),
+                    isPlan: s.is_plan === true || s.is_plan === 1 || s.is_plan === 'true',
+                    is_plan: s.is_plan === true || s.is_plan === 1 || s.is_plan === 'true',
+                    isNote,
+                    user_id: s.user_id == null ? null : Number(s.user_id),
+                    type: "room"
+                };
+            })
+            .filter((room) => String(room.user_id) === String(userId))
+        ;
+
+        if (Number.isFinite(requestedListId) && requestedListId > 0) {
+            const lists = await getSetupListRows(userId);
+            const listState = lists.find((list) => String(list.id) === String(requestedListId));
+            if (!listState) return res.json({ setups: [] });
+
+            const setupIds = new Set((listState.setupIds || []).map((id) => String(id)));
+            return res.json({
+                setups: normalized.filter((room) => setupIds.has(String(room.id)) || room.isNote)
+            });
+        }
+
+        if (hasPlan && planBool) {
+            return res.json({
+                setups: normalized.filter((room) => room.isPlan)
+            });
+        }
+
+        if (hasFav && favBool) {
+            const favoriteList = await syncLegacyFavoriteSetupsToDefaultList(userId, normalized);
+            const lists = await getSetupListRows(userId);
+            const listState = lists.find((list) => String(list.id) === String(favoriteList.id));
+            const setupIds = new Set((listState?.setupIds || []).map((id) => String(id)));
+            return res.json({
+                setups: normalized.filter((room) => setupIds.has(String(room.id)) || room.isNote)
+            });
+        }
+
+        const filtered = normalized.filter((room) => {
+            if (hasPlan) return room.isPlan === planBool;
+            if (hasFav) return room.isFavorite === favBool;
+            return true;
+        });
+
+        res.json({ setups: filtered });
     } catch (err) {
         console.error("Setup list hiba:", err);
         res.json({ setups: [] });
+    }
+};
+
+exports.listSetupLists = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        await ensureSetupList("favorite", userId, {
+            title: "Favorite",
+            setupType: "favorite",
+            isFavorite: true
+        });
+
+        const lists = await getSetupListRows(userId);
+        res.json({ lists });
+    } catch (err) {
+        console.error("Setup listak hiba:", err);
+        res.status(500).json({ lists: [], error: "List load failed", details: err?.message || String(err) });
+    }
+};
+
+exports.createSetupList = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const rawName = String(req.body?.name ?? req.body?.title ?? "").trim();
+        if (!rawName) return res.status(400).json({ error: "List name required" });
+
+        const slug = rawName.toLowerCase().replace(/\s+/g, "_").replace(/[^a-z0-9_-]/g, "") || rawName;
+        const list = await ensureSetupList(slug, userId, {
+            title: rawName,
+            setupType: req.body?.setupType ?? "plan",
+            description: req.body?.description ?? "",
+            color: req.body?.color ?? "",
+            isFavorite: normalizeBoolean(req.body?.isFavorite),
+            isSecret: normalizeBoolean(req.body?.isSecret ?? req.body?.private ?? req.body?.isPrivate)
+        });
+
+        const lists = await getSetupListRows(userId);
+        res.json({ list: lists.find((item) => String(item.id) === String(list.id)) || list });
+    } catch (err) {
+        console.error("Setup lista letrehozas hiba:", err);
+        res.status(500).json({ error: "List create failed", details: err?.message || String(err) });
+    }
+};
+
+exports.addSetupToList = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const listId = Number(req.params.listId);
+        const setupId = Number(req.body?.setupId ?? req.body?.setup_id);
+        if (!Number.isFinite(listId) || !Number.isFinite(setupId)) {
+            return res.status(400).json({ error: "Missing listId or setupId" });
+        }
+
+        const ok = await assertRoomOwnedByUser(setupId, userId);
+        if (!ok) return res.status(403).json({ error: "Forbidden" });
+
+        const lists = await getSetupListRows(userId);
+        if (!lists.some((list) => String(list.id) === String(listId))) {
+            return res.status(404).json({ error: "List not found" });
+        }
+
+        await addSetupToList(listId, setupId);
+        res.json({ success: true });
+    } catch (err) {
+        console.error("Setup lista hozzaadas hiba:", err);
+        res.status(500).json({ error: "List add failed" });
+    }
+};
+
+exports.removeSetupFromList = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const listId = Number(req.params.listId);
+        const setupId = Number(req.params.setupId);
+        if (!Number.isFinite(listId) || !Number.isFinite(setupId)) {
+            return res.status(400).json({ error: "Missing listId or setupId" });
+        }
+
+        const ok = await assertRoomOwnedByUser(setupId, userId);
+        if (!ok) return res.status(403).json({ error: "Forbidden" });
+
+        const lists = await getSetupListRows(userId);
+        if (!lists.some((list) => String(list.id) === String(listId))) {
+            return res.status(404).json({ error: "List not found" });
+        }
+
+        await removeSetupFromList(listId, setupId);
+        res.json({ success: true });
+    } catch (err) {
+        console.error("Setup lista torles hiba:", err);
+        res.status(500).json({ error: "List remove failed" });
     }
 };
 
@@ -1532,8 +2031,11 @@ exports.create = async (req, res) => {
 
         const isFavorite = normalizeBoolean(req.body?.isFavorite);
         const isNote = normalizeBoolean(req.body?.isNote);
+        const isPlan = normalizeBoolean(req.body?.isPlan);
         const x = Math.round(Number(req.body?.x ?? 0));
         const y = Math.round(Number(req.body?.y ?? 0));
+
+        const setupListId = req.body?.setupListId;
 
         const { data, error } = await supabase
             .from(ROOMS_TABLE)
@@ -1542,7 +2044,7 @@ exports.create = async (req, res) => {
                 name: setup_name,
                 pos_x: x,
                 pos_y: y,
-                is_favorite: isFavorite,
+                is_plan: isPlan || isFavorite,
                 isNote
             }])
             .select("*")
@@ -1558,6 +2060,28 @@ exports.create = async (req, res) => {
             });
         }
 
+        if (isFavorite || isNote) {
+            const favoriteList = await ensureSetupList("favorite", userId, {
+                title: "Favorite",
+                setupType: "favorite",
+                isFavorite: true
+            });
+            await addSetupToList(favoriteList.id, data.id);
+        }
+
+        if (isPlan && !setupListId) {
+            const planList = await ensureSetupList("plan", userId, {
+                title: "Plan",
+                setupType: "plan",
+                isFavorite: false
+            });
+            await addSetupToList(planList.id, data.id);
+        }
+
+        if (setupListId) {
+            await addSetupToList(Number(setupListId), data.id);
+        }
+
         return res.json({
             setup: {
                 ...data,
@@ -1567,7 +2091,9 @@ exports.create = async (req, res) => {
                 type: "room",
                 x: Number(data.pos_x ?? x),
                 y: Number(data.pos_y ?? y),
-                isFavorite: Boolean(data.is_favorite),
+                isFavorite: Boolean(data.is_plan),
+                isPlan: Boolean(data.is_plan),
+                is_plan: Boolean(data.is_plan),
                 isNote: normalizeBoolean(data.isNote ?? data.is_note ?? data.isnote ?? isNote),
                 user_id: Number(data.user_id ?? userId)
             }
@@ -3007,23 +3533,11 @@ exports.removeChildSetup = async (req, res) => {
         const childSetupId = req.params.id;
         const roomId = req.body?.roomId ?? req.body?.setupId ?? req.query?.roomId ?? req.query?.setupId ?? null;
 
-        console.log("[setup.removeChildSetup] request", {
-            userId,
-            childSetupId,
-            roomId,
-            body: req.body,
-            query: req.query
-        });
 
         if (!userId) return res.status(401).json({ error: "Unauthorized" });
 
         const removed = await removeChildSetupRow(childSetupId, userId, roomId);
 
-        console.log("[setup.removeChildSetup] success", {
-            childSetupId,
-            roomId,
-            removed
-        });
 
         return res.json({
             success: true,
@@ -3108,5 +3622,3 @@ exports.deviceConnections = async (req, res) => {
         return res.json([]);
     }
 };
-
-

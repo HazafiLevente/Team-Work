@@ -205,7 +205,6 @@ export class HomeTheaterBuilderComponent implements OnInit, OnChanges {
             next: (res) => {
                 this.saving = false;
                 if (res?.id) this.buildId = res.id;
-                console.log('HT Build saved successfully');
                 this.saved.emit();
             },
             error: (err) => {

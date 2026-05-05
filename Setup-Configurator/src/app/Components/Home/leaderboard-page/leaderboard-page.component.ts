@@ -75,7 +75,14 @@ export class LeaderboardPageComponent implements OnInit, OnDestroy {
   }
 
   goBack(): void {
-    this.router.navigate(['/profile']);
+    this.router.navigate(['/home']);
+  }
+
+  viewProfile(user: LeaderboardUser): void {
+    const username = user.username;
+    if (!username) return;
+    const urlName = this.auth.formatNameForUrl(username);
+    this.router.navigate(['/user/profile', urlName]);
   }
 
   displayName(user: LeaderboardUser): string {

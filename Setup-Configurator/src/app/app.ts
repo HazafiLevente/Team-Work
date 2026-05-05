@@ -140,8 +140,8 @@ export class App implements OnInit, OnDestroy {
         },
         {
           icon: '🌟',
-          label: 'Favorites',
-          onClick: () => this.router.navigateByUrl('/user/favorite')
+          label: 'Plan',
+          onClick: () => this.router.navigateByUrl('/user/plan')
         },
         {
           icon: '🗂️',
@@ -151,7 +151,10 @@ export class App implements OnInit, OnDestroy {
         {
           icon: '👤',
           label: 'Profile',
-          onClick: () => this.router.navigateByUrl('/user/profile')
+          onClick: () => {
+            const myName = this.auth.formatNameForUrl(user.username);
+            this.router.navigate(['/user/profile', myName]);
+          }
         },
         {
           icon: '💬',
@@ -183,7 +186,7 @@ export class App implements OnInit, OnDestroy {
   }
 
   private shouldHideGlobalDock(url: string): boolean {
-    return url.startsWith('/user/setup') || url.startsWith('/user/favorite');
+    return url.startsWith('/user/setup') || url.startsWith('/user/plan') || url.startsWith('/user/favorite');
   }
 
   private applyTheme(theme: UiThemeKey, darkMode: boolean) {

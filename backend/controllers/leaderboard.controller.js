@@ -1,10 +1,8 @@
 const { supabase } = require("../services/supabase");
 
-console.log("✅ NEW leaderboard.controller.js loaded");
 
 exports.listLeaderboard = async (req, res) => {
     try {
-        console.log("✅ listLeaderboard called");
 
 
         const { data: levelData, error: levelError } = await supabase

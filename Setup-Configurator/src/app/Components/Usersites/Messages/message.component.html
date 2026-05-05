@@ -52,6 +52,9 @@
             *ngIf="conversationMenuKey === c.key"
             class="conversation-menu"
             (click)="$event.stopPropagation()">
+            <button type="button" class="conversation-menu-item" (click)="openConversationProfile($event, c)">
+              Profil
+            </button>
             <button type="button" class="conversation-menu-item danger" (click)="openReportModal($event, c)">
               Report
             </button>
@@ -217,6 +220,10 @@
                 class="dropdown-menu"
                 (click)="$event.stopPropagation()">
 
+                <div class="dropdown-item" (click)="openMessageProfile($event, m)">
+                  Profil
+                </div>
+
                 <div class="dropdown-item danger" (click)="openMessageReportModal($event, m)">
                   Report
                 </div>
@@ -350,6 +357,55 @@
   </div>
 
   <div
+    *ngIf="profileLoading || profileTarget || profileError"
+    class="profile-modal-backdrop"
+    (click)="closeProfileModal()">
+    <section class="profile-modal" (click)="$event.stopPropagation()">
+      <div class="profile-modal-head">
+        <div class="profile-avatar-large" *ngIf="profileTarget?.user?.profilePicture; else profileAvatarFallback">
+          <img [src]="profileTarget.user.profilePicture" alt="Profil kep">
+        </div>
+
+        <ng-template #profileAvatarFallback>
+          <div class="profile-avatar-large fallback">{{ profileInitial() }}</div>
+        </ng-template>
+
+        <button type="button" class="profile-close" (click)="closeProfileModal()">x</button>
+      </div>
+
+      <div *ngIf="profileLoading" class="profile-state">Profil betoltese...</div>
+      <div *ngIf="profileError && !profileLoading" class="profile-state error">{{ profileError }}</div>
+
+      <ng-container *ngIf="profileTarget && !profileLoading">
+        <div class="profile-name">{{ profileTarget.user.name || profileTarget.user.username }}</div>
+        <div class="profile-age" *ngIf="profileTarget.user.age !== null && profileTarget.user.age !== undefined">
+          {{ profileTarget.user.age }} eves
+        </div>
+
+        <div class="profile-setup-card">
+          <div class="profile-setup-title">MySetup</div>
+
+          <div class="profile-setup-list" *ngIf="profileTarget.mySetups.length; else noProfileSetups">
+            <div class="profile-setup-row" *ngFor="let setup of profileTarget.mySetups">
+              <span class="profile-chevron">&gt;</span>
+              <span class="profile-folder">&#128193;</span>
+              <span class="profile-setup-name">{{ setup.name }}</span>
+            </div>
+          </div>
+
+          <ng-template #noProfileSetups>
+            <div class="profile-empty-setups">Nincs megjelenitheto setup.</div>
+          </ng-template>
+        </div>
+
+        <button type="button" class="conversation-menu-item" (click)="openDetailedProfile()">
+          R&eacute;szletes megtekint&eacute;s
+        </button>
+      </ng-container>
+    </section>
+  </div>
+
+  <div
     *ngIf="contextMenuOpen"
     class="ctx-backdrop"
     (click)="closeContextMenu()">
@@ -363,6 +419,7 @@
     (click)="$event.stopPropagation()">
 
     <ng-container *ngIf="contextTarget?.type === 'conversation'">
+      <div class="ctx-item" (click)="ctxOpenProfile()">Profil</div>
       <div class="ctx-item danger" (click)="ctxReport()">Report</div>
     </ng-container>
 
@@ -372,6 +429,7 @@
     </ng-container>
 
     <ng-container *ngIf="contextIsOtherMessage()">
+      <div class="ctx-item" (click)="ctxOpenProfile()">Profil</div>
       <div class="ctx-item danger" (click)="ctxReport()">Report</div>
       <div class="ctx-item disabled" (click)="ctxHide()">Eltuntetes</div>
     </ng-container>

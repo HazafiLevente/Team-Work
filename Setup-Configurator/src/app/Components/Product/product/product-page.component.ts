@@ -119,7 +119,6 @@ export class ProductPageComponent implements OnInit {
   }
 
   onToggleFavorite() {
-    console.log('⭐ később: kedvencbe rakás');
   }
 
   goBack() {
@@ -128,7 +127,6 @@ export class ProductPageComponent implements OnInit {
   }
 
   onPlus() {
-    console.log('➕ később: kosárba/setupba adás');
   }
 
   private loadImagesFromMap() {
@@ -142,7 +140,6 @@ export class ProductPageComponent implements OnInit {
 
     if (ProductPageComponent.imageMapCache) {
       this.imageUrls = this.pickImages(ProductPageComponent.imageMapCache, wantTable, wantId);
-      console.log('🖼 PAGE imageUrls from cache:', this.imageUrls);
       return;
     }
 
@@ -151,9 +148,6 @@ export class ProductPageComponent implements OnInit {
         ProductPageComponent.imageMapCache = mapRes;
         this.imageUrls = this.pickImages(ProductPageComponent.imageMapCache, wantTable, wantId);
 
-        console.log('🖼 PAGE map loaded:', ProductPageComponent.imageMapCache);
-        console.log('🖼 PAGE table:', wantTable, 'id:', wantId);
-        console.log('🖼 PAGE imageUrls:', this.imageUrls);
       },
       error: (err) => {
         console.error('❌ image map load error:', err);

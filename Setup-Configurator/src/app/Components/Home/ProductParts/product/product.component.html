@@ -4,7 +4,14 @@
   (click)="open()"
   (dragstart)="onDragStart($event)"
   (dragend)="onDragEnd()">
-  <img [src]="imageUrl" alt="product image" class="product-img" />
+  <img
+    [src]="imageUrl"
+    alt="product image"
+    class="product-img"
+    [attr.loading]="priority ? 'eager' : 'lazy'"
+    [attr.fetchpriority]="priority ? 'high' : 'low'"
+    (error)="onImageError()"
+    decoding="async" />
 
   <h3>{{ displayName }}</h3>
   <p>{{ product.manufacturer }}</p>

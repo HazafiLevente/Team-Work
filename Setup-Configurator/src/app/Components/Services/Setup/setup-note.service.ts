@@ -185,7 +185,7 @@ export class SetupNoteService {
     return {
       id,
       name: String(setup?.setup_name ?? setup?.name ?? fallbackName).trim() || fallbackName,
-      isFavorite: this.toBoolean(setup?.isFavorite ?? setup?.is_favorite),
+      isFavorite: this.toBoolean(setup?.isPlan ?? setup?.is_plan ?? setup?.isFavorite ?? setup?.is_favorite),
       isNote: true
     };
   }

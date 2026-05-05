@@ -1,9 +1,162 @@
 const router = require("express").Router();
 const { supabase } = require("../services/supabase");
 const verifyUser = require("../middlewares/verifyUser");
+const optionalUser = require("../middlewares/optionalUser");
+const { resolveRole } = require("../services/control");
+
+function pickFirst(row, keys) {
+    if (!row || typeof row !== "object") return null;
+
+    for (const key of keys) {
+        const foundKey = Object.keys(row).find((candidate) => candidate.toLowerCase() === key.toLowerCase());
+        if (!foundKey) continue;
+
+        const value = row[foundKey];
+        if (value !== undefined && value !== null && value !== "") return value;
+    }
+
+    return null;
+}
+
+function toBoolean(value) {
+    return value === true || value === "true" || value === 1 || value === "1";
+}
+
+function isRegularSetup(setup) {
+    const isNote = toBoolean(setup?.isNote ?? setup?.is_note ?? setup?.isnote);
+    const setupType = String(setup?.setup_type ?? setup?.type ?? "").trim().toLowerCase();
+
+    // A jegyzeteket mindenképpen kiszűrjük
+    if (isNote || setupType === "note") return false;
+
+    // Minden mást (room, plan, favorite, üres) megtartunk, ha nem titkos
+    return true;
+}
+
+function extractPrice(item) {
+    return item?.price
+        ?? item?.Price
+        ?? item?.price_huf
+        ?? item?.["Price Range (Ft)"]
+        ?? item?.data?.price
+        ?? item?.data?.Price
+        ?? item?.data?.price_huf
+        ?? item?.data?.["Price Range (Ft)"]
+        ?? null;
+}
+
+async function enrichSetupsWithDevices(setups) {
+    if (!setups || setups.length === 0) return [];
+
+    const setupIds = setups.map(s => s.id);
+
+    // Kérdezzük le az eszközöket minden szobához
+    const { data: devices, error: devicesError } = await supabase
+        .from("setups")
+        .select("*")
+        .in("room_id", setupIds);
+
+    if (devicesError) return setups;
+
+    const childSetupIds = devices.map(d => d.id);
+    
+    // Kérdezzük le a termék kapcsolatokat
+    const { data: deviceConnections, error: connError } = await supabase
+        .from("setup_devices")
+        .select("setup_id, device_id, source_table")
+        .in("setup_id", childSetupIds);
+
+    if (connError) return setups;
+
+    // Gyűjtsük össze az összes product_id-t táblánként
+    const tableToIds = {};
+    deviceConnections.forEach(conn => {
+        const table = conn.source_table || "products";
+        if (!tableToIds[table]) tableToIds[table] = [];
+        tableToIds[table].push(conn.device_id);
+    });
+
+    // Kérdezzük le a termék adatokat
+    const productDataMap = new Map();
+    for (const table of Object.keys(tableToIds)) {
+        const ids = [...new Set(tableToIds[table])];
+        const { data: products } = await supabase
+            .from(table)
+            .select("*")
+            .in("id", ids);
+        
+        if (products) {
+            products.forEach(p => productDataMap.set(`${table}:${p.id}`, p));
+        }
+    }
+
+    // Szervezzük össze az adatokat
+    return setups.map(setup => {
+        const setupDevices = devices.filter(d => d.room_id === setup.id);
+        const enrichedDevices = setupDevices.map(d => {
+            const conn = deviceConnections.find(c => c.setup_id === d.id);
+            let product = null;
+            if (conn) {
+                product = productDataMap.get(`${conn.source_table || "products"}:${conn.device_id}`);
+            }
+
+            return {
+                id: d.id,
+                name: d.name,
+                type: d.type,
+                price: product ? extractPrice(product) : 0,
+                manufacturer: product?.manufacturer || product?.Manufacturer || ""
+            };
+        });
+
+        const totalPrice = enrichedDevices.reduce((sum, d) => sum + (Number(d.price) || 0), 0);
+
+        return {
+            ...setup,
+            devices: enrichedDevices,
+            totalPrice
+        };
+    });
+}
+
+async function getPublicSetups(targetUserId, isMe) {
+    const { data: setups, error: setupsError } = await supabase
+        .from("setup_room")
+        .select("*")
+        .eq("user_id", targetUserId)
+        .order("name", { ascending: true });
+
+    if (setupsError) throw setupsError;
+
+    let mySetups = (setups || []);
+
+    if (!isMe) {
+        // Publikus profil esetén csak a nem titkosakat mutatjuk
+        // És kivesszük a jegyzeteket/terveket, hogy csak a valódi setupok maradjanak
+        mySetups = mySetups.filter(s => {
+            const isSecret = toBoolean(s.isSecret ?? s.is_secret ?? s.isPrivate ?? s.is_private);
+            const isPlan = toBoolean(s.is_plan);
+            return !isSecret && isRegularSetup(s) && !isPlan;
+        });
+        
+        // Dúsítás eszközökkel és árakkal
+        mySetups = await enrichSetupsWithDevices(mySetups);
+    } else {
+        // Saját profil esetén (ha valamiért ide jutna) is szűrjük a "regular" típusra
+        mySetups = mySetups.filter(isRegularSetup);
+    }
+
+    return mySetups.map((setup) => ({
+        id: setup.id,
+        name: setup.name || "Nevtelen setup",
+        type: setup.type || setup.setup_type || null,
+        category: setup.category || null,
+        devices: setup.devices || [],
+        totalPrice: setup.totalPrice || 0
+    }));
+}
 
 router.get("/", verifyUser, async (req, res) => {
-
     const currentUserId = Number(req.user.id);
 
     const { data, error } = await supabase
@@ -22,6 +175,110 @@ router.get("/", verifyUser, async (req, res) => {
     }));
 
     res.json(users);
+});
+
+router.get("/by-name/:name/profile", optionalUser, async (req, res) => {
+    try {
+        const name = req.params.name.replace(/_/g, " ");
+        const currentUserId = Number(req.user?.id || 0);
+        
+        const { data: users, error: userError } = await supabase
+            .from("user[Auth]")
+            .select("ID, UserName, Name")
+            .or(`UserName.eq."${name}",Name.eq."${name}"`);
+
+        if (userError) return res.status(500).json({ error: userError.message });
+        if (!users || users.length === 0) return res.status(404).json({ error: "User not found" });
+
+        const user = users[0];
+        const targetUserId = user.ID;
+        const isMe = currentUserId === targetUserId;
+
+        const [{ data: detailsList, error: detailsError }, mySetups] = await Promise.all([
+            supabase
+                .from("user_more[Auth]")
+                .select("*")
+                .eq("user_id", targetUserId),
+            getPublicSetups(targetUserId, isMe)
+        ]);
+
+        if (detailsError) return res.status(500).json({ error: detailsError.message });
+
+        const details = detailsList && detailsList.length > 0 ? detailsList[0] : null;
+
+        const profilePicture = pickFirst(details, [
+            "profile_picture", "profilePicture", "profile_image", "profileImage", "avatar_url", "avatar", "picture", "image"
+        ]);
+
+        const rank = resolveRole(user.ID);
+
+        const responseData = {
+            user: {
+                id: user.ID,
+                username: user.UserName,
+                name: user.Name || user.UserName,
+                age: details?.age ?? null,
+                profilePicture,
+                rank: rank
+            },
+            mySetups
+        };
+
+        res.json(responseData);
+    } catch (err) {
+        res.status(500).json({ error: err.message || "Internal Server Error" });
+    }
+});
+
+router.get("/:id/profile", optionalUser, async (req, res) => {
+    try {
+        const targetUserId = Number(req.params.id);
+        const currentUserId = Number(req.user?.id || 0);
+        const isMe = currentUserId === targetUserId;
+
+        if (!Number.isFinite(targetUserId) || targetUserId <= 0) {
+            return res.status(400).json({ error: "Invalid user id" });
+        }
+
+        const [{ data: users, error: userError }, { data: detailsList, error: detailsError }, mySetups] = await Promise.all([
+            supabase
+                .from("user[Auth]")
+                .select("ID, UserName, Name")
+                .eq("ID", targetUserId),
+            supabase
+                .from("user_more[Auth]")
+                .select("*")
+                .eq("user_id", targetUserId),
+            getPublicSetups(targetUserId, isMe)
+        ]);
+
+        if (userError) return res.status(500).json({ error: userError.message });
+        const user = users && users.length > 0 ? users[0] : null;
+        if (!user) return res.status(404).json({ error: "User not found" });
+        if (detailsError) return res.status(500).json({ error: detailsError.message });
+
+        const details = detailsList && detailsList.length > 0 ? detailsList[0] : null;
+
+        const profilePicture = pickFirst(details, [
+            "profile_picture", "profilePicture", "profile_image", "profileImage", "avatar_url", "avatar", "picture", "image"
+        ]);
+
+        const rank = resolveRole(user.ID);
+
+        res.json({
+            user: {
+                id: user.ID,
+                username: user.UserName,
+                name: user.Name || user.UserName,
+                age: details?.age ?? null,
+                profilePicture,
+                rank: rank
+            },
+            mySetups
+        });
+    } catch (err) {
+        res.status(500).json({ error: err.message || "Internal Server Error" });
+    }
 });
 
 module.exports = router;

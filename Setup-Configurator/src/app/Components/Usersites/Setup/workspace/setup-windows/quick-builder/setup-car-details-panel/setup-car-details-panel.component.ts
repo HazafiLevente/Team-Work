@@ -145,7 +145,6 @@ export class SetupCarDetailsPanelComponent implements OnChanges {
 
       this.http.get<any>(url, { withCredentials: true }).subscribe({
         next: (res) => {
-          console.log('[CAR API RES]', url, res);
 
           const data = this.normalizeCarResponse(res);
 

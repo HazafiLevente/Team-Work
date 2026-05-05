@@ -100,7 +100,7 @@ exports.googleLogin = async (req, res) => {
             id: user.ID,
             username: user.UserName,
             email: user.Email,
-            role: resolveRole(user.ID, user.Role)
+            role: resolveRole(user.ID)
         }, JWT_SECRET, { expiresIn: "12h" });
 
         setAuthCookie(res, token);
@@ -146,7 +146,7 @@ exports.register = async (req, res) => {
             id: user.ID,
             username: user.UserName,
             email: user.Email,
-            role: resolveRole(user.ID, user.Role)
+            role: resolveRole(user.ID)
         }, JWT_SECRET, { expiresIn: "12h" });
 
         setAuthCookie(res, token);
@@ -222,7 +222,6 @@ exports.requestRegisterCode = async (req, res) => {
             return res.status(500).json({ error: "Insert failed" });
         }
 
-        console.log("✅ register code saved:", inserted);
 
 
         try {

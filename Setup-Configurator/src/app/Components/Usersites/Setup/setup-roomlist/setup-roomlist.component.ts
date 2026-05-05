@@ -2,6 +2,8 @@ import {
   Component,
   OnInit,
   AfterViewInit,
+  OnChanges,
+  SimpleChanges,
   Input,
   Output,
   EventEmitter,
@@ -48,8 +50,10 @@ type PairingStage = 'NONE' | 'PICK_SOURCE' | 'PICK_TARGET_SETUP' | 'PICK_TARGET_
   templateUrl: './setup-roomlist.component.html',
   styleUrls: ['./setup-roomlist.component.css']
 })
-export class SetupRoomlistComponent implements OnInit, AfterViewInit {
+export class SetupRoomlistComponent implements OnInit, AfterViewInit, OnChanges {
   @Input() favoriteMode = false;
+  @Input() isPlanView = false;
+  @Input() setupListId: number | null = null;
   @Input() allowCreate = true;
 
   @Output() openCategoryPicker = new EventEmitter<any>();
@@ -152,6 +156,13 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit {
     this.loadGlobalConnections();
   }
 
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['setupListId'] && !changes['setupListId'].firstChange) {
+      this.backToSetups(false);
+      this.loadSetups();
+    }
+  }
+
 
   ngAfterViewInit(): void {
     setTimeout(() => this.updateLines(), 100);
@@ -173,13 +184,14 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit {
       ...setup,
       id: id,
       setup_name: setup?.setup_name ?? setup?.name ?? 'Névtelen setup',
-      isNote: setup?.isNote === true || setup?.is_note === true || setup?.isnote === true
+      isNote: setup?.isNote === true || setup?.is_note === true || setup?.isnote === true,
+      isPlan: setup?.isPlan === true || setup?.is_plan === true || setup?.isPlan === 1 || setup?.is_plan === 1
     };
   }
 
   private buildRoomRoute(roomId?: number | string | null): any[] {
     if (this.favoriteMode) {
-      return roomId == null ? ['/user', 'favorite'] : ['/user', 'favorite', roomId];
+      return roomId == null ? ['/user', 'plan'] : ['/user', 'plan', roomId];
     }
 
     return roomId == null ? ['/user', 'setup'] : ['/user', 'setup', roomId];
@@ -746,10 +758,13 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit {
   }
 
   loadSetups(): void {
-    const fav = this.favoriteMode ? 'true' : 'false';
+    const plan = this.favoriteMode ? 'true' : 'false';
+    const listQuery = this.setupListId ? `listId=${this.setupListId}` : `plan=${plan}`;
+
+    // Setup oldalra is_plan=false szűrés
     this.loading = true;
 
-    this.http.get<any>(`/api/setup?favorite=${fav}`, { withCredentials: true }).subscribe({
+    this.http.get<any>(`/api/setup?${listQuery}`, { withCredentials: true }).subscribe({
       next: (res) => {
         this.userSetups = Array.isArray(res?.setups)
           ? res.setups.map((s: any) => this.normalizeSetup(s))
@@ -806,7 +821,6 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit {
     });
 
     this.globalRoomConnections = Array.from(aggregated.values());
-    console.log('🔄 Global connections processed:', this.globalRoomConnections.length);
     this.updateLines();
   }
 
@@ -1272,7 +1286,6 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit {
       y: pos.y
     }, { withCredentials: true }).subscribe({
       next: () => {
-        console.log(`✅ Room ${setupId} pozíció mentve`, pos);
       },
       error: (err) => {
         console.error('❌ pozíció mentés hiba:', err);
@@ -1298,7 +1311,6 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit {
   }
 
   openDockItem(item: any): void {
-    console.log('Dock item:', item);
   }
 
   private createSetupRequest(payload: any, onSuccess?: (res: any) => void): void {
@@ -1320,7 +1332,9 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit {
       x: customX ?? 50,
       y: customY ?? 50,
       setup_type: 'other',
-      isFavorite: this.favoriteMode,
+      isFavorite: this.isPlanView ? false : this.favoriteMode,
+      isPlan: this.isPlanView,
+      setupListId: this.setupListId,
       isNote: false
     };
 
@@ -1503,7 +1517,6 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit {
       type = 'other';
     }
 
-    console.log(`🔧 Category: "${catName}" → Type: "${type}"`);
 
     if (this.viewingSetup) {
       if (type === 'pc') {
@@ -1540,7 +1553,6 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit {
             return String(sid) === String(setupId) ? { ...s, ...updated } : s;
           });
 
-          console.log('✅ Setup updated');
         },
         error: (err) => console.error('❌ Setup update hiba:', err)
       });
@@ -1554,12 +1566,13 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit {
         x: pos.x,
         y: pos.y,
         setup_type: type,
-        isFavorite: this.favoriteMode,
+        isFavorite: this.isPlanView ? false : this.favoriteMode,
+        isPlan: this.isPlanView,
+        setupListId: this.setupListId,
         isNote: false
       }, (res) => {
         if (res?.setup) {
           this.userSetups = [this.normalizeSetup(res.setup), ...this.userSetups];
-          console.log('✅ Setup created at:', pos);
           this.updateLines();
         }
       });

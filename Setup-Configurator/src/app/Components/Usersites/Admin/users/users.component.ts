@@ -75,7 +75,6 @@ export class UsersComponent implements OnInit, OnChanges {
 
 
   loadUsers() {
-    console.log('🔄 Loading users...');
     this.http.get<any>('/api/admin/users', {
       withCredentials: true
     }).subscribe({
@@ -195,7 +194,6 @@ export class UsersComponent implements OnInit, OnChanges {
       { withCredentials: true }
     ).subscribe({
       next: () => {
-        console.log('💾 User saved:', user.id);
 
       },
       error: err => console.error('❌ Save error', err)
@@ -209,7 +207,6 @@ export class UsersComponent implements OnInit, OnChanges {
       .subscribe({
         next: () => {
           user.banned = true;
-          console.log('🚫 User banned:', user.id);
         },
         error: err => alert(err.error?.error || 'Hiba a kitiltás során')
       });
@@ -220,7 +217,6 @@ export class UsersComponent implements OnInit, OnChanges {
       .subscribe({
         next: () => {
           user.banned = false;
-          console.log('✅ User unbanned:', user.id);
         },
         error: err => alert(err.error?.error || 'Hiba a feloldás során')
       });

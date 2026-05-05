@@ -11,13 +11,6 @@ const PORT = process.env.PORT || 3000;
 
 registerProcessEvents();
 
-console.log("ENV CHECK:", {
-    SUPABASE_URL: process.env.SUPABASE_URL,
-    HAS_KEY: !!process.env.SUPABASE_SERVICE_ROLE_KEY,
-    JWT: !!process.env.JWT_SECRET,
-    DEEPSEEK: !!process.env.DEEPSEEK_API_KEY
-});
-
 try {
     const app = require("./app");
     const server = app.listen(PORT, () => {

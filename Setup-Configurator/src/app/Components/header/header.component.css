@@ -18,7 +18,7 @@
   top: 0;
   left: 0;
   right: 0;
-  z-index: 9999;
+  z-index: 30000;
 
   height: 64px;
   padding: 0 18px;
@@ -290,8 +290,13 @@ body[data-appearance="light"] .username {
   font-weight: 600;
 }
 
-body[data-appearance="light"] .fa-bell {
+body[data-appearance="light"] .bell-icon {
   color: #fdf5e6;
+}
+
+.bell-icon {
+  font-size: 16px;
+  line-height: 1;
 }
 
 body[data-appearance="light"] .avatar-placeholder {

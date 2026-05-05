@@ -40,12 +40,6 @@ export class SetupConnectionsComponent {
     let sEl = this.elementRegistry?.get(sId);
     let tEl = this.elementRegistry?.get(tId);
 
-    console.log('🔗 [Connections] Drawing item line:', {
-      sId,
-      tId,
-      foundS: !!sEl,
-      foundT: !!tEl
-    });
 
     if (!sEl && tEl) {
       const tmp = sEl;

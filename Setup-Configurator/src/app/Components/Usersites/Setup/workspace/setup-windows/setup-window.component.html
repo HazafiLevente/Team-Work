@@ -7,7 +7,6 @@
   cdkDrag
   [cdkDragDisabled]="maximized || resizing"
   [cdkDragBoundary]="boundaryRef"
-  [cdkDragConstrainPosition]="constrainDragPosition"
   [cdkDragFreeDragPosition]="activeDragPosition"
   (cdkDragStarted)="focus()"
   (cdkDragMoved)="onDragMoved($event)"

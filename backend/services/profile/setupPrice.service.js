@@ -3,13 +3,13 @@ const { supabase } = require("../../services/supabase");
 async function getUserSetupIds(userId) {
     const { data: rooms } = await supabase
         .from("setup_room")
-        .select("id, is_favorite, isNote")
+        .select("*")
         .eq("user_id", userId);
 
     if (!rooms || rooms.length === 0) return [];
 
     const roomIds = rooms
-        .filter((room) => !toBoolean(room.is_favorite) && !toBoolean(room.isNote))
+        .filter(isRegularSetupRoom)
         .map((room) => room.id);
 
     if (roomIds.length === 0) return [];
@@ -51,6 +51,13 @@ async function getPricePropertyIds() {
 
 function toBoolean(value) {
     return value === true || value === "true" || value === 1 || value === "1";
+}
+
+function isRegularSetupRoom(room) {
+    const setupType = String(room?.setup_type ?? room?.type ?? "").trim().toLowerCase();
+    return !toBoolean(room?.is_plan ?? room?.is_favorite ?? room?.isFavorite)
+        && !toBoolean(room?.isNote ?? room?.is_note ?? room?.isnote)
+        && !["favorite", "plan", "note"].includes(setupType);
 }
 
 function toPriceNumber(value) {

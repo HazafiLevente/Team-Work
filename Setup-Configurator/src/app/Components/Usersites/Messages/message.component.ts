@@ -4,6 +4,7 @@ import { Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild } fro
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AiService } from '../../Services/AI/ai.service';
+import { AuthService } from '../../Services/Auth/auth.service';
 import { ProductService } from '../../Services/Home/ProductParts/product/product.service';
 import {
   AiConversationMessage,
@@ -109,6 +110,9 @@ export class MessagesComponent implements OnInit, OnDestroy {
     { value: 'scam', label: 'Atveres' },
     { value: 'other', label: 'Egyeb' }
   ];
+  profileTarget: any = null;
+  profileLoading = false;
+  profileError = '';
 
   constructor(
     private http: HttpClient,
@@ -116,7 +120,8 @@ export class MessagesComponent implements OnInit, OnDestroy {
     private router: Router,
     private ai: AiService,
     private aiStore: AiConversationStoreService,
-    private productService: ProductService
+    private productService: ProductService,
+    public auth: AuthService
   ) {}
 
   ngOnInit() {
@@ -321,6 +326,84 @@ export class MessagesComponent implements OnInit, OnDestroy {
     if (this.reportSending) return;
     this.reportTarget = null;
     this.reportError = '';
+  }
+
+  openConversationProfile(event: MouseEvent, conversation: any) {
+    event.preventDefault();
+    event.stopPropagation();
+    this.conversationMenuKey = null;
+    this.openProfileForTarget(conversation);
+  }
+
+  openMessageProfile(event: MouseEvent, message: any) {
+    event.preventDefault();
+    event.stopPropagation();
+    if (this.mode !== 'messages' || this.isOwnMessage(message)) return;
+
+    this.messageMenuId = null;
+    this.openProfileForTarget(message);
+  }
+
+  ctxOpenProfile() {
+    const target = this.contextTarget;
+    if (!target || (target.type !== 'conversation' && target.type !== 'message')) return;
+
+    const data = target.data;
+    this.closeContextMenu();
+    this.openProfileForTarget(data);
+  }
+
+  closeProfileModal() {
+    this.profileTarget = null;
+    this.profileLoading = false;
+    this.profileError = '';
+  }
+
+  profileInitial(): string {
+    const name = this.profileTarget?.user?.name || this.profileTarget?.user?.username || '?';
+    return String(name).charAt(0).toUpperCase();
+  }
+
+  openDetailedProfile() {
+    const username = this.profileTarget?.user?.username;
+    if (!username) return;
+
+    this.closeProfileModal();
+    const urlName = this.auth.formatNameForUrl(username);
+    this.router.navigate(['/user/profile', urlName]);
+  }
+
+  private openProfileForTarget(target: any) {
+    const userId = this.getProfileUserId(target);
+    if (!userId) {
+      this.profileTarget = null;
+      this.profileError = 'Nem talalhato a felhasznalo.';
+      return;
+    }
+
+    this.profileTarget = null;
+    this.profileLoading = true;
+    this.profileError = '';
+
+    this.http.get<any>(`/api/users/${userId}/profile`, { withCredentials: true }).subscribe({
+      next: (profile) => {
+        this.profileTarget = {
+          user: profile?.user || {},
+          mySetups: Array.isArray(profile?.mySetups) ? profile.mySetups : []
+        };
+        this.profileLoading = false;
+      },
+      error: (err) => {
+        this.profileLoading = false;
+        this.profileError = err.error?.error || 'Nem sikerult betolteni a profilt.';
+      }
+    });
+  }
+
+  private getProfileUserId(target: any): number | null {
+    const id = Number(target?.otherUserId ?? target?.user_id);
+    if (!Number.isFinite(id) || id <= 0 || id === Number(this.authUserId)) return null;
+    return id;
   }
 
   submitReport() {

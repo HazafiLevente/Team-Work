@@ -170,6 +170,116 @@
   outline: none;
 }
 
+.list-create-row{
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 10px;
+  align-items: center;
+}
+
+.privacy-toggle{
+  height: 40px;
+  min-width: 74px;
+  border-radius: 12px;
+  border: 1px solid rgba(34,211,238,0.22);
+  background: rgba(34,211,238,0.08);
+  color: rgba(233,238,248,0.92);
+  cursor: pointer;
+  font-weight: 800;
+}
+
+.privacy-toggle.private{
+  border-color: rgba(250,204,21,0.46);
+  background: rgba(250,204,21,0.14);
+  color: #fff;
+}
+
+.privacy-hint{
+  margin-top: 2px;
+  color: rgba(233,238,248,0.62);
+  font-size: 12px;
+}
+
+.favorite-list-toggle{
+  display: grid;
+  grid-template-columns: 26px 1fr;
+  gap: 10px;
+  align-items: center;
+  width: 100%;
+  padding: 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,0.1);
+  background: rgba(255,255,255,0.04);
+  color: rgba(255,255,255,0.92);
+  text-align: left;
+  cursor: pointer;
+}
+
+.favorite-list-toggle.active{
+  border-color: rgba(250,204,21,0.58);
+  background: rgba(250,204,21,0.14);
+}
+
+.list-toggle-stack{
+  display: grid;
+  gap: 8px;
+}
+
+.favorite-list-toggle.list-toggle.active{
+  border-color: rgba(34,211,238,0.5);
+  background: rgba(34,211,238,0.11);
+}
+
+.favorite-list-toggle small{
+  display: block;
+  margin-top: 2px;
+  color: rgba(233,238,248,0.66);
+  font-size: 12px;
+}
+
+.list-select-block{
+  display: grid;
+  gap: 7px;
+}
+
+.list-select-block label{
+  font-size: 12px;
+  opacity: 0.75;
+  color: rgba(233,238,248,0.9);
+}
+
+.list-select-row{
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+  align-items: center;
+}
+
+.list-select-row select{
+  height: 40px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.05);
+  color: rgba(255,255,255,0.92);
+  padding: 0 12px;
+}
+
+.list-check{
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.14);
+  color: #fff;
+  font-weight: 900;
+}
+
+.selected-list-state{
+  font-size: 12px;
+  color: rgba(233,238,248,0.68);
+}
+
 .error{
   color: rgba(255,120,120,0.95);
   font-size: 13px;
@@ -199,4 +309,15 @@
 .btn:disabled{
   opacity: 0.5;
   cursor: default;
+}
+
+@media (max-width: 620px){
+  .list-create-row{
+    grid-template-columns: 1fr;
+  }
+
+  .privacy-toggle,
+  .list-create-row .btn{
+    width: 100%;
+  }
 }
