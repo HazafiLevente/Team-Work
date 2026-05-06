@@ -123,6 +123,7 @@ export class WorkspaceComponent {
 
   @Output() itemOpen = new EventEmitter<any>();
   @Output() itemClicked = new EventEmitter<any>();
+  @Output() itemConnect = new EventEmitter<any>();
   @Output() htSaved = new EventEmitter<void>();
 
   private rafId: number | null = null;
@@ -1158,12 +1159,75 @@ export class WorkspaceComponent {
     this.closeContextMenu();
     if (!item) return;
 
-    const isHT = String(item.setup_type || '').toLowerCase().includes('home_theater') ||
-      String(item.category || '').toLowerCase().includes('home_theater');
+    const setupType = String(item.setup_type ?? item.type ?? item.category ?? '').toLowerCase();
+    const childId = Number(item?.id ?? item?.setup_id ?? item?.ID ?? 0) || null;
+    const productId = Number(item?.product_id ?? item?.device_id ?? item?.productId ?? 0) || null;
+
+    const isHT =
+      setupType.includes('home_theater') ||
+      setupType === 'ht';
+    const isPc =
+      setupType.includes('pc') ||
+      setupType.includes('laptop') ||
+      setupType.includes('all_in_one') ||
+      setupType.includes('computer');
+    const isCar = setupType.includes('car');
+    const isInstrument = setupType.includes('instrument') || setupType.includes('inst') || setupType.includes('hangszer');
+    const isNetwork = setupType.includes('router') || setupType.includes('switch') || setupType.includes('modem') || setupType.includes('network');
 
     if (isHT) {
       this.openHtBuilderWindow(item);
-    } else {
+      return;
+    }
+
+    // Builders expect the parent room setup in [setup]. We keep the same child setup id via editChildSetupId.
+    const extraPayload: any = {
+      editChildSetupId: childId,
+      initialProductId: productId,
+      initialPcSetup: item
+    };
+
+    if (isPc) {
+      this.openEmptyWindow('Szamitogep', this.viewingSetup, extraPayload);
+      return;
+    }
+    if (isCar) {
+      this.openEmptyWindow('Autók', this.viewingSetup, extraPayload);
+      return;
+    }
+    if (isInstrument) {
+      this.openEmptyWindow('Hangszerek', this.viewingSetup, extraPayload);
+      return;
+    }
+    if (isNetwork) {
+      const t = String(item?.setup_type ?? item?.type ?? item?.role ?? item?.category ?? '').toLowerCase();
+      const inferred =
+        t.includes('switch') ? 'switch' :
+        t.includes('modem') ? 'modem' :
+        t.includes('router') ? 'router' :
+        null;
+      extraPayload.initialNetworkType = inferred;
+      // Some list items don't carry product_id yet; resolve it from get-children by id.
+      if (!extraPayload.initialProductId && childId && this.viewingSetup) {
+        const roomId = Number(this.viewingSetup?.id ?? this.viewingSetup?.setup_id ?? this.viewingSetup?.setupId ?? 0) || null;
+        if (roomId) {
+          this.http.get<any>(`/api/setup/${roomId}/get-children`, { withCredentials: true }).subscribe({
+            next: (res) => {
+              const list = Array.isArray(res?.items) ? res.items : Array.isArray(res) ? res : [];
+              const found = list.find((x: any) => Number(x?.id ?? x?.ID ?? 0) === Number(childId));
+              const pid = Number(found?.product_id ?? found?.device_id ?? found?.productId ?? 0) || null;
+              this.openEmptyWindow('Halozat', this.viewingSetup, { ...extraPayload, initialProductId: pid });
+            },
+            error: () => {
+              this.openEmptyWindow('Halozat', this.viewingSetup, extraPayload);
+            }
+          });
+          return;
+        }
+      }
+
+      this.openEmptyWindow('Halozat', this.viewingSetup, extraPayload);
+      return;
     }
   }
 

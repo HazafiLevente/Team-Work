@@ -14,6 +14,9 @@ type NetworkType = 'modem' | 'router' | 'switch';
 })
 export class NetworkBuilderPanelComponent implements OnChanges {
   @Input() setup: any;
+  @Input() editChildSetupId: number | null = null;
+  @Input() initialProductId: number | null = null;
+  @Input() initialNetworkType: NetworkType | null = null;
   @Output() close = new EventEmitter<void>();
   @Output() saved = new EventEmitter<void>();
 
@@ -38,6 +41,34 @@ export class NetworkBuilderPanelComponent implements OnChanges {
     if (changes['setup'] && this.setup) {
       this.resetForm();
       this.loadNetworkOptions();
+    }
+    if (changes['initialNetworkType'] && this.initialNetworkType) {
+      this.selectedType = this.initialNetworkType;
+    }
+    if (changes['initialProductId'] && this.initialProductId != null) {
+      this.selectedDeviceKey = String(this.initialProductId);
+    }
+
+    // In some flows the list item doesn't include product_id; resolve via backend from child id.
+    if ((changes['editChildSetupId'] || changes['setup']) && this.editChildSetupId && !this.initialProductId) {
+      const childId = Number(this.editChildSetupId);
+      this.http.get<any>(`/api/setup/child-device/${childId}`, { withCredentials: true }).subscribe({
+        next: (res) => {
+          const pid = Number(res?.device?.product_id ?? res?.device?.device_id ?? 0) || null;
+          if (pid) {
+            this.selectedDeviceKey = String(pid);
+            // if options already loaded, also correct the tab to match the real device type
+            const selected = this.devices.find((d) => d?.__deviceKey === this.selectedDeviceKey) ?? null;
+            const t = String(selected?.type ?? '').toLowerCase();
+            if (t === 'modem' || t === 'router' || t === 'switch') {
+              this.selectedType = t as NetworkType;
+            }
+          }
+        },
+        error: () => {
+          // ignore, selection just won't be prefilled
+        }
+      });
     }
   }
 
@@ -84,6 +115,17 @@ export class NetworkBuilderPanelComponent implements OnChanges {
           ...device,
           __deviceKey: this.getDeviceKey(device)
         }));
+
+        // If we already have a selected device key (Modify flow), ensure the active tab
+        // matches the device's real type so the <select> can actually show the selection.
+        if (this.selectedDeviceKey) {
+          const selected = this.devices.find((d) => d?.__deviceKey === this.selectedDeviceKey) ?? null;
+          const t = String(selected?.type ?? '').toLowerCase();
+          if (t === 'modem' || t === 'router' || t === 'switch') {
+            this.selectedType = t as NetworkType;
+          }
+        }
+
         this.loading = false;
       },
       error: (err) => {
@@ -154,11 +196,19 @@ export class NetworkBuilderPanelComponent implements OnChanges {
     this.error = '';
     this.success = '';
 
-    this.http.post<any>(
-      `/api/setup/${sid}/add-network`,
-      { product_id: productId, type: this.selectedType },
-      { withCredentials: true }
-    ).subscribe({
+    const request = this.editChildSetupId
+      ? this.http.patch<any>(
+          `/api/setup/replace-child-device/${this.editChildSetupId}`,
+          { product_id: productId },
+          { withCredentials: true }
+        )
+      : this.http.post<any>(
+          `/api/setup/${sid}/add-network`,
+          { product_id: productId, type: this.selectedType },
+          { withCredentials: true }
+        );
+
+    request.subscribe({
       next: () => {
         this.saving = false;
         this.success = 'Halozati eszkoz sikeresen hozzaadva.';

@@ -1702,7 +1702,7 @@ exports.list = async (req, res) => {
 
         if (hasPlan && planBool) {
             return res.json({
-                setups: normalized.filter((room) => room.isPlan)
+                setups: normalized.filter((room) => room.isPlan || room.isNote)
             });
         }
 
@@ -1910,6 +1910,42 @@ exports.children = async (req, res) => {
                     y: Number(item.pos_y ?? 0)
                 }, SETUPS_TABLE));
 
+                // Child setups store the chosen product in setup_devices (device_id).
+                // Attach product_id/device_id so the frontend can prefill "Modify" builders.
+                const childIds = (items || [])
+                    .map((it) => Number(it?.id ?? 0))
+                    .filter((id) => Number.isFinite(id) && id > 0);
+
+                if (childIds.length) {
+                    try {
+                        const { data: deviceLinks, error: deviceLinksErr } = await supabase
+                            .from(SETUP_DEVICES_TABLE)
+                            .select("id, setup_id, device_id, source_table, role")
+                            .in("setup_id", childIds);
+
+                        if (deviceLinksErr) {
+                            console.error("[children] setup_devices lookup failed (non-fatal):", deviceLinksErr);
+                        } else {
+                            const bySetupId = new Map(
+                                (deviceLinks || [])
+                                    .filter((row) => row?.setup_id != null)
+                                    .map((row) => [Number(row.setup_id), row])
+                            );
+
+                            for (const it of items) {
+                                const link = bySetupId.get(Number(it?.id ?? 0));
+                                if (!link) continue;
+                                it.product_id = Number(link.device_id ?? 0) || it.product_id;
+                                it.device_id = Number(link.device_id ?? 0) || it.device_id;
+                                it.source_table = link.source_table ?? it.source_table;
+                                it.role = link.role ?? it.role;
+                            }
+                        }
+                    } catch (lookupErr) {
+                        console.error("[children] setup_devices lookup fatal (non-fatal):", lookupErr);
+                    }
+                }
+
                 let enrichedItems = await enrichPcSetupRows(items);
                 if (normalizeBoolean(roomRow?.isNote ?? roomRow?.is_note ?? roomRow?.isnote)) {
                     enrichedItems = await enrichNoteItemsWithProductData(enrichedItems);
@@ -1947,6 +1983,44 @@ exports.children = async (req, res) => {
                 x: Number(item.pos_x ?? 0),
                 y: Number(item.pos_y ?? 0)
             }, SETUPS_TABLE));
+
+            // Attach product_id/device_id for child setups (see comment above).
+            const childIds = (allItems || [])
+                .map((it) => Number(it?.id ?? 0))
+                .filter((id) => Number.isFinite(id) && id > 0);
+
+            if (childIds.length) {
+                try {
+                    const { data: deviceLinks, error: deviceLinksErr } = await supabase
+                        .from(SETUP_DEVICES_TABLE)
+                        .select("id, setup_id, device_id, source_table, role")
+                        .in("setup_id", childIds);
+
+                    if (deviceLinksErr) {
+                        console.error("[children] setup_devices lookup failed (non-fatal):", deviceLinksErr);
+                    } else {
+                        const bySetupId = new Map(
+                            (deviceLinks || [])
+                                .filter((row) => row?.setup_id != null)
+                                .map((row) => [Number(row.setup_id), row])
+                        );
+
+                        allItems = (allItems || []).map((it) => {
+                            const link = bySetupId.get(Number(it?.id ?? 0));
+                            if (!link) return it;
+                            return {
+                                ...it,
+                                product_id: Number(link.device_id ?? 0) || it.product_id,
+                                device_id: Number(link.device_id ?? 0) || it.device_id,
+                                source_table: link.source_table ?? it.source_table,
+                                role: link.role ?? it.role,
+                            };
+                        });
+                    }
+                } catch (lookupErr) {
+                    console.error("[children] setup_devices lookup fatal (non-fatal):", lookupErr);
+                }
+            }
 
             allItems = await enrichPcSetupRows(allItems);
             if (normalizeBoolean(roomRow?.isNote ?? roomRow?.is_note ?? roomRow?.isnote)) {
@@ -2296,6 +2370,144 @@ exports.addDevice = async (req, res) => {
     } catch (err) {
         console.error("addDevice fatal:", err);
         return res.status(500).json({ error: "Server error" });
+    }
+};
+
+/**
+ * Replaces the product behind an existing child setup (setups row).
+ * Used by "Modify" flows to keep the same child setup id/position but change its product.
+ *
+ * Route: PATCH /api/setup/replace-child-device/:childId
+ * Body: { product_id: number }
+ */
+exports.replaceChildDevice = async (req, res) => {
+    try {
+        const userId = req.user?.id;
+        const childIdRaw = req.params.childId;
+        const childId = childIdRaw == null ? null : Number(childIdRaw);
+        const productIdRaw = req.body?.product_id ?? req.body?.productId ?? req.body?.device_id;
+        const productId = productIdRaw == null ? null : Number(productIdRaw);
+
+        if (!userId) return res.status(401).json({ error: "Unauthorized" });
+        if (!childId || Number.isNaN(childId)) return res.status(400).json({ error: "Missing childId" });
+        if (!productId || Number.isNaN(productId)) return res.status(400).json({ error: "Missing product_id" });
+
+        const owned = await assertSetupOwnedByUser(childId, userId);
+        if (!owned) return res.status(403).json({ error: "Forbidden" });
+
+        const { data: childSetup, error: childErr } = await supabase
+            .from(SETUPS_TABLE)
+            .select("id, room_id, type, name, pos_x, pos_y")
+            .eq("id", childId)
+            .limit(1)
+            .maybeSingle();
+        if (childErr) throw childErr;
+        if (!childSetup) return res.status(404).json({ error: "Child setup not found" });
+
+        const roomId = Number(childSetup.room_id ?? 0);
+        if (!roomId) return res.status(400).json({ error: "Child setup has no room_id" });
+
+        const { data: product, error: productErr } = await supabase
+            .from("products")
+            .select("id, name, type, category")
+            .eq("id", productId)
+            .limit(1)
+            .maybeSingle();
+        if (productErr) throw productErr;
+        if (!product) return res.status(404).json({ error: "Product not found" });
+
+        const nextName = await getUniqueChildSetupName(
+            roomId,
+            String(product.name || "").trim() || `Eszkoz #${productId}`,
+            childId
+        );
+
+        // Update device link (setup_devices row points to child setup id)
+        const { data: deviceRow, error: deviceErr } = await supabase
+            .from(SETUP_DEVICES_TABLE)
+            .select("id, setup_id, device_id, role, source_table")
+            .eq("setup_id", childId)
+            .order("id", { ascending: true })
+            .limit(1)
+            .maybeSingle();
+        if (deviceErr) throw deviceErr;
+        if (!deviceRow) return res.status(404).json({ error: "setup_devices row not found for child" });
+
+        const { error: updateDeviceErr } = await supabase
+            .from(SETUP_DEVICES_TABLE)
+            .update({ device_id: productId })
+            .eq("id", deviceRow.id);
+        if (updateDeviceErr) throw updateDeviceErr;
+
+        // Keep child type as-is (pc/car/instrument/router/...) but update its name.
+        const { data: updatedChild, error: updateChildErr } = await supabase
+            .from(SETUPS_TABLE)
+            .update({ name: nextName })
+            .eq("id", childId)
+            .select("*")
+            .single();
+        if (updateChildErr) throw updateChildErr;
+
+        childrenCache.delete(String(roomId));
+        childrenCache.delete(String(childId));
+
+        return res.json({
+            ok: true,
+            child: {
+                ...mapDisplay(updatedChild, SETUPS_TABLE),
+                setup_name: updatedChild?.name ?? nextName,
+                display_name: updatedChild?.name ?? nextName,
+                setup_type: updatedChild?.type ?? childSetup.type,
+                product_id: productId,
+                x: Number(updatedChild?.pos_x ?? childSetup.pos_x ?? 0),
+                y: Number(updatedChild?.pos_y ?? childSetup.pos_y ?? 0),
+            }
+        });
+    } catch (err) {
+        console.error("replaceChildDevice fatal:", err);
+        return res.status(500).json({ error: err?.message || "Server error" });
+    }
+};
+
+/**
+ * Resolves the product/device behind a child setup via setup_devices.
+ * Route: GET /api/setup/child-device/:childId
+ */
+exports.childDevice = async (req, res) => {
+    try {
+        const userId = req.user?.id;
+        const childIdRaw = req.params.childId;
+        const childId = childIdRaw == null ? null : Number(childIdRaw);
+
+        if (!userId) return res.status(401).json({ error: "Unauthorized" });
+        if (!childId || Number.isNaN(childId)) return res.status(400).json({ error: "Missing childId" });
+
+        const owned = await assertSetupOwnedByUser(childId, userId);
+        if (!owned) return res.status(403).json({ error: "Forbidden" });
+
+        const { data: deviceRow, error: deviceErr } = await supabase
+            .from(SETUP_DEVICES_TABLE)
+            .select("id, setup_id, device_id, source_table, role")
+            .eq("setup_id", childId)
+            .order("id", { ascending: true })
+            .limit(1)
+            .maybeSingle();
+        if (deviceErr) throw deviceErr;
+        if (!deviceRow) return res.status(404).json({ error: "Device link not found" });
+
+        return res.json({
+            ok: true,
+            childId,
+            device: {
+                device_id: Number(deviceRow.device_id ?? 0) || null,
+                product_id: Number(deviceRow.device_id ?? 0) || null,
+                source_table: deviceRow.source_table ?? null,
+                role: deviceRow.role ?? null,
+            }
+        });
+    } catch (err) {
+        console.error("childDevice fatal:", err);
+        return res.status(500).json({ error: err?.message || "Server error" });
     }
 };
 exports.remove = async (req, res) => {
@@ -3431,6 +3643,20 @@ exports.connectionsCreate = async (req, res) => {
                 .maybeSingle();
 
             if (devErr) return null;
+
+            // If this id is not a setup_devices.id, try treating it as a setups.id directly.
+            if (!deviceRow) {
+                const { data: directSetup, error: directErr } = await supabase
+                    .from(SETUPS_TABLE)
+                    .select("id, name")
+                    .eq("id", id)
+                    .limit(1)
+                    .maybeSingle();
+                if (directErr) return null;
+                const directName = String(directSetup?.name ?? "").trim();
+                return directName || null;
+            }
+
             const childSetupId = Number(deviceRow?.setup_id ?? 0);
             if (!childSetupId) return null;
 

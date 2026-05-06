@@ -12,6 +12,8 @@ import { HttpClient, HttpClientModule } from '@angular/common/http';
 })
 export class InstrumentBuilderPanelComponent implements OnChanges {
   @Input() setup: any;
+  @Input() editChildSetupId: number | null = null;
+  @Input() initialProductId: number | null = null;
   @Output() close = new EventEmitter<void>();
   @Output() saved = new EventEmitter<void>();
 
@@ -29,6 +31,9 @@ export class InstrumentBuilderPanelComponent implements OnChanges {
     if (changes['setup'] && this.setup) {
       this.resetForm();
       this.loadInstrumentOptions();
+    }
+    if (changes['initialProductId'] && this.initialProductId != null) {
+      this.selectedInstrumentKey = String(this.initialProductId);
     }
   }
 
@@ -130,7 +135,11 @@ export class InstrumentBuilderPanelComponent implements OnChanges {
       type: 'inst'
     };
 
-    this.http.post<any>(`/api/setup/${sid}/add-instrument`, payload, { withCredentials: true }).subscribe({
+    const request = this.editChildSetupId
+      ? this.http.patch<any>(`/api/setup/replace-child-device/${this.editChildSetupId}`, { product_id: instId }, { withCredentials: true })
+      : this.http.post<any>(`/api/setup/${sid}/add-instrument`, payload, { withCredentials: true });
+
+    request.subscribe({
       next: () => {
         this.saving = false;
         this.success = 'Hangszer sikeresen hozzáadva.';

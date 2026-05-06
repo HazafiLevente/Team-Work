@@ -28,6 +28,9 @@ type PcBuilderMode = 'build' | 'all_in_one' | 'laptop';
 })
 export class PcBuilderPanelComponent implements OnChanges {
   @Input() setup: any;
+  @Input() editChildSetupId: number | null = null;
+  @Input() initialProductId: number | null = null;
+  @Input() initialPcSetup: any | null = null;
   @Output() close = new EventEmitter<void>();
   @Output() saved = new EventEmitter<void>();
 
@@ -62,6 +65,67 @@ export class PcBuilderPanelComponent implements OnChanges {
       this.resetSelections();
       this.loadAllParts();
       this.loadComputerProducts();
+    }
+    if (changes['initialProductId'] && this.initialProductId != null) {
+      this.selectedComputerId = Number(this.initialProductId);
+    }
+    if (changes['initialPcSetup'] && this.initialPcSetup) {
+      this.applyInitialPcSetup(this.initialPcSetup);
+    }
+    if (changes['editChildSetupId'] && this.editChildSetupId && this.initialPcSetup) {
+      this.applyInitialPcSetup(this.initialPcSetup);
+    }
+  }
+
+  private applyInitialPcSetup(pc: any): void {
+    // Expecting a child setup enriched by backend (`enrichPcSetupRows`), so it can contain part ids.
+    const name = String(pc?.setup_name ?? pc?.name ?? '').trim();
+    const processorId = Number(pc?.processor_id ?? 0) || null;
+    const motherboardId = Number(pc?.motherboard_id ?? 0) || null;
+    const ramId = Number(pc?.ram_id ?? 0) || null;
+    const gpuId = Number(pc?.videocard_id ?? 0) || null;
+    const psuId = Number(pc?.psu_id ?? 0) || null;
+
+    if (name) this.buildName = name;
+
+    // If it looks like a custom build, switch to build mode and preselect parts.
+    if (processorId || motherboardId || ramId || gpuId || psuId) {
+      this.mode = 'build';
+      this.selectedComputerId = null;
+      this.selectedProcessorId = processorId;
+      this.selectedMotherboardId = motherboardId;
+      this.selectedRamId = ramId;
+      this.selectedGpuId = gpuId;
+      this.selectedPsuId = psuId;
+      return;
+    }
+
+    // Otherwise, if we have a product id, keep current ready-PC selection behavior.
+    const productId = Number(pc?.product_id ?? pc?.device_id ?? 0) || null;
+    if (productId) {
+      this.selectedComputerId = productId;
+      // Temporarily switch out of build mode so the ready-PC UI is visible.
+      // The exact ready mode (Laptop vs Egybegép) will be determined after catalog load.
+      this.mode = 'all_in_one';
+      this.applyReadyComputerModeFromSelectedProduct();
+    }
+  }
+
+  private applyReadyComputerModeFromSelectedProduct(): void {
+    if (!this.selectedComputerId) return;
+    if (this.isBuildMode()) return;
+
+    const product = this.computerProducts.find((p) => this.getId(p) === this.selectedComputerId) ?? null;
+    if (!product) return;
+
+    const category = this.getProductCategory(product);
+    if (category === 'laptop') {
+      this.mode = 'laptop';
+      return;
+    }
+    if (category === 'desktop') {
+      this.mode = 'all_in_one';
+      return;
     }
   }
 
@@ -190,6 +254,21 @@ export class PcBuilderPanelComponent implements OnChanges {
         const items = Array.isArray(res?.items) ? res.items : Array.isArray(res) ? res : [];
         this.computerProducts = items;
         this.loadingComputerProducts = false;
+
+        // If we're editing a ready computer, auto-switch to the correct tab (Laptop/Egybegép).
+        // This can only be decided once the catalog is loaded.
+        if (this.initialPcSetup) {
+          const hasParts =
+            Number(this.initialPcSetup?.processor_id ?? 0) ||
+            Number(this.initialPcSetup?.motherboard_id ?? 0) ||
+            Number(this.initialPcSetup?.ram_id ?? 0) ||
+            Number(this.initialPcSetup?.videocard_id ?? 0) ||
+            Number(this.initialPcSetup?.psu_id ?? 0);
+
+          if (!hasParts) {
+            this.applyReadyComputerModeFromSelectedProduct();
+          }
+        }
       },
       error: (err) => {
         console.error('Computer catalog load error:', err);
@@ -233,13 +312,31 @@ export class PcBuilderPanelComponent implements OnChanges {
 
     const sourceTable = this.getProductSourceTable(product);
     const displayName = this.getComputerLabel(product);
+    const productId = this.getId(product);
+    if (productId == null) {
+      this.saving = false;
+      this.error = 'Hianyzik a termek azonosito.';
+      return;
+    }
 
-    this.http.post<any>(`/api/setup/${setupId}/save-device`, {
-      product_id: this.getId(product),
-      source_table: sourceTable,
-      display_name: displayName,
-      manufacturer: this.getManufacturer(product)
-    }, { withCredentials: true }).subscribe({
+    const request = this.editChildSetupId
+      ? this.http.patch<any>(
+          `/api/setup/replace-child-device/${this.editChildSetupId}`,
+          { product_id: productId },
+          { withCredentials: true }
+        )
+      : this.http.post<any>(
+          `/api/setup/${setupId}/save-device`,
+          {
+            product_id: productId,
+            source_table: sourceTable,
+            display_name: displayName,
+            manufacturer: this.getManufacturer(product)
+          },
+          { withCredentials: true }
+        );
+
+    request.subscribe({
       next: () => {
         this.saving = false;
         this.success = 'Eszkoz hozzaadva.';
@@ -703,6 +800,45 @@ export class PcBuilderPanelComponent implements OnChanges {
     this.saving = true;
     this.error = '';
     this.success = '';
+
+    // Edit existing PC build (child setup id), otherwise create new.
+    if (this.editChildSetupId) {
+      const pcId = Number(this.editChildSetupId);
+      const nextName = this.buildName.trim();
+      const payload = {
+        processor_id: this.selectedProcessorId,
+        motherboard_id: this.selectedMotherboardId,
+        ram_id: this.selectedRamId,
+        videocard_id: this.selectedGpuId,
+        psu_id: this.selectedPsuId
+      };
+
+      const rename$ = this.http.patch<any>(
+        '/api/setup/rename-item',
+        { itemId: pcId, tableName: 'setups', newName: nextName },
+        { withCredentials: true }
+      );
+
+      // Fire rename but don't block build update on it.
+      rename$.subscribe({
+        error: (err) => console.warn('PC rename failed (non-fatal):', err)
+      });
+
+      this.tryPatchPcBuild(
+        [
+          `/api/setup-update/save-pcbuild/${pcId}`,
+          `/api/setup/save-pcbuild/${pcId}`
+        ],
+        payload,
+        () => {
+          this.saving = false;
+          this.success = 'PC build saved successfully.';
+          this.saved.emit();
+        }
+      );
+
+      return;
+    }
 
     this.createPcBuild(sid);
   }

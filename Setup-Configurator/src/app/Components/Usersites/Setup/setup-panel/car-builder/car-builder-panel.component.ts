@@ -12,6 +12,8 @@ import { HttpClient, HttpClientModule } from '@angular/common/http';
 })
 export class CarBuilderPanelComponent implements OnChanges {
   @Input() setup: any;
+  @Input() editChildSetupId: number | null = null;
+  @Input() initialProductId: number | null = null;
   @Output() close = new EventEmitter<void>();
   @Output() saved = new EventEmitter<void>();
 
@@ -29,6 +31,9 @@ export class CarBuilderPanelComponent implements OnChanges {
     if (changes['setup'] && this.setup) {
       this.resetForm();
       this.loadCarOptions();
+    }
+    if (changes['initialProductId'] && this.initialProductId != null) {
+      this.selectedCarKey = String(this.initialProductId);
     }
   }
 
@@ -128,7 +133,11 @@ export class CarBuilderPanelComponent implements OnChanges {
       car_id: carId
     };
 
-    this.http.post<any>(`/api/setup/${sid}/add-car`, payload, { withCredentials: true }).subscribe({
+    const request = this.editChildSetupId
+      ? this.http.patch<any>(`/api/setup/replace-child-device/${this.editChildSetupId}`, { product_id: carId }, { withCredentials: true })
+      : this.http.post<any>(`/api/setup/${sid}/add-car`, payload, { withCredentials: true });
+
+    request.subscribe({
       next: () => {
         this.saving = false;
         this.success = 'Autó sikeresen hozzáadva.';

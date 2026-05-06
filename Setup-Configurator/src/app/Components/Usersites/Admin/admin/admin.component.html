@@ -72,6 +72,101 @@
       <div class="daily-panel">
         <h3>📊 Napi aktivitás</h3>
 
+        <div class="calendar-section">
+          <div class="calendar-header">
+            <div class="calendar-title">🗓 {{ calendarTitle }}</div>
+            <div class="calendar-actions">
+              <button class="cal-btn" (click)="prevMonth()">‹</button>
+              <button class="cal-btn" (click)="nextMonth()">›</button>
+            </div>
+          </div>
+
+          <div class="calendar-grid">
+            @for (w of weekDays; track w) {
+              <div class="cal-weekday">{{ w }}</div>
+            }
+
+            @for (c of calendarCells; track $index) {
+              <div
+                class="cal-cell"
+                [class.empty]="!c.inMonth"
+                [class.active]="c.active"
+                [class.inactive]="c.inMonth && !c.active"
+                [class.today]="c.isToday"
+                [class.selected]="c.iso && c.iso === selectedDayIso"
+                [title]="c.iso ? (c.iso + (c.active ? ': volt aktivitás' : ': nem volt aktivitás')) : ''"
+                (click)="openDay(c.iso)"
+              >
+                @if (c.date) {
+                  <span class="cal-day">{{ c.date.getDate() }}</span>
+                }
+              </div>
+            }
+          </div>
+        </div>
+
+        @if (selectedDayIso) {
+          <div class="day-details">
+            <div class="day-details-header">
+              <div class="day-details-title">📌 {{ selectedDayIso }}</div>
+              <button class="day-close" (click)="closeDay()">Bezár</button>
+            </div>
+
+            @if (dayLoading) {
+              <div class="muted">Betöltés…</div>
+            } @else if (selectedDayDetails) {
+              <div class="day-metrics">
+                <div class="metric">
+                  <div class="metric-label">Egyedi felhasználók</div>
+                  <div class="metric-value">{{ selectedDayDetails.unique }}</div>
+                </div>
+                <div class="metric">
+                  <div class="metric-label">Összes kérés</div>
+                  <div class="metric-value">{{ selectedDayDetails.total_requests }}</div>
+                </div>
+                <div class="metric">
+                  <div class="metric-label">Max online</div>
+                  <div class="metric-value">{{ selectedDayDetails.max_count || 0 }}</div>
+                </div>
+                <div class="metric">
+                  <div class="metric-label">Min online</div>
+                  <div class="metric-value">{{ selectedDayDetails.min_count || 0 }}</div>
+                </div>
+              </div>
+
+              <div class="day-diagram">
+                <div class="diag-row">
+                  <span>Egyedi</span>
+                  <div class="diag-bar">
+                    <div class="diag-fill unique" [style.width.%]="uniqueBarWidthPct()"></div>
+                  </div>
+                </div>
+                <div class="diag-row">
+                  <span>Kérések</span>
+                  <div class="diag-bar">
+                    <div class="diag-fill requests" [style.width.%]="requestsBarWidthPct()"></div>
+                  </div>
+                </div>
+              </div>
+
+              @if (selectedUsers.length > 0) {
+                <div class="day-users">
+                  <div class="day-users-title">Felhasználók</div>
+                  <div class="day-users-list">
+                    @for (u of selectedUsers; track u.id) {
+                      <span class="online-badge clickable" (dblclick)="onUserDblClick(u)">{{ u.username }}</span>
+                    }
+                  </div>
+                </div>
+              } @else {
+                <div class="muted">Nincs felhasználó lista ehhez a naphoz.</div>
+              }
+            } @else {
+              <div class="muted">Nincs adat ehhez a naphoz.</div>
+            }
+          </div>
+        }
+
 
         @if (onlineList.length > 0) {
         <div class="online-section">
@@ -86,31 +181,6 @@
         }
 
 
-        @if (dailyStats.length > 0) {
-        <div class="chart-section">
-          <h4>📅 Napi egyedi felhasználók</h4>
-          <div class="bar-chart">
-            @for (day of dailyStats; track day.date) {
-            <div class="bar-col"
-              [title]="day.date + ': ' + day.unique + ' felhasználó, ' + day.total_requests + ' kérés'">
-              <div class="bar-fill" [style.height.%]="day.unique > 0 ? (day.unique / getMaxUsers()) * 100 : 2">
-              </div>
-              <span class="bar-val">{{ day.unique }}</span>
-              <span class="bar-label">{{ day.date.slice(5) }}</span>
-
-
-              <div class="day-users-list" *ngIf="day.users?.length > 0">
-                @for (u of day.users; track u.id) {
-                <div class="day-user-item" (dblclick)="onUserDblClick(u)">{{ u.username }}</div>
-                }
-              </div>
-            </div>
-            }
-          </div>
-        </div>
-        } @else {
-        <div class="muted">Még nincs napi adat.</div>
-        }
       </div>
       }
     </ng-container>

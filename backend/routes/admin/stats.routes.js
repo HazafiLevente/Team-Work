@@ -20,12 +20,38 @@ router.get("/stats", verifyAdmin, async (req, res) => {
     });
 });
 
-router.get("/active-users", verifyAdmin, (req, res) => {
-    res.json({
-        online: activeUsersTracker.getActiveUsers(),
-        onlineCount: activeUsersTracker.getActiveCount(),
-        daily: activeUsersTracker.getDailyHistory()
-    });
+router.get("/active-users", verifyAdmin, async (req, res) => {
+    try {
+        const [activityDays, daily] = await Promise.all([
+            activeUsersTracker.getActivityDays?.({ days: 180 }),
+            activeUsersTracker.getDailyHistory?.({ days: 180 })
+        ]);
+
+        res.json({
+            online: activeUsersTracker.getActiveUsers(),
+            onlineCount: activeUsersTracker.getActiveCount(),
+            activityDays: activityDays || [],
+            daily: daily || []
+        });
+    } catch {
+        res.json({
+            online: activeUsersTracker.getActiveUsers(),
+            onlineCount: activeUsersTracker.getActiveCount(),
+            activityDays: [],
+            daily: []
+        });
+    }
+});
+
+router.get("/active-users/day/:date", verifyAdmin, async (req, res) => {
+    try {
+        const date = String(req.params.date || "");
+        const details = await activeUsersTracker.getDayDetails?.(date);
+        if (!details) return res.status(400).json({ error: "Bad date" });
+        return res.json(details);
+    } catch {
+        return res.status(500).json({ error: "Failed" });
+    }
 });
 
 module.exports = router;

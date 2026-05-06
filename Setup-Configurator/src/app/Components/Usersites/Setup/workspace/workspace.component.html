@@ -78,6 +78,7 @@
       (openItem)="openItemDetails(ctxItem)"
       (rename)="startRenameForContextItem()"
       (modify)="onItemModify(ctxItem)"
+      (connectItem)="itemConnect.emit(ctxItem)"
       (deleteItem)="deleteContextItem()">
     </app-context-menu-item>
   }
@@ -137,6 +138,9 @@
           @if (w.title === 'Szamitogep') {
             <app-pc-builder-panel
               [setup]="w.payload.setup"
+              [editChildSetupId]="w.payload.editChildSetupId ?? null"
+              [initialProductId]="w.payload.initialProductId ?? null"
+              [initialPcSetup]="w.payload.initialPcSetup ?? null"
               (close)="closeWindow(w.id)"
               (saved)="onHtSaved(); closeWindow(w.id)">
             </app-pc-builder-panel>
@@ -150,18 +154,25 @@
           } @else if (w.title === 'Autók') {
             <app-car-builder-panel
               [setup]="w.payload.setup"
+              [editChildSetupId]="w.payload.editChildSetupId ?? null"
+              [initialProductId]="w.payload.initialProductId ?? null"
               (saved)="onHtSaved()">
             </app-car-builder-panel>
 
           } @else if (w.title === 'Hangszerek') {
             <app-instrument-builder-panel
               [setup]="w.payload.setup"
+              [editChildSetupId]="w.payload.editChildSetupId ?? null"
+              [initialProductId]="w.payload.initialProductId ?? null"
               (saved)="onHtSaved()">
             </app-instrument-builder-panel>
 
           } @else if (w.title === 'Halozat') {
             <app-network-builder-panel
               [setup]="w.payload.setup"
+              [editChildSetupId]="w.payload.editChildSetupId ?? null"
+              [initialProductId]="w.payload.initialProductId ?? null"
+              [initialNetworkType]="w.payload.initialNetworkType ?? null"
               (saved)="onHtSaved()">
             </app-network-builder-panel>
 

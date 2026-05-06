@@ -29,7 +29,37 @@ export class AdminComponent implements OnInit, OnDestroy {
   showDailyStats = false;
   dailyStats: any[] = [];
   onlineList: any[] = [];
+  activityDays: string[] = [];
+  activityDaySet = new Set<string>();
+
+  calendarMonth = new Date();
+  calendarCells: Array<{
+    date: Date | null;
+    iso: string | null;
+    inMonth: boolean;
+    active: boolean;
+    isToday: boolean;
+  }> = [];
+
+  readonly weekDays = ['H', 'K', 'Sz', 'Cs', 'P', 'Sz', 'V'];
   selectedUserId: number | null = null;
+  selectedDayIso: string | null = null;
+  selectedDayDetails: { date: string; unique: number; total_requests: number; max_count?: number; min_count?: number; avg_count?: number; users: any[] } | null = null;
+  dayLoading = false;
+
+  get selectedUsers(): any[] {
+    return this.selectedDayDetails?.users || [];
+  }
+
+  uniqueBarWidthPct(): number {
+    const v = this.selectedDayDetails?.unique || 0;
+    return Math.min(100, Math.max(0, v * 10));
+  }
+
+  requestsBarWidthPct(): number {
+    const v = this.selectedDayDetails?.total_requests || 0;
+    return Math.min(100, Math.max(0, v / 5));
+  }
 
   activeSection: 'dashboard' | 'users' | 'products' | 'reports' | 'system' | 'logs' = 'dashboard';
 
@@ -110,9 +140,107 @@ export class AdminComponent implements OnInit, OnDestroy {
         next: res => {
           this.dailyStats = res.daily || [];
           this.onlineList = res.online || [];
+          this.activityDays = res.activityDays || [];
+          this.activityDaySet = new Set(this.activityDays);
+          this.buildCalendar();
         },
         error: err => console.error('Daily stats error:', err)
       });
+  }
+
+  private isoDate(d: Date) {
+    const yyyy = d.getFullYear();
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const dd = String(d.getDate()).padStart(2, '0');
+    return `${yyyy}-${mm}-${dd}`;
+  }
+
+  private startOfMonth(d: Date) {
+    return new Date(d.getFullYear(), d.getMonth(), 1);
+  }
+
+  private endOfMonth(d: Date) {
+    return new Date(d.getFullYear(), d.getMonth() + 1, 0);
+  }
+
+  private mondayBasedDayIndex(jsDay: number) {
+    // JS: 0=Sun..6=Sat -> Monday=0..Sunday=6
+    return (jsDay + 6) % 7;
+  }
+
+  prevMonth() {
+    this.calendarMonth = new Date(this.calendarMonth.getFullYear(), this.calendarMonth.getMonth() - 1, 1);
+    this.buildCalendar();
+  }
+
+  nextMonth() {
+    this.calendarMonth = new Date(this.calendarMonth.getFullYear(), this.calendarMonth.getMonth() + 1, 1);
+    this.buildCalendar();
+  }
+
+  openDay(iso: string | null) {
+    if (!iso) return;
+    this.selectedDayIso = iso;
+    this.selectedDayDetails = null;
+    this.dayLoading = true;
+
+    this.http.get<any>(`/api/admin/active-users/day/${encodeURIComponent(iso)}`, { withCredentials: true })
+      .subscribe({
+        next: res => {
+          this.selectedDayDetails = res;
+          this.dayLoading = false;
+        },
+        error: err => {
+          console.error('Day details error:', err);
+          this.dayLoading = false;
+        }
+      });
+  }
+
+  closeDay() {
+    this.selectedDayIso = null;
+    this.selectedDayDetails = null;
+  }
+
+  buildCalendar() {
+    const first = this.startOfMonth(this.calendarMonth);
+    const last = this.endOfMonth(this.calendarMonth);
+
+    const today = new Date();
+    const todayIso = this.isoDate(today);
+
+    const leadEmpty = this.mondayBasedDayIndex(first.getDay());
+    const daysInMonth = last.getDate();
+
+    const cells: typeof this.calendarCells = [];
+
+    for (let i = 0; i < leadEmpty; i++) {
+      cells.push({ date: null, iso: null, inMonth: false, active: false, isToday: false });
+    }
+
+    for (let day = 1; day <= daysInMonth; day++) {
+      const d = new Date(first.getFullYear(), first.getMonth(), day);
+      const iso = this.isoDate(d);
+      const active = this.activityDaySet.has(iso);
+      cells.push({
+        date: d,
+        iso,
+        inMonth: true,
+        active,
+        isToday: iso === todayIso
+      });
+    }
+
+    // pad to full weeks (multiple of 7)
+    while (cells.length % 7 !== 0) {
+      cells.push({ date: null, iso: null, inMonth: false, active: false, isToday: false });
+    }
+
+    this.calendarCells = cells;
+  }
+
+  get calendarTitle() {
+    return this.calendarMonth.toLocaleDateString('hu-HU', { year: 'numeric', month: 'long' });
   }
 
   getMaxUsers(): number {

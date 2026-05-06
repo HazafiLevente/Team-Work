@@ -95,6 +95,7 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit, OnChanges 
   connectSourceItem: any = null;
   connectTargetSetup: any = null;
   allowPcHtLinks = false;
+  allowPcHtLinksOneShot = false;
   pairingItems: any[] = [];
   pairingTargetItems: any[] = [];
   pairingConnections: any[] = [];
@@ -1007,6 +1008,31 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit, OnChanges 
   }
 
   onWorkspaceItemSelect(item: any): void {
+    // Quick connect mode: next click selects target item immediately.
+    if (this.pairingStage === 'PICK_TARGET_ITEM' && this.connectSourceItem && this.connectSourceSetup && this.viewingSetup) {
+      const sourceId = this.getItemId(this.connectSourceItem);
+      const targetId = this.getItemId(item);
+      if (sourceId && targetId && String(sourceId) !== String(targetId)) {
+        const fromType = this.mapItemCategoryToDeviceType(this.connectSourceItem);
+        const toType = this.mapItemCategoryToDeviceType(item);
+
+        const fromNorm = this.normalizeConnectableType(fromType);
+        const toNorm = this.normalizeConnectableType(toType);
+
+        if (fromNorm === 'pc' && toNorm === 'pc') {
+          const ok = window.confirm('Biztos, hogy PC-t PC-vel össze akarsz kötni?');
+          if (!ok) {
+            // Keep dashed line active.
+            return;
+          }
+          this.allowPcHtLinksOneShot = true;
+        }
+
+        this.finalizeConnection({ setup: this.viewingSetup, item });
+        return;
+      }
+    }
+
     this.selectedWorkspaceItem = item;
     this.selectedSetup = null;
     this.closeProductOverlay();
@@ -1202,11 +1228,16 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit, OnChanges 
     this.connectSourceItem = null;
     this.connectTargetSetup = null;
     this.allowPcHtLinks = false;
+    this.allowPcHtLinksOneShot = false;
     this.pairingItems = [];
     this.pairingTargetItems = [];
     this.pairingConnections = [];
     this.pairingStage = 'NONE';
     this.workspaceComp?.closePairingWindows();
+  }
+
+  private effectiveAllowPcHtLinks(): boolean {
+    return this.allowPcHtLinks || this.allowPcHtLinksOneShot;
   }
 
   private isNetworkEndpoint(type: string): boolean {
@@ -1227,7 +1258,7 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit, OnChanges 
     if (this.isNetworkEndpoint(f) || this.isNetworkEndpoint(t)) return true;
 
     // Checkbox: allow PC/HT interconnect
-    if (this.allowPcHtLinks && this.isPcOrHt(f) && this.isPcOrHt(t)) return true;
+    if (this.effectiveAllowPcHtLinks() && this.isPcOrHt(f) && this.isPcOrHt(t)) return true;
 
     return false;
   }
@@ -1336,7 +1367,7 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit, OnChanges 
       from_device_id,
       to_device_type,
       to_device_id,
-      allow_pc_ht_links: this.allowPcHtLinks
+      allow_pc_ht_links: this.effectiveAllowPcHtLinks()
     }, { withCredentials: true }).subscribe({
       next: () => {
         this.cancelConnecting();
@@ -1913,17 +1944,35 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit, OnChanges 
     if (!item) return [];
 
     const rows = [
-      { label: 'Nev', value: this.itemTitle(item) },
-      { label: 'Tipus', value: this.itemTypeLabel(item) },
       { label: 'Gyarto', value: item?.manufacturer || item?.Manufacturer || item?.brand || '' },
       { label: 'Modell', value: item?.model || item?.Model || item?.product_name || '' },
-      { label: 'Tabla', value: item?.category || item?.source_table || item?.table_name || item?.table || '' },
-      { label: 'ID', value: item?.id ?? item?.ID ?? item?.item_id ?? '' }
+      { label: 'Ar', value: item?.price ?? item?.Price ?? '' }
     ];
 
     return rows
       .map((row) => ({ label: row.label, value: String(row.value ?? '').trim() }))
       .filter((row) => row.value);
+  }
+
+  startQuickConnectFromSelectedItem(): void {
+    if (!this.viewingSetup || !this.selectedWorkspaceItem) return;
+    this.startQuickConnectFromItem(this.selectedWorkspaceItem);
+  }
+
+  startQuickConnectFromItem(item: any): void {
+    if (!this.viewingSetup || !item) return;
+
+    // Always restart quick-connect to avoid "stuck" states.
+    this.cancelConnecting();
+    this.connectSourceSetup = this.viewingSetup;
+    this.connectSourceItem = item;
+    this.connectTargetSetup = this.viewingSetup;
+    this.pairingStage = 'PICK_TARGET_ITEM';
+
+    const setupId = this.getSetupId(this.viewingSetup);
+    if (setupId) {
+      this.loadPairingConnections();
+    }
   }
 
   selectDeviceCategory(category: string): void {

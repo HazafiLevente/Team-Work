@@ -46,6 +46,7 @@
             <button type="button" class="property-action" (click)="openSelectedItem()">Megnyitas</button>
             <button type="button" class="property-action" (click)="renameSelectedItem()">Atnevezes</button>
             <button type="button" class="property-action" (click)="modifySelectedItem()">Modositas</button>
+            <button type="button" class="property-action" (click)="startQuickConnectFromSelectedItem()">Osszekotes</button>
           </div>
         } @else if (viewingSetup) {
           <div class="property-selection">
@@ -72,11 +73,13 @@
 
           <div class="property-action-grid">
             <button type="button" class="property-action" (click)="openSelectedSetup()">Megnyitas</button>
-            <button type="button" class="property-action" (click)="openSelectedSetupTools()">Eszkozok</button>
-            <button type="button" class="property-action" (click)="renameSelectedSetup()">Atnevezes</button>
-            <button type="button" class="property-action" (click)="connectSelectedSetup()">Osszekotes</button>
-            <button type="button" class="property-action" (click)="openSelectedSetupConnections()">Kapcsolatok</button>
-            <button type="button" class="property-action danger" (click)="deleteSelectedSetup()">Torles</button>
+            @if (!isNoteSetup(selectedSetup)) {
+              <button type="button" class="property-action" (click)="openSelectedSetupTools()">Eszkozok</button>
+              <button type="button" class="property-action" (click)="renameSelectedSetup()">Atnevezes</button>
+              <button type="button" class="property-action" (click)="connectSelectedSetup()">Osszekotes</button>
+              <button type="button" class="property-action" (click)="openSelectedSetupConnections()">Kapcsolatok</button>
+              <button type="button" class="property-action danger" (click)="deleteSelectedSetup()">Torles</button>
+            }
           </div>
         }
       </div>
@@ -101,6 +104,7 @@
       (openSetup)="onSetupDetails($event)"
       (itemOpen)="openItemOverlay($event)"
       (itemClicked)="onWorkspaceItemSelect($event)"
+      (itemConnect)="startQuickConnectFromItem($event)"
       (back)="backToSetups()"
       (roomMoved)="onRoomDragEnded($event.setup, $event.pos)"
       (roomRenamed)="saveRenamedRoom($event)"

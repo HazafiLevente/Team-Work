@@ -45,6 +45,10 @@ export class ContextMenuRoomComponent {
 
   constructor(private http: HttpClient) {}
 
+  isNoteSetup(): boolean {
+    return this.setup?.isNote === true || this.setup?.is_note === true || this.setup?.isnote === true;
+  }
+
   emitAndClose(emitter: EventEmitter<void>) {
     emitter.emit();
     this.close.emit();

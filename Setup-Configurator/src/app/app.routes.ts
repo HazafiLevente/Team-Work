@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { adminGuard } from './Components/Auth/authguard/admin.guard';
+import { noDesktopOnMobileGuard } from './Components/Auth/authguard/device.guard';
 
 export const routes: Routes = [
   {
@@ -41,18 +42,20 @@ export const routes: Routes = [
       },
       {
         path: 'plan',
-        redirectTo: 'plan/desktop',
-        pathMatch: 'full'
+        loadComponent: () => import('./Components/Usersites/Plan/plan-entry/plan-entry.component')
+          .then(m => m.PlanEntryComponent)
       },
       {
         path: 'plan/desktop',
         loadComponent: () => import('./Components/Usersites/Plan/plan-desktop/plan-desktop.component')
-          .then(m => m.PlanDesktopComponent)
+          .then(m => m.PlanDesktopComponent),
+        canMatch: [noDesktopOnMobileGuard]
       },
       {
         path: 'plan/desktop/:roomId',
         loadComponent: () => import('./Components/Usersites/Plan/plan-desktop/plan-desktop.component')
-          .then(m => m.PlanDesktopComponent)
+          .then(m => m.PlanDesktopComponent),
+        canMatch: [noDesktopOnMobileGuard]
       },
       {
         path: 'plan/mobile',
@@ -66,25 +69,27 @@ export const routes: Routes = [
       },
       {
         path: 'plan/:roomId',
-        redirectTo: 'plan/desktop/:roomId',
-        pathMatch: 'full'
+        loadComponent: () => import('./Components/Usersites/Plan/plan-entry/plan-entry.component')
+          .then(m => m.PlanEntryComponent)
       },
       { path: 'favorite', redirectTo: 'plan', pathMatch: 'full' },
       { path: 'favorite/:roomId', redirectTo: 'plan/:roomId', pathMatch: 'full' },
       {
         path: 'setup',
-        redirectTo: 'setup/desktop',
-        pathMatch: 'full'
+        loadComponent: () => import('./Components/Usersites/Setup/setup-entry/setup-entry.component')
+          .then(m => m.SetupEntryComponent)
       },
       {
         path: 'setup/desktop',
         loadComponent: () => import('./Components/Usersites/Setup/setup-desktop/setup-desktop.component')
-          .then(m => m.SetupDesktopComponent)
+          .then(m => m.SetupDesktopComponent),
+        canMatch: [noDesktopOnMobileGuard]
       },
       {
         path: 'setup/desktop/:roomId',
         loadComponent: () => import('./Components/Usersites/Setup/setup-desktop/setup-desktop.component')
-          .then(m => m.SetupDesktopComponent)
+          .then(m => m.SetupDesktopComponent),
+        canMatch: [noDesktopOnMobileGuard]
       },
       {
         path: 'setup/mobile',
@@ -98,8 +103,8 @@ export const routes: Routes = [
       },
       {
         path: 'setup/:roomId',
-        redirectTo: 'setup/desktop/:roomId',
-        pathMatch: 'full'
+        loadComponent: () => import('./Components/Usersites/Setup/setup-entry/setup-entry.component')
+          .then(m => m.SetupEntryComponent)
       },
       {
         path: 'messages',

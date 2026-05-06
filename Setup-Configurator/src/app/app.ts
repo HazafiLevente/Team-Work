@@ -146,7 +146,7 @@ export class App implements OnInit, OnDestroy {
         {
           icon: '🗂️',
           label: 'MySetup',
-          onClick: () => this.router.navigateByUrl('/user/setup/desktop')
+          onClick: () => this.router.navigateByUrl('/user/setup')
         },
         {
           icon: '👤',
