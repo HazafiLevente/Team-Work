@@ -1,113 +1,5 @@
 [
   {
-    "id": "1777902794649aaqu",
-    "timestamp": "2026-05-04T13:53:14.649Z",
-    "level": "log",
-    "message": "🖼 IMAGES_ROOT: C:\\Users\\Levente\\WebstormProjects\\Team-Work\\datas\\images"
-  },
-  {
-    "id": "1777902795132ybmq",
-    "timestamp": "2026-05-04T13:53:15.132Z",
-    "level": "log",
-    "message": "🖼 IMAGES_ROOT: C:\\Users\\Levente\\WebstormProjects\\Team-Work\\datas\\images"
-  },
-  {
-    "id": "1777902795756y6dc",
-    "timestamp": "2026-05-04T13:53:15.756Z",
-    "level": "log",
-    "message": "🖼 IMAGES_ROOT: C:\\Users\\Levente\\WebstormProjects\\Team-Work\\datas\\images"
-  },
-  {
-    "id": "1777902796240hbad",
-    "timestamp": "2026-05-04T13:53:16.240Z",
-    "level": "log",
-    "message": "🖼 IMAGES_ROOT: C:\\Users\\Levente\\WebstormProjects\\Team-Work\\datas\\images"
-  },
-  {
-    "id": "177790279674904nq",
-    "timestamp": "2026-05-04T13:53:16.749Z",
-    "level": "log",
-    "message": "🖼 IMAGES_ROOT: C:\\Users\\Levente\\WebstormProjects\\Team-Work\\datas\\images"
-  },
-  {
-    "id": "1777902797229lv0x",
-    "timestamp": "2026-05-04T13:53:17.229Z",
-    "level": "log",
-    "message": "🖼 IMAGES_ROOT: C:\\Users\\Levente\\WebstormProjects\\Team-Work\\datas\\images"
-  },
-  {
-    "id": "1777902797509lduk",
-    "timestamp": "2026-05-04T13:53:17.509Z",
-    "level": "log",
-    "message": "🍪 COOKIES: {\"Webstorm-4a9b1ed1\":\"2cd47b33-d91f-4180-94e5-e3cd66fd6f7d\",\"Webstorm-4a9b1ed2\":\"4825e2dd-8848-40aa-82fa-6b6096e480a5\",\"Webstorm-4a9b1ed3\":\"4b21ec80-24ec-43df-ad72-310d7e663763\",\"g_state\":\"{\\\"i_l\\\":0,\\\"i_ll\\\":1777888281835,\\\"i_e\\\":{\\\"enable_itp_optimization\\\":23},\\\"i_et\\\":1776274771520}\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJIYXphZmlMZXYiLCJlbWFpbCI6ImhhemFmaWxldkBnbWFpbC5jb20iLCJyb2xlIjoib3duZXIiLCJpYXQiOjE3Nzc4ODgyODQsImV4cCI6MTc3NzkzMTQ4NH0.IvKfaA3Wcc1_MLEHVV7ceLj7gceYaeyNwnHTuGIBJao\",\"Webstorm-4a9b2292\":\"5c6302da-5be2-463a-bcc0-7cd6929d554c\"}"
-  },
-  {
-    "id": "1777902797510vbvk",
-    "timestamp": "2026-05-04T13:53:17.510Z",
-    "level": "log",
-    "message": "🍪 COOKIES: {\"Webstorm-4a9b1ed1\":\"2cd47b33-d91f-4180-94e5-e3cd66fd6f7d\",\"Webstorm-4a9b1ed2\":\"4825e2dd-8848-40aa-82fa-6b6096e480a5\",\"Webstorm-4a9b1ed3\":\"4b21ec80-24ec-43df-ad72-310d7e663763\",\"g_state\":\"{\\\"i_l\\\":0,\\\"i_ll\\\":1777888281835,\\\"i_e\\\":{\\\"enable_itp_optimization\\\":23},\\\"i_et\\\":1776274771520}\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJIYXphZmlMZXYiLCJlbWFpbCI6ImhhemFmaWxldkBnbWFpbC5jb20iLCJyb2xlIjoib3duZXIiLCJpYXQiOjE3Nzc4ODgyODQsImV4cCI6MTc3NzkzMTQ4NH0.IvKfaA3Wcc1_MLEHVV7ceLj7gceYaeyNwnHTuGIBJao\",\"Webstorm-4a9b2292\":\"5c6302da-5be2-463a-bcc0-7cd6929d554c\"}"
-  },
-  {
-    "id": "1777902797711w7tc",
-    "timestamp": "2026-05-04T13:53:17.711Z",
-    "level": "log",
-    "message": "🖼 IMAGES_ROOT: C:\\Users\\Levente\\WebstormProjects\\Team-Work\\datas\\images"
-  },
-  {
-    "id": "177790279819813g0",
-    "timestamp": "2026-05-04T13:53:18.198Z",
-    "level": "log",
-    "message": "🖼 IMAGES_ROOT: C:\\Users\\Levente\\WebstormProjects\\Team-Work\\datas\\images"
-  },
-  {
-    "id": "1777902798694p6bs",
-    "timestamp": "2026-05-04T13:53:18.694Z",
-    "level": "log",
-    "message": "🖼 IMAGES_ROOT: C:\\Users\\Levente\\WebstormProjects\\Team-Work\\datas\\images"
-  },
-  {
-    "id": "1777902799177gi9f",
-    "timestamp": "2026-05-04T13:53:19.177Z",
-    "level": "log",
-    "message": "🖼 IMAGES_ROOT: C:\\Users\\Levente\\WebstormProjects\\Team-Work\\datas\\images"
-  },
-  {
-    "id": "17779027996600vi6",
-    "timestamp": "2026-05-04T13:53:19.660Z",
-    "level": "log",
-    "message": "🖼 IMAGES_ROOT: C:\\Users\\Levente\\WebstormProjects\\Team-Work\\datas\\images"
-  },
-  {
-    "id": "17779028001435elv",
-    "timestamp": "2026-05-04T13:53:20.143Z",
-    "level": "log",
-    "message": "🖼 IMAGES_ROOT: C:\\Users\\Levente\\WebstormProjects\\Team-Work\\datas\\images"
-  },
-  {
-    "id": "1777902800641ddxz",
-    "timestamp": "2026-05-04T13:53:20.641Z",
-    "level": "log",
-    "message": "🖼 IMAGES_ROOT: C:\\Users\\Levente\\WebstormProjects\\Team-Work\\datas\\images"
-  },
-  {
-    "id": "1777902801121cbx4",
-    "timestamp": "2026-05-04T13:53:21.121Z",
-    "level": "log",
-    "message": "🖼 IMAGES_ROOT: C:\\Users\\Levente\\WebstormProjects\\Team-Work\\datas\\images"
-  },
-  {
-    "id": "1777902801605ispe",
-    "timestamp": "2026-05-04T13:53:21.605Z",
-    "level": "log",
-    "message": "🖼 IMAGES_ROOT: C:\\Users\\Levente\\WebstormProjects\\Team-Work\\datas\\images"
-  },
-  {
-    "id": "17779028020923q7l",
-    "timestamp": "2026-05-04T13:53:22.092Z",
-    "level": "log",
-    "message": "🖼 IMAGES_ROOT: C:\\Users\\Levente\\WebstormProjects\\Team-Work\\datas\\images"
-  },
-  {
     "id": "1777902802574a8le",
     "timestamp": "2026-05-04T13:53:22.574Z",
     "level": "log",
@@ -11998,5 +11890,113 @@
     "timestamp": "2026-05-07T22:21:24.386Z",
     "level": "log",
     "message": "Server running on http://localhost:3000"
+  },
+  {
+    "id": "177819342677217jo",
+    "timestamp": "2026-05-07T22:37:06.772Z",
+    "level": "log",
+    "message": "[dotenv@17.2.3] injecting env (18) from ..\\.env \u001b[2m-- tip: ⚙️  write to custom object with { processEnv: myObject }\u001b[0m"
+  },
+  {
+    "id": "1778193426800134p",
+    "timestamp": "2026-05-07T22:37:06.800Z",
+    "level": "log",
+    "message": "🖼️  Serving images from: C:\\Users\\typed\\WebstormProjects\\Team-Work4\\datas\\images"
+  },
+  {
+    "id": "1778193426997mavv",
+    "timestamp": "2026-05-07T22:37:06.997Z",
+    "level": "log",
+    "message": "Server running on http://localhost:3000"
+  },
+  {
+    "id": "17781934368800cef",
+    "timestamp": "2026-05-07T22:37:16.880Z",
+    "level": "log",
+    "message": "✅ ActiveUsers snapshot persisted {\"day\":\"2026-05-08\",\"active_id\":2}"
+  },
+  {
+    "id": "1778193442833x8qz",
+    "timestamp": "2026-05-07T22:37:22.833Z",
+    "level": "log",
+    "message": "✅ ActiveUsers synced to Supabase on shutdown {\"day\":\"2026-05-08\"}"
+  },
+  {
+    "id": "17781934579300hez",
+    "timestamp": "2026-05-07T22:37:37.930Z",
+    "level": "error",
+    "message": "[children] setup_devices lookup failed (non-fatal): {\"code\":\"42703\",\"details\":null,\"hint\":null,\"message\":\"column setup_devices.source_table does not exist\"}"
+  },
+  {
+    "id": "1778193459378qarh",
+    "timestamp": "2026-05-07T22:37:39.378Z",
+    "level": "error",
+    "message": "[children] setup_devices lookup failed (non-fatal): {\"code\":\"42703\",\"details\":null,\"hint\":null,\"message\":\"column setup_devices.source_table does not exist\"}"
+  },
+  {
+    "id": "1778193461310apr6",
+    "timestamp": "2026-05-07T22:37:41.310Z",
+    "level": "log",
+    "message": "✅ ActiveUsers synced to Supabase on shutdown {\"day\":\"2026-05-08\"}"
+  },
+  {
+    "id": "177819347177802dz",
+    "timestamp": "2026-05-07T22:37:51.778Z",
+    "level": "error",
+    "message": "❌ Image preview failed: C:\\Users\\typed\\WebstormProjects\\Team-Work4\\datas\\images\\products\\1311\\4.jpg: bad seek to 20539\nC:\\Users\\typed\\WebstormProjects\\Team-Work4\\datas\\images\\products\\1311\\4.jpg: bad seek to 20519\nC:\\Users\\typed\\WebstormProjects\\Team-Work4\\datas\\images\\products\\1311\\4.jpg: bad seek to 20509\nC:\\Users\\typed\\WebstormProjects\\Team-Work4\\datas\\images\\products\\1311\\4.jpg: bad seek to 20508\nheif: Invalid input: Unspecified: Bitstream not supported by this decoder (2.0)"
+  },
+  {
+    "id": "17781935346115xab",
+    "timestamp": "2026-05-07T22:38:54.611Z",
+    "level": "log",
+    "message": "✅ ActiveUsers snapshot persisted {\"day\":\"2026-05-08\",\"active_id\":2}"
+  },
+  {
+    "id": "17781935386389aaq",
+    "timestamp": "2026-05-07T22:38:58.638Z",
+    "level": "log",
+    "message": "✅ ActiveUsers synced to Supabase on shutdown {\"day\":\"2026-05-08\"}"
+  },
+  {
+    "id": "1778193538736l2xz",
+    "timestamp": "2026-05-07T22:38:58.736Z",
+    "level": "error",
+    "message": "[children] setup_devices lookup failed (non-fatal): {\"code\":\"42703\",\"details\":null,\"hint\":null,\"message\":\"column setup_devices.source_table does not exist\"}"
+  },
+  {
+    "id": "1778193540763jdc2",
+    "timestamp": "2026-05-07T22:39:00.763Z",
+    "level": "log",
+    "message": "✅ ActiveUsers synced to Supabase on shutdown {\"day\":\"2026-05-08\"}"
+  },
+  {
+    "id": "17781935550760qix",
+    "timestamp": "2026-05-07T22:39:15.076Z",
+    "level": "error",
+    "message": "❌ Image preview failed: C:\\Users\\typed\\WebstormProjects\\Team-Work4\\datas\\images\\products\\1311\\4.jpg: bad seek to 20539\nC:\\Users\\typed\\WebstormProjects\\Team-Work4\\datas\\images\\products\\1311\\4.jpg: bad seek to 20519\nC:\\Users\\typed\\WebstormProjects\\Team-Work4\\datas\\images\\products\\1311\\4.jpg: bad seek to 20509\nC:\\Users\\typed\\WebstormProjects\\Team-Work4\\datas\\images\\products\\1311\\4.jpg: bad seek to 20508\nheif: Invalid input: Unspecified: Bitstream not supported by this decoder (2.0)"
+  },
+  {
+    "id": "1778193617895b19u",
+    "timestamp": "2026-05-07T22:40:17.895Z",
+    "level": "log",
+    "message": "✅ ActiveUsers snapshot persisted {\"day\":\"2026-05-08\",\"active_id\":2}"
+  },
+  {
+    "id": "1778193621882degp",
+    "timestamp": "2026-05-07T22:40:21.882Z",
+    "level": "log",
+    "message": "✅ ActiveUsers synced to Supabase on shutdown {\"day\":\"2026-05-08\"}"
+  },
+  {
+    "id": "1778193726856tfk0",
+    "timestamp": "2026-05-07T22:42:06.856Z",
+    "level": "log",
+    "message": "✅ ActiveUsers snapshot persisted {\"day\":\"2026-05-08\",\"active_id\":2}"
+  },
+  {
+    "id": "1778193732189a20i",
+    "timestamp": "2026-05-07T22:42:12.189Z",
+    "level": "log",
+    "message": "✅ ActiveUsers synced to Supabase on shutdown {\"day\":\"2026-05-08\"}"
   }
 ]
