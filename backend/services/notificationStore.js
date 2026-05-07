@@ -1,14 +1,32 @@
+/**
+ * --------------------------------------------------------------------------
+ *  NOTIFICATION & NEWS STORE (EAV PATTERN)
+ * --------------------------------------------------------------------------
+ *  Manages system notifications using an Entity-Attribute-Value architecture.
+ *  This allows for flexible property storage (message, sender, category)
+ *  while keeping the core 'news' table lightweight.
+ */
+
 const { supabase } = require("./supabase");
 
+// --- DATABASE CONSTANTS ---
 const NEWS_TABLE = "news[System]";
 const PROPERTIES_TABLE = "news_properties[System]";
 const VALUES_TABLE = "news_values[System]";
 
+/**
+ * Ensures category strings are consistent across the system.
+ */
 function normalizeCategory(value) {
     const normalized = String(value || "").trim().toLowerCase();
     return normalized || "system";
 }
 
+// --- METADATA HELPERS ---
+
+/**
+ * Loads the mapping of property names to their respective Database IDs.
+ */
 async function loadPropertyMap() {
     const { data, error } = await supabase
         .from(PROPERTIES_TABLE)
@@ -24,6 +42,9 @@ async function loadPropertyMap() {
     return byName;
 }
 
+/**
+ * Checks if required property keys exist in the DB, creates them if missing.
+ */
 async function ensurePropertyIds(names) {
     const map = await loadPropertyMap();
     const missing = names
@@ -44,10 +65,14 @@ async function ensurePropertyIds(names) {
             if (name) map.set(name, row.id);
         }
     }
-
     return map;
 }
 
+// --- CORE LOGIC ---
+
+/**
+ * Merges base news rows with dynamic EAV values into a clean notification object.
+ */
 function buildNotification(baseRow, values = {}) {
     const category = normalizeCategory(values.category);
 
@@ -64,25 +89,28 @@ function buildNotification(baseRow, values = {}) {
     };
 }
 
+/**
+ * Fetches all notifications, joins their properties, and optionally filters by category.
+ */
 async function listNotifications({ category } = {}) {
+    // 1. Fetch base news entries
     const { data: newsRows, error: newsError } = await supabase
         .from(NEWS_TABLE)
         .select("id, title, created_at")
         .order("created_at", { ascending: false });
 
     if (newsError) throw newsError;
+    if (!newsRows?.length) return [];
 
-    const items = newsRows || [];
-    if (!items.length) return [];
-
+    // 2. Fetch all values associated with these news items
     const propertyMap = await loadPropertyMap();
     const propertyIds = Array.from(propertyMap.values());
 
     if (!propertyIds.length) {
-        return items.map(row => buildNotification(row));
+        return newsRows.map(row => buildNotification(row));
     }
 
-    const newsIds = items.map(row => row.id);
+    const newsIds = newsRows.map(row => row.id);
     const { data: valueRows, error: valueError } = await supabase
         .from(VALUES_TABLE)
         .select("news_id, property_id, value")
@@ -91,6 +119,7 @@ async function listNotifications({ category } = {}) {
 
     if (valueError) throw valueError;
 
+    // 3. Map IDs back to property names for easy building
     const propertyById = new Map();
     for (const [name, id] of propertyMap.entries()) {
         propertyById.set(id, name);
@@ -105,16 +134,21 @@ async function listNotifications({ category } = {}) {
         valuesByNewsId.get(row.news_id)[propertyName] = row.value;
     }
 
+    // 4. Assemble and filter
     const normalizedFilter = category ? normalizeCategory(category) : null;
 
-    return items
+    return newsRows
         .map(row => buildNotification(row, valuesByNewsId.get(row.id)))
         .filter(row => !normalizedFilter || row.category === normalizedFilter);
 }
 
+/**
+ * Creates a new notification by inserting into 'news' and 'news_values' tables.
+ */
 async function createNotification({ title, message, target, sender, category }) {
     const propertyIds = await ensurePropertyIds(["message", "target", "sender", "category"]);
 
+    // Insert base news
     const { data: newsRow, error: newsError } = await supabase
         .from(NEWS_TABLE)
         .insert({
@@ -126,6 +160,7 @@ async function createNotification({ title, message, target, sender, category }) 
 
     if (newsError) throw newsError;
 
+    // Insert associated properties
     const values = [
         { news_id: newsRow.id, property_id: propertyIds.get("message"), value: String(message || "").trim() },
         { news_id: newsRow.id, property_id: propertyIds.get("target"), value: String(target || "all").trim().toLowerCase() },
@@ -133,35 +168,22 @@ async function createNotification({ title, message, target, sender, category }) 
         { news_id: newsRow.id, property_id: propertyIds.get("category"), value: normalizeCategory(category) }
     ];
 
-    const { error: valuesError } = await supabase
-        .from(VALUES_TABLE)
-        .insert(values);
-
+    const { error: valuesError } = await supabase.from(VALUES_TABLE).insert(values);
     if (valuesError) throw valuesError;
 
-    return buildNotification(newsRow, {
-        message,
-        target,
-        sender,
-        category
-    });
+    return buildNotification(newsRow, { message, target, sender, category });
 }
 
+/**
+ * Deletes a notification and its associated properties.
+ */
 async function deleteNotification(id) {
     const notificationId = Number(id);
 
-    const { error: valuesError } = await supabase
-        .from(VALUES_TABLE)
-        .delete()
-        .eq("news_id", notificationId);
+    // Values should be deleted first due to foreign key constraints
+    await supabase.from(VALUES_TABLE).delete().eq("news_id", notificationId);
 
-    if (valuesError) throw valuesError;
-
-    const { error: newsError } = await supabase
-        .from(NEWS_TABLE)
-        .delete()
-        .eq("id", notificationId);
-
+    const { error: newsError } = await supabase.from(NEWS_TABLE).delete().eq("id", notificationId);
     if (newsError) throw newsError;
 }
 
