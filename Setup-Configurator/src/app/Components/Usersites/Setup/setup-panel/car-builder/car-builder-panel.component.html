@@ -1,0 +1,49 @@
+<div class="car-builder-shell">
+  <div class="car-builder-body">
+    @if (loading) {
+      <div class="state">Autók betöltése...</div>
+    } @else {
+      @if (error) {
+        <div class="state error">{{ error }}</div>
+      }
+
+      @if (success) {
+        <div class="state success">{{ success }}</div>
+      }
+
+      <div class="grid">
+        <div class="field-card full">
+          <label class="field-label">Autó kiválasztása</label>
+          <select
+            class="select"
+            [(ngModel)]="selectedCarKey"
+          >
+            <option value="">-- válassz autót --</option>
+
+            @for (car of cars; track trackCar($index, car)) {
+              <option [value]="car.__carKey">
+                {{ getCarLabel(car) }}
+              </option>
+            }
+          </select>
+        </div>
+
+      </div>
+
+      <div class="actions">
+        <button
+          type="button"
+          class="save-btn"
+          (click)="saveCar()"
+          [disabled]="saving || loading"
+        >
+          @if (saving) {
+            Mentés...
+          } @else {
+            Autó hozzáadása
+          }
+        </button>
+      </div>
+    }
+  </div>
+</div>

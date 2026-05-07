@@ -1,0 +1,18 @@
+id,manufacturer,model,connection_type,sensor,max_dpi,polling_rate_hz,buttons,weight_g,shape,grip_style,rgb,battery_life_hours,switch_type,feet_material,target_use,category,notes,created_at,Price
+1,Logitech,G Pro,wired,HERO,25600,1000,6,83,ambidextrous,claw/fingertip,false,,Omron,PTFE,FPS,pc,Original G Pro wired,2026-02-05 10:56:48.488716+00,56000
+2,Logitech,G Pro Wireless,wireless,HERO,25600,1000,6,80,ambidextrous,claw/fingertip,false,60,Omron,PTFE,FPS,pc,Esports classic,2026-02-05 10:56:48.488716+00,56000
+3,Logitech,G Pro X Superlight,wireless,HERO 25K,25600,1000,5,63,ambidextrous,fingertip/claw,false,70,Omron,PTFE,FPS,pc,Ultra lightweight,2026-02-05 10:56:48.488716+00,60000
+4,Logitech,G Pro X Superlight 2,wireless,HERO 2,32000,2000,5,60,ambidextrous,fingertip/claw,false,95,Optical,PTFE,FPS,pc,Next-gen Superlight,2026-02-05 10:56:48.488716+00,55000
+5,Logitech,G502 Hero,wired,HERO,25600,1000,11,121,ergonomic,palm/claw,true,,Omron,PTFE,FPS/MOBA,pc,Classic heavy mouse,2026-02-05 10:56:48.488716+00,21000
+6,Logitech,G502 Lightspeed,wireless,HERO,25600,1000,11,114,ergonomic,palm/claw,true,48,Omron,PTFE,FPS/MOBA,pc,Wireless G502,2026-02-05 10:56:48.488716+00,50000
+7,Logitech,G502 X,wired,HERO 25K,25600,1000,13,89,ergonomic,palm/claw,false,,Optical,PTFE,FPS/MOBA,pc,Redesigned G502,2026-02-05 10:56:48.488716+00,25000
+8,Logitech,G502 X Lightspeed,wireless,HERO 25K,25600,1000,13,102,ergonomic,palm/claw,false,140,Optical,PTFE,FPS/MOBA,pc,Wireless X,2026-02-05 10:56:48.488716+00,42000
+9,Logitech,G502 X Plus,wireless,HERO 25K,25600,1000,13,106,ergonomic,palm/claw,true,120,Optical,PTFE,FPS/MOBA,pc,RGB flagship,2026-02-05 10:56:48.488716+00,48000
+10,MCHOSE,AX5 Pro,wireless,PixArt PAW3395,26000,4000,5,59,ambidextrous,claw/fingertip,false,80,Optical,PTFE,FPS,pc,High-end budget killer,2026-02-05 10:56:48.488716+00,29000
+11,MCHOSE,AX5 Ultra,wireless,PixArt PAW3395,26000,8000,5,56,ambidextrous,fingertip,false,70,Optical,PTFE,FPS,pc,8K polling,2026-02-05 10:56:48.488716+00,50000
+12,Lamzu,Atlantis,wireless,PixArt PAW3395,26000,1000,5,55,ambidextrous,claw,false,70,Optical,PTFE,FPS,pc,Very popular FPS mouse,2026-02-05 10:56:48.488716+00,48000
+13,Lamzu,Thorn,wireless,PixArt PAW3395,26000,4000,6,52,ergonomic,claw/palm,false,80,Optical,PTFE,FPS,pc,Ergo FPS,2026-02-05 10:56:48.488716+00,44000
+14,Pulsar,X2,wireless,PixArt PAW3395,26000,1000,5,56,ambidextrous,claw,false,70,Optical,PTFE,FPS,pc,Competitive standard,2026-02-05 10:56:48.488716+00,58000
+15,Pulsar,X2V2 Mini,wireless,PixArt PAW3395,26000,4000,5,51,ambidextrous,fingertip,false,80,Optical,PTFE,FPS,pc,Small hands,2026-02-05 10:56:48.488716+00,40000
+16,Endgame Gear,XM2we,wireless,PixArt PAW3370,19000,1000,5,63,ambidextrous,claw,false,80,Kailh GM 8.0,PTFE,FPS,pc,Tank build,2026-02-05 10:56:48.488716+00,43000
+17,Finalmouse,UltralightX,wireless,PixArt PAW3395,26000,8000,5,38,ambidextrous,fingertip,false,50,Optical,PTFE,FPS,pc,Extreme lightweight,2026-02-05 10:56:48.488716+00,75000

@@ -1,0 +1,105 @@
+.notifications-layout {
+  display: grid;
+  grid-template-columns: 260px minmax(0, 1fr);
+  gap: 18px;
+  width: 100%;
+  min-height: 100vh;
+  padding: 88px 18px 112px;
+  color: #fff;
+}
+
+.sidebar {
+  padding: 18px;
+  border-radius: 24px;
+  background: rgba(10, 14, 22, 0.64);
+  border: 1px solid rgba(255,255,255,0.08);
+  box-shadow: 0 16px 44px rgba(0,0,0,0.28);
+  backdrop-filter: blur(12px);
+  align-self: start;
+}
+
+.sidebar-title {
+  font-weight: 800;
+  margin-bottom: 16px;
+  opacity: 0.76;
+  font-size: 18px;
+}
+
+.tab-item {
+  padding: 12px 14px;
+  border-radius: 14px;
+  margin-bottom: 10px;
+  cursor: pointer;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid transparent;
+  transition: transform .16s ease, background .16s ease, border-color .16s ease;
+}
+
+.tab-item:hover {
+  transform: translateY(-1px);
+  background: rgba(255,255,255,0.05);
+  border-color: rgba(255,255,255,0.08);
+}
+
+.tab-item.active {
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--page-accent, #6366f1) 20%, transparent),
+    color-mix(in srgb, var(--page-accent-2, #60a5fa) 16%, transparent)
+  );
+  border-color: color-mix(in srgb, var(--page-accent, #6366f1) 32%, transparent);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--page-accent, #6366f1) 14%, transparent);
+}
+
+.content {
+  padding: 18px;
+  border-radius: 28px;
+  background: rgba(10, 14, 22, 0.62);
+  border: 1px solid rgba(255,255,255,0.08);
+  box-shadow: 0 16px 44px rgba(0,0,0,0.28);
+  backdrop-filter: blur(12px);
+}
+
+.message-box {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.08);
+  padding: 18px;
+  border-radius: 18px;
+  margin-bottom: 14px;
+  transition: transform .16s ease, border-color .16s ease, background .16s ease;
+}
+
+.message-box:hover {
+  transform: translateY(-1px);
+  background: rgba(255,255,255,0.05);
+  border-color: color-mix(in srgb, var(--page-accent, #6366f1) 24%, transparent);
+}
+
+.msg-title {
+  font-weight: 800;
+  margin-bottom: 8px;
+  font-size: 16px;
+}
+
+.msg-body {
+  margin-bottom: 8px;
+  line-height: 1.55;
+  color: rgba(255,255,255,0.86);
+}
+
+.msg-time {
+  font-size: 12px;
+  opacity: 0.54;
+}
+
+@media (max-width: 900px) {
+  .notifications-layout {
+    grid-template-columns: 1fr;
+    padding: 82px 12px 104px;
+  }
+
+  .sidebar,
+  .content {
+    padding: 16px;
+  }
+}

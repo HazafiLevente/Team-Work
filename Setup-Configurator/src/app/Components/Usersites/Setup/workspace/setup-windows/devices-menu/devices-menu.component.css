@@ -1,0 +1,134 @@
+.devices-container{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+  padding:10px;
+}
+
+.loading{
+  padding: 10px 6px;
+  color: rgba(255,255,255,0.72);
+  font-size: 13px;
+}
+
+.note-total{
+  padding:4px 2px 8px;
+  color:#8a7cff;
+  font-size:12px;
+  font-weight:800;
+}
+
+.note-device-list{
+  display:grid;
+  gap:8px;
+  margin:0;
+  padding:0 0 0 24px;
+}
+
+.note-device-item{
+  position:relative;
+  padding:9px 10px;
+  padding-right:42px;
+  border-radius:8px;
+  border:1px solid rgba(255,255,255,0.08);
+  background:rgba(255,255,255,0.04);
+}
+
+.note-device-item::marker{
+  color:#8a7cff;
+  font-weight:800;
+}
+
+.note-device-name{
+  color:#f5f3ff;
+  font-size:13px;
+  font-weight:800;
+}
+
+.note-device-meta{
+  margin-top:4px;
+  color:rgba(255,255,255,0.62);
+  font-size:12px;
+  font-weight:600;
+}
+
+.note-device-price{
+  margin-top:6px;
+  color:#67e8f9;
+  font-size:12px;
+  font-weight:800;
+}
+
+.note-device-delete{
+  position:absolute;
+  top:8px;
+  right:8px;
+  width:24px;
+  height:24px;
+  border-radius:7px;
+  border:1px solid rgba(255,255,255,0.12);
+  color:#ffb4b4;
+  background:rgba(255,255,255,0.04);
+  cursor:pointer;
+  font-size:11px;
+  font-weight:900;
+}
+
+.note-device-delete:hover:not(:disabled){
+  border-color:rgba(255,120,120,0.44);
+  background:rgba(255,120,120,0.12);
+}
+
+.note-device-delete:disabled{
+  opacity:0.55;
+  cursor:wait;
+}
+
+.pager{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  margin-top:10px;
+  padding-top:10px;
+  border-top:1px solid rgba(255,255,255,0.08);
+}
+
+.pager-pages{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+  flex-wrap:wrap;
+}
+
+.pager-btn,
+.pager-page{
+  min-width:36px;
+  height:36px;
+  padding:0 12px;
+  border-radius:10px;
+  border:1px solid rgba(255,255,255,0.12);
+  background:rgba(255,255,255,0.05);
+  color:rgba(255,255,255,0.88);
+  cursor:pointer;
+}
+
+.pager-page.active{
+  background:rgba(82,39,255,0.32);
+  border-color:rgba(82,39,255,0.55);
+  color:#fff;
+}
+
+.pager-btn:disabled,
+.pager-page:disabled{
+  opacity:0.45;
+  cursor:default;
+}
+
+.pager-meta{
+  color: rgba(255,255,255,0.6);
+  font-size: 12px;
+  text-align: center;
+  margin-top: 4px;
+}

@@ -1,0 +1,19 @@
+<div #root class="drag-element" [class.circle]="isCircularNetworkType()" [class.is-ht]="isHT()" [class.is-note]="isNote()" cdkDrag
+  [cdkDragDisabled]="dragDisabled" [cdkDragFreeDragPosition]="dragPosition" [cdkDragBoundary]="boundaryRef"
+  [attr.data-id]="dataId" (cdkDragStarted)="onDragStarted()" (cdkDragMoved)="onDragMoved()"
+  (cdkDragEnded)="onDragEnded($event)" (click)="onClick()" (dblclick)="onDblClick()"
+  (contextmenu)="onRightClick($event)">
+
+
+  <span class="setup-name" *ngIf="!editing">
+    <span *ngIf="isHT()" class="ht-icon">🎬</span>
+    <span *ngIf="isNote()" class="note-icon">Jegyzet</span>
+    {{ setup?.display_name || setup?.setup_name || setup?.name || 'Névtelen setup' }}
+  </span>
+
+
+  <input *ngIf="editing" class="setup-edit-input" [(ngModel)]="editName" (keydown.enter)="confirmRename()"
+    (keydown.escape)="cancelRename()" (blur)="confirmRename()" (mousedown)="$event.stopPropagation()"
+    (click)="$event.stopPropagation()" />
+
+</div>

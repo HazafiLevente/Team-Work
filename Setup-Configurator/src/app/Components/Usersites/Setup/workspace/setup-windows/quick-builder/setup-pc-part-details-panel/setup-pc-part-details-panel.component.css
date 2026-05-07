@@ -1,0 +1,118 @@
+.overlay{
+  display: none;
+}
+
+.panel{
+  position: absolute;
+  width: 360px;
+  max-width: calc(100% - 24px);
+  max-height: calc(100% - 24px);
+  border-radius: 16px;
+  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(18,18,22,0.96);
+  box-shadow: 0 30px 120px rgba(0,0,0,0.6);
+  overflow: hidden;
+  z-index: 2;
+  pointer-events: auto;
+
+  display: flex;
+  flex-direction: column;
+}
+
+.titlebar{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 14px;
+  border-bottom: 1px solid rgba(255,255,255,0.10);
+  background: linear-gradient(90deg, rgba(0,255,255,0.06), rgba(255,0,255,0.05));
+  cursor: grab;
+  user-select: none;
+  flex: 0 0 auto;
+}
+
+.titlebar:active{
+  cursor: grabbing;
+}
+
+.caption .big{
+  font-weight: 900;
+  color: rgba(255,255,255,0.92);
+  font-size: 14px;
+}
+
+.caption .small{
+  margin-top: 2px;
+  font-size: 12px;
+  opacity: 0.7;
+  color: rgba(233,238,248,0.85);
+}
+
+.x{
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+  cursor: pointer;
+  font-size: 18px;
+  line-height: 1;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.14);
+  color: rgba(255,255,255,0.85);
+}
+
+.x:hover{
+  background: rgba(255,255,255,0.10);
+  color: #fff;
+}
+
+.content{
+  padding: 12px;
+  overflow-y: auto;
+  min-height: 0;
+  flex: 1 1 auto;
+}
+
+.state{
+  color: rgba(233,238,248,0.78);
+  font-size: 14px;
+  padding: 10px 2px;
+}
+
+.state.error{
+  color: #ff8b8b;
+}
+
+.list{
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.row{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.03);
+}
+
+.label{
+  color: rgba(233,238,248,0.72);
+  font-size: 14px;
+}
+
+.value{
+  text-align: right;
+  font-weight: 800;
+  color: rgba(255,255,255,0.95);
+  word-break: break-word;
+}
+
+.hint{
+  margin-top: 12px;
+  color: rgba(233,238,248,0.72);
+  font-size: 13px;
+}

@@ -1,0 +1,221 @@
+.usersite-layout {
+  width: 100%;
+  margin: 0;
+  padding: 82px 20px 28px;
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr);
+  gap: 20px;
+  box-sizing: border-box;
+  min-height: 100vh;
+}
+
+
+.usersite-sidebar {
+  width: 220px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px;
+  border-radius: 24px;
+  background: rgba(10, 14, 22, 0.72);
+  border: 1px solid rgba(255,255,255,0.08);
+  backdrop-filter: blur(14px);
+  box-shadow: 0 16px 36px rgba(0,0,0,0.24);
+  overflow: hidden;
+  transition: width .24s ease;
+  position: sticky;
+  top: 82px;
+  height: fit-content;
+  z-index: 5;
+}
+
+.usersite-sidebar:hover {
+  width: 220px;
+}
+
+.nav-btn {
+  width: 100%;
+  min-width: 0;
+  height: 52px;
+  padding: 0 14px;
+  border-radius: 16px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.08);
+  color: var(--text, #fff);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-align: left;
+  transition: all 0.2s ease;
+  overflow: hidden;
+}
+
+.nav-btn:hover {
+  transform: translateY(-1px);
+  background: rgba(255,255,255,0.05);
+  border-color: rgba(255,255,255,0.12);
+}
+
+.nav-btn.active {
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--page-accent, #67e8f9) 18%, transparent),
+    color-mix(in srgb, var(--page-accent-2, #38bdf8) 12%, transparent)
+  );
+  border-color: color-mix(in srgb, var(--page-accent, #67e8f9) 28%, transparent);
+  color: #fff;
+  font-weight: 700;
+}
+
+.nav-icon {
+  width: 24px;
+  min-width: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+}
+
+.nav-label {
+  white-space: nowrap;
+  opacity: 1;
+  transform: none;
+  transition: opacity .18s ease, transform .18s ease;
+  pointer-events: auto;
+}
+
+.usersite-sidebar:hover .nav-label,
+.usersite-sidebar:focus-within .nav-label {
+  opacity: 1;
+  transform: none;
+  pointer-events: auto;
+}
+
+body[data-appearance="light"] .usersite-sidebar {
+  background: var(--bg-elevated);
+  border-color: var(--line);
+  box-shadow: var(--shadow-soft);
+}
+
+body[data-appearance="light"] .nav-btn {
+  background: var(--chrome-bg);
+  border-color: var(--line);
+  color: var(--text);
+}
+
+body[data-appearance="light"] .nav-btn:hover {
+  background: var(--chrome-bg-hover);
+  border-color: var(--page-accent);
+}
+
+body[data-appearance="light"] .nav-btn.active {
+  background: var(--page-accent);
+  color: #fff;
+  border-color: var(--page-accent);
+}
+
+.admin-btn {
+  margin-top: 6px;
+  border: 1px solid rgba(255, 120, 120, 0.24);
+}
+
+.admin-btn.active {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 77, 77, 0.22),
+    rgba(255, 152, 0, 0.18)
+  );
+  color: #fff;
+  border-color: rgba(255, 152, 0, 0.34);
+}
+
+
+.usersite-content {
+  min-width: 0;
+  padding: 0;
+}
+
+body[data-appearance="light"] .usersite-sidebar {
+  background: var(--bg-elevated);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow-soft);
+}
+
+body[data-appearance="light"] .nav-btn {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  color: var(--text);
+}
+
+body[data-appearance="light"] .nav-btn:hover {
+  background: var(--chrome-bg-hover);
+  border-color: var(--page-accent-2);
+}
+
+body[data-appearance="light"] .nav-btn.active {
+  background: linear-gradient(135deg, var(--theme-band-1), var(--theme-band-2));
+  border-color: var(--page-accent);
+  color: var(--text);
+  box-shadow: none;
+}
+
+
+.form {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+}
+
+.form input {
+  padding: 14px;
+  border-radius: 12px;
+  background: var(--glass-alpha);
+  border: 1px solid var(--glass-border);
+  color: var(--text);
+  font-family: inherit;
+}
+
+.form button {
+  grid-column: span 2;
+  margin-top: 8px;
+}
+
+.sep {
+  margin: 28px 0;
+  opacity: 0.25;
+}
+
+
+@media (max-width: 900px) {
+  .usersite-layout {
+    grid-template-columns: 1fr;
+    gap: 16px;
+    padding: 76px 14px 24px;
+  }
+
+  .usersite-sidebar {
+    width: 100%;
+    position: static;
+    flex-direction: row;
+    flex-wrap: wrap;
+    border-radius: 20px;
+    padding: 12px;
+  }
+
+  .usersite-sidebar:hover {
+    width: 100%;
+  }
+
+  .nav-btn {
+    flex: 1;
+    min-width: 140px;
+    justify-content: flex-start;
+  }
+
+  .nav-label {
+    opacity: 1;
+    transform: none;
+    pointer-events: auto;
+  }
+}

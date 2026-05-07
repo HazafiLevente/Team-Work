@@ -1,0 +1,193 @@
+.reports-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.reports-toolbar {
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+  align-items: flex-start;
+  padding: 20px;
+  border-radius: 22px;
+  background: rgba(10, 14, 22, 0.62);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.2);
+}
+
+.reports-toolbar h2 {
+  margin: 0 0 6px;
+}
+
+.reports-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.reports-actions input {
+  min-width: 310px;
+  padding: 11px 14px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text);
+  outline: none;
+}
+
+.reports-actions button,
+.details-btn,
+.delete-btn {
+  padding: 10px 14px;
+  border-radius: 14px;
+  border: 1px solid color-mix(in srgb, var(--page-accent, #fb923c) 34%, transparent);
+  color: var(--text);
+  background: color-mix(in srgb, var(--page-accent, #fb923c) 14%, transparent);
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.report-type-tabs {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.report-type-tabs button {
+  padding: 10px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text);
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.report-type-tabs button.active {
+  border-color: color-mix(in srgb, var(--page-accent, #fb923c) 36%, transparent);
+  background: color-mix(in srgb, var(--page-accent, #fb923c) 16%, transparent);
+}
+
+.report-actions-cell {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.delete-btn {
+  border-color: rgba(248, 113, 113, 0.34);
+  background: rgba(248, 113, 113, 0.14);
+  color: #fecaca;
+}
+
+.state-card,
+.reports-table-wrap {
+  border-radius: 22px;
+  background: rgba(10, 14, 22, 0.62);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.2);
+}
+
+.state-card {
+  padding: 24px;
+}
+
+.state-card.error {
+  color: #fca5a5;
+  border-color: rgba(248, 113, 113, 0.24);
+}
+
+.reports-table-wrap {
+  overflow-x: auto;
+}
+
+.reports-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 900px;
+}
+
+.reports-table th,
+.reports-table td {
+  padding: 14px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  text-align: left;
+  vertical-align: top;
+}
+
+.reports-table th {
+  font-size: 12px;
+  opacity: 0.62;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.message-cell {
+  max-width: 360px;
+  white-space: normal;
+}
+
+.report-type {
+  display: inline-flex;
+  padding: 5px 10px;
+  border-radius: 999px;
+  background: rgba(251, 146, 60, 0.12);
+  border: 1px solid rgba(251, 146, 60, 0.18);
+}
+
+.report-main-type {
+  display: inline-flex;
+  padding: 5px 9px;
+  border-radius: 999px;
+  background: rgba(96, 165, 250, 0.12);
+  border: 1px solid rgba(96, 165, 250, 0.18);
+}
+
+.details-row td {
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.details-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 10px;
+}
+
+.detail-card {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.detail-card span {
+  font-size: 12px;
+  opacity: 0.58;
+}
+
+.detail-card strong {
+  font-size: 14px;
+  word-break: break-word;
+}
+
+.muted {
+  opacity: 0.52;
+  font-size: 13px;
+}
+
+@media (max-width: 768px) {
+  .reports-toolbar {
+    flex-direction: column;
+  }
+
+  .reports-actions,
+  .reports-actions input {
+    width: 100%;
+    min-width: 0;
+  }
+}

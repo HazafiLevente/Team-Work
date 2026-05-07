@@ -1,0 +1,150 @@
+<div class="spotlight">
+  <div class="spotlight-header">
+    <div class="title">
+      Spotlight
+      <div class="sub">Random termek ajanlo</div>
+    </div>
+  </div>
+
+  <div class="swap-wrap" *ngIf="cards.length">
+    <app-card-swap
+      [images]="images"
+      [width]="'100%'"
+      [height]="'100%'"
+      [delay]="6000"
+      [pauseOnHover]="true"
+      (cardClick)="onCardClick($event)"
+      (activeIndexChanged)="onActiveChanged($event)">
+    </app-card-swap>
+  </div>
+
+  <ng-container *ngIf="current as p">
+    <div class="meta">
+      <div class="manu">{{ p.manufacturer || '-' }}</div>
+      <div class="model">{{ p.name || p.model || '-' }}</div>
+      <div class="price">{{ formatPrice(p.price) }}</div>
+
+      <div class="mini">
+        <span class="chip">table: {{ p.table_name || p.table || '-' }}</span>
+        <span class="chip">id: {{ p.id }}</span>
+      </div>
+    </div>
+
+    <div class="specs" *ngIf="specs(p).length">
+      <div class="spec-row" *ngFor="let s of specs(p)">
+        <div class="k">{{ s.k }}</div>
+        <div class="v">{{ s.v }}</div>
+      </div>
+    </div>
+
+    <div class="hint">kattints a kartyara a reszletekhez</div>
+
+    <button
+      type="button"
+      class="quick-note-fab"
+      aria-label="Jegyzettomb"
+      (click)="openNotes()">
+      📝
+    </button>
+  </ng-container>
+
+  <div class="notes-overlay" *ngIf="notesOpen" (click)="closeNotes()"></div>
+
+  <section class="notes-panel" *ngIf="notesOpen" (click)="$event.stopPropagation()">
+    <div class="notes-panel-head">
+      <div>
+        <div class="notes-kicker">Jegyzettomb</div>
+        <div class="notes-title">Mentett jegyzetek</div>
+      </div>
+      <button type="button" class="notes-close" (click)="closeNotes()">X</button>
+    </div>
+
+    <div class="note-create">
+      <input
+        type="text"
+        [(ngModel)]="newNoteName"
+        placeholder="Uj jegyzet neve"
+        [disabled]="creatingNote"
+        (keydown.enter)="createNote()" />
+      <button
+        type="button"
+        [disabled]="creatingNote || !newNoteName.trim()"
+        (click)="createNote()">
+        {{ creatingNote ? '...' : '+' }}
+      </button>
+    </div>
+
+    <div class="notes-state" *ngIf="notesLoading">Betoltes...</div>
+    <div class="notes-state error" *ngIf="!notesLoading && noteError">{{ noteError }}</div>
+    <div class="notes-state" *ngIf="!notesLoading && !noteError && !notes.length">Meg nincs jegyzet.</div>
+
+    <div class="notes-layout" *ngIf="!notesLoading && !noteError && notes.length">
+      <div class="notes-list" aria-label="Jegyzetek">
+        <div
+          class="note-row"
+          role="button"
+          tabindex="0"
+          *ngFor="let note of notes"
+          [class.active]="selectedNote?.id === note.id"
+          (click)="selectNote(note)"
+          (keydown.enter)="selectNote(note)"
+          (keydown.space)="$event.preventDefault(); selectNote(note)">
+          <span>{{ note.name }}</span>
+          <button
+            type="button"
+            class="note-delete"
+            [disabled]="deletingNoteId === note.id"
+            (click)="removeNote(note, $event)">
+            {{ deletingNoteId === note.id ? '...' : 'X' }}
+          </button>
+        </div>
+      </div>
+
+      <div
+        class="note-devices"
+        [class.drop-active]="noteDropActive"
+        [class.drop-saving]="noteDropSaving"
+        (dragover)="onNoteDragOver($event)"
+        (dragleave)="onNoteDragLeave($event)"
+        (drop)="onNoteDrop($event)">
+        <div class="note-devices-head">
+          <div>
+            <div class="note-devices-title">{{ selectedNote?.name || 'Jegyzet' }}</div>
+            <div class="note-devices-total">Teljes ar: {{ noteTotalPrice() }}</div>
+          </div>
+          <div class="note-devices-count">{{ noteDevices.length }} eszkoz</div>
+        </div>
+
+        <div class="note-drop-hint">
+          {{ noteDropSaving ? 'Mentes...' : 'Huzd ide az eszkozt' }}
+        </div>
+
+        <div class="notes-state" *ngIf="noteDevicesLoading">Eszkozok betoltese...</div>
+        <div class="notes-state" *ngIf="!noteDevicesLoading && !noteDevices.length">Ebben a jegyzetben meg nincs eszkoz.</div>
+
+        <div class="device-list" *ngIf="!noteDevicesLoading && noteDevices.length">
+          <div class="device-row" *ngFor="let device of noteDevices">
+            <div>
+              <div class="device-name">{{ device.name }}</div>
+              <div class="device-meta">{{ device.manufacturer || device.category }}</div>
+            </div>
+            <div class="device-side">
+              <div class="device-price">{{ formatDevicePrice(device.price) }}</div>
+              <button
+                type="button"
+                class="device-delete"
+                [disabled]="deletingNoteDeviceId === device.id"
+                (click)="removeDeviceFromNote(device)">
+                {{ deletingNoteDeviceId === device.id ? '...' : 'X' }}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="empty" *ngIf="!cards.length">
+    Nincs megjelenitheto termek.
+  </div>
+</div>

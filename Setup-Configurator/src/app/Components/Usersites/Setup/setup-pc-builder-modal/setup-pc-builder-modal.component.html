@@ -1,0 +1,118 @@
+<div class="overlay" (click)="onBackdropClick()">
+  <div class="window" (click)="stop($event)">
+
+    <div class="titlebar">
+      <div class="caption">
+        <div class="big">{{ title() }}</div>
+        <div class="small">Számítógép összerakó</div>
+      </div>
+      <button class="x" (click)="close.emit()">×</button>
+    </div>
+
+    <div class="tabs">
+      <button class="tab" [class.active]="tab==='cpu'" (click)="tab='cpu'">Processzor</button>
+      <button class="tab" [class.active]="tab==='gpu'" (click)="tab='gpu'">Videókártya</button>
+      <button class="tab" [class.active]="tab==='motherboard'" (click)="tab='motherboard'">Alaplap</button>
+      <button class="tab" [class.active]="tab==='ram'" (click)="tab='ram'">RAM</button>
+      <button class="tab" [class.active]="tab==='psu'" (click)="tab='psu'">Táp</button>
+    </div>
+
+    <div class="content">
+      @if (loadingParts) {
+        <div class="hint">Betöltés...</div>
+      } @else {
+        @if (partsError) {
+          <div class="error">{{ partsError }}</div>
+        } @else {
+
+
+          @if (tab === 'cpu') {
+            <div class="section">
+              <div class="field">
+                <label>Processzor</label>
+                <select [(ngModel)]="cpuId">
+                  <option [ngValue]="null">— nincs kiválasztva —</option>
+                  @for (p of getOptions('cpu'); track p.id) {
+                    <option [ngValue]="p.id">{{ p.display_name }}</option>
+                  }
+                </select>
+              </div>
+            </div>
+          }
+
+
+          @if (tab === 'gpu') {
+            <div class="section">
+              <div class="field">
+                <label>Videókártya</label>
+                <select [(ngModel)]="gpuId">
+                  <option [ngValue]="null">— nincs kiválasztva —</option>
+                  @for (p of getOptions('gpu'); track p.id) {
+                    <option [ngValue]="p.id">{{ p.display_name }}</option>
+                  }
+                </select>
+              </div>
+            </div>
+          }
+
+
+          @if (tab === 'motherboard') {
+            <div class="section">
+              <div class="field">
+                <label>Alaplap</label>
+                <select [(ngModel)]="motherboardId">
+                  <option [ngValue]="null">— nincs kiválasztva —</option>
+                  @for (p of getOptions('motherboard'); track p.id) {
+                    <option [ngValue]="p.id">{{ p.display_name }}</option>
+                  }
+                </select>
+              </div>
+            </div>
+          }
+
+
+          @if (tab === 'ram') {
+            <div class="section">
+              <div class="field">
+                <label>RAM</label>
+                <select [(ngModel)]="ramId">
+                  <option [ngValue]="null">— nincs kiválasztva —</option>
+                  @for (p of getOptions('ram'); track p.id) {
+                    <option [ngValue]="p.id">{{ p.display_name }}</option>
+                  }
+                </select>
+              </div>
+            </div>
+          }
+
+
+          @if (tab === 'psu') {
+            <div class="section">
+              <div class="field">
+                <label>Táp</label>
+                <select [(ngModel)]="psuId">
+                  <option [ngValue]="null">— nincs kiválasztva —</option>
+                  @for (p of getOptions('psu'); track p.id) {
+                    <option [ngValue]="p.id">{{ p.display_name }}</option>
+                  }
+                </select>
+              </div>
+            </div>
+          }
+
+          @if (errorMsg) {
+            <div class="error">{{ errorMsg }}</div>
+          }
+
+          <div class="actions">
+            <button class="btn" (click)="close.emit()">Mégse</button>
+            <button class="btn primary" (click)="save()" [disabled]="saving">
+              @if (saving) { Mentés... } @else { Mentés }
+            </button>
+          </div>
+        }
+      }
+    </div>
+
+  </div>
+</div>

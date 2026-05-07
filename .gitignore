@@ -1,0 +1,17 @@
+node_modules
+/node_modules/
+# image-downloader cache/debug/log
+#datas/Jsons/bing_cache.json
+#datas/Jsons/image_download_failures.json
+#datas/Jsons/bing_debug/
+#datas/Jsons/server-logs.json
+#datas/Jsons/active-users-history.json
+
+# letöltött képek (ha nem akarod repo-ba)
+#datas/images/
+
+
+#datas/Jsons/bing_cache.json
+#datas/jsons/bing_cache.json
+#datas/image-cache/
+

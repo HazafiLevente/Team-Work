@@ -1,0 +1,215 @@
+<div class="admin-page">
+
+
+  <div class="admin-header">
+    <h1>🛡 Admin Panel</h1>
+    <p class="muted">Valós rendszer statisztikák</p>
+  </div>
+
+
+  <div class="admin-actions-bar">
+    <button class="admin-btn" [class.active]="activeSection === 'dashboard'" (click)="openDashboard()">
+      📊 Dashboard
+    </button>
+
+    <button class="admin-btn" [class.active]="activeSection === 'users'" (click)="openUsers()">
+      👥 Users
+    </button>
+
+    <button *ngIf="canSeeProducts()" class="admin-btn" [class.active]="activeSection === 'products'" (click)="openProducts()">📦
+      Products</button>
+
+    <button class="admin-btn" [class.active]="activeSection === 'reports'" (click)="openReports()">
+      Reports
+    </button>
+
+
+    <button *ngIf="canSeeLogs()" class="admin-btn" [class.active]="activeSection === 'logs'" (click)="openLogs()">
+      🧾 Logs
+    </button>
+
+    <button *ngIf="canSeeSystem()" class="admin-btn" [class.active]="activeSection === 'system'" (click)="openSystem()">
+      ⚙️ System
+    </button>
+  </div>
+
+
+  <div class="admin-content">
+
+
+    <ng-container *ngIf="activeSection === 'dashboard'">
+      <div class="admin-stats">
+
+        <div class="stat-card">
+          👤 {{ loading ? '…' : users }}
+          <span>Felhasználók</span>
+        </div>
+
+        <div class="stat-card clickable" (click)="toggleDailyStats()">
+          🟢 {{ loading ? '…' : onlineUsers }}
+          <span>Online most</span>
+        </div>
+
+        <div class="stat-card">
+          🗂 {{ loading ? '…' : tables }}
+          <span>Összes tábla</span>
+        </div>
+
+        <div class="stat-card">
+          📦 {{ loading ? '…' : productTables }}
+          <span>Product táblák</span>
+        </div>
+
+        <div class="stat-card">
+          🧰 {{ loading ? '…' : products }}
+          <span>Összes termék</span>
+        </div>
+
+      </div>
+
+
+      @if (showDailyStats) {
+      <div class="daily-panel">
+        <h3>📊 Napi aktivitás</h3>
+
+        <div class="calendar-section">
+          <div class="calendar-header">
+            <div class="calendar-title">🗓 {{ calendarTitle }}</div>
+            <div class="calendar-actions">
+              <button class="cal-btn" (click)="prevMonth()">‹</button>
+              <button class="cal-btn" (click)="nextMonth()">›</button>
+            </div>
+          </div>
+
+          <div class="calendar-grid">
+            @for (w of weekDays; track w) {
+              <div class="cal-weekday">{{ w }}</div>
+            }
+
+            @for (c of calendarCells; track $index) {
+              <div
+                class="cal-cell"
+                [class.empty]="!c.inMonth"
+                [class.active]="c.active"
+                [class.inactive]="c.inMonth && !c.active"
+                [class.today]="c.isToday"
+                [class.selected]="c.iso && c.iso === selectedDayIso"
+                [title]="c.iso ? (c.iso + (c.active ? ': volt aktivitás' : ': nem volt aktivitás')) : ''"
+                (click)="openDay(c.iso)"
+              >
+                @if (c.date) {
+                  <span class="cal-day">{{ c.date.getDate() }}</span>
+                }
+              </div>
+            }
+          </div>
+        </div>
+
+        @if (selectedDayIso) {
+          <div class="day-details">
+            <div class="day-details-header">
+              <div class="day-details-title">📌 {{ selectedDayIso }}</div>
+              <button class="day-close" (click)="closeDay()">Bezár</button>
+            </div>
+
+            @if (dayLoading) {
+              <div class="muted">Betöltés…</div>
+            } @else if (selectedDayDetails) {
+              <div class="day-metrics">
+                <div class="metric">
+                  <div class="metric-label">Egyedi felhasználók</div>
+                  <div class="metric-value">{{ selectedDayDetails.unique }}</div>
+                </div>
+                <div class="metric">
+                  <div class="metric-label">Összes kérés</div>
+                  <div class="metric-value">{{ selectedDayDetails.total_requests }}</div>
+                </div>
+                <div class="metric">
+                  <div class="metric-label">Max online</div>
+                  <div class="metric-value">{{ selectedDayDetails.max_count || 0 }}</div>
+                </div>
+                <div class="metric">
+                  <div class="metric-label">Min online</div>
+                  <div class="metric-value">{{ selectedDayDetails.min_count || 0 }}</div>
+                </div>
+              </div>
+
+              <div class="day-diagram">
+                <div class="diag-row">
+                  <span>Egyedi</span>
+                  <div class="diag-bar">
+                    <div class="diag-fill unique" [style.width.%]="uniqueBarWidthPct()"></div>
+                  </div>
+                </div>
+                <div class="diag-row">
+                  <span>Kérések</span>
+                  <div class="diag-bar">
+                    <div class="diag-fill requests" [style.width.%]="requestsBarWidthPct()"></div>
+                  </div>
+                </div>
+              </div>
+
+              @if (selectedUsers.length > 0) {
+                <div class="day-users">
+                  <div class="day-users-title">Felhasználók</div>
+                  <div class="day-users-list">
+                    @for (u of selectedUsers; track u.id) {
+                      <span class="online-badge clickable" (dblclick)="onUserDblClick(u)">{{ u.username }}</span>
+                    }
+                  </div>
+                </div>
+              } @else {
+                <div class="muted">Nincs felhasználó lista ehhez a naphoz.</div>
+              }
+            } @else {
+              <div class="muted">Nincs adat ehhez a naphoz.</div>
+            }
+          </div>
+        }
+
+
+        @if (onlineList.length > 0) {
+        <div class="online-section">
+          <h4>🟢 Jelenleg online ({{ onlineList.length }})</h4>
+          <div class="online-list">
+            @for (u of onlineList; track u.id) {
+            <span class="online-badge clickable" (dblclick)="onUserDblClick(u)"
+              title="Dupla katt: ugrás a felhasználóhoz">{{ u.username }}</span>
+            }
+          </div>
+        </div>
+        }
+
+
+      </div>
+      }
+    </ng-container>
+
+
+    <ng-container *ngIf="activeSection === 'users'">
+      <app-users [autoExpandUserId]="selectedUserId" (onExpanded)="onUserExpanded($event)"></app-users>
+    </ng-container>
+
+
+    <ng-container *ngIf="activeSection === 'products'">
+      <app-admin-products></app-admin-products>
+    </ng-container>
+
+
+    <ng-container *ngIf="activeSection === 'reports'">
+      <app-admin-reports></app-admin-reports>
+    </ng-container>
+
+
+    <ng-container *ngIf="activeSection === 'system'">
+      <app-admin-system></app-admin-system>
+    </ng-container>
+
+
+    <ng-container *ngIf="activeSection === 'logs'">
+      <app-admin-logs></app-admin-logs>
+    </ng-container>
+
+  </div>
+
+</div>

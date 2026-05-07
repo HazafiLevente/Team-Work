@@ -1,0 +1,11 @@
+{
+  "Owners": {
+    "user_1": 1,
+    "user_2": 2,
+    "user_5": 5
+  },
+  "Admin": {
+    "user_8": 8
+  },
+  "Admin+": {}
+}

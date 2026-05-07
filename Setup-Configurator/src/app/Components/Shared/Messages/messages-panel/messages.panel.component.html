@@ -1,0 +1,69 @@
+<div class="overlay" (click)="close.emit()"></div>
+
+<div class="panel" (click)="$event.stopPropagation()">
+  <div class="panel-header">
+    <div class="panel-title-wrap">
+      <span class="panel-kicker">Asszisztens</span>
+      <span class="panel-title">Setup AI</span>
+    </div>
+    <span class="close-btn" (click)="close.emit()">X</span>
+  </div>
+
+  <div class="panel-body">
+    <div
+      *ngFor="let m of messages"
+      class="message"
+      [class.me]="m.sender === 'me'"
+      [class.ai]="m.sender === 'ai'"
+      [class.system]="m.sender === 'system'"
+      [class.product-wrapper]="m.sender === 'product'"
+      [class.hidden-message]="m.sender === 'product'">
+
+      <ng-container *ngIf="m.text">
+        <ng-container *ngIf="m.sender === 'ai' && !m.loading; else plainPanelText">
+          <div class="ai-badge-row">
+            <span class="ai-badge">AI Valasz</span>
+            <span class="ai-message-time">{{ m.created_at | date:'HH:mm' }}</span>
+          </div>
+
+          <div class="ai-rich-text">
+            <div
+              *ngFor="let block of formatAiText(m.text, m.products || [])"
+              class="ai-line"
+              [class.ai-line-heading]="block.type === 'heading'"
+              [class.ai-line-bullet]="block.type === 'bullet'"
+              [class.ai-line-paragraph]="block.type === 'paragraph'">
+              <ng-container *ngIf="block.mention; else plainPanelAiLine">
+                <span *ngIf="block.type === 'bullet'" class="ai-line-dot"></span>
+                <a
+                  class="ai-inline-link"
+                  [attr.href]="buildProductPath(block.product) || buildMentionOpenPath(block.mention)"
+                  (click)="openInlineProductCard($event, block.product, block.mention)">
+                  {{ block.mention }}
+                </a>
+              </ng-container>
+
+              <ng-template #plainPanelAiLine>
+                <span *ngIf="block.type === 'bullet'" class="ai-line-dot"></span>
+                <span>{{ block.text }}</span>
+              </ng-template>
+            </div>
+          </div>
+        </ng-container>
+
+        <ng-template #plainPanelText>
+          {{ m.text }}
+        </ng-template>
+      </ng-container>
+    </div>
+  </div>
+
+  <div class="panel-input">
+    <input
+      [(ngModel)]="newMessage"
+      (keyup.enter)="send()"
+      placeholder="Irj kerdest a termekekrol..."
+    />
+    <button (click)="send()">Kuldes</button>
+  </div>
+</div>
