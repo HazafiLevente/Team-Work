@@ -1,0 +1,23 @@
+<div class="dock-outer">
+  <div
+    class="dock-panel"
+    [style.height.px]="panelHeight"
+    (mousemove)="onMouseMove($event)"
+    (mouseleave)="onMouseLeave()"
+    role="toolbar"
+    aria-label="Application dock"
+  >
+    <div
+      #dockItemEl
+      class="dock-item"
+      *ngFor="let item of items; let i = index"
+      [ngClass]="item.className"
+      (click)="clickItem(i)"
+      tabindex="0"
+      role="button"
+    >
+      <div class="dock-icon">{{ item.icon }}</div>
+      <div class="dock-label">{{ item.label }}</div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,11 @@
+<app-context-menu-base [x]="x" [y]="y" (close)="close.emit()">
+  <div class="menu-section">
+    <button class="menu-item create" (click)="$event.stopPropagation(); emitAndClose()">
+      @if (isInsideSetup) {
+        + Uj eszkoz hozzaadasa
+      } @else {
+        + Uj setup letrehozasa
+      }
+    </button>
+  </div>
+</app-context-menu-base>

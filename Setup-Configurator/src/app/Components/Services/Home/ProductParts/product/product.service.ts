@@ -1,0 +1,79 @@
+import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+
+@Injectable({ providedIn: 'root' })
+export class ProductService {
+  private readonly API = '/api';
+
+  constructor(private http: HttpClient) {}
+
+  getProducts(limit = 20) {
+    return this.http.get<{ items: any[] }>(
+      `${this.API}/products`,
+      { params: { limit: String(limit) }, withCredentials: true }
+    );
+  }
+
+  getBrands() {
+    return this.http.get<{ brands: string[] }>(
+      `${this.API}/products/brands`,
+      { withCredentials: true }
+    );
+  }
+
+  getProductDetails(table: string, id: string) {
+    return this.http.get<{ item: any }>(
+      `${this.API}/items/${encodeURIComponent(table)}/${encodeURIComponent(id)}`,
+      { withCredentials: true }
+    );
+  }
+
+  getComputers(limit = 2000) {
+    return this.http.get<{ items: any[] }>(
+      `${this.API}/computers`,
+      { params: { limit: String(limit) }, withCredentials: true }
+    );
+  }
+
+  getComputerMeta() {
+    return this.http.get<any>(
+      `${this.API}/meta/computer`,
+      { withCredentials: true }
+    );
+  }
+
+  getHomeTheaters(limit = 2000) {
+    return this.http.get<{ items: any[] }>(
+      `${this.API}/home-theater`,
+      { params: { limit: String(limit) }, withCredentials: true }
+    );
+  }
+
+  getHtMeta() {
+    return this.http.get<any>(
+      `${this.API}/meta/ht`,
+      { withCredentials: true }
+    );
+  }
+
+  getCars(limit = 2000) {
+    return this.http.get<{ items: any[] }>(
+      `${this.API}/cars`,
+      { params: { limit: String(limit) }, withCredentials: true }
+    );
+  }
+
+  getInstruments(limit = 2000) {
+    return this.http.get<{ items: any[] }>(
+      `${this.API}/instruments`,
+      { params: { limit: String(limit) }, withCredentials: true }
+    );
+  }
+
+  getInstrumentMeta() {
+    return this.http.get<any>(
+      `${this.API}/meta/instruments`,
+      { withCredentials: true }
+    );
+  }
+}

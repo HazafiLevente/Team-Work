@@ -1,0 +1,90 @@
+<div class="reports-panel">
+  <div class="reports-toolbar">
+    <div>
+      <h2>Reports</h2>
+      <p class="muted">A reports[Admin], reports_properties[Admin] es reports_values[Admin] tablak osszefuzve.</p>
+    </div>
+
+    <div class="reports-actions">
+      <input
+        type="text"
+        [(ngModel)]="search"
+        placeholder="Kereses report id, user, tipus vagy uzenet alapjan"
+      >
+      <button type="button" (click)="loadReports()">Frissites</button>
+    </div>
+  </div>
+
+  <div class="report-type-tabs">
+    <button
+      type="button"
+      [class.active]="activeType === 'profile'"
+      (click)="setActiveType('profile')">
+      Profile reportok ({{ countByType('profile') }})
+    </button>
+    <button
+      type="button"
+      [class.active]="activeType === 'message'"
+      (click)="setActiveType('message')">
+      Message reportok ({{ countByType('message') }})
+    </button>
+  </div>
+
+  <div *ngIf="loading" class="state-card">Reportok betoltese...</div>
+  <div *ngIf="!loading && error" class="state-card error">{{ error }}</div>
+  <div *ngIf="!loading && !error && filteredReports.length === 0" class="state-card">
+    Nincs megjelenitheto report.
+  </div>
+
+  <div *ngIf="!loading && !error && filteredReports.length > 0" class="reports-table-wrap">
+    <table class="reports-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Type</th>
+          <th>Cim</th>
+          <th>Reporter</th>
+          <th>Reported</th>
+          <th>Tipus</th>
+          <th>Uzenet</th>
+          <th>Datum</th>
+          <th></th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <ng-container *ngFor="let report of filteredReports">
+          <tr>
+            <td>{{ report.id }}</td>
+            <td><span class="report-main-type">{{ report.type || 'profile' }}</span></td>
+            <td>{{ report.title }}</td>
+            <td>{{ displayValue(report.reporter_user_id) }}</td>
+            <td>{{ displayValue(report.reported_user_id) }}</td>
+            <td><span class="report-type">{{ displayValue(report.report_type) }}</span></td>
+            <td class="message-cell">{{ displayValue(report.report_message) }}</td>
+            <td>{{ formatDate(report.created_at) }}</td>
+            <td class="report-actions-cell">
+              <button type="button" class="details-btn" (click)="toggle(report)">
+                {{ report.expanded ? 'Bezar' : 'Reszletek' }}
+              </button>
+              <button type="button" class="delete-btn" (click)="deleteReport(report)">
+                Torles
+              </button>
+            </td>
+          </tr>
+
+          <tr *ngIf="report.expanded" class="details-row">
+            <td colspan="9">
+              <div class="details-grid">
+                <div *ngFor="let detail of report.details" class="detail-card">
+                  <span>{{ detail.property }}</span>
+                  <strong>{{ displayValue(detail.value) }}</strong>
+                </div>
+              </div>
+            </td>
+          </tr>
+        </ng-container>
+      </tbody>
+    </table>
+  </div>
+</div>

@@ -1,0 +1,136 @@
+
+<ng-container *ngIf="!adminMode; else adminTemplate">
+
+  <div class="product-card" (click)="onOpen()">
+    <h3>
+      {{ obj.manufacturer }} {{ obj.model }}
+    </h3>
+
+    <p *ngIf="obj.price != null">
+      {{ obj.price | number }} Ft
+    </p>
+  </div>
+
+</ng-container>
+
+
+
+<ng-template #adminTemplate>
+
+  <div class="products-right" *ngIf="product; else empty">
+
+    <div class="title-row">
+      <h2>
+        {{ obj.manufacturer }} {{ obj.model }}
+      </h2>
+      <span class="pill">
+        {{ typeLabel(obj.type) }} • {{ product?.table_name }} #{{ obj.id }}
+      </span>
+    </div>
+
+    <div class="form-scroll">
+      <div class="form-grid">
+
+        <label>
+          Típus
+          <select [ngModel]="obj.type" (ngModelChange)="onTypeChange($event)">
+            <option value="">Válassz...</option>
+            <option *ngFor="let t of types" [value]="t">{{ typeLabel(t) }}</option>
+            <option value="__new__">+ Új típus...</option>
+          </select>
+        </label>
+
+        <label>
+          Gyártó
+          <input type="text" [(ngModel)]="obj.manufacturer" />
+        </label>
+
+        <label>
+          Modell
+          <input type="text" [(ngModel)]="obj.model" />
+        </label>
+
+        <label>
+          Ár (Ft)
+          <input type="number" [(ngModel)]="obj.price" />
+        </label>
+
+        <ng-container *ngIf="creatingType">
+          <div style="grid-column: 1 / -1; display: grid; gap: 12px;">
+            <label>
+              Új típus neve
+              <input type="text" [(ngModel)]="newTypeName" placeholder="pl. cpu_desktop / pc / ..." />
+            </label>
+
+            <div>
+              <div style="font-weight: 600; margin-bottom: 6px;">Property-k</div>
+              <div style="display:flex; gap:8px; align-items:center;">
+                <input type="text" [(ngModel)]="newTypePropsInput" placeholder="pl. socket" />
+                <button type="button" (click)="addNewTypeProp()">+</button>
+              </div>
+
+              <div *ngIf="newTypeProps.length" style="margin-top:10px; display:flex; flex-wrap:wrap; gap:8px;">
+                <button type="button" *ngFor="let p of newTypeProps; let i = index" (click)="removeNewTypeProp(i)">
+                  {{ p }} ✕
+                </button>
+              </div>
+
+              <div style="margin-top:10px;">
+                <button
+                  type="button"
+                  class="save"
+                  (click)="createTypeTemplate()"
+                >
+                  Típus létrehozása
+                </button>
+              </div>
+            </div>
+          </div>
+        </ng-container>
+
+        <ng-container *ngFor="let key of editableKeys()">
+
+          <label>
+            {{ formatLabel(key) }}
+
+
+            <input *ngIf="getInputType(obj[key]) === 'number'" type="number" [(ngModel)]="obj[key]" />
+
+
+            <input *ngIf="getInputType(obj[key]) === 'checkbox'" type="checkbox" [(ngModel)]="obj[key]" />
+
+
+            <textarea *ngIf="getInputType(obj[key]) === 'textarea'" rows="3" [(ngModel)]="obj[key]">
+            </textarea>
+
+
+            <input *ngIf="getInputType(obj[key]) === 'text'" type="text" [(ngModel)]="obj[key]" />
+
+          </label>
+
+        </ng-container>
+
+      </div>
+    </div>
+
+    <div class="actions">
+      <button class="delete" type="button" (click)="onDelete()">
+        Törlés
+      </button>
+      <button class="save" type="button" (click)="onSave()">
+        {{ (obj.id === 0 || !obj.id) ? 'Létrehozás' : 'Mentés' }}
+      </button>
+    </div>
+
+
+    <pre class="debug">{{ obj | json }}</pre>
+
+  </div>
+
+  <ng-template #empty>
+    <div class="empty">
+      Válassz ki egy terméket
+    </div>
+  </ng-template>
+
+</ng-template>

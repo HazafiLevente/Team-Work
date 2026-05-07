@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="hu">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Setup Configurator</title>
+    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+</head>
+<body>
+<header class="top-menu">
+    <div class="brand">
+        <div class="logo">SC</div>
+        <div>
+            <h1>Setup Configurator</h1>
+            <div class="muted" style="font-size:12px;margin-top:2px">Test Version</div>
+        </div>
+    </div>
+
+    <nav class="nav">
+        <a href="/home">Home</a>
+        <div id="bell">
+            <i class="fas fa-bell"></i>
+
+        </div>
+
+        <div id="user-menu-wrap" class="hidden">
+            <div id="user-avatar-btn" class="user-avatar">
+                <span class="avatar-placeholder"></span>
+            </div>
+        </div>
+
+        <a href="/webs/webs/Regist" id="connect-btn" class="btn ghost">Connect</a>
+    </nav>
+
+
+
+
+</header>
+
+<main class="content">
+
+
+
+    <div style="margin-bottom: 20px; grid-column: 1 / -1; display:flex; gap:12px; flex-wrap:wrap;">
+
+        <select id="manufacturer-select" style="
+        min-width:240px;
+        padding:14px;
+        border-radius:10px;
+        background:rgba(255,255,255,0.05);
+        border:1px solid rgba(255,255,255,0.12);
+        color:white;
+        font-size:16px;
+    ">
+            <option value="">⏳ Gyártók betöltése...</option>
+        </select>
+
+        <input
+                id="search-input"
+                type="text"
+                placeholder="Keresés: model, kategória..."
+                style="
+            flex:1;
+            min-width:220px;
+            padding:14px;
+            border-radius:10px;
+            background:rgba(255,255,255,0.05);
+            border:1px solid rgba(255,255,255,0.12);
+            color:white;
+            font-size:16px;
+        ">
+
+        <input
+                id="min-price"
+                type="number"
+                inputmode="numeric"
+                placeholder="Min ár (Ft)"
+                style="
+    width:160px;
+    padding:14px;
+    border-radius:10px;
+    background:rgba(255,255,255,0.05);
+    border:1px solid rgba(255,255,255,0.12);
+    color:white;
+    font-size:16px;
+  "
+        >
+
+        <input
+                id="max-price"
+                type="number"
+                inputmode="numeric"
+                placeholder="Max ár (Ft)"
+                style="
+    width:160px;
+    padding:14px;
+    border-radius:10px;
+    background:rgba(255,255,255,0.05);
+    border:1px solid rgba(255,255,255,0.12);
+    color:white;
+    font-size:16px;
+  "
+        >
+
+        <select id="sort-select" style="
+  width:220px;
+  padding:14px;
+  border-radius:10px;
+  background:rgba(255,255,255,0.05);
+  border:1px solid rgba(255,255,255,0.12);
+  color:white;
+  font-size:16px;
+">
+            <option value="relevance">Alap (nincs rendezés)</option>
+            <option value="price_asc">Ár ↑ növekvő</option>
+            <option value="price_desc">Ár ↓ csökkenő</option>
+            <option value="name_asc">Név A→Z</option>
+            <option value="name_desc">Név Z→A</option>
+        </select>
+
+
+
+
+        <button id="brand-search-btn" class="btn">
+            🔎 Keresés
+        </button>
+
+    </div>
+
+
+
+    <details id="more-filters" style="grid-column: 1 / -1; margin-bottom:16px;">
+        <summary style="cursor:pointer; user-select:none; font-weight:700;">
+            Több:
+            <span class="muted" style="font-weight:400;">(részletes keresés)</span>
+        </summary>
+
+        <div style="
+      margin-top:12px;
+      padding:14px;
+      border-radius:12px;
+      background:rgba(255,255,255,0.04);
+      border:1px solid rgba(255,255,255,0.10);
+  ">
+            <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-bottom:12px;">
+                <span class="tag">🚗 Autók</span>
+                <span class="muted">Csak autó táblákra szűr</span>
+            </div>
+
+
+            <div style="
+      display:grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap:12px;
+    ">
+
+
+                <input id="car-manufacturer" class="search-input" placeholder="Gyártó (pl. BMW)" />
+
+
+                <input id="car-model" class="search-input" placeholder="Modell (pl. 320d)" />
+
+
+                <input id="car-price-min" class="search-input" type="number" min="0" placeholder="Ár min (Ft)" />
+                <input id="car-price-max" class="search-input" type="number" min="0" placeholder="Ár max (Ft)" />
+
+
+                <select id="car-bodytype" class="search-input">
+                    <option value="">Kivitel (összes)</option>
+                    <option value="hatchback">Hatchback</option>
+                    <option value="coupe">Coupé</option>
+                    <option value="cabrio">Cabrio</option>
+                    <option value="wagon">Kombi</option>
+                    <option value="mpv">Egyterű</option>
+                    <option value="sedan">Sedan</option>
+                    <option value="suv">SUV</option>
+                </select>
+
+
+                <input id="car-hp-min" class="search-input" type="number" min="0" placeholder="Lóerő min" />
+                <input id="car-hp-max" class="search-input" type="number" min="0" placeholder="Lóerő max" />
+
+
+                <input id="car-accel-min" class="search-input" type="number" min="0" step="0.1" placeholder="Gyorsulás min (s)" />
+                <input id="car-accel-max" class="search-input" type="number" min="0" step="0.1" placeholder="Gyorsulás max (s)" />
+
+
+                <input id="car-seats-min" class="search-input" type="number" min="1" placeholder="Ülések min" />
+                <input id="car-seats-max" class="search-input" type="number" min="1" placeholder="Ülések max" />
+
+
+                <select id="car-fuel" class="search-input">
+                    <option value="">Üzemanyag (összes)</option>
+                    <option value="hybrid">Hibrid</option>
+                    <option value="petrol">Benzin</option>
+                    <option value="diesel">Dízel</option>
+                    <option value="electric">Elektromos</option>
+                </select>
+
+
+                <input id="car-year-min" class="search-input" type="number" min="1950" placeholder="Évjárat min" />
+                <input id="car-year-max" class="search-input" type="number" min="1950" placeholder="Évjárat max" />
+
+
+                <select id="car-transmission" class="search-input">
+                    <option value="">Váltó (összes)</option>
+                    <option value="manual">Manuális</option>
+                    <option value="automatic">Automata</option>
+                </select>
+
+            </div>
+
+            <div style="display:flex; gap:10px; margin-top:12px; flex-wrap:wrap;">
+                <button class="btn small" id="car-clear-btn" type="button">🧹 Autó szűrők törlése</button>
+                <span class="muted" style="align-self:center;">A 🔎 Keresés gomb ezeket is figyelembe veszi.</span>
+            </div>
+        </div>
+    </details>
+
+
+
+
+
+    <div id="product-grid" style="grid-column: 1 / -1;"></div>
+
+
+
+</main>
+
+
+
+
+<script src="script.js"></script>
+</body>
+</html>

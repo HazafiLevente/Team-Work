@@ -1,0 +1,23 @@
+id,manufacturer,model,speaker_type,way,impedance_ohm,sensitivity_db,frequency_response,rms_power_w,peak_power_w,woofer_size_inch,tweeter_type,cutout_diameter_mm,mounting_depth_mm,paintable,moisture_resistant,recommended_use,category,notes,created_at,Price
+1,Focal,100 ICW6,in-ceiling,2,8,89,60Hz–23kHz,60,120,6.5,Aluminum inverted dome,184,93,true,false,Dolby Atmos,homeT,Balanced hi-fi ceiling speaker,2026-01-31 15:10:46.741919+00,73000
+2,Focal,300 ICW8,in-ceiling,2,8,90,48Hz–28kHz,90,180,8,Al/Mg inverted dome,245,111,true,false,Atmos / cinema,homeT,High-end in-ceiling,2026-01-31 15:10:46.741919+00,180000
+3,Focal,300 ICW6,in-ceiling,2,8,89,55Hz–28kHz,80,160,6.5,Al/Mg inverted dome,216,100,true,false,Atmos,homeT,Premium series,2026-01-31 15:10:46.741919+00,160000
+4,JBL,Studio 6 8IC,in-ceiling,2,8,88,45Hz–40kHz,80,160,8,HDI compression,244,110,true,false,Home theater,homeT,Wide dispersion,2026-01-31 15:10:46.741919+00,300000
+5,JBL,Control 328CT,in-ceiling,2,8,90,62Hz–18kHz,75,150,8,Soft dome,245,105,true,true,Commercial / home,homeT,Moisture resistant,2026-01-31 15:10:46.741919+00,252142
+6,Bowers & Wilkins,CCM664,in-ceiling,2,8,87,45Hz–30kHz,80,160,6,Nautilus soft dome,202,133,true,false,Atmos,homeT,Reference ceiling,2026-01-31 15:10:46.741919+00,160000
+7,Bowers & Wilkins,CCM682,in-ceiling,2,8,88,38Hz–30kHz,100,200,8,Nautilus soft dome,250,133,true,false,Cinema,homeT,High output,2026-01-31 15:10:46.741919+00,320000
+8,SVS,Prime Elevation In-Ceiling,in-ceiling,2,8,87,55Hz–25kHz,75,150,6.5,Aluminum dome,210,100,true,false,Atmos,homeT,Matched with Prime series,2026-01-31 15:10:46.741919+00,96832
+9,KEF,Ci160QR,in-ceiling,2,8,90,52Hz–34kHz,80,160,6.5,Uni-Q aluminum,194,84,true,false,Atmos,homeT,Wide sweet spot,2026-01-31 15:10:46.741919+00,140000
+10,KEF,Ci200QR,in-ceiling,2,8,89,38Hz–34kHz,100,200,8,Uni-Q aluminum,240,90,true,false,Cinema,homeT,Large rooms,2026-01-31 15:10:46.741919+00,200000
+11,Sony,SS-CSE Atmos,in-ceiling,2,6,86,70Hz–32kHz,50,100,4,Wide dispersion,180,95,true,false,Atmos,homeT,Entry level,2026-01-31 15:10:46.741919+00,64582
+12,Yamaha,NS-IC600,in-ceiling,2,8,90,55Hz–28kHz,90,180,6.5,Soft dome,203,84,true,false,Cinema,homeT,Good value,2026-01-31 15:10:46.741919+00,110000
+13,Yamaha,NS-IC800,in-ceiling,2,8,91,50Hz–28kHz,110,220,8,Soft dome,248,90,true,false,Cinema,homeT,High SPL,2026-01-31 15:10:46.741919+00,140000
+14,Polk Audio,RC80i,in-ceiling,2,8,90,50Hz–20kHz,100,200,8,Swivel silk dome,241,96,true,true,Home theater,homeT,Moisture safe,2026-01-31 15:10:46.741919+00,88000
+15,Polk Audio,RC60i,in-ceiling,2,8,89,60Hz–20kHz,80,160,6.5,Swivel silk dome,203,90,true,true,Atmos,homeT,Bathrooms ok,2026-01-31 15:10:46.741919+00,60000
+16,Klipsch,CDT-5800-C II,in-ceiling,2,8,92,63Hz–23kHz,100,200,8,Titanium horn,248,122,true,false,Cinema,homeT,High efficiency,2026-01-31 15:10:46.741919+00,190000
+17,Klipsch,CDT-5650-C II,in-ceiling,2,8,91,70Hz–23kHz,80,160,6.5,Titanium horn,210,111,true,false,Atmos,homeT,Horn loaded,2026-01-31 15:10:46.741919+00,49000
+18,Monitor Audio,C165,in-ceiling,2,8,88,60Hz–25kHz,65,130,6.5,C-CAM gold dome,212,100,true,false,Cinema,homeT,Slim depth,2026-01-31 15:10:46.741919+00,60000
+19,Monitor Audio,C280,in-ceiling,2,8,90,45Hz–30kHz,100,200,8,C-CAM gold dome,250,108,true,false,High-end,homeT,Reference ceiling,2026-01-31 15:10:46.741919+00,150000
+20,Definitive Technology,DT6.5R,in-ceiling,2,8,90,45Hz–30kHz,100,200,6.5,Aluminum dome,210,95,true,false,Atmos,homeT,Balanced sound,2026-01-31 15:10:46.741919+00,106000
+21,ELAC,IC-DW61-W,in-ceiling,2,8,89,44Hz–35kHz,80,160,6.5,Cloth dome,210,90,true,false,Cinema,homeT,Wide response,2026-01-31 15:10:46.741919+00,96930
+22,Sonance,MAG6R,in-ceiling,2,8,90,55Hz–30kHz,80,160,6.5,Silk dome,210,96,true,false,Multiroom,homeT,Architectural,2026-01-31 15:10:46.741919+00,67851

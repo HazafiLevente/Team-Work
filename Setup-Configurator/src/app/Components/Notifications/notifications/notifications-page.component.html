@@ -1,0 +1,35 @@
+<div class="notifications-layout">
+
+  <div class="sidebar">
+    <div class="sidebar-title">
+      Ertesitesek
+    </div>
+
+    @for (category of categories; track category) {
+    <div
+      class="tab-item"
+      [class.active]="activeTab === category"
+      (click)="setTab(category)">
+      {{ tabLabel(category) }}
+    </div>
+    }
+  </div>
+
+  <div class="content">
+    @if (itemsFor(activeTab).length === 0) {
+    <div class="message-box">
+      <div class="msg-title">Nincs ertesites</div>
+      <div class="msg-body">Ebben a kategoriaban jelenleg nincs megjelenitheto uzenet.</div>
+    </div>
+    } @else {
+    <div *ngFor="let m of itemsFor(activeTab)" class="message-box">
+      <div class="msg-title">{{ m.title }}</div>
+      <div class="msg-body">{{ m.message }}</div>
+      <div class="msg-time">
+        {{ m.created_at | date:'yyyy.MM.dd HH:mm' }}
+      </div>
+    </div>
+    }
+  </div>
+
+</div>

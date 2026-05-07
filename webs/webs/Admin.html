@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="hu">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Setup Configurator</title>
+    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+</head>
+<body>
+<header class="top-menu">
+    <div class="brand">
+        <div class="logo">SC</div>
+        <div>
+            <h1>Setup Configurator</h1>
+            <div class="muted" style="font-size:12px;margin-top:2px">Test Version</div>
+        </div>
+    </div>
+
+    <nav class="nav">
+        <a href="/webs/webs/Home">Home</a>
+        <div id="bell">
+            <i class="fas fa-bell"></i>
+
+        </div>
+
+        <div id="user-menu-wrap" class="hidden">
+            <div id="user-avatar-btn" class="user-avatar">
+                <span class="avatar-placeholder"></span>
+            </div>
+        </div>
+
+        <a href="/webs/webs/Regist" id="connect-btn" class="btn ghost">Connect</a>
+    </nav>
+
+
+
+
+</header>
+
+<main class="admin-layout">
+
+
+    <aside class="admin-sidebar">
+        <h3>📦 Tables</h3>
+
+        <input id="admin-table-search" type="text" placeholder="Search table..." class="admin-row-search">
+
+
+        <ul id="table-list"></ul>
+
+
+        <div class="admin-queries">
+            <div class="queries-header">
+                <span>🧾 Queries</span>
+                <button id="add-query-btn" class="query-add-btn">+</button>
+            </div>
+
+            <ul id="query-list"></ul>
+        </div>
+    </aside>
+
+
+
+    <section class="admin-main">
+        <div id="sql-editor" class="sql-editor hidden">
+            <textarea id="sql-textarea" placeholder="Write SQL query here..."></textarea>
+
+            <div class="sql-actions">
+                <button class="btn small" onclick="runSQL()">▶ Run</button>
+                <button class="btn small" onclick="saveSQL()">💾 Save</button>
+                <button class="btn small danger" onclick="discardSQL()">❌ Discard</button>
+            </div>
+
+            <pre id="sql-result" class="sql-result"></pre>
+        </div>
+
+        <div class="admin-header">
+            <h2 id="active-table">Select a table</h2>
+
+            <input id="admin-row-search" type="text" placeholder="Search in table..." class="admin-row-search">
+
+        </div>
+
+
+        <div class="admin-table-wrapper">
+            <table class="admin-table">
+                <thead id="admin-thead"></thead>
+                <tbody id="admin-tbody"></tbody>
+            </table>
+        </div>
+    </section>
+
+</main>
+
+
+
+
+<script src="script.js"></script>
+</body>
+</html>

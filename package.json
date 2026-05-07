@@ -1,11 +1,14 @@
 {
   "name": "team-work",
   "version": "1.0.0",
-  "description": "",
-  "main": "server.js",
+  "description": "Project:\r -kereső sáv(Norbi)\r -profile(+admin)(Roli)\r -termékek, dinamikusan feltöltve(Roli)\r -Setup configurator(Levi)\r -AI(Kételyes, mivel kicsit nagy projekt de jó lenne)(Közös)\r -Profile: favorite, legutóbbi amit néztél, téma kedvencek, milyen cuccaid vannak, profile kép stb.(Roli) \r -Termék árak dinamikusan változó(Norbi)\r -Menu(Norbi)\r -típusok megírása (pl. autóknál)(Roli)\r -About, Kapcsolat, Üzenet AI-al(egyre biztosabb hogy lesz!)\r -Logo(Levi)\r -Animációk gyüjtése, és megírása(Norbi,Levi)\r -Szerver(Api requests) (Levi) \r -Adabázis feltöltése(Supabase[https://supabase.com/dashboard/org/zffexebqsxmjsmcmllni])(közös)",
+  "main": "backend/server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js"
+    "dev": "concurrently \"npm run backend\" \"npm run frontend\"",
+    "backend": "node backend/server.js",
+    "frontend": "cd Setup-Configurator && ng serve --proxy-config proxy.conf.json",
+    "start": "node backend/server.js",
+    "start:images": "node tools/image-downloader/download-images.mjs"
   },
   "repository": {
     "type": "git",
@@ -15,15 +18,25 @@
   "dependencies": {
     "@angular/core": "^20.2.4",
     "@angular/forms": "^20.2.4",
+    "@google/genai": "^1.40.0",
+    "@google/generative-ai": "^0.24.1",
     "@supabase/supabase-js": "^2.75.0",
     "bcryptjs": "^3.0.3",
+    "better-sqlite3": "^12.6.2",
     "cookie-parser": "^1.4.7",
+    "cors": "^2.8.6",
     "dotenv": "^17.2.3",
     "express": "^5.1.0",
+    "google-auth-library": "^10.6.1",
+    "gsap": "^3.14.2",
     "jsonwebtoken": "^9.0.2",
     "msnodesqlv8": "^5.1.1",
     "mysql2": "^3.15.1",
-    "postgres": "^3.4.7"
+    "nodemailer": "^7.0.12",
+    "ogl": "^1.0.11",
+    "openai": "^6.21.0",
+    "postgres": "^3.4.7",
+    "sharp": "^0.34.5"
   },
   "keywords": [],
   "author": "",
@@ -31,5 +44,8 @@
   "bugs": {
     "url": "https://github.com/HazafiLevente/Team-Work/issues"
   },
-  "homepage": "https://github.com/HazafiLevente/Team-Work#readme"
+  "homepage": "https://github.com/HazafiLevente/Team-Work#readme",
+  "devDependencies": {
+    "concurrently": "^9.2.1"
+  }
 }

@@ -1,0 +1,61 @@
+
+<form *ngIf="mode === 'login'" (ngSubmit)="submit()">
+
+  <h2 class="title">Bejelentkezés</h2>
+
+  <div *ngIf="errorMessage" class="error-box">
+    {{ errorMessage }}
+  </div>
+
+  <input
+    [(ngModel)]="email"
+    name="email"
+    type="email"
+    placeholder="Email cím"
+    required
+  />
+
+  <div class="password-wrap">
+    <input
+      [type]="showPassword ? 'text' : 'password'"
+      [(ngModel)]="password"
+      name="password"
+      placeholder="Jelszó"
+      required
+    />
+    <button type="button" class="eye-btn" (click)="togglePassword()">
+      {{ showPassword ? '🙈' : '👁️' }}
+    </button>
+  </div>
+  <div id="googleBtn"></div>
+
+  <label class="remember">
+    <input type="checkbox" [(ngModel)]="rememberMe" name="rememberMe">
+    Emlékezz rám
+  </label>
+  <button class="btn">Bejelentkezés</button>
+  <div class="auth-links">
+    <p class="switch-auth">
+      Nincs fiókom!
+      <a routerLink="/register">Regisztrálok</a>
+    </p>
+
+    <button type="button" class="link-btn" (click)="showForgotPassword()">
+      Elfelejtetted a jelszót?
+    </button>
+  </div>
+</form>
+
+
+<app-email-verify
+  *ngIf="mode === 'emailVerify'"
+  (codeSent)="handleCodeSent($event)"
+  (back)="backToLogin()">
+</app-email-verify>
+
+<app-new-password
+  *ngIf="mode === 'newPassword'"
+  [email]="resetEmail"
+  (back)="backToLogin()"
+  (success)="afterResetFromLogin()">
+</app-new-password>

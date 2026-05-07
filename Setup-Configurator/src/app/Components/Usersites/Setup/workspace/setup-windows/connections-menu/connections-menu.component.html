@@ -1,0 +1,24 @@
+<div class="connections-list">
+    @if (loading) {
+    <div class="loading-box">Betöltés...</div>
+    } @else if (connections.length === 0) {
+    <div class="empty-box">Nincsenek aktív összekötések ebben a szobában.</div>
+    } @else {
+    @for (conn of connections; track conn.id) {
+    <div class="conn-manage-item">
+        <div class="conn-info">
+            <div class="conn-endpoint">
+                <span class="setup-name">{{ conn.source?.name || conn.from_setup?.setup_name || '?' }}</span>
+                <span class="type-badge">{{ (conn.source?.category || '').replace('[Setup]', '') }}</span>
+            </div>
+            <span class="arrow">→</span>
+            <div class="conn-endpoint">
+                <span class="setup-name">{{ conn.target?.name || conn.to_setup?.setup_name || '?' }}</span>
+                <span class="type-badge">{{ (conn.target?.category || '').replace('[Setup]', '') }}</span>
+            </div>
+        </div>
+        <button class="delete-btn" (click)="deleteConnection(conn.id)">Törlés</button>
+    </div>
+    }
+    }
+</div>

@@ -1,0 +1,118 @@
+<form class="settings-page" [formGroup]="form">
+  <section class="hero-card">
+    <div class="hero-copy">
+      <div class="eyebrow">Interface Studio</div>
+      <h2>Designold a feluletet a sajat stilusodra</h2>
+      <p class="muted">
+        Valassz megjelenesi modot, utana allitsd be a hozza tartozo szinpalettat.
+        A sotet nezet az alap, de a vilagos mod is teljes erteku es szabadon szinezheto.
+      </p>
+
+      <div class="hero-stats">
+        <div class="stat-chip">
+          <span class="stat-label">Aktiv mod</span>
+          <strong>{{ activeAppearanceLabel }}</strong>
+        </div>
+        <div class="stat-chip">
+          <span class="stat-label">Aktiv paletta</span>
+          <strong>{{ activeThemeTitle }}</strong>
+        </div>
+      </div>
+    </div>
+
+    <div class="hero-preview">
+      <div class="preview-shell" [class.preview-light]="!form.value.darkMode">
+        <div class="preview-topbar">
+          <span></span><span></span><span></span>
+        </div>
+        <div class="preview-body" [ngClass]="selectedTheme?.previewClass">
+          <aside></aside>
+          <main>
+            <div class="preview-head"></div>
+            <div class="preview-panels">
+              <span></span>
+              <span></span>
+              <span></span>
+            </div>
+            <div class="preview-line"></div>
+          </main>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel-card">
+    <div class="section-head">
+      <div>
+        <div class="section-kicker">1. Megjelenes</div>
+        <h3>Valassz alap temat</h3>
+        <p class="muted">A mod a teljes felulet vilagossagat adja, a szinek utana kulon valthatok.</p>
+      </div>
+    </div>
+
+    <div class="appearance-grid">
+      <button
+        type="button"
+        *ngFor="let option of appearanceOptions"
+        class="appearance-card"
+        [class.active]="form.value.darkMode === (option.key === 'dark')"
+        (click)="setAppearance(option.key)">
+        <div class="appearance-visual" [class.light]="option.key === 'light'">
+          <div class="appearance-glow"></div>
+          <div class="appearance-surface">
+            <span></span><span></span><span></span>
+          </div>
+        </div>
+        <div class="appearance-copy">
+          <div class="appearance-title">{{ option.title }}</div>
+          <div class="appearance-sub">{{ option.sub }}</div>
+        </div>
+      </button>
+    </div>
+  </section>
+
+  <section class="panel-card">
+    <div class="section-head">
+      <div>
+        <div class="section-kicker">2. Szinpaletta</div>
+        <h3>Finomhangold a hangulatot</h3>
+        <p class="muted">Ugyanaz a paletta mukodik sotetben es vilagosban is, csak a felulet alaphangja valtozik.</p>
+      </div>
+      <div class="theme-badge">
+        Aktiv: {{ activeThemeTitle }}
+      </div>
+    </div>
+
+    <div class="theme-grid">
+      <button
+        type="button"
+        *ngFor="let t of themeOptions"
+        class="theme-card"
+        [class.active]="isThemeActive(t.key)"
+        (click)="selectTheme(t.key)">
+
+        <div class="theme-preview" [ngClass]="t.previewClass" [class.preview-light]="!form.value.darkMode">
+          <div class="mini-sidebar"></div>
+          <div class="mini-content">
+            <div class="mini-top"></div>
+            <div class="mini-cards">
+              <span></span><span></span><span></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="theme-meta">
+          <div class="theme-title-row">
+            <div class="theme-title">{{ t.title }}</div>
+            <div class="active-pill" *ngIf="isThemeActive(t.key)">Aktiv</div>
+          </div>
+          <div class="theme-sub">{{ t.sub }}</div>
+          <div class="swatches">
+            <span *ngFor="let swatch of t.swatches" [style.background]="swatch"></span>
+          </div>
+        </div>
+      </button>
+    </div>
+  </section>
+
+</form>

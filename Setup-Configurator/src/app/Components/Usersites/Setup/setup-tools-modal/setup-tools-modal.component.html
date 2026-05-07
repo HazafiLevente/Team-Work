@@ -1,0 +1,280 @@
+<div class="overlay" (click)="onBackdropClick()">
+  <div class="window" (click)="stop($event)">
+
+    <div class="titlebar">
+      <div class="caption">
+        <div class="big">{{ title() }}</div>
+        <div class="small">Eszközök</div>
+      </div>
+      <button class="x" (click)="close.emit()">×</button>
+    </div>
+
+    <div class="tabs">
+      <button class="tab" [class.active]="tab==='items'" (click)="tab='items'">Eszközök</button>
+      <button class="tab" [class.active]="tab==='pc'" (click)="tab='pc'">PC-k</button>
+      <button class="tab" [class.active]="tab==='cars'" (click)="tab='cars'">Autók</button>
+      <button class="tab" [class.active]="tab==='ht'" (click)="tab='ht'">Házimozi</button>
+    </div>
+
+    <div class="content">
+
+      @if (tab === 'items') {
+        @if (loading) {
+          <div class="hint">Betöltés...</div>
+        } @else {
+          @if (errorMsg) {
+            <div class="error">{{ errorMsg }}</div>
+          } @else {
+            @if (!items || items.length === 0) {
+              <div class="hint">Ez a setup üres.</div>
+            } @else {
+              <div class="items">
+                @for (it of items; track $index) {
+                  <div class="item">
+                    <div class="cat">{{ it.category }}</div>
+                    <div class="name">{{ it.display_name }}</div>
+                    @if (it.manufacturer) {
+                      <div class="meta">{{ it.manufacturer }}</div>
+                    }
+                  </div>
+                }
+              </div>
+
+              @if (itemsTotalPages > 1) {
+                <div class="pager">
+                  <button class="pager-btn" type="button" (click)="prevItemsPage()" [disabled]="itemsCurrentPage === 1 || loading">
+                    Előző
+                  </button>
+
+                  <div class="pager-pages">
+                    @for (page of visibleItemsPages(); track page) {
+                      <button
+                        class="pager-page"
+                        type="button"
+                        [class.active]="page === itemsCurrentPage"
+                        (click)="goToItemsPage(page)"
+                        [disabled]="loading">
+                        {{ page }}
+                      </button>
+                    }
+                  </div>
+
+                  <button class="pager-btn" type="button" (click)="nextItemsPage()" [disabled]="itemsCurrentPage === itemsTotalPages || loading">
+                    Következő
+                  </button>
+                </div>
+              }
+
+              <div class="pager-meta">
+                {{ itemsCurrentPage }} / {{ itemsTotalPages }} oldal · összesen {{ itemsTotal }} eszköz
+              </div>
+            }
+          }
+        }
+      }
+
+      @if (tab === 'pc') {
+        <div class="pc-create">
+          <div class="pc-field">
+            <label>Új PC neve</label>
+            <input [(ngModel)]="pcCreateName" placeholder="pl. GamingPc" />
+          </div>
+
+          <button class="pc-btn" type="button" (click)="createPc()" [disabled]="pcCreateSaving">
+            @if (pcCreateSaving) { Létrehozás... } @else { + Létrehozás }
+          </button>
+        </div>
+
+        @if (pcCreateError) {
+          <div class="error">{{ pcCreateError }}</div>
+        }
+
+        @if (pcLoading) {
+          <div class="hint">Betöltés...</div>
+        } @else {
+          @if (pcError) {
+            <div class="error">{{ pcError }}</div>
+          } @else {
+            @if (!pcs || pcs.length === 0) {
+              <div class="hint">Még nincs PC ehhez a setuphoz.</div>
+            } @else {
+              <div class="pcs">
+                @for (pc of pcs; track pc.id) {
+                  <div class="pc-card" (dblclick)="openPcBuilder(pc)">
+                    <div class="pc-title">{{ pc.setup_name || 'Névtelen PC' }}</div>
+                    <div class="pc-sub">Dupla katt: szerkesztés</div>
+                  </div>
+                }
+              </div>
+            }
+          }
+        }
+      }
+
+      @if (tab === 'ht') {
+        <div class="ht-section">
+          <div class="field">
+            <label>Layout</label>
+            <select [(ngModel)]="htLayout" (change)="generateHtInputs()">
+              <option value="">-- válassz layoutot --</option>
+              <option value="2.1">2.1</option>
+              <option value="5.1">5.1</option>
+              <option value="7.1">7.1</option>
+            </select>
+          </div>
+
+          @if (htLayout) {
+            <div class="field">
+              <label>Receiver</label>
+
+              <div class="field">
+                <label>Build neve</label>
+                <input [(ngModel)]="htTitle" placeholder="pl. Nappali 5.1 mozi" />
+              </div>
+
+              <select [(ngModel)]="htForm.receiver">
+                <option value="">-- válassz receiver --</option>
+
+                @for (r of htCatalog.receivers; track r.id) {
+                  <option [ngValue]="r.id">
+                    {{ r.manufacturer }} {{ r.model }}
+                  </option>
+                }
+              </select>
+            </div>
+
+            <div class="field">
+              <label>Bass Amplifier</label>
+              <select [(ngModel)]="htForm.bass_amplifier">
+                <option value="">-- válassz bass amplifier --</option>
+
+                @for (b of htCatalog.bassAmplifiers; track b.id) {
+                  <option [ngValue]="b.id">
+                    {{ b.manufacturer }} {{ b.model }}
+                  </option>
+                }
+              </select>
+            </div>
+
+            @for (sp of htSpeakers; track sp.key) {
+              <div class="field">
+                <label>{{ sp.label }}</label>
+
+                <select [(ngModel)]="htForm[sp.key]">
+                  <option value="">-- válassz eszközt --</option>
+
+                  @if (sp.key.includes('sub')) {
+                    @for (s of htCatalog.subwoofers; track s.id) {
+                      <option [ngValue]="s.id" style="color:white;">
+                        {{ s.manufacturer }} {{ s.model }}
+                      </option>
+                    }
+                  } @else if (sp.key.includes('center')) {
+                    @for (s of htCatalog.centerSpeakers; track s.id) {
+                      <option [ngValue]="s.id" style="color:white;">
+                        {{ s.manufacturer }} {{ s.model }}
+                      </option>
+                    }
+                  } @else if (sp.key.includes('back')) {
+                    @for (s of htCatalog.backSpeakers; track s.id) {
+                      <option [ngValue]="s.id" style="color:white;">
+                        {{ s.manufacturer }} {{ s.model }}
+                      </option>
+                    }
+                  } @else if (sp.key.includes('surround')) {
+                    @for (s of htCatalog.sideSpeakers; track s.id) {
+                      <option [ngValue]="s.id" style="color:white;">
+                        {{ s.manufacturer }} {{ s.model }}
+                      </option>
+                    }
+                  } @else {
+                    @for (s of htCatalog.frontSpeakers; track s.id) {
+                      <option [ngValue]="s.id" style="color:white;">
+                        {{ s.manufacturer }} {{ s.model }}
+                      </option>
+                    }
+                  }
+                </select>
+              </div>
+            }
+
+            <button class="btn primary"
+                    [disabled]="htSaving"
+                    (click)="saveHtConfig()">
+              @if (htSaving) { Mentés... }
+              @else { Mentés }
+            </button>
+
+            @if (htSaveSuccess) {
+              <div class="success-msg">Sikeresen elmentve</div>
+            }
+
+            @if (htSaveError) {
+              <div class="error">{{ htSaveError }}</div>
+            }
+          }
+        </div>
+      }
+
+      @if (tab === 'cars') {
+        <div class="car-create">
+          <div class="car-field">
+            <label>Autó kiválasztása</label>
+
+            @if (carOptionsLoading) {
+              <div class="hint">Autók betöltése...</div>
+            } @else {
+              <select [(ngModel)]="selectedCarKey">
+                <option [ngValue]="''">-- válassz autót --</option>
+                @for (c of carOptions; track c.id) {
+                  <option [ngValue]="c.id">{{ c.display_name }}</option>
+                }
+              </select>
+            }
+          </div>
+
+          <button class="car-btn" type="button" (click)="createCar()" [disabled]="carCreateSaving || carOptionsLoading">
+            @if (carCreateSaving) { Hozzáadás... } @else { + Hozzáadás }
+          </button>
+        </div>
+
+        @if (carOptionsError) {
+          <div class="error">{{ carOptionsError }}</div>
+        }
+        @if (carCreateError) {
+          <div class="error">{{ carCreateError }}</div>
+        }
+
+        @if (carLoading) {
+          <div class="hint">Betöltés...</div>
+        } @else {
+          @if (carError) {
+            <div class="error">{{ carError }}</div>
+          } @else {
+            @if (!cars || cars.length === 0) {
+              <div class="hint">Még nincs autó ehhez a setuphoz.</div>
+            } @else {
+              <div class="cars">
+                @for (c of cars; track c.id) {
+                  <div class="car-card">
+                    <div class="car-title">{{ c.setup_name || 'Névtelen autó' }}</div>
+                  </div>
+                }
+              </div>
+            }
+          }
+        }
+      }
+    </div>
+
+  </div>
+</div>
+
+@if (pcBuilderOpen && pcBuilderRow) {
+  <app-setup-pc-builder-modal
+    [setup]="setup"
+    [pc]="pcBuilderRow"
+    (close)="closePcBuilder()"
+    (saved)="onPcSaved($event)">
+  </app-setup-pc-builder-modal>
+}

@@ -1,0 +1,10 @@
+ID,manufacturer,Model,pedal_type,effect_category,analog,digital,true_bypass,buffered,stereo,midi,presets,power_supply,enclosure,country_of_origin,release_year,skill_level,notes,category,Price
+1,BOSS," RC-1 Loop Station effektpedál",Looper,Time-based,false,true,false,true,true,false,false,9V DC / Adapter,Compact,Japan,2013,Beginner,"Egyszerű, megbízható loop pedál LED indikátorral",accessory,49300
+2,BOSS," RC-500 Loop Station effektpedál",Looper,Time-based,false,true,false,true,true,true,true,9V DC Adapter,Large,Japan,2020,Advanced,Dupla trackes profi looper MIDI támogatással,accessory,114400
+3,BOSS," OC-5 Octave effektpedál",Octave,Pitch,false,true,false,true,false,false,false,9V DC,Compact,Japan,2020,Intermediate,Polyfonikus oktáv pedál basszus és gitárhoz,accessory,57000
+4,BOSS," BD-2 Blues Driver effektpedál",Overdrive,Drive,true,false,false,true,false,false,false,9V DC,Compact,Japan,1995,Beginner,Klasszikus blues / rock overdrive,accessory,43200
+5,BOSS," DS-2 Turbo Distortion effektpedál",Distortion,Drive,true,false,false,true,false,false,false,9V DC,Compact,Japan,1987,Beginner,Ikonikus distortion Turbo mód kapcsolóval,accessory,39400
+6,TC Electronic," Flashback 2 Delay effektpedál",Delay,Time-based,false,true,true,true,true,false,true,9V DC,Compact,Thailand,2017,Intermediate,TonePrint delay több algoritmussal,accessory,48400
+7,BOSS," MT-2 Metal Zone effektpedál",Distortion,Drive,true,false,false,true,false,false,false,9V DC,Compact,Japan,1991,Intermediate,"Extrém gain, parametrikus EQ",accessory,56800
+8,BOSS," CS-3 Compressor effektpedál",Compressor,Dynamics,true,false,false,true,false,false,false,9V DC,Compact,Japan,1986,Beginner,Klasszikus kompresszor gitárhoz,accessory,41600
+9,BOSS," SD-1W Waza Craft Super Overdrive effektpedál",Overdrive,Drive,true,false,false,true,false,false,false,9V DC,Compact,Japan,2014,Professional,Waza Craft prémium overdrive,accessory,62300

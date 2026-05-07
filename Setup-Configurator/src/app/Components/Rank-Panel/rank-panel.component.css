@@ -1,0 +1,127 @@
+
+.rank-backdrop{
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0,0,0,0.55);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  padding: 18px;
+}
+
+
+.rank-shell{
+  width: min(720px, 100%);
+  display: block;
+}
+
+
+.rank-embedded{
+  width: 100%;
+  max-width: 980px;
+  margin: 14px 0 18px;
+}
+
+.rank-embedded .rank-shell{
+  width: 100%;
+}
+
+
+.rank-card{
+  width: 100%;
+  min-height: 140px;
+  padding: 18px 18px 16px;
+  border-radius: 18px;
+  background: rgba(15,15,22,0.55);
+  border: 1px solid rgba(255,255,255,0.08);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+body[data-appearance="light"] .rank-card {
+  background: var(--bg-elevated);
+  border-color: var(--line);
+  box-shadow: var(--shadow-soft);
+}
+
+.top{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap: 14px;
+}
+
+.pill{
+  display:inline-block;
+  font-size: 12px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.10);
+  margin-bottom: 6px;
+}
+
+.title{
+  font-size: 22px;
+  font-weight: 800;
+  line-height: 1.1;
+}
+
+.muted{
+  opacity: .75;
+  margin-top: 6px;
+}
+
+.x{
+  border: 0;
+  outline: 0;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  cursor: pointer;
+  background: rgba(255,255,255,0.10);
+  color: inherit;
+}
+
+.bar-wrap{
+  margin-top: 18px;
+}
+
+.bar-meta{
+  display:flex;
+  justify-content:space-between;
+  font-weight: 700;
+  opacity: .9;
+  margin-bottom: 8px;
+}
+
+.bar{
+  width: 100%;
+  height: 12px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.08);
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,0.08);
+}
+
+.fill{
+  height: 100%;
+  width: 0%;
+  border-radius: 999px;
+  background: currentColor;
+  box-shadow: 0 0 18px currentColor;
+  transition: width .25s ease;
+}
+
+body[data-appearance="light"] .fill {
+  box-shadow: none;
+}
+
+.rank-shell {
+  width: min(720px, 100%);
+  display: block;
+}

@@ -1,0 +1,14 @@
+<div class="admin-products">
+
+  <app-product-list [products]="products" [search]="search" [selected]="selected"
+    (searchChange)="onSearchChange($event)" (productSelect)="onProductSelect($event)" (newProduct)="onNewProduct()">
+  </app-product-list>
+
+  <app-product [product]="selected" [adminMode]="true" (saveProduct)="onSave($event)"
+    [types]="types" [typeTemplates]="templates"
+    (typeTemplatesChanged)="loadTypeMeta()"
+    (deleteProduct)="onDelete($event)">
+  </app-product>
+
+
+</div>

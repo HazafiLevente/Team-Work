@@ -1,0 +1,23 @@
+<app-register-form
+  *ngIf="step === 'form'"
+  [fullname]="fullname" (fullnameChange)="fullname = $event"
+  [username]="username" (usernameChange)="username = $event"
+  [email]="email" (emailChange)="email = $event"
+  [password]="password" (passwordChange)="password = $event"
+  [loading]="loading"
+  [errorMessage]="errorMessage"
+  [successMessage]="successMessage"
+  (submit)="submit()">
+</app-register-form>
+
+<app-register-code
+  *ngIf="step === 'code'"
+  [email]="email"
+  [code]="code" (codeChange)="code = $event"
+  [loading]="loading"
+  [errorMessage]="errorMessage"
+  [successMessage]="successMessage"
+  (verify)="verify()"
+  (resend)="resendCode()"
+  (back)="backToForm()">
+</app-register-code>

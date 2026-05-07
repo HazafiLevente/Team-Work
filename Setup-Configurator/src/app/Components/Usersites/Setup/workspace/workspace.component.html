@@ -1,0 +1,293 @@
+<div class="setup-workspace" #workspaceRoot (contextmenu)="onBackgroundRightClick($event)" (mousedown)="onMouseDown($event)" (click)="onBackgroundClick($event)" [class.panning]="isPanning">
+
+  <div class="pan-wrapper" [style.transform]="'translate(' + panX + 'px, ' + panY + 'px)'" (contextmenu)="onBackgroundRightClick($event)">
+    <app-dot-grid class="dot-bg" [dotSize]="5" [gap]="15" baseColor="#271E37" activeColor="#5227FF" [proximity]="100"
+                  [shockRadius]="250" [shockStrength]="5" [resistance]="750" [returnDuration]="1.5" (contextmenu)="onBackgroundRightClick($event)">
+    </app-dot-grid>
+
+    <div class="toolbar">
+      @if (viewingSetup) {
+        <button class="back-btn" type="button" (click)="back.emit()">
+          ← Vissza
+        </button>
+      }
+    </div>
+
+    <div class="boundary-area" #dragBoundary [style.min-width.px]="extWidth" [style.min-height.px]="extHeight" (contextmenu)="onBackgroundRightClick($event)">
+
+      @if (!viewingSetup) {
+
+        @if (!loading) {
+          @for (setup of userSetups; track setup.id || setup.setup_id || $index) {
+            <app-setup-room [dataId]="'room:' + (setup.id || setup.setup_id || $index)" [setup]="setup"
+                            [boundaryRef]="boundaryEl.nativeElement" [dragDisabled]="pairingStage !== 'NONE'" [initialPosition]="{
+                x: setup.x ?? 50,
+                y: setup.y ?? 50
+              }" (elementReady)="registerElement($event)" (moved)="updateLines()"
+                            (dragEnded)="onRoomDragEnded(setup, $event)" (setupClick)="onSetupClick($event)"
+                            (setupDblClick)="openSetupDetails($event)" (setupRightClick)="onSetupRightClick($event)"
+                            (renamed)="onRoomRenamed($event)">
+            </app-setup-room>
+          }
+          @empty {
+            <div class="no-data">Nincs setup.</div>
+          }
+        } @else {
+          <div class="no-data">Betöltés...</div>
+        }
+
+      } @else {
+
+        @if (loadingItems) {
+          <div class="no-data">Betöltés...</div>
+        } @else if (!items || items.length === 0) {
+          <div class="no-data">Ez a setup üres.</div>
+        } @else {
+          @for (item of items; track getItemTrackKey(item, $index)) {
+            <app-setup-item-card [item]="item" [dataId]="getItemDataId(item)" [boundaryRef]="boundaryEl.nativeElement"
+                                 [dragDisabled]="false" [initialPosition]="getItemPosition(item, $index)" (elementReady)="registerElement($event)"
+                                 (moved)="updateLines()" (dragEnded)="onItemDragEnded(item, $event)" (itemClick)="onItemClick($event)" (itemDblClick)="openItemDetails($event)"
+                                 (itemRightClick)="onItemRightClick($event)" (renamed)="onItemRenamed($event)">
+            </app-setup-item-card>
+          }
+        }
+
+      }
+
+      <app-setup-connections [connections]="connections" [globalRoomConnections]="globalRoomConnections"
+                             [lineRefreshTrigger]="lineRefreshTrigger" [elementRegistry]="elementRegistry"
+                             [boundaryEl]="boundaryEl.nativeElement" [connectMousePos]="connectMousePos"
+                             [connectSourceSetup]="connectSourceSetup" [pairingStage]="pairingStage" [viewingSetup]="viewingSetup">
+      </app-setup-connections>
+
+    </div>
+  </div>
+
+  @if (ctxOpen && ctxSetup) {
+    <app-context-menu-room [x]="ctxX" [y]="ctxY" [setup]="ctxSetup" (close)="closeContextMenu()" (openSetup)="openSetupDetails(ctxSetup)"
+                           (openTools)="openDevicesWindow(ctxSetup)" (openAllProducts)="openAllBuilderWindow(ctxSetup)" (rename)="startRenameForContextSetup()" (connect)="connect.emit(ctxSetup)"
+                           (connections)="openConnectionsWindow(ctxSetup)" (deleteSetup)="deleteSetup.emit(ctxSetup)">
+    </app-context-menu-room>
+  }
+
+  @if (ctxOpen && ctxItem) {
+    <app-context-menu-item
+      [x]="ctxX"
+      [y]="ctxY"
+      (close)="closeContextMenu()"
+      (openItem)="openItemDetails(ctxItem)"
+      (rename)="startRenameForContextItem()"
+      (modify)="onItemModify(ctxItem)"
+      (connectItem)="itemConnect.emit(ctxItem)"
+      (deleteItem)="deleteContextItem()">
+    </app-context-menu-item>
+  }
+
+  @if (ctxWorkspaceOpen) {
+    <app-context-menu-base [x]="ctxWorkspaceX" [y]="ctxWorkspaceY" (close)="ctxWorkspaceOpen=false">
+      <div class="menu-section">
+        <button class="menu-item create" type="button" (click)="$event.stopPropagation(); createSetupAtPosition()">
+          @if (viewingSetup) {
+            + Uj eszkoz hozzaadasa
+          } @else {
+            + Uj setup letrehozasa
+          }
+        </button>
+      </div>
+    </app-context-menu-base>
+  }
+
+  @if (ctxCategoryOpen) {
+  }
+
+  @for (w of windows; track w.id) {
+    @if (!w.minimized) {
+      <app-setup-window [id]="w.id" [title]="w.title" [instanceNo]="w.instanceNo" [x]="w.x" [y]="w.y" [zIndex]="w.zIndex"
+                        [width]="w.width || 420" [maximized]="w.maximized" [boundaryRef]="boundaryEl.nativeElement"
+                        [height]="w.height || null" [snapMode]="w.snapMode || null"
+                        (closed)="onWindowClosed($event)" (minimized)="minimizeWindow($event)" (focused)="focusWindow($event)"
+                        (maximizeToggled)="toggleMaximizeWindow($event)" (dragMoved)="onWindowDragMoved(w.id, $event)"
+                        (resized)="resizeWindow(w.id, $event)"
+                        (moved)="onWindowDragEnded(w.id, $event)">
+        @if (w.kind === 'devices') {
+          <app-devices-menu [setup]="w.payload.setup"></app-devices-menu>
+        }
+
+        @if (w.kind === 'connections') {
+          <app-connections-menu [setup]="w.payload.setup"></app-connections-menu>
+          <div class="empty-window-content">
+            <p>Hamarosan: Kapcsolatok...</p>
+          </div>
+        }
+
+        @if (w.kind === 'pairing') {
+          <app-setup-pairing-modal [pairingStage]="w.payload.pairingStage" [pairingItemList]="w.payload.pairingItemList"
+                                   [connectSourceSetup]="w.payload.setup"
+                                   [connectTargetSetup]="connectTargetSetup"
+                                   [connectSourceItem]="connectSourceItem"
+                                   [allowPcHtLinks]="allowPcHtLinks"
+                                   [pairingConnections]="pairingConnections"
+                                   (allowPcHtLinksChange)="allowPcHtLinksChange.emit($event)"
+                                   (cancel)="closeWindow(w.id)"
+                                   (selectSource)="selectSourceEvent.emit($event)"
+                                   (finalize)="finalizeConnectionEvent.emit({setup: w.payload.setup, item: $event})">
+          </app-setup-pairing-modal>
+        }
+
+        @if (w.kind === 'empty') {
+          @if (w.title === 'Szamitogep') {
+            <app-pc-builder-panel
+              [setup]="w.payload.setup"
+              [editChildSetupId]="w.payload.editChildSetupId ?? null"
+              [initialProductId]="w.payload.initialProductId ?? null"
+              [initialPcSetup]="w.payload.initialPcSetup ?? null"
+              (close)="closeWindow(w.id)"
+              (saved)="onHtSaved(); closeWindow(w.id)">
+            </app-pc-builder-panel>
+          } @else {
+          @if (w.title === 'Házimozi') {
+            @if (fixedLayout === 'mobile' || w.payload?.useSimpleBuilder) {
+              <app-home-theater-simple-builder
+                [setup]="w.payload.setup"
+                (saved)="onHtSaved()">
+              </app-home-theater-simple-builder>
+            } @else {
+              <app-home-theater-builder
+                [setup]="w.payload.setup"
+                [buildId]="w.payload.buildId"
+                (saved)="onHtSaved()">
+              </app-home-theater-builder>
+            }
+          } @else if (w.title === 'Autók') {
+            <app-car-builder-panel
+              [setup]="w.payload.setup"
+              [editChildSetupId]="w.payload.editChildSetupId ?? null"
+              [initialProductId]="w.payload.initialProductId ?? null"
+              (saved)="onHtSaved()">
+            </app-car-builder-panel>
+
+          } @else if (w.title === 'Hangszerek') {
+            <app-instrument-builder-panel
+              [setup]="w.payload.setup"
+              [editChildSetupId]="w.payload.editChildSetupId ?? null"
+              [initialProductId]="w.payload.initialProductId ?? null"
+              (saved)="onHtSaved()">
+            </app-instrument-builder-panel>
+
+          } @else if (w.title === 'Összes termék' || w.title === 'Egyéb' || w.title === 'Egyeb') {
+            <app-all-builder-panel
+              [setup]="w.payload.setup"
+              [editChildSetupId]="w.payload.editChildSetupId ?? null"
+              [initialProductId]="w.payload.initialProductId ?? null"
+              (saved)="onHtSaved()">
+            </app-all-builder-panel>
+
+          } @else if (w.title === 'Halozat') {
+            <app-network-builder-panel
+              [setup]="w.payload.setup"
+              [editChildSetupId]="w.payload.editChildSetupId ?? null"
+              [initialProductId]="w.payload.initialProductId ?? null"
+              [initialNetworkType]="w.payload.initialNetworkType ?? null"
+              (saved)="onHtSaved()">
+            </app-network-builder-panel>
+
+          } @else {
+            <div class="empty-window-content">
+              <p>Hamarosan: {{ w.title }} tartalom...</p>
+            </div>
+          }
+          }
+        }
+
+        @if (w.kind === 'add-device') {
+        }
+      </app-setup-window>
+    }
+  }
+
+  @if (snapAssistVisible && snapAssistWindowId) {
+    <div class="snap-assist" (contextmenu)="$event.preventDefault()" (click)="$event.stopPropagation()">
+      <button type="button" class="snap-option snap-max" (click)="applySnapLayout('max')" title="Teljes meret">
+        <span></span>
+      </button>
+      <button type="button" class="snap-option snap-left" (click)="applySnapLayout('left')" title="Bal oldal">
+        <span></span>
+      </button>
+      <button type="button" class="snap-option snap-right" (click)="applySnapLayout('right')" title="Jobb oldal">
+        <span></span>
+      </button>
+      <button type="button" class="snap-close" (click)="closeSnapAssist()" title="Bezaras">x</button>
+    </div>
+  }
+
+  @if (noteSetups().length) {
+    <div class="note-bookmarks" aria-label="Jegyzet konyvjelzok">
+      @for (note of noteSetups(); track noteTrackKey($index, note)) {
+        <button
+          type="button"
+          class="note-bookmark"
+          [attr.aria-label]="noteName(note)"
+          [attr.data-title]="noteName(note)"
+          (click)="openNoteBookmark(note, $event)"
+          (dblclick)="openNoteBookmark(note, $event)"
+          (contextmenu)="$event.preventDefault(); $event.stopPropagation()">
+          <span>{{ noteBookmarkLabel(note, $index) }}</span>
+        </button>
+      }
+    </div>
+  }
+
+  @if (windows.length > 0 && !hideDock) {
+    <app-setup-dock [windows]="windows" (restore)="restoreWindow($event)" (maximize)="toggleMaximizeWindow($event)"
+                    (terminate)="onWindowClosed($event)" (dockItemRightClick)="onDockItemRightClick($event)">
+    </app-setup-dock>
+  }
+
+  @if (ctxDockOpen && ctxDockWindow) {
+    <app-context-menu-dock [x]="ctxDockX" [y]="ctxDockY" (close)="closeContextMenu()"
+                           (restore)="restoreWindow(ctxDockWindow.id)" (maximize)="toggleMaximizeWindow(ctxDockWindow.id)"
+                           (terminate)="onWindowClosed(ctxDockWindow.id)">
+    </app-context-menu-dock>
+  }
+
+  @if (pairingStage !== 'NONE') {
+    <div class="pairing-status">
+      <div class="status-box">
+        @if (pairingStage === 'PICK_SOURCE') {
+          <span>Válaszd ki a forrás eszközt!</span>
+        } @else if (pairingStage === 'PICK_TARGET_SETUP') {
+          <span>Válaszd ki a cél szobát!</span>
+        } @else if (pairingStage === 'PICK_TARGET_ITEM') {
+          <span>Válaszd ki a cél eszközt!</span>
+        }
+        <button class="cancel-btn" (click)="cancelConnectingEvent.emit()">Mégse</button>
+      </div>
+    </div>
+  }
+
+  @if (ctxCategoryOpen) {
+    <app-context-menu-category
+      [x]="ctxCategoryX"
+      [y]="ctxCategoryY"
+      (close)="ctxCategoryOpen=false"
+      (categorySelected)="onCategorySelected($event)">
+    </app-context-menu-category>
+  }
+
+  @if (confirmDialogState?.isOpen) {
+    <div class="custom-confirm-overlay" (click)="confirmDialogState = null">
+      <div class="custom-confirm-modal" (click)="$event.stopPropagation()">
+        <h3>{{ confirmDialogState?.title }}</h3>
+        <p>{{ confirmDialogState?.message }}</p>
+        <div class="confirm-actions">
+          @if (!confirmDialogState?.hideCancel) {
+            <button class="confirm-cancel" (click)="confirmDialogState = null">{{ confirmDialogState?.cancelText || 'Megse' }}</button>
+          }
+          <button class="confirm-danger" (click)="confirmDialogState?.onConfirm?.()">{{ confirmDialogState?.confirmText || 'Torles' }}</button>
+        </div>
+      </div>
+    </div>
+  }
+
+
+</div>

@@ -1,0 +1,10 @@
+<div
+  #menu
+  class="context-menu"
+  [style.left.px]="menuX"
+  [style.top.px]="menuY"
+  (contextmenu)="$event.preventDefault()"
+  (click)="$event.stopPropagation()"
+>
+  <ng-content></ng-content>
+</div>

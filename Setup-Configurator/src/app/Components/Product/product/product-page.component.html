@@ -1,0 +1,101 @@
+<div class="wrap">
+
+
+  <div class="topbar">
+    <button class="btn ghost" (click)="goBack()">← Vissza</button>
+  </div>
+
+
+  <div class="left-panel" *ngIf="!loading && item; else loadingBlock">
+    <div class="topline">
+      <div>
+        <div class="kicker">Termék részletek</div>
+        <h1 class="title">{{ displayTitle }}</h1>
+        <div class="subtitle">{{ displaySubtitle }}</div>
+      </div>
+
+
+    </div>
+
+    <div class="actions">
+      <button class="btn primary" (click)="onPlus()">➕ Setupba</button>
+      <button class="btn ghost" (click)="onToggleFavorite()">⭐ Kedvenc (később)</button>
+    </div>
+
+    <div class="hint muted">
+      Tipp: kattints a képre a fullscreen nézethez.
+    </div>
+
+
+    <div class="info-grid">
+      <div class="card">
+        <div class="card-title">Áttekintés</div>
+
+        <div class="kv">
+          <div class="row" *ngIf="primary.manufacturer">
+            <div class="k">Gyártó</div>
+            <div class="v">{{ primary.manufacturer }}</div>
+          </div>
+
+          <div class="row" *ngIf="primary.model">
+            <div class="k">Modell</div>
+            <div class="v">{{ primary.model }}</div>
+          </div>
+
+          <div class="row" *ngIf="primary.category">
+            <div class="k">Kategória</div>
+            <div class="v">{{ primary.category }}</div>
+          </div>
+
+          <div class="row" *ngIf="primary.description">
+            <div class="k">Leírás</div>
+            <div class="v">{{ primary.description }}</div>
+          </div>
+
+          <div class="row" *ngIf="displayPrice">
+            <div class="k">Ár</div>
+            <div class="v"><strong>{{ displayPrice }}</strong></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Tulajdonságok</div>
+
+        <div class="kv">
+          <ng-container *ngFor="let f of fields">
+            <div class="row">
+              <div class="k">{{ f.label }}</div>
+              <div class="v">{{ f.value }}</div>
+            </div>
+          </ng-container>
+        </div>
+      </div>
+    </div>
+
+
+    <div class="card gallery-bottom">
+      <div class="card-title">Képek</div>
+
+      <app-product-gallery
+        [images]="imageUrls"
+        [title]="displayTitle">
+      </app-product-gallery>
+    </div>
+
+
+    <div class="card subtle-card" *ngIf="userRole === 'admin' || userRole === 'admin+' || userRole === 'owner'">
+      <details>
+        <summary>Debug / nyers adat</summary>
+        <pre class="raw">{{ item | json }}</pre>
+      </details>
+    </div>
+
+
+  </div>
+
+  <ng-template #loadingBlock>
+    <div class="card" *ngIf="loading">Betöltés...</div>
+    <div class="card error" *ngIf="!loading && error">{{ error }}</div>
+  </ng-template>
+</div>

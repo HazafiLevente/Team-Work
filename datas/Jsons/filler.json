@@ -1,0 +1,10 @@
+{
+  "exclude_table_patterns": [
+    "[Setup]",
+    "[Auth]",
+    "[Setups]",
+    "[System]",
+    "[Lists]",
+    "[Cables]"
+  ]
+}

@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="hu">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Setup Configurator - Connect</title>
+    <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+<header class="top-menu">
+    <div class="brand">
+        <div class="logo">SC</div>
+        <div>
+            <h1>Setup Configurator</h1>
+            <div class="muted" style="font-size:12px;margin-top:2px">Test Version</div>
+        </div>
+    </div>
+
+    <nav class="nav" aria-label="Főmenü">
+        <a href="/webs/webs/Home">Home</a>
+        <a class="cta" id="auth-btn" href="/regist">Connect</a>
+    </nav>
+</header>
+
+<main class="content">
+    <section class="panel">
+        <div class="hero">
+            <h2>Registration</h2>
+            <label for="username">Username:</label>
+            <input type="text" id="username" required/>
+            <label for="fullname">Fullname:</label>
+            <input type="text" id="fullname" required/>
+            <label for="email">Email:</label>
+            <input type="text" id="email" required/>
+            <label for="password">Password:</label>
+            <input type="password" id="password" required/>
+            <br>
+            <button class="btn" onclick="connectreg()">Connect</button>
+            <p class="logorreg">
+                Van már fiókom, <a class='logorreg' onclick="login()">bejelentkezek</a>
+            </p>
+
+        </div>
+    </section>
+</main>
+
+<script src="script.js"></script>
+</body>
+</html>

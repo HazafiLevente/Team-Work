@@ -1,0 +1,55 @@
+<div
+  class="drawer"
+  cdkDrag
+  [cdkDragBoundary]="'body'"
+  (mousedown)="stop($event)">
+
+  <div class="drawer-titlebar" cdkDragHandle>
+    <div class="caption">
+      <div class="big">{{ title() }}</div>
+      <div class="small">PC alkatrészek</div>
+    </div>
+
+    <button class="x" type="button" (click)="close.emit()">×</button>
+  </div>
+
+  @if (partsLoading) {
+    <div class="state">Alkatrészek betöltése...</div>
+  } @else {
+
+    @if (partsError) {
+      <div class="state error">{{ partsError }}</div>
+    }
+
+    <div class="list">
+      <div class="row">
+        <div class="label">Processzor</div>
+        <div class="value">{{ cpuName() }}</div>
+      </div>
+
+      <div class="row">
+        <div class="label">Videókártya</div>
+        <div class="value">{{ gpuName() }}</div>
+      </div>
+
+      <div class="row">
+        <div class="label">Alaplap</div>
+        <div class="value">{{ motherboardName() }}</div>
+      </div>
+
+      <div class="row">
+        <div class="label">RAM</div>
+        <div class="value">{{ ramName() }}</div>
+      </div>
+
+      <div class="row">
+        <div class="label">Táp</div>
+        <div class="value">{{ psuName() }}</div>
+      </div>
+    </div>
+
+    <div class="hint">
+      Húzható panel • Dupla katt a PC elemre a megnyitáshoz
+    </div>
+  }
+</div>

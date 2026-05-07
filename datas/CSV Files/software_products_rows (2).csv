@@ -1,0 +1,20 @@
+id,manufacturer,product_name,software_type,category,edition,license_type,edu_version,upgrade_version,supported_os,plugin_formats,copy_protection,download_only,release_version,notes,created_at,Price
+1,Spectrasonics,Omnisphere 2.6,plugin,synth,Full,perpetual,false,false,Windows / macOS,"VST3, AU, AAX, Standalone",Account-based,true,,Prémium szoftver szintetizátor,2025-12-18 10:06:35.091771,161000
+2,Spectrasonics,Keyscape,plugin,keyboard,Full,perpetual,false,false,Windows / macOS,"VST3, AU, AAX",Account-based,true,,Virtuális billentyűs hangszer gyűjtemény,2025-12-18 10:06:35.091771,188248
+3,Arturia,Pigments 6,plugin,synth,Full,perpetual,false,false,Windows / macOS,"VST3, AU, AAX",Account-based,true,,Modern hibrid szintetizátor,2025-12-18 10:06:35.091771,71843
+4,Ableton,Live 12 Intro,DAW,daw,Intro,perpetual,false,false,Windows / macOS,"VST3, AU",,true,,Belépő szintű DAW,2025-12-18 10:07:01.370023,31390
+5,Ableton,Live 12 Standard,DAW,daw,Standard,perpetual,false,false,Windows / macOS,"VST3, AU",,true,,Teljes DAW alap verzió,2025-12-18 10:07:01.370023,55300
+6,Ableton,Live 12 Suite,DAW,daw,Suite,perpetual,false,false,Windows / macOS,"VST3, AU",,true,,Teljes Suite verzió,2025-12-18 10:07:01.370023,238400
+7,Ableton,Live 12 Suite EDU,DAW,daw,Suite EDU,perpetual,true,false,Windows / macOS,"VST3, AU",,true,,Oktatási licenc,2025-12-18 10:07:01.370023,119000
+8,Image Line,FL Studio Fruity Edition,DAW,daw,Fruity,perpetual,false,false,Windows / macOS,VST3,,true,,Alap FL Studio,2025-12-18 10:07:18.222474,22660
+9,Image Line,FL Studio Producer Edition,DAW,daw,Producer,perpetual,false,false,Windows / macOS,VST3,,true,,Legnépszerűbb verzió,2025-12-18 10:07:18.222474,38606
+10,Image Line,FL Studio Signature Bundle,DAW,daw,Signature,perpetual,false,false,Windows / macOS,VST3,,true,,Bővített plugin csomag,2025-12-18 10:07:18.222474,43870
+11,Image Line,FL Studio All Plugins Edition,DAW,daw,All Plugins,perpetual,false,false,Windows / macOS,VST3,,true,,Összes Image Line plugin,2025-12-18 10:07:18.222474,97170
+12,Steinberg,Cubase Artist 13 EDU,DAW,daw,Artist,perpetual,true,false,Windows / macOS,VST3,,true,,Oktatási verzió,2025-12-18 10:07:24.800818,138800
+13,Steinberg,Cubase Elements 14,DAW,daw,Elements,perpetual,false,false,Windows / macOS,VST3,,true,,Belépő Cubase,2025-12-18 10:07:24.800818,40000
+14,Steinberg,Cubase Elements 14 EDU,DAW,daw,Elements EDU,perpetual,true,false,Windows / macOS,VST3,,true,,Oktatási licenc,2025-12-18 10:07:24.800818,21500
+15,Steinberg,Cubase Elements 14 Upgrade AI,DAW,daw,Upgrade AI,perpetual,false,true,Windows / macOS,VST3,,true,,AI verzióról frissítés,2025-12-18 10:07:24.800818,32000
+16,Steinberg,Cubase Elements 14 Upgrade LE,DAW,daw,Upgrade LE,perpetual,false,true,Windows / macOS,VST3,,true,,LE verzióról frissítés,2025-12-18 10:07:24.800818,19000
+17,Avid,Pro Tools Ultimate Perpetual License,DAW,daw,Ultimate,perpetual,false,false,Windows / macOS,AAX,,true,,Professzionális stúdió DAW,2025-12-18 10:07:34.050472,613000
+18,Presonus,Studio One Pro 7 Academic,DAW,daw,Pro Academic,perpetual,false,false,Windows / macOS,"VST3, AU",,true,,Oktatási verzió,2025-12-18 10:07:34.050472,45000
+19,Native Instruments,Traktor Pro 4,DJ Software,dj,Pro,perpetual,false,false,Windows / macOS,Standalone,,true,,DJ szoftver,2025-12-18 10:07:34.050472,56400

@@ -1,0 +1,23 @@
+<form (ngSubmit)="sendCode()" class="auth-form">
+  <h2 class="title">Jelszó visszaállítás</h2>
+  <p class="subtitle">Add meg az email címed, és küldünk egy 6 jegyű kódot.</p>
+
+  <div *ngIf="error" class="error-box">{{ error }}</div>
+  <div *ngIf="message" class="success-box">{{ message }}</div>
+
+  <input
+    [(ngModel)]="email"
+    name="email"
+    type="email"
+    placeholder="Email cím"
+    required
+  />
+
+  <button class="btn" type="submit" [disabled]="loading">
+    {{ loading ? 'Küldés...' : 'Kód küldése' }}
+  </button>
+
+  <button class="link-btn" type="button" (click)="back.emit()">
+    ← Vissza a bejelentkezéshez
+  </button>
+</form>

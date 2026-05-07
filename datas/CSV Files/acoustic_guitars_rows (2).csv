@@ -1,0 +1,8 @@
+id,manufacturer,model,body_shape,size,top_wood,back_sides_wood,neck_wood,fretboard_wood,scale_length_mm,nut_width_mm,frets,electronics,finish,color,includes_case,includes_accessories,suitable_for,notes,category,created_at,Price
+1,Fender,FA-115 Dreadnought,Dreadnought,Full,Spruce,Basswood,Nato,Walnut,,,20,false,Gloss,Natural,false,true,beginner,"Kezdő szett (tok, pengető stb.)",instrument,2025-12-17 14:07:48.960294,69070
+2,Ibanez,PF15-NT,Dreadnought,Full,Spruce,Mahogany,Mahogany,Nandu,,,20,false,Gloss,Natural,false,false,beginner,Megbízható belépő szintű akusztikus gitár,instrument,2025-12-17 14:07:48.960294,88900
+3,Epiphone,DR-100,Dreadnought,Full,Spruce,Mahogany,Mahogany,Rosewood,,,20,false,Gloss,Natural,false,false,beginner,Klasszikus Epiphone akusztikus modell,instrument,2025-12-17 14:07:48.960294,74900
+4,Epiphone,Starling Acoustic Player Pack,Dreadnought,Full,Spruce,Mahogany,Mahogany,Rosewood,,,20,false,Gloss,Hot Pink Pearl,false,true,beginner,"Színes szett kezdőknek, kiegészítőkkel",instrument,2025-12-17 14:07:48.960294,87900
+5,Taylor,GS Mini Mahogany,Grand Symphony,Mini,Mahogany,Mahogany,Mahogany,Ebony,,,20,false,Matte,Natural,false,false,travel,Kompakt prémium utazó gitár,instrument,2025-12-17 14:07:48.960294,248900
+6,Ibanez,AW54JR-OPN Artwood,Dreadnought Junior,Junior,Solid Mahogany,Mahogany,Mahogany,Ovangkol,,,20,false,Open Pore,Natural,false,false,intermediate,"Teljes mahagóni test, meleg hang",instrument,2025-12-17 14:07:48.960294,139900
+7,Taylor,Baby Mahogany BT2,Baby,Mini,Mahogany,Mahogany,Mahogany,Ebony,,,19,false,Matte,Natural,false,false,travel,"Kis méretű Taylor, utazáshoz ideális",instrument,2025-12-17 14:07:48.960294,155100
