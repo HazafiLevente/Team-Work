@@ -61,8 +61,33 @@ function findLoosePrice(obj: any): any {
   return null;
 }
 
+function mergeAllData(raw: any, d: any): any {
+  const out: any = {};
+
+  if (raw && typeof raw === 'object') {
+    for (const [k, v] of Object.entries(raw)) {
+      if (v !== undefined) out[k] = v;
+    }
+  }
+
+  if (d && typeof d === 'object') {
+    for (const [k, v] of Object.entries(d)) {
+      if (v !== undefined) out[k] = v;
+    }
+  }
+
+  if (raw?.fields && typeof raw.fields === 'object') {
+    for (const [k, v] of Object.entries(raw.fields)) {
+      if (v !== undefined) out[k] = v;
+    }
+  }
+
+  return out;
+}
+
 export function normalizeProduct(raw: any): Product {
   const d = raw?.data ?? raw ?? {};
+  const merged = mergeAllData(raw, d);
 
   const id =
     toInt(raw?.id) ??
@@ -71,19 +96,33 @@ export function normalizeProduct(raw: any): Product {
     toInt(d?.ID) ??
     0;
 
+  const name =
+    str(raw?.name) ||
+    str(raw?.Name) ||
+    str(d?.name) ||
+    str(d?.Name) ||
+    str(merged?.name) ||
+    str(merged?.Name);
+
   const manufacturer =
     str(raw?.manufacturer) ||
     str(raw?.Manufacturer) ||
     str(d?.manufacturer) ||
     str(d?.Manufacturer) ||
     str(d?.brand) ||
-    str(d?.Brand);
+    str(d?.Brand) ||
+    str(merged?.manufacturer) ||
+    str(merged?.Manufacturer) ||
+    str(merged?.brand) ||
+    str(merged?.Brand);
 
   const model =
     str(raw?.model) ||
     str(raw?.Model) ||
     str(d?.model) ||
     str(d?.Model) ||
+    str(merged?.model) ||
+    str(merged?.Model) ||
     str(d?.name) ||
     str(d?.Name);
 
@@ -91,10 +130,21 @@ export function normalizeProduct(raw: any): Product {
     str(raw?.table_name) ||
     str(raw?.table) ||
     str(d?.table_name) ||
-    str(d?.table);
+    str(d?.table) ||
+    str(merged?.table_name) ||
+    str(merged?.table) ||
+    str(merged?.category) ||
+    str(merged?.type_name);
 
-  const category = str(raw?.category) || str(d?.category);
-  const type = str(raw?.type) || str(d?.type);
+  const category =
+    str(raw?.category) ||
+    str(d?.category) ||
+    str(merged?.category);
+
+  const type =
+    str(raw?.type) ||
+    str(d?.type) ||
+    str(merged?.type);
 
   const priceRaw =
     raw?.price ??
@@ -105,22 +155,28 @@ export function normalizeProduct(raw: any): Product {
     d?.Price ??
     d?.price_range ??
     d?.['Price Range (Ft)'] ??
+    merged?.price ??
+    merged?.Price ??
+    merged?.price_range ??
+    merged?.['Price Range (Ft)'] ??
     findLoosePrice(raw) ??
-    findLoosePrice(d);
+    findLoosePrice(d) ??
+    findLoosePrice(merged);
 
   const priceNum = toInt(priceRaw);
   const price = (priceNum != null && priceNum > 0) ? priceNum : null;
 
   return {
     id,
+    name: name || model,
     manufacturer,
     model,
     price,
     table: table_name,
-    table_name: table_name,
+    table_name,
     category: category || undefined,
     type: type || undefined,
-    data: d
+    data: merged
   };
 }
 

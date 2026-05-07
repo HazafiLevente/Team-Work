@@ -10,7 +10,6 @@ import { take } from 'rxjs/operators';
 import { AuthService } from '../Services/Auth/auth.service';
 import { BellService, BellItem } from '../Services/Bell/bell.service';
 import { text } from '../../Constants/constants';
-import { GoogleTranslateComponent } from '../Shared/GoogleTranslate/google-translate.component';
 import { RankPanelComponent } from '../Rank-Panel/rank-panel.component';
 
 @Component({
@@ -18,7 +17,7 @@ import { RankPanelComponent } from '../Rank-Panel/rank-panel.component';
   standalone: true,
   templateUrl: './header.component.html',
   styleUrls: ['./header.component.css'],
-  imports: [CommonModule, RouterLink, RankPanelComponent, GoogleTranslateComponent]
+  imports: [CommonModule, RouterLink, RankPanelComponent]
 })
 export class HeaderComponent implements OnInit, AfterViewInit {
   user$!: Observable<any | null>;
@@ -43,7 +42,7 @@ export class HeaderComponent implements OnInit, AfterViewInit {
   ngOnInit() {
     this.user$ = this.auth.user$;
 
-    // 🔥 EZ HIÁNYZOTT
+
     this.auth.check().subscribe();
 
     this.bellOpen$ = this.bell.open$;
@@ -55,7 +54,7 @@ export class HeaderComponent implements OnInit, AfterViewInit {
     const el = this.userMenuRef?.nativeElement;
     if (!el) return;
 
-    // ✅ kezdeti állapot: becsukva
+
     gsap.set(el, {
       opacity: 0,
       height: 0,
@@ -77,20 +76,20 @@ export class HeaderComponent implements OnInit, AfterViewInit {
 
       this.menuTl = gsap.timeline();
 
-      // ✅ méréshez: legyen renderelhető
+
       this.menuTl.set(el, {
         pointerEvents: 'auto',
         overflow: 'hidden',
         height: 'auto',
-        opacity: 1,     // ideiglenesen 1, hogy layout biztosan frissüljön
+        opacity: 1,
         y: 0,
         scale: 1
       });
 
-      // ✅ a tuti magasság: scrollHeight (nem offsetHeight)
+
       const targetH = el.scrollHeight;
 
-      // ✅ vissza zárt állapotba, és onnan animálunk
+
       this.menuTl.set(el, { height: 0, opacity: 0, y: -6, scale: 0.98 });
 
       this.menuTl.to(el, {
@@ -101,8 +100,8 @@ export class HeaderComponent implements OnInit, AfterViewInit {
         duration: 0.22,
         ease: 'power3.out',
         onComplete: () => {
-          // ✅ nyitva legyen "auto", hogy ha tartalom változik, ne vágja el
-          // zárás előtt fixáljuk az aktuális magasságot (ha auto volt)
+
+
           gsap.set(el, { height: el.offsetHeight });
 
         }
@@ -132,7 +131,7 @@ export class HeaderComponent implements OnInit, AfterViewInit {
     this.menuTl?.kill();
     this.dropdownOpen = false;
 
-    // ✅ zárás: height vissza 0 + fade
+
     this.menuTl = gsap.timeline({
       onComplete: () => {
         gsap.set(el, { pointerEvents: 'none' });
@@ -161,6 +160,13 @@ export class HeaderComponent implements OnInit, AfterViewInit {
     this.ranksOpen = false;
   }
 
+  openLeaderboard(event?: Event) {
+    event?.preventDefault();
+    event?.stopPropagation();
+    this.closeMenu();
+    this.router.navigateByUrl('/leaderboard');
+  }
+
   toggleBell(event: MouseEvent) {
     event.stopPropagation();
     this.bell.toggle();
@@ -172,9 +178,20 @@ export class HeaderComponent implements OnInit, AfterViewInit {
 
     this.router.navigate(['/notifications'], {
       queryParams: {
-        tab: n.type   // 'system' | 'news' | 'register'
+        tab: n.type
       }
     });
+  }
+
+  bellTypeLabel(n: BellItem): string {
+    const type = String(n?.type || '').toLowerCase();
+
+    if (type === 'system') return 'Rendszer';
+    if (type === 'news') return 'Hir';
+    if (type === 'register') return 'Regisztracio';
+    if (type === 'message') return 'Uzenet';
+
+    return 'Ertesites';
   }
 
   logout() {

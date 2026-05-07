@@ -33,7 +33,6 @@ export interface HomeTheaterFiltersV2 {
   styleUrls: ['./hometheaterfilter.component.css']
 })
 export class HometheaterfilterComponent implements OnInit, OnDestroy {
-
   @Output() filtersChange = new EventEmitter<HomeTheaterFiltersV2>();
   @Output() clearClicked = new EventEmitter<void>();
 
@@ -47,6 +46,8 @@ export class HometheaterfilterComponent implements OnInit, OnDestroy {
 
   loading = true;
   error: string | null = null;
+
+  showAdvanced = false;
 
   constructor(private fb: FormBuilder, private http: HttpClient) {}
 
@@ -70,7 +71,12 @@ export class HometheaterfilterComponent implements OnInit, OnDestroy {
         console.error('❌ HT meta load error:', err);
         this.error = 'HT meta betöltés hiba';
 
-        this.meta = { table_names: [], manufacturers: [], dynamic_by_table: {} };
+        this.meta = {
+          table_names: [],
+          manufacturers: [],
+          dynamic_by_table: {}
+        };
+
         this.buildForm();
         this.hookForm();
 
@@ -85,7 +91,22 @@ export class HometheaterfilterComponent implements OnInit, OnDestroy {
     this.subTable?.unsubscribe();
   }
 
-  private buildForm() {
+  toggleAdvanced(): void {
+    this.showAdvanced = !this.showAdvanced;
+  }
+
+  hasAdvancedControls(): boolean {
+    const dyn = this.dynForSelected();
+    if (!dyn) return false;
+
+    return !!(
+      (dyn.booleans?.length || 0) ||
+      (dyn.numbers?.length || 0) ||
+      Object.keys(dyn.enums || {}).length
+    );
+  }
+
+  private buildForm(): void {
     this.dynamicForm = this.fb.group({});
 
     this.form = this.fb.group({
@@ -97,45 +118,44 @@ export class HometheaterfilterComponent implements OnInit, OnDestroy {
       dynamic: this.dynamicForm
     });
 
-    // tableName változás -> újraépítjük a dynamic mezőket
     this.subTable = this.form.get('tableName')!.valueChanges.subscribe(() => {
       this.rebuildDynamicControls();
       this.emitFilters();
     });
 
-    // első build
     this.rebuildDynamicControls();
   }
 
-  private rebuildDynamicControls() {
-    // töröljük az előző dynamic mezőket
-    Object.keys(this.dynamicForm.controls).forEach(k => this.dynamicForm.removeControl(k));
+  private rebuildDynamicControls(): void {
+    Object.keys(this.dynamicForm.controls).forEach(k => {
+      this.dynamicForm.removeControl(k);
+    });
 
-    const table = this.s(this.form.get('tableName')!.value);
+    const table = this.s(this.form.get('tableName')?.value);
     const dyn = this.meta?.dynamic_by_table?.[table];
     if (!dyn) return;
 
     const booleans = dyn.booleans ?? [];
-    const numbers  = dyn.numbers ?? [];
-    const enums    = dyn.enums ?? {};
+    const numbers = dyn.numbers ?? [];
+    const enums = dyn.enums ?? {};
 
-    // boolean: checkbox
     for (const k of booleans) {
       this.dynamicForm.addControl(k, this.fb.control(false));
     }
 
-    // numbers: range min/max
     for (const k of numbers) {
-      this.dynamicForm.addControl(k, this.fb.group({ min: '', max: '' }));
+      this.dynamicForm.addControl(k, this.fb.group({
+        min: '',
+        max: ''
+      }));
     }
 
-    // enums: select
     for (const k of Object.keys(enums)) {
       this.dynamicForm.addControl(k, this.fb.control(''));
     }
   }
 
-  private hookForm() {
+  private hookForm(): void {
     this.sub = this.form.valueChanges
       .pipe(
         debounceTime(200),
@@ -144,8 +164,13 @@ export class HometheaterfilterComponent implements OnInit, OnDestroy {
       .subscribe(() => this.emitFilters());
   }
 
-  private s(v: any): string { return String(v ?? '').trim(); }
-  private n(v: any): string { return (v === '' || v == null) ? '' : String(v).trim(); }
+  private s(v: any): string {
+    return String(v ?? '').trim();
+  }
+
+  private n(v: any): string {
+    return (v === '' || v == null) ? '' : String(v).trim();
+  }
 
   emitFilters(): void {
     const raw: any = this.form.getRawValue();
@@ -177,8 +202,6 @@ export class HometheaterfilterComponent implements OnInit, OnDestroy {
     this.clearClicked.emit();
     this.emitFilters();
   }
-
-  // ---- template helper-ek ----
 
   dynForSelected() {
     const t = this.s(this.form?.get('tableName')?.value);

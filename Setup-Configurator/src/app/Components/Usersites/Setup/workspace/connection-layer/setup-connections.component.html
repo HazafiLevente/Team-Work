@@ -6,22 +6,30 @@
         class="connection-line cross">
       </path>
     }
-
-    @if (pairingStage === 'PICK_TARGET_SETUP' || pairingStage === 'PICK_TARGET_ITEM') {
-      <path
-        [attr.d]="getGhostLinePath()"
-        class="connection-line ghost-line">
-      </path>
-    }
   } @else {
     @for (conn of connections; track conn.id) {
-      @if (!viewingSetup || !conn.crossSetup) {
+      @if (!conn.crossSetup) {
         <path
           [attr.d]="getLinePath(conn, lineRefreshTrigger)"
           class="connection-line"
           [class.cross]="conn.crossSetup">
         </path>
+        @if (getLineLabelPosition(conn); as labelPos) {
+          <text
+            [attr.x]="labelPos.x"
+            [attr.y]="labelPos.y"
+            class="connection-label">
+            {{ conn.cableLabel || 'utp' }}
+          </text>
+        }
       }
     }
+  }
+
+  @if (pairingStage === 'PICK_TARGET_SETUP' || pairingStage === 'PICK_TARGET_ITEM') {
+    <path
+      [attr.d]="getGhostLinePath()"
+      class="connection-line ghost-line">
+    </path>
   }
 </svg>

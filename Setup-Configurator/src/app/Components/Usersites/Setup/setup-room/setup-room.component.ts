@@ -64,12 +64,29 @@ export class SetupRoomComponent implements AfterViewInit {
     }
   }
 
-  isNetwork(): boolean {
-    return String(this.setup?.isNetwork).toLowerCase() === 'true' || this.setup?.isNetwork === true;
+  isCircularNetworkType(): boolean {
+    const rawValues = [
+      this.setup?.setup_type,
+      this.setup?.type,
+      this.setup?.category,
+      this.setup?.setup_name,
+      this.setup?.display_name,
+      this.setup?.name
+    ];
+
+    const normalized = rawValues
+      .map((value) => String(value || '').toLowerCase().trim())
+      .join(' ');
+
+    return ['modem', 'router', 'switch'].some((token) => normalized.includes(token));
   }
   isHT(): boolean {
-    const type = String(this.setup?.setup_type || '').toLowerCase();
+    const type = String(this.setup?.setup_type ?? this.setup?.type ?? '').toLowerCase();
     return type === 'home_theater' || type === 'hometheater' || type === 'home theater';
+  }
+
+  isNote(): boolean {
+    return this.setup?.isNote === true || this.setup?.is_note === true || this.setup?.isnote === true;
   }
   startRename(): void {
 
@@ -133,7 +150,6 @@ export class SetupRoomComponent implements AfterViewInit {
   onClick(): void {
     const now = Date.now();
     if (now - this.lastClickTime < 450) {
-      console.log('🏁 Manual double-click (450ms) detected on:', this.setup?.setup_name);
       this.onDblClick();
       this.lastClickTime = 0;
       return;
@@ -143,7 +159,6 @@ export class SetupRoomComponent implements AfterViewInit {
   }
 
   onDblClick(): void {
-    console.log('🔥 Final dblclick event emitted for:', this.setup?.setup_name);
     this.setupDblClick.emit(this.setup);
   }
 
@@ -160,3 +175,4 @@ export class SetupRoomComponent implements AfterViewInit {
 
 
 }
+

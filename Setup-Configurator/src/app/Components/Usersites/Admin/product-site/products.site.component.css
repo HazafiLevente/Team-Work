@@ -4,7 +4,7 @@
   height: 100%;
 }
 
-/* BAL OLDAL */
+
 .products-left {
   width: 280px;
   display: flex;
@@ -20,7 +20,7 @@
   color: white;
 }
 
-/* TERMÉK KÁRTYA */
+
 .product-card {
   padding: 14px;
   border-radius: 16px;
@@ -46,7 +46,7 @@
   opacity: 0.8;
 }
 
-/* JOBB OLDAL */
+
 .products-right {
   flex: 1;
   background: #16161d;

@@ -11,26 +11,26 @@
 
   <div class="filter-grid" *ngIf="!loadingMeta">
 
-    <!-- TYPE -->
+
     <select class="search-input" formControlName="itemType" title="Típus">
       <option value="all">Minden</option>
       <option value="instrument">Instrument</option>
       <option value="accessory">Accessory</option>
     </select>
 
-    <!-- TABLE -->
+
     <select class="search-input" formControlName="tableName" title="Tábla">
       <option value="">Tábla (összes)</option>
       <option *ngFor="let t of (meta?.table_names || [])" [value]="t">{{ t }}</option>
     </select>
 
-    <!-- MANUFACTURER -->
+
     <select class="search-input" formControlName="manufacturer" title="Gyártó">
       <option value="">Gyártó (összes)</option>
       <option *ngFor="let m of (meta?.manufacturers || [])" [value]="m">{{ m }}</option>
     </select>
 
-    <!-- MODEL -->
+
     <input class="search-input"
            placeholder="Modell"
            title="Modell"

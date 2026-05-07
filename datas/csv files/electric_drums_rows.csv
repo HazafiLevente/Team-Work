@@ -1,7 +1,0 @@
-ID,manufacturer,Model,drum_type,pad_type,shell_design,module_model,kit_pieces,cymbals,hi_hat_type,kick_type,usb_midi,bluetooth,recording,target_level,genre_recommendation,release_year,notes,category
-1,Nux," DM-210 Elektromos dobszett",Electronic,Mesh,false,NUX DM-210 Module,5,3,Pedal,Pad,true,false,false,Beginner,"Practice, Pop, Rock",2022,Kedvező árú mesh head elektronikus dobszett gyakorláshoz,instrument
-2,Roland," TD-07DMK V-Drums elektromos dobszett",Electronic,Mesh,false,Roland TD-07,5,3,Pedal,Tower,true,true,true,Intermediate,"Rock, Metal, Practice",2021,Professzionális Roland mesh rendszer Bluetooth támogatással,instrument
-3,Alesis," Turbo Mesh Kit elektromos dobszett",Electronic,Mesh,false,Alesis Turbo Module,7,3,Pedal,Pedal,true,false,false,Beginner,"Practice, Beginner",2019,Belépő szintű mesh dobszett otthoni gyakorláshoz,instrument
-4,Roland,TD-50KV2 V-Drums elektromos dobszett,Electronic,Mesh,false,Roland TD-50X,7,4,Stand,Tower,true,true,true,Professional,"Metal, Progressive, Studio",2022,Csúcskategóriás Roland V-Drums professzionális stúdió- és színpadi használatra,instrument
-5,Roland," VAD504 V-Drums Acoustic Design elektromos dobszett",Hybrid,Mesh,true,Roland TD-27,5,3,Stand,Acoustic Shell,true,true,true,Professional,"Live, Studio",2020,Akusztikus megjelenésű V-Drums szett professzionális dobosoknak,instrument
-6,Alesis," Nitro Max Kit elektromos dobszett",Electronic,Mesh,false,Alesis Nitro Max Module,5,3,Pedal,Pad,true,true,false,Beginner,"Practice, Home use",2023,Modern belépőszintű dobszett Bluetooth funkcióval,instrument

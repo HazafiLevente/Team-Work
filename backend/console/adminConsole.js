@@ -5,12 +5,10 @@ require("dotenv").config({
     override: true
 });
 
-
 const readline = require("readline");
 const { refreshTables } = require("../services/control");
-const {syncOnce } = require("../services/syncService");
-const fetch = global.fetch;
-
+const { syncOnce } = require("../services/syncService");
+const { runAiPrompt } = require("../ai/ai.controller");
 
 const rl = readline.createInterface({
     input: process.stdin,
@@ -24,6 +22,7 @@ function help() {
     console.log(`
 Commands:
   help     - this help
+  ai       - ask AI: ai <prompt>
   refresh  - control + sync
   control  - only control
   sync     - only sync
@@ -33,82 +32,101 @@ Commands:
 
 async function runSafe(fn) {
     if (busy) {
-        console.log("⏳ Busy, wait...");
+        console.log("Busy, wait...");
         return;
     }
+
     busy = true;
+
     try {
         await fn();
+    } catch (error) {
+        console.error("Console command failed:", error?.message || error);
     } finally {
         busy = false;
         rl.prompt();
     }
 }
 
-console.log("🧰 Admin console ready. Type: help");
+console.log("Admin console ready. Type: help");
 rl.prompt();
 
 rl.on("line", (line) => {
-    const cmd = line.trim().toLowerCase();
+    const raw = String(line || "").trim();
+    const cmd = raw.toLowerCase();
 
-    if (!cmd) return rl.prompt();
-
-    if (cmd === "help") return help(), rl.prompt();
-    if (cmd === "exit") return rl.close();
-    if (cmd.startsWith("ai ")) {
-        const question = line.slice(3).trim();
-
-        if (!question) {
-            console.log("❗ Usage: ai <question>");
-            return rl.prompt();
-        }
-
-        return runSafe(async () => {
-            const res = await fetch("http://localhost:3000/api/ai/chat", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ message: question })
-            });
-
-            const data = await res.json();
-
-            if (data.answer) {
-                console.log("\n🤖 AI:", data.answer, "\n");
-            } else {
-                console.log("⚠️ AI error:", data);
-            }
-        });
+    if (!cmd) {
+        rl.prompt();
+        return;
     }
 
+    if (cmd === "help") {
+        help();
+        rl.prompt();
+        return;
+    }
+
+    if (cmd === "exit") {
+        rl.close();
+        return;
+    }
+
+    if (cmd.startsWith("ai ")) {
+        const question = raw.slice(3).trim();
+
+        if (!question) {
+            console.log("Usage: ai <question>");
+            rl.prompt();
+            return;
+        }
+
+        runSafe(async () => {
+            const data = await runAiPrompt({
+                message: question,
+                history: [],
+                persist: false
+            });
+
+            if (data?.answer) {
+                console.log(`\nAI: ${data.answer}\n`);
+            } else {
+                console.log("AI error:", data);
+            }
+        });
+        return;
+    }
 
     if (cmd === "refresh") {
-        return runSafe(async () => {
-            console.log("🔄 CONTROL...");
+        runSafe(async () => {
+            console.log("CONTROL...");
             await refreshTables();
-            console.log("🔄 SYNC...");
+            console.log("SYNC...");
             await syncOnce({ upload: false });
-            console.log("✅ DONE");
+            console.log("DONE");
         });
+        return;
     }
 
     if (cmd === "control") {
-        return runSafe(async () => {
+        runSafe(async () => {
             await refreshTables();
-            console.log("✅ CONTROL DONE");
+            console.log("CONTROL DONE");
         });
+        return;
     }
 
     if (cmd === "sync") {
-        return runSafe(async () => {
+        runSafe(async () => {
             await syncOnce({ upload: false });
-            console.log("✅ SYNC DONE");
+            console.log("SYNC DONE");
         });
+        return;
     }
 
-    console.log("❓ Unknown command");
+    console.log("Unknown command");
     rl.prompt();
 });
 
 rl.on("close", () => {
-    console.log("👋 Admin console closed");
+    console.log("Admin console closed");
 });

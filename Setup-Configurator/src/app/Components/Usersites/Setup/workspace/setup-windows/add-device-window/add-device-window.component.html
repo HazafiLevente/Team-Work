@@ -1,6 +1,6 @@
 <div class="add-device-container">
 
-  <!-- CATEGORY PICKER -->
+
   @if (!selectedCategory) {
   <div class="picker-header">
     <h3>Milyen eszközt szeretnél hozzáadni?</h3>
@@ -15,7 +15,7 @@
   </div>
   }
 
-  <!-- PRODUCT LIST -->
+
   @if (selectedCategory) {
   <div class="product-header">
     <button class="back-btn" (click)="goBack()">← Vissza</button>

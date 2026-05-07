@@ -1,7 +1,8 @@
 <div class="product-grid" *ngIf="pagedProducts.length > 0">
   <app-product
-    *ngFor="let p of pagedProducts"
+    *ngFor="let p of pagedProducts; let i = index"
     [product]="p"
+    [priority]="i < 6"
     (openProduct)="onOpenProduct($event)">
   </app-product>
 </div>
@@ -10,7 +11,7 @@
   Nincs találat.
 </p>
 
-<!-- ✅ Pagination -->
+
 <div class="pager" *ngIf="filteredProducts.length > PAGE_SIZE">
   <button (click)="prevPage()" [disabled]="page === 1">
     ◀ Prev

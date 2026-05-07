@@ -1,72 +1,43 @@
+:host {
+  --header-h: 64px;
+}
+
 .home-top {
   display: grid;
-  gap: 12px;
-  margin-bottom: 14px;
-  /* <-- EZ akadályozza meg, hogy ráfussanak a kártyákra */
+  gap: 14px;
+  margin-bottom: 16px;
+  padding-top: calc(var(--header-h) + 12px);
 }
 
-/* két oszlop: bal rugalmas, jobb fixebb, de nem “kilógós” */
 .home-row {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 560px;
-  gap: 28px;
+  grid-template-columns: minmax(0, 1fr) 420px;
+  gap: 22px;
   align-items: start;
-  padding-right: 22px;
 }
 
-/* NE fixáld szélességre a balt – ez okozza a csúszás/átfedés 80%-át */
-.left {
-  min-width: 0;
-}
-
-/* jobb oldal ne kényszerítse rá magát a layout-ra */
+.left,
 .right {
   min-width: 0;
 }
 
-@media (max-width: 768px) {
-  .searchbar {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-    position: sticky;
-    top: 0;
-    z-index: 60;
-    padding-top: 10px;
-    padding-bottom: 10px;
-    backdrop-filter: blur(10px);
-  }
-
-  /* a “Keresés: model...” legyen teljes széles */
-  .searchbar .term {
-    grid-column: 1 / -1;
-  }
-
-  /* a Keresés gomb is legyen full */
-  .searchbar .search-btn {
-    grid-column: 1 / -1;
-    justify-content: center;
-  }
-
-  /* inputok ne legyenek túl magasak */
-  .searchbar .search-input {
-    padding: 10px 10px;
-  }
+.right {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
 
-/* általános hover feedback minden mezőre */
 .search-input {
   transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease;
 }
 
 .search-input:hover {
-  border-color: rgba(0, 255, 255, .35);
-  box-shadow: 0 0 0 1px rgba(0, 255, 255, .15);
+  border-color: color-mix(in srgb, var(--page-accent, #67e8f9) 35%, transparent);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--page-accent, #67e8f9) 14%, transparent);
   transform: translateY(-1px);
 }
 
-/* gombok */
 .btn,
 .tag {
   transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease, opacity .12s ease;
@@ -75,17 +46,39 @@
 .btn:hover,
 .tag:hover {
   transform: translateY(-1px);
-  box-shadow: 0 0 0 1px rgba(0, 255, 255, .18);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--page-accent, #67e8f9) 18%, transparent);
 }
 
 
-/* show/hide helpers */
 .mobile-only {
-  display: none;
+  display: none !important;
 }
 
 .desktop-only {
-  display: block;
+  display: block !important;
+}
+
+
+.mobile-overlay,
+.mobile-sheet {
+  display: none;
+}
+
+@media (max-width: 1200px) {
+  .home-row {
+    grid-template-columns: minmax(0, 1fr) 360px;
+  }
+}
+
+@media (max-width: 980px) {
+  .home-row {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .right {
+    order: -1;
+  }
 }
 
 @media (max-width: 768px) {
@@ -97,7 +90,6 @@
     display: block !important;
   }
 
-  /* a searchbar legyen rendesen sticky (nem az egész oldal teteje) */
   .searchbar {
     position: sticky;
     top: 0;
@@ -105,81 +97,10 @@
     padding-top: 10px;
     padding-bottom: 10px;
     backdrop-filter: blur(10px);
-  }
 
-  /* a fő layout legyen egy oszlop */
-  .home-row {
-    grid-template-columns: 1fr !important;
-    gap: 14px !important;
-    padding-right: 0 !important;
-  }
-
-  /* Mobile bottom sheet */
-  .mobile-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, .55);
-    z-index: 9998;
-  }
-
-  .mobile-sheet {
-    position: fixed;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    height: 85vh;
-    background: var(--surface);
-    border-top: 1px solid var(--glass-border);
-    border-radius: 16px 16px 0 0;
-    transform: translateY(110%);
-    transition: transform .2s ease;
-    z-index: 9999;
-    overflow: auto;
-    padding: 12px;
-    padding-bottom: 150px;
-  }
-
-  .mobile-sheet.open {
-    transform: translateY(0);
-  }
-
-  .sheet-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 10px;
-  }
-
-  .sheet-header .x {
-    background: transparent;
-    border: 1px solid var(--glass-border);
-    color: var(--text);
-    border-radius: 10px;
-    padding: 6px 10px;
-  }
-
-  /* “Több” gomb egységes stílus */
-  .more-btn {
-    width: 100%;
-    text-align: left;
-    padding: 10px 12px;
-    border-radius: 12px;
-    border: 1px solid var(--glass-border);
-    background: var(--surface);
-    color: var(--text);
-    margin-top: 6px;
-  }
-}
-
-
-/* 📱 MOBILE – Searchbar középre */
-@media (max-width: 768px) {
-
-  .searchbar {
     display: flex;
     flex-direction: column;
     align-items: center;
-    /* EZ teszi középre */
     gap: 12px;
   }
 
@@ -187,95 +108,78 @@
   .searchbar select,
   .searchbar .search-btn {
     width: 90%;
-    /* ne legyen full 100%, így szebb */
     max-width: 420px;
-    /* ne nőjön túl nagyra */
   }
 
-}
-
-/* alapból desktop: NE látszódjon */
-.mobile-only {
-  display: none;
-}
-
-.desktop-only {
-  display: block;
-}
-
-/* a gomb mobilon legyen fix lent */
-@media (max-width: 768px) {
-  .mobile-only {
-    display: inline-flex;
+  .home-row {
+    grid-template-columns: 1fr !important;
+    gap: 14px !important;
   }
 
-  .desktop-only {
-    display: none;
+  .mobile-overlay {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, .55);
+    z-index: 9998;
+  }
+
+  .mobile-sheet {
+    display: block;
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 84vh;
+    background: rgba(10, 14, 22, 0.96);
+    border-top: 1px solid rgba(255,255,255,0.10);
+    border-radius: 18px 18px 0 0;
+    transform: translateY(110%);
+    transition: transform .2s ease;
+    z-index: 9999;
+    overflow: auto;
+    padding: 12px;
+    padding-bottom: 140px;
+    backdrop-filter: blur(18px);
+  }
+
+  .mobile-sheet.open {
+    transform: translateY(0);
+  }
+
+  .sheet-header {
+    position: sticky;
+    top: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    padding: 12px 0;
+    background: rgba(10, 14, 22, 0.96);
+    z-index: 2;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+  }
+
+  .sheet-header .x {
+    background: transparent;
+    border: 1px solid rgba(255,255,255,0.10);
+    color: var(--text);
+    border-radius: 10px;
+    padding: 6px 10px;
   }
 
   .more-btn {
     position: fixed;
     left: 12px;
     bottom: 92px;
-    /* dock fölé */
     z-index: 80;
-
     padding: 10px 12px;
-    border-radius: 12px;
-
-    background: var(--surface);
-    border: 1px solid var(--glass-border);
+    border-radius: 14px;
+    background: rgba(10, 14, 22, 0.92);
+    border: 1px solid rgba(255,255,255,0.10);
     color: var(--text);
     cursor: pointer;
+    box-shadow: 0 12px 28px rgba(0,0,0,0.28);
+    backdrop-filter: blur(14px);
   }
-}
-
-/* bottom sheet */
-.mobile-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, .55);
-  z-index: 90;
-}
-
-.mobile-sheet {
-  position: fixed;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  height: 82vh;
-
-  transform: translateY(100%);
-  transition: transform .18s ease;
-
-  z-index: 100;
-  background: var(--surface);
-  border-top: 1px solid var(--glass-border);
-  border-radius: 16px 16px 0 0;
-  overflow: auto;
-}
-
-.mobile-sheet.open {
-  transform: translateY(0);
-}
-
-.sheet-header {
-  position: sticky;
-  top: 0;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-
-  padding: 12px;
-  border-bottom: 1px solid var(--glass-border);
-  background: var(--surface);
-  z-index: 2;
-}
-
-.sheet-header .x {
-  background: transparent;
-  border: 1px solid var(--glass-border);
-  border-radius: 10px;
-  color: var(--text);
-  padding: 6px 10px;
 }

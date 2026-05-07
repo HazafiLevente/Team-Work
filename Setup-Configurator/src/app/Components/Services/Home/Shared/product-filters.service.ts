@@ -5,15 +5,12 @@ import { SearchFilters } from '../../../../Models/Filters/searchfilters.model';
 import { CarFilters } from '../../../Home/Filterparts/carfilter/carfilter.component';
 import { ComputerFilters } from '../../../Home/Filterparts/computerfilter/computerfilter/computerfilter.component';
 import { HomeTheaterFiltersV2 as HomeTheaterFilters } from '../../../Home/Filterparts/hometheaterfilter/hometheaterfilter.component';
-
 import { InstrumentFilters } from '../../../Home/Filterparts/instrumentfilter/instrumentfilter.component';
 
 export type CategoryKey = 'all' | 'car' | 'computer' | 'ht' | 'instrument';
 
 export interface CombinedFilters {
   activeCategory: CategoryKey;
-
-  // ✅ a Productlist ezekre a nevekre fog hivatkozni
   search: SearchFilters;
   car: CarFilters;
   computer: ComputerFilters;
@@ -33,40 +30,40 @@ const EMPTY_CAR: CarFilters = {
   category: 'car',
   manufacturer: '',
   model: '',
-  minPrice: '',
-  maxPrice: '',
-  // ha nálad több mező van, maradhatnak itt üresen (TS nem fog összeomlani ha interface bővebb)
-} as any;
+  priceMin: '',
+  priceMax: '',
+  bodyType: '',
+  hpMin: '',
+  hpMax: '',
+  accelMin: '',
+  accelMax: '',
+  seatsMin: '',
+  seatsMax: '',
+  fuel: '',
+  yearMin: '',
+  yearMax: '',
+  transmission: ''
+};
 
 const EMPTY_COMPUTER: ComputerFilters = {
   category: 'computer',
-  cpuBrand: '',
-  cpuModel: '',
-  gpuBrand: '',
-  gpuModel: '',
-  ramMin: '',
-  ramMax: '',
-  storageType: '',
-  storageMin: '',
-  storageMax: '',
-  psuMin: '',
-  psuMax: ''
+  tableName: '',
+  manufacturer: '',
+  model: '',
+  priceMin: '',
+  priceMax: '',
+  dynamic: {}
 };
 
 const EMPTY_HT: HomeTheaterFilters = {
   category: 'ht',
-  type: '',
+  tableName: '',
   manufacturer: '',
   model: '',
-  minChannels: '',
-  maxChannels: '',
-  minPower: '',
-  maxPower: '',
-  bluetooth: false,
-  wifi: false,
-  earc: false
-} as any;
-
+  priceMin: '',
+  priceMax: '',
+  dynamic: {}
+};
 
 const EMPTY_INSTRUMENT: InstrumentFilters = {
   itemType: 'instrument',
@@ -80,103 +77,60 @@ const EMPTY_INSTRUMENT: InstrumentFilters = {
 
 @Injectable({ providedIn: 'root' })
 export class ProductFiltersService {
-
-  // ✅ single source of truth
-  current: CombinedFilters = {
+  private readonly state$ = new BehaviorSubject<CombinedFilters>({
     activeCategory: 'all',
-    search: { ...EMPTY_SEARCH },
-    car: { ...EMPTY_CAR },
-    computer: { ...EMPTY_COMPUTER },
-    ht: { ...EMPTY_HT },
-    instrument: { ...EMPTY_INSTRUMENT }
-  };
+    search: EMPTY_SEARCH,
+    car: EMPTY_CAR,
+    computer: EMPTY_COMPUTER,
+    ht: EMPTY_HT,
+    instrument: EMPTY_INSTRUMENT
+  });
 
-  private subj = new BehaviorSubject<CombinedFilters>({ ...this.current });
-  filters$ = this.subj.asObservable();
+  readonly filters$ = this.state$.asObservable();
 
-  /** Mindig hívjuk, ha változott valami */
-  private emit() {
-    // fontos: új object reference, hogy minden subscriber reagáljon
-    this.subj.next({
-      ...this.current,
-      search: { ...this.current.search },
-      car: { ...(this.current.car as any) },
-      computer: { ...this.current.computer },
-      ht: { ...this.current.ht },
-      instrument: { ...this.current.instrument }
+  get current(): CombinedFilters {
+    return this.state$.value;
+  }
+
+  private patch(partial: Partial<CombinedFilters>) {
+    this.state$.next({
+      ...this.state$.value,
+      ...partial
     });
-
-    // DEBUG - ezt nyugodtan hagyd bent, amíg teszteled
-    console.log('✅ filters emit:', this.current);
   }
 
-  /* -----------------------------
-     CATEGORY
-  ----------------------------- */
-
-  setActiveCategory(cat: CategoryKey) {
-    this.current.activeCategory = cat;
-    this.emit();
+  setActiveCategory(activeCategory: CategoryKey) {
+    this.patch({ activeCategory });
   }
 
-  /* -----------------------------
-     SEARCHBAR
-  ----------------------------- */
-
-  setSearch(s: SearchFilters) {
-    this.current.search = {
-      ...this.current.search,
-      term: (s.term ?? '').trim(),
-      manufacturer: (s.manufacturer ?? '').trim(),
-      priceMin: s.priceMin ?? null,
-      priceMax: s.priceMax ?? null,
-      sort: (s.sort ?? '').trim()
-    };
-    this.emit();
+  setSearch(search: SearchFilters) {
+    this.patch({ search });
   }
 
-  clearSearch() {
-    this.current.search = { ...EMPTY_SEARCH };
-    this.emit();
+  setCar(car: CarFilters) {
+    this.patch({ car });
   }
 
-  /* -----------------------------
-     DETAILED PANELS
-  ----------------------------- */
-
-  setCar(f: CarFilters) {
-    this.current.car = { ...(f as any) };
-    this.emit();
+  setComputer(computer: ComputerFilters) {
+    this.patch({ computer });
   }
 
-  setComputer(f: ComputerFilters) {
-    this.current.computer = { ...f };
-    this.emit();
+  setHt(ht: HomeTheaterFilters) {
+    this.patch({ ht });
   }
 
-  setHt(f: HomeTheaterFilters) {
-    this.current.ht = { ...f };
-    this.emit();
+  setInstrument(instrument: InstrumentFilters) {
+    this.patch({ instrument });
   }
 
-  setInstrument(f: InstrumentFilters) {
-    this.current.instrument = { ...f };
-    this.emit();
-  }
-
-  /* -----------------------------
-     FULL RESET (optional)
-  ----------------------------- */
-
-  resetAll() {
-    this.current = {
+  clearAll() {
+    this.state$.next({
       activeCategory: 'all',
-      search: { ...EMPTY_SEARCH },
-      car: { ...EMPTY_CAR },
-      computer: { ...EMPTY_COMPUTER },
-      ht: { ...EMPTY_HT },
-      instrument: { ...EMPTY_INSTRUMENT }
-    };
-    this.emit();
+      search: EMPTY_SEARCH,
+      car: EMPTY_CAR,
+      computer: EMPTY_COMPUTER,
+      ht: EMPTY_HT,
+      instrument: EMPTY_INSTRUMENT
+    });
   }
 }

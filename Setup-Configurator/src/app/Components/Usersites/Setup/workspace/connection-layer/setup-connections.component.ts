@@ -40,12 +40,6 @@ export class SetupConnectionsComponent {
     let sEl = this.elementRegistry?.get(sId);
     let tEl = this.elementRegistry?.get(tId);
 
-    console.log('🔗 [Connections] Drawing item line:', {
-      sId,
-      tId,
-      foundS: !!sEl,
-      foundT: !!tEl
-    });
 
     if (!sEl && tEl) {
       const tmp = sEl;
@@ -74,6 +68,31 @@ export class SetupConnectionsComponent {
     return `M ${x1} ${y1} L ${x2} ${y2}`;
   }
 
+  getLineLabelPosition(conn: any): { x: number; y: number } | null {
+    if (!this.boundaryEl || !this.elementRegistry) return null;
+
+    const sCat = this.normalizeCategory(conn?.source?.category);
+    const tCat = this.normalizeCategory(conn?.target?.category);
+    const sEl = this.elementRegistry?.get(`${sCat}:${conn?.source?.id}`);
+    const tEl = this.elementRegistry?.get(`${tCat}:${conn?.target?.id}`);
+
+    if (!sEl || !tEl) return null;
+
+    const rect = this.boundaryEl.getBoundingClientRect();
+    const sRect = sEl.getBoundingClientRect();
+    const tRect = tEl.getBoundingClientRect();
+
+    const x1 = sRect.left + sRect.width / 2 - rect.left;
+    const y1 = sRect.top + sRect.height / 2 - rect.top;
+    const x2 = tRect.left + tRect.width / 2 - rect.left;
+    const y2 = tRect.top + tRect.height / 2 - rect.top;
+
+    return {
+      x: (x1 + x2) / 2,
+      y: (y1 + y2) / 2 - 6
+    };
+  }
+
   getRoomLinePath(conn: any, _trigger?: any): string {
     if (!this.boundaryEl || !this.elementRegistry) return '';
 
@@ -83,13 +102,8 @@ export class SetupConnectionsComponent {
     const sEl = this.elementRegistry.get(sId);
     const tEl = this.elementRegistry.get(tId);
 
-    /*console.log('🔗 [Connections] Drawing room line:', {
-      sId,
-      tId,
-      foundS: !!sEl,
-      foundT: !!tEl,
-      registrySize: this.elementRegistry?.size
-    });*/
+
+
 
     if (!sEl || !tEl) return '';
 

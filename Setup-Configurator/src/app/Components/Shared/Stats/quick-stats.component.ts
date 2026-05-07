@@ -11,7 +11,7 @@ import { CountUpComponent } from './count-up.component';
 
 })
 export class QuickStatsComponent {
-  @Input() total = 0;     // összes termék
-  @Input() pool = 0;      // spotlight pool (cards)
+  @Input() total = 0;
+  @Input() pool = 0;
   @Input() chips: string[] = [];
 }

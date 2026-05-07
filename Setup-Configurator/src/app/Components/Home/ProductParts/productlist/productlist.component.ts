@@ -8,6 +8,12 @@ import { ProductComponent } from '../product/product.component';
 
 import { ProductFiltersService, CombinedFilters } from '../../../Services/Home/Shared/product-filters.service';
 import { normalizeList } from '../../../Services/Home/Shared/product-normalizer';
+import {
+  passesCarFilters,
+  passesComputerFilters,
+  passesHtFilters,
+  passesInstrumentFilters
+} from '../../../Services/Home/Shared/product-advanced-filter.util';
 
 type AnyProduct = Product & {
   table_name?: string;
@@ -21,7 +27,6 @@ type AnyProduct = Product & {
   id?: any;
   ID?: any;
 
-  // car top-level fallbackok
   price_range?: any;
   body_type?: any;
   horsepower?: any;
@@ -53,7 +58,7 @@ export class ProductlistComponent implements OnInit, OnDestroy {
 
   filteredProducts: AnyProduct[] = [];
 
-  readonly PAGE_SIZE = 50;
+  readonly PAGE_SIZE = 24;
   page = 1;
   totalPages = 1;
   pagedProducts: AnyProduct[] = [];
@@ -71,40 +76,22 @@ export class ProductlistComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.sub = this.filtersService.filters$.subscribe(f => this.applyFilters(f));
 
-    this.productService.getHomeTheaters(this.PRODUCT_LIMIT).subscribe(res => {
-      console.log('HT RES:', res);
-      this.htProducts = normalizeList(res.items || []);
-      console.log('HT NORMALIZED:', this.htProducts);
-      this.emitStats();
-      this.applyFilters(this.filtersService.current);
-
-
-    });
-    this.productService.getProducts(this.PRODUCT_LIMIT).subscribe(res => {
-      this.allProducts = normalizeList(res.items || []);
-      this.loading = false;
-      this.emitStats();
-      this.applyFilters(this.filtersService.current);
-    });
-
-    this.productService.getCars(this.PRODUCT_LIMIT).subscribe(res => {
-      this.carProducts = normalizeList(res.items || []);
-      this.emitStats();
-      this.applyFilters(this.filtersService.current);
-    });
-
-    this.productService.getComputers(this.PRODUCT_LIMIT).subscribe(res => {
-      this.computerProducts = normalizeList(res.items || []);
-      this.emitStats();
-      this.applyFilters(this.filtersService.current);
-    });
-
-
-
-    this.productService.getInstruments(this.PRODUCT_LIMIT).subscribe(res => {
-      this.allInstruments = normalizeList(res.items || []);
-      this.emitStats();
-      this.applyFilters(this.filtersService.current);
+    this.productService.getProducts(this.PRODUCT_LIMIT).subscribe({
+      next: (res) => {
+        this.allProducts = normalizeList(res.items || []);
+        this.rebuildCategoryBuckets();
+        this.loading = false;
+        this.emitStats();
+        this.applyFilters(this.filtersService.current);
+      },
+      error: (err) => {
+        console.error('Product load error:', err);
+        this.allProducts = [];
+        this.rebuildCategoryBuckets();
+        this.loading = false;
+        this.emitStats();
+        this.applyFilters(this.filtersService.current);
+      }
     });
   }
 
@@ -116,9 +103,8 @@ export class ProductlistComponent implements OnInit, OnDestroy {
     this.openProduct.emit(p);
   }
 
-  /* -----------------------------
-     UTILS
-  ----------------------------- */
+
+
 
   private norm(v: any): string {
     return String(v ?? '').trim().toLowerCase();
@@ -161,7 +147,7 @@ export class ProductlistComponent implements OnInit, OnDestroy {
       p.data?.price ??
       p.data?.Price ??
       p.data?.price_range ??
-      p.data?.["Price Range (Ft)"];
+      p.data?.['Price Range (Ft)'];
 
     if (raw == null || raw === '') return null;
 
@@ -186,20 +172,204 @@ export class ProductlistComponent implements OnInit, OnDestroy {
     return Math.round((min + max) / 2);
   }
 
-  private field(p: AnyProduct, ...keys: string[]): any {
-    for (const key of keys) {
-      const top = (p as any)?.[key];
-      if (top !== undefined && top !== null && String(top) !== '') return top;
-
-      const nested = (p as any)?.data?.[key];
-      if (nested !== undefined && nested !== null && String(nested) !== '') return nested;
-    }
-    return null;
+  private containsAny(value: any, needles: string[]): boolean {
+    const hay = this.norm(value);
+    if (!hay) return false;
+    return needles.some(needle => hay.includes(this.norm(needle)));
   }
 
-  /* -----------------------------
-     ALL MERGED (dedup)
-  ----------------------------- */
+  private equalsAny(value: any, needles: string[]): boolean {
+    const hay = this.norm(value);
+    if (!hay) return false;
+    return needles.some(needle => hay === this.norm(needle));
+  }
+
+  private isCarProduct(p: AnyProduct): boolean {
+    return (
+      this.equalsAny(p.category, ['car']) ||
+      this.equalsAny(p.type, ['car']) ||
+      this.equalsAny(this.getTable(p), [
+        'car',
+        'cabrio_cars',
+        'coupe_cars',
+        'crossover_cars',
+        'hatchback_cars',
+        'mpv_cars',
+        'pickup_cars',
+        'wagon_cars'
+      ])
+    );
+  }
+
+  private isComputerProduct(p: AnyProduct): boolean {
+    return (
+      this.containsAny(p.category, [
+        'computer',
+        'pc',
+        'cpu_desktop',
+        'gpu',
+        'motherboard',
+        'ram',
+        'psu',
+        'cpu_cooler',
+        'soundcard',
+        'server_desktop'
+      ]) ||
+      this.containsAny(p.type, [
+        'computer',
+        'pc',
+        'cpu_desktop',
+        'gpu',
+        'motherboard',
+        'ram',
+        'psu',
+        'cpu_cooler',
+        'soundcard',
+        'server_desktop'
+      ]) ||
+      this.containsAny(this.getTable(p), [
+        'computer',
+        'pc',
+        'processors',
+        'video_cards',
+        'motherboard',
+        'ram',
+        'psu',
+        'cpu_coolers',
+        'soundcards',
+        'storages'
+      ])
+    );
+  }
+
+  private isHtProduct(p: AnyProduct): boolean {
+    return (
+      this.containsAny(p.category, [
+        'ht',
+        'home theater',
+        'home_theater',
+        'receiver',
+        'audio_processor',
+        'portable_speaker',
+        'front_speaker',
+        'back_speaker',
+        'side_speaker',
+        'center_speaker',
+        'floor_speaker',
+        'ceiling_speaker',
+        'subwoofer',
+        'bass_amplifier',
+        'bass_shaker',
+        'studio_monitor',
+        'soundbar'
+      ]) ||
+      this.containsAny(p.type, [
+        'ht',
+        'home theater',
+        'home_theater',
+        'receiver',
+        'audio_processor',
+        'portable_speaker',
+        'front_speaker',
+        'back_speaker',
+        'side_speaker',
+        'center_speaker',
+        'floor_speaker',
+        'ceiling_speaker',
+        'subwoofer',
+        'bass_amplifier',
+        'bass_shaker',
+        'studio_monitor',
+        'soundbar'
+      ]) ||
+      this.containsAny(this.getTable(p), [
+        'home_theater',
+        'audio_processors',
+        'portable_speakers',
+        'front_speaker',
+        'back_speaker',
+        'side_speaker',
+        'center_speakers',
+        'floor_speakers',
+        'ceiling_speakers',
+        'subwoofer',
+        'bass_amplifier',
+        'bass_shaker',
+        'studio_monitor_speakers'
+      ])
+    );
+  }
+
+  private isInstrumentProduct(p: AnyProduct): boolean {
+    return (
+      this.containsAny(p.category, [
+        'inst',
+        'instrument',
+        'instruments',
+        'accessory',
+        'accessories',
+        'acoustic_drums',
+        'acoustic_guitar',
+        'trumpet',
+        'saxophone',
+        'guitar',
+        'drum'
+      ]) ||
+      this.containsAny(p.type, [
+        'inst',
+        'instrument',
+        'instruments',
+        'accessory',
+        'accessories',
+        'acoustic_drums',
+        'acoustic_guitar',
+        'trumpet',
+        'saxophone',
+        'guitar',
+        'drum'
+      ]) ||
+      this.containsAny(this.getTable(p), [
+        'inst',
+        'instrument',
+        'instruments',
+        'accessory',
+        'accessories',
+        'acoustic_drums',
+        'acoustic_guitars',
+        'c_trumpets',
+        'alt_saxophone'
+      ])
+    );
+  }
+
+  private rebuildCategoryBuckets(): void {
+    const merged = this.getAllMergedBase();
+
+    this.carProducts = merged.filter(p => this.isCarProduct(p));
+    this.computerProducts = merged.filter(p => this.isComputerProduct(p));
+    this.htProducts = merged.filter(p => this.isHtProduct(p));
+    this.allInstruments = merged.filter(p => this.isInstrumentProduct(p));
+  }
+
+
+
+
+  private getAllMergedBase(): AnyProduct[] {
+    const map = new Map<string, AnyProduct>();
+
+    for (const p of this.allProducts) {
+      const table = this.getTable(p);
+      const id = this.getId(p);
+
+      if (table && id != null) {
+        map.set(`${table}:${id}`, p);
+      } else {
+        map.set(`fallback:${Math.random()}`, p);
+      }
+    }
+
+    return Array.from(map.values());
+  }
 
   private getAllMerged(): AnyProduct[] {
     const merged = [
@@ -223,17 +393,21 @@ export class ProductlistComponent implements OnInit, OnDestroy {
 
   private getSourceByCategory(state: CombinedFilters): AnyProduct[] {
     switch (state.activeCategory) {
-      case 'car': return this.carProducts;
-      case 'computer': return this.computerProducts;
-      case 'ht': return this.htProducts;
-      case 'instrument': return this.allInstruments;
-      default: return this.getAllMerged();
+      case 'car':
+        return this.carProducts;
+      case 'computer':
+        return this.computerProducts;
+      case 'ht':
+        return this.htProducts;
+      case 'instrument':
+        return this.allInstruments;
+      default:
+        return this.getAllMergedBase();
     }
   }
 
-  /* -----------------------------
-     SEARCHBAR FILTER
-  ----------------------------- */
+
+
 
   private applySearch(list: AnyProduct[], state: CombinedFilters): AnyProduct[] {
     const s: any = (state as any).search ?? {};
@@ -276,326 +450,30 @@ export class ProductlistComponent implements OnInit, OnDestroy {
     }
   }
 
-  /* -----------------------------
-     DETAILED FILTERS
-  ----------------------------- */
+
+
 
   private applyDetailed(list: AnyProduct[], state: CombinedFilters): AnyProduct[] {
-    const norm = (v: any) => String(v ?? '').trim().toLowerCase();
+    switch (state.activeCategory) {
+      case 'car':
+        return list.filter(p => passesCarFilters(p, state.car));
 
-    const toNum = (v: any): number | null => {
-      if (v == null || v === '') return null;
-      const s = String(v).trim().replace(',', '.');
-      const m = s.match(/-?\d+(\.\d+)?/);
-      if (!m) return null;
-      const n = Number(m[0]);
-      return Number.isFinite(n) ? n : null;
-    };
+      case 'computer':
+        return list.filter(p => passesComputerFilters(p, state.computer));
 
-    const matchText = (value: any, needle: string) => {
-      if (!needle) return true;
-      return norm(value).includes(norm(needle));
-    };
+      case 'ht':
+        return list.filter(p => passesHtFilters(p, state.ht));
 
-    const matchExact = (value: any, expected: string) => {
-      if (!expected) return true;
-      return norm(value) === norm(expected);
-    };
+      case 'instrument':
+        return list.filter(p => passesInstrumentFilters(p, state.instrument));
 
-    const matchRange = (value: any, minV: any, maxV: any) => {
-      const min = toNum(minV);
-      const max = toNum(maxV);
-      if (min == null && max == null) return true;
-
-      const v = toNum(value);
-      if (v == null) return false;
-
-      if (min != null && v < min) return false;
-      if (max != null && v > max) return false;
-      return true;
-    };
-
-    const matchBool = (value: any, wantTrue: boolean) => {
-      if (!wantTrue) return true;
-      if (typeof value === 'boolean') return value === true;
-      const s = norm(value);
-      return s === 'true' || s === '1' || s === 'yes' || s === 'igen';
-    };
-
-    // ---------------- CAR ----------------
-    // ---------------- CAR ----------------
-    if (state.activeCategory === 'car') {
-      const f: any = (state as any).car ?? {};
-
-      const manF = norm(f.manufacturer);
-      const modelF = norm(f.model);
-
-      const parseLooseRange = (value: any): { min: number; max: number } | null => {
-        const s = String(value ?? '').trim().replace(',', '.');
-        if (!s) return null;
-
-        const nums = (s.match(/-?\d+(\.\d+)?/g) || []).map(Number).filter(Number.isFinite);
-        if (!nums.length) return null;
-
-        if (nums.length === 1) return { min: nums[0], max: nums[0] };
-
-        return {
-          min: Math.min(...nums),
-          max: Math.max(...nums)
-        };
-      };
-
-      const overlapsFilterRange = (value: any, minWanted: any, maxWanted: any) => {
-        const wantMin = toNum(minWanted);
-        const wantMax = toNum(maxWanted);
-
-        if (wantMin == null && wantMax == null) return true;
-
-        const r = parseLooseRange(value);
-        if (!r) return false;
-
-        if (wantMin != null && r.max < wantMin) return false;
-        if (wantMax != null && r.min > wantMax) return false;
-
-        return true;
-      };
-
-      return list.filter(p => {
-        const manu = norm(this.getManufacturer(p));
-        const model = norm(this.getModel(p));
-
-        if (manF && !manu.includes(manF)) return false;
-        if (modelF && !model.includes(modelF)) return false;
-
-        // ha az autóknál nincs rendes numeric price, ezt hagyhatod így vagy kikapcsolhatod
-        if (!matchRange(this.getPrice(p), f.priceMin, f.priceMax)) return false;
-
-        const year = this.field(p, 'year', 'Year');
-        if (!overlapsFilterRange(year, f.yearMin, f.yearMax)) return false;
-
-        const seats = this.field(p, 'seats', 'Seats');
-        if (!overlapsFilterRange(seats, f.seatsMin, f.seatsMax)) return false;
-
-        const hp = this.field(p, 'horsepower', 'Horsepower');
-        if (!overlapsFilterRange(hp, f.hpMin, f.hpMax)) return false;
-
-        const acc = this.field(p, 'acceleration', 'Acceleration', 'Acceleration (s)');
-        if (!overlapsFilterRange(acc, f.accelMin, f.accelMax)) return false;
-
-        const fuelVal = norm(this.field(p, 'fuel_type', 'FuelType', 'fuel', 'Fuel Type'));
-        if (f.fuel) {
-          if (!fuelVal) return false;
-          if (!fuelVal.includes(norm(f.fuel))) return false;
-        }
-
-        const transVal = norm(this.field(p, 'transmission', 'Transmission'));
-        if (f.transmission && !transVal.includes(norm(f.transmission))) return false;
-
-        const bodyVal = norm(this.field(p, 'body_type', 'BodyType', 'body', 'Body Type'));
-        if (f.bodyType && !bodyVal.includes(norm(f.bodyType))) return false;
-
-        return true;
-      });
+      default:
+        return list;
     }
-
-    // ---------------- HT ----------------
-    if (state.activeCategory === 'ht') {
-      const f: any = (state as any).ht ?? {};
-
-      const manF = norm(f.manufacturer);
-      const modelF = norm(f.model);
-
-      const hasV2 = ('dynamic' in f) || ('tableName' in f) || ('priceMin' in f);
-
-      return list.filter(p => {
-        const manu = norm(this.getManufacturer(p));
-        const model = norm(this.getModel(p));
-
-        if (manF && !manu.includes(manF)) return false;
-        if (modelF && !model.includes(modelF)) return false;
-
-        if (hasV2) {
-          const tableName = norm(f.tableName);
-          if (tableName) {
-            const t = norm(p.table_name ?? p.table);
-            if (t !== tableName) return false;
-          }
-
-          if (!matchRange(this.getPrice(p), f.priceMin, f.priceMax)) return false;
-
-          const dyn = f.dynamic ?? {};
-          for (const key of Object.keys(dyn)) {
-            const v = dyn[key];
-            const field = this.field(p, key);
-
-            if (typeof v === 'boolean') {
-              if (!matchBool(field, v)) return false;
-            } else if (typeof v === 'string') {
-              if (v && !matchExact(field, v)) return false;
-            } else if (v && typeof v === 'object') {
-              if (!matchRange(field, v.min, v.max)) return false;
-            }
-          }
-
-          return true;
-        }
-
-        return true;
-      });
-    }
-
-    // ---------------- COMPUTER ----------------
-    // ---------------- COMPUTER ----------------
-    if (state.activeCategory === 'computer') {
-      const f: any = (state as any).computer ?? {};
-
-      const hasCpu = !!(f.cpuBrand || f.cpuModel);
-      const hasGpu = !!(f.gpuBrand || f.gpuModel);
-      const hasRam = !!(f.ramMin || f.ramMax || f.storageType); // memória típus a RAM-hoz is tartozzon
-      const hasStorage = !!(f.storageMin || f.storageMax);
-      const hasPsu = !!(f.psuMin || f.psuMax);
-
-      const hasAnyComputerFilter = hasCpu || hasGpu || hasRam || hasStorage || hasPsu;
-
-      return list.filter(p => {
-        const table = norm(p.table_name ?? p.table);
-        const manufacturer = norm(this.getManufacturer(p));
-        const model = norm(this.getModel(p));
-
-        if (!hasAnyComputerFilter) return true;
-
-        let matchedAny = false;
-
-        // CPU
-        if (hasCpu && table === 'processors') {
-          let ok = true;
-
-          if (f.cpuBrand && !manufacturer.includes(norm(f.cpuBrand))) ok = false;
-          if (f.cpuModel && !model.includes(norm(f.cpuModel))) ok = false;
-
-          if (ok) matchedAny = true;
-        }
-
-        // GPU
-        if (hasGpu && (table === 'video_cards' || table === 'gpus' || table === 'graphics_cards')) {
-          let ok = true;
-
-          if (f.gpuBrand && !manufacturer.includes(norm(f.gpuBrand))) ok = false;
-          if (f.gpuModel && !model.includes(norm(f.gpuModel))) ok = false;
-
-          if (ok) matchedAny = true;
-        }
-
-        // RAM
-        if (hasRam && (table === 'ram' || table === 'memory')) {
-          let ok = true;
-
-          const ramValue = this.field(
-            p,
-            'capacity_gb',
-            'Capacity_GB',
-            'capacity',
-            'Capacity',
-            'memory_capacity'
-          );
-
-          if (!matchRange(ramValue, f.ramMin, f.ramMax)) ok = false;
-
-          // ✅ "Memória típus" itt a RAM memory_type legyen
-          if (f.storageType) {
-            const mt = norm(this.field(
-              p,
-              'memory_type',
-              'MemoryType',
-              'type',
-              'Type'
-            ));
-
-            if (!mt.includes(norm(f.storageType))) ok = false;
-          }
-
-          if (ok) matchedAny = true;
-        }
-
-        // STORAGE
-        if (hasStorage && (
-          table === 'storage' ||
-          table === 'ssd' ||
-          table === 'hdd' ||
-          table === 'nvme' ||
-          table === 'storage_devices'
-        )) {
-          const storageValue = this.field(
-            p,
-            'capacity_gb',
-            'Capacity_GB',
-            'storage_gb',
-            'StorageGB',
-            'capacity',
-            'Capacity'
-          );
-
-          if (matchRange(storageValue, f.storageMin, f.storageMax)) {
-            matchedAny = true;
-          }
-        }
-
-        // PSU
-        if (hasPsu && (table === 'psu' || table === 'power_supply' || table === 'power_supplies')) {
-          const wattValue = this.field(
-            p,
-            'wattage',
-            'Wattage',
-            'watt',
-            'Watt'
-          );
-
-          if (matchRange(wattValue, f.psuMin, f.psuMax)) {
-            matchedAny = true;
-          }
-        }
-
-        return matchedAny;
-      });
-    }
-
-    // ---------------- INSTRUMENT ----------------
-    if (state.activeCategory === 'instrument') {
-      const f: any = (state as any).instrument ?? {};
-      const wantTable = norm(f.tableName);
-      const wantType = norm(f.itemType);
-
-      return list.filter(p => {
-        const table = norm(p.table_name ?? p.table);
-        const type = norm((p as any).type ?? this.field(p, 'type') ?? 'instrument');
-
-        if (wantType && wantType !== 'all') {
-          if (!type) return false;
-          if (type !== wantType) return false;
-        }
-
-        if (wantTable && table !== wantTable) return false;
-
-        if (!matchText(this.getManufacturer(p), f.manufacturer)) return false;
-        if (!matchText(this.getModel(p), f.model)) return false;
-
-        if (!matchRange(this.getPrice(p), f.minPrice, f.maxPrice)) return false;
-
-        if (f.isUsed === true) {
-          const cond = norm(this.field(p, 'condition', 'is_used'));
-          if (!(cond.includes('used') || cond === 'true' || cond === '1' || cond.includes('használt'))) return false;
-        }
-
-        return true;
-      });
-    }
-
-    return list;
   }
 
-  /* -----------------------------
-     SORT
-  ----------------------------- */
+
+
 
   private applySort(list: AnyProduct[], state: CombinedFilters): AnyProduct[] {
     const s: any = (state as any).search ?? {};
@@ -615,9 +493,8 @@ export class ProductlistComponent implements OnInit, OnDestroy {
     return out;
   }
 
-  /* -----------------------------
-     MAIN APPLY
-  ----------------------------- */
+
+
 
   private applyFilters(state: CombinedFilters) {
     const source = this.getSourceByCategory(state);
@@ -658,18 +535,11 @@ export class ProductlistComponent implements OnInit, OnDestroy {
     }
   }
 
-  /* -----------------------------
-     STATS
-  ----------------------------- */
+
+
 
   private emitStats() {
-    const merged = [
-      ...this.allProducts,
-      ...this.carProducts,
-      ...this.computerProducts,
-      ...this.htProducts,
-      ...this.allInstruments
-    ];
+    const merged = this.getAllMerged();
 
     const map = new Map<string, AnyProduct>();
     for (const p of merged) {

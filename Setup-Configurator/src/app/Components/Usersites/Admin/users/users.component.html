@@ -7,7 +7,7 @@
       <div class="user-card" *ngFor="let u of usersList" [class.expanded]="expandedUserId === u.id"
         [id]="'user-card-' + u.id" [class.banned]="u.banned" (contextmenu)="onUserContextMenu($event, u)">
 
-        <!-- CARD HEADER -->
+
         <div class="user-header" (click)="toggleUser(u)">
           <div class="user-info">
             <span class="user-name">{{ u.username }}</span>
@@ -16,12 +16,12 @@
           <div class="user-meta">
             <span class="muted smaller date-label">{{ u.created_at | date:'yyyy.MM.dd' }}</span>
             <span class="badge ban-badge" *ngIf="u.banned">BANNED</span>
-            <span class="badge">{{ u.role }}</span>
+            <span class="badge" *ngIf="canSeeRoleBadge(u.role)">{{ u.role }}</span>
             <span class="chevron">▼</span>
           </div>
         </div>
 
-        <!-- EXPANDED CONTENT -->
+
         <div class="user-details" *ngIf="expandedUserId === u.id">
 
           <div class="details-grid">
@@ -31,12 +31,14 @@
             </div>
             <div class="field">
               <label>Role</label>
-              <select [(ngModel)]="u.role">
-                <option value="user">user</option>
-                <option value="admin">admin</option>
-                <option value="admin+">admin+</option>
-                <option value="owner">owner</option>
-              </select>
+              <ng-container *ngIf="canEditUserRole(u.role); else roleLocked">
+                <select [(ngModel)]="u.role">
+                  <option *ngFor="let r of availableRolesForMe()" [value]="r">{{ r }}</option>
+                </select>
+              </ng-container>
+              <ng-template #roleLocked>
+                <input [ngModel]="u.role" disabled>
+              </ng-template>
             </div>
             <div class="field">
               <label>Város</label>
@@ -57,7 +59,7 @@
 
           <hr class="sep">
 
-          <!-- SETUPS GRID -->
+
           <div class="setups-section">
             <h3>Setups</h3>
 
@@ -88,7 +90,7 @@
     </div>
   </div>
 
-  <!-- SIDE PANEL: SETUP ITEMS -->
+
   <div class="items-side-panel" *ngIf="itemsViewOpen">
     <div class="panel-header">
       <div class="panel-title">
@@ -114,7 +116,7 @@
     </div>
   </div>
 
-  <!-- CONTEXT MENU -->
+
   <div class="custom-context-menu" *ngIf="contextMenuVisible" [style.top.px]="contextMenuPos.y"
     [style.left.px]="contextMenuPos.x">
     <div class="menu-item danger" *ngIf="canBan && !contextUser?.banned" (click)="banUser(contextUser)">

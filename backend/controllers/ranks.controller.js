@@ -5,7 +5,7 @@ exports.me = async (req, res) => {
         const userId = Number(req.user?.id);
         if (!userId) return res.status(401).json({ error: "Not logged in" });
 
-        // 1) user current points + level
+
         const { data: ul, error: ulErr } = await supabase
             .from('user_level[Level]')
             .select('level, points')
@@ -17,7 +17,7 @@ exports.me = async (req, res) => {
         const level = Number(ul?.level ?? 1);
         const points = Number(ul?.points ?? 0);
 
-        // 2) threshold for current level
+
         const { data: thr, error: thrErr } = await supabase
             .from('level_ranks[Level]')
             .select('min_point, max_point, level')

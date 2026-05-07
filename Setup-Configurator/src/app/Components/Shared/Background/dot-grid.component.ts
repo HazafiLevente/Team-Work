@@ -54,7 +54,7 @@ const throttle = (fn: (...args: any[]) => void, limitMs: number) => {
 })
 export class DotGridComponent implements AfterViewInit, OnDestroy {
 
-  /* ===== INPUTS ===== */
+
   @Input() dotSize = 5;
   @Input() gap = 15;
 
@@ -74,11 +74,11 @@ export class DotGridComponent implements AfterViewInit, OnDestroy {
   @Input() className = '';
   @Input() style: Record<string, any> | null = null;
 
-  /* ===== REFS ===== */
+
   @ViewChild('wrap', { static: true }) wrapRef!: ElementRef<HTMLDivElement>;
   @ViewChild('canvas', { static: true }) canvasRef!: ElementRef<HTMLCanvasElement>;
 
-  /* ===== INTERNAL ===== */
+
   private dots: Dot[] = [];
   private rafId = 0;
   private ro: ResizeObserver | null = null;
@@ -100,11 +100,11 @@ export class DotGridComponent implements AfterViewInit, OnDestroy {
 
   constructor(private zone: NgZone) {}
 
-  /* ===== LIFECYCLE ===== */
+
   async ngAfterViewInit() {
     if (typeof window === 'undefined') return;
 
-    // kör Path2D
+
     if ('Path2D' in window) {
       const p = new Path2D();
       p.arc(0, 0, this.dotSize / 2, 0, Math.PI * 2);
@@ -131,7 +131,7 @@ export class DotGridComponent implements AfterViewInit, OnDestroy {
     }
   }
 
-  /* ===== RESIZE ===== */
+
   private resizeHandler = () => {
     this.buildGrid();
   };
@@ -150,7 +150,7 @@ export class DotGridComponent implements AfterViewInit, OnDestroy {
     }
   }
 
-  /* ===== GRID ===== */
+
   private buildGrid() {
     const wrap = this.wrapRef.nativeElement;
     const canvas = this.canvasRef.nativeElement;
@@ -195,7 +195,7 @@ export class DotGridComponent implements AfterViewInit, OnDestroy {
     this.dots = dots;
   }
 
-  /* ===== DRAW ===== */
+
   private startDraw() {
     const canvas = this.canvasRef.nativeElement;
     const ctx = canvas.getContext('2d');
@@ -242,7 +242,7 @@ export class DotGridComponent implements AfterViewInit, OnDestroy {
     this.rafId = requestAnimationFrame(draw);
   }
 
-  /* ===== POINTER ===== */
+
   private _onMove = (e: MouseEvent) => {};
   private _onClick = (e: MouseEvent) => {};
 
@@ -314,7 +314,7 @@ export class DotGridComponent implements AfterViewInit, OnDestroy {
     });
   }
 
-  /* ===== ANIMATION ===== */
+
   private async tryEnableInertia() {
     try {
       const mod: any = await import('gsap/InertiaPlugin');

@@ -11,7 +11,40 @@
         <div class="state success">{{ success }}</div>
       }
 
-      <div class="grid">
+      <div class="mode-selector" aria-label="Gep tipusa">
+        <button
+          type="button"
+          class="mode-card"
+          [class.active]="mode === 'build'"
+          (click)="setMode('build')">
+          <span class="mode-icon">+</span>
+          <span class="mode-title">Osszerako</span>
+          <span class="mode-text">CPU, alaplap, RAM es tobbi alkatresz kulon valasztva.</span>
+        </button>
+
+        <button
+          type="button"
+          class="mode-card"
+          [class.active]="mode === 'all_in_one'"
+          (click)="setMode('all_in_one')">
+          <span class="mode-icon">[]</span>
+          <span class="mode-title">Egybegep</span>
+          <span class="mode-text">Kesz all-in-one gep hozzaadasa a setuphoz.</span>
+        </button>
+
+        <button
+          type="button"
+          class="mode-card"
+          [class.active]="mode === 'laptop'"
+          (click)="setMode('laptop')">
+          <span class="mode-icon">__</span>
+          <span class="mode-title">Laptop</span>
+          <span class="mode-text">Notebook vagy hordozhato gep valasztasa.</span>
+        </button>
+      </div>
+
+      @if (isBuildMode()) {
+        <div class="grid">
         <div class="field-card">
           <label class="field-label">Processor</label>
           <select
@@ -39,13 +72,17 @@
           >
             <option [ngValue]="null">
               @if (!canSelectMotherboard()) {
-                -- choose processor first --
+                @if (!getSelectedProcessor()) {
+                  -- choose processor first --
+                } @else {
+                  -- no compatible motherboard --
+                }
               } @else {
                 -- choose motherboard --
               }
             </option>
 
-            @for (mb of getCompatibleMotherboards(); track getId(mb)) {
+            @for (mb of getVisibleMotherboards(); track getId(mb)) {
               <option [ngValue]="getId(mb)">
                 {{ getMotherboardLabel(mb) }}
               </option>
@@ -61,14 +98,20 @@
             [disabled]="!canSelectRam()"
           >
             <option [ngValue]="null">
-              @if (!canSelectRam()) {
-                -- choose compatible motherboard first --
+              @if (rams.length === 0) {
+                -- no RAM loaded --
+              } @else if (!getSelectedProcessor()) {
+                -- choose processor first --
+              } @else if (!getSelectedMotherboard()) {
+                -- choose motherboard first --
+              } @else if (!canSelectRam()) {
+                -- no compatible RAM --
               } @else {
                 -- choose RAM --
               }
             </option>
 
-            @for (ram of getCompatibleRams(); track getId(ram)) {
+            @for (ram of getVisibleRams(); track getId(ram)) {
               <option [ngValue]="getId(ram)">
                 {{ getRamLabel(ram) }}
               </option>
@@ -118,9 +161,9 @@
             }
           </select>
         </div>
-      </div>
+        </div>
 
-      <div class="compatibility-box">
+        <div class="compatibility-box">
         <div class="compatibility-title">Compatibility rules</div>
 
         <div class="compatibility-row">
@@ -152,6 +195,47 @@
           </span>
         </div>
       </div>
+      } @else {
+        <div class="ready-machine-panel">
+          <div class="ready-header">
+            <div>
+              <div class="ready-title">
+                @if (mode === 'laptop') {
+                  Laptop valasztasa
+                } @else {
+                  Egybegep valasztasa
+                }
+              </div>
+              <div class="ready-subtitle">A kivalasztott gep kozvetlenul bekerul a setupba.</div>
+            </div>
+
+            <input
+              class="ready-search"
+              type="text"
+              [(ngModel)]="computerSearch"
+              placeholder="Kereses model alapjan..." />
+          </div>
+
+          @if (loadingComputerProducts) {
+            <div class="state">Gepek betoltese...</div>
+          } @else if (getVisibleComputerProducts().length === 0) {
+            <div class="state error">Nincs talalat ehhez a tipushoz.</div>
+          } @else {
+            <div class="ready-grid">
+              @for (product of getVisibleComputerProducts(); track getId(product)) {
+                <button
+                  type="button"
+                  class="ready-card"
+                  [class.active]="selectedComputerId === getId(product)"
+                  (click)="selectedComputerId = getId(product)">
+                  <span class="ready-card-title">{{ getComputerLabel(product) }}</span>
+                  <span class="ready-card-meta">{{ getComputerMeta(product) }}</span>
+                </button>
+              }
+            </div>
+          }
+        </div>
+      }
 
       <div class="actions">
         <button
@@ -171,6 +255,8 @@
         >
           @if (saving) {
             Saving...
+          } @else if (isReadyComputerMode()) {
+            Gep hozzaadasa
           } @else {
             Save PC build
           }

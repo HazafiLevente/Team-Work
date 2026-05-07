@@ -11,7 +11,7 @@ import { CommonModule } from '@angular/common';
         <h3>Ablakkezelő</h3>
         <button class="close-btn" (click)="close.emit()">×</button>
       </div>
-      
+
       <div class="window-list">
         @for (w of windows; track w.id) {
           <div class="window-entry" [class.minimized]="w.minimized">
@@ -19,7 +19,7 @@ import { CommonModule } from '@angular/common';
               <span class="window-icon">🗔</span>
               <span class="window-name">{{ w.title }}</span>
             </div>
-            
+
             <div class="window-actions">
               <button class="action-btn" title="Visszaállítás" (click)="onRestore(w.id)">
                 <span>⤴</span>
@@ -194,11 +194,11 @@ export class DockManagementModalComponent {
 
   onRestore(id: string): void {
     this.restore.emit(id);
-    this.close.emit(); // Close on action
+    this.close.emit();
   }
 
   onMaximize(id: string): void {
     this.maximize.emit(id);
-    this.close.emit(); // Close on action
+    this.close.emit();
   }
 }

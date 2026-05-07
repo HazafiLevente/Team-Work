@@ -12,7 +12,7 @@ export class CountUpComponent implements OnChanges, OnDestroy {
   @Input() from = 0;
   @Input() to = 0;
   @Input() durationMs = 900;
-  @Input() separator = ' '; // hu: space grouping
+  @Input() separator = ' ';
 
   @ViewChild('el', { static: true }) elRef!: ElementRef<HTMLSpanElement>;
 
@@ -42,7 +42,7 @@ export class CountUpComponent implements OnChanges, OnDestroy {
     const tick = (now: number) => {
       const t = Math.min(1, (now - this.startTs) / dur);
 
-      // easeOutCubic
+
       const eased = 1 - Math.pow(1 - t, 3);
 
       const v = from + (to - from) * eased;
@@ -56,7 +56,7 @@ export class CountUpComponent implements OnChanges, OnDestroy {
   }
 
   private format(n: number): string {
-    // grouping space: 12 345
+
     const s = Math.abs(n).toString();
     const out = s.replace(/\B(?=(\d{3})+(?!\d))/g, this.separator);
     return n < 0 ? `-${out}` : out;

@@ -1,12 +1,12 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
-//import { DockItemComponent } from './dock-item.component';
-//import { DockManagementModalComponent } from './dock-management-modal.component';
+
+
 
 @Component({
   selector: 'app-setup-dock',
   standalone: true,
-  imports: [CommonModule, //DockItemComponent, DockManagementModalComponent
+  imports: [CommonModule,
   ],
   templateUrl: './dock.component.html',
   styleUrls: ['./dock.component.css']
@@ -25,6 +25,12 @@ export class SetupDockComponent {
   toggleManager(event: MouseEvent) {
     event.stopPropagation();
     this.isManagerOpen = !this.isManagerOpen;
+  }
+
+  openManager(event: MouseEvent) {
+    event.preventDefault();
+    event.stopPropagation();
+    this.isManagerOpen = true;
   }
 
   onRestore(id: string) {

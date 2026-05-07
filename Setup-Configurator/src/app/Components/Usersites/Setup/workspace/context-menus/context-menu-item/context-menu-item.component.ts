@@ -18,6 +18,7 @@ export class ContextMenuItemComponent {
   @Output() openItem = new EventEmitter<void>();
   @Output() rename = new EventEmitter<void>();
   @Output() modify = new EventEmitter<void>();
+  @Output() connectItem = new EventEmitter<void>();
   @Output() deleteItem = new EventEmitter<void>();
 
   emitAndClose(emitter: EventEmitter<void>) {

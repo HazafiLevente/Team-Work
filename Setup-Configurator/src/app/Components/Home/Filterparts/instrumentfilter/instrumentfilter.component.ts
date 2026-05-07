@@ -21,8 +21,6 @@ export interface InstrumentFilterMetaV1 {
   min_price: number | null;
   max_price: number | null;
   has_used_flag: boolean;
-
-  // (opcionális) ha később hozzáadod view-ba, ez még jobb:
   has_price?: boolean;
 }
 
@@ -31,9 +29,8 @@ export interface InstrumentFilterMetaV1 {
   standalone: true,
   imports: [ReactiveFormsModule, CommonModule, HttpClientModule],
   templateUrl: './instrumentfilter.component.html',
-  styleUrls: ['./instrumentfilter.component.css'] // <-- EZ legyen, ne styleUrl
+  styleUrls: ['./instrumentfilter.component.css']
 })
-
 export class InstrumentfilterComponent implements OnInit, OnDestroy {
   @Output() filtersChange = new EventEmitter<InstrumentFilters>();
   @Output() clearClicked = new EventEmitter<void>();
@@ -48,7 +45,7 @@ export class InstrumentfilterComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.form = this.fb.group({
-      itemType: 'instrument',
+      itemType: 'all',
       tableName: '',
       manufacturer: '',
       model: '',
@@ -57,7 +54,6 @@ export class InstrumentfilterComponent implements OnInit, OnDestroy {
       isUsed: false
     });
 
-    // META load
     this.http.get<any>('/api/meta/instruments').subscribe({
       next: (res) => {
         const meta =
@@ -68,18 +64,13 @@ export class InstrumentfilterComponent implements OnInit, OnDestroy {
         this.meta = meta as InstrumentFilterMetaV1;
         this.loadingMeta = false;
 
-        // okos disable/hide logika:
         this.applyMetaCapabilities();
-
-        // meta után is küldjünk state-et
         this.emitFilters();
       },
       error: (err) => {
         console.error('❌ instrument meta load error:', err);
         this.meta = null;
         this.loadingMeta = false;
-
-        // meta nélkül is működjön alap inputokkal
         this.emitFilters();
       }
     });
@@ -99,7 +90,6 @@ export class InstrumentfilterComponent implements OnInit, OnDestroy {
   }
 
   private applyMetaCapabilities() {
-    // Ár: ha min/max null és nincs has_price -> nincs ár adat
     const hasPrice =
       this.meta?.has_price === true ||
       this.meta?.min_price != null ||
@@ -114,7 +104,6 @@ export class InstrumentfilterComponent implements OnInit, OnDestroy {
       this.form.get('maxPrice')?.enable({ emitEvent: false });
     }
 
-    // Használt: ha nincs flag, tiltjuk
     const hasUsed = this.meta?.has_used_flag === true;
     if (!hasUsed) {
       this.form.get('isUsed')?.disable({ emitEvent: false });
@@ -137,7 +126,7 @@ export class InstrumentfilterComponent implements OnInit, OnDestroy {
     const raw = this.form.getRawValue() as any;
 
     const cleaned: InstrumentFilters = {
-      itemType: (raw.itemType as any) || 'instrument',
+      itemType: (raw.itemType as any) || 'all',
       tableName: this.s(raw.tableName),
       manufacturer: this.s(raw.manufacturer),
       model: this.s(raw.model),
@@ -151,7 +140,7 @@ export class InstrumentfilterComponent implements OnInit, OnDestroy {
 
   clear(): void {
     this.form.reset({
-      itemType: 'instrument',
+      itemType: 'all',
       tableName: '',
       manufacturer: '',
       model: '',
@@ -160,7 +149,6 @@ export class InstrumentfilterComponent implements OnInit, OnDestroy {
       isUsed: false
     });
 
-    // meta tiltások vissza
     if (this.meta) this.applyMetaCapabilities();
 
     this.clearClicked.emit();

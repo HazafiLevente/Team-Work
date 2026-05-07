@@ -6,7 +6,7 @@ export type RankMeDto = {
   level: number;
   points: number;
   current: { min: number; max: number };
-  progress: number; // 0..1
+  progress: number;
   next: { level: number; pointsNeeded: number };
 };
 

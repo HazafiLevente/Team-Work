@@ -1,360 +1,511 @@
+/**
+ * --------------------------------------------------------------------------
+ *  SYSTEM CONTROL & SCHEMA ORCHESTRATOR
+ * --------------------------------------------------------------------------
+ *  Handles:
+ *   - database schema introspection
+ *   - dynamic SQL generation
+ *   - automatic table synchronization
+ *   - role-based access control (RBAC)
+ * --------------------------------------------------------------------------
+ */
+
 const fs = require("fs");
 const path = require("path");
 const { createClient } = require("@supabase/supabase-js");
 
-require("dotenv").config();
+// Load environment variables from .env
+require("dotenv").config({
+    path: path.join(__dirname, "..", "..", ".env"),
+    override: false,
+    quiet: true
+});
 
 const filler = require("../../datas/Jsons/filler.json");
 
-const OUT_FILE = path.join(__dirname, "../../datas", "Jsons", "tables.runtime.json");
-
-function createControlLog() {
-    return {
-        lines: [],
-        add(l) {
-            this.lines.push(l);
-        },
-        flush() {
-            console.log("\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-            console.log("📘 CONTROL / SCHEMA REFRESH");
-            console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-            this.lines.forEach(l => console.log(l));
-            console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n");
-        }
-    };
-}
-
-
-
-
-const ALL_TABLES_FILE = path.join(
+// Runtime-generated table metadata output
+const OUT_FILE = path.join(
     __dirname,
     "../../datas",
     "Jsons",
-    "tables.all.json"
+    "tables.runtime.json"
 );
 
-const TABLE_LIST_FILE = path.join(
-    __dirname,
-    "../../datas",
-    "Jsons",
-    "tables.list.json"
-);
+/* =========================================================================
+   SUPABASE INITIALIZATION
+   ========================================================================= */
 
+// Create Supabase admin/service client
 const supabase = createClient(
     process.env.SUPABASE_URL,
     process.env.SUPABASE_SERVICE_ROLE_KEY
 );
 
-/* ======================================================
-   TABLES
-====================================================== */
+/* =========================================================================
+   LOGGING UTILITIES
+   ========================================================================= */
 
-function isExcluded(name) {
-    return filler.exclude_table_patterns.some(p => name.includes(p));
+/**
+ * Creates a lightweight structured logger
+ * used during schema refresh operations.
+ */
+function createControlLog() {
+    return {
+        lines: [],
+
+        // Add new log line
+        add(l) {
+            this.lines.push(l);
+        },
+
+        // Print collected logs to console
+        flush() {
+            console.log("\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+            console.log("📘 CONTROL / SCHEMA REFRESH");
+            console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+
+            this.lines.forEach(l => console.log(l));
+
+            console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n");
+        }
+    };
 }
 
+/* =========================================================================
+   DATABASE INTROSPECTION
+   ========================================================================= */
+
+/**
+ * Refreshes all runtime table metadata.
+ *
+ * Steps:
+ *  1. Load all database tables
+ *  2. Exclude ignored/internal tables
+ *  3. Fetch column metadata
+ *  4. Generate runtime JSON files
+ *  5. Rebuild global SQL search function
+ */
 async function refreshTables() {
+
     const log = createControlLog();
 
+    // Load all database tables through RPC
     const { data, error } = await supabase.rpc("get_all_tables");
+
     if (error || !Array.isArray(data)) {
-        log.add(`❌ table list load error`);
+        log.add(`❌ Table list load error: ${error?.message}`);
         log.flush();
         return;
     }
 
-    const allTableNames = data.map(t => t.table_name).filter(Boolean);
-    const runtimeTableNames = allTableNames.filter(name => !isExcluded(name));
+    // Extract valid table names
+    const allTableNames = data
+        .map(t => t.table_name)
+        .filter(Boolean);
 
-    fs.writeFileSync(ALL_TABLES_FILE, JSON.stringify({
-        lastUpdated: Date.now(),
-        tables: allTableNames
-    }, null, 2));
+    /**
+     * Ignore internal/system tables
+     * based on configured patterns.
+     */
+    const isExcluded = (name) =>
+        filler.exclude_table_patterns.some(p => name.includes(p));
 
+    // Runtime-visible tables only
+    const runtimeTableNames = allTableNames.filter(
+        name => !isExcluded(name)
+    );
+
+    // Load column metadata for all tables
     const columnMap = await getAllTableColumns();
+
     const tables = {};
 
+    /**
+     * Build runtime table structure:
+     * {
+     *   table_name: {
+     *      columns: [...]
+     *   }
+     * }
+     */
     runtimeTableNames.forEach(table => {
         if (columnMap[table]?.length) {
-            tables[table] = { columns: columnMap[table] };
+            tables[table] = {
+                columns: columnMap[table]
+            };
         }
     });
 
-    fs.writeFileSync(OUT_FILE, JSON.stringify({
+    /* ---------------------------------------------------------------------
+       Persist generated metadata files
+       --------------------------------------------------------------------- */
+
+    const writeJson = (file, content) =>
+        fs.writeFileSync(file, JSON.stringify(content, null, 2));
+
+    // Full table list
+    writeJson(
+        path.join(__dirname, "../../datas", "Jsons", "tables.all.json"),
+        {
+            lastUpdated: Date.now(),
+            tables: allTableNames
+        }
+    );
+
+    // Runtime table metadata
+    writeJson(OUT_FILE, {
         lastUpdated: Date.now(),
         tables
-    }, null, 2));
+    });
 
-    fs.writeFileSync(TABLE_LIST_FILE, JSON.stringify({
-        lastUpdated: Date.now(),
-        tables: allTableNames
-    }, null, 2));
+    // Simple table name list
+    writeJson(
+        path.join(__dirname, "../../datas", "Jsons", "tables.list.json"),
+        {
+            lastUpdated: Date.now(),
+            tables: allTableNames
+        }
+    );
 
-    log.add(`🔄 táblák frissítve`);
-    log.add(`   összes: ${allTableNames.length}`);
-    log.add(`   runtime: ${Object.keys(tables).length}`);
-    log.add(`📦 fájlok:`);
-    log.add(`   ✔ tables.all.json`);
-    log.add(`   ✔ tables.runtime.json`);
-    log.add(`   ✔ tables.list.json`);
+    log.add(
+        `🔄 Tables updated | Total: ${allTableNames.length} | Runtime: ${Object.keys(tables).length}`
+    );
 
     log.flush();
 
-    updateProductsHomeFunction(tables);
+    // Rebuild global SQL search function
+    await updateProductsHomeFunction(tables);
 }
 
-
+/**
+ * Loads all table columns using a Supabase RPC.
+ */
 async function getAllTableColumns() {
+
     const { data, error } = await supabase.rpc("get_table_columns");
 
-    if (error || !data) {
-        console.error("❌ column rpc failed", error);
+    if (error) {
+        console.error("❌ Column RPC failed", error);
         return {};
     }
 
-    // A data most már közvetlenül a map (jsonb miatt)
     return data;
 }
 
-function detectColumns(columns, tableName) {
+/* =========================================================================
+   DYNAMIC SQL GENERATION
+   ========================================================================= */
+
+/**
+ * Attempts to detect common semantic columns
+ * across arbitrary tables.
+ *
+ * Detects:
+ *  - ID
+ *  - manufacturer
+ *  - model/name
+ *  - price
+ */
+function detectColumns(columns) {
+
     const id =
         columns.find(c => ["id", "ID"].includes(c)) || "'0'";
 
-    let manufacturer =
-        columns.find(c => ["manufacturer", "brand", "maker"].includes(c.toLowerCase()));
+    const mfr =
+        columns.find(c =>
+            ["manufacturer", "brand", "maker"]
+                .includes(c.toLowerCase())
+        );
 
-    let model =
-        columns.find(c => ["model", "name", "product_name", "series", "title"].includes(c.toLowerCase()));
+    const model =
+        columns.find(c =>
+            ["model", "name", "product_name", "series", "title"]
+                .includes(c.toLowerCase())
+        );
 
     const price =
-        columns.find(c => ["price", "cost", "price_huf"].includes(c.toLowerCase()));
+        columns.find(c =>
+            ["price", "cost", "price_huf"]
+                .includes(c.toLowerCase())
+        );
 
-    // Fallbacks ha hiányzik valami
-    if (!manufacturer) manufacturer = null; // buildUnionSQL fogja kezelni
-    if (!model) model = null;
-
-    return { id, manufacturer, model, price: price || null };
+    return {
+        id,
+        manufacturer: mfr || null,
+        model: model || null,
+        price: price || null
+    };
 }
 
-function q(col) {
-    return `"${col.replace(/"/g, '""')}"`;
-}
-
+/**
+ * Dynamically generates a giant UNION ALL SQL query
+ * from every detected hardware/product table.
+ *
+ * This allows global searching across the entire database.
+ */
 function buildUnionSQL(tablesMeta) {
+
+    // SQL-safe quoted identifier
+    const q = (col) =>
+        `"${col.replace(/"/g, '""')}"`;
+
     const blocks = [];
 
     for (const [table, meta] of Object.entries(tablesMeta)) {
-        const cols = detectColumns(meta.columns, table);
-        if (!cols) continue;
 
-        const mfrExpr = cols.manufacturer ? q(cols.manufacturer) : `'${table}'`;
-        const modelExpr = cols.model ? q(cols.model) : "'Ismeretlen'";
+        const cols = detectColumns(meta.columns);
+
+        const mfrExpr =
+            cols.manufacturer
+                ? q(cols.manufacturer)
+                : `'${table}'`;
+
+        const modelExpr =
+            cols.model
+                ? q(cols.model)
+                : "'Unknown'";
 
         blocks.push(`
-            select
-                '${table}'::text as table_name,
-                ${cols.id === "'0'" ? "'0'" : q(cols.id)}::text as id,
-                ${mfrExpr}::text as manufacturer,
-                ${modelExpr}::text as model,
-                ${cols.price ? q(cols.price) + "::numeric" : "null::numeric"} as price
-            from "${table}"
+            SELECT 
+                '${table}'::text AS table_name,
+
+                ${cols.id === "'0'"
+            ? "'0'"
+            : q(cols.id)
+        }::text AS id,
+
+                ${mfrExpr}::text AS manufacturer,
+
+                ${modelExpr}::text AS model,
+
+                ${cols.price
+            ? q(cols.price) + "::numeric"
+            : "NULL::numeric"
+        } AS price
+
+            FROM "${table}"
         `.trim());
     }
 
-    return blocks.join("\nunion all\n");
+    return blocks.join("\nUNION ALL\n");
 }
 
-function buildProductsHomeSQL(unionSQL) {
-    return `
-create or replace function products_home(
-    q text
-)
-returns table (
-    table_name text,
-    id text,
-    manufacturer text,
-    model text,
-    price numeric
-)
-language sql
-security definer
-as $$
-    select * from (
-        ${unionSQL}
-    ) all_products
-    where
-        q is null
-        or lower(table_name) like '%' || q || '%'
-        or lower(manufacturer) like '%' || q || '%'
-        or lower(model) like '%' || q || '%';
-$$;
-`;
-}
-
+/**
+ * Recreates the products_home SQL function inside Supabase.
+ *
+ * The function provides a unified searchable product endpoint.
+ */
 async function updateProductsHomeFunction(tablesMeta) {
+
     const unionSQL = buildUnionSQL(tablesMeta);
+
     if (!unionSQL) return;
 
-    const sql = buildProductsHomeSQL(unionSQL);
+    const sql = `
+        CREATE OR REPLACE FUNCTION products_home(q TEXT)
 
-    const { error } = await supabase.rpc("update_products_home", { sql });
+        RETURNS TABLE (
+            table_name TEXT,
+            id TEXT,
+            manufacturer TEXT,
+            model TEXT,
+            price NUMERIC
+        )
+
+        LANGUAGE sql
+        SECURITY DEFINER
+
+        AS $$
+
+            SELECT * FROM (${unionSQL}) all_products
+
+            WHERE q IS NULL
+
+               OR LOWER(table_name)
+                    LIKE '%' || q || '%'
+
+               OR LOWER(manufacturer)
+                    LIKE '%' || q || '%'
+
+               OR LOWER(model)
+                    LIKE '%' || q || '%';
+
+        $$;
+    `;
+
+    const { error } = await supabase.rpc(
+        "update_products_home",
+        { sql }
+    );
 
     if (error) {
         console.error("❌ products_home update failed", error);
     } else {
-        console.log("✅ products_home updated");
+        console.log("✅ products_home SQL function updated");
     }
 }
 
-/* ======================================================
-   ADMIN / ROLES
-====================================================== */
+/* =========================================================================
+   ROLE-BASED ACCESS CONTROL (RBAC)
+   ========================================================================= */
 
-const OWNER_IDS = new Set(
-    (process.env.OWNERS || "")
-        .split(",")
-        .map(Number)
-        .filter(Boolean)
-);
+/**
+ * Converts comma-separated environment IDs
+ * into Set collections for fast lookups.
+ */
+const parseIds = (envVar) =>
+    new Set(
+        (process.env[envVar] || "")
+            .split(",")
+            .map(Number)
+            .filter(Boolean)
+    );
 
-const ADMIN_PLUS_IDS = new Set(
-    (process.env.ADMINS_PLUS || "")
-        .split(",")
-        .map(Number)
-        .filter(Boolean)
-);
-
-const ADMIN_IDS = new Set(
-    (process.env.ADMINS || "")
-        .split(",")
-        .map(Number)
-        .filter(Boolean)
-);
-
-const BANNED_IDS = new Set(
-    (process.env.BANNED_USERS || "")
-        .split(",")
-        .map(Number)
-        .filter(Boolean)
-);
-
+/**
+ * Role collections loaded from environment variables.
+ */
 const ROLES = {
-    owners: OWNER_IDS,
-    adminsPlus: ADMIN_PLUS_IDS,
-    admins: ADMIN_IDS,
-    banned: BANNED_IDS
+
+    owners: parseIds("OWNERS"),
+
+    adminsPlus: parseIds("ADMINS_PLUS"),
+
+    admins: parseIds("ADMINS"),
+
+    banned: parseIds("BANNED_USERS")
 };
 
+/**
+ * Resolves a user's role based on environment config.
+ */
 function resolveRole(userId) {
-    if (ROLES.owners.has(userId)) return "owner";
-    if (ROLES.adminsPlus.has(userId)) return "admin+";
-    if (ROLES.admins.has(userId)) return "admin";
+
+    const id = Number(userId);
+
+    if (ROLES.owners.has(id)) return "owner";
+
+    if (ROLES.adminsPlus.has(id)) return "admin+";
+
+    if (ROLES.admins.has(id)) return "admin";
+
     return "user";
 }
 
+/**
+ * Updates a user's role dynamically
+ * and persists changes into the .env file.
+ */
 function updateUserEnvRole(userId, newRole) {
-    const envPath = path.join(__dirname, "..", "..", ".env");
-    if (!fs.existsSync(envPath)) {
-        console.error("❌ .env file not found at", envPath);
+
+    const envPath = path.join(
+        __dirname,
+        "..",
+        "..",
+        ".env"
+    );
+
+    const numId = Number(userId);
+
+    // Owner roles are immutable
+    if (ROLES.owners.has(numId)) {
+
+        console.warn(
+            `⚠️ Security: Cannot modify owner role (ID: ${numId})`
+        );
+
         return;
     }
 
-    let content = fs.readFileSync(envPath, "utf-8");
+    // Remove from all admin collections
+    ROLES.adminsPlus.delete(numId);
+    ROLES.admins.delete(numId);
 
-    const owners = ROLES.owners;
-    const adminPlus = ROLES.adminsPlus;
-    const admins = ROLES.admins;
-
-    const numId = Number(userId);
-    if (owners.has(numId)) {
-        console.warn(`⚠️ Attempt to modify owner role for ID ${numId} ignored.`);
-        return;
+    // Reassign role
+    if (newRole === "admin+") {
+        ROLES.adminsPlus.add(numId);
     }
 
-    // 1. Update in-memory sets
-    adminPlus.delete(numId);
-    admins.delete(numId);
+    if (newRole === "admin") {
+        ROLES.admins.add(numId);
+    }
 
-    if (newRole === "admin+") adminPlus.add(numId);
-    if (newRole === "admin") admins.add(numId);
+    // Sync memory -> process.env
+    process.env.ADMINS_PLUS =
+        Array.from(ROLES.adminsPlus).join(",");
 
-    // 2. Update process.env strings for other parts of the app
-    process.env.ADMINS_PLUS = Array.from(adminPlus).join(",");
-    process.env.ADMINS = Array.from(admins).join(",");
+    process.env.ADMINS =
+        Array.from(ROLES.admins).join(",");
 
-    // 3. Update the physical .env file
-    content = content.replace(/^ADMINS_PLUS=.*$/m, `ADMINS_PLUS=${process.env.ADMINS_PLUS}`);
-    content = content.replace(/^ADMINS=.*$/m, `ADMINS=${process.env.ADMINS}`);
+    // Persist into .env file
+    let content =
+        fs.readFileSync(envPath, "utf-8");
+
+    content = content.replace(
+        /^ADMINS_PLUS=.*$/m,
+        `ADMINS_PLUS=${process.env.ADMINS_PLUS}`
+    );
+
+    content = content.replace(
+        /^ADMINS=.*$/m,
+        `ADMINS=${process.env.ADMINS}`
+    );
 
     fs.writeFileSync(envPath, content, "utf-8");
-    console.log(`✅ .env and memory updated for user ${numId} -> ${newRole}`);
+
+    console.log(
+        `✅ Role updated: ${numId} -> ${newRole}`
+    );
 }
 
-function isBanned(userId) {
-    return ROLES.banned.has(Number(userId));
-}
-
-function updateUserBanStatus(userId, banned) {
-    const envPath = path.join(__dirname, "..", "..", ".env");
-    if (!fs.existsSync(envPath)) return;
-
-    let content = fs.readFileSync(envPath, "utf-8");
-    const numId = Number(userId);
-
-    if (banned) {
-        ROLES.banned.add(numId);
-    } else {
-        ROLES.banned.delete(numId);
-    }
-
-    process.env.BANNED_USERS = Array.from(ROLES.banned).join(",");
-
-    if (/^BANNED_USERS=.*$/m.test(content)) {
-        content = content.replace(/^BANNED_USERS=.*$/m, `BANNED_USERS=${process.env.BANNED_USERS}`);
-    } else {
-        content += `\nBANNED_USERS=${process.env.BANNED_USERS}`;
-    }
-
-    fs.writeFileSync(envPath, content, "utf-8");
-    console.log(`✅ .env updated: user ${numId} banned status -> ${banned}`);
-}
-
-function canAssignRole(granterRole, targetRole) {
-    const rank = { owner: 3, "admin+": 2, admin: 1, user: 0 };
-    return rank[granterRole] > rank[targetRole];
-}
-
-function hasAdminAccess(role) {
-    return ["admin", "admin+", "owner"].includes(role);
-}
-
-function hasAdminPlusAccess(role) {
-    return ["admin+", "owner"].includes(role);
-}
+/* =========================================================================
+   SYSTEM LIFECYCLE
+   ========================================================================= */
 
 let interval = null;
 
+/**
+ * Starts the automated control system.
+ *
+ * Features:
+ *  - initial schema refresh
+ *  - periodic metadata synchronization
+ */
 function startControl() {
+
     if (interval) return;
 
-    console.log("🚀 control.js started");
+    console.log("🚀 Control system initializing...");
 
+    // Initial refresh
     refreshTables();
-    interval = setInterval(refreshTables, 5000);
+
+    // Auto-refresh every 10 minutes
+    interval = setInterval(
+        refreshTables,
+        600000
+    );
 }
 
 module.exports = {
+
     startControl,
+
     refreshTables,
+
     resolveRole,
-    updateUserEnvRole, // ✅ NEW
-    isBanned,          // ✅ NEW
-    updateUserBanStatus, // ✅ NEW
-    canAssignRole,
-    hasAdminAccess,
-    hasAdminPlusAccess,
+
+    updateUserEnvRole,
+
+    // Ban checker
+    isBanned: (id) =>
+        ROLES.banned.has(Number(id)),
+
+    // Access guards
+    hasAdminAccess: (role) =>
+        ["admin", "admin+", "owner"].includes(role),
+
+    hasAdminPlusAccess: (role) =>
+        ["admin+", "owner"].includes(role),
+
     ROLES
 };
-
-

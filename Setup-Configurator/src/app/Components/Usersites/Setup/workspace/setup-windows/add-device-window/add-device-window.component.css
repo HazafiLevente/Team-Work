@@ -9,7 +9,7 @@
   font-family: 'Inter', sans-serif;
 }
 
-/* ---- CATEGORY PICKER ---- */
+
 .picker-header h3 {
   margin: 0 0 14px;
   font-size: 14px;
@@ -47,7 +47,7 @@
 .cat-icon { font-size: 22px; }
 .cat-label { font-size: 11px; text-align: center; line-height: 1.2; }
 
-/* ---- PRODUCT LIST ---- */
+
 .product-header {
   display: flex;
   align-items: center;

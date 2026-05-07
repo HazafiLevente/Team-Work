@@ -16,8 +16,6 @@ import { CommonModule } from '@angular/common';
         <div class="eb-glow-2"></div>
         <div class="eb-background-glow"></div>
       </div>
-
-      <!-- ✅ EZT fogjuk mérni, nem a hostot -->
       <div #content class="eb-content">
         <ng-content></ng-content>
       </div>
@@ -122,7 +120,7 @@ export class ElectricBorderComponent implements AfterViewInit, OnDestroy {
       return cornerPoint(left + r, top + r, r, Math.PI, Math.PI / 2, (dist - acc) / ca);
     };
 
-    // ✅ CONTENT-et mérünk, és a CANVAS-t a CONTENT köré feszítjük
+
     const updateSize = () => {
       const rect = content.getBoundingClientRect();
       const width = rect.width + borderOffset * 2;
@@ -134,7 +132,7 @@ export class ElectricBorderComponent implements AfterViewInit, OnDestroy {
       canvas.style.width = `${width}px`;
       canvas.style.height = `${height}px`;
 
-      // ✅ a canvas középre kerül a content fölé (különben elcsúszik)
+
       const left = (content.offsetLeft - borderOffset);
       const top = (content.offsetTop - borderOffset);
 
@@ -193,7 +191,7 @@ export class ElectricBorderComponent implements AfterViewInit, OnDestroy {
       this.raf = requestAnimationFrame(draw);
     };
 
-    // ✅ content + container resize figyelés
+
     this.ro = new ResizeObserver(() => {
       if (this.resizeRaf) cancelAnimationFrame(this.resizeRaf);
       this.resizeRaf = requestAnimationFrame(() => {

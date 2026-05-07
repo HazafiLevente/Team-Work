@@ -1,54 +1,64 @@
 /**
- * 📋 Centralized Logger Service
- * Intercepts all console.log / console.warn / console.error
- * and persists entries to a rolling JSON log file.
+ * --------------------------------------------------------------------------
+ *  SERVER EVENT LOGGER & CONSOLE HIJACKER
+ * --------------------------------------------------------------------------
+ *  Intersects all console output and persists it to a circular JSON buffer.
+ *  Features asynchronous debounced saving to prevent I/O bottlenecks.
  */
 
 const fs = require("fs");
 const path = require("path");
 
+// --- CONFIGURATION ---
 const LOG_DIR = path.join(__dirname, "..", "..", "datas", "Jsons");
 const LOG_FILE = path.join(LOG_DIR, "server-logs.json");
-const MAX_ENTRIES = 2000; // max entries kept in the file
+const MAX_ENTRIES = 2000; // Keep the file size manageable
+const SAVE_DELAY_MS = 1000;
 
-// Ensure directory exists
+// Ensure log directory existence
 if (!fs.existsSync(LOG_DIR)) {
     fs.mkdirSync(LOG_DIR, { recursive: true });
 }
 
-// In-memory buffer
+// --- LOG BUFFER INITIALIZATION ---
 let logBuffer = [];
 
-// Load existing logs on startup
 try {
     if (fs.existsSync(LOG_FILE)) {
         const raw = fs.readFileSync(LOG_FILE, "utf-8");
         logBuffer = JSON.parse(raw);
         if (!Array.isArray(logBuffer)) logBuffer = [];
     }
-} catch {
-    logBuffer = [];
+} catch (e) {
+    logBuffer = []; // Fallback if JSON is corrupted
 }
 
-// ---- Persist (debounced) ----
+// --- PERSISTENCE LOGIC (DEBOUNCED) ---
 let saveTimer = null;
+
+/**
+ * Persists the buffer to disk with a debounce to group multiple logs
+ * into a single write operation.
+ */
 function scheduleSave() {
     if (saveTimer) return;
     saveTimer = setTimeout(() => {
         saveTimer = null;
         try {
-            // Trim old entries
+            // Implement circular buffer (FIFO)
             if (logBuffer.length > MAX_ENTRIES) {
                 logBuffer = logBuffer.slice(logBuffer.length - MAX_ENTRIES);
             }
             fs.writeFileSync(LOG_FILE, JSON.stringify(logBuffer, null, 2), "utf-8");
-        } catch (e) {
-            // fallback – can't log here or we'd recurse
+        } catch (err) {
+            process.stderr.write(`❌ Logger failed to write to disk: ${err.message}\n`);
         }
-    }, 1000);
+    }, SAVE_DELAY_MS);
 }
 
-// ---- Core log function ----
+/**
+ * Creates a structured log entry from console arguments.
+ */
 function addEntry(level, args) {
     const message = args
         .map(a => {
@@ -60,7 +70,7 @@ function addEntry(level, args) {
     const entry = {
         id: Date.now() + Math.random().toString(36).slice(2, 6),
         timestamp: new Date().toISOString(),
-        level,      // "log" | "warn" | "error"
+        level,
         message
     };
 
@@ -68,7 +78,8 @@ function addEntry(level, args) {
     scheduleSave();
 }
 
-// ---- Intercept console ----
+// --- CONSOLE HIJACKING ---
+
 const _origLog = console.log.bind(console);
 const _origWarn = console.warn.bind(console);
 const _origError = console.error.bind(console);
@@ -88,7 +99,11 @@ console.error = (...args) => {
     _origError(...args);
 };
 
-// ---- Public API ----
+// --- PUBLIC API ---
+
+/**
+ * Retrieves logs with optional filtering and search capabilities.
+ */
 function getLogs({ limit = 200, level, search, since } = {}) {
     let result = [...logBuffer];
 
@@ -106,12 +121,14 @@ function getLogs({ limit = 200, level, search, since } = {}) {
         result = result.filter(e => new Date(e.timestamp) >= sinceDate);
     }
 
-    // newest first
+    // Newest first
     result.reverse();
-
     return result.slice(0, limit);
 }
 
+/**
+ * Resets the log buffer and clears the file.
+ */
 function clearLogs() {
     logBuffer = [];
     scheduleSave();

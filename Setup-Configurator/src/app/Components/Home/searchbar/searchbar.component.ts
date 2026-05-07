@@ -28,32 +28,25 @@ export class SearchbarComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    // gyártók betöltése
-    this.productService.getProducts(2000).subscribe({
+    this.productService.getBrands().subscribe({
       next: (res: any) => {
-        const items: any[] = res?.items ?? [];
-        const norm = (v: any) => String(v ?? '').trim();
-
         this.manufacturers = [...new Set<string>(
-          items
-            .map((p: any) => norm(p.manufacturer) || norm(p.Manufacturer))
+          (res?.brands ?? [])
+            .map((brand: any) => String(brand ?? '').trim())
             .filter((x: string) => x.length > 0)
         )].sort((a, b) => a.localeCompare(b, 'hu'));
       },
       error: (err) => console.error('Manufacturer load error:', err),
     });
 
-
-    // aktuális filter visszatöltése
-    const cur = this.filtersService.current;      // CombinedFilters
-    const s = cur.search;                         // SearchFilters
+    const cur = this.filtersService.current;
+    const s = cur.search;
 
     this.term = s.term ?? '';
     this.manufacturer = s.manufacturer ?? '';
     this.priceMin = s.priceMin ?? null;
     this.priceMax = s.priceMax ?? null;
     this.sort = s.sort ?? '';
-
   }
 
   sanitizePrice(which: 'min' | 'max'): void {
@@ -77,10 +70,7 @@ export class SearchbarComponent implements OnInit {
       sort: (this.sort || '').trim()
     };
 
-    console.log('SEARCHBAR -> setFilters()', filters);
 
     this.filtersService.setSearch(filters as SearchFilters);
   }
-
-
 }

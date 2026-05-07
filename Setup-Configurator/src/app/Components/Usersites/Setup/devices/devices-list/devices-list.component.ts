@@ -78,10 +78,10 @@ export class DevicesListComponent implements OnChanges {
           this.loading = false;
         },
         error: (err) => {
-          console.error('❌ Eszköz betöltési hiba:', err);
+          console.error('âťŚ EszkĂ¶z betĂ¶ltĂ©si hiba:', err);
           this.devices = [];
           this.loading = false;
-          this.errorMsg = 'Az eszközök betöltése sikertelen.';
+          this.errorMsg = 'Az eszkĂ¶zĂ¶k betĂ¶ltĂ©se sikertelen.';
         }
       });
   }
@@ -89,12 +89,23 @@ export class DevicesListComponent implements OnChanges {
   onDeviceDragEnded(payload: { device: any; pos: { x: number; y: number } }): void {
     const deviceId = payload?.device?.id;
     if (!deviceId) return;
+    const tableName = payload?.device?.category ?? 'setup_devices';
 
     this.devices = this.devices.map(d =>
       String(d?.id) === String(deviceId)
         ? { ...d, x: payload.pos.x, y: payload.pos.y }
         : d
     );
+
+    this.http.patch(
+      `/api/setup/update-item-position`,
+      { itemId: deviceId, tableName, x: payload.pos.x, y: payload.pos.y },
+      { withCredentials: true }
+    ).subscribe({
+      error: (err) => {
+        console.error('Device position save error:', err);
+      }
+    });
   }
 
   onDeviceRightClick(payload: { device: any; x: number; y: number }): void {
@@ -124,7 +135,21 @@ export class DevicesListComponent implements OnChanges {
   }
 
   deleteDevice(device: any): void {
-    console.log('Törlés:', device);
+    const itemId = device?.id;
+    const tableName = device?.category ?? 'setup_devices';
+    if (!itemId) return;
+
+    this.devices = this.devices.filter(d => String(d?.id) !== String(itemId));
+
+    this.http.request('delete', `/api/setup/remove-item`, {
+      body: { itemId, tableName },
+      withCredentials: true
+    }).subscribe({
+      error: (err) => {
+        console.error('Device delete hiba:', err);
+      }
+    });
+
     this.closeContextMenu();
   }
 
@@ -142,13 +167,13 @@ export class DevicesListComponent implements OnChanges {
     );
 
     this.http.patch(
-      `/api/setup/children/${deviceId}/rename`,
-      { name: newName, display_name: newName },
+      `/api/setup/rename-item`,
+      { itemId: deviceId, tableName: device?.category ?? 'setup_devices', newName },
       { withCredentials: true }
     ).subscribe({
       next: () => {},
       error: (err) => {
-        console.error('❌ Device rename hiba:', err);
+        console.error('âťŚ Device rename hiba:', err);
       }
     });
   }
@@ -175,3 +200,4 @@ export class DevicesListComponent implements OnChanges {
     return `${category}:${device?.id}`;
   }
 }
+

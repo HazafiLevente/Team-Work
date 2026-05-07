@@ -6,7 +6,8 @@ const { sendPasswordResetCode } = require("../services/mailer");
 const { sendRegisterCode } = require("../services/mailer");
 const { OAuth2Client } = require("google-auth-library");
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
-const crypto = require("crypto"); // vagy maradhat Math.random is
+const crypto = require("crypto");
+const { awardRankPointsSafe } = require("../services/rankPoints.service");
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
@@ -41,7 +42,7 @@ exports.googleLogin = async (req, res) => {
 
         let user = null;
 
-        // 1️⃣ Google ID alapján keresés
+
         const { data: byGoogle } = await supabase
             .from("user[Auth]")
             .select("*")
@@ -52,7 +53,7 @@ exports.googleLogin = async (req, res) => {
             user = byGoogle;
         }
 
-        // 2️⃣ Ha nincs google_id, email alapján keresés
+
         if (!user) {
             const { data: byEmail } = await supabase
                 .from("user[Auth]")
@@ -61,7 +62,7 @@ exports.googleLogin = async (req, res) => {
                 .single();
 
             if (byEmail) {
-                // 🔗 linking
+
                 await supabase
                     .from("user[Auth]")
                     .update({ google_id: googleId })
@@ -71,7 +72,7 @@ exports.googleLogin = async (req, res) => {
             }
         }
 
-        // 3️⃣ Ha semmi nincs → új user
+
         if (!user) {
             const { data: newUser } = await supabase
                 .from("user[Auth]")
@@ -90,14 +91,17 @@ exports.googleLogin = async (req, res) => {
             await supabase
                 .from("user_more[Auth]")
                 .insert({ user_id: user.ID });
+
+            await awardRankPointsSafe(user.ID, "register");
         }
 
-        // 🎟 JWT generálás
+
         const token = jwt.sign({
             id: user.ID,
             username: user.UserName,
+            fullname: user.Name,
             email: user.Email,
-            role: resolveRole(user.ID, user.Role)
+            role: resolveRole(user.ID)
         }, JWT_SECRET, { expiresIn: "12h" });
 
         setAuthCookie(res, token);
@@ -137,12 +141,14 @@ exports.register = async (req, res) => {
         if (error) return res.status(500).json({ error: error.message });
 
         await supabase.from("user_more[Auth]").insert({ user_id: user.ID });
+        await awardRankPointsSafe(user.ID, "register");
 
         const token = jwt.sign({
             id: user.ID,
             username: user.UserName,
+            fullname: user.Name,
             email: user.Email,
-            role: resolveRole(user.ID, user.Role)
+            role: resolveRole(user.ID)
         }, JWT_SECRET, { expiresIn: "12h" });
 
         setAuthCookie(res, token);
@@ -170,12 +176,12 @@ exports.login = async (req, res) => {
     if (!ok) return res.status(401).json({ error: "Invalid login" });
 
     const token = jwt.sign(
-        { id: user.ID, username: user.UserName, email: user.Email, role: resolveRole(user.ID, user.Role) },
+        { id: user.ID, username: user.UserName, fullname: user.Name, email: user.Email, role: resolveRole(user.ID) },
         JWT_SECRET,
         { expiresIn: rememberMe ? "25d" : "12h" }
     );
 
-    setAuthCookie(res, token, rememberMe); // ✅ IDE JÖN BE
+    setAuthCookie(res, token, rememberMe);
 
     res.json({ success: true });
 };
@@ -193,9 +199,29 @@ exports.logout = (_, res) => {
 };
 
 
-exports.me = (req, res) => {
+exports.me = async (req, res) => {
     if (!req.user) return res.json({ loggedIn: false });
-    res.json({ loggedIn: true, user: req.user });
+
+    const { data: user, error } = await supabase
+        .from("user[Auth]")
+        .select("ID, UserName, Name, Email")
+        .eq("ID", req.user.id)
+        .maybeSingle();
+
+    if (error) {
+        return res.json({ loggedIn: true, user: req.user });
+    }
+
+    res.json({
+        loggedIn: true,
+        user: {
+            id: req.user.id,
+            username: user?.UserName || req.user.username,
+            fullname: user?.Name || req.user.fullname,
+            email: user?.Email || req.user.email,
+            role: req.user.role
+        }
+    });
 };
 exports.requestRegisterCode = async (req, res) => {
     try {
@@ -218,15 +244,14 @@ exports.requestRegisterCode = async (req, res) => {
             return res.status(500).json({ error: "Insert failed" });
         }
 
-        console.log("✅ register code saved:", inserted);
 
-        // 🔥 mail küldés: ha ez száll el, attól még ne legyen 500 (különben nincs code step)
+
         try {
             await sendRegisterCode(email, code);
         } catch (mailErr) {
             console.error("❌ sendRegisterCode failed:", mailErr);
-            // opcionálisan: visszaadhatsz 200-at is, hogy a UI menjen tovább,
-            // csak jelezd, hogy mail hiba volt:
+
+
             return res.status(200).json({ success: true, mailSent: false });
         }
 
@@ -273,12 +298,14 @@ exports.verifyRegisterCode = async (req, res) => {
         .single();
 
     await supabase.from("user_more[Auth]").insert({ user_id: user.ID });
+    await awardRankPointsSafe(user.ID, "register");
 
     const token = jwt.sign({
         id: user.ID,
         username: user.UserName,
+        fullname: user.Name,
         email: user.Email,
-        role: resolveRole(user.ID, user.Role)
+        role: resolveRole(user.ID)
     }, JWT_SECRET, { expiresIn: "12h" });
 
     setAuthCookie(res, token);
@@ -310,7 +337,7 @@ exports.resetPassword = async (req, res) => {
 
         const hashed = await bcrypt.hash(newPassword, 10);
 
-        // user update (ID alapján a legbiztosabb)
+
         const { error: upErr } = await supabase
             .from("user[Auth]")
             .update({ password: hashed })
@@ -337,7 +364,7 @@ exports.requestPasswordReset = async (req, res) => {
         const { email } = req.body;
         if (!email) return res.status(400).json({ error: "Missing email" });
 
-        // user lookup (nálad Email nagy E!)
+
         const { data: user, error: userErr } = await supabase
             .from("user[Auth]")
             .select("ID, Email")

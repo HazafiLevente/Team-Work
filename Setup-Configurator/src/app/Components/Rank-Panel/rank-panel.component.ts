@@ -13,7 +13,7 @@ import { RANK_COLORS } from '../../Constants/ranks.constants';
   styleUrls: ['./rank-panel.component.css']
 })
 export class RankPanelComponent implements OnInit {
-  @Input() embedded = false;          // ✅ ha profil oldalon "beágyazva" használod
+  @Input() embedded = false;
   @Output() close = new EventEmitter<void>();
 
   readonly RANK_COLORS = RANK_COLORS;

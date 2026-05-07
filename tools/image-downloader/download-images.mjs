@@ -7,13 +7,14 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const ROOT = path.resolve(__dirname, "..", "..");
-const API_BASE = "http://localhost:3000";
+const API_BASE = process.env.API_BASE || "http://localhost:3000";
 
 const OUT_ROOT = path.join(ROOT, "datas", "images");
 
 const MAX_IMAGES = Number(process.env.MAX_IMAGES || 6);
 const START = Number(process.env.START || 0);
 const LIMIT = Number(process.env.LIMIT || 0);
+const API_LIMIT = Number(process.env.API_LIMIT || 5000);
 
 const DELAY_MS = 800;
 const MIN_BYTES = 20000;
@@ -33,7 +34,11 @@ function normalize(str) {
 }
 
 function buildQuery(p) {
-  return `${normalize(p.manufacturer)} ${normalize(p.model)} product photo`;
+  const displayName = normalize(p.name || p?.data?.name);
+  const manufacturer = normalize(p.manufacturer);
+  const model = normalize(p.model);
+  const base = displayName || `${manufacturer} ${model}`.trim();
+  return `${base} product photo`;
 }
 
 function sha1(buf) {
@@ -41,7 +46,7 @@ function sha1(buf) {
 }
 
 async function fetchProducts() {
-  const r = await fetch(`${API_BASE}/api/products`);
+  const r = await fetch(`${API_BASE}/api/products?limit=${API_LIMIT}`);
   if (!r.ok) throw new Error("Products API error");
   const data = await r.json();
   return data.items || data;
@@ -60,7 +65,7 @@ async function searchImages(query) {
 
   const html = await r.text();
 
-  // Bing HTML-ben murl mező tartalmazza a valódi képet
+
   const regex = /"murl":"(.*?)"/g;
   const results = [];
 

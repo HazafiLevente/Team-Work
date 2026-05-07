@@ -3,12 +3,12 @@
   align-items: center;
 }
 
-/* Google logó elrejtése */
+
 :host ::ng-deep .goog-logo-link {
   display: none !important;
 }
 
-/* felesleges szöveg eltüntetés */
+
 :host ::ng-deep .goog-te-gadget {
   font-size: 12px;
   color: transparent;
@@ -18,7 +18,7 @@
   color: #ccc;
 }
 
-/* dropdown */
+
 :host ::ng-deep select {
   background: rgba(255,255,255,0.06);
   color: #fff;

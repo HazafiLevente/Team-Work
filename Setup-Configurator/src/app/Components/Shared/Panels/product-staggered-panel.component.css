@@ -9,7 +9,7 @@
 
 .ps-panel{
   position: fixed;
-  top: 74px; /* header alá */
+  top: 74px;
   right: 0;
   width: min(520px, 92vw);
   height: calc(100vh - 74px);
@@ -27,7 +27,7 @@
   overflow: hidden;
 }
 
-/* bal oldali mód */
+
 .ps-panel[data-pos="left"]{
   left: 0;
   right: auto;
@@ -131,7 +131,7 @@
 }
 
 .ps-panel{
-  /* ... */
+
   border-left: 1px solid rgba(255,255,255,0.10);
   box-shadow: -20px 0 60px rgba(0,0,0,0.55), 0 0 0 1px rgba(255,255,255,0.06);
 }

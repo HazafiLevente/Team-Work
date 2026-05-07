@@ -126,12 +126,7 @@ export class SetupCarDetailsPanelComponent implements OnChanges {
     this.loading = true;
 
     const urls = [
-      `/api/cars?id=${id}`,
-      `/api/car?id=${id}`,
-      `/api/setup/cars/${id}`,
-      `/api/cars/${id}`,
-      `/api/car/${id}`,
-      `/api/setup/car/${id}`
+      `/api/setup/car-setup/${id}/details`
     ];
 
     const tryFetch = (i: number) => {
@@ -150,12 +145,12 @@ export class SetupCarDetailsPanelComponent implements OnChanges {
 
       this.http.get<any>(url, { withCredentials: true }).subscribe({
         next: (res) => {
-          console.log('[CAR API RES]', url, res);
 
           const data = this.normalizeCarResponse(res);
 
           this.rows = this.buildRowsFromItem(data);
           this.loading = false;
+          this.errorMsg = '';
 
           if (!this.rows.length) {
             const fb = this.buildRowsFromItem(this.carItem);
@@ -186,6 +181,10 @@ export class SetupCarDetailsPanelComponent implements OnChanges {
 
   private normalizeCarResponse(res: any): any {
     if (res == null) return res;
+
+    if (res?.fields && typeof res.fields === 'object' && !Array.isArray(res.fields)) {
+      return res;
+    }
 
     const wantedId =
       this.carItem?.car_id ??
@@ -246,7 +245,6 @@ export class SetupCarDetailsPanelComponent implements OnChanges {
     }
 
     let data =
-      res?.car ??
       res?.data ??
       res?.result ??
       res?.payload ??
@@ -258,7 +256,11 @@ export class SetupCarDetailsPanelComponent implements OnChanges {
       return hit ?? this.carItem;
     }
 
-    if (data?.car) data = data.car;
+    if (data?.fields && typeof data.fields === 'object' && !Array.isArray(data.fields)) {
+      return data;
+    }
+
+    if (data?.car && !data?.fields) data = data.car;
 
     return data;
   }
@@ -289,6 +291,19 @@ export class SetupCarDetailsPanelComponent implements OnChanges {
   private buildRowsFromItem(data: any): CarRow[] {
     if (!data) return [];
 
+    const directFields = data?.fields;
+    if (directFields && typeof directFields === 'object' && !Array.isArray(directFields)) {
+      const mapped: CarRow[] = Object.entries(directFields)
+        .map(([label, value]) => ({
+          key: String(label).toLowerCase().replace(/[^a-z0-9]+/g, '_'),
+          label: String(label),
+          value
+        }))
+        .filter(r => r.value !== undefined && r.value !== null && String(r.value).trim() !== '' && String(r.value).trim() !== '—');
+
+      if (mapped.length) return mapped;
+    }
+
     const manufacturer = this.getAny(data, [
       'manufacturer', 'manufacturer_name', 'brand', 'brand_name', 'make', 'maker', 'gyarto', 'gyártó'
     ]);
@@ -310,7 +325,7 @@ export class SetupCarDetailsPanelComponent implements OnChanges {
     const price = exactPrice ?? priceRange;
 
     const bodyType = this.getAny(data, [
-      'body_type', 'bodyType', 'body', 'type', 'karosszeria', 'karosszéria'
+      'body_type', 'bodyType', 'body', 'karosszeria', 'karosszéria'
     ]);
 
     const hp = this.getAny(data, [

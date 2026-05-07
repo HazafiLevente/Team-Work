@@ -1,0 +1,62 @@
+<div class="network-builder-shell">
+  <div class="network-builder-body">
+    @if (loading) {
+      <div class="state">Halozati eszkozok betoltese...</div>
+    } @else {
+      @if (error) {
+        <div class="state error">{{ error }}</div>
+      }
+
+      @if (success) {
+        <div class="state success">{{ success }}</div>
+      }
+
+      <div class="type-row">
+        @for (type of networkTypes; track type.key) {
+          <button
+            type="button"
+            class="type-btn"
+            [class.active]="selectedType === type.key"
+            (click)="setType(type.key)"
+          >
+            <span>{{ type.label }}</span>
+            <small>{{ countForType(type.key) }}</small>
+          </button>
+        }
+      </div>
+
+      <div class="grid">
+        <div class="field-card full">
+          <label class="field-label">{{ typeLabel(selectedType) }} kivalasztasa</label>
+          <select
+            class="select"
+            [(ngModel)]="selectedDeviceKey"
+          >
+            <option value="">-- valassz eszkozt --</option>
+
+            @for (device of filteredDevices(); track trackDevice($index, device)) {
+              <option [value]="device.__deviceKey">
+                {{ getDeviceLabel(device) }}
+              </option>
+            }
+          </select>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button
+          type="button"
+          class="save-btn"
+          (click)="saveNetworkDevice()"
+          [disabled]="saving || loading"
+        >
+          @if (saving) {
+            Mentes...
+          } @else {
+            Halozati eszkoz hozzaadasa
+          }
+        </button>
+      </div>
+    }
+  </div>
+</div>

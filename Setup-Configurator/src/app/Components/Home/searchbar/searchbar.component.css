@@ -1,4 +1,4 @@
-/* Wrapper */
+
 .searchbar-row{
   display: flex;
   gap: 12px;
@@ -10,7 +10,7 @@
   margin: 16px 0 10px;
 }
 
-/* közös input/select kinézet */
+
 .ctrl{
   padding: 14px;
   border-radius: 12px;
@@ -36,8 +36,20 @@
   box-shadow: 0 0 0 1px rgba(0,255,255,.18);
 }
 
-/* gomb */
+
 .btn{
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px 18px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.05);
+  color: var(--text);
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
   transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease;
 }
 .btn:hover{
@@ -45,31 +57,80 @@
   box-shadow: 0 0 0 1px rgba(0,255,255,.18);
 }
 
-/* szélesség szabályok (desktop) */
+body[data-appearance="light"] .ctrl{
+  background: #fdf5e6;
+  border: 1px solid var(--line);
+  color: var(--text);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+body[data-appearance="light"] .ctrl::placeholder{
+  color: var(--muted);
+}
+
+body[data-appearance="light"] .ctrl:hover{
+  border-color: #8b5e3c;
+  background: #ffffff;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+body[data-appearance="light"] .ctrl:focus{
+  border-color: #4b3621;
+  background: #ffffff;
+  box-shadow: 0 0 0 2px rgba(75, 54, 33, 0.1);
+}
+
+body[data-appearance="light"] .btn{
+  background: #fdf5e6;
+  color: var(--text);
+  border: 1px solid var(--line);
+  padding: 14px;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+body[data-appearance="light"] .btn:hover{
+  background: #ffffff;
+  border-color: #8b5e3c;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  transform: translateY(-1px);
+}
+
+
 .w-manufacturer{ min-width: 240px; }
 .w-term{ flex: 1; min-width: 240px; }
 .w-price{ width: 160px; }
 .w-sort{ width: 220px; }
 .w-btn{ height: 48px; }
 
-/* ✅ MOBIL: csak gyártó + keresés + gomb marad */
+.searchbar-row .w-btn {
+  background: rgba(255,255,255,0.05);
+}
+
+body[data-appearance="light"] .searchbar-row .w-btn {
+  background: #f7f2eb;
+}
+
+
 @media (max-width: 768px){
 
-  /* rejtsük mobilon */
+
   .min-price,
   .max-price,
   .sort-select{
     display: none !important;
   }
 
-  /* mobil layout: középre, max szélesség */
+
   .searchbar-row{
     display: grid;
     grid-template-columns: 1fr;
     gap: 10px;
 
     width: 100%;
-    max-width: 420px;   /* ✅ középre fogja */
+    max-width: 420px;
     margin: 12px auto 10px;
     padding: 0 12px;
   }

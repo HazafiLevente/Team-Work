@@ -1,10 +1,11 @@
-import { Component, EventEmitter, Input, Output, OnChanges, SimpleChanges, ElementRef, ViewChild } from '@angular/core';
+import { Component, EventEmitter, Input, Output, OnChanges, SimpleChanges, ElementRef, ViewChild, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { HttpClient, HttpClientModule } from '@angular/common/http';
 
 @Component({
   selector: 'app-setup-ht-details-panel',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, HttpClientModule],
   templateUrl: './setup-ht-details-panel.component.html',
   styleUrls: ['./setup-ht-details-panel.component.css']
 })
@@ -21,12 +22,13 @@ export class SetupHtDetailsPanelComponent implements OnChanges {
   dragging = false;
   private dragOffsetX = 0;
   private dragOffsetY = 0;
+  private readonly http = inject(HttpClient);
 
   private devicesList: any[] = [];
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['htItem'] && this.htItem) {
-      this.normalizeDevices();
+      this.loadDevices();
     }
   }
 
@@ -67,12 +69,19 @@ export class SetupHtDetailsPanelComponent implements OnChanges {
     }
   }
 
-  private normalizeDevices(): void {
+  private getSetupId(): number | null {
+    const raw = this.htItem?.id ?? this.htItem?.setupId ?? this.htItem?.setup_id ?? null;
+    const parsed = Number(raw);
+    return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
+  }
+
+  private normalizeDevices(fallback?: any): void {
     this.loading = false;
     this.error = '';
     this.devicesList = [];
 
     const parsedDevices = this.tryParseJson(
+      fallback ??
       this.htItem?.devices ??
       this.htItem?.device_map ??
       this.htItem?.deviceMap ??
@@ -104,22 +113,56 @@ export class SetupHtDetailsPanelComponent implements OnChanges {
     this.devicesList = [];
   }
 
+  private loadDevices(): void {
+    const setupId = this.getSetupId();
+    if (!setupId) {
+      this.normalizeDevices();
+      return;
+    }
+
+    this.loading = true;
+    this.error = '';
+
+    this.http.get<any[]>(`/api/home-theater/${setupId}/devices`, {
+      withCredentials: true
+    }).subscribe({
+      next: (rows) => {
+        this.loading = false;
+
+        if (Array.isArray(rows) && rows.length > 0) {
+          this.devicesList = rows;
+          return;
+        }
+
+        this.normalizeDevices();
+      },
+      error: () => {
+        this.loading = false;
+        this.normalizeDevices();
+      }
+    });
+  }
+
   private cleanDeviceName(device: any): string {
     if (!device) return 'Not selected';
 
     const manufacturer = String(device?.manufacturer ?? '').trim();
     const name = String(device?.name ?? '').trim();
     const model = String(device?.model ?? '').trim();
+    const fieldModel = String(device?.fields?.model ?? '').trim();
+    const fieldManufacturer = String(device?.fields?.manufacturer ?? '').trim();
 
-    const pretty = [manufacturer, name || model].filter(Boolean).join(' ').trim();
+    const pretty = [manufacturer || fieldManufacturer, name || model || fieldModel].filter(Boolean).join(' ').trim();
     return pretty || 'Not selected';
   }
 
   private roleOf(device: any): string {
     return this.normalizeText(
+      device?.product_category ??
+      device?.category ??
+      device?.fields?.category ??
       device?.role ??
       device?.type ??
-      device?.category ??
       ''
     );
   }
@@ -193,6 +236,10 @@ export class SetupHtDetailsPanelComponent implements OnChanges {
     return this.firstDeviceName('receiver', 'receivers', 'av_receiver', 'avr');
   }
 
+  bassAmplifierName(): string {
+    return this.firstDeviceName('bass_amplifier', 'bassamplifier', 'bass_amplifier_setup');
+  }
+
   frontLeftName(): string {
     return this.nthDeviceName(0, 'front_left', 'frontspeakers', 'front_speakers');
   }
@@ -225,44 +272,74 @@ export class SetupHtDetailsPanelComponent implements OnChanges {
     return this.firstDeviceName('subwoofer', 'subwoofers');
   }
 
+  private roleLabel(role: string): string {
+    const normalized = this.normalizeText(role);
+
+    const labels: Record<string, string> = {
+      receiver: 'Receiver',
+      reciever: 'reciever',
+      recievers: 'reciever',
+      av_receiver: 'reciever',
+      avr: 'reciever',
+      audio_processor: 'audio_processor',
+      bass_amplifier: 'Bass Amplifier',
+      front_speaker: 'front_speaker',
+      front_left: 'Front Left',
+      front_right: 'Front Right',
+      center_speaker: 'center_speaker',
+      center: 'Center',
+      side_speaker: 'side_speaker',
+      surround_left: 'Surround Left',
+      surround_right: 'Surround Right',
+      back_speaker: 'back_speaker',
+      back_left: 'Back Left',
+      back_right: 'Back Right',
+      side_left: 'Side Left',
+      side_right: 'Side Right',
+      subwoofer: 'Subwoofer',
+      speaker: 'speaker',
+      htdevices: 'speaker'
+    };
+
+    return labels[normalized] ?? role;
+  }
+
+  private roleOrder(role: string): number {
+    const normalized = this.normalizeText(role);
+    const order: Record<string, number> = {
+      receiver: 10,
+      reciever: 10,
+      audio_processor: 20,
+      bass_amplifier: 25,
+      front_speaker: 30,
+      front_left: 31,
+      front_right: 32,
+      center_speaker: 40,
+      center: 41,
+      side_speaker: 50,
+      surround_left: 51,
+      surround_right: 52,
+      back_speaker: 60,
+      back_left: 61,
+      back_right: 62,
+      subwoofer: 70,
+      speaker: 80,
+      htdevices: 80
+    };
+
+    return order[normalized] ?? 999;
+  }
+
   visibleRows(): Array<{ label: string; value: string }> {
-    const rows: Array<{ label: string; value: string }> = [
-      { label: 'Layout', value: this.layoutValue() },
-      { label: 'Receiver', value: this.receiverName() },
-      { label: 'Front Left', value: this.frontLeftName() },
-      { label: 'Front Right', value: this.frontRightName() }
-    ];
-
-    const center = this.centerName();
-    const surroundLeft = this.surroundLeftName();
-    const surroundRight = this.surroundRightName();
-    const backLeft = this.backLeftName();
-    const backRight = this.backRightName();
-    const sub = this.subwooferName();
-
-    if (center !== 'Not selected') {
-      rows.push({ label: 'Center', value: center });
-    }
-
-    if (surroundLeft !== 'Not selected') {
-      rows.push({ label: 'Surround Left', value: surroundLeft });
-    }
-
-    if (surroundRight !== 'Not selected') {
-      rows.push({ label: 'Surround Right', value: surroundRight });
-    }
-
-    if (backLeft !== 'Not selected') {
-      rows.push({ label: 'Back Left', value: backLeft });
-    }
-
-    if (backRight !== 'Not selected') {
-      rows.push({ label: 'Back Right', value: backRight });
-    }
-
-    rows.push({ label: 'Subwoofer', value: sub });
-
-    return rows;
+    return this.devicesList
+      .map((device: any) => ({
+        role: this.roleOf(device),
+        label: this.roleLabel(this.roleOf(device)),
+        value: this.cleanDeviceName(device)
+      }))
+      .filter((row) => row.role && row.value !== 'Not selected')
+      .sort((a, b) => this.roleOrder(a.role) - this.roleOrder(b.role))
+      .map(({ label, value }) => ({ label, value }));
   }
 
   stop(e: MouseEvent): void {

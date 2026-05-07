@@ -1,47 +1,57 @@
+/**
+ * --------------------------------------------------------------------------
+ *  DATABASE SCHEMA FILTER SERVICE
+ * --------------------------------------------------------------------------
+ *  Filters out internal, system, or excluded database tables based on
+ *  patterns defined in the central 'filler.json' configuration.
+ */
+
 const fs = require("fs");
 const path = require("path");
 
-const FILLER_PATH = path.join(
-    __dirname,
-    "..",
-    "..",
-    "datas",
-    "Jsons",
-    "filler.json"
-);
+// --- CONFIGURATION ---
+const FILLER_PATH = path.join(__dirname, "..", "..", "datas", "Jsons", "filler.json");
 
+/** @type {string[]} List of strings/patterns to identify tables for exclusion */
 let excludePatterns = [];
 
 /**
- * Betölti a filler.json-ból a kizárandó mintákat.
+ * Loads (or reloads) the filter patterns from the filesystem.
+ * Designed to be called at startup or when the config file changes.
  */
 function loadFilters() {
     if (!fs.existsSync(FILLER_PATH)) {
-        console.warn("⚠️ filler.json nem található, nincs szűrés.");
+        console.warn("⚠️ filler.json not found. All tables will be visible by default.");
         return;
     }
 
     try {
-        const json = JSON.parse(fs.readFileSync(FILLER_PATH, "utf8"));
-        excludePatterns = json.exclude_table_patterns || [];
+        const raw = fs.readFileSync(FILLER_PATH, "utf8");
+        const json = JSON.parse(raw);
+        excludePatterns = Array.isArray(json.exclude_table_patterns)
+            ? json.exclude_table_patterns
+            : [];
     } catch (e) {
-        console.error("❌ filler.json betöltési hiba:", e.message);
+        console.error("❌ Failed to parse filler.json:", e.message);
     }
 }
 
-// Kezdeti betöltés
+// Initial load on module require
 loadFilters();
 
 /**
- * Meghatározza, hogy egy táblát ki kell-e zárni a neve alapján.
- * @param {string} tableName 
- * @returns {boolean} true, ha ki kell zárni
+ * Checks if a given table name matches any of the exclusion patterns.
+ *
+ * @param {string} tableName - The name of the DB table to check.
+ * @returns {boolean} True if the table should be hidden from the UI/API.
  */
 function shouldExclude(tableName) {
-    if (!tableName) return true;
+    if (!tableName || typeof tableName !== "string") return true;
 
-    // Ha bármelyik minta szerepel a táblanévben (bárhol)
-    return excludePatterns.some(pattern => tableName.includes(pattern));
+    // Returns true if any pattern is found within the table name
+    return excludePatterns.some(pattern =>
+        tableName.toLowerCase().includes(pattern.toLowerCase())
+    );
 }
 
 module.exports = {

@@ -9,7 +9,6 @@
   <div class="muted" *ngIf="error">{{ error }}</div>
 
   <div class="filter-grid" *ngIf="!loading">
-
     <select class="search-input" title="HT tábla" formControlName="tableName">
       <option value="">HT típus (összes)</option>
       <option *ngFor="let t of meta?.table_names" [value]="t">{{ t }}</option>
@@ -38,42 +37,16 @@
            formControlName="priceMax" />
   </div>
 
-  <!-- DYNAMIC: csak ha van kiválasztott table meta -->
-  <div class="filter-grid"
-       *ngIf="!loading && dynForSelected() as dyn"
-       [formGroup]="dynamicForm">
-
-    <!-- BOOLEANS -->
-    <ng-container *ngFor="let k of (dyn.booleans || [])">
-      <label class="muted">
-        <input type="checkbox" [formControlName]="k">
-        {{ k }}
-      </label>
-    </ng-container>
-
-    <!-- NUMBERS (RANGE) -->
-    <ng-container *ngFor="let k of (dyn.numbers || [])">
-      <div [formGroupName]="k">
-        <input class="search-input" type="number" [placeholder]="k + ' min'" formControlName="min">
-        <input class="search-input" type="number" [placeholder]="k + ' max'" formControlName="max">
-      </div>
-    </ng-container>
-
-    <!-- ENUMS (SELECT) -->
-    <ng-container *ngFor="let k of enumKeys()">
-      <select class="search-input" [formControlName]="k" [title]="k">
-        <option value="">{{ k }} (összes)</option>
-
-        <option *ngFor="let opt of (dyn.enums?.[k] || [])" [value]="opt">
-          {{ opt }}
-        </option>
-      </select>
-    </ng-container>
-
-  </div>
-
-
   <div class="carfilter-footer">
+    <button
+      *ngIf="hasAdvancedControls()"
+      type="button"
+      class="btn small ghost"
+      (click)="toggleAdvanced()"
+    >
+      {{ showAdvanced ? '− Kevesebb szűrési szempont' : '+ Több szűrési szempont' }}
+    </button>
+
     <button type="button"
             class="btn small"
             title="Törli a HT szűrőket"
@@ -82,6 +55,35 @@
     </button>
 
     <span class="muted">A 🔎 Keresés gomb ezeket is figyelembe veszi.</span>
+  </div>
+
+  <div
+    class="filter-grid"
+    *ngIf="showAdvanced && !loading && dynForSelected() as dyn"
+    [formGroup]="dynamicForm"
+  >
+    <ng-container *ngFor="let k of (dyn.booleans || [])">
+      <label class="muted">
+        <input type="checkbox" [formControlName]="k">
+        {{ k }}
+      </label>
+    </ng-container>
+
+    <ng-container *ngFor="let k of (dyn.numbers || [])">
+      <div [formGroupName]="k">
+        <input class="search-input" type="number" [placeholder]="k + ' min'" formControlName="min">
+        <input class="search-input" type="number" [placeholder]="k + ' max'" formControlName="max">
+      </div>
+    </ng-container>
+
+    <ng-container *ngFor="let k of enumKeys()">
+      <select class="search-input" [formControlName]="k" [title]="k">
+        <option value="">{{ k }} (összes)</option>
+        <option *ngFor="let opt of (dyn.enums?.[k] || [])" [value]="opt">
+          {{ opt }}
+        </option>
+      </select>
+    </ng-container>
   </div>
 
 </div>

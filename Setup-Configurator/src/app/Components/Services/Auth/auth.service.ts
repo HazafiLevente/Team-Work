@@ -5,6 +5,7 @@ import { BehaviorSubject, Observable, map, tap, switchMap, catchError, of } from
 export type AuthUser = {
   id: number;
   username: string;
+  fullname?: string;
   email: string;
   role: string;
 };
@@ -24,10 +25,8 @@ export class AuthService {
 
   constructor(private http: HttpClient) { }
 
-  /**
-   * Lekéri a jelenlegi session usert a backendtől és frissíti a user$-t.
-   * Ezt hívjuk login után (és app initkor is lehet).
-   */
+
+
   check(): Observable<AuthUser | null> {
     return this.http.get<MeResp>('/api/auth/me', { withCredentials: true }).pipe(
       map(r => (r.loggedIn ? (r.user ?? null) : null)),
@@ -49,23 +48,21 @@ export class AuthService {
     password: string;
   }): Observable<AuthUser | null> {
     return this.http.post('/api/auth/register', payload, { withCredentials: true }).pipe(
-      // 🔥 regisztráció után azonnal kérjük le az aktuális usert
+
       switchMap(() => this.check())
     );
   }
 
-  /**
-   * Login: cookie beáll -> utána azonnal check() -> user$ frissül, nincs F5.
-   */
+
+
   login(payload: { email: string; password: string; rememberMe: boolean }): Observable<AuthUser | null> {
     return this.http.post('/api/auth/login', payload, { withCredentials: true }).pipe(
       switchMap(() => this.check())
     );
   }
 
-  /**
-   * Logout: cookie törlés -> user$ null
-   */
+
+
   logout(): Observable<any> {
     return this.http.post('/api/auth/logout', {}, { withCredentials: true }).pipe(
       tap(() => {
@@ -86,7 +83,7 @@ export class AuthService {
       data,
       { withCredentials: true }
     ).pipe(
-      switchMap(() => this.check()) // 🔥 login után user frissül
+      switchMap(() => this.check())
     );
   }
 
@@ -109,6 +106,9 @@ export class AuthService {
     return this.http.post('/api/auth/password/reset', { email, code, newPassword });
   }
 
+  formatNameForUrl(name: string): string {
+    return (name || '').trim().replace(/\s+/g, '_');
+  }
 
   googleLogin(idToken: string) {
     return this.http.post(

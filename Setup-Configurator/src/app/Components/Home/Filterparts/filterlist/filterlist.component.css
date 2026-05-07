@@ -5,7 +5,7 @@
   margin-left: 0;
 }
 
-/* általános hover feedback minden mezőre */
+
 .search-input{
   transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease;
 }
@@ -16,7 +16,7 @@
   transform: translateY(-1px);
 }
 
-/* gombok */
+
 .btn, .tag{
   transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease, opacity .12s ease;
 }

@@ -8,10 +8,73 @@
 
   } @else {
 
-    @for (d of devices; track trackByDevice($index,d)) {
+    @if (isNoteSetup() && devices.length) {
+      <div class="note-total">Teljes ar: {{ totalPrice() }}</div>
+      <ol class="note-device-list">
+        @for (d of devices; track trackByDevice($index,d)) {
+          <li class="note-device-item">
+            <div>
+              <div class="note-device-name">{{ deviceName(d) }}</div>
+              <div class="note-device-meta">{{ deviceMeta(d) }}</div>
+            </div>
+            <div class="note-device-price">{{ devicePrice(d) }}</div>
+            <button
+              type="button"
+              class="note-device-delete"
+              [disabled]="deletingDeviceId === d.id"
+              (click)="removeNoteDevice(d)">
+              {{ deletingDeviceId === d.id ? '...' : 'X' }}
+            </button>
+          </li>
+        }
+      </ol>
+    } @else {
+      @for (d of devices; track trackByDevice($index,d)) {
 
-      <app-device [device]="d"></app-device>
+        <app-device
+          [device]="d"
+          [deleting]="deletingDeviceId === d.id"
+          (deleteDevice)="removeNoteDevice($event)">
+        </app-device>
 
+      }
+    }
+
+    @if (!devices.length) {
+      <div class="loading">
+        Nincs megjeleníthető eszköz.
+      </div>
+    }
+
+    @if (totalPages > 1) {
+      <div class="pager">
+        <button class="pager-btn" type="button" (click)="prevPage()" [disabled]="currentPage === 1 || loading">
+          Előző
+        </button>
+
+        <div class="pager-pages">
+          @for (page of visiblePages(); track page) {
+            <button
+              class="pager-page"
+              type="button"
+              [class.active]="page === currentPage"
+              (click)="goToPage(page)"
+              [disabled]="loading">
+              {{ page }}
+            </button>
+          }
+        </div>
+
+        <button class="pager-btn" type="button" (click)="nextPage()" [disabled]="currentPage === totalPages || loading">
+          Következő
+        </button>
+      </div>
+    }
+
+    @if (totalItems > 0) {
+      <div class="pager-meta">
+        {{ currentPage }} / {{ totalPages }} oldal · összesen {{ totalItems }} eszköz
+      </div>
     }
 
   }

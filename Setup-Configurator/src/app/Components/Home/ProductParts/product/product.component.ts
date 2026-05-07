@@ -12,11 +12,27 @@ import { ImageService } from '../../../Services/image/image.service';
 })
 export class ProductComponent implements OnInit {
   @Input({ required: true }) product!: Product;
+  @Input() priority = false;
   @Output() openProduct = new EventEmitter<Product>();
 
-  imageUrl = 'https://via.placeholder.com/200?text=Loading';
+  imageUrl = 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 16 16%22/%3E';
+  private originalImageUrl = '';
+  private imageFallbackUsed = false;
+  private dragging = false;
 
   constructor(private images: ImageService) {}
+
+  get displayName(): string {
+    const p: any = this.product;
+    return String(
+      p?.name ??
+      p?.data?.name ??
+      p?.model ??
+      p?.data?.model ??
+      p?.data?.Model ??
+      ''
+    ).trim();
+  }
 
   get displayPrice(): number | null {
     const p: any = this.product;
@@ -60,22 +76,40 @@ export class ProductComponent implements OnInit {
     await this.images.load();
 
     const table = (this.product as any).table_name || this.product.table;
-    this.imageUrl = this.images.getImage(table, this.product);
+    this.originalImageUrl = this.images.getOriginalImage(table, this.product);
+    this.imageUrl = this.images.getImage(table, this.product, 260);
 
-    console.log('🖼 CARD IMAGE', {
-      table,
-      id: (this.product as any).id,
-      imageUrl: this.imageUrl,
-      product: this.product
-    });
 
-    console.log('💰 CARD PRICE RAW', {
-      product: this.product,
-      displayPrice: this.displayPrice
-    });
+  }
+
+  onImageError(): void {
+    if (this.imageFallbackUsed || !this.originalImageUrl) return;
+
+    this.imageFallbackUsed = true;
+    this.imageUrl = this.originalImageUrl;
   }
 
   open(): void {
+    if (this.dragging) {
+      this.dragging = false;
+      return;
+    }
+
     this.openProduct.emit(this.product);
+  }
+
+  onDragStart(event: DragEvent): void {
+    this.dragging = true;
+    event.dataTransfer?.setData('application/json', JSON.stringify(this.product));
+    event.dataTransfer?.setData('text/plain', JSON.stringify(this.product));
+    if (event.dataTransfer) {
+      event.dataTransfer.effectAllowed = 'copy';
+    }
+  }
+
+  onDragEnd(): void {
+    setTimeout(() => {
+      this.dragging = false;
+    });
   }
 }

@@ -37,7 +37,134 @@
   margin: 6px 0;
 }
 
-/* Danger item styling */
+.list-panel {
+  display: grid;
+  gap: 8px;
+  padding: 8px;
+  margin-top: 4px;
+  border-radius: 10px;
+  border: 1px solid rgba(82, 39, 255, 0.28);
+  background: rgba(12, 7, 24, 0.72);
+}
+
+.favorite-toggle,
+.select-row button,
+.create-row button {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.05);
+  color: #e2e8f0;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.favorite-toggle {
+  display: grid;
+  grid-template-columns: 22px 1fr;
+  gap: 8px;
+  align-items: center;
+  padding: 8px 10px;
+  text-align: left;
+}
+
+.favorite-toggle small {
+  display: block;
+  margin-top: 2px;
+  color: rgba(226, 232, 240, 0.58);
+  font-size: 11px;
+}
+
+.favorite-toggle.active {
+  border-color: rgba(250, 204, 21, 0.58);
+  background: rgba(250, 204, 21, 0.14);
+}
+
+.list-toggle-stack {
+  display: grid;
+  gap: 6px;
+}
+
+.list-toggle.active {
+  border-color: rgba(34, 211, 238, 0.5);
+  background: rgba(34, 211, 238, 0.11);
+}
+
+.check {
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 7px;
+  background: rgba(255, 255, 255, 0.06);
+  font-weight: 900;
+}
+
+.create-row,
+.select-row {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 6px;
+}
+
+.create-row input,
+.select-row select {
+  min-width: 0;
+  height: 34px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.05);
+  color: #e2e8f0;
+  padding: 0 9px;
+}
+
+.create-row button,
+.select-row button {
+  min-width: 42px;
+  height: 34px;
+  padding: 0 9px;
+}
+
+.create-row .privacy-toggle {
+  min-width: 64px;
+  border-color: rgba(34, 211, 238, 0.28);
+  background: rgba(34, 211, 238, 0.08);
+  color: #a5f3fc;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.create-row .privacy-toggle.private {
+  border-color: rgba(250, 204, 21, 0.42);
+  background: rgba(250, 204, 21, 0.13);
+  color: #fde68a;
+}
+
+.privacy-hint {
+  margin-top: -3px;
+  padding: 0 2px;
+  color: rgba(226, 232, 240, 0.58);
+  font-size: 11px;
+}
+
+.favorite-toggle:disabled,
+.create-row button:disabled,
+.select-row button:disabled,
+.select-row select:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+.list-hint,
+.list-error {
+  padding: 3px 2px;
+  font-size: 12px;
+  color: rgba(226, 232, 240, 0.68);
+}
+
+.list-error {
+  color: #fda4af;
+}
+
+
 .menu-item.danger {
   color: #fda4af;
 }

@@ -5,6 +5,8 @@
   </app-product-list>
 
   <app-product [product]="selected" [adminMode]="true" (saveProduct)="onSave($event)"
+    [types]="types" [typeTemplates]="templates"
+    (typeTemplatesChanged)="loadTypeMeta()"
     (deleteProduct)="onDelete($event)">
   </app-product>
 

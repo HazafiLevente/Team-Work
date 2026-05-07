@@ -9,6 +9,9 @@
       [class.active]="selected?.id === p.id && selected?.table_name === p.table_name" (click)="productSelect.emit(p)">
       <div class="brand">{{ p.manufacturer }}</div>
       <div class="model">{{ p.model }}</div>
+      <div class="model" *ngIf="p.type_label" style="opacity:.7; font-size: 12px;">
+        {{ p.type_label }}
+      </div>
     </button>
   </div>
 </div>

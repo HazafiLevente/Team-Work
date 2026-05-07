@@ -22,11 +22,11 @@ export class AdminLogsComponent implements OnInit, OnDestroy {
     logs: LogEntry[] = [];
     loading = true;
 
-    // Filters
+
     levelFilter = '';
     searchFilter = '';
 
-    // Auto-refresh
+
     autoRefresh = true;
     private refreshInterval: any;
 

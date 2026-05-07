@@ -1,4 +1,4 @@
-<!-- LOGIN FORM -->
+
 <form *ngIf="mode === 'login'" (ngSubmit)="submit()">
 
   <h2 class="title">Bejelentkezés</h2>
@@ -46,7 +46,7 @@
   </div>
 </form>
 
-<!-- EMAIL VERIFY COMPONENT -->
+
 <app-email-verify
   *ngIf="mode === 'emailVerify'"
   (codeSent)="handleCodeSent($event)"

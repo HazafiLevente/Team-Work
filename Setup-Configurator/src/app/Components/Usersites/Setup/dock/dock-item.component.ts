@@ -6,7 +6,7 @@ import { CommonModule } from '@angular/common';
   standalone: true,
   imports: [CommonModule],
   template: `
-    <button class="taskbar-item" [class.minimized]="window.minimized" 
+    <button class="taskbar-item" [class.minimized]="window.minimized"
       (click)="restore.emit(window.id)"
       (contextmenu)="onRightClick($event)">
       <span class="taskbar-icon">🗔</span>

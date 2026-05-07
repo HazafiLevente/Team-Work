@@ -25,14 +25,19 @@ import { DevicesMenuComponent } from './setup-windows/devices-menu/devices-menu.
 import { ConnectionsMenuComponent } from './setup-windows/connections-menu/connections-menu.component';
 import { SetupPairingModalComponent } from '../setup-pairing-modal/setup-pairing-modal.component';
 import { ContextMenuDockComponent } from './context-menus/context-menu-dock/context-menu-dock.component';
-import { ContextMenuWorkspaceComponent } from './context-menus/context-menu-workspace/context-menu-workspace.component';
 import { ContextMenuCategoryComponent } from './context-menus/context-menu-category/context-menu-category.component';
 
 import { AddDeviceWindowComponent } from './setup-windows/add-device-window/add-device-window.component';
 import {
   HomeTheaterBuilderComponent
 } from '../setup-panel/home-theater-builder/ht-builder/home-theater-builder.component';
+import { HomeTheaterSimpleBuilderComponent } from '../setup-panel/home-theater-simple-builder/home-theater-simple-builder.component';
 import { CarBuilderPanelComponent } from '../setup-panel/car-builder/car-builder-panel.component';
+import { InstrumentBuilderPanelComponent } from '../setup-panel/instrument-builder/instrument-builder-panel.component';
+import { PcBuilderPanelComponent } from '../setup-panel/pc-builder/pc-builder-panel.component';
+import { AllBuilderPanelComponent } from '../setup-panel/all-builder/all-builder-panel.component';
+import { NetworkBuilderPanelComponent } from '../setup-panel/network-builder/network-builder-panel.component';
+
 
 export type WorkspaceWindow = {
   id: string;
@@ -46,6 +51,8 @@ export type WorkspaceWindow = {
   minimized: boolean;
   maximized: boolean;
   width?: number;
+  height?: number | null;
+  snapMode?: 'left' | 'right' | null;
 };
 
 @Component({
@@ -67,26 +74,34 @@ export type WorkspaceWindow = {
     SetupPairingModalComponent,
     SetupDockComponent,
     ContextMenuDockComponent,
-    ContextMenuWorkspaceComponent,
     ContextMenuCategoryComponent,
     DotGridComponent,
-    AddDeviceWindowComponent,
     HomeTheaterBuilderComponent,
-    CarBuilderPanelComponent
+    HomeTheaterSimpleBuilderComponent,
+    CarBuilderPanelComponent,
+    InstrumentBuilderPanelComponent,
+    PcBuilderPanelComponent,
+    AllBuilderPanelComponent,
+    NetworkBuilderPanelComponent,
   ]
 })
 export class WorkspaceComponent {
   @Input() lineRefreshTrigger = 0;
   @Input() connectMousePos: any = { x: 0, y: 0 };
   @Input() connectSourceSetup: any = null;
+  @Input() connectSourceItem: any = null;
   @Input() connectTargetSetup: any = null;
   @Input() pairingStage: 'NONE' | 'PICK_SOURCE' | 'PICK_TARGET_SETUP' | 'PICK_TARGET_ITEM' = 'NONE';
+  @Input() allowPcHtLinks = false;
+  @Input() pairingConnections: any[] = [];
 
   @Input() userSetups: any[] = [];
   @Input() items: any[] = [];
   @Input() connections: any[] = [];
   @Input() globalRoomConnections: any[] = [];
   @Input() viewingSetup: any = null;
+  @Input() hideDock = false;
+  @Input() fixedLayout: 'desktop' | 'mobile' | null = null;
   @Input() loading = false;
   @Input() loadingItems = false;
 
@@ -101,6 +116,7 @@ export class WorkspaceComponent {
   @Output() openSetup = new EventEmitter<any>();
   @Output() roomRenamed = new EventEmitter<any>();
   @Output() setupClicked = new EventEmitter<any>();
+  @Output() backgroundClicked = new EventEmitter<void>();
   @Output() createSetup = new EventEmitter<{ x: number; y: number }>();
   @Output() createItem = new EventEmitter<{ x: number; y: number }>();
   @Output() categorySelected = new EventEmitter<any>();
@@ -108,8 +124,11 @@ export class WorkspaceComponent {
   @Output() cancelConnectingEvent = new EventEmitter<void>();
   @Output() selectSourceEvent = new EventEmitter<any>();
   @Output() finalizeConnectionEvent = new EventEmitter<any>();
+  @Output() allowPcHtLinksChange = new EventEmitter<boolean>();
 
   @Output() itemOpen = new EventEmitter<any>();
+  @Output() itemClicked = new EventEmitter<any>();
+  @Output() itemConnect = new EventEmitter<any>();
   @Output() htSaved = new EventEmitter<void>();
 
   private rafId: number | null = null;
@@ -119,6 +138,8 @@ export class WorkspaceComponent {
   ctxY = 0;
   ctxSetup: any = null;
   ctxItem: any = null;
+  pendingDeleteItem: any = null;
+  pendingDeleteSetup: any = null;
 
   ctxWorkspaceOpen = false;
   ctxWorkspaceX = 0;
@@ -136,8 +157,12 @@ export class WorkspaceComponent {
   windows: WorkspaceWindow[] = [];
   private nextZIndex = 10000;
 
+  snapAssistWindowId: string | null = null;
+  snapAssistVisible = false;
+  private readonly snapAssistThreshold = 18;
+
   extWidth = 0;
-  extHeight = 0;
+  extHeight = 1100;
 
   @ViewChild('workspaceRoot', { static: true })
   workspaceRoot!: ElementRef<HTMLElement>;
@@ -150,9 +175,21 @@ export class WorkspaceComponent {
   startPanX = 0;
   startPanY = 0;
 
+  confirmDialogState: {
+    isOpen: boolean;
+    title: string;
+    message: string;
+    onConfirm: () => void;
+    confirmText?: string;
+    cancelText?: string;
+    hideCancel?: boolean;
+  } | null = null;
+
   constructor(private http: HttpClient) {}
 
   onMouseDown(event: MouseEvent): void {
+    return;
+
     const target = event.target as HTMLElement;
     const isBackground = target.classList.contains('setup-workspace') ||
       target.classList.contains('boundary-area') ||
@@ -208,9 +245,35 @@ export class WorkspaceComponent {
   elementRegistry = new Map<string, HTMLElement>();
 
   registerElement(e: { id: string; el: HTMLElement }) {
-    console.log(`📝 [Workspace] Registering element: ${e.id}`, !!e.el);
     this.elementRegistry.set(e.id, e.el);
     this.updateLines();
+  }
+
+  noteSetups(): any[] {
+    return (this.userSetups || []).filter((setup) => this.isNoteSetup(setup));
+  }
+
+  isNoteSetup(setup: any): boolean {
+    return setup?.isNote === true || setup?.is_note === true || setup?.isnote === true;
+  }
+
+  noteName(setup: any): string {
+    return String(setup?.display_name ?? setup?.setup_name ?? setup?.name ?? 'Jegyzet');
+  }
+
+  noteBookmarkLabel(setup: any, index: number): string {
+    const name = this.noteName(setup).trim();
+    return name ? name.slice(0, 1).toUpperCase() : String(index + 1);
+  }
+
+  noteTrackKey(index: number, setup: any): any {
+    return setup?.id ?? setup?.setup_id ?? setup?.setupId ?? index;
+  }
+
+  openNoteBookmark(setup: any, event?: MouseEvent): void {
+    event?.preventDefault();
+    event?.stopPropagation();
+    this.openDevicesWindow(setup);
   }
 
   updateLines(): void {
@@ -259,6 +322,34 @@ export class WorkspaceComponent {
       return;
     }
 
+    if (this.ctxSetup && (normalized === 'hangszer' || normalized === 'hangszerek' || normalized === 'instrument' || normalized === 'instruments')) {
+      this.openInstrumentBuilderWindow(this.ctxSetup);
+      this.ctxCategoryOpen = false;
+      this.ctxSetup = null;
+      return;
+    }
+
+    if (this.ctxSetup && (normalized === 'hálózat' || normalized === 'halozat' || normalized === 'network' || normalized === 'modem' || normalized === 'router' || normalized === 'switch')) {
+      this.openNetworkBuilderWindow(this.ctxSetup);
+      this.ctxCategoryOpen = false;
+      this.ctxSetup = null;
+      return;
+    }
+
+    if (this.ctxSetup && (normalized === 'házimozi' || normalized === 'hazimozi' || normalized === 'home_theater' || normalized === 'home theater')) {
+      this.openAddDeviceWindow(this.ctxSetup);
+      this.ctxCategoryOpen = false;
+      this.ctxSetup = null;
+      return;
+    }
+
+    if (this.ctxSetup && (normalized === 'egyéb' || normalized === 'egyeb' || normalized === 'other')) {
+      this.openAllBuilderWindow(this.ctxSetup);
+      this.ctxCategoryOpen = false;
+      this.ctxSetup = null;
+      return;
+    }
+
     const pos = { x: this.ctxCategoryX, y: this.ctxCategoryY };
 
     this.categorySelected.emit({
@@ -283,6 +374,19 @@ export class WorkspaceComponent {
     this.ctxOpen = false;
     this.ctxSetup = null;
     this.ctxItem = null;
+  }
+
+  onBackgroundClick(event: MouseEvent): void {
+    const target = event.target as HTMLElement | null;
+    if (!target) return;
+
+    const interactive = target.closest(
+      '.drag-element, app-setup-room, app-setup-item-card, app-setup-window, app-setup-dock, app-context-menu-base, button, input, select, textarea'
+    );
+    if (interactive) return;
+
+    this.closeContextMenu();
+    this.backgroundClicked.emit();
   }
 
   onSetupRightClick(payload: any): void {
@@ -323,13 +427,16 @@ export class WorkspaceComponent {
 
   onDockItemRightClick(payload: { event: MouseEvent, window: any }): void {
     const rect = this.boundaryEl.nativeElement.getBoundingClientRect();
-    this.ctxDockWindow = payload.window;
-    this.ctxDockX = payload.event.clientX - rect.left;
-    this.ctxDockY = payload.event.clientY - rect.top;
+    const dockItem = payload.event.currentTarget as HTMLElement | null;
+    const dockItemRect = dockItem?.getBoundingClientRect();
 
-    if (this.ctxDockY > rect.height - 150) {
-      this.ctxDockY -= 150;
-    }
+    this.ctxDockWindow = payload.window;
+    this.ctxDockX = dockItemRect
+      ? dockItemRect.left - rect.left + (dockItemRect.width / 2) - 122
+      : payload.event.clientX - rect.left;
+    this.ctxDockY = dockItemRect
+      ? dockItemRect.top - rect.top + 14
+      : payload.event.clientY - rect.top;
 
     this.ctxDockOpen = true;
     this.ctxOpen = false;
@@ -337,12 +444,17 @@ export class WorkspaceComponent {
   }
 
   startRenameForContextSetup(): void {
-    if (!this.ctxSetup || !this.roomComponents) return;
+    this.startRenameForSetup(this.ctxSetup);
+    this.closeContextMenu();
+  }
+
+  startRenameForSetup(setup: any): void {
+    if (!setup || !this.roomComponents) return;
 
     const targetId =
-      this.ctxSetup?.id ??
-      this.ctxSetup?.setup_id ??
-      this.ctxSetup?.setupId;
+      setup?.id ??
+      setup?.setup_id ??
+      setup?.setupId;
 
     const room = this.roomComponents.find(c => {
       const cid =
@@ -354,7 +466,6 @@ export class WorkspaceComponent {
     });
 
     room?.startRename();
-    this.closeContextMenu();
   }
 
   private getContextItemKey(item: any): string {
@@ -378,6 +489,10 @@ export class WorkspaceComponent {
   }
 
   private getContextItemTableName(item: any): string {
+    if (this.isSetupRoomContext(this.viewingSetup)) return 'setups';
+    if (item?.room_id != null) return 'setups';
+    if (item?.setup_id != null && item?.device_id != null) return 'setup_devices';
+
     return (
       item?.category ??
       item?.source_table ??
@@ -387,10 +502,19 @@ export class WorkspaceComponent {
     );
   }
 
-  startRenameForContextItem(): void {
-    if (!this.ctxItem || !this.itemComponents) return;
+  private isSetupRoomContext(setup: any): boolean {
+    return !!setup && setup?.room_id == null;
+  }
 
-    const targetKey = this.getContextItemKey(this.ctxItem);
+  startRenameForContextItem(): void {
+    this.startRenameForItem(this.ctxItem);
+    this.closeContextMenu();
+  }
+
+  startRenameForItem(item: any): void {
+    if (!item || !this.itemComponents) return;
+
+    const targetKey = this.getContextItemKey(item);
 
     const itemComp = this.itemComponents.find(c => {
       const item = (c as any).item;
@@ -399,28 +523,41 @@ export class WorkspaceComponent {
     });
 
     (itemComp as any)?.startRename?.();
-    this.closeContextMenu();
   }
 
   private tryDeleteContextItem(
     urls: string[],
-    body: { itemId: any; tableName: string },
+    body: { itemId: any; tableName: string; setupId?: any },
     onSuccess: () => void,
     index = 0
   ): void {
     if (index >= urls.length) {
       console.error('❌ Item törlés hiba: egyik endpoint sem működött.', urls);
-      alert('Törlés sikertelen.');
+      this.showDeleteError('Torles sikertelen.');
       return;
     }
 
     const url = urls[index];
+    const deleteUrl = body.tableName === 'setups'
+      ? `/api/setup/remove-child-setup/${body.itemId}`
+      : url;
+    const deleteBody = body.tableName === 'setups'
+      ? { roomId: body.setupId }
+      : body;
 
-    this.http.request<any>('delete', url, {
-      body,
-      withCredentials: true
-    }).subscribe({
-      next: () => {
+
+    const request = body.tableName === 'setups'
+      ? this.http.request<any>('delete', deleteUrl, {
+          body: deleteBody,
+          withCredentials: true
+        })
+      : this.http.request<any>('delete', deleteUrl, {
+          body: deleteBody,
+          withCredentials: true
+        });
+
+    request.subscribe({
+      next: (res) => {
         onSuccess();
       },
       error: (err) => {
@@ -433,41 +570,96 @@ export class WorkspaceComponent {
         }
 
         console.error('❌ Item törlés hiba:', err);
-        alert('Törlés sikertelen.');
+        this.showDeleteError(err?.error?.error || 'Torles sikertelen.');
       }
     });
   }
 
-  deleteContextItem(): void {
-    if (!this.ctxItem) return;
+  private showDeleteError(message: string): void {
+    this.confirmDialogState = {
+      isOpen: true,
+      title: 'Torles sikertelen',
+      message,
+      confirmText: 'Rendben',
+      hideCancel: true,
+      onConfirm: () => {
+        this.confirmDialogState = null;
+      }
+    };
+  }
 
-    const itemId = this.ctxItem?.id ?? this.ctxItem?.ID ?? this.ctxItem?.item_id;
-    const tableName = this.getContextItemTableName(this.ctxItem);
+  deleteContextItem(): void {
+    const item = this.ctxItem;
+    const setup = this.viewingSetup;
+
+    console.error('[workspace] context delete clicked', {
+      ctxItem: item,
+      viewingSetup: setup
+    });
+
+    if (!item) {
+      console.error('[workspace] context delete stopped: missing ctxItem');
+      return;
+    }
+
+    const itemId = item?.id ?? item?.ID ?? item?.item_id;
+    const tableName = this.getContextItemTableName(item);
 
     if (!itemId || !tableName) {
+      console.error('[workspace] context delete stopped: missing itemId or tableName', {
+        itemId,
+        tableName,
+        ctxItem: item
+      });
       console.error('❌ Hiányzó itemId vagy tableName törléshez:', this.ctxItem);
       return;
     }
 
     const displayName =
-      this.ctxItem?.display_name ??
-      this.ctxItem?.setup_name ??
-      this.ctxItem?.name ??
-      this.ctxItem?.model ??
+      item?.display_name ??
+      item?.setup_name ??
+      item?.name ??
+      item?.model ??
       'Elem';
 
-    const ok = window.confirm(`Biztos törlöd?\n\n${displayName}`);
-    if (!ok) return;
+    this.pendingDeleteItem = { ...item };
+    this.pendingDeleteSetup = setup ? { ...setup } : null;
 
-    const targetKey = this.getContextItemKey(this.ctxItem);
-    const dataId = this.getItemDataId(this.ctxItem);
+    this.confirmDialogState = {
+      isOpen: true,
+      title: 'Biztos törlöd?',
+      message: displayName,
+      onConfirm: () => {
+        this.confirmDialogState = null;
+        this.executeDeleteContextItem();
+      }
+    };
+  }
+
+  private executeDeleteContextItem(): void {
+    const item = this.pendingDeleteItem;
+    const setup = this.pendingDeleteSetup ?? this.viewingSetup;
+
+    if (!item) {
+      console.error('[workspace] execute delete stopped: missing pendingDeleteItem');
+      return;
+    }
+
+    const itemId = item?.id ?? item?.ID ?? item?.item_id;
+    const tableName = this.getContextItemTableName(item);
+    const setupId = item?.setup_id ?? item?.room_id ?? setup?.id ?? setup?.setup_id;
+
+    const targetKey = this.getContextItemKey(item);
+    const dataId = this.getItemDataId(item);
 
     this.tryDeleteContextItem(
       ['/api/setup/remove-item', '/api/remove-item'],
-      { itemId, tableName },
+      { itemId, tableName, setupId },
       () => {
         this.items = this.items.filter(it => this.getContextItemKey(it) !== targetKey);
         this.elementRegistry.delete(dataId);
+        this.pendingDeleteItem = null;
+        this.pendingDeleteSetup = null;
         this.closeContextMenu();
         this.updateLines();
       }
@@ -553,14 +745,26 @@ export class WorkspaceComponent {
   }
 
   openDevicesWindow(setup: any): void {
+    const isNote = setup?.isNote === true || setup?.is_note === true || setup?.isnote === true;
+    const setupName = setup?.setup_name ?? setup?.display_name ?? setup?.name ?? 'Jegyzet';
+    const setupId = setup?.id ?? setup?.setup_id ?? setup?.setupId ?? setupName;
+    const winId = `${isNote ? 'note' : 'devices'}_${setupId}`;
+    const existing = this.windows.find(w => w.id === winId);
+
+    if (existing) {
+      this.windows = this.windows.map(w => w.id === winId ? { ...w, minimized: false, zIndex: ++this.nextZIndex } : w);
+      this.closeContextMenu();
+      return;
+    }
+
     const devicesCount = this.windows.filter(w => w.kind === 'devices').length + 1;
     const offset = (devicesCount - 1) * 28;
 
     const newWindow: WorkspaceWindow = {
-      id: 'win_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
+      id: winId,
       kind: 'devices',
-      title: 'Eszközök',
       payload: { setup },
+      title: isNote ? `Jegyzet: ${setupName}` : 'Eszkozok',
       instanceNo: devicesCount,
       x: 100 + offset,
       y: 100 + offset,
@@ -617,7 +821,35 @@ export class WorkspaceComponent {
     this.windows = [...this.windows, newWindow];
   }
 
-  private openCarBuilderWindow(setup: any): void {
+  openPcBuilderWindow(setup: any): void {
+    const setupId = setup?.id ?? setup?.setup_id ?? setup?.setupId ?? Date.now();
+    const winId = 'pc_builder_' + setupId;
+
+    const existing = this.windows.find(w => w.id === winId);
+    if (existing) {
+      this.focusWindow(winId);
+      return;
+    }
+
+    const newWindow: WorkspaceWindow = {
+      id: winId,
+      kind: 'empty',
+      title: 'Szamitogep',
+      payload: { setup },
+      instanceNo: this.windows.length + 1,
+      x: 140,
+      y: 70,
+      width: 1100,
+      zIndex: ++this.nextZIndex,
+      minimized: false,
+      maximized: false
+    };
+
+    this.closeContextMenu();
+    this.windows = [...this.windows, newWindow];
+  }
+
+  openCarBuilderWindow(setup: any): void {
     const setupId = setup?.id ?? setup?.setup_id ?? setup?.setupId ?? Date.now();
     const winId = 'car_builder_' + setupId;
 
@@ -636,6 +868,90 @@ export class WorkspaceComponent {
       x: 160,
       y: 90,
       width: 900,
+      zIndex: ++this.nextZIndex,
+      minimized: false,
+      maximized: false
+    };
+
+    this.closeContextMenu();
+    this.windows = [...this.windows, newWindow];
+  }
+
+  openInstrumentBuilderWindow(setup: any): void {
+    const setupId = setup?.id ?? setup?.setup_id ?? setup?.setupId ?? Date.now();
+    const winId = 'instrument_builder_' + setupId;
+
+    const existing = this.windows.find(w => w.id === winId);
+    if (existing) {
+      this.focusWindow(winId);
+      return;
+    }
+
+    const newWindow: WorkspaceWindow = {
+      id: winId,
+      kind: 'empty',
+      title: 'Hangszerek',
+      payload: { setup },
+      instanceNo: this.windows.length + 1,
+      x: 160,
+      y: 90,
+      width: 900,
+      zIndex: ++this.nextZIndex,
+      minimized: false,
+      maximized: false
+    };
+
+    this.closeContextMenu();
+    this.windows = [...this.windows, newWindow];
+  }
+
+  openAllBuilderWindow(setup: any): void {
+    const setupId = setup?.id ?? setup?.setup_id ?? setup?.setupId ?? Date.now();
+    const winId = 'all_builder_' + setupId;
+
+    const existing = this.windows.find(w => w.id === winId);
+    if (existing) {
+      this.focusWindow(winId);
+      return;
+    }
+
+    const newWindow: WorkspaceWindow = {
+      id: winId,
+      kind: 'empty',
+      title: 'Összes termék',
+      payload: { setup },
+      instanceNo: this.windows.length + 1,
+      x: 180,
+      y: 110,
+      width: 900,
+      zIndex: ++this.nextZIndex,
+      minimized: false,
+      maximized: false
+    };
+
+    this.closeContextMenu();
+    this.windows = [...this.windows, newWindow];
+  }
+
+  openNetworkBuilderWindow(setup: any): void {
+    const setupId = setup?.id ?? setup?.setup_id ?? setup?.setupId ?? Date.now();
+    const winId = 'network_builder_' + setupId;
+
+    const existing = this.windows.find(w => w.id === winId);
+    if (existing) {
+      this.focusWindow(winId);
+      return;
+    }
+
+    const newWindow: WorkspaceWindow = {
+      id: winId,
+      kind: 'empty',
+      title: 'Halozat',
+      payload: { setup },
+      instanceNo: this.windows.length + 1,
+      x: 180,
+      y: 110,
+      width: 760,
       zIndex: ++this.nextZIndex,
       minimized: false,
       maximized: false
@@ -697,20 +1013,110 @@ export class WorkspaceComponent {
     if (idx !== -1) {
       this.windows[idx].x = pos.x;
       this.windows[idx].y = pos.y;
+      this.windows[idx].snapMode = null;
+      this.windows[idx].height = null;
       this.calculateWorkspaceExtension();
     }
+  }
+
+  resizeWindow(id: string, size: { width: number, height: number, x: number, y: number }): void {
+    const idx = this.windows.findIndex(w => w.id === id);
+    if (idx === -1) return;
+
+    this.windows[idx] = {
+      ...this.windows[idx],
+      x: size.x,
+      y: size.y,
+      width: size.width,
+      height: size.height,
+      maximized: false,
+      snapMode: null
+    };
+
+    this.calculateWorkspaceExtension();
+  }
+
+  onWindowDragMoved(id: string, pos: { x: number, y: number }): void {
+    if (pos.y <= this.snapAssistThreshold) {
+      this.snapAssistWindowId = id;
+      this.snapAssistVisible = true;
+      return;
+    }
+
+    if (this.snapAssistWindowId === id) {
+      this.snapAssistVisible = false;
+      this.snapAssistWindowId = null;
+    }
+  }
+
+  onWindowDragEnded(id: string, pos: { x: number, y: number }): void {
+    this.updateWindowPosition(id, pos);
+
+    if (pos.y <= this.snapAssistThreshold) {
+      this.snapAssistWindowId = id;
+      this.snapAssistVisible = true;
+    }
+  }
+
+  closeSnapAssist(): void {
+    this.snapAssistVisible = false;
+    this.snapAssistWindowId = null;
+  }
+
+  applySnapLayout(mode: 'max' | 'left' | 'right'): void {
+    const id = this.snapAssistWindowId;
+    const boundary = this.boundaryEl?.nativeElement;
+    if (!id || !boundary) return;
+
+    const width = boundary.clientWidth;
+    const height = boundary.clientHeight;
+    const halfWidth = Math.max(420, Math.floor(width / 2));
+
+    this.windows = this.windows.map(w => {
+      if (w.id !== id) return w;
+
+      if (mode === 'max') {
+        return {
+          ...w,
+          x: 0,
+          y: 0,
+          width: undefined,
+          height: null,
+          snapMode: null,
+          maximized: true,
+          minimized: false,
+          zIndex: ++this.nextZIndex
+        };
+      }
+
+      return {
+        ...w,
+        x: mode === 'left' ? 0 : Math.max(0, width - halfWidth),
+        y: 0,
+        width: halfWidth,
+        height,
+        snapMode: mode,
+        maximized: false,
+        minimized: false,
+        zIndex: ++this.nextZIndex
+      };
+    });
+
+    this.closeSnapAssist();
+    this.calculateWorkspaceExtension();
   }
 
   private calculateWorkspaceExtension(): void {
     if (!this.boundaryEl) return;
 
+    const defaultWorkspaceHeight = 1100;
     let maxX = 0;
-    let maxY = 0;
+    let maxY = defaultWorkspaceHeight;
 
     this.windows.forEach(w => {
       if (w.minimized) return;
       const width = w.width || 420;
-      const height = 500;
+      const height = this.getEstimatedWindowHeight(w);
 
       const right = w.x + width;
       const bottom = w.y + height;
@@ -723,9 +1129,21 @@ export class WorkspaceComponent {
     const margin = 100;
 
     this.extWidth = maxX > rect.width ? maxX + margin : 0;
-    this.extHeight = maxY > rect.height ? maxY + margin : 0;
+    this.extHeight = Math.max(defaultWorkspaceHeight, rect.height, maxY + margin);
 
     this.updateLines();
+  }
+
+  private getEstimatedWindowHeight(window: WorkspaceWindow): number {
+    if (window.kind === 'pairing') return 560;
+    if (window.kind === 'devices' || window.kind === 'connections') return 560;
+
+    const title = String(window.title || '').toLowerCase();
+    if (title.includes('szamitogep')) return 780;
+    if (title.includes('házimozi') || title.includes('hazimozi')) return 720;
+    if (title.includes('aut') || title.includes('hangszer')) return 700;
+
+    return 560;
   }
 
   onWindowClosed(id: string): void {
@@ -738,6 +1156,9 @@ export class WorkspaceComponent {
 
   closeWindow(id: string): void {
     this.windows = this.windows.filter(w => w.id !== id);
+    if (this.snapAssistWindowId === id) {
+      this.closeSnapAssist();
+    }
   }
 
   minimizeWindow(id: string): void {
@@ -753,7 +1174,8 @@ export class WorkspaceComponent {
   }
 
   toggleMaximizeWindow(id: string): void {
-    this.windows = this.windows.map(w => w.id === id ? { ...w, maximized: !w.maximized, minimized: false, zIndex: ++this.nextZIndex } : w);
+    this.windows = this.windows.map(w => w.id === id ? { ...w, maximized: !w.maximized, minimized: false, snapMode: null, height: null, zIndex: ++this.nextZIndex } : w);
+    this.closeSnapAssist();
   }
 
   onRoomDragEnded(setup: any, pos: any): void {
@@ -762,6 +1184,10 @@ export class WorkspaceComponent {
 
   onSetupClick(setup: any): void {
     this.setupClicked.emit(setup);
+  }
+
+  onItemClick(item: any): void {
+    this.itemClicked.emit(item);
   }
 
   openSetupDetails(setup: any): void {
@@ -780,14 +1206,79 @@ export class WorkspaceComponent {
     this.closeContextMenu();
     if (!item) return;
 
-    const isHT = String(item.setup_type || '').toLowerCase().includes('home_theater') ||
-      String(item.category || '').toLowerCase().includes('home_theater');
+    const setupType = String(item.setup_type ?? item.type ?? item.category ?? '').toLowerCase();
+    const childId = Number(item?.id ?? item?.setup_id ?? item?.ID ?? 0) || null;
+    const productId = Number(item?.product_id ?? item?.device_id ?? item?.productId ?? 0) || null;
+
+    const isHT =
+      setupType.includes('home_theater') ||
+      setupType === 'ht';
+    const isPc =
+      setupType.includes('pc') ||
+      setupType.includes('laptop') ||
+      setupType.includes('all_in_one') ||
+      setupType.includes('computer');
+    const isCar = setupType.includes('car');
+    const isInstrument = setupType.includes('instrument') || setupType.includes('inst') || setupType.includes('hangszer');
+    const isNetwork = setupType.includes('router') || setupType.includes('switch') || setupType.includes('modem') || setupType.includes('network');
 
     if (isHT) {
       this.openHtBuilderWindow(item);
-    } else {
-      console.log('Modify not supported for this item type:', item);
+      return;
     }
+
+    // Builders expect the parent room setup in [setup]. We keep the same child setup id via editChildSetupId.
+    const extraPayload: any = {
+      editChildSetupId: childId,
+      initialProductId: productId,
+      initialPcSetup: item
+    };
+
+    if (isPc) {
+      this.openEmptyWindow('Szamitogep', this.viewingSetup, extraPayload);
+      return;
+    }
+    if (isCar) {
+      this.openEmptyWindow('Autók', this.viewingSetup, extraPayload);
+      return;
+    }
+    if (isInstrument) {
+      this.openEmptyWindow('Hangszerek', this.viewingSetup, extraPayload);
+      return;
+    }
+    if (isNetwork) {
+      const t = String(item?.setup_type ?? item?.type ?? item?.role ?? item?.category ?? '').toLowerCase();
+      const inferred =
+        t.includes('switch') ? 'switch' :
+        t.includes('modem') ? 'modem' :
+        t.includes('router') ? 'router' :
+        null;
+      extraPayload.initialNetworkType = inferred;
+      // Some list items don't carry product_id yet; resolve it from get-children by id.
+      if (!extraPayload.initialProductId && childId && this.viewingSetup) {
+        const roomId = Number(this.viewingSetup?.id ?? this.viewingSetup?.setup_id ?? this.viewingSetup?.setupId ?? 0) || null;
+        if (roomId) {
+          this.http.get<any>(`/api/setup/${roomId}/get-children`, { withCredentials: true }).subscribe({
+            next: (res) => {
+              const list = Array.isArray(res?.items) ? res.items : Array.isArray(res) ? res : [];
+              const found = list.find((x: any) => Number(x?.id ?? x?.ID ?? 0) === Number(childId));
+              const pid = Number(found?.product_id ?? found?.device_id ?? found?.productId ?? 0) || null;
+              this.openEmptyWindow('Halozat', this.viewingSetup, { ...extraPayload, initialProductId: pid });
+            },
+            error: () => {
+              this.openEmptyWindow('Halozat', this.viewingSetup, extraPayload);
+            }
+          });
+          return;
+        }
+      }
+
+      this.openEmptyWindow('Halozat', this.viewingSetup, extraPayload);
+      return;
+    }
+
+    // Default to All Builder for everything else (including "Egyéb")
+    this.openEmptyWindow('Összes termék', this.viewingSetup, extraPayload);
   }
 
   private openHtBuilderWindow(item: any): void {
@@ -819,6 +1310,8 @@ export class WorkspaceComponent {
 
   onItemDragEnded(item: any, pos: { x: number; y: number }): void {
     const currentKey = this.getItemTrackKey(item, 0);
+    const itemId = item?.id ?? item?.ID ?? item?.item_id;
+    const tableName = item?.category ?? item?.source_table ?? item?.table_name ?? item?.table;
 
     this.items = this.items.map((it, index) => {
       const key = this.getItemTrackKey(it, index);
@@ -835,6 +1328,21 @@ export class WorkspaceComponent {
     });
 
     this.updateLines();
+
+    const normalizedTable = String(tableName || '').toLowerCase();
+    if (!itemId || (normalizedTable !== 'setups[setup]' && normalizedTable !== 'setup[setup]' && normalizedTable !== 'setup' && normalizedTable !== 'setups')) {
+      return;
+    }
+
+    this.http.patch(
+      '/api/setup/update-item-position',
+      { itemId, tableName, x: pos.x, y: pos.y },
+      { withCredentials: true }
+    ).subscribe({
+      error: (err) => {
+        console.error('Item pozicio mentes hiba:', err);
+      }
+    });
   }
 
   getItemTrackKey(item: any, index: number): string {
@@ -857,11 +1365,42 @@ export class WorkspaceComponent {
     return `${source}::${slot}::${id}::${index}`;
   }
 
+  private getConnectionCategoryForItem(item: any): string {
+    const setupType = [
+      item?.setup_type,
+      item?.type,
+      item?.device_type,
+      item?.category,
+      item?.source_table,
+      item?.table_name,
+      item?.table,
+      item?.slot,
+      item?.display_name,
+      item?.setup_name,
+      item?.name,
+      item?.model
+    ].map((value) => String(value || '').toLowerCase().replace('[setup]', '').replace(/[\s-]+/g, '_').trim()).filter(Boolean).join(' ');
+
+    if (!setupType || setupType === 'room') return 'setup';
+    if (setupType.includes('pc')) return 'pc';
+    if (setupType.includes('network_card')) return 'network_card';
+    if (setupType.includes('network_adapter')) return 'network_card';
+    if (setupType.includes('ethernet_adapter')) return 'network_card';
+    if (setupType.includes('wifi_adapter')) return 'network_card';
+    if (setupType.includes('wi_fi_adapter')) return 'network_card';
+    if (setupType.includes('switch')) return 'switch';
+    if (setupType.includes('router')) return 'router';
+    if (setupType.includes('modem')) return 'modem';
+    if (setupType.includes('home_theater') || setupType === 'ht') return 'ht';
+    if (setupType.includes('audio_processor') || setupType === 'audiop') return 'audiop';
+    if (setupType.includes('mixer')) return 'mixer';
+    if (setupType.includes('car')) return 'car';
+
+    return setupType;
+  }
+
   getItemDataId(item: any): string {
-    const cat = String(item?.category || item?.source_table || item?.table_name || '')
-      .toLowerCase()
-      .replace('[setup]', '')
-      .trim();
+    const cat = this.getConnectionCategoryForItem(item);
     const id = item?.id ?? item?.ID ?? item?.item_id;
     return `${cat}:${id}`;
   }

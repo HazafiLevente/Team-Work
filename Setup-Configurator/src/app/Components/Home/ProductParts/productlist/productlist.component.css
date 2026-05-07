@@ -2,6 +2,7 @@
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
   gap: 16px;
+  align-items: stretch;
 }
 
 .pager {
@@ -9,12 +10,25 @@
   align-items: center;
   justify-content: center;
   gap: 12px;
-  margin: 20px 0;
+  margin: 20px 0 140px;
+  position: relative;
+  z-index: 1;
 }
 
 .pager button {
-  padding: 6px 12px;
+  padding: 9px 14px;
   cursor: pointer;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,0.10);
+  background: rgba(255,255,255,0.04);
+  color: var(--text);
+  transition: transform .14s ease, background .14s ease, border-color .14s ease;
+}
+
+.pager button:hover:not([disabled]) {
+  transform: translateY(-1px);
+  background: color-mix(in srgb, var(--page-accent, #67e8f9) 10%, transparent);
+  border-color: color-mix(in srgb, var(--page-accent, #67e8f9) 22%, transparent);
 }
 
 .pager button[disabled] {
@@ -22,32 +36,36 @@
   cursor: not-allowed;
 }
 
-/* általános hover feedback minden mezőre */
-.search-input{
+.muted {
+  color: rgba(255,255,255,0.62);
+}
+
+
+.search-input {
   transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease;
 }
 
-.search-input:hover{
-  border-color: rgba(0,255,255,.35);
-  box-shadow: 0 0 0 1px rgba(0,255,255,.15);
+.search-input:hover {
+  border-color: color-mix(in srgb, var(--page-accent, #67e8f9) 35%, transparent);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--page-accent, #67e8f9) 14%, transparent);
   transform: translateY(-1px);
 }
 
-/* gombok */
-.btn, .tag{
+.btn,
+.tag {
   transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease, opacity .12s ease;
 }
 
-.btn:hover, .tag:hover{
+.btn:hover,
+.tag:hover {
   transform: translateY(-1px);
-  box-shadow: 0 0 0 1px rgba(0,255,255,.18);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--page-accent, #67e8f9) 18%, transparent);
 }
 
-/* 📱 MOBILE – kártyák középre */
 @media (max-width: 768px) {
   .product-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr)); /* ✅ 2 oszlop */
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 12px;
-    padding: 0 10px;
+    padding: 0 4px;
   }
 }

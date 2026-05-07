@@ -2,10 +2,10 @@ import json
 import os
 from pathlib import Path
 
-PROJECT_PATH = Path(r"E:\Projekt\Setup-Configurator")
+PROJECT_PATH3 = Path(r"E:\Projekt\Setup-Configurator")
 
 PROJECT_PATH1 = Path(r"E:\Projekt\Setup-Configurator\src\app\Components\Usersites\Setup")
-PROJECT_PATH3 = Path(r"E:\Projekt\backend")
+PROJECT_PATH = Path(r"C:\Users\typed\WebstormProjects\Team-Work\backend")
 PROJECT_PATH2 = Path(r"E:\Projekt\Setup-Configurator\src\app\Components\Usersites\Setup\setup-tools-modal")
 
 ALLOWED_EXTENSIONS = {".html", ".ts", ".js", ".css", ".txt"}
@@ -33,7 +33,7 @@ def collect_files():
 
     for root, dirs, filenames in os.walk(PROJECT_PATH):
 
-        # itt vágjuk ki a mappákat
+
         dirs[:] = [d for d in dirs if d not in IGNORE_FOLDERS]
 
         for name in filenames:

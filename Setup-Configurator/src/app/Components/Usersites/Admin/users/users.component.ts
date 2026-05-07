@@ -64,7 +64,7 @@ export class UsersComponent implements OnInit, OnChanges {
       this.loadUserSetups(user.id);
       this.onExpanded.emit(user.id);
 
-      // Scroll into view
+
       setTimeout(() => {
         const el = document.getElementById('user-card-' + user.id);
         if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -72,11 +72,9 @@ export class UsersComponent implements OnInit, OnChanges {
     }
   }
 
-  /* ======================
-     LOAD USERS
-  ====================== */
+
+
   loadUsers() {
-    console.log('🔄 Loading users...');
     this.http.get<any>('/api/admin/users', {
       withCredentials: true
     }).subscribe({
@@ -104,9 +102,38 @@ export class UsersComponent implements OnInit, OnChanges {
     return this.currentUserRole === 'admin+' || this.currentUserRole === 'owner';
   }
 
-  /* ======================
-     INLINE EDIT HELPERS
-  ====================== */
+  private rank(role: string): number {
+    const rank: Record<string, number> = { user: 0, admin: 1, 'admin+': 2, owner: 3 };
+    return rank[role] ?? 0;
+  }
+
+  canSeeRoleBadge(role: string): boolean {
+    // admin/admin+ should not see roles above themselves
+    if (this.currentUserRole === 'admin' || this.currentUserRole === 'admin+') {
+      return this.rank(role) <= this.rank(this.currentUserRole);
+    }
+    return true;
+  }
+
+  canAssign(role: string): boolean {
+    const me = this.rank(this.currentUserRole);
+    const target = this.rank(role);
+    // Can assign up to own rank (not above)
+    return target <= me;
+  }
+
+  availableRolesForMe(): string[] {
+    const roles = ['user', 'admin', 'admin+', 'owner'];
+    return roles.filter(r => this.canAssign(r));
+  }
+
+  canEditUserRole(targetRole: string): boolean {
+    // Only allow editing when the current admin outranks the target user's CURRENT role
+    return this.rank(this.currentUserRole) > this.rank(targetRole);
+  }
+
+
+
   edit(user: any, field: string) {
     this.editing[`${user.id}_${field}`] = true;
   }
@@ -119,9 +146,8 @@ export class UsersComponent implements OnInit, OnChanges {
     return !!this.editing[`${user.id}_${field}`];
   }
 
-  /* ======================
-     ACCORDION & SETUPS
-  ====================== */
+
+
   toggleUser(user: any) {
     const userId = user.id;
     if (this.expandedUserId === userId) {
@@ -149,9 +175,8 @@ export class UsersComponent implements OnInit, OnChanges {
       });
   }
 
-  /* ======================
-     ITEMS VIEW (SIDE PANEL)
-  ====================== */
+
+
   onSetupDblClick(setup: any) {
     this.selectedSetup = setup;
     this.itemsViewOpen = true;
@@ -184,9 +209,8 @@ export class UsersComponent implements OnInit, OnChanges {
     return setup.total_price || 0;
   }
 
-  /* ======================
-     SAVE USER
-  ====================== */
+
+
   saveUser(user: any) {
     this.http.patch(
       `/api/admin/users/${user.id}`,
@@ -200,8 +224,7 @@ export class UsersComponent implements OnInit, OnChanges {
       { withCredentials: true }
     ).subscribe({
       next: () => {
-        console.log('💾 User saved:', user.id);
-        // Opcionálisan mutathatunk egy toast-ot vagy visszajelzést
+
       },
       error: err => console.error('❌ Save error', err)
     });
@@ -214,7 +237,6 @@ export class UsersComponent implements OnInit, OnChanges {
       .subscribe({
         next: () => {
           user.banned = true;
-          console.log('🚫 User banned:', user.id);
         },
         error: err => alert(err.error?.error || 'Hiba a kitiltás során')
       });
@@ -225,7 +247,6 @@ export class UsersComponent implements OnInit, OnChanges {
       .subscribe({
         next: () => {
           user.banned = false;
-          console.log('✅ User unbanned:', user.id);
         },
         error: err => alert(err.error?.error || 'Hiba a feloldás során')
       });

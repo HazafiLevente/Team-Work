@@ -3,7 +3,7 @@
   width: 100%;
   height: 100%;
 
-  /* ✅ fontos: ne lógjon rá a thumbs-ra kattintásnál */
+
   overflow: hidden;
 }
 
@@ -23,7 +23,7 @@
   cursor: pointer;
   overflow: hidden;
 
-  /* ✅ 2D, crisp */
+
   transform-style: flat;
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;

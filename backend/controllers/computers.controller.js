@@ -1,13 +1,24 @@
-const { supabase } = require("../services/supabase");
+const { listProducts, clampLimit } = require("../services/products/productCatalog.service");
+const { norm } = require("../services/products/productCatalog.helpers");
 
 async function list(req, res) {
-    // ha kell q, később ráteszünk ILIKE szűrést RPC-ben, de most egyszerű:
-    const { data, error } = await supabase
-        .from("pc_items_view")
-        .select("*");
+    const limit = clampLimit(req.query.limit, 200, 2000);
 
-    if (error) return res.status(500).json({ error: error.message });
-    res.json({ items: data || [] });
+    try {
+        // PC builder "kész gép" listához: csak a products táblából
+        // type === 'pc' és category === ('desktop'|'laptop')
+        // (A "category: computer" szűrés a jelenlegi matchesCategory() miatt
+        // nem garantálja, hogy desktop/laptop pc-k benne lesznek.)
+        const rows = await listProducts({ limit: Math.max(limit, 500), category: "all" });
+
+        const items = (Array.isArray(rows) ? rows : [])
+            .filter((row) => norm(row?.type) === "pc")
+            .filter((row) => ["desktop", "laptop"].includes(norm(row?.category)));
+
+        res.json({ items });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
 }
 
 module.exports = { list };

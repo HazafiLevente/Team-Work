@@ -24,7 +24,7 @@
       class="bell-wrap"
       (click)="toggleBell($event)">
 
-      <i class="fas fa-bell"></i>
+      <span class="bell-icon" aria-hidden="true">&#128276;</span>
 
       <div
         *ngIf="bellOpen$ | async"
@@ -42,7 +42,7 @@
           (click)="openMessage(n, $event)">
 
           <div class="bell-title">
-            {{ n.type === 'system' ? 'System' : n.type === 'news' ? 'News' : 'Register' }}
+            {{ bellTypeLabel(n) }}
           </div>
 
           <div class="bell-message">
@@ -68,7 +68,7 @@
         <span class="avatar-placeholder"></span>
       </div>
 
-      <!-- ✅ dropdown always in DOM -->
+
       <div #userMenu class="user-menu neon" [attr.aria-hidden]="!dropdownOpen">
 
         <div class="menu-title">{{ user.username }}</div>
@@ -76,12 +76,13 @@
 
         <hr>
 
-        <div class="menu-item" routerLink="/user/profile">👤 Profile</div>
-        <div class="menu-item" routerLink="/user/favorite">⭐ Favorite</div>
+        <div class="menu-item" [routerLink]="['/user/profile', auth.formatNameForUrl(user.fullname || user.username)]">👤 Profile</div>
+        <div class="menu-item" routerLink="/user/plan">⭐ Plan</div>
         <div class="menu-item" routerLink="/user/setup">🧰 My Setup</div>
+        <div class="menu-item" routerLink="/user/messages">💬 Messages</div>
+        <div class="menu-item" routerLink="/user/settings">⚙️ Settings</div>
 
-        <!-- ✅ Rangok -->
-        <div id="rank">
+        <div id="rank" role="button" tabindex="0" title="Ranglista megnyitasa" (click)="openLeaderboard($event)" (keydown.enter)="openLeaderboard($event)" (keydown.space)="openLeaderboard($event)">
           <app-rank-panel [embedded]="true"></app-rank-panel>
         </div>
 
@@ -106,7 +107,7 @@
   </nav>
 </header>
 
-<!-- ✅ ezt teheted ide is -->
+
 <app-rank-panel *ngIf="ranksOpen" (close)="closeRanks()"></app-rank-panel>
 
 

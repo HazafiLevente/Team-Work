@@ -8,10 +8,10 @@
   border-radius: 16px;
   border: 1px solid rgba(255, 255, 255, 0.10);
 
-  /* ❌ FONTOS: backdrop-filter innen KIKERÜL, mert bugolja a position:fixed + CDK drag-ot */
-  /* backdrop-filter: blur(10px); */
 
-  /* a háttér/blend marad, de blur a ::before-ben lesz */
+
+
+
   background: transparent;
 
   box-shadow: 0 18px 60px rgba(0, 0, 0, 0.55);
@@ -24,7 +24,210 @@
   user-select: none;
 }
 
-/* ✅ Blur + háttér pseudo-elemen: így a fixed panelek nem ugranak */
+.snap-assist {
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 14000;
+  display: grid;
+  grid-template-columns: repeat(3, 64px) 28px;
+  gap: 8px;
+  align-items: center;
+  padding: 10px;
+  background: rgba(12, 9, 24, 0.92);
+  border: 1px solid rgba(168, 85, 247, 0.55);
+  border-radius: 8px;
+  box-shadow: 0 18px 46px rgba(0, 0, 0, 0.48), 0 0 24px rgba(168, 85, 247, 0.16);
+  backdrop-filter: blur(18px);
+}
+
+.snap-option,
+.snap-close {
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.snap-option {
+  width: 64px;
+  height: 44px;
+  padding: 5px;
+}
+
+.snap-option span {
+  display: block;
+  height: 100%;
+  border: 1px solid rgba(216, 180, 254, 0.8);
+  border-radius: 4px;
+  background: rgba(168, 85, 247, 0.14);
+}
+
+.snap-left span {
+  width: 48%;
+}
+
+.snap-right span {
+  width: 48%;
+  margin-left: auto;
+}
+
+.snap-option:hover,
+.snap-close:hover {
+  background: rgba(168, 85, 247, 0.26);
+  border-color: rgba(216, 180, 254, 0.6);
+}
+
+.snap-close {
+  width: 28px;
+  height: 28px;
+  font-weight: 800;
+}
+
+.note-bookmarks {
+  position: absolute;
+  top: 58px;
+  right: 12px;
+  bottom: auto;
+  z-index: 12050;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-end;
+  gap: 8px;
+  pointer-events: none;
+}
+
+.note-bookmark {
+  position: relative;
+  width: 34px;
+  min-height: 44px;
+  padding: 0;
+  border: 1px solid rgba(250, 204, 21, 0.62);
+  border-right: none;
+  border-radius: 8px 0 0 8px;
+  background:
+    linear-gradient(90deg, rgba(255, 248, 199, 0.98), rgba(250, 204, 21, 0.92));
+  color: #5f4300;
+  cursor: pointer;
+  pointer-events: auto;
+  box-shadow: -8px 8px 22px rgba(0, 0, 0, 0.22);
+  transition: width 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.note-bookmark span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  min-height: 42px;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.note-bookmark::after {
+  content: attr(data-title);
+  position: absolute;
+  top: 50%;
+  right: calc(100% + 10px);
+  transform: translateY(-50%) translateX(8px);
+  max-width: 220px;
+  padding: 8px 10px;
+  border: 1px solid rgba(250, 204, 21, 0.44);
+  border-radius: 8px;
+  background: rgba(12, 9, 24, 0.95);
+  color: #fff8c7;
+  font-size: 12px;
+  font-weight: 800;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  opacity: 0;
+  pointer-events: none;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.34);
+  transition: opacity 0.16s ease, transform 0.16s ease;
+}
+
+.note-bookmark:hover {
+  width: 44px;
+  transform: translateX(-2px);
+  box-shadow: -12px 12px 28px rgba(0, 0, 0, 0.3);
+}
+
+.note-bookmark:hover::after {
+  opacity: 1;
+  transform: translateY(-50%) translateX(0);
+}
+
+.custom-confirm-overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 92px 16px 0;
+  z-index: 99999;
+  pointer-events: none;
+}
+
+.custom-confirm-modal {
+  width: min(420px, calc(100vw - 32px));
+  background: linear-gradient(135deg, rgba(18, 17, 27, 0.98), rgba(31, 26, 45, 0.98));
+  border: 1px solid rgba(71, 236, 255, 0.25);
+  padding: 18px;
+  border-radius: 12px;
+  color: #fff;
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.55), 0 0 30px rgba(83, 70, 255, 0.18);
+  pointer-events: auto;
+}
+
+.custom-confirm-modal h3 {
+  margin: 0 0 8px;
+  font-size: 1.05rem;
+}
+
+.custom-confirm-modal p {
+  margin: 0 0 18px;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.92rem;
+}
+
+.confirm-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.confirm-actions button {
+  padding: 8px 22px;
+  border: 0;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 800;
+}
+
+.confirm-cancel {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+.confirm-danger {
+  background: #ff4757;
+  color: #fff;
+}
+
+.confirm-cancel:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.confirm-danger:hover {
+  background: #ff6b81;
+}
+
+
 .setup-workspace::before {
   content: "";
   position: absolute;
@@ -38,7 +241,7 @@
   pointer-events: none;
 }
 
-/* ✅ felső gombsor: Új setup + Vissza */
+
 .toolbar {
   position: absolute;
   top: 12px;
@@ -75,7 +278,7 @@
   border-color: rgba(82, 39, 255, 0.45);
 }
 
-/* DotGrid háttér */
+
 .dot-bg {
   position: absolute;
   inset: 0;
@@ -84,14 +287,13 @@
   pointer-events: none;
 }
 
-/* kártyák tartója */
+
 .boundary-area {
   position: relative;
   z-index: 2;
 
   width: 100%;
-  min-height: 100%;
-  height: 100%;
+  min-height: 1100px;
 
   padding: 18px;
   padding-top: 62px;
@@ -119,7 +321,7 @@
 .boundary-area {
   position: relative;
   width: 100%;
-  height: 100%;
+  min-height: 1100px;
 }
 
 .workspace-dock {
@@ -157,10 +359,21 @@
 
 }
 
-.dock-item:hover {
+body[data-appearance="light"] .workspace-dock {
+  background: var(--bg-elevated);
+  border-color: var(--line);
+  box-shadow: var(--shadow-soft);
+}
 
-  background: #2d2155;
+body[data-appearance="light"] .dock-item {
+  background: var(--chrome-bg);
+  border: 1px solid var(--line);
+  color: var(--text);
+}
 
+body[data-appearance="light"] .dock-item:hover {
+  background: var(--chrome-bg-hover);
+  border-color: var(--page-accent);
 }
 
 .device-row {
@@ -240,11 +453,11 @@
   word-break: break-word;
 }
 
-/* PAIRING STATUS OVERLAY */
+
 .pairing-status {
   position: absolute;
   bottom: 80px;
-  /* Dock fölött */
+
   left: 50%;
   transform: translateX(-50%);
   z-index: 10002;
@@ -280,4 +493,62 @@
 .cancel-btn:hover {
   background: rgba(255, 77, 77, 0.3);
   transform: scale(1.05);
+}
+
+body[data-appearance="light"] .setup-workspace {
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow-soft);
+}
+
+body[data-appearance="light"] .setup-workspace::before {
+  background: linear-gradient(180deg, var(--bg-elevated), var(--surface-2));
+  backdrop-filter: none;
+}
+
+body[data-appearance="light"] .dot-bg {
+  display: none;
+}
+
+body[data-appearance="light"] .boundary-area {
+  background: var(--bg);
+}
+
+body[data-appearance="light"] .back-btn {
+  border: 1px solid var(--line);
+  background: var(--bg-elevated);
+  color: var(--text);
+  box-shadow: var(--shadow-soft);
+}
+
+body[data-appearance="light"] .back-btn:hover {
+  background: var(--chrome-bg-hover);
+  border-color: var(--page-accent-2);
+}
+
+body[data-appearance="light"] .device-row,
+body[data-appearance="light"] .item-popup-row {
+  background: var(--chrome-bg);
+  border: 1px solid var(--line);
+}
+
+body[data-appearance="light"] .device-type {
+  color: var(--text);
+  background: var(--theme-band-1);
+  border: 1px solid var(--line);
+}
+body[data-appearance="light"] .item-popup-row-name,
+body[data-appearance="light"] .item-popup-state {
+  color: var(--text);
+}
+
+body[data-appearance="light"] .item-popup-row-type,
+body[data-appearance="light"] .no-data {
+  color: var(--muted);
+}
+
+body[data-appearance="light"] .status-box {
+  background: var(--bg-elevated);
+  border: 1px solid var(--line);
+  color: var(--text);
+  box-shadow: var(--shadow-soft);
 }

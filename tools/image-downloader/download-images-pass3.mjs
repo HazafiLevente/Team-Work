@@ -1,4 +1,4 @@
-// tools/image-downloader/download-images-pass3.mjs
+
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -15,6 +15,7 @@ const DEBUG_DIR = path.join(ROOT, "datas", "Jsons", "bing_debug");
 const TARGET = Number(process.env.MAX_IMAGES || 4);
 const START = Number(process.env.START || 0);
 const LIMIT = Number(process.env.LIMIT || 0);
+const API_LIMIT = Number(process.env.API_LIMIT || 5000);
 
 const SEARCH_DELAY_MS = Number(process.env.SEARCH_DELAY_MS || 2000);
 const DL_DELAY_MS = Number(process.env.DL_DELAY_MS || 600);
@@ -35,7 +36,7 @@ function existingImageCount(dir) {
 }
 
 async function fetchProducts() {
-    const r = await fetch(`${API_BASE}/api/products`);
+    const r = await fetch(`${API_BASE}/api/products?limit=${API_LIMIT}`);
     if (!r.ok) throw new Error(`Products API error HTTP ${r.status}`);
     const data = await r.json();
     return data.items || data;
@@ -56,14 +57,15 @@ function pickFromData(dataObj) {
 function makeQueries(p) {
     const man = normalize(p.manufacturer);
     const model = normalize(p.model);
+    const displayName = normalize(p.name || p?.data?.name);
     const hint = normalize(p.table_name || p.category || p.type || "");
 
     let dataName = "";
     try { if (p.data && typeof p.data === "object") dataName = pickFromData(p.data); } catch {}
 
-    const base = normalize(`${man} ${model}`) || normalize(dataName) || hint || `${p.table_name || ""} ${p.id}`.trim();
+    const base = displayName || normalize(`${man} ${model}`) || normalize(dataName) || hint || `${p.table_name || ""} ${p.id}`.trim();
 
-    // 5 query elég, gyorsabb és kevésbé triggereli a robot-check-et
+
     return [
         `${base} product photo`,
         `${base} product image`,
@@ -77,12 +79,12 @@ function isBadUrl(u) {
     const s = (u || "").toLowerCase();
     if (!s) return true;
 
-    // kiszűrjük a tipikus junkot
+
     if (s.includes("logo") || s.includes("icon") || s.includes("sprite") || s.includes("banner")) return true;
     if (s.includes("data:image")) return true;
     if (s.endsWith(".svg")) return true;
 
-    // bing redirect / tracking url-ek
+
     if (s.includes("bing.com/th?") && s.includes("pid=")) return true;
 
     return false;
@@ -132,13 +134,13 @@ async function searchBing(query, dbgCtx) {
 
     const blocked = detectBlocked(html);
     if (blocked) {
-        // ha blokkol: dobjuk hibára, így felmegy a topErrors-be
+
         throw new Error(blocked);
     }
 
     let results = [];
 
-    // 1) klasszikus JSON: "murl":"https://..."
+
     {
         const regex = /"murl"\s*:\s*"(.*?)"/g;
         let m;
@@ -149,7 +151,7 @@ async function searchBing(query, dbgCtx) {
         }
     }
 
-    // 2) HTML-escape: m="{&quot;murl&quot;:&quot;https://...&quot;,...}"
+
     if (results.length === 0) {
         const regex2 = /murl&quot;\s*:\s*&quot;(.*?)&quot;/g;
         let m2;
@@ -160,7 +162,7 @@ async function searchBing(query, dbgCtx) {
         }
     }
 
-    // 3) fallback: "imgurl":"..."
+
     if (results.length === 0) {
         const regex3 = /"imgurl"\s*:\s*"(.*?)"/g;
         let m3;
@@ -171,12 +173,12 @@ async function searchBing(query, dbgCtx) {
         }
     }
 
-    // ha még mindig 0 → JSON debug mentés
+
     if (results.length === 0) {
         ensureDir(DEBUG_DIR);
 
         const title = extractTitle(html);
-        const sample = html.slice(0, 5000); // ne legyen végtelen
+        const sample = html.slice(0, 5000);
 
         const out = {
             when: new Date().toISOString(),
@@ -238,7 +240,7 @@ async function run() {
 
         let have = existingImageCount(dir);
 
-        // ✅ ha már megvan a TARGET → skip
+
         if (have >= TARGET) { skip++; continue; }
 
         touched++;

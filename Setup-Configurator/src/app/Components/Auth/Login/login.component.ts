@@ -10,6 +10,8 @@ import { NewPasswordComponent } from "./new-password/new-password.component";
 
 declare const google: any;
 
+const GOOGLE_CLIENT_SRC = 'https://accounts.google.com/gsi/client';
+
 @Component({
   selector: 'app-login',
   standalone: true,
@@ -39,7 +41,9 @@ export class LoginComponent implements AfterViewInit {
     private router: Router
   ) {}
 
-  ngAfterViewInit(): void {
+  async ngAfterViewInit(): Promise<void> {
+    await this.loadGoogleClient();
+
     google.accounts.id.initialize({
       client_id: '532912380153-m52bf55o6mh97thupt086j8ift2r4qro.apps.googleusercontent.com',
       callback: (response: any) => this.handleGoogle(response)
@@ -49,6 +53,30 @@ export class LoginComponent implements AfterViewInit {
       document.getElementById("googleBtn"),
       { theme: "outline", size: "large" }
     );
+  }
+
+  private loadGoogleClient(): Promise<void> {
+    if ((window as any).google?.accounts?.id) {
+      return Promise.resolve();
+    }
+
+    return new Promise((resolve, reject) => {
+      const existing = document.querySelector<HTMLScriptElement>(`script[src="${GOOGLE_CLIENT_SRC}"]`);
+
+      if (existing) {
+        existing.addEventListener('load', () => resolve(), { once: true });
+        existing.addEventListener('error', () => reject(), { once: true });
+        return;
+      }
+
+      const script = document.createElement('script');
+      script.src = GOOGLE_CLIENT_SRC;
+      script.async = true;
+      script.defer = true;
+      script.onload = () => resolve();
+      script.onerror = () => reject();
+      document.head.appendChild(script);
+    });
   }
 
   handleGoogle(response: any) {

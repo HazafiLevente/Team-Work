@@ -6,6 +6,7 @@ export type BellItem = {
   source_table: string;
   id: number;
   type: string;
+  category?: string;
   title: string;
   message: string;
   created_at: string;
@@ -18,7 +19,7 @@ export type BellItem = {
   sender_name?: string | null;
   receiver_name?: string | null;
 
-  read?: boolean; // ha nincs a view-ban, akkor undefined marad
+  read?: boolean;
 };
 
 @Injectable({ providedIn: 'root' })
@@ -30,7 +31,7 @@ export class BellService {
   items$: Observable<BellItem[]> = this.itemsSub.asObservable();
 
   constructor(private http: HttpClient) {
-    // induláskor töltsön
+
     this.refresh();
   }
 
@@ -38,7 +39,7 @@ export class BellService {
     const next = !this.openSub.value;
     this.openSub.next(next);
 
-    // amikor kinyitod, frissítsen
+
     if (next) this.refresh();
   }
 
@@ -56,11 +57,8 @@ export class BellService {
                 [];
 
         this.itemsSub.next(arr);
-        console.log("🔔 bell refresh got:", res);
-        console.log("🔔 bell items array:", arr);
       },
       error: (err) => {
-        console.log("🔔 bell refresh error:", err);
         this.itemsSub.next([]);
       }
     });

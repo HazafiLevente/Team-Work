@@ -50,7 +50,7 @@ export class LeaderboardPageComponent implements OnInit, OnDestroy {
         '';
     });
 
-    // ha kell, ezzel frissítheted is az auth state-et
+
     this.auth.check();
   }
 
@@ -75,7 +75,14 @@ export class LeaderboardPageComponent implements OnInit, OnDestroy {
   }
 
   goBack(): void {
-    this.router.navigate(['/profile']);
+    this.router.navigate(['/home']);
+  }
+
+  viewProfile(user: LeaderboardUser): void {
+    const profileName = user.fullname || user.username;
+    if (!profileName) return;
+    const urlName = this.auth.formatNameForUrl(profileName);
+    this.router.navigate(['/user/profile', urlName]);
   }
 
   displayName(user: LeaderboardUser): string {

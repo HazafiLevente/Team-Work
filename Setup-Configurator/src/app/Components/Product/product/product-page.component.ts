@@ -54,9 +54,14 @@ export class ProductPageComponent implements OnInit {
   }
 
   get displayPrice(): string | null {
-    const p = this.item?.price ?? this.item?.Price;
-    const n = Number(p);
-    if (!Number.isFinite(n)) return null;
+    const n = this.parsePrice(
+      this.item?.price ??
+      this.item?.Price ??
+      this.item?.price_range ??
+      this.item?.['Price Range (Ft)'] ??
+      null
+    );
+    if (n == null) return null;
     return `${Math.round(n).toLocaleString('hu-HU')} Ft`;
   }
 
@@ -91,7 +96,7 @@ export class ProductPageComponent implements OnInit {
 
       this.productService.getProductDetails(table, id).subscribe({
         next: res => {
-          this.item = res?.item ?? res;
+          this.item = this.normalizeItem(res?.item ?? res, table, id);
 
           this.primary = {
             manufacturer: this.pick(this.item, ['manufacturer', 'Manufacturer', 'brand', 'Brand']),
@@ -114,7 +119,6 @@ export class ProductPageComponent implements OnInit {
   }
 
   onToggleFavorite() {
-    console.log('⭐ később: kedvencbe rakás');
   }
 
   goBack() {
@@ -123,7 +127,6 @@ export class ProductPageComponent implements OnInit {
   }
 
   onPlus() {
-    console.log('➕ később: kosárba/setupba adás');
   }
 
   private loadImagesFromMap() {
@@ -137,7 +140,6 @@ export class ProductPageComponent implements OnInit {
 
     if (ProductPageComponent.imageMapCache) {
       this.imageUrls = this.pickImages(ProductPageComponent.imageMapCache, wantTable, wantId);
-      console.log('🖼 PAGE imageUrls from cache:', this.imageUrls);
       return;
     }
 
@@ -146,9 +148,6 @@ export class ProductPageComponent implements OnInit {
         ProductPageComponent.imageMapCache = mapRes;
         this.imageUrls = this.pickImages(ProductPageComponent.imageMapCache, wantTable, wantId);
 
-        console.log('🖼 PAGE map loaded:', ProductPageComponent.imageMapCache);
-        console.log('🖼 PAGE table:', wantTable, 'id:', wantId);
-        console.log('🖼 PAGE imageUrls:', this.imageUrls);
       },
       error: (err) => {
         console.error('❌ image map load error:', err);
@@ -178,6 +177,41 @@ export class ProductPageComponent implements OnInit {
       }
     }
     return '';
+  }
+
+  private parsePrice(raw: any): number | null {
+    if (raw == null || raw === '') return null;
+    if (typeof raw === 'number') return Number.isFinite(raw) ? raw : null;
+
+    const nums = (String(raw).match(/\d+(\.\d+)?/g) || [])
+      .map(Number)
+      .filter(Number.isFinite);
+
+    if (!nums.length) return null;
+    if (nums.length === 1) return Math.round(nums[0]);
+
+    return Math.round((Math.min(...nums) + Math.max(...nums)) / 2);
+  }
+
+  private normalizeItem(item: any, table: string, id: string): any {
+    if (!item || typeof item !== 'object') return item;
+
+    return {
+      ...item,
+      table_name: item.table_name ?? table,
+      id: item.id ?? item.ID ?? id,
+      manufacturer: this.pick(item, ['manufacturer', 'Manufacturer', 'brand', 'Brand']),
+      model: this.pick(item, ['model', 'Model', 'name', 'Name', 'product_name', 'Product Name']),
+      category: this.pick(item, ['category', 'Category', 'type', 'Type']),
+      description: this.pick(item, ['description', 'Description', 'notes', 'Notes']),
+      price: this.parsePrice(
+        item.price ??
+        item.Price ??
+        item.price_range ??
+        item['Price Range (Ft)'] ??
+        null
+      )
+    };
   }
 
   private buildFields(item: any): Array<{ label: string; value: string }> {

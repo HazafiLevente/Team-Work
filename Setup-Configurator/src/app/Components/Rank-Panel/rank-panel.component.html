@@ -1,4 +1,4 @@
-<!-- ✅ EMBEDDED: profil oldalon (nincs backdrop) -->
+
 <div *ngIf="embedded" class="rank-embedded">
   <app-electric-border class="rank-shell" [color]="color" [borderRadius]="18">
     <div class="rank-card" [style.color]="color">
@@ -19,14 +19,14 @@
         </div>
 
         <div class="bar">
-          <div class="fill" [style.width.%]="(data.progress ?? 0) * 100"></div>
+          <div class="fill" [style.width.%]="data.progress * 100"></div>
         </div>
       </div>
     </div>
   </app-electric-border>
 </div>
 
-<!-- ✅ POPUP: dropdownból -->
+
 <div *ngIf="!embedded" class="rank-backdrop" (click)="backdropClick($event)">
   <app-electric-border class="rank-shell" [color]="color" [borderRadius]="18">
     <div class="rank-card" [style.color]="color">
@@ -49,7 +49,7 @@
         </div>
 
         <div class="bar">
-          <div class="fill" [style.width.%]="(data.progress ?? 0) * 100"></div>
+          <div class="fill" [style.width.%]="data.progress * 100"></div>
         </div>
       </div>
     </div>

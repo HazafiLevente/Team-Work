@@ -43,7 +43,7 @@ export class ClickSparkComponent implements AfterViewInit, OnDestroy {
   @Input() easing: Easing = 'ease-out';
   @Input() extraScale = 1.0;
 
-  /** Ha false, nem csinál semmit */
+
   @Input() enabled = true;
 
   @ViewChild('wrap', { static: true }) wrapRef!: ElementRef<HTMLDivElement>;
@@ -52,14 +52,14 @@ export class ClickSparkComponent implements AfterViewInit, OnDestroy {
   private ctx: CanvasRenderingContext2D | null = null;
   private rafId = 0;
 
-  // ✅ LAZA RO TÍPUS (ne a DOM liben múljon)
+
   private ro: { observe: (el: Element) => void; disconnect: () => void } | null = null;
   private usedWindowResizeFallback = false;
 
   private sparks: Spark[] = [];
   private destroyed = false;
 
-  // ✅ stabil handler (add/remove)
+
   private resizeHandler = () => this.resizeCanvas();
 
   constructor(private zone: NgZone) {}
@@ -94,7 +94,6 @@ export class ClickSparkComponent implements AfterViewInit, OnDestroy {
 
     if (!this.enabled) return;
     if (typeof window === 'undefined') return;
-    console.log('CLICK SPARK fired');
 
     const rect = this.canvasRef.nativeElement.getBoundingClientRect();
     const x = e.clientX - rect.left;
@@ -217,7 +216,7 @@ export class ClickSparkComponent implements AfterViewInit, OnDestroy {
         return x * x;
       case 'ease-in-out':
         return x < 0.5 ? 2 * x * x : -1 + (4 - 2 * x) * x;
-      default: // 'ease-out'
+      default:
         return x * (2 - x);
     }
 

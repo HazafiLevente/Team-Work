@@ -21,16 +21,16 @@
     <nav class="nav">
         <a href="/home">Home</a>
         <div id="bell">
-            <i class="fas fa-bell"></i><!-- Teljes csengő -->
-            <!--<i class="fas fa-bell-message-slash"></i> < -- Kikapcsolt csengő -->
+            <i class="fas fa-bell"></i>
+
         </div>
-        <!-- 👤 USER AVATAR (login után) -->
+
         <div id="user-menu-wrap" class="hidden">
             <div id="user-avatar-btn" class="user-avatar">
                 <span class="avatar-placeholder"></span>
             </div>
         </div>
-        <!-- 🔐 GUEST CONNECT -->
+
         <a href="/webs/webs/Regist" id="connect-btn" class="btn ghost">Connect</a>
     </nav>
 
@@ -42,7 +42,7 @@
 <main class="content">
 
 
-    <!-- 🔍 SEARCH BAR + BRAND SELECT -->
+
     <div style="margin-bottom: 20px; grid-column: 1 / -1; display:flex; gap:12px; flex-wrap:wrap;">
 
         <select id="manufacturer-select" style="
@@ -130,7 +130,7 @@
     </div>
 
 
-    <!-- 🔽 MORE / ADVANCED -->
+
     <details id="more-filters" style="grid-column: 1 / -1; margin-bottom:16px;">
         <summary style="cursor:pointer; user-select:none; font-weight:700;">
             Több:
@@ -149,24 +149,24 @@
                 <span class="muted">Csak autó táblákra szűr</span>
             </div>
 
-            <!-- AUTÓK SZŰRŐK GRID -->
+
             <div style="
       display:grid;
       grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
       gap:12px;
     ">
 
-                <!-- Gyártó -->
+
                 <input id="car-manufacturer" class="search-input" placeholder="Gyártó (pl. BMW)" />
 
-                <!-- Modell -->
+
                 <input id="car-model" class="search-input" placeholder="Modell (pl. 320d)" />
 
-                <!-- Árkategória (min-max) -->
+
                 <input id="car-price-min" class="search-input" type="number" min="0" placeholder="Ár min (Ft)" />
                 <input id="car-price-max" class="search-input" type="number" min="0" placeholder="Ár max (Ft)" />
 
-                <!-- Kivitel -->
+
                 <select id="car-bodytype" class="search-input">
                     <option value="">Kivitel (összes)</option>
                     <option value="hatchback">Hatchback</option>
@@ -178,19 +178,19 @@
                     <option value="suv">SUV</option>
                 </select>
 
-                <!-- Lóerő -->
+
                 <input id="car-hp-min" class="search-input" type="number" min="0" placeholder="Lóerő min" />
                 <input id="car-hp-max" class="search-input" type="number" min="0" placeholder="Lóerő max" />
 
-                <!-- Gyorsulás (0-100) másodperc -->
+
                 <input id="car-accel-min" class="search-input" type="number" min="0" step="0.1" placeholder="Gyorsulás min (s)" />
                 <input id="car-accel-max" class="search-input" type="number" min="0" step="0.1" placeholder="Gyorsulás max (s)" />
 
-                <!-- Ülések -->
+
                 <input id="car-seats-min" class="search-input" type="number" min="1" placeholder="Ülések min" />
                 <input id="car-seats-max" class="search-input" type="number" min="1" placeholder="Ülések max" />
 
-                <!-- Üzemanyag -->
+
                 <select id="car-fuel" class="search-input">
                     <option value="">Üzemanyag (összes)</option>
                     <option value="hybrid">Hibrid</option>
@@ -199,11 +199,11 @@
                     <option value="electric">Elektromos</option>
                 </select>
 
-                <!-- Évjárat -->
+
                 <input id="car-year-min" class="search-input" type="number" min="1950" placeholder="Évjárat min" />
                 <input id="car-year-max" class="search-input" type="number" min="1950" placeholder="Évjárat max" />
 
-                <!-- Váltó -->
+
                 <select id="car-transmission" class="search-input">
                     <option value="">Váltó (összes)</option>
                     <option value="manual">Manuális</option>
@@ -222,7 +222,7 @@
 
 
 
-    <!-- 🟣 PRODUCT GRID -->
+
     <div id="product-grid" style="grid-column: 1 / -1;"></div>
 
 

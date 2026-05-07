@@ -1,25 +1,45 @@
-<div class="window" cdkDrag [cdkDragBoundary]="boundaryRef" [cdkDragFreeDragPosition]="dragPosition"
-  (cdkDragStarted)="focus()" (cdkDragEnded)="onDragEnded($event)" [style.z-index]="zIndex" [style.width.px]="width">
-
+<div
+  #windowEl
+  class="window"
+  [class.maximized]="maximized"
+  [class.snapped]="snapMode"
+  [class.resizing]="resizing"
+  cdkDrag
+  [cdkDragDisabled]="maximized || resizing"
+  [cdkDragBoundary]="boundaryRef"
+  [cdkDragFreeDragPosition]="activeDragPosition"
+  (cdkDragStarted)="focus()"
+  (cdkDragMoved)="onDragMoved($event)"
+  (cdkDragEnded)="onDragEnded($event)"
+  [style.z-index]="zIndex"
+  [style.width.px]="maximized ? maximizedWidth : width"
+  [style.height.px]="activeHeight"
+  (contextmenu)="onContextMenu($event)"
+>
   <div class="window-header" cdkDragHandle>
-
     <span class="title">
-      {{title}}
+      {{ title }}
     </span>
 
     <div class="window-actions">
-      <button (click)="minimize()">—</button>
-      <button (click)="toggleMaximize()">□</button>
-      <button (click)="close()">✕</button>
+      <button type="button" (click)="minimize()">-</button>
+      <button type="button" (click)="toggleMaximize()">{{ maximized ? '□' : '▢' }}</button>
+      <button type="button" (click)="close()">x</button>
     </div>
-
   </div>
 
   <div class="window-body">
-
-    <!-- IDE jön a tartalom -->
     <ng-content></ng-content>
-
   </div>
 
+  @if (!maximized) {
+    <div class="resize-handle resize-n" (mousedown)="startResize($event, 'n')"></div>
+    <div class="resize-handle resize-e" (mousedown)="startResize($event, 'e')"></div>
+    <div class="resize-handle resize-s" (mousedown)="startResize($event, 's')"></div>
+    <div class="resize-handle resize-w" (mousedown)="startResize($event, 'w')"></div>
+    <div class="resize-handle resize-ne" (mousedown)="startResize($event, 'ne')"></div>
+    <div class="resize-handle resize-se" (mousedown)="startResize($event, 'se')"></div>
+    <div class="resize-handle resize-sw" (mousedown)="startResize($event, 'sw')"></div>
+    <div class="resize-handle resize-nw" (mousedown)="startResize($event, 'nw')"></div>
+  }
 </div>
