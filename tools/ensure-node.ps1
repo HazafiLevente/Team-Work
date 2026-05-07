@@ -5,11 +5,15 @@ param(
 
 $ErrorActionPreference = "Stop"
 $preferredMajor = 20
+$minSupportedMajor = 18
+$maxSupportedMajor = 20
 $nodeRoot = Join-Path $ProjectRoot "tools\nodejs"
 $cacheRoot = Join-Path $ProjectRoot "tools\node-cache"
 $installerRoot = Join-Path $ProjectRoot "tools\nodejs-msi"
 $installStartedToken = "__INSTALL_STARTED__"
 $installRequiredToken = "__INSTALL_REQUIRED__"
+$directMsiVersion = "v20.18.0"
+$directMsiUrl = "https://nodejs.org/dist/$directMsiVersion/node-$directMsiVersion-x64.msi"
 
 function Get-NodeVersion([string]$NodeExe) {
     try {
@@ -51,7 +55,7 @@ function Test-NpmCommand([string]$NpmCmd) {
     }
 }
 
-function Test-NodeCandidate([string]$NodeExe, [int]$RequiredMajor = 0) {
+function Test-NodeCandidate([string]$NodeExe, [int]$MinMajor = 0, [int]$MaxMajor = 0) {
     if (-not $NodeExe -or -not (Test-Path $NodeExe)) {
         return $null
     }
@@ -63,8 +67,10 @@ function Test-NodeCandidate([string]$NodeExe, [int]$RequiredMajor = 0) {
         return $null
     }
 
-    if ($RequiredMajor -gt 0 -and $major -ne $RequiredMajor) {
-        return $null
+    if ($MinMajor -gt 0 -and $MaxMajor -gt 0) {
+        if ($major -lt $MinMajor -or $major -gt $MaxMajor) {
+            return $null
+        }
     }
 
     $npmCmd = Get-NpmCommand -NodeExe $NodeExe
@@ -78,6 +84,77 @@ function Test-NodeCandidate([string]$NodeExe, [int]$RequiredMajor = 0) {
         Version = $version
         Major   = $major
         NpmCmd  = $npmCmd
+    }
+}
+
+function Test-CommandAvailable([string]$Name) {
+    try {
+        return $null -ne (Get-Command $Name -ErrorAction SilentlyContinue)
+    } catch {
+        return $false
+    }
+}
+
+function Refresh-ProcessPathFromRegistry {
+    try {
+        $sysPath = (Get-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Environment" -Name "Path" -ErrorAction Stop).Path
+    } catch {
+        $sysPath = $null
+    }
+
+    try {
+        $userPath = (Get-ItemProperty -Path "HKCU:\Environment" -Name "Path" -ErrorAction Stop).Path
+    } catch {
+        $userPath = $null
+    }
+
+    $paths = @()
+    if ($sysPath) { $paths += $sysPath }
+    if ($userPath) { $paths += $userPath }
+
+    if ($paths.Count -gt 0) {
+        $env:Path = ($paths -join ";")
+    }
+}
+
+function Install-NodeJsFromInternet {
+    if ($SkipInstaller) {
+        return $false
+    }
+
+    if (Test-CommandAvailable -Name "winget") {
+        try {
+            Write-Host "Node.js telepitese winget-tel..."
+            $p = Start-Process -FilePath "winget" -ArgumentList @("install", "-e", "--id", "OpenJS.NodeJS.LTS") -Wait -PassThru
+            if ($p.ExitCode -eq 0) { return $true }
+            Write-Host "winget telepites sikertelen, masik modszer probalasa..."
+        } catch {
+            Write-Host "winget telepites sikertelen, masik modszer probalasa..."
+        }
+    }
+
+    if (Test-CommandAvailable -Name "choco") {
+        try {
+            Write-Host "Node.js telepitese Chocolatey-vel..."
+            $p = Start-Process -FilePath "choco" -ArgumentList @("install", "nodejs-lts", "-y") -Wait -PassThru
+            if ($p.ExitCode -eq 0) { return $true }
+            Write-Host "Chocolatey telepites sikertelen, masik modszer probalasa..."
+        } catch {
+            Write-Host "Chocolatey telepites sikertelen, masik modszer probalasa..."
+        }
+    }
+
+    try {
+        Write-Host "Node.js telepitese kozvetlen letoltessel (PowerShell)..."
+        $out = Join-Path $env:TEMP "nodejs-installer.msi"
+        Write-Host "Letoltes..."
+        Invoke-WebRequest -Uri $directMsiUrl -OutFile $out
+        Write-Host "Telepites..."
+        $p = Start-Process -FilePath "msiexec.exe" -ArgumentList @("/i", "`"$out`"", "/quiet", "/norestart") -Wait -PassThru
+        Remove-Item -LiteralPath $out -Force -ErrorAction SilentlyContinue
+        return ($p.ExitCode -eq 0)
+    } catch {
+        return $false
     }
 }
 
@@ -160,7 +237,7 @@ function Repair-PortableNode([System.IO.FileInfo]$ArchiveFile) {
 
     $extractFolder = Join-Path $nodeRoot $ArchiveFile.BaseName
     $extractedNode = Join-Path $extractFolder "node.exe"
-    $validatedNode = Test-NodeCandidate -NodeExe $extractedNode -RequiredMajor $preferredMajor
+    $validatedNode = Test-NodeCandidate -NodeExe $extractedNode -MinMajor $minSupportedMajor -MaxMajor $maxSupportedMajor
 
     if ($validatedNode) {
         return $validatedNode
@@ -179,7 +256,7 @@ function Repair-PortableNode([System.IO.FileInfo]$ArchiveFile) {
 
     Expand-Archive -LiteralPath $ArchiveFile.FullName -DestinationPath $nodeRoot -Force
 
-    $validatedNode = Test-NodeCandidate -NodeExe $extractedNode -RequiredMajor $preferredMajor
+    $validatedNode = Test-NodeCandidate -NodeExe $extractedNode -MinMajor $minSupportedMajor -MaxMajor $maxSupportedMajor
 
     if ($validatedNode) {
         return $validatedNode
@@ -188,9 +265,9 @@ function Repair-PortableNode([System.IO.FileInfo]$ArchiveFile) {
     throw "Portable Node.js archive $($ArchiveFile.Name) was extracted, but npm is still not usable."
 }
 
-function Find-CompatibleSystemNode([int]$PreferredMajor) {
+function Find-CompatibleSystemNode([int]$MinMajor = 0, [int]$MaxMajor = 0) {
     foreach ($candidate in (Get-SystemNodeCandidates)) {
-        $validated = Test-NodeCandidate -NodeExe $candidate -RequiredMajor $PreferredMajor
+        $validated = Test-NodeCandidate -NodeExe $candidate -MinMajor $MinMajor -MaxMajor $MaxMajor
 
         if ($validated) {
             return $validated
@@ -200,20 +277,51 @@ function Find-CompatibleSystemNode([int]$PreferredMajor) {
     return $null
 }
 
+# Prefer supported majors (18-20) to avoid native-module / engine issues.
+$existingNode = Find-CompatibleSystemNode -MinMajor $minSupportedMajor -MaxMajor $maxSupportedMajor
+if ($existingNode) {
+    Write-Output $existingNode.NodeExe
+    exit 0
+}
+
+# If only an unsupported Node is installed, we still prefer installing Node 20 LTS rather than using it,
+# because the project contains native addons and the frontend declares engines <21.
+
+# Online install attempts (winget -> choco -> direct MSI). If these fail, we fall back to the original
+# "bundled ZIP/MSI" behavior as the last resort.
+if ($SkipInstaller) {
+    Write-Output $installRequiredToken
+    exit 0
+}
+
+$didInstall = Install-NodeJsFromInternet
+if ($didInstall) {
+    Refresh-ProcessPathFromRegistry
+    $existingNode = Find-CompatibleSystemNode -MinMajor $minSupportedMajor -MaxMajor $maxSupportedMajor
+    if ($existingNode) {
+        Write-Output $existingNode.NodeExe
+        exit 0
+    }
+
+    Write-Output $installStartedToken
+    exit 0
+}
+
+# --- Last resort: use bundled portable ZIP or bundled MSI (original behavior) ---
 $portableArchive = Get-BestArtifact -SearchRoot $cacheRoot -Filter "node-v*-win-x64.zip" -RequiredMajor $preferredMajor
+if (-not $portableArchive) {
+    $portableArchive = Get-BestArtifact -SearchRoot $cacheRoot -Filter "node-v*-win-x64.zip" -RequiredMajor 0
+}
 if ($portableArchive) {
     $portableNode = Repair-PortableNode -ArchiveFile $portableArchive.File
     Write-Output $portableNode.NodeExe
     exit 0
 }
 
-$existingNode = Find-CompatibleSystemNode -PreferredMajor $preferredMajor
-if ($existingNode) {
-    Write-Output $existingNode.NodeExe
-    exit 0
-}
-
 $installer = Get-BestArtifact -SearchRoot $installerRoot -Filter "node-v*-x64.msi" -RequiredMajor $preferredMajor
+if (-not $installer) {
+    $installer = Get-BestArtifact -SearchRoot $installerRoot -Filter "node-v*-x64.msi" -RequiredMajor 0
+}
 
 if ($installer) {
     if ($installer.Major -ne $preferredMajor) {
@@ -222,14 +330,10 @@ if ($installer) {
         )
     }
 
-    if ($SkipInstaller) {
-        Write-Output $installRequiredToken
-        exit 0
-    }
-
     Start-Process -FilePath "msiexec.exe" -ArgumentList @("/i", "`"$($installer.File.FullName)`"") -Wait | Out-Null
 
-    $installedNode = Find-CompatibleSystemNode -PreferredMajor $preferredMajor
+    Refresh-ProcessPathFromRegistry
+    $installedNode = Find-CompatibleSystemNode -MinMajor $minSupportedMajor -MaxMajor $maxSupportedMajor
     if ($installedNode) {
         Write-Output $installedNode.NodeExe
         exit 0
@@ -239,4 +343,4 @@ if ($installer) {
     exit 0
 }
 
-throw "No compatible Node.js $preferredMajor installation with a working npm was found, and no Node.js $preferredMajor runtime is bundled in tools\node-cache or tools\nodejs-msi."
+throw "No compatible Node.js installation with a working npm was found, and no Node.js runtime is bundled in tools\node-cache or tools\nodejs-msi."

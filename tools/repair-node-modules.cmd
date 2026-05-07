@@ -41,6 +41,47 @@ if errorlevel 1 (
         exit /b 1
     )
 )
+
+REM Verify native modules actually load under the current Node runtime.
+"%NODE_EXE%" -e "require('better-sqlite3'); console.log('better-sqlite3 OK')"
+if errorlevel 1 (
+    echo =====================================
+    echo better-sqlite3 still broken, reinstalling...
+    echo =====================================
+    if exist "node_modules\better-sqlite3" rmdir /s /q "node_modules\better-sqlite3"
+    call "%NPM_CMD%" install
+    if errorlevel 1 (
+        popd
+        echo better-sqlite3 reinstall failed.
+        exit /b 1
+    )
+    "%NODE_EXE%" -e "require('better-sqlite3'); console.log('better-sqlite3 OK after reinstall')"
+    if errorlevel 1 (
+        popd
+        echo better-sqlite3 still fails to load after reinstall.
+        exit /b 1
+    )
+)
+
+"%NODE_EXE%" -e "require('msnodesqlv8'); console.log('msnodesqlv8 OK')"
+if errorlevel 1 (
+    echo =====================================
+    echo msnodesqlv8 still broken (may require build tools).
+    echo =====================================
+    echo Trying full reinstall once...
+    call "%NPM_CMD%" install
+    if errorlevel 1 (
+        popd
+        echo msnodesqlv8 reinstall failed.
+        exit /b 1
+    )
+    "%NODE_EXE%" -e "require('msnodesqlv8'); console.log('msnodesqlv8 OK after reinstall')"
+    if errorlevel 1 (
+        popd
+        echo msnodesqlv8 still fails to load after reinstall.
+        exit /b 1
+    )
+)
 popd
 
 if exist "%ROOT%\Setup-Configurator\package.json" (
