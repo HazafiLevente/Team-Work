@@ -1,8 +1,0 @@
-id,manufacturer,model,string_count,gauge,material,winding,coated,suitable_for,tension,price,notes,created_at,category,Price
-1,Ernie Ball,2221 Nickel Wound Regular Slinky,6,10-46,Nickel Plated Steel,Roundwound,false,electric,regular,,Klasszikus Regular Slinky készlet,2025-12-17 14:04:11.852033,guitarstring,5220
-2,Ernie Ball,2223 Nickel Wound Super Slinky,6,9-42,Nickel Plated Steel,Roundwound,false,electric,light,,"Könnyű feszítés, Super Slinky",2025-12-17 14:04:11.852033,guitarstring,4650
-3,Ernie Ball,2222 Nickel Wound Hybrid Slinky,6,9-46,Nickel Plated Steel,Roundwound,false,electric,hybrid,,"Vékony felső, vastagabb alsó húrok",2025-12-17 14:04:11.852033,guitarstring,4420
-4,Ernie Ball,2215 Nickel Wound Skinny Top Heavy Bottom Slinky,6,10-52,Nickel Plated Steel,Roundwound,false,electric,hybrid,,Drop hangolásokhoz ideális,2025-12-17 14:04:11.852033,guitarstring,4480
-5,Ernie Ball,2220 Nickel Wound Power Slinky,6,11-48,Nickel Plated Steel,Roundwound,false,electric,heavy,,"Nagyobb feszítés, vastagabb hang",2025-12-17 14:04:11.852033,guitarstring,5190
-6,Ernie Ball,2721 Cobalt Regular Slinky,6,10-46,Cobalt,Roundwound,false,electric,regular,,Cobalt ötvözet – nagyobb kimeneti jel,2025-12-17 14:04:11.852033,guitarstring,7160
-7,Ernie Ball,2723 Cobalt Super Slinky,6,9-42,Cobalt,Roundwound,false,electric,light,,Cobalt Super Slinky – fényesebb hang,2025-12-17 14:04:11.852033,guitarstring,6040
