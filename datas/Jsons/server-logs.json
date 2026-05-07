@@ -1,29 +1,5 @@
 [
   {
-    "id": "1777902372803fx57",
-    "timestamp": "2026-05-04T13:46:12.803Z",
-    "level": "log",
-    "message": "🍪 COOKIES: {\"Webstorm-4a9b1ed1\":\"2cd47b33-d91f-4180-94e5-e3cd66fd6f7d\",\"Webstorm-4a9b1ed2\":\"4825e2dd-8848-40aa-82fa-6b6096e480a5\",\"Webstorm-4a9b1ed3\":\"4b21ec80-24ec-43df-ad72-310d7e663763\",\"g_state\":\"{\\\"i_l\\\":0,\\\"i_ll\\\":1777888281835,\\\"i_e\\\":{\\\"enable_itp_optimization\\\":23},\\\"i_et\\\":1776274771520}\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJIYXphZmlMZXYiLCJlbWFpbCI6ImhhemFmaWxldkBnbWFpbC5jb20iLCJyb2xlIjoib3duZXIiLCJpYXQiOjE3Nzc4ODgyODQsImV4cCI6MTc3NzkzMTQ4NH0.IvKfaA3Wcc1_MLEHVV7ceLj7gceYaeyNwnHTuGIBJao\",\"Webstorm-4a9b2292\":\"5c6302da-5be2-463a-bcc0-7cd6929d554c\"}"
-  },
-  {
-    "id": "1777902373115vzzm",
-    "timestamp": "2026-05-04T13:46:13.115Z",
-    "level": "log",
-    "message": "🍪 COOKIES: {\"Webstorm-4a9b1ed1\":\"2cd47b33-d91f-4180-94e5-e3cd66fd6f7d\",\"Webstorm-4a9b1ed2\":\"4825e2dd-8848-40aa-82fa-6b6096e480a5\",\"Webstorm-4a9b1ed3\":\"4b21ec80-24ec-43df-ad72-310d7e663763\",\"g_state\":\"{\\\"i_l\\\":0,\\\"i_ll\\\":1777888281835,\\\"i_e\\\":{\\\"enable_itp_optimization\\\":23},\\\"i_et\\\":1776274771520}\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJIYXphZmlMZXYiLCJlbWFpbCI6ImhhemFmaWxldkBnbWFpbC5jb20iLCJyb2xlIjoib3duZXIiLCJpYXQiOjE3Nzc4ODgyODQsImV4cCI6MTc3NzkzMTQ4NH0.IvKfaA3Wcc1_MLEHVV7ceLj7gceYaeyNwnHTuGIBJao\",\"Webstorm-4a9b2292\":\"5c6302da-5be2-463a-bcc0-7cd6929d554c\"}"
-  },
-  {
-    "id": "1777902375963ush9",
-    "timestamp": "2026-05-04T13:46:15.963Z",
-    "level": "log",
-    "message": "🍪 COOKIES: {\"Webstorm-4a9b1ed1\":\"2cd47b33-d91f-4180-94e5-e3cd66fd6f7d\",\"Webstorm-4a9b1ed2\":\"4825e2dd-8848-40aa-82fa-6b6096e480a5\",\"Webstorm-4a9b1ed3\":\"4b21ec80-24ec-43df-ad72-310d7e663763\",\"g_state\":\"{\\\"i_l\\\":0,\\\"i_ll\\\":1777888281835,\\\"i_e\\\":{\\\"enable_itp_optimization\\\":23},\\\"i_et\\\":1776274771520}\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJIYXphZmlMZXYiLCJlbWFpbCI6ImhhemFmaWxldkBnbWFpbC5jb20iLCJyb2xlIjoib3duZXIiLCJpYXQiOjE3Nzc4ODgyODQsImV4cCI6MTc3NzkzMTQ4NH0.IvKfaA3Wcc1_MLEHVV7ceLj7gceYaeyNwnHTuGIBJao\",\"Webstorm-4a9b2292\":\"5c6302da-5be2-463a-bcc0-7cd6929d554c\"}"
-  },
-  {
-    "id": "1777902381410w3um",
-    "timestamp": "2026-05-04T13:46:21.410Z",
-    "level": "log",
-    "message": "🍪 COOKIES: {\"Webstorm-4a9b1ed1\":\"2cd47b33-d91f-4180-94e5-e3cd66fd6f7d\",\"Webstorm-4a9b1ed2\":\"4825e2dd-8848-40aa-82fa-6b6096e480a5\",\"Webstorm-4a9b1ed3\":\"4b21ec80-24ec-43df-ad72-310d7e663763\",\"g_state\":\"{\\\"i_l\\\":0,\\\"i_ll\\\":1777888281835,\\\"i_e\\\":{\\\"enable_itp_optimization\\\":23},\\\"i_et\\\":1776274771520}\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJIYXphZmlMZXYiLCJlbWFpbCI6ImhhemFmaWxldkBnbWFpbC5jb20iLCJyb2xlIjoib3duZXIiLCJpYXQiOjE3Nzc4ODgyODQsImV4cCI6MTc3NzkzMTQ4NH0.IvKfaA3Wcc1_MLEHVV7ceLj7gceYaeyNwnHTuGIBJao\",\"Webstorm-4a9b2292\":\"5c6302da-5be2-463a-bcc0-7cd6929d554c\"}"
-  },
-  {
     "id": "17779024114544aku",
     "timestamp": "2026-05-04T13:46:51.454Z",
     "level": "log",
@@ -11998,5 +11974,29 @@
     "timestamp": "2026-05-07T17:46:07.592Z",
     "level": "log",
     "message": "✅ ActiveUsers synced to Supabase on shutdown {\"day\":\"2026-05-07\"}"
+  },
+  {
+    "id": "1778177025444moc4",
+    "timestamp": "2026-05-07T18:03:45.444Z",
+    "level": "log",
+    "message": "[dotenv@17.2.3] injecting env (18) from ..\\.env \u001b[2m-- tip: 🔐 prevent committing .env to code: https://dotenvx.com/precommit\u001b[0m"
+  },
+  {
+    "id": "1778177025468wxkb",
+    "timestamp": "2026-05-07T18:03:45.468Z",
+    "level": "log",
+    "message": "🖼️  Serving images from: C:\\Users\\Levente\\WebstormProjects\\Team-Work\\datas\\images"
+  },
+  {
+    "id": "1778177025600h7l2",
+    "timestamp": "2026-05-07T18:03:45.600Z",
+    "level": "log",
+    "message": "Server running on http://localhost:3000"
+  },
+  {
+    "id": "1778177035609p1ea",
+    "timestamp": "2026-05-07T18:03:55.609Z",
+    "level": "log",
+    "message": "✅ ActiveUsers snapshot persisted {\"day\":\"2026-05-07\",\"active_id\":1}"
   }
 ]

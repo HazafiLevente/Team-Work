@@ -7,12 +7,13 @@ $ErrorActionPreference = "Stop"
 $preferredMajor = 20
 $minSupportedMajor = 18
 $maxSupportedMajor = 20
+$requiredVersion = "v20.20.2"
 $nodeRoot = Join-Path $ProjectRoot "tools\nodejs"
 $cacheRoot = Join-Path $ProjectRoot "tools\node-cache"
 $installerRoot = Join-Path $ProjectRoot "tools\nodejs-msi"
 $installStartedToken = "__INSTALL_STARTED__"
 $installRequiredToken = "__INSTALL_REQUIRED__"
-$directMsiVersion = "v20.18.0"
+$directMsiVersion = "v20.20.2"
 $directMsiUrl = "https://nodejs.org/dist/$directMsiVersion/node-$directMsiVersion-x64.msi"
 
 function Get-NodeVersion([string]$NodeExe) {
@@ -37,6 +38,26 @@ function Get-NpmCommand([string]$NodeExe) {
 
     if (Test-Path $npmCmd) {
         return $npmCmd
+    }
+
+    # Portable ZIP installs may not ship npm.cmd shims next to node.exe.
+    # If npm is present under node_modules, create a small cmd shim so the rest
+    # of our tooling (start.bat) can reliably call npm.cmd.
+    $npmCli = Join-Path $nodeDir "node_modules\npm\bin\npm-cli.js"
+    if (Test-Path $npmCli) {
+        try {
+            $shimPath = $npmCmd
+            $shim = @"
+@echo off
+setlocal
+set "NODE_EXE=%~dp0node.exe"
+"%NODE_EXE%" "%~dp0node_modules\npm\bin\npm-cli.js" %*
+"@
+            Set-Content -LiteralPath $shimPath -Value $shim -Encoding ASCII -Force
+            return $shimPath
+        } catch {
+            return $null
+        }
     }
 
     return $null
@@ -64,6 +85,10 @@ function Test-NodeCandidate([string]$NodeExe, [int]$MinMajor = 0, [int]$MaxMajor
     $major = Get-NodeMajor -Version $version
 
     if (-not $major) {
+        return $null
+    }
+
+    if ($requiredVersion -and $version -ne $requiredVersion) {
         return $null
     }
 
@@ -122,6 +147,23 @@ function Install-NodeJsFromInternet {
         return $false
     }
 
+    # Prefer a pinned Node 20 MSI to match native module compatibility and frontend engines.
+    try {
+        Write-Host "Node.js telepitese kozvetlen letoltessel (PowerShell)..."
+        $out = Join-Path $env:TEMP "nodejs-installer.msi"
+        Write-Host "Letoltes..."
+        Invoke-WebRequest -Uri $directMsiUrl -OutFile $out
+        Write-Host "Telepites..."
+        $p = Start-Process -FilePath "msiexec.exe" -ArgumentList @("/i", "`"$out`"", "/quiet", "/norestart") -Wait -PassThru
+        Remove-Item -LiteralPath $out -Force -ErrorAction SilentlyContinue
+        if ($p.ExitCode -eq 0) {
+            return $true
+        }
+        Write-Host "Direkt MSI telepites sikertelen, masik modszer probalasa..."
+    } catch {
+        Write-Host "Direkt MSI telepites sikertelen, masik modszer probalasa..."
+    }
+
     if (Test-CommandAvailable -Name "winget") {
         try {
             Write-Host "Node.js telepitese winget-tel..."
@@ -143,19 +185,7 @@ function Install-NodeJsFromInternet {
             Write-Host "Chocolatey telepites sikertelen, masik modszer probalasa..."
         }
     }
-
-    try {
-        Write-Host "Node.js telepitese kozvetlen letoltessel (PowerShell)..."
-        $out = Join-Path $env:TEMP "nodejs-installer.msi"
-        Write-Host "Letoltes..."
-        Invoke-WebRequest -Uri $directMsiUrl -OutFile $out
-        Write-Host "Telepites..."
-        $p = Start-Process -FilePath "msiexec.exe" -ArgumentList @("/i", "`"$out`"", "/quiet", "/norestart") -Wait -PassThru
-        Remove-Item -LiteralPath $out -Force -ErrorAction SilentlyContinue
-        return ($p.ExitCode -eq 0)
-    } catch {
-        return $false
-    }
+    return $false
 }
 
 function Get-SystemNodeCandidates {
@@ -191,7 +221,7 @@ function Get-ProjectNodeCandidates([string]$SearchRoot) {
 }
 
 function Get-VersionedArtifactInfo([System.IO.FileInfo]$File) {
-    if ($File.BaseName -match '^node-v(\d+)\.(\d+)\.(\d+)-x64$') {
+    if ($File.BaseName -match '^node-v(\d+)\.(\d+)\.(\d+)-(?:win-)?x64$') {
         return [PSCustomObject]@{
             File    = $File
             Version = [version]("{0}.{1}.{2}" -f $Matches[1], $Matches[2], $Matches[3])
@@ -262,7 +292,7 @@ function Repair-PortableNode([System.IO.FileInfo]$ArchiveFile) {
         return $validatedNode
     }
 
-    throw "Portable Node.js archive $($ArchiveFile.Name) was extracted, but npm is still not usable."
+    return $null
 }
 
 function Find-CompatibleSystemNode([int]$MinMajor = 0, [int]$MaxMajor = 0) {
@@ -277,15 +307,15 @@ function Find-CompatibleSystemNode([int]$MinMajor = 0, [int]$MaxMajor = 0) {
     return $null
 }
 
-# Prefer supported majors (18-20) to avoid native-module / engine issues.
+# Prefer the pinned Node version, even if another 18-20 is installed.
 $existingNode = Find-CompatibleSystemNode -MinMajor $minSupportedMajor -MaxMajor $maxSupportedMajor
 if ($existingNode) {
     Write-Output $existingNode.NodeExe
     exit 0
 }
 
-# If only an unsupported Node is installed, we still prefer installing Node 20 LTS rather than using it,
-# because the project contains native addons and the frontend declares engines <21.
+# If the pinned Node is not present, install it (even if another Node is installed),
+# because native addons and frontend engines are sensitive to ABI/engine changes.
 
 # Online install attempts (winget -> choco -> direct MSI). If these fail, we fall back to the original
 # "bundled ZIP/MSI" behavior as the last resort.
@@ -308,29 +338,31 @@ if ($didInstall) {
 }
 
 # --- Last resort: use bundled portable ZIP or bundled MSI (original behavior) ---
-$portableArchive = Get-BestArtifact -SearchRoot $cacheRoot -Filter "node-v*-win-x64.zip" -RequiredMajor $preferredMajor
-if (-not $portableArchive) {
-    $portableArchive = Get-BestArtifact -SearchRoot $cacheRoot -Filter "node-v*-win-x64.zip" -RequiredMajor 0
+$portableArchive = $null
+if ($requiredVersion) {
+    $portableArchive = Get-ChildItem -Path $cacheRoot -Filter ("node-" + $requiredVersion + "-win-x64.zip") -File -ErrorAction SilentlyContinue |
+        Select-Object -First 1
 }
 if ($portableArchive) {
-    $portableNode = Repair-PortableNode -ArchiveFile $portableArchive.File
-    Write-Output $portableNode.NodeExe
-    exit 0
+    try {
+        $portableNode = Repair-PortableNode -ArchiveFile $portableArchive
+        if ($portableNode) {
+            Write-Output $portableNode.NodeExe
+            exit 0
+        }
+    } catch {
+        # ignore and continue to MSI fallback
+    }
 }
 
-$installer = Get-BestArtifact -SearchRoot $installerRoot -Filter "node-v*-x64.msi" -RequiredMajor $preferredMajor
-if (-not $installer) {
-    $installer = Get-BestArtifact -SearchRoot $installerRoot -Filter "node-v*-x64.msi" -RequiredMajor 0
+$installer = $null
+if ($requiredVersion) {
+    $installer = Get-ChildItem -Path $installerRoot -Filter ("node-" + $requiredVersion + "-x64.msi") -File -ErrorAction SilentlyContinue |
+        Select-Object -First 1
 }
 
 if ($installer) {
-    if ($installer.Major -ne $preferredMajor) {
-        [Console]::Error.WriteLine(
-            "No Node.js $preferredMajor installer was found. Launching bundled installer $($installer.File.Name) instead."
-        )
-    }
-
-    Start-Process -FilePath "msiexec.exe" -ArgumentList @("/i", "`"$($installer.File.FullName)`"") -Wait | Out-Null
+    Start-Process -FilePath "msiexec.exe" -ArgumentList @("/i", "`"$($installer.FullName)`"", "/quiet", "/norestart") -Wait | Out-Null
 
     Refresh-ProcessPathFromRegistry
     $installedNode = Find-CompatibleSystemNode -MinMajor $minSupportedMajor -MaxMajor $maxSupportedMajor
