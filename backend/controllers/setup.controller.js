@@ -244,6 +244,7 @@ const pcPartsCache = new Map();
 const carOptionsCache = new Map();
 const carDetailsCache = new Map();
 const instrumentOptionsCache = new Map();
+const allProductOptionsCache = new Map();
 const networkOptionsCache = new Map();
 
 const CHILDREN_TTL_MS = 30_000;
@@ -251,6 +252,7 @@ const PCPARTS_TTL_MS = 10 * 60_000;
 const CAROPTIONS_TTL_MS = 10 * 60_000;
 const CARDETAILS_TTL_MS = 30_000;
 const INSTRUMENTOPTIONS_TTL_MS = 10 * 60_000;
+const ALLPRODUCTOPTIONS_TTL_MS = 10 * 60_000;
 const NETWORKOPTIONS_TTL_MS = 10 * 60_000;
 
 function cacheGet(map, key) {
@@ -1610,7 +1612,7 @@ function extractPrice(item) {
         ?? null;
 }
 
-async function enrichNoteItemsWithProductData(items) {
+async function enrichItemsWithProductData(items) {
     const enriched = [...items];
     let catalogItems = null;
 
@@ -1618,18 +1620,24 @@ async function enrichNoteItemsWithProductData(items) {
         const childSetupId = Number(item?.id ?? 0);
         if (!Number.isFinite(childSetupId) || childSetupId <= 0) return;
 
-        const { data: deviceRow } = await supabase
-            .from(SETUP_DEVICES_TABLE)
-            .select("*")
-            .eq("setup_id", childSetupId)
-            .limit(1)
-            .maybeSingle();
+        // Try to get link if not present
+        if (item.product_id == null && item.device_id == null) {
+            const { data: deviceRow } = await supabase
+                .from(SETUP_DEVICES_TABLE)
+                .select("*")
+                .eq("setup_id", childSetupId)
+                .limit(1)
+                .maybeSingle();
 
-        const productId = Number(deviceRow?.device_id ?? deviceRow?.product_id ?? 0);
-        const sourceTable = String(deviceRow?.source_table ?? item?.source_table ?? "products").trim() || "products";
+            if (deviceRow) {
+                item.product_id = Number(deviceRow.device_id ?? deviceRow.product_id ?? 0);
+                item.device_id = item.product_id;
+                item.source_table = String(deviceRow.source_table ?? "products").trim() || "products";
+            }
+        }
 
-        item.product_id = Number.isFinite(productId) && productId > 0 ? productId : item.product_id;
-        item.source_table = sourceTable || item.source_table;
+        const productId = Number(item?.product_id ?? item?.device_id ?? 0);
+        const sourceTable = String(item?.source_table ?? "products").trim() || "products";
 
         if (!Number.isFinite(productId) || productId <= 0) return;
 
@@ -1645,6 +1653,7 @@ async function enrichNoteItemsWithProductData(items) {
         item.price = extractPrice(product);
         item.manufacturer = item.manufacturer || product.manufacturer || product.Manufacturer || "";
         item.display_name = item.display_name || product.name || product.model || product.Model || item.name;
+        item.product_data = product; // Store raw product data for frontend
     });
 
     return enriched;
@@ -1946,9 +1955,9 @@ exports.children = async (req, res) => {
                     }
                 }
 
-                let enrichedItems = await enrichPcSetupRows(items);
+                let enrichedItems = await enrichItemsWithProductData(items);
                 if (normalizeBoolean(roomRow?.isNote ?? roomRow?.is_note ?? roomRow?.isnote)) {
-                    enrichedItems = await enrichNoteItemsWithProductData(enrichedItems);
+                    // Already enriched above, but kept for clarity if logic diverges later
                 }
                 const total = Number(count ?? 0);
                 const totalPages = Math.max(Math.ceil(total / limit), 1);
@@ -2022,9 +2031,9 @@ exports.children = async (req, res) => {
                 }
             }
 
-            allItems = await enrichPcSetupRows(allItems);
+            allItems = await enrichItemsWithProductData(allItems);
             if (normalizeBoolean(roomRow?.isNote ?? roomRow?.is_note ?? roomRow?.isnote)) {
-                allItems = await enrichNoteItemsWithProductData(allItems);
+                // Already enriched above
             }
         } else {
             if (isPaginated) {
@@ -2039,7 +2048,7 @@ exports.children = async (req, res) => {
 
                 if (error) throw error;
 
-                const items = (data || []).map((item) => mapDisplay({
+                const itemsToEnrich = (data || []).map((item) => mapDisplay({
                     ...item,
                     type: item.role ?? "device",
                     setup_type: item.role ?? "device",
@@ -2049,12 +2058,14 @@ exports.children = async (req, res) => {
                     rotation: Number(item.rotation ?? 0)
                 }, SETUP_DEVICES_TABLE));
 
+                const enrichedItems = await enrichItemsWithProductData(itemsToEnrich);
+
                 const total = Number(count ?? 0);
                 const totalPages = Math.max(Math.ceil(total / limit), 1);
                 const safePage = Math.min(page, totalPages);
 
                 return res.json({
-                    items,
+                    items: enrichedItems,
                     pagination: {
                         page: safePage,
                         limit,
@@ -2074,7 +2085,7 @@ exports.children = async (req, res) => {
 
             if (error) throw error;
 
-            allItems = (data || []).map((item) => mapDisplay({
+            const items = (data || []).map((item) => mapDisplay({
                 ...item,
                 type: item.role ?? "device",
                 setup_type: item.role ?? "device",
@@ -2083,6 +2094,8 @@ exports.children = async (req, res) => {
                 y: Number(item.pos_y ?? 0),
                 rotation: Number(item.rotation ?? 0)
             }, SETUP_DEVICES_TABLE));
+
+            allItems = await enrichItemsWithProductData(items);
         }
 
         cacheSet(childrenCache, setupId, allItems, CHILDREN_TTL_MS);
@@ -3084,6 +3097,38 @@ exports.instrumentOptions = async (req, res) => {
     }
 };
 
+exports.allProductOptions = async (req, res) => {
+    try {
+        const cacheKey = "all-product-options:v1";
+        const cached = cacheGet(allProductOptionsCache, cacheKey);
+        if (cached) return res.json({ products: cached });
+
+        const { data, error } = await supabase
+            .from("products")
+            .select("id, name, type")
+            .order("name", { ascending: true })
+            .limit(10000);
+
+        if (error) throw error;
+
+        const products = (Array.isArray(data) ? data : [])
+            .map((row) => ({
+                id: Number(row.id),
+                name: String(row.name || "").trim(),
+                type: String(row.type || "").trim(),
+                display_name: String(row.name || "").trim() || `Termék #${row.id}`
+            }));
+
+        products.sort((a, b) => a.display_name.localeCompare(b.display_name, "hu"));
+
+        cacheSet(allProductOptionsCache, cacheKey, products, ALLPRODUCTOPTIONS_TTL_MS);
+        return res.json({ products });
+    } catch (err) {
+        console.error("❌ allProductOptions hiba:", err);
+        return res.json({ products: [] });
+    }
+};
+
 exports.instrumentsList = async (req, res) => {
     try {
         const userId = req.user.id;
@@ -3203,6 +3248,107 @@ exports.instrumentsAdd = async (req, res) => {
     } catch (err) {
         console.error("❌ instrumentsAdd hiba:", err);
         return res.status(500).json({ error: "Create failed" });
+    }
+};
+
+exports.allProductAdd = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const setupId = req.params.id;
+
+        const ok = await assertSetupOwnedByUser(setupId, userId);
+        if (!ok) return res.status(403).json({ error: "Forbidden" });
+
+        const product_id_raw = req.body?.product_id;
+        const product_id = product_id_raw == null ? null : Number(product_id_raw);
+
+        if (!product_id || Number.isNaN(product_id)) {
+            return res.status(400).json({ error: "A product_id kötelező" });
+        }
+
+        const { data: product, error: productError } = await supabase
+            .from("products")
+            .select("id, name, type")
+            .eq("id", product_id)
+            .limit(1)
+            .maybeSingle();
+
+        if (productError) throw productError;
+        if (!product) {
+            return res.status(404).json({ error: "Termék nem található" });
+        }
+
+        const setup_name = await getUniqueChildSetupName(setupId, String(product.name || "").trim() || `Termék #${product_id}`);
+
+        const { data, error } = await supabase
+            .from(SETUPS_TABLE)
+            .insert([{
+                room_id: Number(setupId),
+                name: setup_name,
+                type: "product",
+                pos_x: 0,
+                pos_y: 0
+            }])
+            .select("*")
+            .single();
+        if (error) throw error;
+
+        const { data: createdDevice, error: deviceError } = await supabase
+            .from(SETUP_DEVICES_TABLE)
+            .insert([{
+                setup_id: Number(data.id),
+                device_id: Number(product_id),
+                role: "product",
+                pos_x: Number(data.pos_x ?? 0),
+                pos_y: Number(data.pos_y ?? 0),
+                rotation: 0
+            }])
+            .select("*")
+            .single();
+
+        if (deviceError) {
+            await supabase
+                .from(SETUPS_TABLE)
+                .delete()
+                .eq("id", data.id);
+            throw deviceError;
+        }
+
+        childrenCache.delete(String(setupId));
+        childrenCache.delete(String(data.id));
+
+        return res.json({
+            product: {
+                ...data,
+                setup_name: data.name ?? setup_name,
+                setup_type: "product",
+                product_id,
+                device: createdDevice ?? null,
+                x: Number(data.pos_x ?? 0),
+                y: Number(data.pos_y ?? 0)
+            }
+        });
+    } catch (err) {
+        console.error("❌ allProductAdd hiba:", err);
+        return res.status(500).json({ error: "Create failed" });
+    }
+};
+
+exports.getDeviceLink = async (req, res) => {
+    try {
+        const setupId = req.params.id;
+        const { data, error } = await supabase
+            .from(SETUP_DEVICES_TABLE)
+            .select("*")
+            .eq("setup_id", setupId)
+            .limit(1)
+            .maybeSingle();
+
+        if (error) throw error;
+        return res.json(data || {});
+    } catch (err) {
+        console.error("❌ getDeviceLink hiba:", err);
+        return res.status(500).json({ error: "Fetch failed" });
     }
 };
 

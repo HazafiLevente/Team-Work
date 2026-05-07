@@ -311,7 +311,7 @@ async function syncFromSupabase() {
          */
         const stmt = db.prepare(`
             INSERT INTO ${qIdent(table)}
-            (${cols.map(c => qIdent(c)).join(",")})
+                (${cols.map(c => qIdent(c)).join(",")})
             VALUES (${cols.map(() => "?").join(",")})
         `);
 

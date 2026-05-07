@@ -29,6 +29,7 @@ export class ContextMenuRoomComponent {
 
   @Output() openSetup = new EventEmitter<void>();
   @Output() openTools = new EventEmitter<void>();
+  @Output() openAllProducts = new EventEmitter<void>();
   @Output() rename = new EventEmitter<void>();
   @Output() connect = new EventEmitter<void>();
   @Output() connections = new EventEmitter<void>();

@@ -3,19 +3,6 @@
   @if (!hierarchyMode) {
     <div class="property-strip compact">
       <div class="property-strip-toggle">
-        @if (!fixedLayout) {
-          <label class="hierarchy-toggle" [class.hierarchy-active]="hierarchyMode">
-            <input
-              type="checkbox"
-              class="hierarchy-toggle-input"
-              [checked]="hierarchyMode"
-              (change)="toggleHierarchyMode($any($event.target).checked)" />
-
-            <span class="hierarchy-toggle-track"></span>
-            <span class="hierarchy-toggle-thumb"></span>
-          </label>
-        }
-
         <div class="property-strip-copy">
           <div class="property-strip-title">
             {{ viewingSetup ? viewingSetupTitle() : 'Tulajdonsag Sav' }}
@@ -89,6 +76,7 @@
       [userSetups]="userSetups"
       [items]="items"
       [viewingSetup]="viewingSetup"
+      [fixedLayout]="fixedLayout"
       [connections]="connections"
       [globalRoomConnections]="globalRoomConnections"
       [loading]="loading"
@@ -126,6 +114,7 @@
     <div class="hierarchy-workspace-shell">
       <app-setup-hierarchy-sidebar
         [hierarchyMode]="hierarchyMode"
+        [fixedLayout]="fixedLayout"
         [rootTreeExpanded]="rootTreeExpanded"
         [userSetups]="userSetups"
         [hierarchyRootCtxOpen]="hierarchyRootCtxOpen"
@@ -185,19 +174,16 @@
                 (saved)="onHierarchyBuilderSaved()">
               </app-network-builder-panel>
             } @else if (hierarchyBuilderType === 'home_theater') {
-              <div class="hierarchy-builder-placeholder">
-                <div class="hierarchy-builder-placeholder-title">Hazi-mozi builder</div>
-                <div class="hierarchy-builder-placeholder-sub">
-                  Ehhez a kategorihoz itt most csak placeholder van.
-                </div>
-              </div>
+              <app-home-theater-simple-builder
+                [setup]="hierarchyBuilderSetup"
+                (saved)="onHierarchyBuilderSaved()">
+              </app-home-theater-simple-builder>
             } @else {
-              <div class="hierarchy-builder-placeholder">
-                <div class="hierarchy-builder-placeholder-title">Egyeb builder</div>
-                <div class="hierarchy-builder-placeholder-sub">
-                  Ehhez a kategorihoz itt most csak placeholder van.
-                </div>
-              </div>
+              <app-all-builder-panel
+                [setup]="hierarchyBuilderSetup"
+                (close)="closeHierarchyBuilder()"
+                (saved)="onHierarchyBuilderSaved()">
+              </app-all-builder-panel>
             }
           } @else if (hierarchyBuilderLoading) {
             <div class="hierarchy-builder-placeholder">
@@ -225,12 +211,10 @@
               (close)="closeHierarchyBuilder()">
             </app-setup-instrument-details-panel>
           } @else if (hierarchyBuilderType === 'home_theater') {
-            <div class="hierarchy-builder-placeholder">
-              <div class="hierarchy-builder-placeholder-title">Hazi-mozi builder</div>
-              <div class="hierarchy-builder-placeholder-sub">
-                Ehhez a kategorihoz itt most csak placeholder van.
-              </div>
-            </div>
+            <app-home-theater-simple-builder
+              [setup]="hierarchyBuilderSetup"
+              (saved)="onHierarchyBuilderSaved()">
+            </app-home-theater-simple-builder>
           } @else if (hierarchyBuilderType === 'network') {
             <div class="hierarchy-builder-placeholder">
               <div class="hierarchy-builder-placeholder-title">Halozat builder</div>
@@ -239,12 +223,11 @@
               </div>
             </div>
           } @else {
-            <div class="hierarchy-builder-placeholder">
-              <div class="hierarchy-builder-placeholder-title">Egyeb builder</div>
-              <div class="hierarchy-builder-placeholder-sub">
-                Ehhez a kategorihoz itt most csak placeholder van.
-              </div>
-            </div>
+            <app-all-builder-panel
+              [setup]="hierarchyBuilderSetup"
+              (close)="closeHierarchyBuilder()"
+              (saved)="onHierarchyBuilderSaved()">
+            </app-all-builder-panel>
           }
         </div>
       } @else if (hierarchyRightMode === 'home_theater_picker') {
@@ -279,7 +262,6 @@
 
   @if (selectedProduct) {
     <app-product-details-panel
-      class="workspace-floating-panel"
       [product]="selectedProduct"
       (closed)="closeProductOverlay()">
     </app-product-details-panel>

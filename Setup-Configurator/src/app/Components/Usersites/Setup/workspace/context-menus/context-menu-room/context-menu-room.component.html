@@ -9,6 +9,10 @@
         Eszkozok
       </button>
 
+      <button class="menu-item" (click)="$event.stopPropagation(); emitAndClose(openAllProducts)">
+        Termék hozzáadása
+      </button>
+
       <button class="menu-item" (click)="$event.stopPropagation(); emitAndClose(rename)">
         Atnevezes
       </button>

@@ -34,6 +34,19 @@ function eqText(a: any, b: any): boolean {
   return sl(a) === sl(b);
 }
 
+function matchesCarBodyType(value: any, selected: string): boolean {
+  const body = sl(value);
+  const filter = sl(selected);
+
+  if (!filter) return true;
+  if (!body) return false;
+  if (body.includes(filter)) return true;
+
+  if (filter === 'suv' && body.includes('crossover')) return true;
+
+  return false;
+}
+
 function getField(item: Product | any, key: string): any {
   if (!item) return '';
 
@@ -108,7 +121,7 @@ export function passesCarFilters(item: Product, f: CarFilters): boolean {
   if (f.manufacturer && !contains(getField(item, 'manufacturer'), f.manufacturer)) return false;
   if (f.model && !matchModelLike(item, f.model)) return false;
   if (!passesRange(getField(item, 'price'), f.priceMin, f.priceMax)) return false;
-  if (f.bodyType && !contains(getField(item, 'body_type'), f.bodyType)) return false;
+  if (f.bodyType && !matchesCarBodyType(getField(item, 'body_type'), f.bodyType)) return false;
   if (!passesRange(getField(item, 'horsepower'), f.hpMin, f.hpMax)) return false;
   if (!passesRange(getField(item, 'zero_to_hundred') || getField(item, 'acceleration'), f.accelMin, f.accelMax)) return false;
   if (!passesRange(getField(item, 'seats'), f.seatsMin, f.seatsMax)) return false;

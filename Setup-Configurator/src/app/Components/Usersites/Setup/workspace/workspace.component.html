@@ -65,7 +65,7 @@
 
   @if (ctxOpen && ctxSetup) {
     <app-context-menu-room [x]="ctxX" [y]="ctxY" [setup]="ctxSetup" (close)="closeContextMenu()" (openSetup)="openSetupDetails(ctxSetup)"
-                           (openTools)="openDevicesWindow(ctxSetup)" (rename)="startRenameForContextSetup()" (connect)="connect.emit(ctxSetup)"
+                           (openTools)="openDevicesWindow(ctxSetup)" (openAllProducts)="openAllBuilderWindow(ctxSetup)" (rename)="startRenameForContextSetup()" (connect)="connect.emit(ctxSetup)"
                            (connections)="openConnectionsWindow(ctxSetup)" (deleteSetup)="deleteSetup.emit(ctxSetup)">
     </app-context-menu-room>
   }
@@ -146,11 +146,18 @@
             </app-pc-builder-panel>
           } @else {
           @if (w.title === 'Házimozi') {
-            <app-home-theater-builder
-              [setup]="w.payload.setup"
-              [buildId]="w.payload.buildId"
-              (saved)="onHtSaved()">
-            </app-home-theater-builder>
+            @if (fixedLayout === 'mobile' || w.payload?.useSimpleBuilder) {
+              <app-home-theater-simple-builder
+                [setup]="w.payload.setup"
+                (saved)="onHtSaved()">
+              </app-home-theater-simple-builder>
+            } @else {
+              <app-home-theater-builder
+                [setup]="w.payload.setup"
+                [buildId]="w.payload.buildId"
+                (saved)="onHtSaved()">
+              </app-home-theater-builder>
+            }
           } @else if (w.title === 'Autók') {
             <app-car-builder-panel
               [setup]="w.payload.setup"
@@ -166,6 +173,14 @@
               [initialProductId]="w.payload.initialProductId ?? null"
               (saved)="onHtSaved()">
             </app-instrument-builder-panel>
+
+          } @else if (w.title === 'Összes termék' || w.title === 'Egyéb' || w.title === 'Egyeb') {
+            <app-all-builder-panel
+              [setup]="w.payload.setup"
+              [editChildSetupId]="w.payload.editChildSetupId ?? null"
+              [initialProductId]="w.payload.initialProductId ?? null"
+              (saved)="onHtSaved()">
+            </app-all-builder-panel>
 
           } @else if (w.title === 'Halozat') {
             <app-network-builder-panel

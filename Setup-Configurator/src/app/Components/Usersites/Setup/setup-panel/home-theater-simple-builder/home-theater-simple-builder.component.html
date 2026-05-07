@@ -1,0 +1,99 @@
+<div class="ht-simple-shell">
+  <div class="ht-simple-head">
+    <div class="ht-simple-kicker">Hazimozi Builder</div>
+    <div class="ht-simple-title-row">
+      <div>
+        <div class="ht-simple-title">{{ title || setupTitle() }}</div>
+        <div class="ht-simple-sub">Egyszerubb osszeallitas layouttal, receiverrel es hangsugarzokkal.</div>
+      </div>
+    </div>
+  </div>
+
+  @if (loading) {
+    <div class="ht-simple-state">Betoltes...</div>
+  } @else {
+    <div class="ht-simple-grid">
+      <div class="ht-simple-panel">
+        <div class="ht-simple-panel-title">Alapok</div>
+
+        <label class="ht-simple-field">
+          <span>Build neve</span>
+          <input
+            type="text"
+            [(ngModel)]="title"
+            placeholder="pl. Nappali 5.1 mozi" />
+        </label>
+
+        <label class="ht-simple-field">
+          <span>Layout</span>
+          <select [(ngModel)]="layout" (change)="onLayoutChange()">
+            <option value="">-- valassz layoutot --</option>
+            @for (option of layoutOptions; track option.value) {
+              <option [value]="option.value">{{ option.label }}</option>
+            }
+          </select>
+        </label>
+
+        <label class="ht-simple-field">
+          <span>Receiver</span>
+          <select [(ngModel)]="form['receiver']">
+            <option value="">-- valassz receivert --</option>
+            @for (product of catalog['receivers']; track (product?.id ?? product?.ID)) {
+              <option [ngValue]="product?.id ?? product?.ID">{{ productLabel(product) }}</option>
+            }
+          </select>
+        </label>
+
+        <label class="ht-simple-field">
+          <span>Bass amplifier</span>
+          <select [(ngModel)]="form['bass_amplifier']">
+            <option value="">-- opcionális --</option>
+            @for (product of catalog['bassAmplifiers']; track (product?.id ?? product?.ID)) {
+              <option [ngValue]="product?.id ?? product?.ID">{{ productLabel(product) }}</option>
+            }
+          </select>
+        </label>
+      </div>
+
+      <div class="ht-simple-panel">
+        <div class="ht-simple-panel-title">Hangfalak</div>
+
+        @if (!layout) {
+          <div class="ht-simple-inline-state">Valassz layoutot, es utana megjelennek a slotok.</div>
+        } @else {
+          <div class="ht-simple-fields">
+            @for (field of roleFields; track field.key) {
+              <label class="ht-simple-field">
+                <span>{{ field.label }}</span>
+                <select [(ngModel)]="form[field.key]">
+                  <option value="">-- valassz eszkozt --</option>
+                  @for (product of productOptions(field); track (product?.id ?? product?.ID)) {
+                    <option [ngValue]="product?.id ?? product?.ID">{{ productLabel(product) }}</option>
+                  }
+                </select>
+              </label>
+            }
+          </div>
+        }
+      </div>
+    </div>
+
+    <div class="ht-simple-footer">
+      @if (error) {
+        <div class="ht-simple-message error">{{ error }}</div>
+      }
+
+      @if (success) {
+        <div class="ht-simple-message success">{{ success }}</div>
+      }
+
+      <button
+        class="ht-simple-save"
+        type="button"
+        [disabled]="saving || loading"
+        (click)="save()">
+        {{ saving ? 'Mentes...' : 'Mentés' }}
+      </button>
+    </div>
+  }
+</div>

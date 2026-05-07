@@ -30,6 +30,9 @@ import { PcBuilderPanelComponent } from '../setup-panel/pc-builder/pc-builder-pa
 import { CarBuilderPanelComponent } from '../setup-panel/car-builder/car-builder-panel.component';
 import { InstrumentBuilderPanelComponent } from '../setup-panel/instrument-builder/instrument-builder-panel.component';
 import { NetworkBuilderPanelComponent } from '../setup-panel/network-builder/network-builder-panel.component';
+import { AllBuilderPanelComponent } from '../setup-panel/all-builder/all-builder-panel.component';
+import { HomeTheaterBuilderComponent } from '../setup-panel/home-theater-builder/ht-builder/home-theater-builder.component';
+import { HomeTheaterSimpleBuilderComponent } from '../setup-panel/home-theater-simple-builder/home-theater-simple-builder.component';
 
 type PairingStage = 'NONE' | 'PICK_SOURCE' | 'PICK_TARGET_SETUP' | 'PICK_TARGET_ITEM';
 
@@ -53,7 +56,10 @@ type PairingStage = 'NONE' | 'PICK_SOURCE' | 'PICK_TARGET_SETUP' | 'PICK_TARGET_
     PcBuilderPanelComponent,
     CarBuilderPanelComponent,
     InstrumentBuilderPanelComponent,
-    NetworkBuilderPanelComponent
+    NetworkBuilderPanelComponent,
+    AllBuilderPanelComponent,
+    HomeTheaterBuilderComponent,
+    HomeTheaterSimpleBuilderComponent
   ],
   templateUrl: './setup-roomlist.component.html',
   styleUrls: ['./setup-roomlist.component.css']
@@ -638,7 +644,7 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit, OnChanges 
 
     // Mobile route uses the "builder" panels (selection + add flows),
     // so we don't need to locate an existing child item first.
-    if (this.fixedLayout === 'mobile') {
+    if (this.fixedLayout === 'mobile' || type === 'home_theater' || type === 'other') {
       this.hierarchyBuilderLoading = false;
       return;
     }
@@ -1440,7 +1446,28 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit, OnChanges 
       this.selectedPcPartItem = null;
       this.selectedHtItem = null;
       this.selectedInstrumentItem = null;
+      // Child items from get-children often don't carry the selected part IDs
+      // (processor_id, videocard_id, etc.). Fetch the enriched PC row so the
+      // details panel can display the actual chosen parts.
       this.selectedPcItem = item;
+
+      const roomId = Number(this.getSetupId(this.viewingSetup) ?? 0) || null;
+      const pcId = Number(item?.id ?? item?.ID ?? 0) || null;
+      if (roomId && pcId) {
+        this.http.get<any>(`/api/setup/${roomId}/get-pcbuilds`, { withCredentials: true }).subscribe({
+          next: (res) => {
+            const list = Array.isArray(res?.pcs) ? res.pcs : Array.isArray(res) ? res : [];
+            const found = list.find((pc: any) => Number(pc?.id ?? pc?.ID ?? 0) === pcId);
+            if (found) {
+              // Keep the original display position fields from the workspace item if needed.
+              this.selectedPcItem = { ...item, ...found };
+            }
+          },
+          error: (err) => {
+            console.error('❌ get-pcbuilds hiba:', err);
+          }
+        });
+      }
       return;
     }
 
@@ -1456,6 +1483,66 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit, OnChanges 
       this.selectedPcItem = null;
       this.selectedHtItem = null;
       this.selectedPcPartItem = item;
+      return;
+    }
+
+    // Home theater devices should open the draggable HT details panel (like instruments),
+    // not the generic ProductDetails overlay (many HT rows have product_id too).
+    if (
+      setupType.includes('home_theater') ||
+      setupType === 'ht' ||
+      category.includes('home_theater') ||
+      category.includes('audio_processor') ||
+      category.includes('front_speaker') ||
+      category.includes('subwoofer') ||
+      category.includes('center_speaker') ||
+      category.includes('side_speaker') ||
+      category.includes('back_speaker') ||
+      category.includes('ceiling_speaker') ||
+      category.includes('floor_speaker') ||
+      category.includes('receiver') ||
+      category.includes('reciever') ||
+      category.includes('receivers') ||
+      category.includes('recievers')
+    ) {
+      this.selectedProduct = null;
+      this.selectedCarItem = null;
+      this.selectedPcItem = null;
+      this.selectedPcPartItem = null;
+      this.selectedInstrumentItem = null;
+      this.selectedHtItem = item;
+      return;
+    }
+
+    // Generic product overlay (fallback) - must be after HT/PC/Car/Instrument routing.
+    if (setupType === 'product' || category === 'product' || item?.product_id) {
+      const table = (item?.category === 'product' || !item?.category) ? (item?.source_table || 'products') : item?.category;
+      const id = item?.product_id || item?.device_id || item?.id;
+
+      if (!id) {
+        console.error('❌ Hiányzó ID product overlay megnyitáshoz:', item);
+        return;
+      }
+
+      this.selectedCarItem = null;
+      this.selectedPcItem = null;
+      this.selectedPcPartItem = null;
+      this.selectedHtItem = null;
+      this.selectedInstrumentItem = null;
+      this.selectedProduct = {
+        id,
+        table,
+        table_name: table,
+        manufacturer: item?.manufacturer ?? '',
+        model: item?.display_name ?? item?.name ?? item?.model ?? 'Eszköz',
+        data: item?.product_data || {
+          id,
+          table,
+          table_name: table,
+          manufacturer: item?.manufacturer ?? '',
+          model: item?.display_name ?? item?.name ?? item?.model ?? 'Eszköz'
+        }
+      };
       return;
     }
 
@@ -1815,7 +1902,7 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit, OnChanges 
       }
 
       if (type === 'home_theater') {
-        this.openEmptyWindowForCategory('Házimozi', this.viewingSetup);
+        this.workspaceComp?.openAddDeviceWindow(this.viewingSetup);
         return;
       }
 
@@ -1831,6 +1918,11 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit, OnChanges 
 
       if (type === 'network') {
         this.workspaceComp?.openNetworkBuilderWindow(this.viewingSetup);
+        return;
+      }
+
+      if (type === 'other') {
+        this.workspaceComp?.openAllBuilderWindow(this.viewingSetup);
         return;
       }
 
@@ -1944,9 +2036,7 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit, OnChanges 
     if (!item) return [];
 
     const rows = [
-      { label: 'Gyarto', value: item?.manufacturer || item?.Manufacturer || item?.brand || '' },
-      { label: 'Modell', value: item?.model || item?.Model || item?.product_name || '' },
-      { label: 'Ar', value: item?.price ?? item?.Price ?? '' }
+      { label: 'Modell', value: item?.model || item?.Model || item?.product_name || '' }
     ];
 
     return rows

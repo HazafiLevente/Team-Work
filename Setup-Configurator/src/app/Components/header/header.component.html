@@ -79,8 +79,8 @@
         <div class="menu-item" [routerLink]="['/user/profile', auth.formatNameForUrl(user.fullname || user.username)]">👤 Profile</div>
         <div class="menu-item" routerLink="/user/plan">⭐ Plan</div>
         <div class="menu-item" routerLink="/user/setup">🧰 My Setup</div>
-        <div class="menu-item" routerLink="/user/messages">Messages</div>
-        <div class="menu-item" routerLink="/user/settings">Settings</div>
+        <div class="menu-item" routerLink="/user/messages">💬 Messages</div>
+        <div class="menu-item" routerLink="/user/settings">⚙️ Settings</div>
 
         <div id="rank" role="button" tabindex="0" title="Ranglista megnyitasa" (click)="openLeaderboard($event)" (keydown.enter)="openLeaderboard($event)" (keydown.space)="openLeaderboard($event)">
           <app-rank-panel [embedded]="true"></app-rank-panel>

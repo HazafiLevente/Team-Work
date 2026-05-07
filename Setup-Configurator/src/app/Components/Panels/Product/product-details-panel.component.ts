@@ -7,10 +7,10 @@ import {
   OnDestroy,
   Output
 } from '@angular/core';
-import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { Subscription } from 'rxjs';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 
 import { Product } from '../../../Models/Product/product.model';
 import { ProductService } from '../../Services/Home/ProductParts/product/product.service';
@@ -46,6 +46,7 @@ export class ProductDetailsPanelComponent implements OnChanges, OnDestroy {
   savingTargetId: number | null = null;
   noteName = '';
   creatingNote = false;
+  isWidePage = true;
 
   detailsKeys: string[] = [];
   trackKey = (_: number, k: string) => k;
@@ -58,10 +59,12 @@ export class ProductDetailsPanelComponent implements OnChanges, OnDestroy {
 
   constructor(
     private productService: ProductService,
-    private router: Router,
     private http: HttpClient,
-    private setupNote: SetupNoteService
-  ) {}
+    private setupNote: SetupNoteService,
+    private router: Router
+  ) {
+    this.isWidePage = true;
+  }
 
   ngOnChanges(): void {
     const table = this.getTable(this.product);
@@ -85,6 +88,16 @@ export class ProductDetailsPanelComponent implements OnChanges, OnDestroy {
   close() {
     this.unlockScroll();
     this.closed.emit();
+  }
+
+  get isOtherProduct(): boolean {
+    const table = this.getTable(this.product);
+    return table === 'products';
+  }
+
+  shouldShowFooter(): boolean {
+    if (this.loading || !this.details) return false;
+    return true;
   }
 
   onMore() {

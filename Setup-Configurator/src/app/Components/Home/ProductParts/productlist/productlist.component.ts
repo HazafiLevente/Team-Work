@@ -178,11 +178,17 @@ export class ProductlistComponent implements OnInit, OnDestroy {
     return needles.some(needle => hay.includes(this.norm(needle)));
   }
 
+  private equalsAny(value: any, needles: string[]): boolean {
+    const hay = this.norm(value);
+    if (!hay) return false;
+    return needles.some(needle => hay === this.norm(needle));
+  }
+
   private isCarProduct(p: AnyProduct): boolean {
     return (
-      this.containsAny(p.category, ['car']) ||
-      this.containsAny(p.type, ['car']) ||
-      this.containsAny(this.getTable(p), [
+      this.equalsAny(p.category, ['car']) ||
+      this.equalsAny(p.type, ['car']) ||
+      this.equalsAny(this.getTable(p), [
         'car',
         'cabrio_cars',
         'coupe_cars',

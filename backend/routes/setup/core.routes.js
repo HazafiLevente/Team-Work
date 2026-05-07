@@ -11,6 +11,8 @@ router.post("/lists/:listId/setups", ctrl.addSetupToList);
 router.delete("/lists/:listId/setups/:setupId", ctrl.removeSetupFromList);
 router.get("/", ctrl.list);
 router.patch("/:id/update-setup", ctrl.update);
+router.post("/:id/add-product", ctrl.allProductAdd);
+router.get("/device-link/:id", ctrl.getDeviceLink);
 router.delete("/:id/remove-setup", ctrl.remove);
 router.patch("/rooms/:setupId/update-position", ctrl.upsertRoomPosition);
 

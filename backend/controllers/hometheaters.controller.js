@@ -8,10 +8,10 @@ const { listProducts, clampLimit } = require("../services/products/productCatalo
 
 exports.getHtCatalog = async (req, res) => {
     try {
-        const allItems = await listProducts({ limit: 5000 });
-        const items = (Array.isArray(allItems) ? allItems : []).filter(
-            (item) => String(item?.type || "").trim().toLowerCase() === "ht"
-        );
+        // NOTE: productCatalog.service derives "type" from EAV properties.type (e.g. receiver/front_speaker),
+        // so filtering for type === "ht" would incorrectly return an empty list.
+        // Use the shared category alias matching instead.
+        const items = await listProducts({ limit: 5000, category: "ht" });
 
         const catalog = {
             reciever: [],

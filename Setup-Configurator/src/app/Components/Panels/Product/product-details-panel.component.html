@@ -1,9 +1,8 @@
 <div class="overlay" (click)="close()"></div>
 
 <div class="panel" (click)="$event.stopPropagation()">
-  <button class="x" type="button" (click)="close()" aria-label="Bezaras">X</button>
-
   <div class="panel-header">
+    <button class="x" type="button" (click)="close()" aria-label="Bezaras" title="Bezaras">×</button>
     <div class="title">
       <div class="model">{{ displayHeading }}</div>
     </div>
@@ -30,7 +29,7 @@
     </div>
   </div>
 
-  <div class="panel-footer" *ngIf="!loading && details">
+  <div class="panel-footer" *ngIf="shouldShowFooter()">
     <button type="button" class="btn secondary" (click)="onMore()">Tobb</button>
     <button type="button" class="btn primary icon" (click)="onPlus()">+</button>
   </div>

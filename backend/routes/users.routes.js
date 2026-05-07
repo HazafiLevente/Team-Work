@@ -63,6 +63,51 @@ function extractPrice(item) {
         ?? null;
 }
 
+function parsePriceToNumber(raw) {
+    if (raw === null || raw === undefined || raw === "") return 0;
+    if (typeof raw === "number") return Number.isFinite(raw) ? Math.round(raw) : 0;
+
+    const nums = String(raw)
+        .replace(/\u00a0/g, " ")
+        .match(/\d+(?:[.,]\d+)?/g);
+
+    if (!nums || nums.length === 0) return 0;
+
+    const parsed = nums
+        .map((x) => Number(String(x).replace(",", ".")))
+        .filter((n) => Number.isFinite(n));
+
+    if (!parsed.length) return 0;
+    if (parsed.length === 1) return Math.round(parsed[0]);
+
+    return Math.round((Math.min(...parsed) + Math.max(...parsed)) / 2);
+}
+
+async function buildEavIndexForProducts(productIds) {
+    const ids = [...new Set((productIds || []).map((x) => Number(x)).filter(Boolean))];
+    if (!ids.length) return new Map();
+
+    const { data: rows, error } = await supabase
+        .from("values")
+        .select(`products_id, value, properties:properties_id (id, property, type)`)
+        .in("products_id", ids);
+
+    if (error) {
+        console.error("users.routes: EAV load error:", error.message);
+        return new Map();
+    }
+
+    const index = new Map(); // productId -> {propName: value}
+    for (const row of rows || []) {
+        const pid = Number(row?.products_id);
+        const propName = String(row?.properties?.property || "").trim();
+        if (!pid || !propName) continue;
+        if (!index.has(pid)) index.set(pid, {});
+        index.get(pid)[propName] = row?.value ?? null;
+    }
+    return index;
+}
+
 
 // --- DATA ENRICHMENT SERVICES ---
 
@@ -73,7 +118,13 @@ function extractPrice(item) {
 async function enrichSetupsWithDevices(setups) {
     if (!setups || setups.length === 0) return [];
 
-    const setupIds = setups.map(s => s.id);
+    const setupIds = (setups || [])
+        .map((s) => Number(s?.id ?? s?.ID ?? s?.setup_id ?? s?.setupId ?? 0))
+        .filter((id) => Number.isFinite(id) && id > 0);
+
+    if (!setupIds.length) {
+        return (setups || []).map((setup) => ({ ...setup, devices: [], totalPrice: 0 }));
+    }
 
 
     const { data: devices, error: devicesError } = await supabase
@@ -81,56 +132,57 @@ async function enrichSetupsWithDevices(setups) {
         .select("*")
         .in("room_id", setupIds);
 
-    if (devicesError) return setups;
+    if (devicesError) {
+        console.error("users.routes: failed to load child setups:", devicesError.message || devicesError);
+        return setups;
+    }
 
     const childSetupIds = devices.map(d => d.id);
     
 
     const { data: deviceConnections, error: connError } = await supabase
         .from("setup_devices")
-        .select("setup_id, device_id, source_table")
+        // NOTE: not all schemas have `source_table` column here (it's not needed for EAV-based enrichment).
+        .select("setup_id, device_id")
         .in("setup_id", childSetupIds);
 
-    if (connError) return setups;
-
-
-    const tableToIds = {};
-    deviceConnections.forEach(conn => {
-        const table = conn.source_table || "products";
-        if (!tableToIds[table]) tableToIds[table] = [];
-        tableToIds[table].push(conn.device_id);
-    });
-
-
-    const productDataMap = new Map();
-    for (const table of Object.keys(tableToIds)) {
-        const ids = [...new Set(tableToIds[table])];
-        const { data: products } = await supabase
-            .from(table)
-            .select("*")
-            .in("id", ids);
-        
-        if (products) {
-            products.forEach(p => productDataMap.set(`${table}:${p.id}`, p));
-        }
+    if (connError) {
+        console.error("users.routes: failed to load setup_devices:", connError.message || connError);
+        return setups;
     }
+
+
+    const productIds = [...new Set((deviceConnections || []).map((c) => Number(c?.device_id)).filter(Boolean))];
+    const eavIndex = await buildEavIndexForProducts(productIds);
 
 
     return setups.map(setup => {
         const setupDevices = devices.filter(d => d.room_id === setup.id);
         const enrichedDevices = setupDevices.map(d => {
             const conn = deviceConnections.find(c => c.setup_id === d.id);
-            let product = null;
-            if (conn) {
-                product = productDataMap.get(`${conn.source_table || "products"}:${conn.device_id}`);
-            }
+            const productId = Number(conn?.device_id);
+            const valueMap = productId ? (eavIndex.get(productId) || {}) : {};
+            const merged = {
+                id: productId || null,
+                name: d.name,
+                type: d.type,
+                category: d.category,
+                ...valueMap,
+                data: valueMap
+            };
 
             return {
                 id: d.id,
                 name: d.name,
                 type: d.type,
-                price: product ? extractPrice(product) : 0,
-                manufacturer: product?.manufacturer || product?.Manufacturer || ""
+                price: productId ? parsePriceToNumber(extractPrice(merged)) : 0,
+                manufacturer: String(
+                    valueMap?.manufacturer ??
+                    valueMap?.Manufacturer ??
+                    valueMap?.brand ??
+                    valueMap?.Brand ??
+                    ""
+                ).trim()
             };
         });
 

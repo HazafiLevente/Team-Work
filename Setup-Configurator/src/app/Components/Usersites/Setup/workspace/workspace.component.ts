@@ -31,9 +31,11 @@ import { AddDeviceWindowComponent } from './setup-windows/add-device-window/add-
 import {
   HomeTheaterBuilderComponent
 } from '../setup-panel/home-theater-builder/ht-builder/home-theater-builder.component';
+import { HomeTheaterSimpleBuilderComponent } from '../setup-panel/home-theater-simple-builder/home-theater-simple-builder.component';
 import { CarBuilderPanelComponent } from '../setup-panel/car-builder/car-builder-panel.component';
 import { InstrumentBuilderPanelComponent } from '../setup-panel/instrument-builder/instrument-builder-panel.component';
 import { PcBuilderPanelComponent } from '../setup-panel/pc-builder/pc-builder-panel.component';
+import { AllBuilderPanelComponent } from '../setup-panel/all-builder/all-builder-panel.component';
 import { NetworkBuilderPanelComponent } from '../setup-panel/network-builder/network-builder-panel.component';
 
 
@@ -75,9 +77,11 @@ export type WorkspaceWindow = {
     ContextMenuCategoryComponent,
     DotGridComponent,
     HomeTheaterBuilderComponent,
+    HomeTheaterSimpleBuilderComponent,
     CarBuilderPanelComponent,
     InstrumentBuilderPanelComponent,
     PcBuilderPanelComponent,
+    AllBuilderPanelComponent,
     NetworkBuilderPanelComponent,
   ]
 })
@@ -97,6 +101,7 @@ export class WorkspaceComponent {
   @Input() globalRoomConnections: any[] = [];
   @Input() viewingSetup: any = null;
   @Input() hideDock = false;
+  @Input() fixedLayout: 'desktop' | 'mobile' | null = null;
   @Input() loading = false;
   @Input() loadingItems = false;
 
@@ -326,6 +331,20 @@ export class WorkspaceComponent {
 
     if (this.ctxSetup && (normalized === 'hálózat' || normalized === 'halozat' || normalized === 'network' || normalized === 'modem' || normalized === 'router' || normalized === 'switch')) {
       this.openNetworkBuilderWindow(this.ctxSetup);
+      this.ctxCategoryOpen = false;
+      this.ctxSetup = null;
+      return;
+    }
+
+    if (this.ctxSetup && (normalized === 'házimozi' || normalized === 'hazimozi' || normalized === 'home_theater' || normalized === 'home theater')) {
+      this.openAddDeviceWindow(this.ctxSetup);
+      this.ctxCategoryOpen = false;
+      this.ctxSetup = null;
+      return;
+    }
+
+    if (this.ctxSetup && (normalized === 'egyéb' || normalized === 'egyeb' || normalized === 'other')) {
+      this.openAllBuilderWindow(this.ctxSetup);
       this.ctxCategoryOpen = false;
       this.ctxSetup = null;
       return;
@@ -886,6 +905,34 @@ export class WorkspaceComponent {
     this.windows = [...this.windows, newWindow];
   }
 
+  openAllBuilderWindow(setup: any): void {
+    const setupId = setup?.id ?? setup?.setup_id ?? setup?.setupId ?? Date.now();
+    const winId = 'all_builder_' + setupId;
+
+    const existing = this.windows.find(w => w.id === winId);
+    if (existing) {
+      this.focusWindow(winId);
+      return;
+    }
+
+    const newWindow: WorkspaceWindow = {
+      id: winId,
+      kind: 'empty',
+      title: 'Összes termék',
+      payload: { setup },
+      instanceNo: this.windows.length + 1,
+      x: 180,
+      y: 110,
+      width: 900,
+      zIndex: ++this.nextZIndex,
+      minimized: false,
+      maximized: false
+    };
+
+    this.closeContextMenu();
+    this.windows = [...this.windows, newWindow];
+  }
+
   openNetworkBuilderWindow(setup: any): void {
     const setupId = setup?.id ?? setup?.setup_id ?? setup?.setupId ?? Date.now();
     const winId = 'network_builder_' + setupId;
@@ -1229,6 +1276,9 @@ export class WorkspaceComponent {
       this.openEmptyWindow('Halozat', this.viewingSetup, extraPayload);
       return;
     }
+
+    // Default to All Builder for everything else (including "Egyéb")
+    this.openEmptyWindow('Összes termék', this.viewingSetup, extraPayload);
   }
 
   private openHtBuilderWindow(item: any): void {

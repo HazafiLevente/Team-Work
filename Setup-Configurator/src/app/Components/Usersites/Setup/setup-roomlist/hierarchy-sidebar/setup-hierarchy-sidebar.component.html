@@ -1,16 +1,18 @@
 <div class="hierarchy-sidebar">
   <div class="property-strip vertical">
     <div class="property-strip-toggle">
-      <label class="hierarchy-toggle" [class.hierarchy-active]="hierarchyMode">
-        <input
-          type="checkbox"
-          class="hierarchy-toggle-input"
-          [checked]="hierarchyMode"
-          (change)="onModeChange($event)" />
+      @if (fixedLayout !== 'mobile') {
+        <label class="hierarchy-toggle" [class.hierarchy-active]="hierarchyMode">
+          <input
+            type="checkbox"
+            class="hierarchy-toggle-input"
+            [checked]="hierarchyMode"
+            (change)="onModeChange($event)" />
 
-        <span class="hierarchy-toggle-track"></span>
-        <span class="hierarchy-toggle-thumb"></span>
-      </label>
+          <span class="hierarchy-toggle-track"></span>
+          <span class="hierarchy-toggle-thumb"></span>
+        </label>
+      }
 
       <div class="property-strip-copy">
         <div class="property-strip-title">Tulajdonsag Sav</div>

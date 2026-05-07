@@ -10,6 +10,7 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
 })
 export class SetupHierarchySidebarComponent {
   @Input() hierarchyMode = false;
+  @Input() fixedLayout: 'desktop' | 'mobile' | null = null;
   @Input() rootTreeExpanded = true;
   @Input() userSetups: any[] = [];
   @Input() hierarchyRootCtxOpen = false;
