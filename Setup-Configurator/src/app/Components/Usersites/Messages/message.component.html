@@ -247,50 +247,6 @@
 
         <div #bottom></div>
       </div>
-
-      <aside class="product-side-panel" *ngIf="mode === 'ai'">
-        <div class="product-side-empty" *ngIf="!selectedAiResponseProducts.length">
-          Kattints egy AI valaszra, es itt megjelennek az abban szereplo eszkozok.
-        </div>
-
-        <div class="product-side-card" *ngIf="selectedAiResponseProducts.length">
-          <button class="product-side-close" type="button" (click)="selectedAiResponseProducts = []; selectedAiResponseMessageId = null">×</button>
-
-          <div class="product-side-head">
-            <div class="product-side-label">AI eszkozlista</div>
-            <div class="product-side-title">{{ selectedAiResponseProducts.length }} eszkoz</div>
-            <div class="product-side-sub">Rovid adatok a kijelolt AI valaszbol</div>
-          </div>
-
-          <div class="product-side-list">
-            <div
-              class="product-side-item"
-              *ngFor="let product of selectedAiResponseProducts"
-              (dblclick)="openAiProduct(product)">
-              <div class="product-side-item-head">
-                <div>
-                  <div class="product-side-item-title">{{ aiResponseDisplayName(product) }}</div>
-                  <div class="product-side-item-sub">{{ aiResponseDisplayManufacturer(product) || 'Ismeretlen gyarto' }}</div>
-                </div>
-                <div class="product-side-item-price">{{ aiResponseDisplayPrice(product) }}</div>
-              </div>
-
-              <div class="product-side-mini-specs" *ngIf="aiResponsePreviewKeys(product).length">
-                <div class="product-side-mini-row" *ngFor="let key of aiResponsePreviewKeys(product)">
-                  <span class="product-side-mini-key">{{ key }}</span>
-                  <span class="product-side-mini-value">{{ aiResponsePreview(product)?.[key] }}</span>
-                </div>
-              </div>
-
-              <div class="product-side-actions">
-                <button type="button" class="product-side-more" (click)="openAiResponseProduct($event, product)">
-                  Tobb
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </aside>
     </div>
 
     <div *ngIf="activeSelectionKey" class="chat-input">

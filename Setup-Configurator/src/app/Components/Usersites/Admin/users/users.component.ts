@@ -102,6 +102,36 @@ export class UsersComponent implements OnInit, OnChanges {
     return this.currentUserRole === 'admin+' || this.currentUserRole === 'owner';
   }
 
+  private rank(role: string): number {
+    const rank: Record<string, number> = { user: 0, admin: 1, 'admin+': 2, owner: 3 };
+    return rank[role] ?? 0;
+  }
+
+  canSeeRoleBadge(role: string): boolean {
+    // admin/admin+ should not see roles above themselves
+    if (this.currentUserRole === 'admin' || this.currentUserRole === 'admin+') {
+      return this.rank(role) <= this.rank(this.currentUserRole);
+    }
+    return true;
+  }
+
+  canAssign(role: string): boolean {
+    const me = this.rank(this.currentUserRole);
+    const target = this.rank(role);
+    // Can assign up to own rank (not above)
+    return target <= me;
+  }
+
+  availableRolesForMe(): string[] {
+    const roles = ['user', 'admin', 'admin+', 'owner'];
+    return roles.filter(r => this.canAssign(r));
+  }
+
+  canEditUserRole(targetRole: string): boolean {
+    // Only allow editing when the current admin outranks the target user's CURRENT role
+    return this.rank(this.currentUserRole) > this.rank(targetRole);
+  }
+
 
 
   edit(user: any, field: string) {

@@ -3,6 +3,11 @@ const verifyAdmin = require("../../middlewares/verifyAdmin");
 const { supabase } = require("../../services/supabase");
 const { resolveRole, updateUserEnvRole, isBanned, updateUserBanStatus } = require("../../services/control");
 
+function rank(role) {
+    const map = { user: 0, admin: 1, "admin+": 2, owner: 3 };
+    return map[String(role || "")] ?? 0;
+}
+
 router.get("/users", verifyAdmin, async (req, res) => {
     const { data: users, error: userError } = await supabase
         .from("user[Auth]")
@@ -58,10 +63,21 @@ router.patch("/users/:id", verifyAdmin, async (req, res) => {
             throw authError;
         }
 
-        try {
-            updateUserEnvRole(numId, role);
-        } catch (envErr) {
-            console.error("âťŚ Step 2 (.env role) failed:", envErr);
+        if (role) {
+            const granter = String(req.user?.role || "user");
+            const targetCurrent = resolveRole(numId);
+            const desired = String(role);
+
+            // Can only modify users below you, and only assign up to your own rank
+            if (rank(granter) <= rank(targetCurrent) || rank(desired) > rank(granter)) {
+                return res.status(403).json({ error: "Insufficient role to assign this rank" });
+            }
+
+            try {
+                updateUserEnvRole(numId, desired);
+            } catch (envErr) {
+                console.error("âťŚ Step 2 (.env role) failed:", envErr);
+            }
         }
 
         const { data: existingMore, error: findError } = await supabase

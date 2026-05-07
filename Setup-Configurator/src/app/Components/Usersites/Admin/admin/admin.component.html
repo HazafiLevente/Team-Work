@@ -16,7 +16,7 @@
       👥 Users
     </button>
 
-    <button class="admin-btn" [class.active]="activeSection === 'products'" (click)="openProducts()">📦
+    <button *ngIf="canSeeProducts()" class="admin-btn" [class.active]="activeSection === 'products'" (click)="openProducts()">📦
       Products</button>
 
     <button class="admin-btn" [class.active]="activeSection === 'reports'" (click)="openReports()">
@@ -24,11 +24,11 @@
     </button>
 
 
-    <button class="admin-btn" [class.active]="activeSection === 'logs'" (click)="openLogs()">
+    <button *ngIf="canSeeLogs()" class="admin-btn" [class.active]="activeSection === 'logs'" (click)="openLogs()">
       🧾 Logs
     </button>
 
-    <button class="admin-btn" [class.active]="activeSection === 'system'" (click)="openSystem()">
+    <button *ngIf="canSeeSystem()" class="admin-btn" [class.active]="activeSection === 'system'" (click)="openSystem()">
       ⚙️ System
     </button>
   </div>

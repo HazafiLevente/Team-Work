@@ -1,6 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
+import { AuthService } from '../../../Services/Auth/auth.service';
 import { UsersComponent } from '../users/users.component';
 import { ProductsSiteComponent } from '../product-site/products.site.component';
 import { AdminSystemComponent } from '../system/admin-system.component';
@@ -63,9 +64,16 @@ export class AdminComponent implements OnInit, OnDestroy {
 
   activeSection: 'dashboard' | 'users' | 'products' | 'reports' | 'system' | 'logs' = 'dashboard';
 
-  constructor(private http: HttpClient) { }
+  role: 'admin' | 'admin+' | 'owner' | 'user' | '' = '';
+
+  constructor(private http: HttpClient, private auth: AuthService) { }
 
   ngOnInit() {
+    this.auth.user$.subscribe(u => {
+      this.role = (u?.role as any) || '';
+      this.ensureAllowedSection();
+    });
+
     this.http.get<any>('/api/admin/stats', {
       withCredentials: true
     }).subscribe({
@@ -102,7 +110,26 @@ export class AdminComponent implements OnInit, OnDestroy {
   }
 
 
+  canSeeProducts(): boolean {
+    return this.role === 'admin+' || this.role === 'owner';
+  }
+
+  canSeeSystem(): boolean {
+    return this.role === 'admin+' || this.role === 'owner';
+  }
+
+  canSeeLogs(): boolean {
+    return this.role === 'owner';
+  }
+
+  private ensureAllowedSection() {
+    if (this.activeSection === 'products' && !this.canSeeProducts()) this.activeSection = 'dashboard';
+    if (this.activeSection === 'system' && !this.canSeeSystem()) this.activeSection = 'dashboard';
+    if (this.activeSection === 'logs' && !this.canSeeLogs()) this.activeSection = 'dashboard';
+  }
+
   openProducts() {
+    if (!this.canSeeProducts()) return;
     this.activeSection = 'products';
   }
 
@@ -120,10 +147,12 @@ export class AdminComponent implements OnInit, OnDestroy {
   }
 
   openSystem() {
+    if (!this.canSeeSystem()) return;
     this.activeSection = 'system';
   }
 
   openLogs() {
+    if (!this.canSeeLogs()) return;
     this.activeSection = 'logs';
   }
 

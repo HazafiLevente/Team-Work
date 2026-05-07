@@ -24,12 +24,69 @@
         {{ obj.manufacturer }} {{ obj.model }}
       </h2>
       <span class="pill">
-        {{ product?.table_name }} #{{ obj.id }}
+        {{ typeLabel(obj.type) }} • {{ product?.table_name }} #{{ obj.id }}
       </span>
     </div>
 
     <div class="form-scroll">
       <div class="form-grid">
+
+        <label>
+          Típus
+          <select [ngModel]="obj.type" (ngModelChange)="onTypeChange($event)">
+            <option value="">Válassz...</option>
+            <option *ngFor="let t of types" [value]="t">{{ typeLabel(t) }}</option>
+            <option value="__new__">+ Új típus...</option>
+          </select>
+        </label>
+
+        <label>
+          Gyártó
+          <input type="text" [(ngModel)]="obj.manufacturer" />
+        </label>
+
+        <label>
+          Modell
+          <input type="text" [(ngModel)]="obj.model" />
+        </label>
+
+        <label>
+          Ár (Ft)
+          <input type="number" [(ngModel)]="obj.price" />
+        </label>
+
+        <ng-container *ngIf="creatingType">
+          <div style="grid-column: 1 / -1; display: grid; gap: 12px;">
+            <label>
+              Új típus neve
+              <input type="text" [(ngModel)]="newTypeName" placeholder="pl. cpu_desktop / pc / ..." />
+            </label>
+
+            <div>
+              <div style="font-weight: 600; margin-bottom: 6px;">Property-k</div>
+              <div style="display:flex; gap:8px; align-items:center;">
+                <input type="text" [(ngModel)]="newTypePropsInput" placeholder="pl. socket" />
+                <button type="button" (click)="addNewTypeProp()">+</button>
+              </div>
+
+              <div *ngIf="newTypeProps.length" style="margin-top:10px; display:flex; flex-wrap:wrap; gap:8px;">
+                <button type="button" *ngFor="let p of newTypeProps; let i = index" (click)="removeNewTypeProp(i)">
+                  {{ p }} ✕
+                </button>
+              </div>
+
+              <div style="margin-top:10px;">
+                <button
+                  type="button"
+                  class="save"
+                  (click)="createTypeTemplate()"
+                >
+                  Típus létrehozása
+                </button>
+              </div>
+            </div>
+          </div>
+        </ng-container>
 
         <ng-container *ngFor="let key of editableKeys()">
 

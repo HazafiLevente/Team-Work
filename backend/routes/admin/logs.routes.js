@@ -1,8 +1,8 @@
 const router = require("express").Router();
-const verifyAdmin = require("../../middlewares/verifyAdmin");
+const verifyOwner = require("../../middlewares/verifyOwner");
 const logger = require("../../services/logger");
 
-router.get("/logs", verifyAdmin, (req, res) => {
+router.get("/logs", verifyOwner, (req, res) => {
     const { limit, level, search, since } = req.query;
     const logs = logger.getLogs({
         limit: Number(limit) || 200,
@@ -13,7 +13,7 @@ router.get("/logs", verifyAdmin, (req, res) => {
     res.json({ logs });
 });
 
-router.delete("/logs", verifyAdmin, (req, res) => {
+router.delete("/logs", verifyOwner, (req, res) => {
     logger.clearLogs();
     res.json({ success: true });
 });

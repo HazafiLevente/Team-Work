@@ -22,16 +22,92 @@ db.exec(`
         "id" INTEGER PRIMARY KEY AUTOINCREMENT,
         "active_id" INTEGER NOT NULL,
         "property" TEXT NOT NULL,
-        "values" TEXT,
+        "value" TEXT,
         UNIQUE("active_id","property"),
         FOREIGN KEY("active_id") REFERENCES "active_users"("id") ON DELETE CASCADE
     );
 `);
 
+// Migration: older versions used "values" column name -> rename to "value"
+try {
+    const cols = db.prepare(`PRAGMA table_info("active_users_values")`).all();
+    const hasValues = cols.some(c => c.name === "values");
+    const hasValue = cols.some(c => c.name === "value");
+    if (hasValues && !hasValue) {
+        db.exec(`ALTER TABLE "active_users_values" RENAME COLUMN "values" TO "value"`);
+        console.log("✅ Migrated active_users_values.values -> value");
+    }
+} catch (e) {
+    console.warn("⚠️ active_users_values migration check failed:", e?.message || e);
+}
+
 // Optional Supabase sync (on shutdown)
 let supabaseClient = null;
 let supabaseSchemaChecked = false;
 let supabaseSchemaOk = false;
+
+// Real Supabase table names (with project naming convention)
+const SB_TABLE_ACTIVE_USERS = process.env.SUPABASE_TABLE_ACTIVE_USERS || "active_users[Active]";
+const SB_TABLE_ACTIVE_USERS_VALUES = process.env.SUPABASE_TABLE_ACTIVE_USERS_VALUES || "active_users_values[Active]";
+const SB_TABLE_ACTIVE_USERS_PROPERTIES = process.env.SUPABASE_TABLE_ACTIVE_USERS_PROPERTIES || "active_users_properties[Active]";
+
+// property-name -> property-id cache (resolved against SB_TABLE_ACTIVE_USERS_PROPERTIES)
+const propertyIdCache = new Map();
+
+// Properties we may sync to Supabase. Any name not present in the
+// active_users_properties[Active] table is silently skipped, so adding
+// entries here is safe even if the schema doesn't have them yet.
+const SUPPORTED_REMOTE_PROPERTIES = new Set([
+    // base 8
+    "server_life_time",
+    "first_person_id",
+    "person_longest_time",
+    "person_id",
+    "person_name",
+    "max_count",
+    "avg_count",
+    "min_count",
+    // extras (only synced if the property exists in active_users_properties[Active])
+    "users",
+    "unique",
+    "total_requests",
+    "now_time"
+]);
+
+const propertyMissingWarned = new Set();
+async function resolvePropertyId(sb, name) {
+    if (!SUPPORTED_REMOTE_PROPERTIES.has(name)) return null;
+    if (propertyIdCache.has(name)) return propertyIdCache.get(name);
+
+    try {
+        const sel = await sb
+            .from(SB_TABLE_ACTIVE_USERS_PROPERTIES)
+            .select("id, property")
+            .eq("property", name)
+            .limit(1);
+
+        if (sel?.error) {
+            console.warn(`⚠️ Supabase ${SB_TABLE_ACTIVE_USERS_PROPERTIES} select failed:`, sel.error?.message || sel.error, name);
+            return null;
+        }
+
+        const existingId = sel.data?.[0]?.id;
+        if (existingId) {
+            propertyIdCache.set(name, existingId);
+            return existingId;
+        }
+
+        // Schema is fixed: do not insert new properties. Warn only once per name.
+        if (!propertyMissingWarned.has(name)) {
+            propertyMissingWarned.add(name);
+            console.warn(`ℹ️ Supabase ${SB_TABLE_ACTIVE_USERS_PROPERTIES} missing property (skip):`, name);
+        }
+        return null;
+    } catch (e) {
+        console.warn(`⚠️ Supabase resolveProperty exception:`, e?.message || e, name);
+        return null;
+    }
+}
 
 function getSupabaseForSync() {
     if (supabaseClient) return supabaseClient;
@@ -55,11 +131,10 @@ async function checkSupabaseSchemaAccess() {
     }
 
     try {
-        // This will fail unless the schema is exposed via PostgREST
-        const probe = await sb.schema("Active").from("active_users").select("id").limit(1);
+        const probe = await sb.from(SB_TABLE_ACTIVE_USERS).select("id").limit(1);
         if (probe?.error) {
             supabaseSchemaOk = false;
-            console.warn("⚠️ Supabase Active schema not accessible via API:", probe.error?.message || probe.error);
+            console.warn(`⚠️ Supabase ${SB_TABLE_ACTIVE_USERS} not accessible:`, probe.error?.message || probe.error);
             return false;
         }
         supabaseSchemaOk = true;
@@ -94,15 +169,14 @@ async function syncTodayToSupabase() {
         if (!localRow?.id) return true;
 
         const localValues = db.prepare(`
-            SELECT property, values
+            SELECT "property", "value"
             FROM "active_users_values"
-            WHERE active_id = ?
+            WHERE "active_id" = ?
         `).all(localRow.id);
 
         // Ensure remote day row exists and get its id
         const remoteExisting = await sb
-            .schema("Active")
-            .from("active_users")
+            .from(SB_TABLE_ACTIVE_USERS)
             .select("id, created_at")
             .gte("created_at", from)
             .lt("created_at", to)
@@ -110,7 +184,7 @@ async function syncTodayToSupabase() {
             .limit(1);
 
         if (remoteExisting?.error) {
-            console.warn("⚠️ Supabase active_users select failed:", remoteExisting.error?.message || remoteExisting.error);
+            console.warn(`⚠️ Supabase ${SB_TABLE_ACTIVE_USERS} select failed:`, remoteExisting.error?.message || remoteExisting.error);
             return false;
         }
 
@@ -118,14 +192,13 @@ async function syncTodayToSupabase() {
 
         if (!remoteActiveId) {
             const ins = await sb
-                .schema("Active")
-                .from("active_users")
+                .from(SB_TABLE_ACTIVE_USERS)
                 .insert({ created_at: localRow.created_at })
                 .select("id")
                 .single();
 
             if (ins?.error) {
-                console.warn("⚠️ Supabase active_users insert failed:", ins.error?.message || ins.error);
+                console.warn(`⚠️ Supabase ${SB_TABLE_ACTIVE_USERS} insert failed:`, ins.error?.message || ins.error);
                 return false;
             }
             remoteActiveId = ins.data?.id;
@@ -133,24 +206,44 @@ async function syncTodayToSupabase() {
 
         if (!remoteActiveId) return false;
 
-        // Upsert properties into active_users_values
+        // Upsert properties into active_users_values.
+        // The "property" column is bigint (FK to active_users_properties.id),
+        // so we resolve the property name to its id first.
         for (const v of localValues) {
-            const upd = await sb
-                .schema("Active")
-                .from("active_users_values")
-                .update({ values: v.values })
+            const propertyId = await resolvePropertyId(sb, v.property);
+            if (!propertyId) continue;
+
+            const existing = await sb
+                .from(SB_TABLE_ACTIVE_USERS_VALUES)
+                .select("id")
                 .eq("active_id", remoteActiveId)
-                .eq("property", v.property);
+                .eq("property", propertyId)
+                .limit(1);
 
-            if (!upd?.error) continue;
+            if (existing?.error) {
+                console.warn(`⚠️ Supabase ${SB_TABLE_ACTIVE_USERS_VALUES} select failed:`, existing.error?.message || existing.error, v.property);
+                continue;
+            }
 
-            const ins2 = await sb
-                .schema("Active")
-                .from("active_users_values")
-                .insert({ active_id: remoteActiveId, property: v.property, values: v.values });
+            const existingId = existing.data?.[0]?.id;
 
-            if (ins2?.error) {
-                console.warn("⚠️ Supabase active_users_values insert failed:", ins2.error?.message || ins2.error, v.property);
+            if (existingId) {
+                const upd = await sb
+                    .from(SB_TABLE_ACTIVE_USERS_VALUES)
+                    .update({ value: v.value })
+                    .eq("id", existingId);
+
+                if (upd?.error) {
+                    console.warn(`⚠️ Supabase ${SB_TABLE_ACTIVE_USERS_VALUES} update failed:`, upd.error?.message || upd.error, v.property);
+                }
+            } else {
+                const ins2 = await sb
+                    .from(SB_TABLE_ACTIVE_USERS_VALUES)
+                    .insert({ active_id: remoteActiveId, property: propertyId, value: v.value });
+
+                if (ins2?.error) {
+                    console.warn(`⚠️ Supabase ${SB_TABLE_ACTIVE_USERS_VALUES} insert failed:`, ins2.error?.message || ins2.error, v.property);
+                }
             }
         }
 
@@ -166,6 +259,11 @@ async function syncTodayToSupabase() {
 
 const activeSessions = new Map();
 const leaveTimers = new Map();
+// Per-user daily session aggregates (for person_longest_time)
+// userId -> { username, firstSeen, lastSeen, totalMs }
+const userDailyTotals = new Map();
+let firstPersonIdToday = null;
+const dayStartedAt = Date.now();
 
 
 
@@ -179,6 +277,7 @@ let todayMaxOnline = null;
 let todayMinOnline = null;
 let todayOnlineSum = 0;
 let todayOnlineSamples = 0;
+let todayDayStartedAt = Date.now();
 
 function pad2(n) {
     return String(n).padStart(2, "0");
@@ -257,23 +356,44 @@ async function persistTodaySnapshot() {
         });
     });
 
+    // Compute extended metrics (server_life_time, first_person_id, person_longest_time, person_id, person_name)
+    const serverLifeTimeSec = Math.max(0, Math.round((Date.now() - todayDayStartedAt) / 1000));
+
+    let longestUserId = null;
+    let longestUsername = null;
+    let longestMs = 0;
+    for (const [uid, t] of userDailyTotals.entries()) {
+        if ((t?.totalMs || 0) > longestMs) {
+            longestMs = t.totalMs;
+            longestUserId = uid;
+            longestUsername = t.username || `User#${uid}`;
+        }
+    }
+    const personLongestTimeSec = Math.round(longestMs / 1000);
+
     const rows = [
-        { active_id: todayActiveId, property: "unique", values: String(todaySeenUserIds.size) },
-        { active_id: todayActiveId, property: "total_requests", values: String(todayRequestCount) },
-        { active_id: todayActiveId, property: "users", values: JSON.stringify(userDetails) },
-        { active_id: todayActiveId, property: "max_count", values: String(todayMaxOnline ?? 0) },
-        { active_id: todayActiveId, property: "min_count", values: String(todayMinOnline ?? 0) },
-        { active_id: todayActiveId, property: "avg_count", values: String(Math.round(avgOnline * 100) / 100) }
+        { active_id: todayActiveId, property: "unique", value: String(todaySeenUserIds.size) },
+        { active_id: todayActiveId, property: "total_requests", value: String(todayRequestCount) },
+        { active_id: todayActiveId, property: "users", value: JSON.stringify(userDetails) },
+        { active_id: todayActiveId, property: "max_count", value: String(todayMaxOnline ?? 0) },
+        { active_id: todayActiveId, property: "min_count", value: String(todayMinOnline ?? 0) },
+        { active_id: todayActiveId, property: "avg_count", value: String(Math.round(avgOnline * 100) / 100) },
+        { active_id: todayActiveId, property: "server_life_time", value: String(serverLifeTimeSec) },
+        { active_id: todayActiveId, property: "first_person_id", value: firstPersonIdToday !== null ? String(firstPersonIdToday) : "" },
+        { active_id: todayActiveId, property: "person_longest_time", value: String(personLongestTimeSec) },
+        { active_id: todayActiveId, property: "person_id", value: longestUserId !== null ? String(longestUserId) : "" },
+        { active_id: todayActiveId, property: "person_name", value: longestUsername || "" },
+        { active_id: todayActiveId, property: "now_time", value: new Date().toISOString() }
     ];
 
     try {
         for (const r of rows) {
             db.prepare(`
-                INSERT INTO "active_users_values"(active_id, property, values)
+                INSERT INTO "active_users_values"("active_id", "property", "value")
                 VALUES (?, ?, ?)
-                ON CONFLICT(active_id, property)
-                DO UPDATE SET values=excluded.values
-            `).run(r.active_id, r.property, r.values);
+                ON CONFLICT("active_id", "property")
+                DO UPDATE SET "value" = excluded."value"
+            `).run(r.active_id, r.property, r.value);
         }
         const now = Date.now();
         if (now - persistOkLoggedAt > 60_000) {
@@ -311,6 +431,9 @@ function ensureDayState() {
         todayMinOnline = null;
         todayOnlineSum = 0;
         todayOnlineSamples = 0;
+        userDailyTotals.clear();
+        firstPersonIdToday = null;
+        todayDayStartedAt = Date.now();
     }
 }
 
@@ -356,6 +479,24 @@ function trackMiddleware(req, _res, next) {
                 username
             });
 
+            // Update per-user daily totals (for person_longest_time)
+            const t = userDailyTotals.get(userId) || { username, firstSeen: now, lastSeen: now, totalMs: 0 };
+            t.username = username;
+            if (!wasOnline) {
+                // Restart "online window" - count any previous segment first
+                if (t.lastSeen && t.firstSeen && t.lastSeen >= t.firstSeen) {
+                    t.totalMs += Math.max(0, t.lastSeen - t.firstSeen);
+                }
+                t.firstSeen = now;
+            }
+            t.lastSeen = now;
+            userDailyTotals.set(userId, t);
+
+            // First person of the day
+            if (firstPersonIdToday === null) {
+                firstPersonIdToday = userId;
+            }
+
             // fire-and-forget: one row/day is enough for calendar activity
             // (do not await to avoid slowing down requests)
             void ensureTodayRow();
@@ -364,9 +505,15 @@ function trackMiddleware(req, _res, next) {
             todayRequestCount++;
             scheduleSave();
 
-            // If the user just came online (enter), push a snapshot immediately.
+            // If the user just came online (enter), push a snapshot immediately
+            // and sync to Supabase right away (don't wait for the 5-minute interval).
             if (!wasOnline) {
-                void persistTodaySnapshot();
+                (async () => {
+                    try {
+                        await persistTodaySnapshot();
+                        await syncTodayToSupabase();
+                    } catch { }
+                })();
             }
 
             // Schedule a "leave" snapshot when their online window expires.
@@ -374,14 +521,16 @@ function trackMiddleware(req, _res, next) {
             if (prevTimer) clearTimeout(prevTimer);
 
             const timer = setTimeout(() => {
-                try {
-                    const s = activeSessions.get(userId);
-                    if (!s) return;
-                    if (Date.now() - s.lastSeen >= ACTIVE_WINDOW_MS) {
-                        // mark leave event by persisting latest snapshot
-                        void persistTodaySnapshot();
-                    }
-                } catch { }
+                (async () => {
+                    try {
+                        const s = activeSessions.get(userId);
+                        if (!s) return;
+                        if (Date.now() - s.lastSeen >= ACTIVE_WINDOW_MS) {
+                            await persistTodaySnapshot();
+                            await syncTodayToSupabase();
+                        }
+                    } catch { }
+                })();
             }, ACTIVE_WINDOW_MS + 250);
 
             leaveTimers.set(userId, timer);
@@ -431,12 +580,12 @@ async function getDailyHistory({ days = 90 } = {}) {
         const mapped = daysRows.map(row => {
             const date = String(row.created_at || "").slice(0, 10);
             const values = db.prepare(`
-                SELECT property, values
+                SELECT "property", "value"
                 FROM "active_users_values"
-                WHERE active_id = ?
+                WHERE "active_id" = ?
             `).all(row.id);
 
-            const get = (p) => values.find(v => v?.property === p)?.values;
+            const get = (p) => values.find(v => v?.property === p)?.value;
             const unique = Number(get("unique") || 0) || 0;
             const total_requests = Number(get("total_requests") || 0) || 0;
             const max_count = Number(get("max_count") || 0) || 0;
@@ -504,12 +653,12 @@ async function getDayDetails(dateKey) {
         if (!row?.id) return { date: dateKey, unique: 0, total_requests: 0, max_count: 0, min_count: 0, avg_count: 0, users: [] };
 
         const values = db.prepare(`
-            SELECT property, values
+            SELECT "property", "value"
             FROM "active_users_values"
-            WHERE active_id = ?
+            WHERE "active_id" = ?
         `).all(row.id);
 
-        const get = (p) => values.find(v => v?.property === p)?.values;
+        const get = (p) => values.find(v => v?.property === p)?.value;
 
         const unique = Number(get("unique") || 0) || 0;
         const total_requests = Number(get("total_requests") || 0) || 0;
@@ -538,17 +687,19 @@ function startPeriodicPersist() {
     intervalStarted = true;
 
     // small delay after boot
-    setTimeout(() => {
+    setTimeout(async () => {
         try {
             ensureDayState();
-            void persistTodaySnapshot();
+            await persistTodaySnapshot();
+            await syncTodayToSupabase();
         } catch { }
     }, 10_000);
 
-    setInterval(() => {
+    setInterval(async () => {
         try {
             ensureDayState();
-            void persistTodaySnapshot();
+            await persistTodaySnapshot();
+            await syncTodayToSupabase();
         } catch { }
     }, 5 * 60 * 1000);
 }

@@ -16,7 +16,7 @@
           <div class="user-meta">
             <span class="muted smaller date-label">{{ u.created_at | date:'yyyy.MM.dd' }}</span>
             <span class="badge ban-badge" *ngIf="u.banned">BANNED</span>
-            <span class="badge">{{ u.role }}</span>
+            <span class="badge" *ngIf="canSeeRoleBadge(u.role)">{{ u.role }}</span>
             <span class="chevron">▼</span>
           </div>
         </div>
@@ -31,12 +31,14 @@
             </div>
             <div class="field">
               <label>Role</label>
-              <select [(ngModel)]="u.role">
-                <option value="user">user</option>
-                <option value="admin">admin</option>
-                <option value="admin+">admin+</option>
-                <option value="owner">owner</option>
-              </select>
+              <ng-container *ngIf="canEditUserRole(u.role); else roleLocked">
+                <select [(ngModel)]="u.role">
+                  <option *ngFor="let r of availableRolesForMe()" [value]="r">{{ r }}</option>
+                </select>
+              </ng-container>
+              <ng-template #roleLocked>
+                <input [ngModel]="u.role" disabled>
+              </ng-template>
             </div>
             <div class="field">
               <label>Város</label>

@@ -1,8 +1,8 @@
 const router = require("express").Router();
-const verifyAdmin = require("../../middlewares/verifyAdmin");
+const verifyAdminPlus = require("../../middlewares/verifyAdminPlus");
 const { listNotifications, createNotification, deleteNotification, normalizeCategory } = require("../../services/notificationStore");
 
-router.get("/system-messages", verifyAdmin, async (req, res) => {
+router.get("/system-messages", verifyAdminPlus, async (req, res) => {
     try {
         const category = req.query.category ? normalizeCategory(req.query.category) : undefined;
         const messages = await listNotifications({ category });
@@ -13,7 +13,7 @@ router.get("/system-messages", verifyAdmin, async (req, res) => {
     }
 });
 
-router.post("/system-message", verifyAdmin, async (req, res) => {
+router.post("/system-message", verifyAdminPlus, async (req, res) => {
     try {
         const { title, message, target, category } = req.body;
 
@@ -37,7 +37,7 @@ router.post("/system-message", verifyAdmin, async (req, res) => {
     }
 });
 
-router.delete("/system-message/:id", verifyAdmin, async (req, res) => {
+router.delete("/system-message/:id", verifyAdminPlus, async (req, res) => {
     try {
         const { id } = req.params;
         await deleteNotification(id);

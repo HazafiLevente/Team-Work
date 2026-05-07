@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { ProductListComponent } from '../product-list/product.list.component';
 import { ProductComponent } from '../product/product.component';
+import { huTypeLabel } from '../product-type.labels';
 
 export interface AdminProduct {
   id: number;
@@ -10,8 +11,12 @@ export interface AdminProduct {
   model: string;
   price?: number;
   table_name: string;
+  type?: string;
+  type_label?: string;
   [key: string]: any;
 }
+
+type TypeTemplate = { type: string; properties: string[] };
 
 @Component({
   selector: 'app-admin-products',
@@ -26,10 +31,29 @@ export class ProductsSiteComponent implements OnInit {
   products: AdminProduct[] = [];
   selected: AdminProduct | null = null;
 
+  types: string[] = [];
+  templates: Record<string, string[]> = {};
+
   constructor(private http: HttpClient) { }
 
   ngOnInit(): void {
+    this.loadTypeMeta();
     this.loadProducts();
+  }
+
+  loadTypeMeta() {
+    this.http.get<any>('/api/admin/products/types', { withCredentials: true }).subscribe({
+      next: (res) => {
+        const templatesArr: TypeTemplate[] = res?.templates || [];
+        this.types = (res?.types || []).slice();
+        this.templates = {};
+        for (const t of templatesArr) this.templates[t.type] = (t.properties || []).slice();
+      },
+      error: () => {
+        this.types = [];
+        this.templates = {};
+      }
+    });
   }
 
   loadProducts() {
@@ -40,7 +64,10 @@ export class ProductsSiteComponent implements OnInit {
         withCredentials: true
       }
     ).subscribe(res => {
-      this.products = res.products || [];
+      this.products = (res.products || []).map((p: any) => ({
+        ...p,
+        type_label: huTypeLabel(p?.type),
+      }));
       this.selected = null;
     });
   }
@@ -82,16 +109,17 @@ export class ProductsSiteComponent implements OnInit {
   }
 
   onNewProduct() {
-    const table = prompt("Melyik táblába szánod? (pl. routers, switches, motherboard)");
-    if (!table) return;
-
-
     this.selected = {
       id: 0,
-      table_name: table,
-      manufacturer: '',
-      model: '',
-      price: 0
+      table_name: 'products',
+      name: '',
+      type: '',
+      category: '',
+      data: {
+        name: '',
+        type: '',
+        category: ''
+      }
     } as any;
   }
 
@@ -112,6 +140,7 @@ export class ProductsSiteComponent implements OnInit {
       next: (res) => {
         alert("Sikeres mentés!");
         if (isNew && res.id) product.id = res.id;
+        this.loadTypeMeta();
         this.loadProducts();
       },
       error: (err) => {

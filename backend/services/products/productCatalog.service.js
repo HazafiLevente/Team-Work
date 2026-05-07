@@ -81,31 +81,61 @@ async function fetchPagedRows(queryBuilderFactory, pageSize) {
  */
 function buildValuesIndex(valueRows) {
     const index = new Map();
+    const typeIndex = new Map(); // productId -> most frequent properties.type
+    const typeCounts = new Map(); // productId -> Map(type -> count)
+    const ignoreProps = new Set(["manufacturer", "model"]);
+
     for (const row of valueRows) {
         const productId = row?.products_id;
         const propertyName = row?.properties?.property;
+        const propertyType = row?.properties?.type;
 
         if (productId == null || !propertyName) continue;
         if (!index.has(String(productId))) index.set(String(productId), {});
 
         const target = index.get(String(productId));
         target[String(propertyName).trim()] = row?.value ?? null;
+
+        const pn = String(propertyName).trim().toLowerCase();
+        const pt = String(propertyType ?? "").trim();
+        if (pn && !ignoreProps.has(pn) && pt) {
+            const pid = String(productId);
+            if (!typeCounts.has(pid)) typeCounts.set(pid, new Map());
+            const m = typeCounts.get(pid);
+            m.set(pt, (m.get(pt) || 0) + 1);
+        }
     }
-    return index;
+
+    for (const [pid, counts] of typeCounts.entries()) {
+        let best = null;
+        let bestCount = -1;
+        for (const [t, c] of counts.entries()) {
+            if (c > bestCount) {
+                best = t;
+                bestCount = c;
+            }
+        }
+        if (best) typeIndex.set(pid, best);
+    }
+
+    return { valuesIndex: index, typeIndex };
 }
 
 /**
  * Combines base product data with its mapped attributes and normalizes the output.
  */
 function decorateProduct(baseRow, valueMap = {}) {
-    const mappedTable = PRODUCT_TYPE_TO_TABLE[norm(baseRow?.type)] ?? "products";
+    // We treat the product "type" as coming from EAV properties.type, not products.type.
+    const inferredType = valueMap?.__inferred_type ?? null;
+    const effectiveType = inferredType || null;
+    const mappedTable = PRODUCT_TYPE_TO_TABLE[norm(effectiveType)] ?? "products";
 
     return normalizeProductRow(
         {
             ...valueMap,
             id: baseRow?.id ?? null,
             name: baseRow?.name ?? "",
-            type: baseRow?.type ?? null,
+            type: effectiveType,
             category: baseRow?.category ?? valueMap?.category ?? null,
             source_table: mappedTable,
             table_name: mappedTable,
@@ -135,8 +165,13 @@ async function buildCatalogSnapshot() {
         ),
     ]);
 
-    const valuesIndex = buildValuesIndex(valueRows);
-    const rows = productRows.map((row) => decorateProduct(row, valuesIndex.get(String(row.id)) || {}));
+    const { valuesIndex, typeIndex } = buildValuesIndex(valueRows);
+    const rows = productRows.map((row) => {
+        const pid = String(row.id);
+        const valueMap = valuesIndex.get(pid) || {};
+        const inferredType = typeIndex.get(pid) || null;
+        return decorateProduct(row, { ...valueMap, __inferred_type: inferredType });
+    });
 
     const brands = Array.from(
         new Set(
@@ -239,8 +274,8 @@ async function getProductByRoute(tableName, id) {
     const normalizedTable = norm(tableName);
     const allowedTypes = TABLE_NAME_TO_PRODUCT_TYPES[normalizedTable] || null;
 
+    // We do not filter by products.type; types are derived from EAV properties.type.
     let query = supabase.from(unifiedTable).select("id, name, type, category").eq("id", id);
-    if (Array.isArray(allowedTypes) && allowedTypes.length) query = query.in("type", allowedTypes);
 
     const { data, error } = await query.limit(1).maybeSingle();
     if (error) throw error;
@@ -253,8 +288,11 @@ async function getProductByRoute(tableName, id) {
 
     if (valuesError) throw valuesError;
 
-    const valueMap = buildValuesIndex(valueRows || []).get(String(data.id)) || {};
-    return decorateProduct(data, valueMap);
+    const { valuesIndex, typeIndex } = buildValuesIndex(valueRows || []);
+    const pid = String(data.id);
+    const valueMap = valuesIndex.get(pid) || {};
+    const inferredType = typeIndex.get(pid) || null;
+    return decorateProduct(data, { ...valueMap, __inferred_type: inferredType });
 }
 
 function clearCatalogCache() {
