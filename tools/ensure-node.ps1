@@ -7,7 +7,7 @@ $ErrorActionPreference = "Stop"
 $preferredMajor = 20
 $minSupportedMajor = 18
 $maxSupportedMajor = 20
-$requiredVersion = "v20.20.2"
+$requiredVersionPrefix = "v20.20."
 $nodeRoot = Join-Path $ProjectRoot "tools\nodejs"
 $cacheRoot = Join-Path $ProjectRoot "tools\node-cache"
 $installerRoot = Join-Path $ProjectRoot "tools\nodejs-msi"
@@ -88,8 +88,10 @@ function Test-NodeCandidate([string]$NodeExe, [int]$MinMajor = 0, [int]$MaxMajor
         return $null
     }
 
-    if ($requiredVersion -and $version -ne $requiredVersion) {
-        return $null
+    if ($requiredVersionPrefix) {
+        if (-not $version -or -not $version.StartsWith($requiredVersionPrefix, [System.StringComparison]::OrdinalIgnoreCase)) {
+            return $null
+        }
     }
 
     if ($MinMajor -gt 0 -and $MaxMajor -gt 0) {
@@ -142,6 +144,10 @@ function Refresh-ProcessPathFromRegistry {
     }
 }
 
+function Find-RequiredNode {
+    return Find-CompatibleSystemNode -MinMajor $minSupportedMajor -MaxMajor $maxSupportedMajor
+}
+
 function Install-NodeJsFromInternet {
     if ($SkipInstaller) {
         return $false
@@ -156,8 +162,9 @@ function Install-NodeJsFromInternet {
         Write-Host "Telepites..."
         $p = Start-Process -FilePath "msiexec.exe" -ArgumentList @("/i", "`"$out`"", "/quiet", "/norestart") -Wait -PassThru
         Remove-Item -LiteralPath $out -Force -ErrorAction SilentlyContinue
-        if ($p.ExitCode -eq 0) {
-            return $true
+        if ($p.ExitCode -eq 0 -or $p.ExitCode -eq 3010) {
+            Refresh-ProcessPathFromRegistry
+            if (Find-RequiredNode) { return $true }
         }
         Write-Host "Direkt MSI telepites sikertelen, masik modszer probalasa..."
     } catch {
@@ -168,7 +175,10 @@ function Install-NodeJsFromInternet {
         try {
             Write-Host "Node.js telepitese winget-tel..."
             $p = Start-Process -FilePath "winget" -ArgumentList @("install", "-e", "--id", "OpenJS.NodeJS.LTS") -Wait -PassThru
-            if ($p.ExitCode -eq 0) { return $true }
+            if ($p.ExitCode -eq 0) {
+                Refresh-ProcessPathFromRegistry
+                if (Find-RequiredNode) { return $true }
+            }
             Write-Host "winget telepites sikertelen, masik modszer probalasa..."
         } catch {
             Write-Host "winget telepites sikertelen, masik modszer probalasa..."
@@ -179,7 +189,10 @@ function Install-NodeJsFromInternet {
         try {
             Write-Host "Node.js telepitese Chocolatey-vel..."
             $p = Start-Process -FilePath "choco" -ArgumentList @("install", "nodejs-lts", "-y") -Wait -PassThru
-            if ($p.ExitCode -eq 0) { return $true }
+            if ($p.ExitCode -eq 0) {
+                Refresh-ProcessPathFromRegistry
+                if (Find-RequiredNode) { return $true }
+            }
             Write-Host "Chocolatey telepites sikertelen, masik modszer probalasa..."
         } catch {
             Write-Host "Chocolatey telepites sikertelen, masik modszer probalasa..."
@@ -339,9 +352,11 @@ if ($didInstall) {
 
 # --- Last resort: use bundled portable ZIP or bundled MSI (original behavior) ---
 $portableArchive = $null
-if ($requiredVersion) {
-    $portableArchive = Get-ChildItem -Path $cacheRoot -Filter ("node-" + $requiredVersion + "-win-x64.zip") -File -ErrorAction SilentlyContinue |
+try {
+    $portableArchive = Get-ChildItem -Path $cacheRoot -Filter ("node-" + $directMsiVersion + "-win-x64.zip") -File -ErrorAction SilentlyContinue |
         Select-Object -First 1
+} catch {
+    $portableArchive = $null
 }
 if ($portableArchive) {
     try {
@@ -356,9 +371,11 @@ if ($portableArchive) {
 }
 
 $installer = $null
-if ($requiredVersion) {
-    $installer = Get-ChildItem -Path $installerRoot -Filter ("node-" + $requiredVersion + "-x64.msi") -File -ErrorAction SilentlyContinue |
+try {
+    $installer = Get-ChildItem -Path $installerRoot -Filter ("node-" + $directMsiVersion + "-x64.msi") -File -ErrorAction SilentlyContinue |
         Select-Object -First 1
+} catch {
+    $installer = $null
 }
 
 if ($installer) {

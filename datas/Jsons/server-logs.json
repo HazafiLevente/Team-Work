@@ -1,425 +1,5 @@
 [
   {
-    "id": "17779024114544aku",
-    "timestamp": "2026-05-04T13:46:51.454Z",
-    "level": "log",
-    "message": "🍪 COOKIES: {\"g_state\":\"{\\\"i_l\\\":0,\\\"i_ll\\\":1777902272959,\\\"i_b\\\":\\\"m9a3u7uhp+Sla4TVk7mwA5CFtpOU6jTfIpLzHRWEHO4\\\",\\\"i_e\\\":{\\\"enable_itp_optimization\\\":0},\\\"i_et\\\":1777902271377}\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NSwidXNlcm5hbWUiOiJIb3JiaWvDoW0iLCJlbWFpbCI6Im5vcmJlcnRrb3ZhY3MxMDFAZ21haWwuY29tIiwicm9sZSI6Im93bmVyIiwiaWF0IjoxNzc3OTAyMjg0LCJleHAiOjE3Nzc5NDU0ODR9.IB44ArVmbTQfbyDo4owkJDWAbMx61TnGNq431wPNP94\"}"
-  },
-  {
-    "id": "17779024114570io8",
-    "timestamp": "2026-05-04T13:46:51.457Z",
-    "level": "log",
-    "message": "🍪 COOKIES: {\"g_state\":\"{\\\"i_l\\\":0,\\\"i_ll\\\":1777902272959,\\\"i_b\\\":\\\"m9a3u7uhp+Sla4TVk7mwA5CFtpOU6jTfIpLzHRWEHO4\\\",\\\"i_e\\\":{\\\"enable_itp_optimization\\\":0},\\\"i_et\\\":1777902271377}\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NSwidXNlcm5hbWUiOiJIb3JiaWvDoW0iLCJlbWFpbCI6Im5vcmJlcnRrb3ZhY3MxMDFAZ21haWwuY29tIiwicm9sZSI6Im93bmVyIiwiaWF0IjoxNzc3OTAyMjg0LCJleHAiOjE3Nzc5NDU0ODR9.IB44ArVmbTQfbyDo4owkJDWAbMx61TnGNq431wPNP94\"}"
-  },
-  {
-    "id": "1777902411553i1fn",
-    "timestamp": "2026-05-04T13:46:51.553Z",
-    "level": "log",
-    "message": "🖼 IMAGES_ROOT: C:\\Users\\Levente\\WebstormProjects\\Team-Work\\datas\\images"
-  },
-  {
-    "id": "177790241173569uu",
-    "timestamp": "2026-05-04T13:46:51.735Z",
-    "level": "log",
-    "message": "đź”Ą HIT GET /api/ranks/me"
-  },
-  {
-    "id": "1777902411735a6ty",
-    "timestamp": "2026-05-04T13:46:51.735Z",
-    "level": "log",
-    "message": "🍪 COOKIES: {\"g_state\":\"{\\\"i_l\\\":0,\\\"i_ll\\\":1777902272959,\\\"i_b\\\":\\\"m9a3u7uhp+Sla4TVk7mwA5CFtpOU6jTfIpLzHRWEHO4\\\",\\\"i_e\\\":{\\\"enable_itp_optimization\\\":0},\\\"i_et\\\":1777902271377}\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NSwidXNlcm5hbWUiOiJIb3JiaWvDoW0iLCJlbWFpbCI6Im5vcmJlcnRrb3ZhY3MxMDFAZ21haWwuY29tIiwicm9sZSI6Im93bmVyIiwiaWF0IjoxNzc3OTAyMjg0LCJleHAiOjE3Nzc5NDU0ODR9.IB44ArVmbTQfbyDo4owkJDWAbMx61TnGNq431wPNP94\"}"
-  },
-  {
-    "id": "1777902411742d662",
-    "timestamp": "2026-05-04T13:46:51.742Z",
-    "level": "log",
-    "message": "🖼 IMAGES_ROOT: C:\\Users\\Levente\\WebstormProjects\\Team-Work\\datas\\images"
-  },
-  {
-    "id": "17779024119300kpo",
-    "timestamp": "2026-05-04T13:46:51.930Z",
-    "level": "log",
-    "message": "🖼 IMAGES_ROOT: C:\\Users\\Levente\\WebstormProjects\\Team-Work\\datas\\images"
-  },
-  {
-    "id": "17779024121434pn5",
-    "timestamp": "2026-05-04T13:46:52.143Z",
-    "level": "log",
-    "message": "🖼 IMAGES_ROOT: C:\\Users\\Levente\\WebstormProjects\\Team-Work\\datas\\images"
-  },
-  {
-    "id": "17779024123336d8s",
-    "timestamp": "2026-05-04T13:46:52.333Z",
-    "level": "log",
-    "message": "🖼 IMAGES_ROOT: C:\\Users\\Levente\\WebstormProjects\\Team-Work\\datas\\images"
-  },
-  {
-    "id": "1777902412516we84",
-    "timestamp": "2026-05-04T13:46:52.516Z",
-    "level": "log",
-    "message": "🖼 IMAGES_ROOT: C:\\Users\\Levente\\WebstormProjects\\Team-Work\\datas\\images"
-  },
-  {
-    "id": "1777902412692825y",
-    "timestamp": "2026-05-04T13:46:52.692Z",
-    "level": "log",
-    "message": "🖼 IMAGES_ROOT: C:\\Users\\Levente\\WebstormProjects\\Team-Work\\datas\\images"
-  },
-  {
-    "id": "1777902412868wr8r",
-    "timestamp": "2026-05-04T13:46:52.868Z",
-    "level": "log",
-    "message": "🖼 IMAGES_ROOT: C:\\Users\\Levente\\WebstormProjects\\Team-Work\\datas\\images"
-  },
-  {
-    "id": "1777902413048imk1",
-    "timestamp": "2026-05-04T13:46:53.048Z",
-    "level": "log",
-    "message": "🖼 IMAGES_ROOT: C:\\Users\\Levente\\WebstormProjects\\Team-Work\\datas\\images"
-  },
-  {
-    "id": "1777902413227naqx",
-    "timestamp": "2026-05-04T13:46:53.227Z",
-    "level": "log",
-    "message": "🖼 IMAGES_ROOT: C:\\Users\\Levente\\WebstormProjects\\Team-Work\\datas\\images"
-  },
-  {
-    "id": "1777902413400cwis",
-    "timestamp": "2026-05-04T13:46:53.400Z",
-    "level": "log",
-    "message": "🖼 IMAGES_ROOT: C:\\Users\\Levente\\WebstormProjects\\Team-Work\\datas\\images"
-  },
-  {
-    "id": "1777902413577czwv",
-    "timestamp": "2026-05-04T13:46:53.577Z",
-    "level": "log",
-    "message": "🖼 IMAGES_ROOT: C:\\Users\\Levente\\WebstormProjects\\Team-Work\\datas\\images"
-  },
-  {
-    "id": "17779024137484ytj",
-    "timestamp": "2026-05-04T13:46:53.748Z",
-    "level": "log",
-    "message": "🖼 IMAGES_ROOT: C:\\Users\\Levente\\WebstormProjects\\Team-Work\\datas\\images"
-  },
-  {
-    "id": "1777902413921y2x0",
-    "timestamp": "2026-05-04T13:46:53.921Z",
-    "level": "log",
-    "message": "🖼 IMAGES_ROOT: C:\\Users\\Levente\\WebstormProjects\\Team-Work\\datas\\images"
-  },
-  {
-    "id": "1777902414099pyn8",
-    "timestamp": "2026-05-04T13:46:54.099Z",
-    "level": "log",
-    "message": "🖼 IMAGES_ROOT: C:\\Users\\Levente\\WebstormProjects\\Team-Work\\datas\\images"
-  },
-  {
-    "id": "17779024142693mup",
-    "timestamp": "2026-05-04T13:46:54.269Z",
-    "level": "log",
-    "message": "🖼 IMAGES_ROOT: C:\\Users\\Levente\\WebstormProjects\\Team-Work\\datas\\images"
-  },
-  {
-    "id": "1777902414460gwgg",
-    "timestamp": "2026-05-04T13:46:54.460Z",
-    "level": "log",
-    "message": "🖼 IMAGES_ROOT: C:\\Users\\Levente\\WebstormProjects\\Team-Work\\datas\\images"
-  },
-  {
-    "id": "1777902414636gef0",
-    "timestamp": "2026-05-04T13:46:54.636Z",
-    "level": "log",
-    "message": "🖼 IMAGES_ROOT: C:\\Users\\Levente\\WebstormProjects\\Team-Work\\datas\\images"
-  },
-  {
-    "id": "1777902414804hphr",
-    "timestamp": "2026-05-04T13:46:54.804Z",
-    "level": "log",
-    "message": "🍪 COOKIES: {\"g_state\":\"{\\\"i_l\\\":0,\\\"i_ll\\\":1777902272959,\\\"i_b\\\":\\\"m9a3u7uhp+Sla4TVk7mwA5CFtpOU6jTfIpLzHRWEHO4\\\",\\\"i_e\\\":{\\\"enable_itp_optimization\\\":0},\\\"i_et\\\":1777902271377}\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NSwidXNlcm5hbWUiOiJIb3JiaWvDoW0iLCJlbWFpbCI6Im5vcmJlcnRrb3ZhY3MxMDFAZ21haWwuY29tIiwicm9sZSI6Im93bmVyIiwiaWF0IjoxNzc3OTAyMjg0LCJleHAiOjE3Nzc5NDU0ODR9.IB44ArVmbTQfbyDo4owkJDWAbMx61TnGNq431wPNP94\"}"
-  },
-  {
-    "id": "17779024148071aq7",
-    "timestamp": "2026-05-04T13:46:54.807Z",
-    "level": "log",
-    "message": "🍪 COOKIES: {\"g_state\":\"{\\\"i_l\\\":0,\\\"i_ll\\\":1777902272959,\\\"i_b\\\":\\\"m9a3u7uhp+Sla4TVk7mwA5CFtpOU6jTfIpLzHRWEHO4\\\",\\\"i_e\\\":{\\\"enable_itp_optimization\\\":0},\\\"i_et\\\":1777902271377}\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NSwidXNlcm5hbWUiOiJIb3JiaWvDoW0iLCJlbWFpbCI6Im5vcmJlcnRrb3ZhY3MxMDFAZ21haWwuY29tIiwicm9sZSI6Im93bmVyIiwiaWF0IjoxNzc3OTAyMjg0LCJleHAiOjE3Nzc5NDU0ODR9.IB44ArVmbTQfbyDo4owkJDWAbMx61TnGNq431wPNP94\"}"
-  },
-  {
-    "id": "177790241481176fd",
-    "timestamp": "2026-05-04T13:46:54.811Z",
-    "level": "log",
-    "message": "🖼 IMAGES_ROOT: C:\\Users\\Levente\\WebstormProjects\\Team-Work\\datas\\images"
-  },
-  {
-    "id": "1777902415000cnfe",
-    "timestamp": "2026-05-04T13:46:55.000Z",
-    "level": "log",
-    "message": "🖼 IMAGES_ROOT: C:\\Users\\Levente\\WebstormProjects\\Team-Work\\datas\\images"
-  },
-  {
-    "id": "1777902415169y0vq",
-    "timestamp": "2026-05-04T13:46:55.169Z",
-    "level": "log",
-    "message": "🖼 IMAGES_ROOT: C:\\Users\\Levente\\WebstormProjects\\Team-Work\\datas\\images"
-  },
-  {
-    "id": "1777902415348cs70",
-    "timestamp": "2026-05-04T13:46:55.348Z",
-    "level": "log",
-    "message": "🖼 IMAGES_ROOT: C:\\Users\\Levente\\WebstormProjects\\Team-Work\\datas\\images"
-  },
-  {
-    "id": "1777902415520fofq",
-    "timestamp": "2026-05-04T13:46:55.520Z",
-    "level": "log",
-    "message": "🖼 IMAGES_ROOT: C:\\Users\\Levente\\WebstormProjects\\Team-Work\\datas\\images"
-  },
-  {
-    "id": "1777902415704se3e",
-    "timestamp": "2026-05-04T13:46:55.704Z",
-    "level": "log",
-    "message": "🖼 IMAGES_ROOT: C:\\Users\\Levente\\WebstormProjects\\Team-Work\\datas\\images"
-  },
-  {
-    "id": "1777902415887s30w",
-    "timestamp": "2026-05-04T13:46:55.887Z",
-    "level": "log",
-    "message": "🖼 IMAGES_ROOT: C:\\Users\\Levente\\WebstormProjects\\Team-Work\\datas\\images"
-  },
-  {
-    "id": "1777902416064clui",
-    "timestamp": "2026-05-04T13:46:56.064Z",
-    "level": "log",
-    "message": "🖼 IMAGES_ROOT: C:\\Users\\Levente\\WebstormProjects\\Team-Work\\datas\\images"
-  },
-  {
-    "id": "177790241625857dy",
-    "timestamp": "2026-05-04T13:46:56.258Z",
-    "level": "log",
-    "message": "🖼 IMAGES_ROOT: C:\\Users\\Levente\\WebstormProjects\\Team-Work\\datas\\images"
-  },
-  {
-    "id": "177790241657807pq",
-    "timestamp": "2026-05-04T13:46:56.578Z",
-    "level": "log",
-    "message": "🖼 IMAGES_ROOT: C:\\Users\\Levente\\WebstormProjects\\Team-Work\\datas\\images"
-  },
-  {
-    "id": "1777902416775fl2f",
-    "timestamp": "2026-05-04T13:46:56.775Z",
-    "level": "log",
-    "message": "🖼 IMAGES_ROOT: C:\\Users\\Levente\\WebstormProjects\\Team-Work\\datas\\images"
-  },
-  {
-    "id": "1777902416964k0g5",
-    "timestamp": "2026-05-04T13:46:56.964Z",
-    "level": "log",
-    "message": "🖼 IMAGES_ROOT: C:\\Users\\Levente\\WebstormProjects\\Team-Work\\datas\\images"
-  },
-  {
-    "id": "1777902417158mtl2",
-    "timestamp": "2026-05-04T13:46:57.158Z",
-    "level": "log",
-    "message": "🖼 IMAGES_ROOT: C:\\Users\\Levente\\WebstormProjects\\Team-Work\\datas\\images"
-  },
-  {
-    "id": "177790241735313a7",
-    "timestamp": "2026-05-04T13:46:57.353Z",
-    "level": "log",
-    "message": "🖼 IMAGES_ROOT: C:\\Users\\Levente\\WebstormProjects\\Team-Work\\datas\\images"
-  },
-  {
-    "id": "1777902417563x7nt",
-    "timestamp": "2026-05-04T13:46:57.563Z",
-    "level": "log",
-    "message": "🍪 COOKIES: {\"g_state\":\"{\\\"i_l\\\":0,\\\"i_ll\\\":1777902272959,\\\"i_b\\\":\\\"m9a3u7uhp+Sla4TVk7mwA5CFtpOU6jTfIpLzHRWEHO4\\\",\\\"i_e\\\":{\\\"enable_itp_optimization\\\":0},\\\"i_et\\\":1777902271377}\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NSwidXNlcm5hbWUiOiJIb3JiaWvDoW0iLCJlbWFpbCI6Im5vcmJlcnRrb3ZhY3MxMDFAZ21haWwuY29tIiwicm9sZSI6Im93bmVyIiwiaWF0IjoxNzc3OTAyMjg0LCJleHAiOjE3Nzc5NDU0ODR9.IB44ArVmbTQfbyDo4owkJDWAbMx61TnGNq431wPNP94\"}"
-  },
-  {
-    "id": "177790241756595d6",
-    "timestamp": "2026-05-04T13:46:57.565Z",
-    "level": "log",
-    "message": "đź”Ą HIT GET /api/ranks/me"
-  },
-  {
-    "id": "1777902417565hweg",
-    "timestamp": "2026-05-04T13:46:57.565Z",
-    "level": "log",
-    "message": "🍪 COOKIES: {\"g_state\":\"{\\\"i_l\\\":0,\\\"i_ll\\\":1777902272959,\\\"i_b\\\":\\\"m9a3u7uhp+Sla4TVk7mwA5CFtpOU6jTfIpLzHRWEHO4\\\",\\\"i_e\\\":{\\\"enable_itp_optimization\\\":0},\\\"i_et\\\":1777902271377}\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NSwidXNlcm5hbWUiOiJIb3JiaWvDoW0iLCJlbWFpbCI6Im5vcmJlcnRrb3ZhY3MxMDFAZ21haWwuY29tIiwicm9sZSI6Im93bmVyIiwiaWF0IjoxNzc3OTAyMjg0LCJleHAiOjE3Nzc5NDU0ODR9.IB44ArVmbTQfbyDo4owkJDWAbMx61TnGNq431wPNP94\"}"
-  },
-  {
-    "id": "1777902417572ozev",
-    "timestamp": "2026-05-04T13:46:57.572Z",
-    "level": "log",
-    "message": "🖼 IMAGES_ROOT: C:\\Users\\Levente\\WebstormProjects\\Team-Work\\datas\\images"
-  },
-  {
-    "id": "177790241775815se",
-    "timestamp": "2026-05-04T13:46:57.758Z",
-    "level": "log",
-    "message": "🖼 IMAGES_ROOT: C:\\Users\\Levente\\WebstormProjects\\Team-Work\\datas\\images"
-  },
-  {
-    "id": "1777902417943mdk4",
-    "timestamp": "2026-05-04T13:46:57.943Z",
-    "level": "log",
-    "message": "🖼 IMAGES_ROOT: C:\\Users\\Levente\\WebstormProjects\\Team-Work\\datas\\images"
-  },
-  {
-    "id": "17779024181318eda",
-    "timestamp": "2026-05-04T13:46:58.131Z",
-    "level": "log",
-    "message": "🖼 IMAGES_ROOT: C:\\Users\\Levente\\WebstormProjects\\Team-Work\\datas\\images"
-  },
-  {
-    "id": "1777902418314079c",
-    "timestamp": "2026-05-04T13:46:58.314Z",
-    "level": "log",
-    "message": "🖼 IMAGES_ROOT: C:\\Users\\Levente\\WebstormProjects\\Team-Work\\datas\\images"
-  },
-  {
-    "id": "1777902418507evwi",
-    "timestamp": "2026-05-04T13:46:58.507Z",
-    "level": "log",
-    "message": "🖼 IMAGES_ROOT: C:\\Users\\Levente\\WebstormProjects\\Team-Work\\datas\\images"
-  },
-  {
-    "id": "17779024186884l9h",
-    "timestamp": "2026-05-04T13:46:58.688Z",
-    "level": "log",
-    "message": "🖼 IMAGES_ROOT: C:\\Users\\Levente\\WebstormProjects\\Team-Work\\datas\\images"
-  },
-  {
-    "id": "1777902418878gly7",
-    "timestamp": "2026-05-04T13:46:58.878Z",
-    "level": "log",
-    "message": "🖼 IMAGES_ROOT: C:\\Users\\Levente\\WebstormProjects\\Team-Work\\datas\\images"
-  },
-  {
-    "id": "1777902419060bs54",
-    "timestamp": "2026-05-04T13:46:59.060Z",
-    "level": "log",
-    "message": "🖼 IMAGES_ROOT: C:\\Users\\Levente\\WebstormProjects\\Team-Work\\datas\\images"
-  },
-  {
-    "id": "17779024192413f49",
-    "timestamp": "2026-05-04T13:46:59.241Z",
-    "level": "log",
-    "message": "🖼 IMAGES_ROOT: C:\\Users\\Levente\\WebstormProjects\\Team-Work\\datas\\images"
-  },
-  {
-    "id": "1777902419423s735",
-    "timestamp": "2026-05-04T13:46:59.423Z",
-    "level": "log",
-    "message": "🖼 IMAGES_ROOT: C:\\Users\\Levente\\WebstormProjects\\Team-Work\\datas\\images"
-  },
-  {
-    "id": "17779024195983c4k",
-    "timestamp": "2026-05-04T13:46:59.598Z",
-    "level": "log",
-    "message": "🖼 IMAGES_ROOT: C:\\Users\\Levente\\WebstormProjects\\Team-Work\\datas\\images"
-  },
-  {
-    "id": "177790241977571aa",
-    "timestamp": "2026-05-04T13:46:59.775Z",
-    "level": "log",
-    "message": "🖼 IMAGES_ROOT: C:\\Users\\Levente\\WebstormProjects\\Team-Work\\datas\\images"
-  },
-  {
-    "id": "1777902419947k4qq",
-    "timestamp": "2026-05-04T13:46:59.947Z",
-    "level": "log",
-    "message": "🖼 IMAGES_ROOT: C:\\Users\\Levente\\WebstormProjects\\Team-Work\\datas\\images"
-  },
-  {
-    "id": "1777902420118ryoq",
-    "timestamp": "2026-05-04T13:47:00.118Z",
-    "level": "log",
-    "message": "🖼 IMAGES_ROOT: C:\\Users\\Levente\\WebstormProjects\\Team-Work\\datas\\images"
-  },
-  {
-    "id": "1777902420296usz4",
-    "timestamp": "2026-05-04T13:47:00.296Z",
-    "level": "log",
-    "message": "🖼 IMAGES_ROOT: C:\\Users\\Levente\\WebstormProjects\\Team-Work\\datas\\images"
-  },
-  {
-    "id": "1777902420471corg",
-    "timestamp": "2026-05-04T13:47:00.471Z",
-    "level": "log",
-    "message": "🖼 IMAGES_ROOT: C:\\Users\\Levente\\WebstormProjects\\Team-Work\\datas\\images"
-  },
-  {
-    "id": "1777902420643qnbz",
-    "timestamp": "2026-05-04T13:47:00.643Z",
-    "level": "log",
-    "message": "🖼 IMAGES_ROOT: C:\\Users\\Levente\\WebstormProjects\\Team-Work\\datas\\images"
-  },
-  {
-    "id": "1777902420818ce5v",
-    "timestamp": "2026-05-04T13:47:00.818Z",
-    "level": "log",
-    "message": "🖼 IMAGES_ROOT: C:\\Users\\Levente\\WebstormProjects\\Team-Work\\datas\\images"
-  },
-  {
-    "id": "1777902420994vtfa",
-    "timestamp": "2026-05-04T13:47:00.994Z",
-    "level": "log",
-    "message": "🖼 IMAGES_ROOT: C:\\Users\\Levente\\WebstormProjects\\Team-Work\\datas\\images"
-  },
-  {
-    "id": "1777902448183ylu7",
-    "timestamp": "2026-05-04T13:47:28.183Z",
-    "level": "log",
-    "message": "🍪 COOKIES: {\"Webstorm-4a9b1ed1\":\"2cd47b33-d91f-4180-94e5-e3cd66fd6f7d\",\"Webstorm-4a9b1ed2\":\"4825e2dd-8848-40aa-82fa-6b6096e480a5\",\"Webstorm-4a9b1ed3\":\"4b21ec80-24ec-43df-ad72-310d7e663763\",\"g_state\":\"{\\\"i_l\\\":0,\\\"i_ll\\\":1777888281835,\\\"i_e\\\":{\\\"enable_itp_optimization\\\":23},\\\"i_et\\\":1776274771520}\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJIYXphZmlMZXYiLCJlbWFpbCI6ImhhemFmaWxldkBnbWFpbC5jb20iLCJyb2xlIjoib3duZXIiLCJpYXQiOjE3Nzc4ODgyODQsImV4cCI6MTc3NzkzMTQ4NH0.IvKfaA3Wcc1_MLEHVV7ceLj7gceYaeyNwnHTuGIBJao\",\"Webstorm-4a9b2292\":\"5c6302da-5be2-463a-bcc0-7cd6929d554c\"}"
-  },
-  {
-    "id": "1777902448433ksbg",
-    "timestamp": "2026-05-04T13:47:28.433Z",
-    "level": "log",
-    "message": "🍪 COOKIES: {\"Webstorm-4a9b1ed1\":\"2cd47b33-d91f-4180-94e5-e3cd66fd6f7d\",\"Webstorm-4a9b1ed2\":\"4825e2dd-8848-40aa-82fa-6b6096e480a5\",\"Webstorm-4a9b1ed3\":\"4b21ec80-24ec-43df-ad72-310d7e663763\",\"g_state\":\"{\\\"i_l\\\":0,\\\"i_ll\\\":1777888281835,\\\"i_e\\\":{\\\"enable_itp_optimization\\\":23},\\\"i_et\\\":1776274771520}\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJIYXphZmlMZXYiLCJlbWFpbCI6ImhhemFmaWxldkBnbWFpbC5jb20iLCJyb2xlIjoib3duZXIiLCJpYXQiOjE3Nzc4ODgyODQsImV4cCI6MTc3NzkzMTQ4NH0.IvKfaA3Wcc1_MLEHVV7ceLj7gceYaeyNwnHTuGIBJao\",\"Webstorm-4a9b2292\":\"5c6302da-5be2-463a-bcc0-7cd6929d554c\"}"
-  },
-  {
-    "id": "1777902458644g1ay",
-    "timestamp": "2026-05-04T13:47:38.644Z",
-    "level": "log",
-    "message": "🍪 COOKIES: {\"Webstorm-4a9b1ed1\":\"2cd47b33-d91f-4180-94e5-e3cd66fd6f7d\",\"Webstorm-4a9b1ed2\":\"4825e2dd-8848-40aa-82fa-6b6096e480a5\",\"Webstorm-4a9b1ed3\":\"4b21ec80-24ec-43df-ad72-310d7e663763\",\"g_state\":\"{\\\"i_l\\\":0,\\\"i_ll\\\":1777888281835,\\\"i_e\\\":{\\\"enable_itp_optimization\\\":23},\\\"i_et\\\":1776274771520}\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJIYXphZmlMZXYiLCJlbWFpbCI6ImhhemFmaWxldkBnbWFpbC5jb20iLCJyb2xlIjoib3duZXIiLCJpYXQiOjE3Nzc4ODgyODQsImV4cCI6MTc3NzkzMTQ4NH0.IvKfaA3Wcc1_MLEHVV7ceLj7gceYaeyNwnHTuGIBJao\",\"Webstorm-4a9b2292\":\"5c6302da-5be2-463a-bcc0-7cd6929d554c\"}"
-  },
-  {
-    "id": "1777902458957aadg",
-    "timestamp": "2026-05-04T13:47:38.957Z",
-    "level": "log",
-    "message": "đź”Ą HIT GET /api/ranks/me"
-  },
-  {
-    "id": "1777902458957etyh",
-    "timestamp": "2026-05-04T13:47:38.957Z",
-    "level": "log",
-    "message": "🍪 COOKIES: {\"Webstorm-4a9b1ed1\":\"2cd47b33-d91f-4180-94e5-e3cd66fd6f7d\",\"Webstorm-4a9b1ed2\":\"4825e2dd-8848-40aa-82fa-6b6096e480a5\",\"Webstorm-4a9b1ed3\":\"4b21ec80-24ec-43df-ad72-310d7e663763\",\"g_state\":\"{\\\"i_l\\\":0,\\\"i_ll\\\":1777888281835,\\\"i_e\\\":{\\\"enable_itp_optimization\\\":23},\\\"i_et\\\":1776274771520}\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJIYXphZmlMZXYiLCJlbWFpbCI6ImhhemFmaWxldkBnbWFpbC5jb20iLCJyb2xlIjoib3duZXIiLCJpYXQiOjE3Nzc4ODgyODQsImV4cCI6MTc3NzkzMTQ4NH0.IvKfaA3Wcc1_MLEHVV7ceLj7gceYaeyNwnHTuGIBJao\",\"Webstorm-4a9b2292\":\"5c6302da-5be2-463a-bcc0-7cd6929d554c\"}"
-  },
-  {
-    "id": "177790246743814c5",
-    "timestamp": "2026-05-04T13:47:47.438Z",
-    "level": "log",
-    "message": "🍪 COOKIES: {\"Webstorm-4a9b1ed1\":\"2cd47b33-d91f-4180-94e5-e3cd66fd6f7d\",\"Webstorm-4a9b1ed2\":\"4825e2dd-8848-40aa-82fa-6b6096e480a5\",\"Webstorm-4a9b1ed3\":\"4b21ec80-24ec-43df-ad72-310d7e663763\",\"g_state\":\"{\\\"i_l\\\":0,\\\"i_ll\\\":1777888281835,\\\"i_e\\\":{\\\"enable_itp_optimization\\\":23},\\\"i_et\\\":1776274771520}\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJIYXphZmlMZXYiLCJlbWFpbCI6ImhhemFmaWxldkBnbWFpbC5jb20iLCJyb2xlIjoib3duZXIiLCJpYXQiOjE3Nzc4ODgyODQsImV4cCI6MTc3NzkzMTQ4NH0.IvKfaA3Wcc1_MLEHVV7ceLj7gceYaeyNwnHTuGIBJao\",\"Webstorm-4a9b2292\":\"5c6302da-5be2-463a-bcc0-7cd6929d554c\"}"
-  },
-  {
-    "id": "1777902467440825a",
-    "timestamp": "2026-05-04T13:47:47.440Z",
-    "level": "log",
-    "message": "🍪 COOKIES: {\"Webstorm-4a9b1ed1\":\"2cd47b33-d91f-4180-94e5-e3cd66fd6f7d\",\"Webstorm-4a9b1ed2\":\"4825e2dd-8848-40aa-82fa-6b6096e480a5\",\"Webstorm-4a9b1ed3\":\"4b21ec80-24ec-43df-ad72-310d7e663763\",\"g_state\":\"{\\\"i_l\\\":0,\\\"i_ll\\\":1777888281835,\\\"i_e\\\":{\\\"enable_itp_optimization\\\":23},\\\"i_et\\\":1776274771520}\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJIYXphZmlMZXYiLCJlbWFpbCI6ImhhemFmaWxldkBnbWFpbC5jb20iLCJyb2xlIjoib3duZXIiLCJpYXQiOjE3Nzc4ODgyODQsImV4cCI6MTc3NzkzMTQ4NH0.IvKfaA3Wcc1_MLEHVV7ceLj7gceYaeyNwnHTuGIBJao\",\"Webstorm-4a9b2292\":\"5c6302da-5be2-463a-bcc0-7cd6929d554c\"}"
-  },
-  {
-    "id": "1777902467703wkug",
-    "timestamp": "2026-05-04T13:47:47.703Z",
-    "level": "log",
-    "message": "🍪 COOKIES: {\"Webstorm-4a9b1ed1\":\"2cd47b33-d91f-4180-94e5-e3cd66fd6f7d\",\"Webstorm-4a9b1ed2\":\"4825e2dd-8848-40aa-82fa-6b6096e480a5\",\"Webstorm-4a9b1ed3\":\"4b21ec80-24ec-43df-ad72-310d7e663763\",\"g_state\":\"{\\\"i_l\\\":0,\\\"i_ll\\\":1777888281835,\\\"i_e\\\":{\\\"enable_itp_optimization\\\":23},\\\"i_et\\\":1776274771520}\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJIYXphZmlMZXYiLCJlbWFpbCI6ImhhemFmaWxldkBnbWFpbC5jb20iLCJyb2xlIjoib3duZXIiLCJpYXQiOjE3Nzc4ODgyODQsImV4cCI6MTc3NzkzMTQ4NH0.IvKfaA3Wcc1_MLEHVV7ceLj7gceYaeyNwnHTuGIBJao\",\"Webstorm-4a9b2292\":\"5c6302da-5be2-463a-bcc0-7cd6929d554c\"}"
-  },
-  {
-    "id": "1777902467749w66x",
-    "timestamp": "2026-05-04T13:47:47.750Z",
-    "level": "log",
-    "message": "🍪 COOKIES: {\"Webstorm-4a9b1ed1\":\"2cd47b33-d91f-4180-94e5-e3cd66fd6f7d\",\"Webstorm-4a9b1ed2\":\"4825e2dd-8848-40aa-82fa-6b6096e480a5\",\"Webstorm-4a9b1ed3\":\"4b21ec80-24ec-43df-ad72-310d7e663763\",\"g_state\":\"{\\\"i_l\\\":0,\\\"i_ll\\\":1777888281835,\\\"i_e\\\":{\\\"enable_itp_optimization\\\":23},\\\"i_et\\\":1776274771520}\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJIYXphZmlMZXYiLCJlbWFpbCI6ImhhemFmaWxldkBnbWFpbC5jb20iLCJyb2xlIjoib3duZXIiLCJpYXQiOjE3Nzc4ODgyODQsImV4cCI6MTc3NzkzMTQ4NH0.IvKfaA3Wcc1_MLEHVV7ceLj7gceYaeyNwnHTuGIBJao\",\"Webstorm-4a9b2292\":\"5c6302da-5be2-463a-bcc0-7cd6929d554c\"}"
-  },
-  {
     "id": "1777902468030enmb",
     "timestamp": "2026-05-04T13:47:48.030Z",
     "level": "log",
@@ -11998,5 +11578,425 @@
     "timestamp": "2026-05-07T18:03:55.609Z",
     "level": "log",
     "message": "✅ ActiveUsers snapshot persisted {\"day\":\"2026-05-07\",\"active_id\":1}"
+  },
+  {
+    "id": "1778179223247i8w9",
+    "timestamp": "2026-05-07T18:40:23.247Z",
+    "level": "log",
+    "message": "[dotenv@17.2.3] injecting env (18) from ..\\.env \u001b[2m-- tip: 🔐 encrypt with Dotenvx: https://dotenvx.com\u001b[0m"
+  },
+  {
+    "id": "1778179223263viqf",
+    "timestamp": "2026-05-07T18:40:23.263Z",
+    "level": "log",
+    "message": "🖼️  Serving images from: C:\\Users\\Levente\\WebstormProjects\\Team-Work\\datas\\images"
+  },
+  {
+    "id": "17781792234285ba4",
+    "timestamp": "2026-05-07T18:40:23.428Z",
+    "level": "log",
+    "message": "Server running on http://localhost:3000"
+  },
+  {
+    "id": "1778179233371rr67",
+    "timestamp": "2026-05-07T18:40:33.371Z",
+    "level": "log",
+    "message": "✅ ActiveUsers snapshot persisted {\"day\":\"2026-05-07\",\"active_id\":1}"
+  },
+  {
+    "id": "17781792433466kvw",
+    "timestamp": "2026-05-07T18:40:43.347Z",
+    "level": "log",
+    "message": "✅ ActiveUsers synced to Supabase on shutdown {\"day\":\"2026-05-07\"}"
+  },
+  {
+    "id": "1778179245579385q",
+    "timestamp": "2026-05-07T18:40:45.579Z",
+    "level": "log",
+    "message": "✅ ActiveUsers synced to Supabase on shutdown {\"day\":\"2026-05-07\"}"
+  },
+  {
+    "id": "1778179311760ugjt",
+    "timestamp": "2026-05-07T18:41:51.760Z",
+    "level": "log",
+    "message": "✅ ActiveUsers snapshot persisted {\"day\":\"2026-05-07\",\"active_id\":1}"
+  },
+  {
+    "id": "1778179316292zu5r",
+    "timestamp": "2026-05-07T18:41:56.292Z",
+    "level": "log",
+    "message": "✅ ActiveUsers synced to Supabase on shutdown {\"day\":\"2026-05-07\"}"
+  },
+  {
+    "id": "17781793259625tjs",
+    "timestamp": "2026-05-07T18:42:05.962Z",
+    "level": "log",
+    "message": "✅ ActiveUsers synced to Supabase on shutdown {\"day\":\"2026-05-07\"}"
+  },
+  {
+    "id": "1778179380004f9jb",
+    "timestamp": "2026-05-07T18:43:00.004Z",
+    "level": "log",
+    "message": "✅ ActiveUsers snapshot persisted {\"day\":\"2026-05-07\",\"active_id\":1}"
+  },
+  {
+    "id": "17781794405691h0d",
+    "timestamp": "2026-05-07T18:44:00.569Z",
+    "level": "log",
+    "message": "✅ ActiveUsers snapshot persisted {\"day\":\"2026-05-07\",\"active_id\":1}"
+  },
+  {
+    "id": "1778179523896unga",
+    "timestamp": "2026-05-07T18:45:23.896Z",
+    "level": "log",
+    "message": "✅ ActiveUsers snapshot persisted {\"day\":\"2026-05-07\",\"active_id\":1}"
+  },
+  {
+    "id": "1778179527907ikqe",
+    "timestamp": "2026-05-07T18:45:27.907Z",
+    "level": "log",
+    "message": "✅ ActiveUsers synced to Supabase on shutdown {\"day\":\"2026-05-07\"}"
+  },
+  {
+    "id": "1778179605418wprd",
+    "timestamp": "2026-05-07T18:46:45.418Z",
+    "level": "log",
+    "message": "✅ ActiveUsers snapshot persisted {\"day\":\"2026-05-07\",\"active_id\":1}"
+  },
+  {
+    "id": "17781796091807wza",
+    "timestamp": "2026-05-07T18:46:49.180Z",
+    "level": "log",
+    "message": "✅ ActiveUsers synced to Supabase on shutdown {\"day\":\"2026-05-07\"}"
+  },
+  {
+    "id": "1778179668809mc0p",
+    "timestamp": "2026-05-07T18:47:48.809Z",
+    "level": "log",
+    "message": "✅ ActiveUsers snapshot persisted {\"day\":\"2026-05-07\",\"active_id\":1}"
+  },
+  {
+    "id": "17781796725719d47",
+    "timestamp": "2026-05-07T18:47:52.571Z",
+    "level": "log",
+    "message": "✅ ActiveUsers synced to Supabase on shutdown {\"day\":\"2026-05-07\"}"
+  },
+  {
+    "id": "1778179677624uev7",
+    "timestamp": "2026-05-07T18:47:57.624Z",
+    "level": "error",
+    "message": "[children] setup_devices lookup failed (non-fatal): {\"code\":\"42703\",\"details\":null,\"hint\":null,\"message\":\"column setup_devices.source_table does not exist\"}"
+  },
+  {
+    "id": "1778179728969wz2j",
+    "timestamp": "2026-05-07T18:48:48.969Z",
+    "level": "log",
+    "message": "✅ ActiveUsers snapshot persisted {\"day\":\"2026-05-07\",\"active_id\":1}"
+  },
+  {
+    "id": "17781797938940ddz",
+    "timestamp": "2026-05-07T18:49:53.894Z",
+    "level": "log",
+    "message": "✅ ActiveUsers snapshot persisted {\"day\":\"2026-05-07\",\"active_id\":1}"
+  },
+  {
+    "id": "1778179799138rmsq",
+    "timestamp": "2026-05-07T18:49:59.138Z",
+    "level": "log",
+    "message": "✅ ActiveUsers synced to Supabase on shutdown {\"day\":\"2026-05-07\"}"
+  },
+  {
+    "id": "1778179828079fcsz",
+    "timestamp": "2026-05-07T18:50:28.079Z",
+    "level": "log",
+    "message": "✅ ActiveUsers synced to Supabase on shutdown {\"day\":\"2026-05-07\"}"
+  },
+  {
+    "id": "1778179922730yrnd",
+    "timestamp": "2026-05-07T18:52:02.730Z",
+    "level": "log",
+    "message": "✅ ActiveUsers snapshot persisted {\"day\":\"2026-05-07\",\"active_id\":1}"
+  },
+  {
+    "id": "17781799266651nb9",
+    "timestamp": "2026-05-07T18:52:06.665Z",
+    "level": "log",
+    "message": "✅ ActiveUsers synced to Supabase on shutdown {\"day\":\"2026-05-07\"}"
+  },
+  {
+    "id": "17781799912132z09",
+    "timestamp": "2026-05-07T18:53:11.213Z",
+    "level": "log",
+    "message": "✅ ActiveUsers snapshot persisted {\"day\":\"2026-05-07\",\"active_id\":1}"
+  },
+  {
+    "id": "1778179995223sibb",
+    "timestamp": "2026-05-07T18:53:15.223Z",
+    "level": "log",
+    "message": "✅ ActiveUsers synced to Supabase on shutdown {\"day\":\"2026-05-07\"}"
+  },
+  {
+    "id": "1778180124027vlyl",
+    "timestamp": "2026-05-07T18:55:24.027Z",
+    "level": "log",
+    "message": "✅ ActiveUsers snapshot persisted {\"day\":\"2026-05-07\",\"active_id\":1}"
+  },
+  {
+    "id": "1778180128734rq81",
+    "timestamp": "2026-05-07T18:55:28.734Z",
+    "level": "log",
+    "message": "✅ ActiveUsers synced to Supabase on shutdown {\"day\":\"2026-05-07\"}"
+  },
+  {
+    "id": "17781804240834fe9",
+    "timestamp": "2026-05-07T19:00:24.083Z",
+    "level": "log",
+    "message": "✅ ActiveUsers snapshot persisted {\"day\":\"2026-05-07\",\"active_id\":1}"
+  },
+  {
+    "id": "1778180428031q1jr",
+    "timestamp": "2026-05-07T19:00:28.031Z",
+    "level": "log",
+    "message": "✅ ActiveUsers synced to Supabase on shutdown {\"day\":\"2026-05-07\"}"
+  },
+  {
+    "id": "1778180724026c9uy",
+    "timestamp": "2026-05-07T19:05:24.026Z",
+    "level": "log",
+    "message": "✅ ActiveUsers snapshot persisted {\"day\":\"2026-05-07\",\"active_id\":1}"
+  },
+  {
+    "id": "17781807282238hvg",
+    "timestamp": "2026-05-07T19:05:28.223Z",
+    "level": "log",
+    "message": "✅ ActiveUsers synced to Supabase on shutdown {\"day\":\"2026-05-07\"}"
+  },
+  {
+    "id": "1778181024126nmyj",
+    "timestamp": "2026-05-07T19:10:24.126Z",
+    "level": "log",
+    "message": "✅ ActiveUsers snapshot persisted {\"day\":\"2026-05-07\",\"active_id\":1}"
+  },
+  {
+    "id": "1778181028351xqot",
+    "timestamp": "2026-05-07T19:10:28.351Z",
+    "level": "log",
+    "message": "✅ ActiveUsers synced to Supabase on shutdown {\"day\":\"2026-05-07\"}"
+  },
+  {
+    "id": "17781813241637wwq",
+    "timestamp": "2026-05-07T19:15:24.163Z",
+    "level": "log",
+    "message": "✅ ActiveUsers snapshot persisted {\"day\":\"2026-05-07\",\"active_id\":1}"
+  },
+  {
+    "id": "1778181328400d0rq",
+    "timestamp": "2026-05-07T19:15:28.400Z",
+    "level": "log",
+    "message": "✅ ActiveUsers synced to Supabase on shutdown {\"day\":\"2026-05-07\"}"
+  },
+  {
+    "id": "1778181624026orpq",
+    "timestamp": "2026-05-07T19:20:24.026Z",
+    "level": "log",
+    "message": "✅ ActiveUsers snapshot persisted {\"day\":\"2026-05-07\",\"active_id\":1}"
+  },
+  {
+    "id": "1778181627842pz9q",
+    "timestamp": "2026-05-07T19:20:27.842Z",
+    "level": "log",
+    "message": "✅ ActiveUsers synced to Supabase on shutdown {\"day\":\"2026-05-07\"}"
+  },
+  {
+    "id": "1778181924476mjxv",
+    "timestamp": "2026-05-07T19:25:24.476Z",
+    "level": "log",
+    "message": "✅ ActiveUsers snapshot persisted {\"day\":\"2026-05-07\",\"active_id\":1}"
+  },
+  {
+    "id": "1778181928446jt15",
+    "timestamp": "2026-05-07T19:25:28.446Z",
+    "level": "log",
+    "message": "✅ ActiveUsers synced to Supabase on shutdown {\"day\":\"2026-05-07\"}"
+  },
+  {
+    "id": "17781822243108lxb",
+    "timestamp": "2026-05-07T19:30:24.310Z",
+    "level": "log",
+    "message": "✅ ActiveUsers snapshot persisted {\"day\":\"2026-05-07\",\"active_id\":1}"
+  },
+  {
+    "id": "1778182228119tflh",
+    "timestamp": "2026-05-07T19:30:28.119Z",
+    "level": "log",
+    "message": "✅ ActiveUsers synced to Supabase on shutdown {\"day\":\"2026-05-07\"}"
+  },
+  {
+    "id": "17781825241435c2d",
+    "timestamp": "2026-05-07T19:35:24.143Z",
+    "level": "log",
+    "message": "✅ ActiveUsers snapshot persisted {\"day\":\"2026-05-07\",\"active_id\":1}"
+  },
+  {
+    "id": "17781825282017d01",
+    "timestamp": "2026-05-07T19:35:28.201Z",
+    "level": "log",
+    "message": "✅ ActiveUsers synced to Supabase on shutdown {\"day\":\"2026-05-07\"}"
+  },
+  {
+    "id": "17781828241260y9x",
+    "timestamp": "2026-05-07T19:40:24.126Z",
+    "level": "log",
+    "message": "✅ ActiveUsers snapshot persisted {\"day\":\"2026-05-07\",\"active_id\":1}"
+  },
+  {
+    "id": "1778182828188ma66",
+    "timestamp": "2026-05-07T19:40:28.188Z",
+    "level": "log",
+    "message": "✅ ActiveUsers synced to Supabase on shutdown {\"day\":\"2026-05-07\"}"
+  },
+  {
+    "id": "1778183124453mmcl",
+    "timestamp": "2026-05-07T19:45:24.453Z",
+    "level": "log",
+    "message": "✅ ActiveUsers snapshot persisted {\"day\":\"2026-05-07\",\"active_id\":1}"
+  },
+  {
+    "id": "17781831284645n3e",
+    "timestamp": "2026-05-07T19:45:28.464Z",
+    "level": "log",
+    "message": "✅ ActiveUsers synced to Supabase on shutdown {\"day\":\"2026-05-07\"}"
+  },
+  {
+    "id": "1778183424103cxrm",
+    "timestamp": "2026-05-07T19:50:24.103Z",
+    "level": "log",
+    "message": "✅ ActiveUsers snapshot persisted {\"day\":\"2026-05-07\",\"active_id\":1}"
+  },
+  {
+    "id": "17781834279350497",
+    "timestamp": "2026-05-07T19:50:27.935Z",
+    "level": "log",
+    "message": "✅ ActiveUsers synced to Supabase on shutdown {\"day\":\"2026-05-07\"}"
+  },
+  {
+    "id": "1778183724202x0wp",
+    "timestamp": "2026-05-07T19:55:24.202Z",
+    "level": "log",
+    "message": "✅ ActiveUsers snapshot persisted {\"day\":\"2026-05-07\",\"active_id\":1}"
+  },
+  {
+    "id": "1778183728240mykh",
+    "timestamp": "2026-05-07T19:55:28.240Z",
+    "level": "log",
+    "message": "✅ ActiveUsers synced to Supabase on shutdown {\"day\":\"2026-05-07\"}"
+  },
+  {
+    "id": "1778183952924w5ff",
+    "timestamp": "2026-05-07T19:59:12.924Z",
+    "level": "log",
+    "message": "✅ ActiveUsers snapshot persisted {\"day\":\"2026-05-07\",\"active_id\":1}"
+  },
+  {
+    "id": "1778183958317ibhp",
+    "timestamp": "2026-05-07T19:59:18.317Z",
+    "level": "log",
+    "message": "✅ ActiveUsers synced to Supabase on shutdown {\"day\":\"2026-05-07\"}"
+  },
+  {
+    "id": "1778183963553f293",
+    "timestamp": "2026-05-07T19:59:23.553Z",
+    "level": "error",
+    "message": "[children] setup_devices lookup failed (non-fatal): {\"code\":\"42703\",\"details\":null,\"hint\":null,\"message\":\"column setup_devices.source_table does not exist\"}"
+  },
+  {
+    "id": "1778184024122nrrz",
+    "timestamp": "2026-05-07T20:00:24.122Z",
+    "level": "log",
+    "message": "✅ ActiveUsers snapshot persisted {\"day\":\"2026-05-07\",\"active_id\":1}"
+  },
+  {
+    "id": "1778184028998iwbs",
+    "timestamp": "2026-05-07T20:00:28.998Z",
+    "level": "log",
+    "message": "✅ ActiveUsers synced to Supabase on shutdown {\"day\":\"2026-05-07\"}"
+  },
+  {
+    "id": "1778184032562bnja",
+    "timestamp": "2026-05-07T20:00:32.562Z",
+    "level": "log",
+    "message": "✅ ActiveUsers synced to Supabase on shutdown {\"day\":\"2026-05-07\"}"
+  },
+  {
+    "id": "17781846817058btq",
+    "timestamp": "2026-05-07T20:11:21.705Z",
+    "level": "log",
+    "message": "[dotenv@17.2.3] injecting env (18) from ..\\.env \u001b[2m-- tip: ⚙️  suppress all logs with { quiet: true }\u001b[0m"
+  },
+  {
+    "id": "1778184681723bq2z",
+    "timestamp": "2026-05-07T20:11:21.723Z",
+    "level": "log",
+    "message": "🖼️  Serving images from: C:\\Users\\Levente\\WebstormProjects\\Team-Work\\datas\\images"
+  },
+  {
+    "id": "1778184681840hfsr",
+    "timestamp": "2026-05-07T20:11:21.840Z",
+    "level": "log",
+    "message": "Server running on http://localhost:3000"
+  },
+  {
+    "id": "17781846918053k54",
+    "timestamp": "2026-05-07T20:11:31.805Z",
+    "level": "log",
+    "message": "✅ ActiveUsers snapshot persisted {\"day\":\"2026-05-07\",\"active_id\":1}"
+  },
+  {
+    "id": "1778184698008utbv",
+    "timestamp": "2026-05-07T20:11:38.008Z",
+    "level": "log",
+    "message": "✅ ActiveUsers synced to Supabase on shutdown {\"day\":\"2026-05-07\"}"
+  },
+  {
+    "id": "177818498183988x3",
+    "timestamp": "2026-05-07T20:16:21.839Z",
+    "level": "log",
+    "message": "✅ ActiveUsers snapshot persisted {\"day\":\"2026-05-07\",\"active_id\":1}"
+  },
+  {
+    "id": "1778184986042rqqr",
+    "timestamp": "2026-05-07T20:16:26.042Z",
+    "level": "log",
+    "message": "✅ ActiveUsers synced to Supabase on shutdown {\"day\":\"2026-05-07\"}"
+  },
+  {
+    "id": "1778185331638oc0v",
+    "timestamp": "2026-05-07T20:22:11.638Z",
+    "level": "log",
+    "message": "[dotenv@17.2.3] injecting env (18) from ..\\.env \u001b[2m-- tip: 📡 add observability to secrets: https://dotenvx.com/ops\u001b[0m"
+  },
+  {
+    "id": "1778185331653yya5",
+    "timestamp": "2026-05-07T20:22:11.653Z",
+    "level": "log",
+    "message": "🖼️  Serving images from: C:\\Users\\Levente\\WebstormProjects\\Team-Work\\datas\\images"
+  },
+  {
+    "id": "1778185331771qxvh",
+    "timestamp": "2026-05-07T20:22:11.771Z",
+    "level": "log",
+    "message": "Server running on http://localhost:3000"
+  },
+  {
+    "id": "17781853418147u5u",
+    "timestamp": "2026-05-07T20:22:21.814Z",
+    "level": "log",
+    "message": "✅ ActiveUsers snapshot persisted {\"day\":\"2026-05-07\",\"active_id\":1}"
+  },
+  {
+    "id": "1778185348101xu0z",
+    "timestamp": "2026-05-07T20:22:28.101Z",
+    "level": "log",
+    "message": "✅ ActiveUsers synced to Supabase on shutdown {\"day\":\"2026-05-07\"}"
   }
 ]
