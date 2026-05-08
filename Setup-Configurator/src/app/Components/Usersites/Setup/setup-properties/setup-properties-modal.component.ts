@@ -186,8 +186,8 @@ export class SetupPropertiesModalComponent {
         this.listsLoading = false;
       },
       error: (err) => {
-        console.error('Lista betoltes hiba:', err);
-        this.listsError = 'Listak betoltese sikertelen.';
+        console.error('Lista betöltes hiba:', err);
+        this.listsError = 'Listák betöltése sikertelen.';
         this.listsLoading = false;
       }
     });
@@ -243,8 +243,8 @@ export class SetupPropertiesModalComponent {
         this.toggleSetupList(normalized);
       },
       error: (err) => {
-        console.error('Favorite lista letrehozas hiba:', err);
-        this.listsError = 'Favorite lista letrehozasa sikertelen.';
+        console.error('Favorite lista létrehozás hiba:', err);
+        this.listsError = 'Favorite lista létrehozása sikertelen.';
         this.listsSavingId = null;
       }
     });
@@ -274,8 +274,8 @@ export class SetupPropertiesModalComponent {
         this.loadSetupLists();
       },
       error: (err) => {
-        console.error('Lista mentes hiba:', err);
-        this.listsError = 'Lista mentes sikertelen.';
+        console.error('Lista mentés hiba:', err);
+        this.listsError = 'Lista mentés sikertelen.';
         this.listsSavingId = null;
       }
     });
@@ -321,8 +321,8 @@ export class SetupPropertiesModalComponent {
         this.toggleSetupList(this.setupLists[this.setupLists.length - 1]);
       },
       error: (err) => {
-        console.error('Lista letrehozas hiba:', err);
-        this.listsError = 'Lista letrehozasa sikertelen.';
+        console.error('Lista létrehozás hiba:', err);
+        this.listsError = 'Lista létrehozása sikertelen.';
         this.listsSavingId = null;
       }
     });

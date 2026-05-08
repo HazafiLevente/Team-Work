@@ -23,7 +23,7 @@ export class SetupHierarchySidebarComponent {
   @Input() hierarchyCategories: string[] = [];
 
   @Input() setupTitleFn: (setup: any) => string = (setup) => setup?.setup_name ?? setup?.name ?? 'Setup';
-  @Input() itemTitleFn: (item: any) => string = (item) => item?.name ?? item?.display_name ?? 'Eszkoz';
+  @Input() itemTitleFn: (item: any) => string = (item) => item?.name ?? item?.display_name ?? 'Eszköz';
   @Input() isTreeExpandedFn: (setup: any) => boolean = () => false;
   @Input() isTreeLoadingFn: (setup: any) => boolean = () => false;
   @Input() treeChildrenForFn: (setup: any) => any[] = () => [];

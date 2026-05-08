@@ -155,8 +155,8 @@ app.get("/api/motherboard", async (_, res) => {
 });
 
 app.get("/api/saxophone/alt", async (_, res) => {
-    const { data, error } = await supabase.from("alt_saxophone").select("*");
-    if (error) return res.status(500).json({ error: error.message });
+    const {data, error} = await supabase.from("alt_saxophone").select("*");
+    if (error) return res.status(500).json({error: error.message});
     res.json(data);
 });
 

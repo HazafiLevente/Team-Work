@@ -50,7 +50,7 @@ export class PlanComponent {
         this.loadingLists = false;
       },
       error: (err) => {
-        console.error('Plan listak betoltesi hiba:', err);
+        console.error('Plan listák betöltési hiba:', err);
         this.lists = [];
         this.selectedListId = null;
         this.loadingLists = false;

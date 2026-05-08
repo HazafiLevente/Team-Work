@@ -1,7 +1,7 @@
 <div class="network-builder-shell">
   <div class="network-builder-body">
     @if (loading) {
-      <div class="state">Halozati eszkozok betoltese...</div>
+      <div class="state">Hálózati eszközök betöltése...</div>
     } @else {
       @if (error) {
         <div class="state error">{{ error }}</div>
@@ -27,12 +27,12 @@
 
       <div class="grid">
         <div class="field-card full">
-          <label class="field-label">{{ typeLabel(selectedType) }} kivalasztasa</label>
+          <label class="field-label">{{ typeLabel(selectedType) }} kiválasztása</label>
           <select
             class="select"
             [(ngModel)]="selectedDeviceKey"
           >
-            <option value="">-- valassz eszkozt --</option>
+            <option value="">-- válassz eszközt --</option>
 
             @for (device of filteredDevices(); track trackDevice($index, device)) {
               <option [value]="device.__deviceKey">
@@ -53,7 +53,7 @@
           @if (saving) {
             Mentes...
           } @else {
-            Halozati eszkoz hozzaadasa
+            Hálózati eszköz hozzáadása
           }
         </button>
       </div>

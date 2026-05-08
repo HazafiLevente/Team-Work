@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, HostListener, OnDestroy, OnInit } from '@angular/core';
 import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { filter, Subscription, Observable } from 'rxjs';
@@ -48,6 +48,7 @@ export class App implements OnInit, OnDestroy {
   user$!: Observable<any | null>;
   dockItems: DockItemData[] = [];
   hideGlobalDock = false;
+  isMobile = false;
   private readonly themePalettes: Record<UiThemeKey, ThemePalette> = {
     'clean-cyan': {
       pageAccent: '#67e8f9',
@@ -119,6 +120,7 @@ export class App implements OnInit, OnDestroy {
     this.user$ = this.auth.user$;
 
     this.hideGlobalDock = this.shouldHideGlobalDock(this.router.url);
+    this.isMobile = this.isMobileViewport();
 
     this.sub = this.router.events
       .pipe(filter((event): event is NavigationEnd => event instanceof NavigationEnd))
@@ -140,17 +142,17 @@ export class App implements OnInit, OnDestroy {
         },
         {
           icon: '🌟',
-          label: 'Plan',
+          label: 'Tervezet',
           onClick: () => this.router.navigateByUrl('/user/plan')
         },
         {
           icon: '🗂️',
-          label: 'MySetup',
+          label: 'Eszközök',
           onClick: () => this.router.navigateByUrl('/user/setup')
         },
         {
           icon: '👤',
-          label: 'Profile',
+          label: 'Profil',
           onClick: () => {
             const myName = this.auth.formatNameForUrl(user.fullname || user.username);
             this.router.navigate(['/user/profile', myName]);
@@ -158,12 +160,12 @@ export class App implements OnInit, OnDestroy {
         },
         {
           icon: '💬',
-          label: 'Messages',
+          label: 'Üzenetek',
           onClick: () => this.router.navigateByUrl('/user/messages')
         },
         {
           icon: '⚙️',
-          label: 'Settings',
+          label: 'Beállítások',
           onClick: () => this.router.navigateByUrl('/user/settings')
         }
       ];
@@ -185,8 +187,26 @@ export class App implements OnInit, OnDestroy {
     this.userSub?.unsubscribe();
   }
 
+  private isMobileViewport(): boolean {
+    if (typeof window === 'undefined') return false;
+    const small = window.matchMedia?.('(max-width: 768px)').matches ?? false;
+    const coarse = window.matchMedia?.('(pointer: coarse)').matches ?? false;
+    const noHover = window.matchMedia?.('(hover: none)').matches ?? false;
+    // Treat "mobile" as a small viewport on a touch-first device.
+    // This prevents hiding the dock on desktop when the window is narrow.
+    return small && (coarse || noHover);
+  }
+
+  @HostListener('window:resize')
+  onResize() {
+    this.isMobile = this.isMobileViewport();
+  }
+
   private shouldHideGlobalDock(url: string): boolean {
-    return url.startsWith('/user/setup') || url.startsWith('/user/plan') || url.startsWith('/user/favorite');
+    return url.startsWith('/user/setup')
+      || url.startsWith('/user/plan')
+      || url.startsWith('/user/favorite')
+      || url.startsWith('/user/messages');
   }
 
   private applyTheme(theme: UiThemeKey, darkMode: boolean) {

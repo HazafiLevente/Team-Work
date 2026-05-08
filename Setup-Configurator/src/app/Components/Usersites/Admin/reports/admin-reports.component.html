@@ -1,7 +1,7 @@
 <div class="reports-panel">
   <div class="reports-toolbar">
     <div>
-      <h2>Reports</h2>
+      <h2>Jelentések</h2>
       <p class="muted">A reports[Admin], reports_properties[Admin] es reports_values[Admin] tablak osszefuzve.</p>
     </div>
 
@@ -11,7 +11,7 @@
         [(ngModel)]="search"
         placeholder="Kereses report id, user, tipus vagy uzenet alapjan"
       >
-      <button type="button" (click)="loadReports()">Frissites</button>
+      <button type="button" (click)="loadReports()">Frissítés</button>
     </div>
   </div>
 
@@ -20,17 +20,17 @@
       type="button"
       [class.active]="activeType === 'profile'"
       (click)="setActiveType('profile')">
-      Profile reportok ({{ countByType('profile') }})
+      Profil jelentések ({{ countByType('profile') }})
     </button>
     <button
       type="button"
       [class.active]="activeType === 'message'"
       (click)="setActiveType('message')">
-      Message reportok ({{ countByType('message') }})
+      Üzenet jelentések ({{ countByType('message') }})
     </button>
   </div>
 
-  <div *ngIf="loading" class="state-card">Reportok betoltese...</div>
+  <div *ngIf="loading" class="state-card">Jelentések betöltése...</div>
   <div *ngIf="!loading && error" class="state-card error">{{ error }}</div>
   <div *ngIf="!loading && !error && filteredReports.length === 0" class="state-card">
     Nincs megjelenitheto report.
@@ -41,13 +41,13 @@
       <thead>
         <tr>
           <th>ID</th>
-          <th>Type</th>
-          <th>Cim</th>
-          <th>Reporter</th>
-          <th>Reported</th>
+          <th>Típus</th>
+          <th>Cím</th>
+          <th>Bejelentő</th>
+          <th>Érintett</th>
           <th>Tipus</th>
           <th>Uzenet</th>
-          <th>Datum</th>
+          <th>Dátum</th>
           <th></th>
         </tr>
       </thead>
@@ -65,10 +65,10 @@
             <td>{{ formatDate(report.created_at) }}</td>
             <td class="report-actions-cell">
               <button type="button" class="details-btn" (click)="toggle(report)">
-                {{ report.expanded ? 'Bezar' : 'Reszletek' }}
+                {{ report.expanded ? 'Bezár' : 'Részletek' }}
               </button>
               <button type="button" class="delete-btn" (click)="deleteReport(report)">
-                Torles
+                Törlés
               </button>
             </td>
           </tr>

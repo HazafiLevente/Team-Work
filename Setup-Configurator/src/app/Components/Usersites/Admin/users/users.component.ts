@@ -84,7 +84,7 @@ export class UsersComponent implements OnInit, OnChanges {
         if (this.autoExpandUserId) this.checkAutoExpand();
       },
       error: err => {
-        console.error('❌ Users load error', err);
+        console.error('❌ Felhasználók betöltési hiba', err);
         this.loading = false;
       }
     });
@@ -169,7 +169,7 @@ export class UsersComponent implements OnInit, OnChanges {
           this.loadingSetups[userId] = false;
         },
         error: err => {
-          console.error('❌ User setups load error', err);
+          console.error('❌ Eszközök betöltési hiba', err);
           this.loadingSetups[userId] = false;
         }
       });
@@ -226,7 +226,7 @@ export class UsersComponent implements OnInit, OnChanges {
       next: () => {
 
       },
-      error: err => console.error('❌ Save error', err)
+      error: err => console.error('❌ Mentési hiba', err)
     });
   }
 

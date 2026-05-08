@@ -12,7 +12,7 @@
     <div class="tabs">
       <button class="tab" [class.active]="tab==='general'" (click)="tab='general'">Általános</button>
       <button class="tab" [class.active]="tab==='items'" (click)="tab='items'">Eszközök</button>
-      <button class="tab" [class.active]="tab==='lists'" (click)="tab='lists'; loadSetupLists()">Listak</button>
+      <button class="tab" [class.active]="tab==='lists'" (click)="tab='lists'; loadSetupLists()">Listák</button>
       <button class="tab" [class.active]="tab==='edit'" (click)="tab='edit'">Átnevezés</button>
     </div>
 
@@ -70,12 +70,12 @@
             </span>
             <span>
               <strong>Favorite</strong>
-              <small>Kulon kedvenc lista</small>
+              <small>Külön kedvenc lista</small>
             </span>
           </button>
 
           <div class="field list-create">
-            <label>Uj lista</label>
+            <label>Új lista</label>
             <div class="list-create-row">
               <input
                 [(ngModel)]="newListName"
@@ -90,11 +90,11 @@
                 {{ newListPrivate ? '🔒' : '🔓' }}
               </button>
               <button class="btn primary" (click)="createSetupList()" [disabled]="!newListName.trim() || listsSavingId === -1">
-                @if (listsSavingId === -1) { Letrehozas... } @else { Letrehoz }
+                @if (listsSavingId === -1) { Létrehozás... } @else { Létrehoz }
               </button>
             </div>
             <div class="privacy-hint">
-              {{ newListPrivate ? 'Privat: csak te latod ezt a listat.' : 'Publikus: alapertelmezett, masok profilnal is megjelenhet.' }}
+              {{ newListPrivate ? 'Privát: csak te látod ezt a listát.' : 'Publikus: alapértelmezett, mások profiljánál is megjelenhet.' }}
             </div>
           </div>
 
@@ -103,7 +103,7 @@
           }
 
           @if (listsLoading) {
-            <div class="hint">Listak betoltese...</div>
+            <div class="hint">Listák betöltése...</div>
           } @else {
             <div class="list-toggle-stack">
               @for (list of planLists(); track list.id) {
@@ -118,12 +118,12 @@
                   </span>
                   <span>
                     <strong>{{ list.title || list.name }}</strong>
-                    <small>{{ list.setupIds.length }} setup · {{ list.isSecret ? 'privat' : 'publikus' }}</small>
+                    <small>{{ list.setupIds.length }} setup · {{ list.isSecret ? 'privát' : 'publikus' }}</small>
                   </span>
                 </button>
               }
               @if (!planLists().length) {
-                <div class="hint">Meg nincs sajat lista.</div>
+                <div class="hint">Még nincs saját lista.</div>
               }
             </div>
           }

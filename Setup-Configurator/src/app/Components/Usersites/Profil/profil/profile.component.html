@@ -2,7 +2,7 @@
 
   <div class="page-title">
     <h2>Profil</h2>
-    <p>Fiok adatok, rang es biztonsag</p>
+    <p>Fiók adatok, rang es biztonság</p>
   </div>
 
   <app-profile-info-section></app-profile-info-section>
@@ -11,16 +11,16 @@
     <div class="overview-head">
       <div>
         <h3>Setup attekintes</h3>
-        <p>Listak szerint rendezve, a privat jeloles mindig felulirja a publikus listat.</p>
+        <p>Listák szerint rendezve, a privát jelölés mindig felülírja a publikus listát.</p>
       </div>
 
       <div class="overview-total">
-        <span>Setupok osszerteke</span>
+        <span>Setupok összértéke</span>
         <strong>{{ formatPrice(totalSetupPrice) }}</strong>
       </div>
     </div>
 
-    <div class="overview-state" *ngIf="profileSummaryLoading">Setup adatok betoltese...</div>
+    <div class="overview-state" *ngIf="profileSummaryLoading">Setup adatok betöltése...</div>
     <div class="overview-state error" *ngIf="profileSummaryError && !profileSummaryLoading">
       {{ profileSummaryError }}
     </div>
@@ -63,22 +63,22 @@
         </div>
 
         <ng-template #noNoteSetups>
-          <div class="overview-empty">Meg nincs jegyzet.</div>
+          <div class="overview-empty">Még nincs jegyzet.</div>
         </ng-template>
       </article>
 
       <div class="overview-empty full-empty" *ngIf="!setupSummary.lists.length && !setupSummary.notes.length">
-        Meg nincs lista vagy jegyzet a profilhoz.
+        Még nincs lista vagy jegyzet a profilhoz.
       </div>
     </div>
 
     <div class="overview-foot" *ngIf="!profileSummaryLoading && !profileSummaryError">
       <div>
-        <span>Osszes nyilvantartott hely</span>
+        <span>Összes nyilvántartott hely</span>
         <strong>{{ totalTrackedItems() }}</strong>
       </div>
       <div>
-        <span>Ertekbe szamolva</span>
+        <span>Értékbe számolva</span>
         <strong>{{ setupSummary.regular.length }} setup</strong>
       </div>
     </div>
@@ -95,7 +95,7 @@
     <button type="button" class="profile-back-btn" (click)="goBack()">Vissza</button>
 
     <div class="public-profile-card">
-      <div *ngIf="publicProfileLoading" class="public-profile-state">Profil betoltese...</div>
+      <div *ngIf="publicProfileLoading" class="public-profile-state">Profil betöltése...</div>
       <div *ngIf="publicProfileError && !publicProfileLoading" class="public-profile-state error">
         {{ publicProfileError }}
       </div>
@@ -122,7 +122,7 @@
         </div>
 
         <section class="public-setup-card">
-          <div class="public-setup-title">Nyilvanos setupok</div>
+          <div class="public-setup-title">Nyilvános setupok</div>
 
           <div class="public-setup-list" *ngIf="publicProfile.mySetups.length; else noPublicSetups">
             <div class="public-setup-group" *ngFor="let setup of publicProfile.mySetups">
@@ -144,7 +144,7 @@
           </div>
 
           <ng-template #noPublicSetups>
-            <div class="public-empty-setups">Nincs megjelenitheto nyilvanos setup.</div>
+            <div class="public-empty-setups">Nincs megjeleníthető nyilvános setup.</div>
           </ng-template>
         </section>
       </ng-container>

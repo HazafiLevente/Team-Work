@@ -36,17 +36,17 @@ export class AdminSystemComponent implements OnInit {
     activeCategoryFilter: 'all' | SystemMessage['category'] = 'all';
 
     readonly TARGET_OPTIONS = [
-        { value: 'all', label: 'Everyone' },
+        { value: 'all', label: 'Mindenki' },
         { value: 'admin', label: 'Admin' },
         { value: 'admin+', label: 'Admin+' },
-        { value: 'owner', label: 'Owner' },
-        { value: 'custom', label: 'Custom user (ID)' }
+        { value: 'owner', label: 'Tulajdonos' },
+        { value: 'custom', label: 'Egyéni felhasználó (ID)' }
     ];
 
     readonly CATEGORY_OPTIONS = [
-        { value: 'system', label: 'System' },
-        { value: 'news', label: 'News' },
-        { value: 'register', label: 'Register' }
+        { value: 'system', label: 'Rendszer' },
+        { value: 'news', label: 'Hírek' },
+        { value: 'register', label: 'Regisztráció' }
     ];
 
     constructor(private http: HttpClient) { }
@@ -136,7 +136,7 @@ export class AdminSystemComponent implements OnInit {
 
     categoryLabel(category: string): string {
         const opt = this.CATEGORY_OPTIONS.find(o => o.value === category);
-        return opt?.label || category || 'System';
+        return opt?.label || category || 'Rendszer';
     }
 
     setCategoryFilter(category: 'all' | SystemMessage['category']): void {

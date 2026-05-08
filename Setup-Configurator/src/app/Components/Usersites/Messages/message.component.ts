@@ -105,10 +105,10 @@ export class MessagesComponent implements OnInit, OnDestroy {
   reportError = '';
   reportTypes = [
     { value: 'spam', label: 'Spam' },
-    { value: 'harassment', label: 'Zaklatas' },
-    { value: 'hate', label: 'Gyuloletkeltes' },
-    { value: 'scam', label: 'Atveres' },
-    { value: 'other', label: 'Egyeb' }
+    { value: 'harassment', label: 'Zaklatás' },
+    { value: 'hate', label: 'Gyűlöletkeltés' },
+    { value: 'scam', label: 'Átverés' },
+    { value: 'other', label: 'Egyéb' }
   ];
   profileTarget: any = null;
   profileLoading = false;
@@ -204,7 +204,7 @@ export class MessagesComponent implements OnInit, OnDestroy {
 
   getActiveTitle(): string {
     if (this.mode === 'ai') {
-      return this.aiConversations.find((c) => c.key === this.activeAiKey)?.title || 'AI beszelgetes';
+      return this.aiConversations.find((c) => c.key === this.activeAiKey)?.title || 'AI beszélgetés';
     }
 
     return this.conversations.find((c) => String(c.key) === String(this.activeKey))?.title || 'Chat';
@@ -296,7 +296,7 @@ export class MessagesComponent implements OnInit, OnDestroy {
   private prepareProfileReport(conversation: any) {
     this.reportScope = 'profile';
     this.reportTarget = conversation;
-    this.reportTitle = `Report: ${conversation.title || 'Felhasznalo'}`;
+    this.reportTitle = `Report: ${conversation.title || 'Felhasználó'}`;
     this.reportType = 'spam';
     this.reportMessage = '';
     this.reportError = '';
@@ -377,7 +377,7 @@ export class MessagesComponent implements OnInit, OnDestroy {
     const userId = this.getProfileUserId(target);
     if (!userId) {
       this.profileTarget = null;
-      this.profileError = 'Nem talalhato a felhasznalo.';
+      this.profileError = 'Nem található a felhasználó.';
       return;
     }
 
@@ -395,7 +395,7 @@ export class MessagesComponent implements OnInit, OnDestroy {
       },
       error: (err) => {
         this.profileLoading = false;
-        this.profileError = err.error?.error || 'Nem sikerult betolteni a profilt.';
+        this.profileError = err.error?.error || 'Nem sikerült betölteni a profilt.';
       }
     });
   }
@@ -413,7 +413,7 @@ export class MessagesComponent implements OnInit, OnDestroy {
     const message = this.reportMessage.trim();
 
     if (!title || !this.reportType || !message) {
-      this.reportError = 'Tolts ki minden mezot.';
+      this.reportError = 'Tölts ki minden mezőt.';
       return;
     }
 
@@ -436,11 +436,11 @@ export class MessagesComponent implements OnInit, OnDestroy {
       next: () => {
         this.reportSending = false;
         this.reportTarget = null;
-        alert('Report elkuldve az adminoknak.');
+        alert('Report elküldve az adminoknak.');
       },
       error: (err) => {
         this.reportSending = false;
-        this.reportError = err.error?.error || 'Nem sikerult elkuldeni a reportot.';
+        this.reportError = err.error?.error || 'Nem sikerült elküldeni a reportot.';
       }
     });
   }
@@ -502,7 +502,7 @@ export class MessagesComponent implements OnInit, OnDestroy {
       return;
     }
 
-    if (!confirm('Biztos torlod ezt a beszelgetest?')) {
+    if (!confirm('Biztos törlöd ezt a beszélgetést?')) {
       this.closeContextMenu();
       return;
     }
@@ -632,7 +632,7 @@ export class MessagesComponent implements OnInit, OnDestroy {
 
     this.openMenuId = null;
 
-    if (!confirm('Biztos torlod az uzenetet?')) return;
+    if (!confirm('Biztos törlöd az üzenetet?')) return;
 
     this.http.delete(`/api/messages/${id}`, { withCredentials: true }).subscribe(() => {
       if (this.activeKey) {
@@ -781,7 +781,7 @@ export class MessagesComponent implements OnInit, OnDestroy {
         this.loadConversations();
       },
       error: () => {
-        alert('Hiba uzenetkuldesnel.');
+        alert('Hiba üzenetküldésnél.');
       }
     });
   }
@@ -868,7 +868,7 @@ export class MessagesComponent implements OnInit, OnDestroy {
         const aiMessage: AiConversationMessage = {
           id: Date.now() + 3,
           sender: 'ai',
-          text: 'Hiba tortent az AI valasz soran.',
+          text: 'Hiba történt az AI válasz során.',
           created_at: new Date().toISOString()
         };
 
@@ -912,7 +912,7 @@ export class MessagesComponent implements OnInit, OnDestroy {
   }
 
   private deleteAiConversation(key: string) {
-    if (!confirm('Biztos torlod ezt az AI beszelgetest?')) return;
+    if (!confirm('Biztos törlöd ezt az AI beszélgetést?')) return;
 
     this.aiStore.deleteConversation(key).subscribe((conversations) => {
       this.aiConversations = conversations;
@@ -1035,7 +1035,7 @@ export class MessagesComponent implements OnInit, OnDestroy {
         const target = this.pickBestMentionMatch(items, q);
 
         if (!target) {
-          this.selectedAiProductError = 'Nem talaltam ehhez a blokkhoz termekadatot.';
+          this.selectedAiProductError = 'Nem találtam ehhez a blokkhoz termékadatot.';
           this.selectedAiProductLoading = false;
           return;
         }
@@ -1043,7 +1043,7 @@ export class MessagesComponent implements OnInit, OnDestroy {
         this.selectAiProduct(target);
       },
       error: () => {
-        this.selectedAiProductError = 'Nem sikerult betolteni a termekadatokat.';
+        this.selectedAiProductError = 'Nem sikerült betölteni a termékadatokat.';
         this.selectedAiProductLoading = false;
       }
     });
@@ -1162,7 +1162,7 @@ export class MessagesComponent implements OnInit, OnDestroy {
     this.selectedAiProductError = null;
 
     if (!table || id === undefined || id === null) {
-      this.selectedAiProductError = 'Nem sikerult beazonositani a termeket.';
+      this.selectedAiProductError = 'Nem sikerült beazonosítani a terméket.';
       return;
     }
 
@@ -1377,7 +1377,7 @@ export class MessagesComponent implements OnInit, OnDestroy {
     return {
       id: Date.now(),
       sender: 'system',
-      text: 'Kerdezz barmit, es az elso uzenetnel letrejon az uj AI beszelgetes.',
+      text: 'Kérdezz bármit, és az első üzenetnél létrejön az új AI beszélgetés.',
       created_at: new Date().toISOString()
     };
   }

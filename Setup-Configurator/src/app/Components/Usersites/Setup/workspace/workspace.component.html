@@ -237,7 +237,7 @@
     </div>
   }
 
-  @if (windows.length > 0 && !hideDock) {
+  @if (windows.length > 0 && !hideDock && fixedLayout !== 'mobile') {
     <app-setup-dock [windows]="windows" (restore)="restoreWindow($event)" (maximize)="toggleMaximizeWindow($event)"
                     (terminate)="onWindowClosed($event)" (dockItemRightClick)="onDockItemRightClick($event)">
     </app-setup-dock>

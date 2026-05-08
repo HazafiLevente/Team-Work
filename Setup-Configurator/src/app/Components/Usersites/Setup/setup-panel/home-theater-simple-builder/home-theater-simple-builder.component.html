@@ -1,16 +1,16 @@
 <div class="ht-simple-shell">
   <div class="ht-simple-head">
-    <div class="ht-simple-kicker">Hazimozi Builder</div>
+    <div class="ht-simple-kicker">Házimozi Builder</div>
     <div class="ht-simple-title-row">
       <div>
         <div class="ht-simple-title">{{ title || setupTitle() }}</div>
-        <div class="ht-simple-sub">Egyszerubb osszeallitas layouttal, receiverrel es hangsugarzokkal.</div>
+        <div class="ht-simple-sub">Egyszerübb összeállítás layouttal, receiverrel es hangsugárzókkal.</div>
       </div>
     </div>
   </div>
 
   @if (loading) {
-    <div class="ht-simple-state">Betoltes...</div>
+    <div class="ht-simple-state">Betöltés...</div>
   } @else {
     <div class="ht-simple-grid">
       <div class="ht-simple-panel">
@@ -27,7 +27,7 @@
         <label class="ht-simple-field">
           <span>Layout</span>
           <select [(ngModel)]="layout" (change)="onLayoutChange()">
-            <option value="">-- valassz layoutot --</option>
+            <option value="">-- válassz layoutot --</option>
             @for (option of layoutOptions; track option.value) {
               <option [value]="option.value">{{ option.label }}</option>
             }
@@ -37,7 +37,7 @@
         <label class="ht-simple-field">
           <span>Receiver</span>
           <select [(ngModel)]="form['receiver']">
-            <option value="">-- valassz receivert --</option>
+            <option value="">-- válassz receivert --</option>
             @for (product of catalog['receivers']; track (product?.id ?? product?.ID)) {
               <option [ngValue]="product?.id ?? product?.ID">{{ productLabel(product) }}</option>
             }
@@ -59,7 +59,7 @@
         <div class="ht-simple-panel-title">Hangfalak</div>
 
         @if (!layout) {
-          <div class="ht-simple-inline-state">Valassz layoutot, es utana megjelennek a slotok.</div>
+          <div class="ht-simple-inline-state">Válassz layoutot, és utána megjelennek a slotok.</div>
         } @else {
           <div class="ht-simple-fields">
             @for (field of roleFields; track field.key) {
@@ -92,7 +92,7 @@
         type="button"
         [disabled]="saving || loading"
         (click)="save()">
-        {{ saving ? 'Mentes...' : 'Mentés' }}
+        {{ saving ? 'Mentés...' : 'Mentés' }}
       </button>
     </div>
   }

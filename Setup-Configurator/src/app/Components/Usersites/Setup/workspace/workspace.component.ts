@@ -570,7 +570,7 @@ export class WorkspaceComponent {
         }
 
         console.error('❌ Item törlés hiba:', err);
-        this.showDeleteError(err?.error?.error || 'Torles sikertelen.');
+        this.showDeleteError(err?.error?.error || 'Törlés sikertelen.');
       }
     });
   }
@@ -578,7 +578,7 @@ export class WorkspaceComponent {
   private showDeleteError(message: string): void {
     this.confirmDialogState = {
       isOpen: true,
-      title: 'Torles sikertelen',
+      title: 'Törlés sikertelen',
       message,
       confirmText: 'Rendben',
       hideCancel: true,
@@ -764,7 +764,7 @@ export class WorkspaceComponent {
       id: winId,
       kind: 'devices',
       payload: { setup },
-      title: isNote ? `Jegyzet: ${setupName}` : 'Eszkozok',
+      title: isNote ? `Jegyzet: ${setupName}` : 'Eszközök',
       instanceNo: devicesCount,
       x: 100 + offset,
       y: 100 + offset,
@@ -834,7 +834,7 @@ export class WorkspaceComponent {
     const newWindow: WorkspaceWindow = {
       id: winId,
       kind: 'empty',
-      title: 'Szamitogep',
+      title: 'Számítógép',
       payload: { setup },
       instanceNo: this.windows.length + 1,
       x: 140,
@@ -946,7 +946,7 @@ export class WorkspaceComponent {
     const newWindow: WorkspaceWindow = {
       id: winId,
       kind: 'empty',
-      title: 'Halozat',
+      title: 'Hálózat',
       payload: { setup },
       instanceNo: this.windows.length + 1,
       x: 180,

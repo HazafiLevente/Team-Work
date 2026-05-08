@@ -87,7 +87,7 @@ export class HomeTheaterSimpleBuilderComponent implements OnChanges {
       this.setup?.setup_name ??
       this.setup?.display_name ??
       this.setup?.name ??
-      'Nevtelen setup'
+      'Névtelen setup'
     );
   }
 
@@ -99,12 +99,12 @@ export class HomeTheaterSimpleBuilderComponent implements OnChanges {
   save(): void {
     const setupId = this.setupId();
     if (!setupId) {
-      this.error = 'Hianyzik a setup azonosito.';
+      this.error = 'Hiányzik a setup azonosító.';
       return;
     }
 
     if (!this.layout) {
-      this.error = 'Valassz layoutot.';
+      this.error = 'Válassz layoutot.';
       return;
     }
 
@@ -125,13 +125,13 @@ export class HomeTheaterSimpleBuilderComponent implements OnChanges {
       next: (res) => {
         this.saving = false;
         this.buildId = this.asNumber(res?.id) ?? this.buildId;
-        this.success = 'Hazimozi setup sikeresen mentve.';
+        this.success = 'Házimozi setup sikeresen mentve.';
         this.saved.emit();
       },
       error: (err) => {
         console.error('HT simple builder save error:', err);
         this.saving = false;
-        this.error = 'Nem sikerult elmenteni a hazimozi setupot.';
+        this.error = 'Nem sikerült elmenteni a házimozi setupot.';
       }
     });
   }
@@ -148,7 +148,7 @@ export class HomeTheaterSimpleBuilderComponent implements OnChanges {
   }
 
   productLabel(product: any): string {
-    return [product?.manufacturer, product?.model].filter(Boolean).join(' ').trim() || `Eszkoz #${product?.id ?? '?'}`;
+    return [product?.manufacturer, product?.model].filter(Boolean).join(' ').trim() || `Eszköz #${product?.id ?? '?'}`;
   }
 
   private loadCatalog(): void {
@@ -166,7 +166,7 @@ export class HomeTheaterSimpleBuilderComponent implements OnChanges {
     const setupId = this.setupId();
     if (!setupId) {
       this.loading = false;
-      this.error = 'Hianyzik a setup azonosito.';
+      this.error = 'Hiányzik a setup azonosító.';
       return;
     }
 

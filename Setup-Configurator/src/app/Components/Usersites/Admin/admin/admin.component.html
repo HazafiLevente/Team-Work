@@ -2,34 +2,34 @@
 
 
   <div class="admin-header">
-    <h1>🛡 Admin Panel</h1>
+    <h1>🛡 Admin felület</h1>
     <p class="muted">Valós rendszer statisztikák</p>
   </div>
 
 
   <div class="admin-actions-bar">
     <button class="admin-btn" [class.active]="activeSection === 'dashboard'" (click)="openDashboard()">
-      📊 Dashboard
+      📊 Vezérlőpult
     </button>
 
     <button class="admin-btn" [class.active]="activeSection === 'users'" (click)="openUsers()">
-      👥 Users
+      👥 Felhasználók
     </button>
 
     <button *ngIf="canSeeProducts()" class="admin-btn" [class.active]="activeSection === 'products'" (click)="openProducts()">📦
-      Products</button>
+      Termékek</button>
 
     <button class="admin-btn" [class.active]="activeSection === 'reports'" (click)="openReports()">
-      Reports
+      Jelentések
     </button>
 
 
     <button *ngIf="canSeeLogs()" class="admin-btn" [class.active]="activeSection === 'logs'" (click)="openLogs()">
-      🧾 Logs
+      🧾 Naplók
     </button>
 
     <button *ngIf="canSeeSystem()" class="admin-btn" [class.active]="activeSection === 'system'" (click)="openSystem()">
-      ⚙️ System
+      ⚙️ Rendszer
     </button>
   </div>
 
@@ -57,7 +57,7 @@
 
         <div class="stat-card">
           📦 {{ loading ? '…' : productTables }}
-          <span>Product táblák</span>
+          <span>Termék táblák</span>
         </div>
 
         <div class="stat-card">

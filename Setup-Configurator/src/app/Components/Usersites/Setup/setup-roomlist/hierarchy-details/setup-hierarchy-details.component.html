@@ -1,12 +1,12 @@
 <div class="hierarchy-stage">
   @if (loading) {
-    <div class="hierarchy-stage-empty">Betoltes...</div>
+    <div class="hierarchy-stage-empty">Betöltes...</div>
   } @else if (error) {
     <div class="hierarchy-stage-empty">{{ error }}</div>
   } @else if (!selection) {
     <div class="hierarchy-stage-empty">
-      A huzogatos nezet helyett most a hierarchikus rendszer aktiv.
-      Nyiss le egy setupot bal oldalon, es valassz ki egy eszkozt.
+      A húzogatós nézet helyett most a hierarchikus rendszer aktív.
+      Nyiss le egy setupot bal oldalon, és válassz ki egy eszközt.
     </div>
   } @else {
     <div class="hierarchy-details-card">
@@ -23,7 +23,7 @@
           </div>
         }
         @empty {
-          <div class="hierarchy-stage-empty">Nincs megjelenitheto adat.</div>
+          <div class="hierarchy-stage-empty">Nincs megjeleníthető adat.</div>
         }
       </div>
     </div>

@@ -61,7 +61,7 @@
               <div class="field">
                 <label>Alaplap</label>
                 <select [(ngModel)]="motherboardId">
-                  <option [ngValue]="null">— nincs kiválasztva —</option>
+                  <option [ngValue]="null">— Nincs kiválasztva —</option>
                   @for (p of getOptions('motherboard'); track p.id) {
                     <option [ngValue]="p.id">{{ p.display_name }}</option>
                   }
@@ -76,7 +76,7 @@
               <div class="field">
                 <label>RAM</label>
                 <select [(ngModel)]="ramId">
-                  <option [ngValue]="null">— nincs kiválasztva —</option>
+                  <option [ngValue]="null">— Nincs kiválasztva —</option>
                   @for (p of getOptions('ram'); track p.id) {
                     <option [ngValue]="p.id">{{ p.display_name }}</option>
                   }
@@ -91,7 +91,7 @@
               <div class="field">
                 <label>Táp</label>
                 <select [(ngModel)]="psuId">
-                  <option [ngValue]="null">— nincs kiválasztva —</option>
+                  <option [ngValue]="null">— Nincs kiválasztva —</option>
                   @for (p of getOptions('psu'); track p.id) {
                     <option [ngValue]="p.id">{{ p.display_name }}</option>
                   }

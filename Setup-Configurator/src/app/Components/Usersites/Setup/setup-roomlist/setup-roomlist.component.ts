@@ -351,7 +351,7 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit, OnChanges 
     if (!target) return;
 
     const currentName = this.getSetupTitle(target);
-    const newName = window.prompt('Uj setup nev:', currentName);
+    const newName = window.prompt('Új setup név:', currentName);
     if (!newName || !newName.trim() || newName.trim() === currentName) return;
 
     this.saveRenamedRoom({
@@ -494,7 +494,7 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit, OnChanges 
           const rows = (Array.isArray(response?.parts) ? response.parts : [])
             .filter((part: any) => part)
             .map((part: any) => ({
-              key: this.prettyPcSlot(part?.slot || part?.type || 'alkatresz'),
+              key: this.prettyPcSlot(part?.slot || part?.type || 'alkatrész'),
               value:
                 part?.display_name ??
                 part?.name ??
@@ -518,7 +518,7 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit, OnChanges 
         next: (devices) => {
           this.hierarchyDetailsLoading = false;
           const rows = (Array.isArray(devices) ? devices : []).map((device) => ({
-            key: this.prettyRole(device?.role || 'eszkoz'),
+            key: this.prettyRole(device?.role || 'eszköz'),
             value: this.treeItemTitle(device)
           }));
           this.hierarchyDetails = rows.length ? rows : this.buildGenericHierarchyDetails(item);
@@ -537,8 +537,8 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit, OnChanges 
 
   private resolveHierarchySubtitle(item: any): string {
     const type = String(item?.setup_type ?? item?.type ?? item?.category ?? '').toLowerCase();
-    if (type.includes('car')) return 'Auto adatok';
-    if (type.includes('home_theater')) return 'Hazimozi adatok';
+    if (type.includes('car')) return 'Autó adatok';
+    if (type.includes('home_theater')) return 'Házimozi adatok';
     if (type.includes('pc')) return 'PC adatok';
     return 'Elem adatok';
   }
@@ -615,7 +615,7 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit, OnChanges 
 
   readonly hierarchyHtCategoryName = (key: string) => this.prettyHtCatalogCategory(key);
   readonly hierarchyHtProductName = (product: any) =>
-    product?.name ?? product?.model ?? product?.display_name ?? 'Eszkoz';
+    product?.name ?? product?.model ?? product?.display_name ?? 'Eszköz';
   readonly hierarchyHtRoleName = (role: string) => this.prettyRole(role);
 
   private resetHierarchyRightPanel(): void {
@@ -758,9 +758,9 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit, OnChanges 
         this.hierarchyHtCatalogLoading = false;
       },
       error: (err) => {
-        console.error('HT katalogus hiba:', err);
+        console.error('HT katalógus hiba:', err);
         this.hierarchyHtCatalogLoading = false;
-        this.hierarchyHtCatalogError = 'Nem sikerult betolteni a HT katalogust.';
+        this.hierarchyHtCatalogError = 'Nem sikerült betölteni a HT katalógust.';
       }
     });
   }
@@ -783,7 +783,7 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit, OnChanges 
         console.error('HT eszkozlista hiba:', err);
         this.hierarchyHtSelectedDevices = [];
         this.hierarchyHtSelectedLoading = false;
-        this.hierarchyHtSelectedError = 'Nem sikerult betolteni a setup eszkozeit.';
+        this.hierarchyHtSelectedError = 'Nem sikerült betölteni a setup eszközeit.';
       }
     });
   }
@@ -826,9 +826,9 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit, OnChanges 
         this.refreshHierarchySetupChildren(this.hierarchyHtPickerSetup);
       },
       error: (err) => {
-        console.error('HT eszkoz hozzaadas hiba:', err);
+        console.error('HT eszköz hozzáadas hiba:', err);
         this.hierarchyHtSelectedLoading = false;
-        this.hierarchyHtSelectedError = 'Nem sikerult hozzaadni az eszkozt.';
+        this.hierarchyHtSelectedError = 'Nem sikerült hozzáadni az eszközt.';
       }
     });
   }
@@ -861,7 +861,7 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit, OnChanges 
         this.hierarchyHtRenameSaving = false;
       },
       error: (err) => {
-        console.error('HT setup atnevezes hiba:', err);
+        console.error('HT setup átnevezés hiba:', err);
         this.hierarchyHtRenameSaving = false;
       }
     });
@@ -889,7 +889,7 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit, OnChanges 
       speaker: 'Hangfal'
     };
 
-    return labels[normalized] || String(slot || 'Alkatresz');
+    return labels[normalized] || String(slot || 'Alkatrész');
   }
 
   private syncRoomFromRoute(): void {
@@ -918,7 +918,7 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit, OnChanges 
       ? 'plan=true'
       : (this.setupListId ? `listId=${this.setupListId}` : `plan=${plan}`);
 
-    // Setup oldalra is_plan=false szűrés
+    // Setup Site is_plan=false filter
     this.loading = true;
 
     this.http.get<any>(`/api/setup?${listQuery}`, { withCredentials: true }).subscribe({
@@ -1731,8 +1731,8 @@ export class SetupRoomlistComponent implements OnInit, AfterViewInit, OnChanges 
         console.error('❌ Setup törlés hiba:', err);
         this.confirmDialogState = {
           isOpen: true,
-          title: 'Torles sikertelen',
-          message: err?.error?.error || 'A setup torlese nem sikerult.',
+          title: 'Törlés sikertelen',
+          message: err?.error?.error || 'A setup törlése nem sikerült.',
           confirmText: 'Rendben',
           hideCancel: true,
           onConfirm: () => {

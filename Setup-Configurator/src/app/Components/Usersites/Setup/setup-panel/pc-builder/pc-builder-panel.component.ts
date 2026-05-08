@@ -306,7 +306,7 @@ export class PcBuilderPanelComponent implements OnChanges {
     const product = this.getSelectedComputer();
     if (!product) {
       this.saving = false;
-      this.error = this.mode === 'laptop' ? 'Valassz laptopot.' : 'Valassz egybegepet.';
+      this.error = this.mode === 'laptop' ? 'Válassz laptopot.' : 'Válassz egybegépet.';
       return;
     }
 
@@ -315,7 +315,7 @@ export class PcBuilderPanelComponent implements OnChanges {
     const productId = this.getId(product);
     if (productId == null) {
       this.saving = false;
-      this.error = 'Hianyzik a termek azonosito.';
+      this.error = 'Hiányzik a termék azonosító.';
       return;
     }
 
@@ -339,13 +339,13 @@ export class PcBuilderPanelComponent implements OnChanges {
     request.subscribe({
       next: () => {
         this.saving = false;
-        this.success = 'Eszkoz hozzaadva.';
+        this.success = 'Eszköz hozzáadva.';
         this.saved.emit();
       },
       error: (err) => {
         console.error('Ready computer save error:', err);
         this.saving = false;
-        this.error = 'Nem sikerult hozzaadni a gepet.';
+        this.error = 'Nem sikerült hozzáadni a gépet.';
       }
     });
   }
@@ -467,7 +467,7 @@ export class PcBuilderPanelComponent implements OnChanges {
     const manufacturer = this.getManufacturer(product);
     const model = this.getModel(product);
     const name = String(product?.name ?? product?.product_name ?? product?.title ?? '').trim();
-    return [manufacturer, model || name].filter(Boolean).join(' ') || 'Ismeretlen gep';
+    return [manufacturer, model || name].filter(Boolean).join(' ') || 'Ismeretlen gép';
   }
 
   getComputerMeta(product: any): string {
@@ -744,7 +744,7 @@ export class PcBuilderPanelComponent implements OnChanges {
 
     if (this.isReadyComputerMode()) {
       if (!this.selectedComputerId) {
-        this.error = this.mode === 'laptop' ? 'Valassz laptopot.' : 'Valassz egybegepet.';
+        this.error = this.mode === 'laptop' ? 'Válassz laptopot.' : 'Válassz egybegépet.';
         return;
       }
 

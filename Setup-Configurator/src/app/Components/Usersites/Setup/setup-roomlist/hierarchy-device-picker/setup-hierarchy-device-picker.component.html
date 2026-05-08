@@ -1,7 +1,7 @@
 <div class="hierarchy-picker-stage">
   @if (mode === 'none') {
     <div class="hierarchy-picker-empty">
-      Valassz egy kategoriat bal oldalon az uj eszkoz hozzaadasahoz.
+      Válassz egy kategóriát bal oldalon az új eszköz hozzáadásahoz.
     </div>
   } @else {
     <div class="hierarchy-picker-shell">
@@ -10,12 +10,12 @@
         <div class="hierarchy-picker-title-row">
           <div>
             <div class="hierarchy-picker-title">{{ setupTitle || 'Nevtelen setup' }}</div>
-            <div class="hierarchy-picker-sub">Adj nevet a setupnak, majd rakd ossze az eszkozlistat a katalogusbol.</div>
+            <div class="hierarchy-picker-sub">Adj nevet a setupnak, majd rakd össze az eszközlistát a katalógusból.</div>
           </div>
 
           <div class="hierarchy-picker-stats">
             <div class="hierarchy-picker-stat">
-              <span class="hierarchy-picker-stat-label">Kivalasztott</span>
+              <span class="hierarchy-picker-stat-label">Kiválasztott</span>
               <span class="hierarchy-picker-stat-value">{{ selectedDevices.length }}</span>
             </div>
           </div>
@@ -27,7 +27,7 @@
             <input
               type="text"
               [(ngModel)]="draftSetupTitle"
-              placeholder="Adj uj setup nevet"
+              placeholder="Adj új setup nevet"
               (keyup.enter)="submitRename()" />
           </label>
 
@@ -36,7 +36,7 @@
             type="button"
             [disabled]="renameSaving"
             (click)="submitRename()">
-            {{ renameSaving ? 'Mentes...' : 'Nev mentese' }}
+            {{ renameSaving ? 'Mentés...' : 'Név mentése' }}
           </button>
         </div>
       </div>
@@ -44,16 +44,16 @@
       <div class="hierarchy-picker-grid">
         <section class="hierarchy-picker-catalog">
           <div class="hierarchy-picker-panel-head">
-            <div class="hierarchy-picker-section-title">HT eszkoz katalogus</div>
+            <div class="hierarchy-picker-section-title">HT eszköz katalógus</div>
             <input
               class="hierarchy-picker-search"
               type="text"
               [(ngModel)]="search"
-              placeholder="Kereses gyarto vagy modell alapjan" />
+              placeholder="Keresés gyártó vagy modell alapján" />
           </div>
 
           @if (catalogLoading) {
-            <div class="hierarchy-picker-state">Katalogus betoltese...</div>
+            <div class="hierarchy-picker-state">Katalógus betöltése...</div>
           } @else if (catalogError) {
             <div class="hierarchy-picker-state hierarchy-picker-state-error">{{ catalogError }}</div>
           } @else {
@@ -63,7 +63,7 @@
                 type="button"
                 [class.active]="activeCategory === 'all'"
                 (click)="selectCategory('all')">
-                Osszes
+                Összes
                 <span>{{ allVisibleCount() }}</span>
               </button>
 
@@ -92,13 +92,13 @@
                         (click)="addDevice.emit({ product, categoryKey })">
                         <div class="hierarchy-picker-item-top">
                           <span class="hierarchy-picker-item-name">{{ productNameFn(product) }}</span>
-                          <span class="hierarchy-picker-item-cta">Hozzaad</span>
+                          <span class="hierarchy-picker-item-cta">Hozzáad</span>
                         </div>
-                        <span class="hierarchy-picker-item-meta">{{ product?.manufacturer || 'Ismeretlen gyarto' }}</span>
+                        <span class="hierarchy-picker-item-meta">{{ product?.manufacturer || 'Ismeretlen gyartó' }}</span>
                       </button>
                     }
                     @empty {
-                      <div class="hierarchy-picker-inline-empty">Nincs talalat ebben a kategoriaban.</div>
+                      <div class="hierarchy-picker-inline-empty">Nincs találat ebben a kategóriában.</div>
                     }
                   </div>
                 </div>
@@ -109,27 +109,27 @@
 
         <section class="hierarchy-picker-selected">
           <div class="hierarchy-picker-panel-head">
-            <div class="hierarchy-picker-section-title">Hozzaadott eszkozok</div>
+            <div class="hierarchy-picker-section-title">Hozzáadott eszközök</div>
             <div class="hierarchy-picker-selected-count">{{ selectedDevices.length }} db</div>
           </div>
 
           @if (selectedLoading) {
-            <div class="hierarchy-picker-state">Eszkozlista frissitese...</div>
+            <div class="hierarchy-picker-state">Eszközlista frissítése...</div>
           } @else if (selectedError) {
             <div class="hierarchy-picker-state hierarchy-picker-state-error">{{ selectedError }}</div>
           } @else if (!selectedDevices.length) {
-            <div class="hierarchy-picker-state">Meg nincs hozzaadott eszkoz.</div>
+            <div class="hierarchy-picker-state">Még nincs hozzáadott eszköz.</div>
           } @else {
             <div class="hierarchy-picker-selected-list">
               @for (device of selectedDevices; track device.id || $index) {
                 <div class="hierarchy-picker-selected-item">
                   <div class="hierarchy-picker-selected-top">
-                    <div class="hierarchy-picker-selected-role">{{ selectedRoleFn(device?.role || 'eszkoz') }}</div>
+                    <div class="hierarchy-picker-selected-role">{{ selectedRoleFn(device?.role || 'eszköz') }}</div>
                     <div class="hierarchy-picker-selected-id">#{{ device?.id }}</div>
                   </div>
                   <div class="hierarchy-picker-selected-name">{{ productNameFn(device) }}</div>
                   <div class="hierarchy-picker-selected-meta">
-                    {{ device?.manufacturer || 'Ismeretlen gyarto' }}
+                    {{ device?.manufacturer || 'Ismeretlen gyartó' }}
                   </div>
                 </div>
               }

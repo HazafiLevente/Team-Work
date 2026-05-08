@@ -62,9 +62,9 @@ export class NotificationsPageComponent implements OnInit {
 
   tabLabel(category: string): string {
     const value = String(category || '').toLowerCase();
-    if (value === 'news') return 'News';
-    if (value === 'register') return 'Register';
-    if (value === 'system') return 'System';
+    if (value === 'news') return 'Hírek';
+    if (value === 'register') return 'Regisztráció';
+    if (value === 'system') return 'Rendszer';
     return value ? value.charAt(0).toUpperCase() + value.slice(1) : 'System';
   }
 }

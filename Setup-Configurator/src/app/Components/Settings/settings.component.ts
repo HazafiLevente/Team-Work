@@ -27,13 +27,13 @@ export class SettingsComponent implements OnDestroy {
   readonly appearanceOptions = [
     {
       key: 'dark',
-      title: 'Sotet tema',
-      sub: 'Ez az alap. Ertelmezett esti, kontrasztos, modernebb megjelenes.'
+      title: 'Sötét tema',
+      sub: 'Ez az alapértelmezett esti, kontrasztos, modernebb megjelenés.'
     },
     {
       key: 'light',
-      title: 'Vilagos tema',
-      sub: 'Tisztabb, nappali nezettel. A szinpaletta itt is kulon valaszthato.'
+      title: 'Világos tema',
+      sub: 'Tisztább, nappali nézettel. A színpaletta itt is külön valasztható.'
     }
   ] as const;
 
@@ -41,28 +41,28 @@ export class SettingsComponent implements OnDestroy {
     {
       key: 'clean-cyan',
       title: 'Clean Cyan',
-      sub: 'Hideg cyan, pontos technologiai erzet.',
+      sub: 'Hideg cyan, pontos technológiai érzet.',
       previewClass: 'theme-clean-cyan',
       swatches: ['#7dd3fc', '#38bdf8', '#22d3ee']
     },
     {
       key: 'purple-premium',
       title: 'Purple Premium',
-      sub: 'Luxusos lila, eros premium karakterrel.',
+      sub: 'Luxusos lila, erős prémium karakterrel.',
       previewClass: 'theme-purple-premium',
       swatches: ['#c084fc', '#8b5cf6', '#e879f9']
     },
     {
       key: 'glass-slate',
       title: 'Glass Slate',
-      sub: 'Zoldes paletta, tiszta uveges hatassal.',
+      sub: 'Zöldes paletta, tiszta üveges hatással.',
       previewClass: 'theme-glass-slate',
       swatches: ['#34d399', '#14b8a6', '#2dd4bf']
     },
     {
       key: 'soft-light',
       title: 'Soft Light',
-      sub: 'Kekes-lila, nyugodtabb modernebb tonus.',
+      sub: 'Kékes-lila, nyugodtabb modernebb tónus.',
       previewClass: 'theme-soft-light',
       swatches: ['#818cf8', '#38bdf8', '#a5b4fc']
     }
@@ -95,7 +95,7 @@ export class SettingsComponent implements OnDestroy {
   }
 
   get activeAppearanceLabel(): string {
-    return this.form.value.darkMode ? 'Sotet' : 'Vilagos';
+    return this.form.value.darkMode ? 'Sötet' : 'Világos';
   }
 
   get selectedTheme(): ThemeOption | undefined {

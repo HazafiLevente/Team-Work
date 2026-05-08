@@ -55,7 +55,7 @@ export class AdminReportsComponent implements OnInit {
           this.loading = false;
         },
         error: (err) => {
-          console.error('Reports load error', err);
+          console.error('Jelentések betöltési hiba', err);
           this.error = err.error?.error || 'Nem sikerult betolteni a reportokat.';
           this.loading = false;
         }

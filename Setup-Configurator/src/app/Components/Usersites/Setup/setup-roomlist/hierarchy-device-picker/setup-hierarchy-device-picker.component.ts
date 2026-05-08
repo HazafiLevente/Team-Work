@@ -19,7 +19,7 @@ export class SetupHierarchyDevicePickerComponent {
   @Input() catalog: Record<string, any[]> = {};
   @Input() selectedDevices: any[] = [];
   @Input() categoryNameFn: (key: string) => string = (key) => key;
-  @Input() productNameFn: (product: any) => string = (product) => product?.name ?? product?.model ?? 'Eszkoz';
+  @Input() productNameFn: (product: any) => string = (product) => product?.name ?? product?.model ?? 'Eszköz';
   @Input() selectedRoleFn: (role: string) => string = (role) => role;
   @Input() renameSaving = false;
 

@@ -1,7 +1,7 @@
 <div class="chat-layout">
   <div class="chat-sidebar" [class.hidden-mobile]="isMobile && mobileView !== 'list'">
     <div class="sidebar-header">
-      <div class="sidebar-title">Beszélgetesek</div>
+      <div class="sidebar-title">Beszélgetések</div>
 
       <div class="messages-ai-toggle-row">
         <label class="hierarchy-toggle" [class.hierarchy-active]="messagesAiEnabled">
@@ -24,78 +24,84 @@
       </div>
     </div>
 
-    <ng-container *ngIf="mode === 'messages'; else aiSidebar">
-      <div
-        *ngFor="let c of conversations"
-        class="chat-item"
-        [class.active]="c.key === activeKey"
-        (click)="goToConversation(c.key)"
-        (contextmenu)="onRightClickConversation($event, c)">
+    <div class="sidebar-scroll">
+      <ng-container *ngIf="mode === 'messages'; else aiSidebar">
+        <div
+          *ngFor="let c of conversations"
+          class="chat-item"
+          [class.active]="c.key === activeKey"
+          (click)="goToConversation(c.key)"
+          (contextmenu)="onRightClickConversation($event, c)">
 
-        <div class="avatar">{{ (c.title || '?').charAt(0) }}</div>
+          <div class="avatar">{{ (c.title || '?').charAt(0) }}</div>
 
-        <div class="chat-info">
-          <div class="chat-title">{{ c.title }}</div>
-          <div class="chat-preview">{{ c.lastText || '-' }}</div>
-        </div>
+          <div class="chat-info">
+            <div class="chat-title">{{ c.title }}</div>
+            <div class="chat-preview">{{ c.lastText || '-' }}</div>
+          </div>
 
-        <div class="conversation-menu-wrap" (click)="$event.stopPropagation()">
-          <button
-            type="button"
-            class="conversation-dots"
-            title="Muveletek"
-            (click)="toggleConversationMenu($event, c)">
-            &#8942;
-          </button>
-
-          <div
-            *ngIf="conversationMenuKey === c.key"
-            class="conversation-menu"
-            (click)="$event.stopPropagation()">
-            <button type="button" class="conversation-menu-item" (click)="openConversationProfile($event, c)">
-              Profil
+          <div class="conversation-menu-wrap" (click)="$event.stopPropagation()">
+            <button
+              type="button"
+              class="conversation-dots"
+              title="Műveletek"
+              (click)="toggleConversationMenu($event, c)">
+              &#8942;
             </button>
-            <button type="button" class="conversation-menu-item danger" (click)="openReportModal($event, c)">
-              Report
-            </button>
+
+            <div
+              *ngIf="conversationMenuKey === c.key"
+              class="conversation-menu"
+              (click)="$event.stopPropagation()">
+              <button type="button" class="conversation-menu-item" (click)="openConversationProfile($event, c)">
+                Profil
+              </button>
+              <button type="button" class="conversation-menu-item danger" (click)="openReportModal($event, c)">
+                Report
+              </button>
+            </div>
           </div>
         </div>
-      </div>
 
-      <button class="new-chat-btn" type="button" (click)="toggleNewChat()">
-        + Uj beszelgetes
-      </button>
+        <div class="sidebar-footer">
+          <button class="new-chat-btn" type="button" (click)="toggleNewChat()">
+            + Új beszélgetés
+          </button>
 
-      <div *ngIf="showNewChat" class="user-list">
+          <div *ngIf="showNewChat" class="user-list">
+            <div
+              *ngFor="let u of users"
+              class="user-row"
+              (click)="startConversation(u)">
+              {{ u.username }}
+            </div>
+          </div>
+        </div>
+      </ng-container>
+
+      <ng-template #aiSidebar>
         <div
-          *ngFor="let u of users"
-          class="user-row"
-          (click)="startConversation(u)">
-          {{ u.username }}
+          *ngFor="let c of aiConversations"
+          class="chat-item ai-item"
+          [class.active]="c.key === activeAiKey"
+          (click)="goToAiConversation(c.key)"
+          (contextmenu)="onRightClickAiConversation($event, c)">
+
+          <div class="avatar ai-avatar">AI</div>
+
+          <div class="chat-info">
+            <div class="chat-title">{{ c.title }}</div>
+            <div class="chat-preview">{{ c.lastText || 'Uj AI beszelgetes' }}</div>
+          </div>
         </div>
-      </div>
-    </ng-container>
 
-    <ng-template #aiSidebar>
-      <div
-        *ngFor="let c of aiConversations"
-        class="chat-item ai-item"
-        [class.active]="c.key === activeAiKey"
-        (click)="goToAiConversation(c.key)"
-        (contextmenu)="onRightClickAiConversation($event, c)">
-
-        <div class="avatar ai-avatar">AI</div>
-
-        <div class="chat-info">
-          <div class="chat-title">{{ c.title }}</div>
-          <div class="chat-preview">{{ c.lastText || 'Uj AI beszelgetes' }}</div>
+        <div class="sidebar-footer">
+          <button class="new-chat-btn ai-btn" type="button" (click)="toggleNewChat()">
+            + Új AI beszélgetés
+          </button>
         </div>
-      </div>
-
-      <button class="new-chat-btn ai-btn" type="button" (click)="toggleNewChat()">
-        + Uj AI beszelgetes
-      </button>
-    </ng-template>
+      </ng-template>
+    </div>
   </div>
 
   <div class="chat-content" [class.hidden-mobile]="isMobile && mobileView !== 'chat'">
@@ -122,7 +128,7 @@
             <input [(ngModel)]="editText" (keyup.enter)="saveEdit()" />
             <div class="edit-actions">
               <button type="button" (click)="saveEdit()">OK</button>
-              <button type="button" (click)="cancelEdit()">Megse</button>
+              <button type="button" (click)="cancelEdit()">Mégse</button>
             </div>
           </div>
         </ng-container>
@@ -132,7 +138,7 @@
             <div class="bubble" [class.ai-bubble]="m.sender === 'ai' && !m.loading">
               <ng-container *ngIf="m.sender === 'ai' && !m.loading; else plainBubble">
                 <div class="ai-badge-row">
-                  <span class="ai-badge">AI Valasz</span>
+                  <span class="ai-badge">AI Válasz</span>
                   <span class="ai-badge-glow"></span>
                 </div>
 
@@ -229,7 +235,7 @@
                 </div>
 
                 <div class="dropdown-item disabled">
-                  Eltuntetes
+                  Eltüntetés
                 </div>
               </div>
             </div>
@@ -242,7 +248,7 @@
       </div>
 
         <div *ngIf="displayedMessages.length === 0" class="empty">
-          {{ mode === 'ai' ? 'Nincs meg AI beszelgetes' : 'Nincs uzenet' }}
+          {{ mode === 'ai' ? 'Nincs meg AI beszelgetés' : 'Nincs üzenet' }}
         </div>
 
         <div #bottom></div>
@@ -252,11 +258,11 @@
     <div *ngIf="activeSelectionKey" class="chat-input">
       <input
         [(ngModel)]="newMessage"
-        [placeholder]="mode === 'ai' ? 'Irj az AI-nak...' : 'Irj uzenetet...'"
+        [placeholder]="mode === 'ai' ? 'Irj az AI-nak...' : 'Írj üzenetet...'"
         (keyup.enter)="sendMessage()"
       />
       <button type="button" (click)="sendMessage()">
-        {{ mode === 'ai' ? 'Kerdezes' : 'Kuldes' }}
+        {{ mode === 'ai' ? 'Kérdezés' : 'Küldés' }}
       </button>
     </div>
   </div>
@@ -268,7 +274,7 @@
     <form class="report-modal" (click)="$event.stopPropagation()" (ngSubmit)="submitReport()">
       <div class="report-modal-head">
         <div>
-          <div class="report-eyebrow">Report kuldese</div>
+          <div class="report-eyebrow">Report küldése</div>
           <h2>{{ reportScope === 'profile' ? reportTarget.title : 'Message report' }}</h2>
         </div>
         <button type="button" class="report-close" (click)="closeReportModal()">x</button>
@@ -304,7 +310,7 @@
       <div *ngIf="reportError" class="report-error">{{ reportError }}</div>
 
       <div class="report-actions">
-        <button type="button" class="report-secondary" (click)="closeReportModal()">Megse</button>
+        <button type="button" class="report-secondary" (click)="closeReportModal()">Mégse</button>
         <button type="submit" class="report-submit" [disabled]="reportSending">
           {{ reportSending ? 'Kuldes...' : 'Report kuldese' }}
         </button>
@@ -329,7 +335,7 @@
         <button type="button" class="profile-close" (click)="closeProfileModal()">x</button>
       </div>
 
-      <div *ngIf="profileLoading" class="profile-state">Profil betoltese...</div>
+      <div *ngIf="profileLoading" class="profile-state">Profil betöltése...</div>
       <div *ngIf="profileError && !profileLoading" class="profile-state error">{{ profileError }}</div>
 
       <ng-container *ngIf="profileTarget && !profileLoading">
@@ -350,7 +356,7 @@
           </div>
 
           <ng-template #noProfileSetups>
-            <div class="profile-empty-setups">Nincs megjelenitheto setup.</div>
+            <div class="profile-empty-setups">Nincs megjeleníthető setup.</div>
           </ng-template>
         </div>
 
@@ -380,18 +386,18 @@
     </ng-container>
 
     <ng-container *ngIf="contextIsOwnMessage()">
-      <div class="ctx-item" (click)="ctxEditMessage()">Szerkesztes</div>
-      <div class="ctx-item danger" (click)="ctxDelete()">Torles</div>
+      <div class="ctx-item" (click)="ctxEditMessage()">Szerkesztés</div>
+      <div class="ctx-item danger" (click)="ctxDelete()">Törlés</div>
     </ng-container>
 
     <ng-container *ngIf="contextIsOtherMessage()">
       <div class="ctx-item" (click)="ctxOpenProfile()">Profil</div>
       <div class="ctx-item danger" (click)="ctxReport()">Report</div>
-      <div class="ctx-item disabled" (click)="ctxHide()">Eltuntetes</div>
+      <div class="ctx-item disabled" (click)="ctxHide()">Eltüntetés</div>
     </ng-container>
 
     <ng-container *ngIf="contextTarget?.type === 'aiConversation'">
-      <div class="ctx-item danger" (click)="ctxDelete()">Torles</div>
+      <div class="ctx-item danger" (click)="ctxDelete()">Törlés</div>
     </ng-container>
   </div>
 </div>

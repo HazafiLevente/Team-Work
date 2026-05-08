@@ -1432,6 +1432,14 @@ app-dark-veil-bg {
   .carfilter {
     border-radius: 14px !important;
   }
+
+}
+
+@media (max-width: 768px) and (pointer: coarse) {
+  app-dock,
+  app-setup-dock {
+    display: none !important;
+  }
 }
 
 body.ai-open .dock-outer {

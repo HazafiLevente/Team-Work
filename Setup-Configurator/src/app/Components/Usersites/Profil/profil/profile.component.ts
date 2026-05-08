@@ -134,7 +134,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
       },
       error: (err) => {
         this.profileSummaryLoading = false;
-        this.profileSummaryError = err?.error?.error || 'Nem sikerult betolteni a setup osszesitot.';
+        this.profileSummaryError = err?.error?.error || 'Nem sikerült betölteni a setup összesítőt.';
       }
     });
   }
@@ -155,7 +155,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
       },
       error: (err) => {
         this.publicProfileLoading = false;
-        this.publicProfileError = err.error?.error || 'Nem sikerult betolteni a profilt.';
+        this.publicProfileError = err.error?.error || 'Nem sikerült betölteni a profilt.';
       }
     });
   }
@@ -175,7 +175,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
       },
       error: (err) => {
         this.publicProfileLoading = false;
-        this.publicProfileError = err.error?.error || 'Nem sikerult betolteni a profilt.';
+        this.publicProfileError = err.error?.error || 'Nem sikerült betölteni a profilt.';
       }
     });
   }

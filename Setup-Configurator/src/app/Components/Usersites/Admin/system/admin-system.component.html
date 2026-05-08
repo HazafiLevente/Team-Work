@@ -1,16 +1,16 @@
 <div class="system-page">
 
     <div class="send-card">
-        <h2>Uj ertesites</h2>
+        <h2>Új értesítés</h2>
 
         <div class="form-grid">
             <div class="field">
-                <label>Cim</label>
+                <label>Cím</label>
                 <input type="text" [(ngModel)]="newTitle" placeholder="pl. Karbantartas holnap 18:00-tol" />
             </div>
 
             <div class="field">
-                <label>Kategoria</label>
+                <label>Kategória</label>
                 <select [(ngModel)]="newCategory">
                     @for (opt of CATEGORY_OPTIONS; track opt.value) {
                     <option [value]="opt.value">{{ opt.label }}</option>
@@ -19,7 +19,7 @@
             </div>
 
             <div class="field">
-                <label>Cimzett</label>
+                <label>Címzett</label>
                 <select [(ngModel)]="newTarget">
                     @for (opt of TARGET_OPTIONS; track opt.value) {
                     <option [value]="opt.value">{{ opt.label }}</option>
@@ -29,13 +29,13 @@
 
             @if (newTarget === 'custom') {
             <div class="field">
-                <label>Felhasznalo ID</label>
+                <label>Felhasználó ID</label>
                 <input type="text" [(ngModel)]="customTarget" placeholder="pl. 42" />
             </div>
             }
 
             <div class="field full">
-                <label>Uzenet</label>
+                <label>Üzenet</label>
                 <textarea [(ngModel)]="newMessage" rows="4" placeholder="Az uzenet szovege..."></textarea>
             </div>
         </div>
@@ -48,13 +48,13 @@
         }
 
         <button class="send-btn" (click)="send()" [disabled]="sending">
-            @if (sending) { Kuldes... } @else { Kuldes }
+            @if (sending) { Küldés... } @else { Küldés }
         </button>
     </div>
 
     <div class="history-card">
         <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;">
-            <h2>Korabbi ertesitesek</h2>
+            <h2>Korábbi értesítések</h2>
             <div style="display:flex;gap:8px;flex-wrap:wrap;">
                 <button class="send-btn" [class.active-filter]="activeCategoryFilter === 'all'" (click)="setCategoryFilter('all')">Mind</button>
                 @for (opt of CATEGORY_OPTIONS; track opt.value) {
@@ -64,9 +64,9 @@
         </div>
 
         @if (loading) {
-        <div class="muted">Betoltes...</div>
+        <div class="muted">Betöltés...</div>
         } @else if (messages.length === 0) {
-        <div class="muted">Meg nincs ertesites ebben a kategoriaban.</div>
+        <div class="muted">Még nincs értesítés ebben a kategóriában.</div>
         } @else {
         <div class="msg-list">
             @for (msg of messages; track msg.id) {
@@ -78,7 +78,7 @@
                 </div>
                 <div class="msg-title">{{ msg.title }}</div>
                 <div class="msg-body">{{ msg.message }}</div>
-                <button class="delete-btn" (click)="deleteMessage(msg.id)">Torles</button>
+                <button class="delete-btn" (click)="deleteMessage(msg.id)">Törlés</button>
             </div>
             }
         </div>

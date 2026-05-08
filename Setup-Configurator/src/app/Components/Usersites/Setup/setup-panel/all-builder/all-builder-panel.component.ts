@@ -91,9 +91,10 @@ export class AllBuilderPanelComponent implements OnChanges {
     this.error = '';
     this.success = '';
 
-    // Feltételezzük, hogy van egy végpont az összes termék lekérésére,
-    // vagy az instrument-options-hoz hasonlóan működik de szélesebb körű.
-    // Mivel a feladat az összes terméket kéri a products táblából:
+    //Lets assume, that there is an endpoint to all of the products request
+    //or works similarly to instrument-options but is more comprehensive.
+    // Since the task requests all products from the products table:
+
     this.http.get<any>('/api/setup/all-product-options', { withCredentials: true }).subscribe({
       next: (res) => {
         this.products = this.unwrapProducts(res).map((prod: any) => ({
@@ -151,11 +152,11 @@ export class AllBuilderPanelComponent implements OnChanges {
     this.error = '';
     this.success = '';
 
-    // Itt a payload típusa 'all' vagy valami általánosabb lehet,
-    // de az instrument logic alapján haladunk.
+    // Here the payload type could be 'all' or something more general,
+    // but we're going by instrument logic.
     const payload = {
       product_id: prodId,
-      type: 'product' // Általános termék típus
+      type: 'product' // General product type
     };
 
     const request = this.editChildSetupId

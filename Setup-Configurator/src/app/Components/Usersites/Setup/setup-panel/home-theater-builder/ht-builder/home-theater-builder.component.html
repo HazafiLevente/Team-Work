@@ -1,15 +1,15 @@
 <div class="ht-container" [class.sidebar-open]="sidebarOpen">
   <div class="canvas-header">
     <div class="build-info">
-      <input type="text" [(ngModel)]="buildTitle" placeholder="Hazimozi neve..." class="title-input">
+      <input type="text" [(ngModel)]="buildTitle" placeholder="Házimozi neve..." class="title-input">
       <span class="setup-hint" *ngIf="setup">Setup: {{ setup.setup_name }}</span>
     </div>
     <div class="actions">
       <button class="btn-secondary" type="button" (click)="toggleSidebar()">
-        {{ sidebarOpen ? 'Katalogus bezarasa' : 'HT eszkozok' }}
+        {{ sidebarOpen ? 'Katalógus bezárasa' : 'HT eszközök' }}
       </button>
       <button class="btn-primary" type="button" (click)="saveBuild()" [disabled]="saving">
-        {{ saving ? 'Mentes...' : 'Elrendezes mentese' }}
+        {{ saving ? 'Mentés...' : 'Elrendezés mentése' }}
       </button>
     </div>
   </div>
@@ -48,13 +48,13 @@
               <div class="card-header">
                 <span class="item-type">{{ getCategoryName(item.category) }}</span>
                 <div class="card-actions">
-                  <button class="icon-btn" type="button" (click)="startConnection(item.id); $event.stopPropagation()" title="Osszekotes">
+                  <button class="icon-btn" type="button" (click)="startConnection(item.id); $event.stopPropagation()" title="Összekötes">
                     L
                   </button>
-                  <button class="icon-btn" type="button" (click)="rotateItem(item); $event.stopPropagation()" title="Forgatas">
+                  <button class="icon-btn" type="button" (click)="rotateItem(item); $event.stopPropagation()" title="Forgatás">
                     R
                   </button>
-                  <button class="icon-btn danger" type="button" (click)="removeItem(item.id); $event.stopPropagation()" title="Torles">
+                  <button class="icon-btn danger" type="button" (click)="removeItem(item.id); $event.stopPropagation()" title="Törlés">
                     x
                   </button>
                 </div>
@@ -71,7 +71,7 @@
         @if (placedItems.length === 0) {
           <div class="empty-state">
             <div class="icon">HT</div>
-            <p>A hazimozi ures. Adj hozza eszkozoket a katalogusbol.</p>
+            <p>A házimozi üres. Adj hozzá eszközöket a katalógusból.</p>
           </div>
         }
       </div>
@@ -80,11 +80,11 @@
     <div class="product-sidebar" [class.open]="sidebarOpen">
       <div class="sidebar-header">
         <div>
-          <h3>Hazimozi katalogus</h3>
+          <h3>Házimozi katalógus</h3>
           <p>type = ht, category szerint rendezve</p>
         </div>
         <div class="search-box">
-          <input type="text" [(ngModel)]="searchQuery" placeholder="Kereses nev vagy gyarto alapjan...">
+          <input type="text" [(ngModel)]="searchQuery" placeholder="Keresés nev vagy gyárto alapján...">
         </div>
       </div>
 

@@ -5,10 +5,10 @@
       <div class="property-strip-toggle">
         <div class="property-strip-copy">
           <div class="property-strip-title">
-            {{ viewingSetup ? viewingSetupTitle() : 'Tulajdonsag Sav' }}
+            {{ viewingSetup ? viewingSetupTitle() : 'Tulajdonság Sáv' }}
           </div>
           <div class="property-strip-sub">
-            {{ viewingSetup ? 'Setup belso nezete' : 'Huzogatos nezet aktiv' }}
+            {{ viewingSetup ? 'Setup belső nézete' : 'Huzogatós nézet aktív' }}
           </div>
         </div>
       </div>
@@ -16,7 +16,7 @@
       <div class="property-actions">
         @if (viewingSetup && selectedWorkspaceItem) {
           <div class="property-selection">
-            <span>Kijelolt eszkoz</span>
+            <span>Kijelölt eszköz</span>
             <strong>{{ itemTitle() }}</strong>
           </div>
 
@@ -30,14 +30,14 @@
           </div>
 
           <div class="property-action-grid">
-            <button type="button" class="property-action" (click)="openSelectedItem()">Megnyitas</button>
-            <button type="button" class="property-action" (click)="renameSelectedItem()">Atnevezes</button>
-            <button type="button" class="property-action" (click)="modifySelectedItem()">Modositas</button>
-            <button type="button" class="property-action" (click)="startQuickConnectFromSelectedItem()">Osszekotes</button>
+            <button type="button" class="property-action" (click)="openSelectedItem()">Megnyitás</button>
+            <button type="button" class="property-action" (click)="renameSelectedItem()">Átnevezés</button>
+            <button type="button" class="property-action" (click)="modifySelectedItem()">Módosítás</button>
+            <button type="button" class="property-action" (click)="startQuickConnectFromSelectedItem()">Összekötés</button>
           </div>
         } @else if (viewingSetup) {
           <div class="property-selection">
-            <span>Uj eszkoz</span>
+            <span>Új eszköz</span>
             <strong>{{ viewingSetupTitle() }}</strong>
           </div>
 
@@ -54,18 +54,18 @@
           </button>
         } @else {
           <div class="property-selection">
-            <span>Kijelolt setup</span>
+            <span>Kijelölt setup</span>
             <strong>{{ selectedSetupTitle() }}</strong>
           </div>
 
           <div class="property-action-grid">
-            <button type="button" class="property-action" (click)="openSelectedSetup()">Megnyitas</button>
+            <button type="button" class="property-action" (click)="openSelectedSetup()">Megnyitás</button>
             @if (!isNoteSetup(selectedSetup)) {
-              <button type="button" class="property-action" (click)="openSelectedSetupTools()">Eszkozok</button>
-              <button type="button" class="property-action" (click)="renameSelectedSetup()">Atnevezes</button>
-              <button type="button" class="property-action" (click)="connectSelectedSetup()">Osszekotes</button>
+              <button type="button" class="property-action" (click)="openSelectedSetupTools()">Eszközök</button>
+              <button type="button" class="property-action" (click)="renameSelectedSetup()">Átnevezés</button>
+              <button type="button" class="property-action" (click)="connectSelectedSetup()">Összekötés</button>
               <button type="button" class="property-action" (click)="openSelectedSetupConnections()">Kapcsolatok</button>
-              <button type="button" class="property-action danger" (click)="deleteSelectedSetup()">Torles</button>
+              <button type="button" class="property-action danger" (click)="deleteSelectedSetup()">Törlés</button>
             }
           </div>
         }
@@ -187,8 +187,8 @@
             }
           } @else if (hierarchyBuilderLoading) {
             <div class="hierarchy-builder-placeholder">
-              <div class="hierarchy-builder-placeholder-title">Betoltes...</div>
-              <div class="hierarchy-builder-placeholder-sub">Setup elemek betoltese folyamatban.</div>
+              <div class="hierarchy-builder-placeholder-title">Betöltés...</div>
+              <div class="hierarchy-builder-placeholder-sub">Setup elemek betöltése folyamatban.</div>
             </div>
           } @else if (hierarchyBuilderError) {
             <div class="hierarchy-builder-placeholder">
@@ -217,9 +217,9 @@
             </app-home-theater-simple-builder>
           } @else if (hierarchyBuilderType === 'network') {
             <div class="hierarchy-builder-placeholder">
-              <div class="hierarchy-builder-placeholder-title">Halozat builder</div>
+              <div class="hierarchy-builder-placeholder-title">Hálózat builder</div>
               <div class="hierarchy-builder-placeholder-sub">
-                Ehhez a kategorihoz most nincs quick-details panel, csak placeholder.
+                Ehhez a kategóriához most nincs quick-details panel, csak placeholder.
               </div>
             </div>
           } @else {

@@ -11,15 +11,15 @@
         <div class="state success">{{ success }}</div>
       }
 
-      <div class="mode-selector" aria-label="Gep tipusa">
+      <div class="mode-selector" aria-label="Gép típusa">
         <button
           type="button"
           class="mode-card"
           [class.active]="mode === 'build'"
           (click)="setMode('build')">
           <span class="mode-icon">+</span>
-          <span class="mode-title">Osszerako</span>
-          <span class="mode-text">CPU, alaplap, RAM es tobbi alkatresz kulon valasztva.</span>
+          <span class="mode-title">Összerakó</span>
+          <span class="mode-text">CPU, alaplap, RAM és többi alkatrész külön választva.</span>
         </button>
 
         <button
@@ -28,8 +28,8 @@
           [class.active]="mode === 'all_in_one'"
           (click)="setMode('all_in_one')">
           <span class="mode-icon">[]</span>
-          <span class="mode-title">Egybegep</span>
-          <span class="mode-text">Kesz all-in-one gep hozzaadasa a setuphoz.</span>
+          <span class="mode-title">Egybegép</span>
+          <span class="mode-text">Kész all-in-one gép hozzáadása a setuphoz.</span>
         </button>
 
         <button
@@ -39,7 +39,7 @@
           (click)="setMode('laptop')">
           <span class="mode-icon">__</span>
           <span class="mode-title">Laptop</span>
-          <span class="mode-text">Notebook vagy hordozhato gep valasztasa.</span>
+          <span class="mode-text">Notebook vagy hordozható gép választása.</span>
         </button>
       </div>
 
@@ -206,20 +206,20 @@
                   Egybegep valasztasa
                 }
               </div>
-              <div class="ready-subtitle">A kivalasztott gep kozvetlenul bekerul a setupba.</div>
+              <div class="ready-subtitle">A kiválasztott gép közvetlenül bekerül a setupba.</div>
             </div>
 
             <input
               class="ready-search"
               type="text"
               [(ngModel)]="computerSearch"
-              placeholder="Kereses model alapjan..." />
+              placeholder="Keresés model alapján..." />
           </div>
 
           @if (loadingComputerProducts) {
-            <div class="state">Gepek betoltese...</div>
+            <div class="state">Gépek betöltése...</div>
           } @else if (getVisibleComputerProducts().length === 0) {
-            <div class="state error">Nincs talalat ehhez a tipushoz.</div>
+            <div class="state error">Nincs találat ehhez a típushoz.</div>
           } @else {
             <div class="ready-grid">
               @for (product of getVisibleComputerProducts(); track getId(product)) {
@@ -256,7 +256,7 @@
           @if (saving) {
             Saving...
           } @else if (isReadyComputerMode()) {
-            Gep hozzaadasa
+            Gép hozzáadása
           } @else {
             Save PC build
           }

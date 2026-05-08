@@ -130,7 +130,7 @@ export class NetworkBuilderPanelComponent implements OnChanges {
       },
       error: (err) => {
         console.error('network options load error:', err);
-        this.error = 'Nem sikerult betolteni a halozati eszkozoket.';
+        this.error = 'Nem sikerült betölteni a hálózati eszközöket.';
         this.loading = false;
       }
     });
@@ -176,19 +176,19 @@ export class NetworkBuilderPanelComponent implements OnChanges {
   saveNetworkDevice(): void {
     const sid = this.setupId();
     if (!sid) {
-      this.error = 'Hianyzik a setup azonosito.';
+      this.error = 'Hiányzik a setup azonosító.';
       return;
     }
 
     const productId = this.parseDeviceKey(this.selectedDeviceKey);
     if (productId == null) {
-      this.error = 'Valassz egy halozati eszkozt.';
+      this.error = 'Válassz egy hálózati eszközt.';
       return;
     }
 
     const selected = this.getSelectedDevice();
     if (!selected) {
-      this.error = 'A kivalasztott eszkoz nem talalhato.';
+      this.error = 'A kiválasztott eszköz nem található.';
       return;
     }
 
@@ -211,13 +211,13 @@ export class NetworkBuilderPanelComponent implements OnChanges {
     request.subscribe({
       next: () => {
         this.saving = false;
-        this.success = 'Halozati eszkoz sikeresen hozzaadva.';
+        this.success = 'Hálózati eszköz sikeresen hozzáadva.';
         this.saved.emit();
       },
       error: (err) => {
         console.error('network add error:', err);
         this.saving = false;
-        this.error = 'Nem sikerult hozzaadni a halozati eszkozt.';
+        this.error = 'Nem sikerült hozzáadni a hálózati eszközt.';
       }
     });
   }

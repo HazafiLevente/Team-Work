@@ -2,23 +2,23 @@
 
 
     <div class="logs-toolbar">
-        <h2>📋 Server Logs</h2>
+        <h2>📋 Szerver naplók</h2>
 
         <div class="toolbar-controls">
             <select [(ngModel)]="levelFilter" (change)="applyFilters()">
                 <option value="">Összes szint</option>
                 <option value="log">🔵 Log</option>
-                <option value="warn">🟡 Warn</option>
-                <option value="error">🔴 Error</option>
+                <option value="warn">🟡 Figyelmeztetés</option>
+                <option value="error">🔴 Hiba</option>
             </select>
 
             <input type="text" [(ngModel)]="searchFilter" (keyup.enter)="applyFilters()" placeholder="🔍 Keresés..." />
 
             <button class="tool-btn" (click)="applyFilters()">Szűrés</button>
-            <button class="tool-btn" (click)="resetFilters()">Reset</button>
+            <button class="tool-btn" (click)="resetFilters()">Visszaállítás</button>
 
             <button class="tool-btn" [class.active]="autoRefresh" (click)="toggleAutoRefresh()">
-                @if (autoRefresh) { 🔄 Auto } @else { ⏸ Pause }
+                @if (autoRefresh) { 🔄 Automata } @else { ⏸ Szünet }
             </button>
 
             <button class="tool-btn danger" (click)="clearLogs()">🗑 Törlés</button>

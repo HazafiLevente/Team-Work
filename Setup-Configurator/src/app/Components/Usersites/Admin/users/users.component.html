@@ -15,7 +15,7 @@
           </div>
           <div class="user-meta">
             <span class="muted smaller date-label">{{ u.created_at | date:'yyyy.MM.dd' }}</span>
-            <span class="badge ban-badge" *ngIf="u.banned">BANNED</span>
+            <span class="badge ban-badge" *ngIf="u.banned">KITILTVA</span>
             <span class="badge" *ngIf="canSeeRoleBadge(u.role)">{{ u.role }}</span>
             <span class="chevron">▼</span>
           </div>
@@ -30,7 +30,7 @@
               <input [(ngModel)]="u.username">
             </div>
             <div class="field">
-              <label>Role</label>
+              <label>Szerepkör</label>
               <ng-container *ngIf="canEditUserRole(u.role); else roleLocked">
                 <select [(ngModel)]="u.role">
                   <option *ngFor="let r of availableRolesForMe()" [value]="r">{{ r }}</option>
@@ -61,9 +61,9 @@
 
 
           <div class="setups-section">
-            <h3>Setups</h3>
+            <h3>Eszközök</h3>
 
-            <div *ngIf="loadingSetups[u.id]" class="muted">Setups betöltése...</div>
+            <div *ngIf="loadingSetups[u.id]" class="muted">Eszközök betöltése...</div>
 
             <div class="setups-grid" *ngIf="!loadingSetups[u.id]">
               <div class="setup-card" *ngFor="let s of userSetups[u.id]" (dblclick)="onSetupDblClick(s)"
@@ -81,7 +81,7 @@
 
               </div>
 
-              <div *ngIf="userSetups[u.id]?.length === 0" class="muted small">Nincs setup.</div>
+            <div *ngIf="userSetups[u.id]?.length === 0" class="muted small">Nincs eszköz.</div>
             </div>
           </div>
 
