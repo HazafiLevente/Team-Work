@@ -96,7 +96,7 @@ export class FeaturedSpotlightComponent implements OnChanges {
       },
       error: (err) => {
         this.creatingNote = false;
-        this.noteError = err?.error?.error || 'Nem sikerult letrehozni a jegyzetet.';
+        this.noteError = err?.error?.error || 'Nem sikerült létrehozni a jegyzetet.';
       }
     });
   }
@@ -115,7 +115,7 @@ export class FeaturedSpotlightComponent implements OnChanges {
       error: (err) => {
         this.noteDevices = [];
         this.noteDevicesLoading = false;
-        this.noteError = err?.error?.error || 'Nem sikerult betolteni a jegyzet eszkozeit.';
+        this.noteError = err?.error?.error || 'Nem sikerült betölteni a jegyzet eszközeit.';
       }
     });
   }
@@ -148,7 +148,7 @@ export class FeaturedSpotlightComponent implements OnChanges {
     const payload = this.setupNote.buildDevicePayload(product);
 
     if (!payload) {
-      this.noteError = 'Nem sikerult beolvasni az athuzott termeket.';
+      this.noteError = 'Nem sikerült beolvasni az áthúzott terméket.';
       return;
     }
 
@@ -162,7 +162,7 @@ export class FeaturedSpotlightComponent implements OnChanges {
       },
       error: (err) => {
         this.noteDropSaving = false;
-        this.noteError = err?.error?.error || 'Nem sikerult jegyzetbe rakni az eszkozt.';
+        this.noteError = err?.error?.error || 'Nem sikerült jegyzetbe rakni az eszközt.';
       }
     });
   }
@@ -193,7 +193,7 @@ export class FeaturedSpotlightComponent implements OnChanges {
       },
       error: (err) => {
         this.deletingNoteDeviceId = null;
-        this.noteError = err?.error?.error || 'Nem sikerult torolni az eszkozt a jegyzetbol.';
+        this.noteError = err?.error?.error || 'Nem sikerült törölni az eszközt a jegyzetből.';
       }
     });
   }
@@ -222,7 +222,7 @@ export class FeaturedSpotlightComponent implements OnChanges {
       },
       error: (err) => {
         this.deletingNoteId = null;
-        this.noteError = err?.error?.error || 'Nem sikerult torolni a jegyzetet.';
+        this.noteError = err?.error?.error || 'Nem sikerült törölni a jegyzetet.';
       }
     });
   }
@@ -253,7 +253,7 @@ export class FeaturedSpotlightComponent implements OnChanges {
         this.selectedNote = null;
         this.noteDevices = [];
         this.notesLoading = false;
-        this.noteError = err?.error?.error || 'Nem sikerult betolteni a jegyzeteket.';
+        this.noteError = err?.error?.error || 'Nem sikerült betölteni a jegyzeteket.';
       }
     });
   }

@@ -2,7 +2,7 @@
   <div class="spotlight-header">
     <div class="title">
       Spotlight
-      <div class="sub">Random termek ajanlo</div>
+      <div class="sub">Random termék ajánló</div>
     </div>
   </div>
 
@@ -37,12 +37,12 @@
       </div>
     </div>
 
-    <div class="hint">kattints a kartyara a reszletekhez</div>
+    <div class="hint">kattints a kártyára a részletekhez</div>
 
     <button
       type="button"
       class="quick-note-fab"
-      aria-label="Jegyzettomb"
+      aria-label="Jegyzettömb"
       (click)="openNotes()">
       📝
     </button>
@@ -53,7 +53,7 @@
   <section class="notes-panel" *ngIf="notesOpen" (click)="$event.stopPropagation()">
     <div class="notes-panel-head">
       <div>
-        <div class="notes-kicker">Jegyzettomb</div>
+        <div class="notes-kicker">Jegyzettömb</div>
         <div class="notes-title">Mentett jegyzetek</div>
       </div>
       <button type="button" class="notes-close" (click)="closeNotes()">X</button>
@@ -63,7 +63,7 @@
       <input
         type="text"
         [(ngModel)]="newNoteName"
-        placeholder="Uj jegyzet neve"
+        placeholder="Új jegyzets neve"
         [disabled]="creatingNote"
         (keydown.enter)="createNote()" />
       <button
@@ -74,9 +74,9 @@
       </button>
     </div>
 
-    <div class="notes-state" *ngIf="notesLoading">Betoltes...</div>
+    <div class="notes-state" *ngIf="notesLoading">Betöltés...</div>
     <div class="notes-state error" *ngIf="!notesLoading && noteError">{{ noteError }}</div>
-    <div class="notes-state" *ngIf="!notesLoading && !noteError && !notes.length">Meg nincs jegyzet.</div>
+    <div class="notes-state" *ngIf="!notesLoading && !noteError && !notes.length">Még nincs jegyzet.</div>
 
     <div class="notes-layout" *ngIf="!notesLoading && !noteError && notes.length">
       <div class="notes-list" aria-label="Jegyzetek">
@@ -110,17 +110,17 @@
         <div class="note-devices-head">
           <div>
             <div class="note-devices-title">{{ selectedNote?.name || 'Jegyzet' }}</div>
-            <div class="note-devices-total">Teljes ar: {{ noteTotalPrice() }}</div>
+            <div class="note-devices-total">Teljes ár: {{ noteTotalPrice() }}</div>
           </div>
-          <div class="note-devices-count">{{ noteDevices.length }} eszkoz</div>
+          <div class="note-devices-count">{{ noteDevices.length }} eszköz</div>
         </div>
 
         <div class="note-drop-hint">
-          {{ noteDropSaving ? 'Mentes...' : 'Huzd ide az eszkozt' }}
+          {{ noteDropSaving ? 'Mentés...' : 'Húzd ide az eszközt' }}
         </div>
 
-        <div class="notes-state" *ngIf="noteDevicesLoading">Eszkozok betoltese...</div>
-        <div class="notes-state" *ngIf="!noteDevicesLoading && !noteDevices.length">Ebben a jegyzetben meg nincs eszkoz.</div>
+        <div class="notes-state" *ngIf="noteDevicesLoading">Eszközök betöltése...</div>
+        <div class="notes-state" *ngIf="!noteDevicesLoading && !noteDevices.length">Ebben a jegyzetben még nincs eszköz.</div>
 
         <div class="device-list" *ngIf="!noteDevicesLoading && noteDevices.length">
           <div class="device-row" *ngFor="let device of noteDevices">
@@ -145,6 +145,6 @@
   </section>
 
   <div class="empty" *ngIf="!cards.length">
-    Nincs megjelenitheto termek.
+    Nincs megjeleníthető termék.
   </div>
 </div>

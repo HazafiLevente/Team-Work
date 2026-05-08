@@ -85,7 +85,7 @@ export class AdminSystemComponent implements OnInit {
 
         const target = this.resolvedTarget;
         if (!this.newTitle.trim() || !this.newMessage.trim() || !target) {
-            this.sendError = 'Minden mezot tolts ki!';
+            this.sendError = 'Minden mezőt tölts ki!';
             return;
         }
 
@@ -98,7 +98,7 @@ export class AdminSystemComponent implements OnInit {
             category: this.newCategory
         }, { withCredentials: true }).subscribe({
             next: () => {
-                this.sendSuccess = 'Uzenet elkuldve.';
+                this.sendSuccess = 'Üzenet elküldve.';
                 this.newTitle = '';
                 this.newMessage = '';
                 this.newTarget = 'all';
@@ -110,7 +110,7 @@ export class AdminSystemComponent implements OnInit {
                 setTimeout(() => this.sendSuccess = '', 3000);
             },
             error: err => {
-                this.sendError = err?.error?.error || 'Hiba tortent!';
+                this.sendError = err?.error?.error || 'Hiba történt!';
                 this.sending = false;
             }
         });

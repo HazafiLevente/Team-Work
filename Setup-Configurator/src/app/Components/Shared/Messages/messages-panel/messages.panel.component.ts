@@ -125,7 +125,7 @@ export class MessagesPanelComponent implements OnInit, OnDestroy {
         role: message.sender === 'me' ? 'user' : 'model',
         text: message.text || (
           Array.isArray(message.products)
-            ? `Termekek: ${message.products.map((product) => product?.name || product?.model || 'ismeretlen').join(', ')}`
+            ? `Termékek: ${message.products.map((product) => product?.name || product?.model || 'ismeretlen').join(', ')}`
             : ''
         )
       }));
@@ -161,7 +161,7 @@ export class MessagesPanelComponent implements OnInit, OnDestroy {
           : {
               id: Date.now(),
               sender: 'ai',
-              text: 'Nincs valasz.',
+              text: 'Nincs válasz.',
               created_at: new Date().toISOString(),
               products: attachedProducts.length ? attachedProducts : undefined
             };
@@ -175,7 +175,7 @@ export class MessagesPanelComponent implements OnInit, OnDestroy {
         const aiMessage: AiConversationMessage = {
           id: Date.now(),
           sender: 'ai',
-          text: 'Hiba tortent az AI valasz soran.',
+          text: 'Hiba történt az AI válasz során.',
           created_at: new Date().toISOString()
         };
 
@@ -498,7 +498,7 @@ export class MessagesPanelComponent implements OnInit, OnDestroy {
     return {
       id: Date.now(),
       sender: 'system',
-      text: 'Kerdezz barmit, es az elso uzenetnel letrejon az uj AI beszelgetes.',
+      text: 'Kérdezz bármit, és az első üzenetnél létrejön az új AI beszélgetés.',
       created_at: new Date().toISOString()
     };
   }

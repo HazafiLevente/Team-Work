@@ -201,11 +201,11 @@
                 (click)="$event.stopPropagation()">
 
                 <div class="dropdown-item" (click)="startEdit(m)">
-                  Szerkesztes
+                  Szerkesztés
                 </div>
 
                 <div class="dropdown-item danger" (click)="deleteMessage(m.id)">
-                  Torles
+                  Törlés
                 </div>
               </div>
             </div>
@@ -248,7 +248,7 @@
       </div>
 
         <div *ngIf="displayedMessages.length === 0" class="empty">
-          {{ mode === 'ai' ? 'Nincs meg AI beszelgetés' : 'Nincs üzenet' }}
+          {{ mode === 'ai' ? 'Nincs meg AI beszélgetés' : 'Nincs üzenet' }}
         </div>
 
         <div #bottom></div>
@@ -258,7 +258,7 @@
     <div *ngIf="activeSelectionKey" class="chat-input">
       <input
         [(ngModel)]="newMessage"
-        [placeholder]="mode === 'ai' ? 'Irj az AI-nak...' : 'Írj üzenetet...'"
+        [placeholder]="mode === 'ai' ? 'Írj az AI-nak...' : 'Írj üzenetet...'"
         (keyup.enter)="sendMessage()"
       />
       <button type="button" (click)="sendMessage()">
@@ -303,7 +303,7 @@
           [(ngModel)]="reportMessage"
           rows="5"
           maxlength="1200"
-          placeholder="Ird le roviden, mi tortent..."
+          placeholder="Írd le röviden, mi történt..."
           required></textarea>
       </label>
 
@@ -312,7 +312,7 @@
       <div class="report-actions">
         <button type="button" class="report-secondary" (click)="closeReportModal()">Mégse</button>
         <button type="submit" class="report-submit" [disabled]="reportSending">
-          {{ reportSending ? 'Kuldes...' : 'Report kuldese' }}
+          {{ reportSending ? 'Küldés...' : 'Report küldése' }}
         </button>
       </div>
     </form>
@@ -325,7 +325,7 @@
     <section class="profile-modal" (click)="$event.stopPropagation()">
       <div class="profile-modal-head">
         <div class="profile-avatar-large" *ngIf="profileTarget?.user?.profilePicture; else profileAvatarFallback">
-          <img [src]="profileTarget.user.profilePicture" alt="Profil kep">
+          <img [src]="profileTarget.user.profilePicture" alt="Profil kép">
         </div>
 
         <ng-template #profileAvatarFallback>

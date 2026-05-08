@@ -2,7 +2,7 @@
 
   <div class="sidebar">
     <div class="sidebar-title">
-      Ertesitesek
+      Értesítések
     </div>
 
     @for (category of categories; track category) {
@@ -18,8 +18,8 @@
   <div class="content">
     @if (itemsFor(activeTab).length === 0) {
     <div class="message-box">
-      <div class="msg-title">Nincs ertesites</div>
-      <div class="msg-body">Ebben a kategoriaban jelenleg nincs megjelenitheto uzenet.</div>
+      <div class="msg-title">Nincs értesítés</div>
+      <div class="msg-body">Ebben a kategóriában jelenleg nincs megjeleníthető üzenet.</div>
     </div>
     } @else {
     <div *ngFor="let m of itemsFor(activeTab)" class="message-box">

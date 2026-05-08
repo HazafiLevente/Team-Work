@@ -56,7 +56,7 @@ export class AdminReportsComponent implements OnInit {
         },
         error: (err) => {
           console.error('Jelentések betöltési hiba', err);
-          this.error = err.error?.error || 'Nem sikerult betolteni a reportokat.';
+          this.error = err.error?.error || 'Nem sikerült betölteni a reportokat.';
           this.loading = false;
         }
       });
@@ -97,7 +97,7 @@ export class AdminReportsComponent implements OnInit {
   }
 
   deleteReport(report: AdminReport) {
-    if (!confirm(`Biztosan torlod ezt a reportot? (#${report.id})`)) return;
+    if (!confirm(`Biztosan törlöd ezt a reportot? (#${report.id})`)) return;
 
     this.http.delete(`/api/admin/reports/${report.id}`, { withCredentials: true })
       .subscribe({
@@ -105,7 +105,7 @@ export class AdminReportsComponent implements OnInit {
           this.reports = this.reports.filter((item) => String(item.id) !== String(report.id));
         },
         error: (err) => {
-          alert(err.error?.error || 'Nem sikerult torolni a reportot.');
+          alert(err.error?.error || 'Nem sikerült törölni a reportot.');
         }
       });
   }
