@@ -1,41 +1,5 @@
 [
   {
-    "id": "17779028074071n5n",
-    "timestamp": "2026-05-04T13:53:27.407Z",
-    "level": "log",
-    "message": "🍪 COOKIES: {\"Webstorm-4a9b1ed1\":\"2cd47b33-d91f-4180-94e5-e3cd66fd6f7d\",\"Webstorm-4a9b1ed2\":\"4825e2dd-8848-40aa-82fa-6b6096e480a5\",\"Webstorm-4a9b1ed3\":\"4b21ec80-24ec-43df-ad72-310d7e663763\",\"g_state\":\"{\\\"i_l\\\":0,\\\"i_ll\\\":1777888281835,\\\"i_e\\\":{\\\"enable_itp_optimization\\\":23},\\\"i_et\\\":1776274771520}\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJIYXphZmlMZXYiLCJlbWFpbCI6ImhhemFmaWxldkBnbWFpbC5jb20iLCJyb2xlIjoib3duZXIiLCJpYXQiOjE3Nzc4ODgyODQsImV4cCI6MTc3NzkzMTQ4NH0.IvKfaA3Wcc1_MLEHVV7ceLj7gceYaeyNwnHTuGIBJao\",\"Webstorm-4a9b2292\":\"5c6302da-5be2-463a-bcc0-7cd6929d554c\"}"
-  },
-  {
-    "id": "1777902807410kph0",
-    "timestamp": "2026-05-04T13:53:27.410Z",
-    "level": "log",
-    "message": "🍪 COOKIES: {\"Webstorm-4a9b1ed1\":\"2cd47b33-d91f-4180-94e5-e3cd66fd6f7d\",\"Webstorm-4a9b1ed2\":\"4825e2dd-8848-40aa-82fa-6b6096e480a5\",\"Webstorm-4a9b1ed3\":\"4b21ec80-24ec-43df-ad72-310d7e663763\",\"g_state\":\"{\\\"i_l\\\":0,\\\"i_ll\\\":1777888281835,\\\"i_e\\\":{\\\"enable_itp_optimization\\\":23},\\\"i_et\\\":1776274771520}\",\"auth_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJIYXphZmlMZXYiLCJlbWFpbCI6ImhhemFmaWxldkBnbWFpbC5jb20iLCJyb2xlIjoib3duZXIiLCJpYXQiOjE3Nzc4ODgyODQsImV4cCI6MTc3NzkzMTQ4NH0.IvKfaA3Wcc1_MLEHVV7ceLj7gceYaeyNwnHTuGIBJao\",\"Webstorm-4a9b2292\":\"5c6302da-5be2-463a-bcc0-7cd6929d554c\"}"
-  },
-  {
-    "id": "1777902807434gmy7",
-    "timestamp": "2026-05-04T13:53:27.434Z",
-    "level": "log",
-    "message": "🖼 IMAGES_ROOT: C:\\Users\\Levente\\WebstormProjects\\Team-Work\\datas\\images"
-  },
-  {
-    "id": "177790280773986fx",
-    "timestamp": "2026-05-04T13:53:27.739Z",
-    "level": "log",
-    "message": "🖼 IMAGES_ROOT: C:\\Users\\Levente\\WebstormProjects\\Team-Work\\datas\\images"
-  },
-  {
-    "id": "17779028082377vab",
-    "timestamp": "2026-05-04T13:53:28.237Z",
-    "level": "log",
-    "message": "🖼 IMAGES_ROOT: C:\\Users\\Levente\\WebstormProjects\\Team-Work\\datas\\images"
-  },
-  {
-    "id": "1777902808762c18l",
-    "timestamp": "2026-05-04T13:53:28.762Z",
-    "level": "log",
-    "message": "🖼 IMAGES_ROOT: C:\\Users\\Levente\\WebstormProjects\\Team-Work\\datas\\images"
-  },
-  {
     "id": "1777902809174yc7s",
     "timestamp": "2026-05-04T13:53:29.174Z",
     "level": "log",
@@ -11996,6 +11960,42 @@
   {
     "id": "17782391643921tsm",
     "timestamp": "2026-05-08T11:19:24.392Z",
+    "level": "log",
+    "message": "✅ ActiveUsers synced to Supabase on shutdown {\"day\":\"2026-05-08\"}"
+  },
+  {
+    "id": "1778240560495bw9m",
+    "timestamp": "2026-05-08T11:42:40.495Z",
+    "level": "log",
+    "message": "[dotenv@17.2.3] injecting env (18) from ..\\.env \u001b[2m-- tip: 🔐 encrypt with Dotenvx: https://dotenvx.com\u001b[0m"
+  },
+  {
+    "id": "1778240560534bjpm",
+    "timestamp": "2026-05-08T11:42:40.534Z",
+    "level": "log",
+    "message": "🖼️  Serving images from: C:\\Users\\norbe\\WebstormProjects\\Team-WorkFASZOMRENDES\\datas\\images"
+  },
+  {
+    "id": "1778240560911f56x",
+    "timestamp": "2026-05-08T11:42:40.911Z",
+    "level": "log",
+    "message": "Server running on http://localhost:3000"
+  },
+  {
+    "id": "177824057044748u8",
+    "timestamp": "2026-05-08T11:42:50.447Z",
+    "level": "log",
+    "message": "✅ ActiveUsers snapshot persisted {\"day\":\"2026-05-08\",\"active_id\":2}"
+  },
+  {
+    "id": "1778240576765k2z6",
+    "timestamp": "2026-05-08T11:42:56.765Z",
+    "level": "log",
+    "message": "✅ ActiveUsers synced to Supabase on shutdown {\"day\":\"2026-05-08\"}"
+  },
+  {
+    "id": "1778240597846w5dk",
+    "timestamp": "2026-05-08T11:43:17.846Z",
     "level": "log",
     "message": "✅ ActiveUsers synced to Supabase on shutdown {\"day\":\"2026-05-08\"}"
   }
