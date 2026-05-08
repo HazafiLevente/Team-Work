@@ -1,71 +1,5 @@
 [
   {
-    "id": "1777902802574a8le",
-    "timestamp": "2026-05-04T13:53:22.574Z",
-    "level": "log",
-    "message": "🖼 IMAGES_ROOT: C:\\Users\\Levente\\WebstormProjects\\Team-Work\\datas\\images"
-  },
-  {
-    "id": "1777902803042o7gy",
-    "timestamp": "2026-05-04T13:53:23.042Z",
-    "level": "log",
-    "message": "🖼 IMAGES_ROOT: C:\\Users\\Levente\\WebstormProjects\\Team-Work\\datas\\images"
-  },
-  {
-    "id": "1777902803522fpn8",
-    "timestamp": "2026-05-04T13:53:23.522Z",
-    "level": "log",
-    "message": "🖼 IMAGES_ROOT: C:\\Users\\Levente\\WebstormProjects\\Team-Work\\datas\\images"
-  },
-  {
-    "id": "1777902804004bh2y",
-    "timestamp": "2026-05-04T13:53:24.004Z",
-    "level": "log",
-    "message": "🖼 IMAGES_ROOT: C:\\Users\\Levente\\WebstormProjects\\Team-Work\\datas\\images"
-  },
-  {
-    "id": "1777902804486zj06",
-    "timestamp": "2026-05-04T13:53:24.486Z",
-    "level": "log",
-    "message": "🖼 IMAGES_ROOT: C:\\Users\\Levente\\WebstormProjects\\Team-Work\\datas\\images"
-  },
-  {
-    "id": "177790280498451ov",
-    "timestamp": "2026-05-04T13:53:24.984Z",
-    "level": "log",
-    "message": "🖼 IMAGES_ROOT: C:\\Users\\Levente\\WebstormProjects\\Team-Work\\datas\\images"
-  },
-  {
-    "id": "1777902805301hljs",
-    "timestamp": "2026-05-04T13:53:25.301Z",
-    "level": "log",
-    "message": "🖼 IMAGES_ROOT: C:\\Users\\Levente\\WebstormProjects\\Team-Work\\datas\\images"
-  },
-  {
-    "id": "1777902805858wejm",
-    "timestamp": "2026-05-04T13:53:25.858Z",
-    "level": "log",
-    "message": "🖼 IMAGES_ROOT: C:\\Users\\Levente\\WebstormProjects\\Team-Work\\datas\\images"
-  },
-  {
-    "id": "1777902806124ijsn",
-    "timestamp": "2026-05-04T13:53:26.124Z",
-    "level": "log",
-    "message": "🖼 IMAGES_ROOT: C:\\Users\\Levente\\WebstormProjects\\Team-Work\\datas\\images"
-  },
-  {
-    "id": "1777902806520w5ph",
-    "timestamp": "2026-05-04T13:53:26.520Z",
-    "level": "log",
-    "message": "🖼 IMAGES_ROOT: C:\\Users\\Levente\\WebstormProjects\\Team-Work\\datas\\images"
-  },
-  {
-    "id": "17779028071849z7v",
-    "timestamp": "2026-05-04T13:53:27.184Z",
-    "level": "log",
-    "message": "🖼 IMAGES_ROOT: C:\\Users\\Levente\\WebstormProjects\\Team-Work\\datas\\images"
-  },
-  {
     "id": "17779028074071n5n",
     "timestamp": "2026-05-04T13:53:27.407Z",
     "level": "log",
@@ -11892,110 +11826,176 @@
     "message": "Server running on http://localhost:3000"
   },
   {
-    "id": "177819342677217jo",
-    "timestamp": "2026-05-07T22:37:06.772Z",
+    "id": "1778236460513eeqa",
+    "timestamp": "2026-05-08T10:34:20.513Z",
     "level": "log",
-    "message": "[dotenv@17.2.3] injecting env (18) from ..\\.env \u001b[2m-- tip: ⚙️  write to custom object with { processEnv: myObject }\u001b[0m"
+    "message": "[dotenv@17.2.3] injecting env (18) from ..\\.env \u001b[2m-- tip: 🔐 prevent committing .env to code: https://dotenvx.com/precommit\u001b[0m"
   },
   {
-    "id": "1778193426800134p",
-    "timestamp": "2026-05-07T22:37:06.800Z",
+    "id": "1778236460534h6gb",
+    "timestamp": "2026-05-08T10:34:20.534Z",
     "level": "log",
-    "message": "🖼️  Serving images from: C:\\Users\\typed\\WebstormProjects\\Team-Work4\\datas\\images"
+    "message": "🖼️  Serving images from: C:\\Users\\Levente\\WebstormProjects\\Team-Work4\\datas\\images"
   },
   {
-    "id": "1778193426997mavv",
-    "timestamp": "2026-05-07T22:37:06.997Z",
+    "id": "1778236460822nmo9",
+    "timestamp": "2026-05-08T10:34:20.822Z",
     "level": "log",
     "message": "Server running on http://localhost:3000"
   },
   {
-    "id": "17781934368800cef",
-    "timestamp": "2026-05-07T22:37:16.880Z",
+    "id": "1778236470603es96",
+    "timestamp": "2026-05-08T10:34:30.603Z",
     "level": "log",
     "message": "✅ ActiveUsers snapshot persisted {\"day\":\"2026-05-08\",\"active_id\":2}"
   },
   {
-    "id": "1778193442833x8qz",
-    "timestamp": "2026-05-07T22:37:22.833Z",
+    "id": "177823647863984pk",
+    "timestamp": "2026-05-08T10:34:38.639Z",
     "level": "log",
     "message": "✅ ActiveUsers synced to Supabase on shutdown {\"day\":\"2026-05-08\"}"
   },
   {
-    "id": "17781934579300hez",
-    "timestamp": "2026-05-07T22:37:37.930Z",
-    "level": "error",
-    "message": "[children] setup_devices lookup failed (non-fatal): {\"code\":\"42703\",\"details\":null,\"hint\":null,\"message\":\"column setup_devices.source_table does not exist\"}"
-  },
-  {
-    "id": "1778193459378qarh",
-    "timestamp": "2026-05-07T22:37:39.378Z",
-    "level": "error",
-    "message": "[children] setup_devices lookup failed (non-fatal): {\"code\":\"42703\",\"details\":null,\"hint\":null,\"message\":\"column setup_devices.source_table does not exist\"}"
-  },
-  {
-    "id": "1778193461310apr6",
-    "timestamp": "2026-05-07T22:37:41.310Z",
+    "id": "1778236503418h8ug",
+    "timestamp": "2026-05-08T10:35:03.418Z",
     "level": "log",
     "message": "✅ ActiveUsers synced to Supabase on shutdown {\"day\":\"2026-05-08\"}"
   },
   {
-    "id": "177819347177802dz",
-    "timestamp": "2026-05-07T22:37:51.778Z",
-    "level": "error",
-    "message": "❌ Image preview failed: C:\\Users\\typed\\WebstormProjects\\Team-Work4\\datas\\images\\products\\1311\\4.jpg: bad seek to 20539\nC:\\Users\\typed\\WebstormProjects\\Team-Work4\\datas\\images\\products\\1311\\4.jpg: bad seek to 20519\nC:\\Users\\typed\\WebstormProjects\\Team-Work4\\datas\\images\\products\\1311\\4.jpg: bad seek to 20509\nC:\\Users\\typed\\WebstormProjects\\Team-Work4\\datas\\images\\products\\1311\\4.jpg: bad seek to 20508\nheif: Invalid input: Unspecified: Bitstream not supported by this decoder (2.0)"
-  },
-  {
-    "id": "17781935346115xab",
-    "timestamp": "2026-05-07T22:38:54.611Z",
+    "id": "1778236584825qjo9",
+    "timestamp": "2026-05-08T10:36:24.825Z",
     "level": "log",
     "message": "✅ ActiveUsers snapshot persisted {\"day\":\"2026-05-08\",\"active_id\":2}"
   },
   {
-    "id": "17781935386389aaq",
-    "timestamp": "2026-05-07T22:38:58.638Z",
+    "id": "1778236589312qb3l",
+    "timestamp": "2026-05-08T10:36:29.312Z",
     "level": "log",
     "message": "✅ ActiveUsers synced to Supabase on shutdown {\"day\":\"2026-05-08\"}"
   },
   {
-    "id": "1778193538736l2xz",
-    "timestamp": "2026-05-07T22:38:58.736Z",
-    "level": "error",
-    "message": "[children] setup_devices lookup failed (non-fatal): {\"code\":\"42703\",\"details\":null,\"hint\":null,\"message\":\"column setup_devices.source_table does not exist\"}"
-  },
-  {
-    "id": "1778193540763jdc2",
-    "timestamp": "2026-05-07T22:39:00.763Z",
-    "level": "log",
-    "message": "✅ ActiveUsers synced to Supabase on shutdown {\"day\":\"2026-05-08\"}"
-  },
-  {
-    "id": "17781935550760qix",
-    "timestamp": "2026-05-07T22:39:15.076Z",
-    "level": "error",
-    "message": "❌ Image preview failed: C:\\Users\\typed\\WebstormProjects\\Team-Work4\\datas\\images\\products\\1311\\4.jpg: bad seek to 20539\nC:\\Users\\typed\\WebstormProjects\\Team-Work4\\datas\\images\\products\\1311\\4.jpg: bad seek to 20519\nC:\\Users\\typed\\WebstormProjects\\Team-Work4\\datas\\images\\products\\1311\\4.jpg: bad seek to 20509\nC:\\Users\\typed\\WebstormProjects\\Team-Work4\\datas\\images\\products\\1311\\4.jpg: bad seek to 20508\nheif: Invalid input: Unspecified: Bitstream not supported by this decoder (2.0)"
-  },
-  {
-    "id": "1778193617895b19u",
-    "timestamp": "2026-05-07T22:40:17.895Z",
+    "id": "1778236760607ygbv",
+    "timestamp": "2026-05-08T10:39:20.607Z",
     "level": "log",
     "message": "✅ ActiveUsers snapshot persisted {\"day\":\"2026-05-08\",\"active_id\":2}"
   },
   {
-    "id": "1778193621882degp",
-    "timestamp": "2026-05-07T22:40:21.882Z",
+    "id": "1778236764655zxhu",
+    "timestamp": "2026-05-08T10:39:24.655Z",
     "level": "log",
     "message": "✅ ActiveUsers synced to Supabase on shutdown {\"day\":\"2026-05-08\"}"
   },
   {
-    "id": "1778193726856tfk0",
-    "timestamp": "2026-05-07T22:42:06.856Z",
+    "id": "1778237060622mdf7",
+    "timestamp": "2026-05-08T10:44:20.622Z",
     "level": "log",
     "message": "✅ ActiveUsers snapshot persisted {\"day\":\"2026-05-08\",\"active_id\":2}"
   },
   {
-    "id": "1778193732189a20i",
-    "timestamp": "2026-05-07T22:42:12.189Z",
+    "id": "1778237064696wyyv",
+    "timestamp": "2026-05-08T10:44:24.696Z",
+    "level": "log",
+    "message": "✅ ActiveUsers synced to Supabase on shutdown {\"day\":\"2026-05-08\"}"
+  },
+  {
+    "id": "1778237360631ib66",
+    "timestamp": "2026-05-08T10:49:20.631Z",
+    "level": "log",
+    "message": "✅ ActiveUsers snapshot persisted {\"day\":\"2026-05-08\",\"active_id\":2}"
+  },
+  {
+    "id": "1778237365112ninj",
+    "timestamp": "2026-05-08T10:49:25.112Z",
+    "level": "log",
+    "message": "✅ ActiveUsers synced to Supabase on shutdown {\"day\":\"2026-05-08\"}"
+  },
+  {
+    "id": "1778237660714wvoa",
+    "timestamp": "2026-05-08T10:54:20.714Z",
+    "level": "log",
+    "message": "✅ ActiveUsers snapshot persisted {\"day\":\"2026-05-08\",\"active_id\":2}"
+  },
+  {
+    "id": "17782376657204inf",
+    "timestamp": "2026-05-08T10:54:25.720Z",
+    "level": "log",
+    "message": "✅ ActiveUsers synced to Supabase on shutdown {\"day\":\"2026-05-08\"}"
+  },
+  {
+    "id": "1778237689044rnv9",
+    "timestamp": "2026-05-08T10:54:49.044Z",
+    "level": "log",
+    "message": "✅ ActiveUsers synced to Supabase on shutdown {\"day\":\"2026-05-08\"}"
+  },
+  {
+    "id": "1778237765678ngpw",
+    "timestamp": "2026-05-08T10:56:05.678Z",
+    "level": "log",
+    "message": "✅ ActiveUsers snapshot persisted {\"day\":\"2026-05-08\",\"active_id\":2}"
+  },
+  {
+    "id": "1778237769466igzv",
+    "timestamp": "2026-05-08T10:56:09.466Z",
+    "level": "log",
+    "message": "✅ ActiveUsers synced to Supabase on shutdown {\"day\":\"2026-05-08\"}"
+  },
+  {
+    "id": "1778237960696vhw5",
+    "timestamp": "2026-05-08T10:59:20.696Z",
+    "level": "log",
+    "message": "✅ ActiveUsers snapshot persisted {\"day\":\"2026-05-08\",\"active_id\":2}"
+  },
+  {
+    "id": "177823796497877ur",
+    "timestamp": "2026-05-08T10:59:24.978Z",
+    "level": "log",
+    "message": "✅ ActiveUsers synced to Supabase on shutdown {\"day\":\"2026-05-08\"}"
+  },
+  {
+    "id": "1778238260641w717",
+    "timestamp": "2026-05-08T11:04:20.641Z",
+    "level": "log",
+    "message": "✅ ActiveUsers snapshot persisted {\"day\":\"2026-05-08\",\"active_id\":2}"
+  },
+  {
+    "id": "1778238264803dvyl",
+    "timestamp": "2026-05-08T11:04:24.803Z",
+    "level": "log",
+    "message": "✅ ActiveUsers synced to Supabase on shutdown {\"day\":\"2026-05-08\"}"
+  },
+  {
+    "id": "17782385606850zpe",
+    "timestamp": "2026-05-08T11:09:20.685Z",
+    "level": "log",
+    "message": "✅ ActiveUsers snapshot persisted {\"day\":\"2026-05-08\",\"active_id\":2}"
+  },
+  {
+    "id": "1778238565005iisa",
+    "timestamp": "2026-05-08T11:09:25.005Z",
+    "level": "log",
+    "message": "✅ ActiveUsers synced to Supabase on shutdown {\"day\":\"2026-05-08\"}"
+  },
+  {
+    "id": "1778238860713p9n0",
+    "timestamp": "2026-05-08T11:14:20.713Z",
+    "level": "log",
+    "message": "✅ ActiveUsers snapshot persisted {\"day\":\"2026-05-08\",\"active_id\":2}"
+  },
+  {
+    "id": "1778238865836s60j",
+    "timestamp": "2026-05-08T11:14:25.836Z",
+    "level": "log",
+    "message": "✅ ActiveUsers synced to Supabase on shutdown {\"day\":\"2026-05-08\"}"
+  },
+  {
+    "id": "1778239160702fcl4",
+    "timestamp": "2026-05-08T11:19:20.702Z",
+    "level": "log",
+    "message": "✅ ActiveUsers snapshot persisted {\"day\":\"2026-05-08\",\"active_id\":2}"
+  },
+  {
+    "id": "17782391643921tsm",
+    "timestamp": "2026-05-08T11:19:24.392Z",
     "level": "log",
     "message": "✅ ActiveUsers synced to Supabase on shutdown {\"day\":\"2026-05-08\"}"
   }
